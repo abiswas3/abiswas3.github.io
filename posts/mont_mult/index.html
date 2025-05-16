@@ -1,0 +1,410 @@
+<!doctype html>
+
+
+
+
+
+
+
+<html
+  class="not-ready lg:text-base"
+  style="--bg:#faf8f1"
+  lang="en-us"
+  dir="ltr"
+><head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, shrink-to-fit=no"
+  />
+
+  
+  <title>Montgomery Multiplication: Theory Vs Realtity - Random Walks</title>
+
+  
+  <meta name="theme-color" />
+
+  <meta name="description" content="Recently, in a blog post Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the montgomery product of two $n$ word1 integers using $2n^2 &#43; 1$ multiplication operations.
+Although an improvement in theory, when compared with exisitng code for Montgomery multiplication, we were unable to manifest this speedup using the provided code.
+This post is a deep dive into why this could be?
+Before diving into the code, we give a brief overview of Montgomery Multiplication.
+We do not go into the proofs, but provide references to resources that go through the maths." />
+  <meta name="author" content="Random Walks" />
+  <link rel="stylesheet" href="/css/bundle.min.css" />
+
+  <link rel="preload" as="image" href="/theme.png" />
+
+  <script
+    defer
+    src="/highlight.min.js"
+    onload="hljs.initHighlightingOnLoad();"
+  ></script><link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css"
+  integrity="sha384-3UiQGuEI4TTMaFmGIZumfRPtfKQ3trwQE2JgosJxCnGmQpL/lJdjpcHkaaFwHlcI"
+  crossorigin="anonymous"
+/>
+<script
+  defer
+  src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js"
+  integrity="sha384-G0zcxDFp5LWZtDuRMnBkk3EphCK1lhEf4UEyEM693ka574TZGwo4IWwS6QLzM/2t"
+  crossorigin="anonymous"
+></script>
+<script
+  defer
+  src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/contrib/auto-render.min.js"
+  integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05"
+  crossorigin="anonymous"
+></script><script>
+  document.addEventListener('DOMContentLoaded', () =>
+    renderMathInElement(document.body, {
+      
+      
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+      ],
+      
+      throwOnError: false,
+    }),
+  );
+</script>
+
+  <link
+    rel="icon"
+    href="/favicon.ico"
+  />
+  <link
+    rel="apple-touch-icon"
+    href="/apple-touch-icon.png"
+  />
+
+  <meta name="generator" content="Hugo 0.147.3">
+  <meta itemprop="name" content="Montgomery Multiplication: Theory Vs Realtity">
+  <meta itemprop="description" content="Recently, in a blog post Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the montgomery product of two $n$ word1 integers using $2n^2 &#43; 1$ multiplication operations. Although an improvement in theory, when compared with exisitng code for Montgomery multiplication, we were unable to manifest this speedup using the provided code. This post is a deep dive into why this could be? Before diving into the code, we give a brief overview of Montgomery Multiplication. We do not go into the proofs, but provide references to resources that go through the maths.">
+  <meta itemprop="datePublished" content="2025-05-15T17:52:40+01:00">
+  <meta itemprop="dateModified" content="2025-05-15T17:52:40+01:00">
+  <meta itemprop="wordCount" content="1225">
+  <meta itemprop="keywords" content="Cryptography,Benchmarking"><meta property="og:url" content="/posts/mont_mult/">
+  <meta property="og:site_name" content="Random Walks">
+  <meta property="og:title" content="Montgomery Multiplication: Theory Vs Realtity">
+  <meta property="og:description" content="Recently, in a blog post Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the montgomery product of two $n$ word1 integers using $2n^2 &#43; 1$ multiplication operations. Although an improvement in theory, when compared with exisitng code for Montgomery multiplication, we were unable to manifest this speedup using the provided code. This post is a deep dive into why this could be? Before diving into the code, we give a brief overview of Montgomery Multiplication. We do not go into the proofs, but provide references to resources that go through the maths.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-05-15T17:52:40+01:00">
+    <meta property="article:modified_time" content="2025-05-15T17:52:40+01:00">
+    <meta property="article:tag" content="Cryptography">
+    <meta property="article:tag" content="Benchmarking">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Montgomery Multiplication: Theory Vs Realtity">
+  <meta name="twitter:description" content="Recently, in a blog post Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the montgomery product of two $n$ word1 integers using $2n^2 &#43; 1$ multiplication operations. Although an improvement in theory, when compared with exisitng code for Montgomery multiplication, we were unable to manifest this speedup using the provided code. This post is a deep dive into why this could be? Before diving into the code, we give a brief overview of Montgomery Multiplication. We do not go into the proofs, but provide references to resources that go through the maths.">
+
+  <link rel="canonical" href="/posts/mont_mult/" /></head>
+<body
+  class="bg-(--bg) text-black antialiased duration-200 ease-out [-webkit-tap-highlight-color:transparent] dark:text-white
+  
+   posts-section
+  
+    
+  "
+><header
+  class="mx-auto flex h-[4.5rem] max-w-(--w) px-8 whitespace-nowrap lg:justify-center"
+>
+  <div class="relative z-50 flex items-center ltr:mr-auto rtl:ml-auto">
+    <a
+      class="-translate-y-[1px] text-2xl font-medium"
+      href="/"
+      >Random Walks</a
+    >
+    <div
+  class="btn-dark ltr:ml-4 rtl:mr-4 shrink-0"
+  role="button"
+  aria-label="Dark"
+></div>
+  </div>
+
+  <div
+    class="btn-menu relative z-50 flex h-[4.5rem] w-[5rem] shrink-0 cursor-pointer flex-col items-center justify-center gap-2.5 lg:hidden ltr:-mr-8 rtl:-ml-8"
+    role="button"
+    aria-label="Menu"
+  ></div>
+
+  <script>
+    
+    const htmlClass = document.documentElement.classList;
+    setTimeout(() => {
+      htmlClass.remove('not-ready');
+    }, 10);
+
+    
+    const btnMenu = document.querySelector('.btn-menu');
+    btnMenu.addEventListener('click', () => {
+      htmlClass.toggle('open');
+    });
+
+    
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    const lightBg = '#faf8f1'.replace(/"/g, '');
+    const setDark = (isDark) => {
+      metaTheme.setAttribute('content', isDark ? '#000' : lightBg);
+      htmlClass[isDark ? 'add' : 'remove']('dark');
+      localStorage.setItem('dark', isDark);
+    };
+
+    
+    const darkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    if (htmlClass.contains('dark')) {
+      setDark(true);
+    } else {
+      const darkVal = localStorage.getItem('dark');
+      setDark(darkVal ? darkVal === 'true' : darkScheme.matches);
+    }
+
+    
+    darkScheme.addEventListener('change', (event) => {
+      setDark(event.matches);
+    });
+
+    
+    const btnDark = document.querySelector('.btn-dark');
+    btnDark.addEventListener('click', () => {
+      setDark(localStorage.getItem('dark') !== 'true');
+    });
+  </script>
+
+  <div
+    class="nav-wrapper fixed inset-x-0 top-full z-40 flex h-full flex-col justify-center bg-(--bg) pb-16 duration-200 select-none lg:static lg:h-auto lg:flex-row lg:bg-transparent! lg:pb-0 lg:transition-none"
+  ><nav
+      class="lg:ml-12 lg:flex lg:flex-row lg:items-center lg:space-x-10 rtl:space-x-reverse"
+    ><a
+        class="block text-center text-xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/publications/"
+        >Publications</a
+      ><a
+        class="block text-center text-xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/posts/"
+        >Posts</a
+      ><a
+        class="block text-center text-xl leading-[5rem] lg:text-base lg:font-normal"
+        href="/teaching/"
+        >Teaching</a
+      ></nav>
+  </div>
+</header>
+<main
+      class="prose prose-neutral dark:prose-invert relative mx-auto min-h-[calc(100vh-9rem)] max-w-(--w) px-8 pt-14 pb-16"
+    ><article>
+<header class="mb-14">
+  
+    <h1>Montgomery Multiplication: Theory Vs Realtity</h1>
+  
+
+  
+    <footer class="mb-4 flex flex-wrap gap-2">
+        <a class="tag" href="/tags/cryptography">cryptography</a>
+        <a class="tag" href="/tags/benchmarking">benchmarking</a>
+    </footer>
+
+  
+  
+    <div class="text-xs antialiased opacity-60">
+      
+        <time>May 15, 2025</time>
+      
+      
+      
+        <span class="mx-1">&middot;</span>
+        
+          <span>Ari</span>
+        
+      
+    </div>
+  
+</header>
+
+
+  
+
+  <aside class="toc">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#montgomery-multiplication---review">Montgomery Multiplication - Review</a></li>
+    <li><a href="#benchmarking-details">Benchmarking Details</a>
+      <ul>
+        <li><a href="#how-we-generated-the-above-numbers">How We Generated The Above numbers</a></li>
+        <li><a href="#analysis">Analysis</a></li>
+      </ul>
+    </li>
+    <li><a href="#how-to-replicate-the-process">How To Replicate The Process</a></li>
+  </ul>
+</nav>
+  </aside>
+
+
+
+
+  <section><p>Recently, in <a href="https://hackmd.io/@Ingonyama/Barret-Montgomery">a blog post</a> Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the montgomery product of two $n$ word<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> integers using $2n^2 + 1$ multiplication operations.
+Although an improvement in theory, when compared with exisitng code for Montgomery multiplication, we were unable to manifest this speedup using the provided code.
+This post is a deep dive into why this could be?
+Before diving into the code, we give a brief overview of Montgomery Multiplication.
+We do not go into the proofs, but provide references to resources that go through the maths.</p>
+<h2 id="montgomery-multiplication---review">Montgomery Multiplication - Review</h2>
+<p>Given $n$ limb modulus $p$, and integers $a$ and $b$, the modular multiplication problem is to compute the remainder of the product</p>
+<p>$$ ab \mod p$$</p>
+<p>Reducing an integer with respect to a modulus, is computationally as expensive as performing the <a href="https://en.algorithmica.org/hpc/arithmetic/division/">division operation</a>, which is known to be much slower than other operations such as multiplication or addition<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>.
+Furthermore, modern cryptographic applications often require chaining many modular multiplications together.
+If we used long division for every individual multiplication, this would be prohibitively slow.
+Instead, we use <a href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication">Montgomery multiplication</a>.</p>
+<p>In Montgomery multiplication, instead of computing $ab \mod p$, we compute $$abR^{-1} \mod p$$where $R$ is set to the smallest power of two exceeding $p$ that falls on a computer word boundary.
+For example, if $p$ is 381 bit integer, then $R= 2^{n \times w}=2^{6\times 64} = R^{384}$ on a 64-bit architechture.
+Abstracting over some details, the reason for doing so is that the above computation does not use the expensive division algorithm.
+As $R$ is a power of two, we can dividie by $R$ by using the bit shift operation which is native to most ISA&rsquo;s.
+For the interested reader, <a href="https://eprint.iacr.org/2017/1057">Montgomery Arithmetic from a Software Perspective
+</a> is a good resource for understanding the theory of Montgomery Multiplication.</p>
+<p>At a high level every Montgomery multiplication uses 4 kinds of operations (see <a href="/papers/Acar.pdf#page=34">Page 34 Table 2.1</a> for an overview of the exact counts):</p>
+<ul>
+<li>Addition of two 64 bit integers with and without carry.</li>
+<li>Multiplication of two 64 bit integers with and without carry.</li>
+<li>Read and Writes of 64 and 128 bit values to meory</li>
+</ul>
+<div class="remark">
+  <p>A critical factor for understanding performance is that these operations not equal.
+For example, on Skylake (mid-level x86 processor)</p>
+<ul>
+<li>
+<p>add has a latency of .25 (i.e. on average, with 1 core, you can retire an add and three other equivalent-cost instructions in one cycle)</p>
+</li>
+<li>
+<p>moving a 64-bit register into memory is .5, and reading 64 bits from memory is latency of 1</p>
+</li>
+<li>
+<p>64-bit multiplication is latency of 3 (so 8 times as long as the add!)</p>
+</li>
+</ul>
+<p><a href="https://www.agner.org/optimize/instruction_tables.pdf">See Page 278</a> for more details on what instructions take how long.</p>
+
+</div>
+
+<p>Now given the above constraints, one would imagine that minimising the number of multiplication operations would the answer to faster algorithms.
+Previously, the best known algorithm for performing a single Montgomery multiplication operation required $2n^2 + n$ multiplication operations.</p>
+<div class="remark">
+  Therefore, in theory having fewer multiplication operations to process, the new algorithm is expected to be faster than the old CIOS algorithm.
+Surprisingly, this was not what we saw in actual experiments.
+The remainder of this document tries to understand why?
+</div>
+
+<h2 id="benchmarking-details">Benchmarking Details</h2>
+<p>We first analyse the performance, and subsequently in a later section, we provide the instructions for re-creating the workflow.</p>
+<h3 id="how-we-generated-the-above-numbers">How We Generated The Above numbers</h3>
+<p><img src="/images/mont_mult/bench.jpeg" alt="Benchmark result"></p>
+<p>In the figure above C-mult refers to the SOS algorithm in <a href="papers/Acar.pdf">Acar&rsquo;s theis</a>, and G-mult refers to an optimisation described by the <a href="https://hackmd.io/@gnark/modular_multiplication">Gnark</a> team.
+Both these algorithms are already implemented in <a href="https://github.com/a16z/arkworks-algebra">Arkworks</a>.</p>
+<p>We found an implementation of the new multiplication algorithm <a href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">here</a> by the folks at <a href="https://www.ingonyama.com/">Ingoyama</a>, specifically targetting the <a href="https://neuromancer.sk/std/bn/bn254">BN-254</a> curve (i.e $n=4$).
+As stated earlier, Arkworks already had an implementation of the CIOS algorithm written <a href="https://github.com/a16z/arkworks-algebra/blob/7ad88c46e859a94ab8e0b19fd8a217c3dc472f1c/ff-macros/src/montgomery/mul.rs#L11">here</a> and the SOS<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> algorithm <a href="https://github.com/a16z/arkworks-algebra/blob/7ad88c46e859a94ab8e0b19fd8a217c3dc472f1c/ff-macros/src/montgomery/mul.rs#L77">here</a>.
+To simplify the investigation process, we stripped the code down to the essential helper functions and the scalar_multiplication function.
+Then we wrote a simple script to compare the performance of the two algorithms, to see the speedup promised in theory manifested itself in practice<sup id="fnref1:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>.
+The stripped down code needed to compute the montgomery product with Yuval&rsquo;s algorithm can be found <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/main/src/yuval_mult.rs">here</a>.
+Similarly, the stripped down code needed to compute the montgomery product with CIOS can be found <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/main/src/optimised_cios.rs">here</a>.
+The benchmarking script is quite simple, and can be found <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/main/src/main.rs">here</a>.</p>
+<div class="remark">
+  This entire writeup focuses on $n=4$.
+It is entirely possible that for larger values of $N$, the miscellaneous overheads we are about to discuss below will be outdone by the gains from fewer multiplications.
+</div>
+
+<h3 id="analysis">Analysis</h3>
+<p>To understand why these algorithms perform the way they do, we look at the x-86 assembly instruction that were executed for each of these algorithms.
+Shown below is the exact x86 assembly instructions that were exectured when running the two new multiplication algorihtms (we ignore SOS as CIOS was known to be faster).</p>
+<ul>
+<li><a href="/code/yuval">y-mult</a></li>
+<li><a href="/code/opt">g-mult</a></li>
+</ul>
+<p>We describe how we extracted the instructions in a subsequent section.
+The format in which the code is expressed is</p>
+<pre tabindex="0"><code>memory address, instruction
+</code></pre><p>Where memory address refers to the virutal memory address at which the instruction is stored for the process executing the program.
+Summarising our findings. The arkworks code base executes fewer x86 instructions; 280 vs 326 to specific.</p>
+<pre tabindex="0"><code>wc -l static/code/yuval                                                                     ─╯
+     326 static/code/yuval
+
+wc -l static/code/opt                                                                       ─╯
+     280 static/code/opt
+</code></pre><p>For <code>g-mult</code>, as expected we see $2n^2 + n = 36$ multiplication operations.</p>
+<pre tabindex="0"><code>1 ret
+1 setb
+3 lea
+4 imul &lt;--
+6 pop
+6 push
+32 mul &lt;--
+40 add
+52 adc
+135 mov
+</code></pre><p>Further more, there are 36 64-bit read/write operations to memory.</p>
+<pre tabindex="0"><code>root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks# cat opt|grep -o &#39;[a-z0-9]\+ ptr&#39; | sort|uniq -c
+     36 qword ptr
+</code></pre><p>For the new algorithm we expect to see fewer multiplications i.e $2n^2 + 1 = 33$ multiplication opearations, and that&rsquo;s exactly what we see.
+This is what we hoped would give us our speedup.</p>
+<pre tabindex="0"><code>1 imul &lt;---
+1 ret
+1 shl
+1 shr
+1 xorps
+2 movups
+2 sar
+3 lea
+3 movzx
+3 sbb
+4 movaps
+4 xor
+5 sub
+6 pop
+6 push
+6 setb
+32 mul &lt;---
+37 add
+56 adc
+152 mov
+</code></pre><p>But the overhead from other instructions, especially read/writes to memory seems far worse.
+We make 74 64-bit read/write operations and 6 128-bit/read write operations.</p>
+<pre tabindex="0"><code>root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks# cat yuval|grep -o &#39;[a-z0-9]\+ ptr&#39; | sort|uniq -c
+      2 byte ptr
+     74 qword ptr
+      6 xmmword ptr
+</code></pre><div class="remark">
+  So it seems that the gains from having fewer multiplications is being drowned out by the heavier read/write operations, and the greater number of assembly instructions.
+Note that this does not imply that the new algorithm could not be faster for even $n=4$.
+It just means that the way the Rust compiler is building the current binary is not as efficient.
+</div>
+
+<p>At this point we have established why we think we do not see an improvement in runtime.
+The remainder of the post is written as tutorial on how we were able to perform the above analysis.</p>
+<h2 id="how-to-replicate-the-process">How To Replicate The Process</h2>
+<div class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1">
+<p>Word, digit, limbs are all interchangeable. For everything we discuss here, a word is 64-bits. So a 2-limb integer is just an integer that takes 2$\times$ 64 bits to describe.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref1:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2">
+<p>This is usually because most CPU&rsquo;s do not directly offer a modulo instruction natively.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3">
+<p>The comments claim that this is CIOS, but if you refer to the algorithms in Acar&rsquo;s thesis, this is defined as SOS.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</div>
+</section>
+
+  
+
+
+</article></main><footer
+  class="mx-auto flex h-[4.5rem] max-w-(--w) items-center px-8 text-xs tracking-wider uppercase opacity-60"
+>
+  
+</footer>
+</body>
+</html>
