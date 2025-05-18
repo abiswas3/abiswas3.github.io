@@ -20,16 +20,15 @@
   />
 
   
-  <title>Montgomery Multiplication: Theory Vs Realtity - Random Walks</title>
+  <title>Montgomery Multiplication: Theory Vs Practice - Random Walks</title>
 
   
   <meta name="theme-color" />
 
-  <meta name="description" content="Recently, in a blog post Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the montgomery product of two $n$ word1 integers using $2n^2 &#43; 1$ multiplication operations.
-Although an improvement in theory, when compared with exisitng code for Montgomery multiplication, we were unable to manifest this speedup using the provided code.
-This post is a deep dive into why this could be?
-Before diving into the code, we give a brief overview of Montgomery Multiplication.
-We do not go into the proofs, but provide references to resources that go through the maths." />
+  <meta name="description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations.
+Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations.
+Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms.
+This post is a deep dive into why this could be, and potentially what can be done about it." />
   <meta name="author" content="Random Walks" />
   <link rel="stylesheet" href="/css/bundle.min.css" />
 
@@ -81,15 +80,15 @@ We do not go into the proofs, but provide references to resources that go throug
   />
 
   <meta name="generator" content="Hugo 0.147.3">
-  <meta itemprop="name" content="Montgomery Multiplication: Theory Vs Realtity">
-  <meta itemprop="description" content="Recently, in a blog post Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the montgomery product of two $n$ word1 integers using $2n^2 &#43; 1$ multiplication operations. Although an improvement in theory, when compared with exisitng code for Montgomery multiplication, we were unable to manifest this speedup using the provided code. This post is a deep dive into why this could be? Before diving into the code, we give a brief overview of Montgomery Multiplication. We do not go into the proofs, but provide references to resources that go through the maths.">
+  <meta itemprop="name" content="Montgomery Multiplication: Theory Vs Practice">
+  <meta itemprop="description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms. This post is a deep dive into why this could be, and potentially what can be done about it.">
   <meta itemprop="datePublished" content="2025-05-15T17:52:40+01:00">
   <meta itemprop="dateModified" content="2025-05-15T17:52:40+01:00">
-  <meta itemprop="wordCount" content="1225">
+  <meta itemprop="wordCount" content="2628">
   <meta itemprop="keywords" content="Cryptography,Benchmarking"><meta property="og:url" content="/posts/mont_mult/">
   <meta property="og:site_name" content="Random Walks">
-  <meta property="og:title" content="Montgomery Multiplication: Theory Vs Realtity">
-  <meta property="og:description" content="Recently, in a blog post Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the montgomery product of two $n$ word1 integers using $2n^2 &#43; 1$ multiplication operations. Although an improvement in theory, when compared with exisitng code for Montgomery multiplication, we were unable to manifest this speedup using the provided code. This post is a deep dive into why this could be? Before diving into the code, we give a brief overview of Montgomery Multiplication. We do not go into the proofs, but provide references to resources that go through the maths.">
+  <meta property="og:title" content="Montgomery Multiplication: Theory Vs Practice">
+  <meta property="og:description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms. This post is a deep dive into why this could be, and potentially what can be done about it.">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -99,8 +98,8 @@ We do not go into the proofs, but provide references to resources that go throug
     <meta property="article:tag" content="Benchmarking">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Montgomery Multiplication: Theory Vs Realtity">
-  <meta name="twitter:description" content="Recently, in a blog post Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the montgomery product of two $n$ word1 integers using $2n^2 &#43; 1$ multiplication operations. Although an improvement in theory, when compared with exisitng code for Montgomery multiplication, we were unable to manifest this speedup using the provided code. This post is a deep dive into why this could be? Before diving into the code, we give a brief overview of Montgomery Multiplication. We do not go into the proofs, but provide references to resources that go through the maths.">
+  <meta name="twitter:title" content="Montgomery Multiplication: Theory Vs Practice">
+  <meta name="twitter:description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms. This post is a deep dive into why this could be, and potentially what can be done about it.">
 
   <link rel="canonical" href="/posts/mont_mult/" /></head>
 <body
@@ -199,7 +198,7 @@ We do not go into the proofs, but provide references to resources that go throug
     ><article>
 <header class="mb-14">
   
-    <h1>Montgomery Multiplication: Theory Vs Realtity</h1>
+    <h1>Montgomery Multiplication: Theory Vs Practice</h1>
   
 
   
@@ -231,11 +230,16 @@ We do not go into the proofs, but provide references to resources that go throug
   <aside class="toc">
     <nav id="TableOfContents">
   <ul>
-    <li><a href="#montgomery-multiplication---review">Montgomery Multiplication - Review</a></li>
+    <li><a href="#montgomery-multiplication---a-brief-review">Montgomery Multiplication - A Brief Review</a></li>
     <li><a href="#benchmarking-details">Benchmarking Details</a>
       <ul>
-        <li><a href="#how-we-generated-the-above-numbers">How We Generated The Above numbers</a></li>
-        <li><a href="#analysis">Analysis</a></li>
+        <li><a href="#empirical-performance">Empirical Performance</a></li>
+        <li><a href="#computer-information">Computer Information</a></li>
+      </ul>
+    </li>
+    <li><a href="#analysis">Analysis</a>
+      <ul>
+        <li><a href="#summary-of-findings">Summary Of Findings</a></li>
       </ul>
     </li>
     <li><a href="#how-to-replicate-the-process">How To Replicate The Process</a></li>
@@ -246,32 +250,33 @@ We do not go into the proofs, but provide references to resources that go throug
 
 
 
-  <section><p>Recently, in <a href="https://hackmd.io/@Ingonyama/Barret-Montgomery">a blog post</a> Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the montgomery product of two $n$ word<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> integers using $2n^2 + 1$ multiplication operations.
-Although an improvement in theory, when compared with exisitng code for Montgomery multiplication, we were unable to manifest this speedup using the provided code.
-This post is a deep dive into why this could be?
-Before diving into the code, we give a brief overview of Montgomery Multiplication.
-We do not go into the proofs, but provide references to resources that go through the maths.</p>
-<h2 id="montgomery-multiplication---review">Montgomery Multiplication - Review</h2>
+  <section><p>In a recent <a href="https://hackmd.io/@Ingonyama/Barret-Montgomery">blog post</a>, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> integer $p$, using $2n^2 + 1$ multiplication operations.
+Previously, the best known algorithm<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> for Montgomery multiplication was known to use $2n^2 + n$ multiplication operations.
+Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms.
+This post is a deep dive into why this could be, and potentially what can be done about it.</p>
+<h2 id="montgomery-multiplication---a-brief-review">Montgomery Multiplication - A Brief Review</h2>
 <p>Given $n$ limb modulus $p$, and integers $a$ and $b$, the modular multiplication problem is to compute the remainder of the product</p>
 <p>$$ ab \mod p$$</p>
-<p>Reducing an integer with respect to a modulus, is computationally as expensive as performing the <a href="https://en.algorithmica.org/hpc/arithmetic/division/">division operation</a>, which is known to be much slower than other operations such as multiplication or addition<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>.
+<p>Reducing an integer with respect to a modulus, is computationally as expensive as performing the <a href="https://en.algorithmica.org/hpc/arithmetic/division/">division operation</a>, which is known to be much slower than other operations such as multiplication or addition<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>.
 Furthermore, modern cryptographic applications often require chaining many modular multiplications together.
 If we used long division for every individual multiplication, this would be prohibitively slow.
 Instead, we use <a href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication">Montgomery multiplication</a>.</p>
-<p>In Montgomery multiplication, instead of computing $ab \mod p$, we compute $$abR^{-1} \mod p$$where $R$ is set to the smallest power of two exceeding $p$ that falls on a computer word boundary.
-For example, if $p$ is 381 bit integer, then $R= 2^{n \times w}=2^{6\times 64} = R^{384}$ on a 64-bit architechture.
+<p>In Montgomery multiplication, instead of computing $ab \mod p$, we compute $$abR^{-1} \equiv (ab + mp)/R \mod p$$ where $R$ is set to the smallest power of two exceeding $p$ that falls on a computer word boundary and $m$ is some carefully chosen integer such that $ab + mp$ is divisible by $R$.
+For example, if $p$ is 381 bit integer, then $R= 2^{n \times w}=2^{6\times 64} = 2^{384}$ on a 64-bit architecture.
 Abstracting over some details, the reason for doing so is that the above computation does not use the expensive division algorithm.
-As $R$ is a power of two, we can dividie by $R$ by using the bit shift operation which is native to most ISA&rsquo;s.
+As $R$ is a power of two, we can divide by $R$ by using the bit shift operation which is native to most Instruction Set Architectures.
+This leads to more efficient code than implementing long division.
 For the interested reader, <a href="https://eprint.iacr.org/2017/1057">Montgomery Arithmetic from a Software Perspective
 </a> is a good resource for understanding the theory of Montgomery Multiplication.</p>
-<p>At a high level every Montgomery multiplication uses 4 kinds of operations (see <a href="/papers/Acar.pdf#page=34">Page 34 Table 2.1</a> for an overview of the exact counts):</p>
+<p>At a high level every Montgomery multiplication algorithm uses 3 kinds of operations<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup> (see <a href="/papers/Acar.pdf#page=34">Page 34 Table 2.1</a> for an overview of the exact counts):</p>
 <ul>
 <li>Addition of two 64 bit integers with and without carry.</li>
 <li>Multiplication of two 64 bit integers with and without carry.</li>
-<li>Read and Writes of 64 and 128 bit values to meory</li>
+<li>Read and Writes of 64 and 128 bit values to memory.</li>
 </ul>
+<p>More complex operations just use the above instructions as building blocks.</p>
 <div class="remark">
-  <p>A critical factor for understanding performance is that these operations not equal.
+  <p>A critical factor for understanding performance is that these operations are not equal.
 For example, on Skylake (mid-level x86 processor)</p>
 <ul>
 <li>
@@ -291,47 +296,114 @@ For example, on Skylake (mid-level x86 processor)</p>
 <p>Now given the above constraints, one would imagine that minimising the number of multiplication operations would the answer to faster algorithms.
 Previously, the best known algorithm for performing a single Montgomery multiplication operation required $2n^2 + n$ multiplication operations.</p>
 <div class="remark">
-  Therefore, in theory having fewer multiplication operations to process, the new algorithm is expected to be faster than the old CIOS algorithm.
-Surprisingly, this was not what we saw in actual experiments.
+  Surprisingly, this was not what we saw in actual experiments.
 The remainder of this document tries to understand why?
 </div>
 
 <h2 id="benchmarking-details">Benchmarking Details</h2>
-<p>We first analyse the performance, and subsequently in a later section, we provide the instructions for re-creating the workflow.</p>
-<h3 id="how-we-generated-the-above-numbers">How We Generated The Above numbers</h3>
-<p><img src="/images/mont_mult/bench.jpeg" alt="Benchmark result"></p>
-<p>In the figure above C-mult refers to the SOS algorithm in <a href="papers/Acar.pdf">Acar&rsquo;s theis</a>, and G-mult refers to an optimisation described by the <a href="https://hackmd.io/@gnark/modular_multiplication">Gnark</a> team.
-Both these algorithms are already implemented in <a href="https://github.com/a16z/arkworks-algebra">Arkworks</a>.</p>
-<p>We found an implementation of the new multiplication algorithm <a href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">here</a> by the folks at <a href="https://www.ingonyama.com/">Ingoyama</a>, specifically targetting the <a href="https://neuromancer.sk/std/bn/bn254">BN-254</a> curve (i.e $n=4$).
-As stated earlier, Arkworks already had an implementation of the CIOS algorithm written <a href="https://github.com/a16z/arkworks-algebra/blob/7ad88c46e859a94ab8e0b19fd8a217c3dc472f1c/ff-macros/src/montgomery/mul.rs#L11">here</a> and the SOS<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> algorithm <a href="https://github.com/a16z/arkworks-algebra/blob/7ad88c46e859a94ab8e0b19fd8a217c3dc472f1c/ff-macros/src/montgomery/mul.rs#L77">here</a>.
-To simplify the investigation process, we stripped the code down to the essential helper functions and the scalar_multiplication function.
-Then we wrote a simple script to compare the performance of the two algorithms, to see the speedup promised in theory manifested itself in practice<sup id="fnref1:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>.
-The stripped down code needed to compute the montgomery product with Yuval&rsquo;s algorithm can be found <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/main/src/yuval_mult.rs">here</a>.
-Similarly, the stripped down code needed to compute the montgomery product with CIOS can be found <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/main/src/optimised_cios.rs">here</a>.
-The benchmarking script is quite simple, and can be found <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/main/src/main.rs">here</a>.</p>
+<p>We first describe our findings, and then describe how to recreate the analysis workflow.</p>
+<h3 id="empirical-performance">Empirical Performance</h3>
+<p>We were provided with an <a href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">implementation</a> of the new multiplication algorithm<sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup> by the folks at <a href="https://www.ingonyama.com/">Ingoyama</a>, specifically targeting the <a href="https://neuromancer.sk/std/bn/bn254">BN-254</a> curve (i.e $n=4$), which we refer to as Y-mult in this post.</p>
+<p>The algorithms used for comparison are the SOS and optimised CIOS algorithms.
+We refer to the SOS algorithm described in <a href="papers/Acar.pdf">Acar&rsquo;s thesis</a> as C-mult in this post.
+We denote as G-mult, the optimised version of the CIOS<sup id="fnref:6"><a href="#fn:6" class="footnote-ref" role="doc-noteref">6</a></sup> algorithm by the <a href="https://hackmd.io/@gnark/modular_multiplication">Gnark</a> team.
+<a href="https://github.com/a16z/arkworks-algebra">Arkworks</a> already had an implementations of the CIOS algorithm, and it can be found <a href="htt:ps://github.com/a16z/arkworks-algebra/blob/7ad88c46e859a94ab8e0b19fd8a217c3dc472f1c/ff-macros/src/montgomery/mul.rs#L11">here</a>.
+An implementation of the SOS<sup id="fnref:7"><a href="#fn:7" class="footnote-ref" role="doc-noteref">7</a></sup> algorithm can be found <a href="https://github.com/a16z/arkworks-algebra/blob/7ad88c46e859a94ab8e0b19fd8a217c3dc472f1c/ff-macros/src/montgomery/mul.rs#L77">here</a>.</p>
+<p>To simplify the investigation process, we stripped the code down to the essential helper functions and the <code>scalar_mul</code> function.
+Then we wrote a <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/barebones_profiling/src/main.rs">simple script</a> to compare the performance of the two algorithms to see the speedup promised in theory manifested itself in practice.
+The stripped down code needed to compute the montgomery product with Yuval&rsquo;s algorithm can be found <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/barebones_profiling/src/yuval_mult.rs">here</a>.
+Similarly, the stripped down code needed to compute the montgomery product with CIOS can be found <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/barebones_profiling/src/optimised_cios.rs">here</a>.</p>
 <div class="remark">
-  This entire writeup focuses on $n=4$.
-It is entirely possible that for larger values of $N$, the miscellaneous overheads we are about to discuss below will be outdone by the gains from fewer multiplications.
+  This entire write-up focuses on $n=4$.
+It is entirely possible that for larger values of $n$, the miscellaneous overheads we are about to discuss below will be outdone by the gains from fewer multiplications.
 </div>
 
-<h3 id="analysis">Analysis</h3>
-<p>To understand why these algorithms perform the way they do, we look at the x-86 assembly instruction that were executed for each of these algorithms.
-Shown below is the exact x86 assembly instructions that were exectured when running the two new multiplication algorihtms (we ignore SOS as CIOS was known to be faster).</p>
+<p>These are the instructions to empirically evaluate the running time of a single Montgomery multiplication.
+We assume that the inputs are already in Montgomery form,
+and the output will be stored in Montgomery form.
+This implies that the time to convert back and forth from standard
+to Montgomery form is not included in benchmarking run times.</p>
+<pre tabindex="0"><code>git clone https://github.com/abiswas3/Montgomery-Benchmarks.git
+cd Montgomery-Benchmarks
+git checkout --track origin/barebones_profiling
+cargo run --release
+</code></pre><p>Cargo run release should produce a <code>benchmark_data.csv</code> file for which each line is a trial run of how long a single multiplication took in nano seconds.
+We then plot a box plot of the distribution to understand run times.</p>
+<p><img src="/images/mont_mult/bench.jpeg" alt="Benchmark result"></p>
+<div class="remark">
+  This implies that the new algorithm is actually slower than even the SOS algorithm.
+</div>
+
+<h3 id="computer-information">Computer Information</h3>
+<p>All computations were run on Intel CPUs on Digital Ocean servers.
+Admittedly, this machine is not one of the top-of-the-line, fully specked-out servers available today.
+However, it was more than sufficient to do multiplication.
+We also ran the code on an M2 MacBook Air with 8GB of RAM and observed that the relative performance trends remained consistent.</p>
+<pre tabindex="0"><code>lscpu
+Architecture:             x86_64
+  CPU op-mode(s):         32-bit, 64-bit
+  Address sizes:          40 bits physical, 48 bits virtual
+  Byte Order:             Little Endian
+CPU(s):                   1
+  On-line CPU(s) list:    0
+Vendor ID:                AuthenticAMD
+  BIOS Vendor ID:         QEMU
+  Model name:             DO-Premium-AMD
+    BIOS Model name:      pc-i440fx-6.1  CPU @ 2.0GHz
+    BIOS CPU family:      1
+    CPU family:           23
+    Model:                49
+    Thread(s) per core:   1
+    Core(s) per socket:   1
+    Socket(s):            1
+    Stepping:             0
+    BogoMIPS:             3992.49
+    Flags:                fpu vme de pse tsc msr pae mce cx8 apic sep mt
+                          rr pge mca cmov pat pse36 clflush mmx fxsr sse
+                           sse2 syscall nx mmxext fxsr_opt pdpe1gb rdtsc
+                          p lm rep_good nopl xtopology cpuid extd_apicid
+                           tsc_known_freq pni pclmulqdq ssse3 fma cx16 s
+                          se4_1 sse4_2 x2apic movbe popcnt aes xsave avx
+                           f16c rdrand hypervisor lahf_lm svm cr8_legacy
+                           abm sse4a misalignsse 3dnowprefetch osvw topo
+                          ext perfctr_core ibpb stibp vmmcall fsgsbase b
+                          mi1 avx2 smep bmi2 rdseed adx smap clflushopt
+                          clwb sha_ni xsaveopt xsavec xgetbv1 clzero xsa
+                          veerptr wbnoinvd arat npt nrip_save umip rdpid
+Virtualization features:
+  Virtualization:         AMD-V
+  Hypervisor vendor:      KVM
+  Virtualization type:    full
+Caches (sum of all):
+  L1d:                    32 KiB (1 instance)
+  L1i:                    32 KiB (1 instance)
+</code></pre><pre tabindex="0"><code>free -h
+               total        used        free      shared  buff/cache   available
+Mem:           1.9Gi       421Mi       359Mi       5.5Mi       1.3Gi       1.5Gi
+Swap:             0B          0B          0B
+</code></pre><h2 id="analysis">Analysis</h2>
+<p>As a first step towards understanding what is going on, shown below is the <code>x86</code>-assembly code that the Rust compiler generates for each of the algorithm implementations.</p>
 <ul>
-<li><a href="/code/yuval">y-mult</a></li>
-<li><a href="/code/opt">g-mult</a></li>
+<li><a href="/code/yuval">y-mult</a> (Short for Yuval&rsquo;s multiplication algorithm.)</li>
+<li><a href="/code/opt">g-mult</a> (This is CIOS from Acar&rsquo;s thesis with the GNARK optimisation)</li>
 </ul>
-<p>We describe how we extracted the instructions in a subsequent section.
+<p>We do not bother with the SOS dump, as we are only interested in comparing the new algorithm with the fastest algorithm.
+More specifically, shown above are the assembly istructions that are executed from the time the <code>scalar_mul</code> function is invoked, to when it returns control to <code>main</code>.
+For reference, <a href="/code/itrace.out.gz">here</a> is a compressed dump of entire (3 million odd) set of x86 instruction that are executed, when we type <code>cargo run</code> into our terminal (this includes all the linking and loading of libraries by the OS).
+We describe in a subsequent section how we were able to efficiently extract these instructions.
+For now you can safely trust that they are accurately represented in the files described above.
 The format in which the code is expressed is</p>
 <pre tabindex="0"><code>memory address, instruction
-</code></pre><p>Where memory address refers to the virutal memory address at which the instruction is stored for the process executing the program.
-Summarising our findings. The arkworks code base executes fewer x86 instructions; 280 vs 326 to specific.</p>
+</code></pre><p>Where memory address refers to the virutal memory address at which the instruction is stored for the process executing the program.</p>
+<h3 id="summary-of-findings">Summary Of Findings</h3>
+<p>The arkworks code base executes fewer x86 instructions; 280 vs 326 to specific.</p>
 <pre tabindex="0"><code>wc -l static/code/yuval                                                                     ─╯
      326 static/code/yuval
 
 wc -l static/code/opt                                                                       ─╯
      280 static/code/opt
-</code></pre><p>For <code>g-mult</code>, as expected we see $2n^2 + n = 36$ multiplication operations.</p>
+</code></pre><p>Shown below is the op code distribution for the optimised CIOS algorithm.
+For <code>g-mult</code>, as expected we see $2n^2 + n = 36$ multiplication operations.</p>
 <pre tabindex="0"><code>1 ret
 1 setb
 3 lea
@@ -346,7 +418,7 @@ wc -l static/code/opt                                                           
 <pre tabindex="0"><code>root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks# cat opt|grep -o &#39;[a-z0-9]\+ ptr&#39; | sort|uniq -c
      36 qword ptr
 </code></pre><p>For the new algorithm we expect to see fewer multiplications i.e $2n^2 + 1 = 33$ multiplication opearations, and that&rsquo;s exactly what we see.
-This is what we hoped would give us our speedup.</p>
+<strong>This is what we hoped would give us our speedup.</strong></p>
 <pre tabindex="0"><code>1 imul &lt;---
 1 ret
 1 shl
@@ -380,19 +452,124 @@ It just means that the way the Rust compiler is building the current binary is n
 </div>
 
 <p>At this point we have established why we think we do not see an improvement in runtime.
-The remainder of the post is written as tutorial on how we were able to perform the above analysis.</p>
+One potential way to see the promised speedup is to right optimised assembly code directly.
+We defer investigating whether this is possible to future work.</p>
 <h2 id="how-to-replicate-the-process">How To Replicate The Process</h2>
+<p>The remainder of the post is written as a tutorial on how we were able to perform the above analysis.
+To extract assembly we use techniques inspired by the field of <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-606.pdf">Dynamic Binary Instrumentation</a>.
+At a high level, when we run <code>cargo run</code>, just before an assembly instruction associated with are executable is physically executed on the CPU, the <a href="https://software.intel.com/sites/landingpage/pintool/downloads/pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz">pin tool</a> provided by Intel interjects, and allows us to run pre and post instrumentation code.
+We wrote <a href="/code/itrace.cpp">this instrumentation</a> code to simply log the assembly instructions to a file called <code>itrace.out</code> just before they are executed.
+Thus, the files above not only describe assembly instructions associated with each algorithm, but they are listed in time order of execution.</p>
+<div class="remark">
+  Given that we use the above tool, our techniques only apply when executing programs on Intel CPUS.
+So this technique for extracting assembly instructions would not apply to a M series Mac on apple silicon.
+</div>
+
+<p>Next, we describe how to download the pin tool and store it in a directory named <code>t</code>.</p>
+<pre tabindex="0"><code>mkdir t &amp;&amp; cd t
+wget https://software.intel.com/sites/landingpage/pintool/downloads/pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz
+ls -l 
+total 32232
+-rw-r--r-- 1 root  root  32994324 May  8 21:45 pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz
+</code></pre><p>The next step is to make sure that the rustc linker includes all the symbols in the binary.
+This is achieved by updating the <code>.cargo/config.toml</code> file as described below.</p>
+<pre tabindex="0"><code>$ cat ~/.cargo/config.toml
+[target.x86_64-unknown-linux-gnu]
+rustflags = [ &#34;-C&#34;, &#34;link-args=-Wl,-export-dynamic&#34; ]
+</code></pre><p>This will allow us to later inspect the binary for the method headers we care about.
+The next step is to update are Cargo.toml file with the following lines.</p>
+<pre tabindex="0"><code>[profile.release-with-debug]
+inherits = &#34;release&#34;
+debug = true
+   
+</code></pre><p>This makes it so that we can build with debug information, but still in release-mode.
+So we still efficiency when running the code, and Rust does all its compiler optimisations.
+Then to builld the binary or executable, we run the code with the following parameters.</p>
+<pre tabindex="0"><code>$ cargo build --profile release-with-debug
+</code></pre><p>This creates a binary file in <code>target/release-with-debug</code> directory called <code>minimal_mult</code>
+(<code>minimal_mult</code> is the name we use when defining the package in the <code>Cargo.toml</code> file).
+Then we wish to see where in memory the fucntions we care about are stored.
+The tool to do this is <code>nm</code>.
+From its <a href="https://linux.die.net/man/1/nm">man pages</a>:</p>
+<div class="quote">
+  GNU nm lists the symbols from object files objfile&hellip;. If no object files are listed as arguments, nm assumes the file a.out.
+</div>
+
+<p>Remember we are interested in the following functions <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/ffbc2d0731c5fd45ff9e6e560c18366fe94f9d7e/src/yuval_mult.rs#L90">yuvals multiplication</a>,
+<a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/ffbc2d0731c5fd45ff9e6e560c18366fe94f9d7e/src/optimised_cios.rs#L77">cios multiplication with GNARK optimisations</a> and <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/ffbc2d0731c5fd45ff9e6e560c18366fe94f9d7e/src/vanilla_cios.rs#L5">sos multiplication</a>, and they all start with the prefix scalar_mul*</p>
+<p>Therefore, on filtering the output of <code>nm</code> by searching for the <code>scalar_mul</code>
+prefix, we get the memory address of the functions we care about.</p>
+<pre tabindex="0"><code>$ nm --defined-only target/release-with-debug/minimal_mult|grep scalar
+
+000000000004b7d0 t _ZN12minimal_mult10yuval_mult10scalar_mul17ha435832ac9fe806eE
+000000000004a790 t _ZN12minimal_mult12vanilla_cios10scalar_mul17h8731c86ebf619ce7E
+000000000004b3a0 t _ZN12minimal_mult14optimised_cios20scalar_mul_unwrapped17h08a3ba9b5ffe6264E
+</code></pre><p>It will soon be clear why we need this.
+Now let&rsquo;s run the binary, but get the pin tool to interject by dumping every x86 instruction to a file before it is executed (as described above).</p>
+<pre tabindex="0"><code>$ ../t/pin-external-3.31-98869-gfa6f126a8-gcc-linux/pin -t ../t/pin-external-3.31-98869-gfa6f126a8-gcc-linux/source/tools/ManualExamples/obj-intel64/itrace.so -- ./target/release-with-debug/minimal_mult
+</code></pre><p>This generates a file file called <code>itrace.out</code>, which looks like this.</p>
+<pre tabindex="0"><code>Loading /root/Montgomery-Benchmarks/target/release-with-debug/minimal_mult 5e4052170000v
+Loading /lib64/ld-linux-x86-64.so.2 793baee95000
+Loading [vdso] 793baee93000
+0x793baeeb5940 mov rdi, rsp
+0x793baeeb5943 call 0x793baeeb6620
+0x793baeeb6620 nop edx, edi
+0x793baeeb6624 push rbp
+0x793baeeb6625 lea rcx, ptr [rip-0x2162c]
+0x793baeeb662c lea rax, ptr [rip+0x19cad]
+0x793baeeb6633 movq xmm2, rcx
+0x793baeeb6638 movq xmm3, rax
+0x793baeeb663d punpcklqdq xmm2, xmm3
+0x793baeeb6641 mov rbp, rsp
+
+...
+</code></pre><p>The key thing to note is that at virtual address <code>0x5e4052170000v</code>of the process executing our program, is where the code for our binary is loaded.
+Thus the yuval::scalar_mul routine is at <code>0x5e4052170000</code>+<code>0x4b7d0</code> (the address where minimal_mult was loaded, as per itrace.out, plus the offset where yuval_mult::scalar_mul is contained within minimal_mult, as per nm)
+Likewise, the opt::scalar_mul routine is contained at <code>0x5e4052170000</code>+<code>0x4b3a0</code></p>
+<p>So if we want to dump a copy of a run of the yuval scalar_mul, we simply print from <code>0x5e4052170000</code>+<code>0x4b7d0</code>=<code>0x5e40521bb7d0</code> to the corresponding ret instruction:</p>
+<pre tabindex="0"><code>cat itrace.out | sed -n &#39;/^0x5e40521bb7d0/,/ret/{p;/ret/q}&#39; &gt; yuval.disas
+</code></pre><p>and similarly</p>
+<pre tabindex="0"><code>cat itrace.out | sed -n &#39;/^0x5e40521bb3a0/,/ret/{p;/ret/q}&#39; &gt; opt.disas
+</code></pre><div class="remark">
+  The above sed script is a little bit facile, and works here because the functions of interest do not call anything established, as we asked the Rust compiler to inline the helpers.
+A more robust way to extract the assembly is to do the following:
+</div>
+
+<pre tabindex="0"><code>$ objdump -d -Mintel target/release-with-debug/minimal_mult|sed -n &#39;/^0.*scalar_mul/,/ret/{/scalar_mul\|ret/p}&#39;
+000000000004a790 &lt;_ZN12minimal_mult12vanilla_cios10scalar_mul17h8731c86ebf619ce7E&gt;:
+   4ac47:       c3                      ret
+000000000004b3a0 &lt;_ZN12minimal_mult14optimised_cios20scalar_mul_unwrapped17h08a3ba9b5ffe6264E&gt;:
+   4b7c6:       c3                      ret
+000000000004b7d0 &lt;_ZN12minimal_mult10yuval_mult10scalar_mul17ha435832ac9fe806eE&gt;:
+   4bce6:       c3                      ret
+</code></pre><p>and then e.g. for yuval,</p>
+<pre tabindex="0"><code>cat itrace.out | sed -n &#39;/^0x5e40521bb7d0/,/0x5e40521bbce6/{p;/0x5e40521bbce6/q}&#39;
+</code></pre><p>that is, using the address of the ret to figure out when to stop printing, and not just searching for the first ret, as this would be the return from the first callee of the function of interest and not from that functino itself.</p>
+<p>And that&rsquo;s how we were able to extract every line of assembly code that was executed when we call the different Montgomery multiplication algorithms.</p>
 <div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>
 <li id="fn:1">
-<p>Word, digit, limbs are all interchangeable. For everything we discuss here, a word is 64-bits. So a 2-limb integer is just an integer that takes 2$\times$ 64 bits to describe.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a>&#160;<a href="#fnref1:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>The terms word, digit, limbs are all interchangeable. For everything we discuss here, the word size is 64-bits. So a 2-limb integer is just an integer that takes 2$\times$ 64 bits to describe.&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:2">
-<p>This is usually because most CPU&rsquo;s do not directly offer a modulo instruction natively.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>A description of this algorithm can be found in <a href="papers/Acard.pdf">Chapter 1 of Acar&rsquo;s Phd thesis</a>.&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:3">
-<p>The comments claim that this is CIOS, but if you refer to the algorithms in Acar&rsquo;s thesis, this is defined as SOS.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>This is usually because most CPU&rsquo;s do not directly offer a modulo instruction natively.&#160;<a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:4">
+<p>These are the operations that the algorithms need. When running code on an actual CPU, there are other instructional overheads &ndash; OS code, memory freeing etc.&#160;<a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:5">
+<p>The only change we made was we <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/0263c89bce53ea62ff7d9cba143020443b763659/src/yuval_mult.rs#L34">unrolled</a> for <code>addv</code> helper method for $n=4$.
+This only sped things up.&#160;<a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:6">
+<p>The CIOS algorithm description can also be found Acar&rsquo;s thesis.&#160;<a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:7">
+<p>The comments claim that this is CIOS, but if you refer to the algorithms in Acar&rsquo;s thesis, this is defined as SOS.&#160;<a href="#fnref:7" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 </ol>
 </div>
