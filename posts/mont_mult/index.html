@@ -11,7 +11,7 @@
   style="--bg:#faf8f1"
   lang="en-us"
   dir="ltr"
-><head>
+><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta
@@ -30,13 +30,13 @@ Previously, the best known algorithm2 for Montgomery multiplication was known to
 Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms.
 This post is a deep dive into why this could be, and potentially what can be done about it." />
   <meta name="author" content="Random Walks" />
-  <link rel="stylesheet" href="/css/bundle.min.css" />
+  <link rel="stylesheet" href="http://localhost:1313/css/bundle.min.css" />
 
-  <link rel="preload" as="image" href="/theme.png" />
+  <link rel="preload" as="image" href="http://localhost:1313/theme.png" />
 
   <script
     defer
-    src="/highlight.min.js"
+    src="http://localhost:1313/highlight.min.js"
     onload="hljs.initHighlightingOnLoad();"
   ></script><link
   rel="stylesheet"
@@ -72,36 +72,14 @@ This post is a deep dive into why this could be, and potentially what can be don
 
   <link
     rel="icon"
-    href="/favicon.ico"
+    href="http://localhost:1313/favicon.ico"
   />
   <link
     rel="apple-touch-icon"
-    href="/apple-touch-icon.png"
+    href="http://localhost:1313/apple-touch-icon.png"
   />
 
-  <meta name="generator" content="Hugo 0.147.3">
-  <meta itemprop="name" content="Montgomery Multiplication: Theory Vs Practice">
-  <meta itemprop="description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms. This post is a deep dive into why this could be, and potentially what can be done about it.">
-  <meta itemprop="datePublished" content="2025-05-15T17:52:40+01:00">
-  <meta itemprop="dateModified" content="2025-05-15T17:52:40+01:00">
-  <meta itemprop="wordCount" content="2628">
-  <meta itemprop="keywords" content="Cryptography,Benchmarking"><meta property="og:url" content="/posts/mont_mult/">
-  <meta property="og:site_name" content="Random Walks">
-  <meta property="og:title" content="Montgomery Multiplication: Theory Vs Practice">
-  <meta property="og:description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms. This post is a deep dive into why this could be, and potentially what can be done about it.">
-  <meta property="og:locale" content="en_us">
-  <meta property="og:type" content="article">
-    <meta property="article:section" content="posts">
-    <meta property="article:published_time" content="2025-05-15T17:52:40+01:00">
-    <meta property="article:modified_time" content="2025-05-15T17:52:40+01:00">
-    <meta property="article:tag" content="Cryptography">
-    <meta property="article:tag" content="Benchmarking">
-
-  <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Montgomery Multiplication: Theory Vs Practice">
-  <meta name="twitter:description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms. This post is a deep dive into why this could be, and potentially what can be done about it.">
-
-  <link rel="canonical" href="/posts/mont_mult/" /></head>
+  <meta name="generator" content="Hugo 0.147.3"></head>
 <body
   class="bg-(--bg) text-black antialiased duration-200 ease-out [-webkit-tap-highlight-color:transparent] dark:text-white
   
@@ -115,7 +93,7 @@ This post is a deep dive into why this could be, and potentially what can be don
   <div class="relative z-50 flex items-center ltr:mr-auto rtl:ml-auto">
     <a
       class="-translate-y-[1px] text-2xl font-medium"
-      href="/"
+      href="http://localhost:1313/"
       >Random Walks</a
     >
     <div
@@ -203,8 +181,8 @@ This post is a deep dive into why this could be, and potentially what can be don
 
   
     <footer class="mb-4 flex flex-wrap gap-2">
-        <a class="tag" href="/tags/cryptography">cryptography</a>
-        <a class="tag" href="/tags/benchmarking">benchmarking</a>
+        <a class="tag" href="http://localhost:1313/tags/cryptography">cryptography</a>
+        <a class="tag" href="http://localhost:1313/tags/benchmarking">benchmarking</a>
     </footer>
 
   
