@@ -84,7 +84,7 @@ This post is a deep dive into why this could be, and potentially what can be don
   <meta itemprop="description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms. This post is a deep dive into why this could be, and potentially what can be done about it.">
   <meta itemprop="datePublished" content="2025-05-15T17:52:40+01:00">
   <meta itemprop="dateModified" content="2025-05-15T17:52:40+01:00">
-  <meta itemprop="wordCount" content="2628">
+  <meta itemprop="wordCount" content="2663">
   <meta itemprop="keywords" content="Cryptography,Benchmarking"><meta property="og:url" content="/posts/mont_mult/">
   <meta property="og:site_name" content="Random Walks">
   <meta property="og:title" content="Montgomery Multiplication: Theory Vs Practice">
@@ -293,8 +293,7 @@ For example, on Skylake (mid-level x86 processor)</p>
 
 </div>
 
-<p>Now given the above constraints, one would imagine that minimising the number of multiplication operations would the answer to faster algorithms.
-Previously, the best known algorithm for performing a single Montgomery multiplication operation required $2n^2 + n$ multiplication operations.</p>
+<p>Now given the above constraints, one would imagine that minimising the number of multiplication operations would the answer to faster algorithms.</p>
 <div class="remark">
   Surprisingly, this was not what we saw in actual experiments.
 The remainder of this document tries to understand why?
@@ -457,21 +456,24 @@ We defer investigating whether this is possible to future work.</p>
 <h2 id="how-to-replicate-the-process">How To Replicate The Process</h2>
 <p>The remainder of the post is written as a tutorial on how we were able to perform the above analysis.
 To extract assembly we use techniques inspired by the field of <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-606.pdf">Dynamic Binary Instrumentation</a>.
-At a high level, when we run <code>cargo run</code>, just before an assembly instruction associated with are executable is physically executed on the CPU, the <a href="https://software.intel.com/sites/landingpage/pintool/downloads/pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz">pin tool</a> provided by Intel interjects, and allows us to run pre and post instrumentation code.
-We wrote <a href="/code/itrace.cpp">this instrumentation</a> code to simply log the assembly instructions to a file called <code>itrace.out</code> just before they are executed.
-Thus, the files above not only describe assembly instructions associated with each algorithm, but they are listed in time order of execution.</p>
+At a high level, when we run <code>cargo run</code>, just before an instruction in our code is physically executed on the CPU, the <a href="https://software.intel.com/sites/landingpage/pintool/downloads/pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz">pin tool</a> provided by Intel interjects, and allows us to run pre and post instrumentation code.
+We modified <a href="/code/itrace.cpp">the instrumentation</a> code to simply log the assembly instructions to a file called <code>itrace.out</code> just before they are executed.
+Thus, the files above not only describe assembly instructions associated with each algorithm, but they are are listed in time order of execution.</p>
 <div class="remark">
-  Given that we use the above tool, our techniques only apply when executing programs on Intel CPUS.
-So this technique for extracting assembly instructions would not apply to a M series Mac on apple silicon.
+  Given that we use the above tool, our techniques only apply when executing programs on Intel CPU&rsquo;s.
+This dynamic technique for extracting assembly instructions by running the binary would not apply to a M series Mac on apple silicon.
+There could be static instrumentation techniques that one could use instead.
 </div>
 
-<p>Next, we describe how to download the pin tool and store it in a directory named <code>t</code>.</p>
+<p>Next, we describe how to download the pin tool and store it in a directory named <code>t</code>.
+(We assume that you are running Linux as the OS, though there are windows and Mac pin tools available on the website)</p>
 <pre tabindex="0"><code>mkdir t &amp;&amp; cd t
 wget https://software.intel.com/sites/landingpage/pintool/downloads/pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz
 ls -l 
 total 32232
 -rw-r--r-- 1 root  root  32994324 May  8 21:45 pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz
-</code></pre><p>The next step is to make sure that the rustc linker includes all the symbols in the binary.
+</code></pre><p>After unzipping the contents, the next step is to make sure that the <code>rustc</code> linker includes all the symbols in the binary.
+If we do not do this, binary created by the rust compiler will have no human readable strings with debug information.
 This is achieved by updating the <code>.cargo/config.toml</code> file as described below.</p>
 <pre tabindex="0"><code>$ cat ~/.cargo/config.toml
 [target.x86_64-unknown-linux-gnu]
@@ -489,16 +491,12 @@ Then to builld the binary or executable, we run the code with the following para
 </code></pre><p>This creates a binary file in <code>target/release-with-debug</code> directory called <code>minimal_mult</code>
 (<code>minimal_mult</code> is the name we use when defining the package in the <code>Cargo.toml</code> file).
 Then we wish to see where in memory the fucntions we care about are stored.
-The tool to do this is <code>nm</code>.
-From its <a href="https://linux.die.net/man/1/nm">man pages</a>:</p>
-<div class="quote">
-  GNU nm lists the symbols from object files objfile&hellip;. If no object files are listed as arguments, nm assumes the file a.out.
-</div>
-
+The tool to do this is <code>nm</code>.</p>
 <p>Remember we are interested in the following functions <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/ffbc2d0731c5fd45ff9e6e560c18366fe94f9d7e/src/yuval_mult.rs#L90">yuvals multiplication</a>,
 <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/ffbc2d0731c5fd45ff9e6e560c18366fe94f9d7e/src/optimised_cios.rs#L77">cios multiplication with GNARK optimisations</a> and <a href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/ffbc2d0731c5fd45ff9e6e560c18366fe94f9d7e/src/vanilla_cios.rs#L5">sos multiplication</a>, and they all start with the prefix scalar_mul*</p>
 <p>Therefore, on filtering the output of <code>nm</code> by searching for the <code>scalar_mul</code>
-prefix, we get the memory address of the functions we care about.</p>
+prefix, we get the memory address of the functions we care about.
+These memory addresses represent the offset from the first line of the executable (not the actual virtual address).</p>
 <pre tabindex="0"><code>$ nm --defined-only target/release-with-debug/minimal_mult|grep scalar
 
 000000000004b7d0 t _ZN12minimal_mult10yuval_mult10scalar_mul17ha435832ac9fe806eE
