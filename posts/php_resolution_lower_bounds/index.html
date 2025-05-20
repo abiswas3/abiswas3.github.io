@@ -9,7 +9,7 @@
 <html
   class="not-ready lg:text-base"
   style="--bg:#faf8f1"
-  lang="en-us"
+  lang="en-gb"
   dir="ltr"
 ><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
   <meta charset="utf-8" />
@@ -20,12 +20,20 @@
   />
 
   
-  <title>Refuting The Pigeon Hole Principle - Random Walks</title>
+  <title>Mont Mult Math - Random Walks</title>
 
   
   <meta name="theme-color" />
 
-  <meta name="description" content="" />
+  <meta name="description" content="$\newcommand{\criticalAlpha}[1]{{\alpha^*{#1}}} \newcommand{\CStar}{\widetilde{C}} \newcommand{\PHP}[2]{\text{PHP}{#2}^{#1}}$
+PHP Refutations In Resolution
+This post is about Refuting The Basic Pigeon Hole Principle In The
+Resolution Proof System. Here the number of pigeons will be $n$ and
+the number of holes will be $n-1$, and we only consider fomulae that
+fail to satisfy the Pigeon and Hole Axioms (so we are not considering
+the functional and onto axioms). See for
+a refresher on the resolution proof system, and the axioms of the PHP
+principle." />
   <meta name="author" content="Random Walks" />
   <link rel="stylesheet" href="//localhost:1313/css/bundle.min.css" />
 
@@ -173,21 +181,19 @@
     ><article>
 <header class="mb-14">
   
-    <h1>Refuting The Pigeon Hole Principle</h1>
+    <h1>Mont Mult Math</h1>
   
 
   
     <footer class="mb-4 flex flex-wrap gap-2">
-        <a class="tag" href="//localhost:1313/tags/complexity-theory">complexity theory</a>
-        <a class="tag" href="//localhost:1313/tags/proof-complexity">proof complexity</a>
-        <a class="tag" href="//localhost:1313/tags/lower-bounds">lower bounds</a>
+        <a class="tag" href="//localhost:1313/tags/misc">Misc</a>
     </footer>
 
   
   
     <div class="text-xs antialiased opacity-60">
       
-        <time>May 15, 2024</time>
+        <time>May 16, 2025</time>
       
       
       
@@ -203,14 +209,32 @@
 
   
 
-  <aside class="toc">
-    <nav id="TableOfContents"></nav>
-  </aside>
 
 
 
+  <section><p>$\newcommand{\criticalAlpha}[1]{{\alpha^*<em>{#1}}} \newcommand{\CStar}{\widetilde{C}} \newcommand{\PHP}[2]{\text{PHP}</em>{#2}^{#1}}$</p>
+<h1 id="php-refutations-in-resolution">PHP Refutations In Resolution</h1>
+<p>This post is about <strong>Refuting The Basic Pigeon Hole Principle In The
+Resolution Proof System</strong>. Here the number of pigeons will be $n$ and
+the number of holes will be $n-1$, and we only consider fomulae that
+fail to satisfy the Pigeon and Hole Axioms (so we are not considering
+the functional and onto axioms). <a href="resolution-crash-course.html">See</a> for
+a refresher on the resolution proof system, and the axioms of the PHP
+principle.</p>
+<p>The main result we wish to prove is that all refutations have large
+size. The original result is by [@haken1984intractability] but we go
+over the proof by [@beame1996simplified] which is a simplification of
+the original proof.</p>
+<div class="def">
+  <h3 class="title">
+    Definition
+  </h3>
+  <h3 id="proof-size-lower-bound-for-phpnn-1">Proof Size Lower Bound For $\PHP{n}{n-1}$</h3>
+<p>Any refutation of $\pi$ for $\PHP{n}{n-1}$ in the resolution proof
+system has size $\BigOmega{\exp{n}}$.</p>
+</div>
 
-  <section></section>
+</section>
 
   
 

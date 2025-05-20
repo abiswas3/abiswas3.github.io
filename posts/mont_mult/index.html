@@ -9,7 +9,7 @@
 <html
   class="not-ready lg:text-base"
   style="--bg:#faf8f1"
-  lang="en-us"
+  lang="en-gb"
   dir="ltr"
 ><head>
   <meta charset="utf-8" />
@@ -27,7 +27,7 @@
 
   <meta name="description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations.
 Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations.
-Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms.
+Although the new algorithm theoretically requires fewer multiplications, empirical evaluations revealed no improvements in runtime. In fact, prior algorithms consistently outperformed the proposed method.
 This post is a deep dive into why this could be, and potentially what can be done about it." />
   <meta name="author" content="Random Walks" />
   <link rel="stylesheet" href="/css/bundle.min.css" />
@@ -81,15 +81,15 @@ This post is a deep dive into why this could be, and potentially what can be don
 
   <meta name="generator" content="Hugo 0.147.3">
   <meta itemprop="name" content="Montgomery Multiplication: Theory Vs Practice">
-  <meta itemprop="description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms. This post is a deep dive into why this could be, and potentially what can be done about it.">
+  <meta itemprop="description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Although the new algorithm theoretically requires fewer multiplications, empirical evaluations revealed no improvements in runtime. In fact, prior algorithms consistently outperformed the proposed method. This post is a deep dive into why this could be, and potentially what can be done about it.">
   <meta itemprop="datePublished" content="2025-05-15T17:52:40+01:00">
   <meta itemprop="dateModified" content="2025-05-15T17:52:40+01:00">
-  <meta itemprop="wordCount" content="2663">
+  <meta itemprop="wordCount" content="2678">
   <meta itemprop="keywords" content="Cryptography,Benchmarking"><meta property="og:url" content="/posts/mont_mult/">
   <meta property="og:site_name" content="Random Walks">
   <meta property="og:title" content="Montgomery Multiplication: Theory Vs Practice">
-  <meta property="og:description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms. This post is a deep dive into why this could be, and potentially what can be done about it.">
-  <meta property="og:locale" content="en_us">
+  <meta property="og:description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Although the new algorithm theoretically requires fewer multiplications, empirical evaluations revealed no improvements in runtime. In fact, prior algorithms consistently outperformed the proposed method. This post is a deep dive into why this could be, and potentially what can be done about it.">
+  <meta property="og:locale" content="en_gb">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
     <meta property="article:published_time" content="2025-05-15T17:52:40+01:00">
@@ -99,7 +99,7 @@ This post is a deep dive into why this could be, and potentially what can be don
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Montgomery Multiplication: Theory Vs Practice">
-  <meta name="twitter:description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms. This post is a deep dive into why this could be, and potentially what can be done about it.">
+  <meta name="twitter:description" content="In a recent blog post, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb1 integer $p$, using $2n^2 &#43; 1$ multiplication operations. Previously, the best known algorithm2 for Montgomery multiplication was known to use $2n^2 &#43; n$ multiplication operations. Although the new algorithm theoretically requires fewer multiplications, empirical evaluations revealed no improvements in runtime. In fact, prior algorithms consistently outperformed the proposed method. This post is a deep dive into why this could be, and potentially what can be done about it.">
 
   <link rel="canonical" href="/posts/mont_mult/" /></head>
 <body
@@ -252,7 +252,7 @@ This post is a deep dive into why this could be, and potentially what can be don
 
   <section><p>In a recent <a href="https://hackmd.io/@Ingonyama/Barret-Montgomery">blog post</a>, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> integer $p$, using $2n^2 + 1$ multiplication operations.
 Previously, the best known algorithm<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup> for Montgomery multiplication was known to use $2n^2 + n$ multiplication operations.
-Despite this theoretical promise of fewer multiplications, we did not see physical speedups in runtime when testing the new algorithm empirically against the old algorithms.
+Although the new algorithm theoretically requires fewer multiplications, empirical evaluations revealed no improvements in runtime. In fact, prior algorithms consistently outperformed the proposed method.
 This post is a deep dive into why this could be, and potentially what can be done about it.</p>
 <h2 id="montgomery-multiplication---a-brief-review">Montgomery Multiplication - A Brief Review</h2>
 <p>Given $n$ limb modulus $p$, and integers $a$ and $b$, the modular multiplication problem is to compute the remainder of the product</p>
@@ -261,11 +261,10 @@ This post is a deep dive into why this could be, and potentially what can be don
 Furthermore, modern cryptographic applications often require chaining many modular multiplications together.
 If we used long division for every individual multiplication, this would be prohibitively slow.
 Instead, we use <a href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication">Montgomery multiplication</a>.</p>
-<p>In Montgomery multiplication, instead of computing $ab \mod p$, we compute $$abR^{-1} \equiv (ab + mp)/R \mod p$$ where $R$ is set to the smallest power of two exceeding $p$ that falls on a computer word boundary and $m$ is some carefully chosen integer such that $ab + mp$ is divisible by $R$.
+<p>In Montgomery multiplication, instead of computing $ab \mod p$, we compute $$abR^{-1} \equiv (ab + mp)/R \mod p$$ where $R$ is set to the smallest power of two exceeding $p$ that falls on a computer word boundary, and $m$ is some carefully chosen integer such that $ab + mp$ is divisible by $R$.
 For example, if $p$ is 381 bit integer, then $R= 2^{n \times w}=2^{6\times 64} = 2^{384}$ on a 64-bit architecture.
 Abstracting over some details, the reason for doing so is that the above computation does not use the expensive division algorithm.
-As $R$ is a power of two, we can divide by $R$ by using the bit shift operation which is native to most Instruction Set Architectures.
-This leads to more efficient code than implementing long division.
+As $R$ is a power of two, dividing by $R$ reduces to the bit shift operation which is native to most Instruction Set Architectures.
 For the interested reader, <a href="https://eprint.iacr.org/2017/1057">Montgomery Arithmetic from a Software Perspective
 </a> is a good resource for understanding the theory of Montgomery Multiplication.</p>
 <p>At a high level every Montgomery multiplication algorithm uses 3 kinds of operations<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup> (see <a href="/papers/Acar.pdf#page=34">Page 34 Table 2.1</a> for an overview of the exact counts):</p>
@@ -293,9 +292,9 @@ For example, on Skylake (mid-level x86 processor)</p>
 
 </div>
 
-<p>Now given the above constraints, one would imagine that minimising the number of multiplication operations would the answer to faster algorithms.</p>
+<p>Now given the above constraints, one would imagine that minimising the number of multiplication operations would be the answer to implementing faster algorithms.</p>
 <div class="remark">
-  Surprisingly, this was not what we saw in actual experiments.
+  Surprisingly, this was not what we see in actual experiments.
 The remainder of this document tries to understand why?
 </div>
 
@@ -303,8 +302,9 @@ The remainder of this document tries to understand why?
 <p>We first describe our findings, and then describe how to recreate the analysis workflow.</p>
 <h3 id="empirical-performance">Empirical Performance</h3>
 <p>We were provided with an <a href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">implementation</a> of the new multiplication algorithm<sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup> by the folks at <a href="https://www.ingonyama.com/">Ingoyama</a>, specifically targeting the <a href="https://neuromancer.sk/std/bn/bn254">BN-254</a> curve (i.e $n=4$), which we refer to as Y-mult in this post.</p>
-<p>The algorithms used for comparison are the SOS and optimised CIOS algorithms.
-We refer to the SOS algorithm described in <a href="papers/Acar.pdf">Acar&rsquo;s thesis</a> as C-mult in this post.
+<p>The algorithms used for comparison are the Separated Operand Scanning Algorithm (SOS) and the optimised Coarsely Integrated Operand Scanning Algorithm (CIOS).
+These were the state of the art Montgomery multiplication algorithms prior to Yuval&rsquo;s post.
+The SOS algorithm is described in <a href="papers/Acar.pdf">Acar&rsquo;s thesis</a>, and we refer to it as C-mult in this post.
 We denote as G-mult, the optimised version of the CIOS<sup id="fnref:6"><a href="#fn:6" class="footnote-ref" role="doc-noteref">6</a></sup> algorithm by the <a href="https://hackmd.io/@gnark/modular_multiplication">Gnark</a> team.
 <a href="https://github.com/a16z/arkworks-algebra">Arkworks</a> already had an implementations of the CIOS algorithm, and it can be found <a href="htt:ps://github.com/a16z/arkworks-algebra/blob/7ad88c46e859a94ab8e0b19fd8a217c3dc472f1c/ff-macros/src/montgomery/mul.rs#L11">here</a>.
 An implementation of the SOS<sup id="fnref:7"><a href="#fn:7" class="footnote-ref" role="doc-noteref">7</a></sup> algorithm can be found <a href="https://github.com/a16z/arkworks-algebra/blob/7ad88c46e859a94ab8e0b19fd8a217c3dc472f1c/ff-macros/src/montgomery/mul.rs#L77">here</a>.</p>
@@ -451,7 +451,7 @@ It just means that the way the Rust compiler is building the current binary is n
 </div>
 
 <p>At this point we have established why we think we do not see an improvement in runtime.
-One potential way to see the promised speedup is to right optimised assembly code directly.
+One potential way to see the promised speedup is to write optimised assembly code directly.
 We defer investigating whether this is possible to future work.</p>
 <h2 id="how-to-replicate-the-process">How To Replicate The Process</h2>
 <p>The remainder of the post is written as a tutorial on how we were able to perform the above analysis.
