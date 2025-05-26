@@ -1,0 +1,210 @@
+.pub-list {
+  max-width: 800px;
+  margin: 0 auto;       /* Centers horizontally */
+  padding: 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+/* Publication container */
+.pub {
+  border-bottom: 1px solid #ddd;
+  padding: 1rem 0;
+  transition: background-color 0.3s ease;
+  max-width: 800px; /* or 900px if you prefer */
+}
+
+.pub-title-text {
+  flex: 0 0 80%; /* fixed 80% width */
+  font-weight: 700;
+  font-size: 1.4rem;
+  overflow-wrap: break-word; /* wrap if too long */
+}
+
+.pub-header {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.pub-title {
+  flex: 1 1 auto;
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin: 0; /* important to reduce default h3 spacing */
+  color: black;
+}
+
+.venue {
+  flex: 0 0 auto;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.venue a {
+  text-decoration: underline;
+}
+
+.venue a:hover {
+  text-decoration: underline;
+}
+
+
+
+.pub:hover {
+  background-color: #f9f9f9;
+}
+
+.pub > div {
+  margin-bottom: 0.3rem;
+}
+
+
+
+/* Authors styling */
+.primary{
+  background-color: #f6d6bd;  /* Warm pastel peach */
+  color: #7a4e32;             /* Darker brown for contrast */
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(122, 78, 50, 0.3);
+  font-size: 0.80rem;
+}
+
+.authors  {
+  color: #0077B6; /* Kon-peki Blue */
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-size: 0.80rem;
+}
+
+.authors a:hover {
+  color: #023E8A; /* Darker Kon-peki Blue */
+  text-decoration: underline;
+}
+
+
+/* Abstract text styling */
+.abstract {
+  font-size: 0.95rem;
+  color: #333;
+  margin-top: 0.5rem;
+  margin-bottom: 0.7rem;
+  white-space: pre-wrap;
+}
+
+/* Artefacts links */
+.artefacts {
+  font-size: 0.85rem;
+
+}
+
+.artefacts p {
+  margin: 0 0 0.25rem 0;
+  font-weight: 600;
+  color: #444;
+}
+
+.artefacts ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.artefacts a {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  color: #319795;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin: 5px;
+}
+
+.artefacts  a:hover {
+  border-color: #1d3557;
+  background-color: pink;
+}
+
+
+/* Responsive content padding */
+@media (max-width: 600px) {
+  .content {
+    padding: 0 0.5rem;
+  }
+}
+
+
+/* ----- TOGGLE DROPDOWNS ----- */
+/* Container styles for abstract and note sections */
+.abstract-container {
+  flex: 1 1 45%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.5rem;
+}
+
+
+/* Hide the native checkboxes */
+.abstract-toggle {
+  display: none;
+}
+
+/* Label styles: clean, minimal, smiley icon before text */
+.abstract-label, .note-container {
+  font-size: 0.85rem;
+  color: teal;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  position: relative;
+  font-weight: 600;
+}
+
+.abstract-label{
+  padding-top: 6px;
+  padding-bottom: 8px;
+}
+
+/* Smiley-style arrow before the label */
+.abstract-label::before {
+  content: "⬇️";
+  display: inline-block;
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.3s ease;
+  transform-origin: center;
+}
+
+/* Rotate arrow when toggled */
+.abstract-toggle:checked + .abstract-label::before{
+  transform: rotate(-90deg);
+}
+
+/* Hidden content by default */
+.abstract-text{
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  margin-top: 0;
+  padding-left: 0.5rem;
+  line-height: 1.4;
+  color: teal;
+  font-size: 0.9rem;
+}
+
+/* Show content when toggled */
+.abstract-toggle:checked + .abstract-label + .abstract-text{
+  max-height: 100vh;
+  margin-top: 0.3rem;
+}

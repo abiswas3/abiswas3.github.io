@@ -1,0 +1,178 @@
+/* index.css - for specific index page with link lists */
+/* === Theme Colors === */
+:root {
+  --bg: #fefcf9;
+  --text: #1a1a1a;
+  --heading: #34558b;
+  --link: #005f99;
+  --link-hover: #004477;
+  --code-bg: #f5f2eb;
+  --border-color: #e0ddd6;
+  --date-bg: #d6eaf8;
+  --date-text: #21618c;
+}
+
+/* === Global Resets & Box Model === */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow-x: hidden; 
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: var(--heading); 
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+
+/* Content container */
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 80px 20px 40px; /* top padding + smaller horizontal + bottom */
+}
+
+/* Responsive margin tweak for large screens */
+@media (min-width: 1024px) {
+  .content {
+    margin-top: 1rem;
+  }
+}
+
+/* Link styles */
+a {
+  color: var(--link);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover, a:focus {
+  color: var(--link-hover);
+  text-decoration: underline;
+  outline: none;
+}
+
+/* Images in content */
+.content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem 0;
+  object-fit: contain;
+}
+
+
+/* === Index page specific list styling === */
+ol {
+  margin-left: 1.5rem;
+  padding-left: 0;
+  margin-bottom: 2.5rem;
+}
+
+ol li {
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Date badges */
+.date {
+  background-color: var(--date-bg);
+  color: var(--date-text);
+  padding: 0.2rem 0.1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-family: monospace;
+  min-width: 100px;
+  text-align: center;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .content {
+    padding: 40px 12px 20px;
+  }
+  ol li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+  .date {
+    min-width: auto;
+    font-size: 0.75rem;
+  }
+}
+
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 900px;
+  margin: auto;
+  padding: 1rem;
+}
+
+.photo-container img {
+  max-width: 100%;
+  border-radius: 10px;
+  height: auto;
+  object-fit: cover;
+}
+
+.text-container {
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+/* Large screens: text 2/3, photo 1/3 */
+@media (min-width: 768px) {
+  .home-container {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .text-container {
+    flex: 2;
+    padding-right: 1rem;
+  }
+
+  .photo-container {
+    flex: 1;
+    max-width: 320px;
+  }
+}
+
+.btn-dark {
+  width: 24px;  /* same as h-6 w-6 */
+  height: 24px;
+  cursor: pointer;
+  background-image: url('/theme.png'); /* absolute path */
+  background-position: left center;
+  background-repeat: no-repeat;
+  transition: background-position 0.4s steps(5);
+  color: transparent;
+  font-size: 0;
+}
+
+.dark .btn-dark {
+  background-position: right center;
+}
+
+a {
+  color: #319795;
+}

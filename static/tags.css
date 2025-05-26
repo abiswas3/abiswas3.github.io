@@ -1,0 +1,25 @@
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem; /* handles spacing between tags */
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.tag-link {
+  border-radius: 1em;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: inline-block;
+  white-space: nowrap;
+  transition: background-color 0.3s ease;
+  padding: 0.3em 0.75em;
+  color: #C5050C;
+}
+
+.tag-link::before {
+  content: "#";
+  opacity: 0.8;
+  margin-right: 0.25em;
+}
