@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+	<meta name="generator" content="pandoc">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+    <!-- Base CSS (common styles) -->
+  <link rel="stylesheet" href="../static/base.css">
+  <link rel="stylesheet" href="../static/thms.css">
+  <link rel="stylesheet" href="../static/imgs.css">       
+  <link rel="stylesheet" href="../static/math.css">  
+  <link rel="stylesheet" href="../static/nav.css">  
+  <link rel="stylesheet" href="../static/tags.css">       
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+  <!-- Prism CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css" rel="stylesheet" />
+
+  <!-- Prism JS -->
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.js"></script>
+
+  <title>Pseudowidth</title>      
+  </head>
+
+  <body class="light-mode">  
+  <header>          
+  <nav class="nav">
+    <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+    <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle menu">
+      &#9776; <!-- hamburger icon -->
+    </label>
+    <ul class="nav-list">
+      <li><a href="/">Random Walks</a></li>
+      <li><a href="/publish/">Notes</a></li>
+      <li><a href="/publications.html">Publications</a></li>
+      <li><a href="/misc.html">Misc</a></li>
+    </ul>
+  </nav>
+
+    <div class="toc" id="toc">      
+      <div class="toc-content">
+          <ul>
+          <li><a href="#razbarovs-pseudowidth"
+          id="toc-razbarovs-pseudowidth">Razbarov’s PseudoWidth</a>
+          <ul>
+          <li><a href="#some-notation" id="toc-some-notation">Some
+          Notation</a></li>
+          <li><a href="#what-is-pseudo-width"
+          id="toc-what-is-pseudo-width">What Is Pseudo Width</a>
+          <ul>
+          <li><a href="#heavy-pigeons" id="toc-heavy-pigeons">Heavy
+          Pigeons</a></li>
+          <li><a href="#super-heavy-pigeons"
+          id="toc-super-heavy-pigeons">Super Heavy Pigeons</a></li>
+          <li><a href="#w_0-vecd-axiom" id="toc-w_0-vecd-axiom"><span
+          class="math inline">\((w_0, \vec{d})\)</span>-axiom</a></li>
+          </ul></li>
+          <li><a
+          href="#first-key-technical-tool---the-pigeon-filtering-lemma"
+          id="toc-first-key-technical-tool---the-pigeon-filtering-lemma">First
+          Key Technical Tool - The Pigeon Filtering Lemma</a></li>
+          <li><a href="#how-do-we-use-the-pigeon-filtering-lemma"
+          id="toc-how-do-we-use-the-pigeon-filtering-lemma">How Do We
+          Use The Pigeon Filtering Lemma</a></li>
+          <li><a
+          href="#refutations-must-have-a-clause-with-high-pseudowidth"
+          id="toc-refutations-must-have-a-clause-with-high-pseudowidth">Refutations
+          Must Have A Clause With High Pseudowidth</a></li>
+          <li><a href="#main-theorem" id="toc-main-theorem">Main
+          Theorem</a></li>
+          </ul></li>
+          <li><a href="#references"
+          id="toc-references">References</a></li>
+          </ul>
+      </div>
+  
+  </div>
+    <br>
+  <br>
+  </header>
+
+
+
+  <main class="content">
+    <h1>Pseudowidth</h1>
+    
+    
+    <section id="razbarovs-pseudowidth" class="level1">
+    <h1>Razbarov’s PseudoWidth</h1>
+    <p><a href="basic-php-resloution-lower-bound.html">Last time</a>, we
+    saw an example of how short proofs imply that all clauses are
+    narrow, but then we also showed that any valid resolution refutation
+    needs a wide clause, so the proofs must long. We showed this for the
+    basic <span class="math inline">\(\text{PHP}_{n-1}^{n}\)</span>,
+    though the same argument applies to <span
+    class="math inline">\(\text{FPHP}_{n-1}^{n}\)</span>.</p>
+    <p>Now we’ll do this again, but we will not use width directly, a
+    but a proxy for width - pseudowidth introduced by <span
+    class="citation" data-cites="razborov2003resolution">(<a
+    href="#ref-razborov2003resolution" role="doc-biblioref">Razborov,
+    2003</a>)</span>. Then we will use this again, when working with
+    sparse graphs, along with a new idea called graph closure.</p>
+    <section id="some-notation" class="level2">
+    <h2>Some Notation</h2>
+    <p><span class="math inline">\(\Delta_{G}\left(i\right) =
+    N_G{j}\)</span>, the holes that <span
+    class="math inline">\(i\)</span> is permitted to fly into.</p>
+    <p><span class="math inline">\(\Delta_{C}\left(i\right) := \{j \in
+    V_H : (i,j) \in E \land x_{ij} \in C\}\)</span> - holes can send
+    pigeon <span class="math inline">\(i\)</span> to and also satisfy
+    clause <span class="math inline">\(C\)</span>.</p>
+    <p><span class="math inline">\(V_{\text{exp}}(G) := V_P\)</span>
+    when <span class="math inline">\(G\)</span> is an bipartite graph
+    <span class="math inline">\(V_P \cup V_H\)</span>, and otherwise
+    <span class="math inline">\(V_{\text{exp}}(G) = G\)</span>.</p>
+    </section>
+    <section id="what-is-pseudo-width" class="level2">
+    <h2>What Is Pseudo Width</h2>
+    <section id="heavy-pigeons" class="level3">
+    <h3>Heavy Pigeons</h3>
+    <p>Given an unsatisfiable formula <span class="math inline">\(F =
+    \text{FPHP}_{n}^{m}\)</span>, and integer vectors of length <span
+    class="math inline">\(m\)</span>, <span
+    class="math inline">\(\vec{d} = (d_1, \dots, d_m), \vec{\delta} =
+    (\delta_1, \dots, \delta_m)\)</span>, such that, <span
+    class="math inline">\(\delta_i &lt; d_i\)</span> for all <span
+    class="math inline">\(i \in [m]\)</span>, the pseudowidth of a
+    clause <span class="math inline">\(C\)</span>, denoted <span
+    class="math inline">\(w_{\vec{d},
+    \vec{\delta}}\left(C\right)\)</span></p>
+    <p><span class="math display">\[w_{\vec{d},
+    \vec{\delta}}\left(C\right) = \left|P_{\vec{d},
+    \vec{\delta}}\left(C\right)\right| := \left|\{ i \in [m]:
+    \Delta_{C}\left(i\right) \geq d_i - \delta_i \}\right|\]</span></p>
+    The pigeons in <span class="math inline">\(P_{\vec{d},
+    \vec{\delta}}\left(C\right)\)</span> are called
+    <strong>heavy</strong> pigeons in clause <span
+    class="math inline">\(C\)</span>.
+    <blockquote>
+    <strong>How I think of Pseudowidth</strong>: If you think of the
+    role of a resolution proof system as starting with all the axioms,
+    and ensuring pigeons cannot be assigned a hole, then the pseudowidth
+    of a clause really measures how many ``important’’ pigeons are there
+    in the clause. These pigeons are important because there are many
+    ways to satisfy these pigeons, and therefore getting rid of them
+    will make a lot of progress.
+    </blockquote>
+    </section>
+    <section id="super-heavy-pigeons" class="level3">
+    <h3>Super Heavy Pigeons</h3>
+    <p>We denote the <strong>super-heavy</strong> pigeons in clause
+    <span class="math inline">\(C\)</span> with</p>
+    <p><span class="math display">\[P_{\vec{d}}(C) : = \{ i \in [m]:
+    \Delta_{C}\left(i\right) \geq d_i \}\]</span></p>
+    </section>
+    <section id="w_0-vecd-axiom" class="level3">
+    <h3><span class="math inline">\((w_0, \vec{d})\)</span>-axiom</h3>
+    <p>Finally, any clause that contains exactly <span
+    class="math inline">\(w_0\)</span> super-heavy pigeons where
+    super-heaviness is parameterised by <span
+    class="math inline">\(\vec{d}\)</span> is called a <span
+    class="math inline">\((w_0, \vec{d})\)</span>-axiom.</p>
+    </section>
+    </section>
+    <section id="first-key-technical-tool---the-pigeon-filtering-lemma"
+    class="level2">
+    <h2>First Key Technical Tool - The Pigeon Filtering Lemma</h2>
+    <p>The above lemma is a generalisation of filtering lemma that was
+    originally introduced in <span class="citation"
+    data-cites="razborov2003resolution">(<a
+    href="#ref-razborov2003resolution" role="doc-biblioref">Razborov,
+    2003</a>)</span>. In the lemma below, <span
+    class="math inline">\(m\)</span> and <span
+    class="math inline">\(n\)</span> in our context will refer to the
+    number of pigeons and holes, and <span
+    class="math inline">\(L\)</span> will be the size of the resolution
+    refutation, but this is a general combinatorial lemma that has
+    nothind do to with the PHP or expander graphs per se.</p>
+    <div class="collapsible" title="Pigeon Filtering Lemma">
+    <p>Fix <span class="math inline">\(m, n, L \in \mathbb{N}\)</span>.
+    Let <span class="math inline">\(\alpha \in [m]\)</span> and <span
+    class="math inline">\(w_0\)</span> be an arbitrary parameter such
+    that <span class="math inline">\(w_0 \ge \alpha^2 \ge 4\)</span> and
+    <span class="math inline">\(w_0 \ge \log L\)</span>. Given any
+    arbitrary set of integer vectors of length <span
+    class="math inline">\(m\)</span>, <span
+    class="math inline">\(\vec{r}(1), \ldots, \vec{r}(L)\)</span>, there
+    <strong>exists</strong> a vector <span class="math inline">\(\vec{r}
+    = (r_1, \ldots, r_m)\)</span> with <span class="math inline">\(r_k
+    \le t=\lfloor \frac{\log m}{\log \alpha}\rfloor -1\)</span>, such
+    that for <strong>every</strong> <span class="math inline">\(C \in
+    [L]\)</span> one of the following holds:</p>
+    <ol type="1">
+    <li><p><span class="math inline">\(\left|\{ i\in [m]: r_i(C) \le r_i
+    \}\right| \geq w_0\)</span></p></li>
+    <li><p><span class="math inline">\(\left|\{ i\in [m]: r_i(C) \le r_i
+    + 1 \}\right|\le O\left(\alpha w_0\right)\)</span></p></li>
+    </ol>
+    </div>
+    <div class="collapsible-content">
+    <p>The proof follows from the probabilistic method, and the chernoff
+    bounds. <a href="assets/Resolution/pigeonFilter.pdf">See here</a>
+    for handwritten notes for every step of the proof.</p>
+    </div>
+    </section>
+    <section id="how-do-we-use-the-pigeon-filtering-lemma"
+    class="level2">
+    <h2>How Do We Use The Pigeon Filtering Lemma</h2>
+    <p>The way <span class="citation" data-cites="rezende2020Exp">(<a
+    href="#ref-rezende2020Exp" role="doc-biblioref">De Rezende et al.,
+    2020</a>)</span> and <span class="citation"
+    data-cites="razborov2003resolution">(<a
+    href="#ref-razborov2003resolution" role="doc-biblioref">Razborov,
+    2003</a>)</span> use this lemma is to show that short proofs imply
+    short pseudo-width for all clauses in the proof.</p>
+    <p>Then independently, they will show that valid refutations
+    <strong>MUST</strong> contain a clause with large pseudowidth,
+    therefore resolution refutations <strong>CANNOT</strong> be short.
+    The proof is remarkably similar to the proof for showing lower
+    bounds for PHP in the dense graph model.</p>
+    <blockquote>
+    <p><strong>How I think of the following parameters</strong></p>
+    <ul>
+    <li><span class="math inline">\(m\)</span> and <span
+    class="math inline">\(n\)</span> mean the usual.</li>
+    <li><span class="math inline">\(w_0\)</span> is an upper bound on
+    the proof size in <span class="math inline">\(\log\)</span> scale.
+    We need this as we will later show that when proof sizes are smaller
+    than <span
+    class="math inline">\(\mathsf{exp}\left(w_0\right)\)</span> we get a
+    contradiction.</li>
+    <li><span class="math inline">\(\alpha = 2\)</span> in the original
+    result by <span class="citation"
+    data-cites="razborov2003resolution">(<a
+    href="#ref-razborov2003resolution" role="doc-biblioref">Razborov,
+    2003</a>)</span>, but here we will set it to <span
+    class="math inline">\(o\left(r/\log m\right)\)</span> – and this
+    will in some ways force us to have a very very strong expander.</li>
+    </ul>
+    </blockquote>
+    <div class="thm"><h3>Theorem</h3><h3 id="short-proofs-have-small-pseudowidth-lemma-4.2">Short Proofs Have
+    Small Pseudowidth (Lemma 4.2)</h3>
+    <p>Let <span class="math inline"><em>π</em></span> be a resolution
+    refutation for an unsatisfiable CNF formula <span
+    class="math inline"><em>F</em> = FPHP<sub><em>n</em></sub><sup><em>m</em></sup>(<em>G</em>)</span>.
+    Let <span class="math inline"><em>w</em><sub>0</sub></span> be an
+    arbitrary parameter and <span
+    class="math inline"><em>α</em> ∈ [<em>m</em>]</span> such that <span
+    class="math inline"><em>w</em><sub>0</sub> ≥ <em>α</em><sup>2</sup> ≥ 4</span>
+    and <span
+    class="math inline"><em>w</em><sub>0</sub> ≥ log |<em>π</em>|</span>,
+    and for each <span class="math inline"><em>i</em> ∈ [<em>m</em>]</span>,
+    define <span class="math inline">$\delta_i =
+    \Delta_{G}\left(i\right)\lfloor\frac{\log \alpha}{\log m}
+    \rfloor$</span>. There exists a vector <span
+    class="math inline"><em>d⃗</em> = (<em>d</em><sub>1</sub>, …, <em>d</em><sub><em>m</em></sub>)</span>,
+    and <span
+    class="math inline"><em>δ</em><sub><em>i</em></sub> &lt; <em>d</em><sub><em>i</em></sub> ≤ <em>Δ</em><sub><em>G</em></sub>(<em>i</em>)</span>,
+    a set <span class="math inline">𝒜 ≤ |<em>π</em>|</span> of <span
+    class="math inline">(<em>w</em><sub>0</sub>, <em>d⃗</em>)</span> axioms,
+    and a proof <span class="math inline"><em>π</em><sup>′</sup></span>
+    which refutes <span
+    class="math inline">FPHP<sub><em>n</em></sub><sup><em>m</em></sup>(<em>G</em>) ∪ 𝒜</span>
+    wuch that <span
+    class="math inline"><em>w</em><sub><em>d⃗</em>, <em>δ⃗</em></sub>(<em>π</em><sup>′</sup>) = <em>O</em>(<em>α</em><em>w</em><sub>0</sub>)</span>.</p></div>
+    <div class="proof">
+    <p>For any <span class="math inline">\(C \in \pi\)</span>, for <span
+    class="math inline">\(i \in [m]\)</span>, set <span
+    class="math display">\[r_i(C) = \lfloor
+    \frac{\Delta_{G}\left(i\right) -
+    \Delta_{C}\left(i\right)}{\delta_i}\rfloor\]</span></p>
+    <p>All the parameters are specified to call pigeon filter lemma
+    which says there exists vector <span class="math inline">\(\vec{r} =
+    (r_1, \dots, r_m)\)</span> where <span class="math inline">\(r_i \le
+    \lfloor \frac{\log m}{\log \alpha}\rfloor  - 1\)</span>. Set</p>
+    <p><span class="math display">\[d_i = \Delta_{G}\left(i\right) -
+    \lceil r_i \delta_i\rceil + \delta_i\]</span></p>
+    <p>Using the above definition, It’s not too hard to see that <span
+    class="math inline">\(d_i = \text{arg}\min_{x \in \mathbb{N}}
+    \lfloor \frac{\Delta_{G}\left(i\right) - x}{\delta_i}\rfloor \le
+    r_i\)</span>.</p>
+    <p>This implies that for a given clause <span
+    class="math inline">\(C\)</span>, for any <span
+    class="math inline">\(i \in [m]\)</span></p>
+    <p><span class="math display">\[r_i(C) \le r_i \implies
+    \Delta_{C}\left(i\right) \ge d_i\]</span> <span
+    class="math display">\[r_i(C) \le r_i + 1 \implies
+    \Delta_{C}\left(i\right) \ge d_i - \delta_i\]</span></p>
+    <p>The pigeon filter lemma also gives us that for any <span
+    class="math inline">\(C \in \pi\)</span>, we either have</p>
+    <ol type="1">
+    <li><span class="math inline">\(\left|\{ i\in [m]: r_i(C) \le r_i
+    \}\right|\geq w_0 \implies \left|\{  i\in [m]:
+    \Delta_{C}\left(i\right) \ge d_i\}\right| \geq w_0\)</span></li>
+    </ol>
+    <p>If this is the case, kill super heavy pigeons in <span
+    class="math inline">\(C\)</span> till there are exactly <span
+    class="math inline">\(w_0\)</span> super pigeons in the strengthened
+    clause <span class="math inline">\(C&#39;\)</span>, which ensures
+    that <span class="math inline">\(w_{\vec{d},\vec{\delta}}(C) =
+    w_0\)</span>. Add <span class="math inline">\(C&#39;\)</span> to set
+    <span class="math inline">\(\mathcal{A}\)</span>. By definition
+    <span class="math inline">\(\left|\mathcal{A}\right| \le
+    \left|\pi\right|\)</span>.</p>
+    <ol start="2" type="1">
+    <li><span class="math inline">\(\left|\{ i\in [m]: r_i(C) \le r_i +
+    1 \}\right|\le O\left(\alpha w_0\right) \implies \left|\{  i\in [m]:
+    \Delta_{C}\left(i\right) \ge d_i - \delta_i\}\right| \le
+    O\left(\alpha w_0\right)\)</span></li>
+    </ol>
+    <p>This automatically gives us <span
+    class="math inline">\(w_{\vec{d},\vec{\delta}}(C) = O\left(\alpha
+    w_0\right)\)</span>.</p>
+    </div>
+    <p>Note in the above proof system we are assuming <span
+    class="math inline">\(\left|\pi\right| &lt; 2^{w_0}\)</span> for
+    some parameter <span class="math inline">\(w_0\)</span>. Later we
+    will set <span class="math inline">\(w_0\)</span> such that <span
+    class="math inline">\(2^{w_0} &lt;
+    \mathsf{exp}\left(\Omega\left(n\right)\right)\)</span>, and this
+    will give us a contradiction, which will give us that contradiction.
+    <strong>REVISIT THIS</strong></p>
+    </section>
+    <section id="refutations-must-have-a-clause-with-high-pseudowidth"
+    class="level2">
+    <h2>Refutations Must Have A Clause With High Pseudowidth</h2>
+    <p>This is the main technical contribution, where we do countign via
+    linear algebra. Before we formally state the lemma, let’s do some
+    setup work.</p>
+    <p><strong>Notation</strong> of matchings as vectors</p>
+    <div class="thm"><h3>Theorem</h3><h3
+    id="valid-resolution-refutations-must-have-a-clause-with-high-pseudowidth-lemma-4.3">Valid
+    Resolution Refutations <em>MUST</em> have a clause with high pseudowidth
+    (Lemma 4.3)</h3>
+    <p><strong>Setup (What Is Given To Me)</strong>: I get</p>
+    <ul>
+    <li>A parameter <span class="math inline"><em>ξ</em> ≤ 1/4</span></li>
+    <li>A bipartite <span
+    class="math inline">(<em>r</em>, <em>Δ</em>, <em>c</em>)</span> boundary
+    expander <span
+    class="math inline"><em>G</em> = (<em>V</em><sub><em>P</em></sub> ∪ <em>V</em><sub><em>H</em></sub>, <em>E</em>)</span>
+    where <span
+    class="math inline"><em>c</em> = (1 − 2<em>ξ</em>)<em>Δ</em></span>,
+    <span
+    class="math inline"><em>V</em><sub><em>P</em></sub> = [<em>m</em>]</span>
+    and <span
+    class="math inline"><em>V</em><sub><em>H</em></sub> = [<em>n</em>]</span>.</li>
+    <li>A slack vector <span
+    class="math inline"><em>δ⃗</em> = (<em>δ</em><sub>1</sub>, …, <em>δ</em><sub><em>m</em></sub>)</span>
+    where $_i = <span
+    class="math inline">4<em>Δ</em><sub><em>G</em></sub>(<em>i</em>)<em>ξ</em></span>.</li>
+    <li>A vector <span
+    class="math inline"><em>d⃗</em> = (<em>d</em><sub>1</sub>, …, <em>d</em><sub><em>m</em></sub>)</span>
+    such that <span
+    class="math inline"><em>δ</em><sub><em>i</em></sub> &lt; <em>d</em><sub><em>i</em></sub> ≤ <em>Δ</em><sub><em>G</em></sub>(<em>i</em>)</span>
+    for all <span class="math inline"><em>i</em> ∈ [<em>m</em>]</span>.</li>
+    <li>An arbitrary parameter <span
+    class="math inline"><em>w</em><sub>0</sub></span></li>
+    <li>An small set<a href="#fn1" class="footnote-ref" id="fnref1"
+    role="doc-noteref"><sup>1</sup></a> of arbitrary <span
+    class="math inline">(<em>w</em><sub>0</sub>, <em>d⃗</em>)</span>-axioms,
+    <span class="math inline">𝒜</span> such that <span
+    class="math inline">|𝒜| ≤ (1 + <em>ξ</em>)<sup><em>w</em><sub>0</sub></sup></span>.</li>
+    </ul>
+    <p><strong>What Do I show</strong>:</p>
+    <p>Every valid proof <span class="math inline"><em>π</em></span> that
+    refutes <span
+    class="math inline">FPHP<sub><em>n</em></sub><sup><em>m</em></sup>(<em>G</em>) ∪ 𝒜</span>
+    must have a clause at least one clause <span
+    class="math inline"><em>C</em> ∈ <em>π</em></span>, such that <span
+    class="math inline">$w_{\vec{d}, \vec{\delta}}\left(C\right) \ge
+    \frac{r\xi}{4}$</span></p>
+    <section id="footnotes" class="footnotes footnotes-end-of-document"
+    role="doc-endnotes">
+    <hr />
+    <ol>
+    <li id="fn1"><p>This smallness just ensures, sticking these axioms along
+    with the refutation does not make the short proof any bigger.<a
+    href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+    </ol>
+    </section></div>
+    <div class="proof">
+    <p>Before we can fully prove this result, we need some setup to
+    introduce linear algbra notation.</p>
+    <p>Define the closure of a clause</p>
+    <p><span class="math display">\[\text{Closure}(C) :=
+    \text{Closure}_{r, \nu}\left(P_{\vec{d},
+    \vec{\delta}}\left(C\right)\right)\]</span></p>
+    <p>Note that closure is only defined if <span
+    class="math inline">\(\left|P_{\vec{d},
+    \vec{\delta}}\left(C\right)\right| \le r\)</span>. If for any <span
+    class="math inline">\(C \in \pi\)</span>, if we have <span
+    class="math inline">\(\left|P_{\vec{d},
+    \vec{\delta}}\left(C\right)\right| &gt; r\)</span>, then <span
+    class="math inline">\(\left|\text{Closure}_{r, \nu}\left(P_{\vec{d},
+    \vec{\delta}}\left(C\right)\right)\right| &gt;
+    \frac{r\xi}{4}\)</span>.</p>
+    <p>To see why: <span class="math inline">\(\xi \le 1/4\)</span>
+    implies <span class="math inline">\(r &gt; \frac{r\xi}{4}\)</span>
+    and, <span class="math inline">\(P_{\vec{d},
+    \vec{\delta}}\left(C\right) \subseteq \text{Closure}_{r,
+    \nu}\left(P_{\vec{d}, \vec{\delta}}\left(C\right)\right)\)</span>.
+    This gives us a our wide clause.</p>
+    <p>So we can safely assume that for every clause <span
+    class="math inline">\(C \in \pi\)</span>, we have <span
+    class="math inline">\(\left|P_{\vec{d},
+    \vec{\delta}}\left(C\right)\right| \le r\)</span>.</p>
+    <p>Fix a field <span class="math inline">\(\mathbb{F}\)</span> of
+    characteristic 0 and for each pigeon <span class="math inline">\(i
+    \in V_P\)</span>, let <span class="math inline">\(\Lambda_i\)</span>
+    be a vector space over <span
+    class="math inline">\(\mathbb{F}\)</span> of dimension <span
+    class="math inline">\(\Delta_{G}\left(i\right) - d_i +
+    \delta_i/4\)</span>. Define</p>
+    <p><span class="math display">\[ \Lambda := \underset{i \in
+    V_P}{\otimes} \Lambda_i\]</span></p>
+    <p>where <span class="math inline">\(\otimes\)</span> denotes the
+    tensor product. Now for each <span class="math inline">\(i\)</span>,
+    define <span class="math inline">\(\lambda_i: V_H \rightarrow
+    \Lambda_i\)</span>, such that for any <span class="math inline">\(J
+    \subseteq V_H\)</span> such that</p>
+    <ul>
+    <li>If <span class="math inline">\(\left|J\right| \ge
+    \text{dim}(\Lambda_i)\)</span>, then <span
+    class="math inline">\(\text{span}\{\lambda(j): j \in J\}\)</span>
+    spans all of <span class="math inline">\(\Lambda_i\)</span>.</li>
+    <li>If <span class="math inline">\(\left|J\right| &lt;
+    \text{dim}(\Lambda_i)\)</span>, then <span
+    class="math inline">\(\text{span}\{\lambda(j): j \in J\}\)</span>
+    spans a subspace of <span class="math inline">\(\Lambda_i\)</span>
+    and has dimension <span
+    class="math inline">\(\left|J\right|\)</span>.</li>
+    </ul>
+    <p>Now for any partial matching <span class="math inline">\(\psi:
+    V_P \rightarrow V_H\)</span>, we can visualise <span
+    class="math inline">\(\psi\)</span> with a vector of length <span
+    class="math inline">\(m\)</span>, where <span
+    class="math inline">\(\psi_i = j \in V_H\)</span> represents the
+    hole pigeon <span class="math inline">\(i\)</span> is sent to hole
+    <span class="math inline">\(j\)</span>, and <span
+    class="math inline">\(\psi_i = \bot\)</span>, means that <span
+    class="math inline">\(i \notin \text{domain}(\psi)\)</span>. For any
+    partial matching <span class="math inline">\(\psi\)</span>, we
+    define</p>
+    <p><span class="math display">\[\lambda(\psi) := \underset{i \in
+    \text{domain}(\psi)}{\otimes}\lambda_i(\psi_i) \bigotimes
+    \underset{i \notin \text{domain}(\psi)}{\otimes}
+    \Lambda_i\]</span></p>
+    <p>where <span class="math inline">\(\text{domain}(\psi){\otimes}
+    \Lambda_i\)</span>, we mean the vector space formed by taking the
+    tensort product of every basis vectors in <span
+    class="math inline">\(\Lambda_i\)</span>.</p>
+    <blockquote>
+    <p>Note that when <span class="math inline">\(\text{domain}(\psi) =
+    V_P\)</span>, <span class="math inline">\(\lambda(\psi) \in
+    \mathbb{F}^{\text{dim}(\Lambda)}\)</span> is a vector of length
+    <span class="math inline">\(\text{dim}(\Lambda)\)</span> or a 1
+    dimensional vector space. Whenever, <span
+    class="math inline">\(\text{domain}(\psi) \subset V_P\)</span>, we
+    get a set of basis vectors that span a proper subspace of <span
+    class="math inline">\(\Lambda\)</span>. Finally, if <span
+    class="math inline">\(\text{domain}(\psi) = \emptyset\)</span> then
+    <span class="math inline">\(\lambda(\psi) = \Lambda\)</span>.</p>
+    <p>So think of <span class="math inline">\(\lambda\)</span> this
+    way: feeding <span class="math inline">\(\psi\)</span> into <span
+    class="math inline">\(\lambda\)</span> should spit out a set of
+    vectors in <span
+    class="math inline">\(\mathbb{F}^{\text{dim}(\Lambda)}\)</span>.
+    Based on the size of the domain of <span
+    class="math inline">\(\psi\)</span>, these vectors could span a
+    1-dimensional subspace or the full space.</p>
+    </blockquote>
+    <p>Finally, let <span class="math inline">\(\mathcal{M}\)</span>
+    denote the set of all partial matchings <span
+    class="math inline">\(\psi: V_P \rightarrow V_H\)</span>. For any
+    clause <span class="math inline">\(C\)</span>, define</p>
+    <p><span class="math display">\[Z(C) := \{ \psi \in \mathcal{M} :
+    \text{domain}(\psi) = \text{Closure}(C) \land C(\psi) =
+    \texttt{False}\}\]</span></p>
+    <p>Finally, we define</p>
+    <p><span class="math display">\[\lambda(C) :=
+    \text{span}\{\underset{\psi \in Z(C)}{\cup}\lambda(\psi)
+    \}\]</span></p>
+    <p>It is clear to see that for <span
+    class="math inline">\(C=\bot\)</span>, we have <span
+    class="math inline">\(P_{\vec{d}, \vec{\delta}}\left(C\right) =
+    \{\}\)</span>, and therefore, <span class="math inline">\(Z(C) = \{
+    \psi_0 \}\)</span> where <span
+    class="math inline">\(\text{domain}(\psi_0) = \emptyset\)</span>.
+    Therefore <span class="math inline">\(\lambda(\bot) =
+    \text{span}\{\lambda{\psi_0}\} = \Lambda\)</span>.</p>
+    <blockquote>
+    <strong>KEY IDEA</strong> Now here’s the trick. We will show that
+    the PHP axioms and the <span class="math inline">\((w_0,
+    \vec{d})\)</span> axioms, span a much smaller subspace than <span
+    class="math inline">\(\Lambda\)</span> under <span
+    class="math inline">\(\lambda\)</span>. <strong>This is Lemma
+    4.9</strong> below. Thus, to go from these axioms to the refutation,
+    we must encounter a resolvent that spans a bigger subsace than its
+    parents. But if the pseudowidth of all close is small i.e smaller
+    than <span class="math inline">\(\frac{r}{2}\)</span>, then every
+    resolvent spans a space entirely contained by the space spanned by
+    its parents, thus we can actually never get to <span
+    class="math inline">\(\bot\)</span>, giving us our contradiction
+    This is formally shown in <strong>Lemma 4.10</strong>.
+    </blockquote>
+    <p>More, formally Lemma 4.9 says that there exists <span
+    class="math display">\[\frac{C_0 \vee x \quad \overline{x} \vee
+    C_1}{C}\]</span> such that <span
+    class="math inline">\(\text{span}\{\lambda(C)\} \not\subseteq
+    \text{span}\{\lambda(C_0), \lambda(C_1)\}\)</span> (otherwise, how
+    do we get to <span class="math inline">\(\bot\)</span>). (Remember,
+    in <span class="citation" data-cites="beame1996simplified">(<a
+    href="#ref-beame1996simplified" role="doc-biblioref">Beame and
+    Pitassi, 1996</a>)</span>, <a
+    href="basic-php-resloution-lower-bound.html">we did the same
+    thing</a> thing with critical pigeons, now we’re playing the same
+    game with subsapces, which is a generalisation.)</p>
+    <p>But Lemma 4.10 prevents this from happening if <span
+    class="math inline">\(\max\{\text{Closure}(C_0),
+    \text{Closure}(C_1), \text{Closure}(C)\} \le \frac{r}{4}\)</span>.
+    Thus, for the resolvent to span more space, we need some <span
+    class="math inline">\(C&#39; \in \{C, C_0, C_1\}\)</span> such that
+    <span class="math inline">\(\text{Closure}(C&#39;) &gt; \frac{r}{4}
+    = \frac{k\Delta}{c - \nu} = \frac{r}{4\xi}\)</span>. Solving for
+    <span class="math inline">\(k = \frac{r\xi}{4}\)</span>.</p>
+    <blockquote>
+    This is the second time we use expansion in the proof. The only
+    other use is in the proof for Lemma 4.10 where we show that the set
+    <span class="math inline">\(\mathcal{M}_D\)</span> is large enough,
+    to do that we need to lower bound how many holes a light pigeon in
+    <span class="math inline">\(C\)</span> can go to in <span
+    class="math inline">\(G\)</span> without satisfying a clause <span
+    class="math inline">\(C\)</span>. Strong expansion implies, many
+    holes. Many holes means many vectors in <span
+    class="math inline">\(\mathcal{M}_D\)</span> which then allows us to
+    span all of <span class="math inline">\(\Lambda_D\)</span>. See
+    proof for more details.
+    </blockquote>
+    <p>Now as, <span class="math inline">\(G\)</span> is a <span
+    class="math inline">\((r,\Delta, c)\)</span> boundary expander, by
+    <strong>Lemma 3.3</strong> (contrapositve), we have that if <span
+    class="math inline">\(\text{Closure}(C&#39;) = \text{Closure}_{r,
+    \nu}\left(P_{\vec{d}, \vec{\delta}}\left(C&#39;\right)\right) &gt;
+    \frac{k\Delta}{c - \nu}\)</span> then <span
+    class="math inline">\(\left|P_{\vec{d},
+    \vec{\delta}}\left(C&#39;\right)\right| &gt;
+    k  \frac{r\xi}{4}\)</span>.</p>
+    <p>This completes the proof.</p>
+    </div>
+    <p>Now we prove the main lemmas the above proof relies on. Numbering
+    is from <span class="citation" data-cites="rezende2020Exp">(<a
+    href="#ref-rezende2020Exp" role="doc-biblioref">De Rezende et al.,
+    2020</a>)</span>.</p>
+    <div class="collapsible" title="Lemma 3.3">
+    <p>Suppose that <span class="math inline">\(G\)</span> is an <span
+    class="math inline">\((r,\Delta,c)\)</span>-boundary expander and
+    that <span class="math inline">\(T \subseteq
+    V_{\text{exp}}(G)\)</span> has size <span
+    class="math inline">\(|T|\le
+    k \le r\)</span>. Then <span
+    class="math inline">\(Size{\text{Closure}_{r, \nu}\left(T\right)}
+    \le \frac{k\Delta}{c-\nu}\)</span>.c</p>
+    <p><strong>Contrapositive</strong></p>
+    <p>If <span class="math inline">\(\left|\text{Closure}_{r,
+    \nu}\left(T\right)\right| &gt; \frac{k\Delta}{c-\nu}\)</span>, then
+    <span class="math inline">\(\left|T\right| &gt; k\)</span></p>
+    </div>
+    <div class="collapsible-content">
+    <p>See <a href="assets/Resolution/Lemma3.3.pdf">full proof</a></p>
+    </div>
+    <div class="collapsible" title="Lemma 4.9">
+    <p>Let <span class="math inline">\(\xi \le 1/4\)</span>. Let <span
+    class="math inline">\(G\)</span> be any graph with <span
+    class="math inline">\(m &gt; n\)</span> and <span
+    class="math inline">\(\delta_i =
+    4\Delta_{G}\left(i\right)\xi\)</span> for all <span
+    class="math inline">\(i\in [m]\)</span>. Given a set of <span
+    class="math inline">\((w_0, \vec{d})\)</span> axioms <span
+    class="math inline">\(\mathcal{A}\)</span> of size <span
+    class="math inline">\(\left|\mathcal{A}\right| \le (1 +
+    \xi)^{w_0}\)</span> for arbitrary <span
+    class="math inline">\(w_0\)</span> and any vector <span
+    class="math inline">\(\vec{d}\)</span> with <span
+    class="math inline">\(d_i \le \Delta_{G}\left(i\right)\)</span> for
+    all <span class="math inline">\(i\in [m]\)</span>, we have</p>
+    <p><span class="math display">\[\text{span}\{\lambda(C) : C \in
+    \text{FPHP}_{n}^{m}(G) \cup \mathcal{A}\} \not\subseteq
+    \Lambda\]</span>.</p>
+    </div>
+    <div class="collapsible-content">
+    <p>See <a href="assets/Resolution/Lemma4.9.pdf">full proof</a></p>
+    </div>
+    <blockquote>
+    <strong>Attention Rajko</strong> This lemma will make use of this
+    idea called closure, which looks remarkably similar to the
+    non-blocking graph game. But I do not think the strong expansion
+    issue is coming from here. I’m curious to see what you think?
+    </blockquote>
+    <div class="collapsible" title="Lemma 4.10">
+    <p>Let <span class="math inline">\(C\)</span> be the resolvent from
+    <span class="math inline">\(C_0\)</span> and <span
+    class="math inline">\(C_1\)</span>. <span class="math display">\[
+    \max\Big\{\text{Closure}(C_0), \text{Closure}(C_1),
+    \text{Closure}(C)\Big\} \le \frac{r}{4} \implies
+    \text{span}\{\lambda(C)\} \subseteq \text{span}\{\lambda(C_0),
+    \lambda(C_1)\}\]</span></p>
+    </div>
+    <div class="collapsible-proof">
+    <p>See <a href="assets/Resolution/Lemma4.10.pdf">full proof</a></p>
+    </div>
+    </section>
+    <section id="main-theorem" class="level2">
+    <h2>Main Theorem</h2>
+    <hr style="height:3px;border:none;color:#333;background-color:#333;">
+    </hr>
+    </section>
+    </section>
+    <section id="references" class="level1">
+    <h1>References</h1>
+    <hr style="height:3px;border:none;color:#333;background-color:#333;">
+    </hr>
+    <div id="refs" class="references csl-bib-body hanging-indent"
+    data-entry-spacing="0" role="list">
+    <div id="ref-beame1996simplified" class="csl-entry" role="listitem">
+    Beame, P., Pitassi, T., 1996. Simplified and improved resolution
+    lower bounds, in: Proceedings of 37th Conference on Foundations of
+    Computer Science. IEEE, pp. 274–282.
+    </div>
+    <div id="ref-rezende2020Exp" class="csl-entry" role="listitem">
+    De Rezende, S.F., Nordström, J., Risse, K., Sokolov, D., 2020.
+    Exponential resolution lower bounds for weak pigeonhole principle
+    and perfect matching formulas over sparse graphs, in: 35th
+    Computational Complexity Conference, CCC 2020, July 28–31, 2020,
+    Saarbrücken, Germany, Virtual Conference. Proceedings. Wadern:
+    Schloss Dagstuhl – Leibniz Zentrum f<span>ü</span>r Informatik, p.
+    24. <a
+    href="https://doi.org/10.4230/LIPIcs.CCC.2020.28">https://doi.org/10.4230/LIPIcs.CCC.2020.28</a>
+    </div>
+    <div id="ref-razborov2003resolution" class="csl-entry"
+    role="listitem">
+    Razborov, A.A., 2003. Resolution lower bounds for the weak
+    functional pigeonhole principle. Theoretical Computer Science 303,
+    233–243.
+    </div>
+    </div>
+    </section>
+  </main>
+
+
+  </body>
+
+<!-- JavaScript for Theme Toggle -->
+<script>
+</script>  
+
+
+
+<script>
+// var coll = document.getElementsByClassName("collapsible");
+var coll = document.querySelectorAll('.collapsible, .question, .collapsible-short')
+var i;
+
+console.log(coll);
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
+
+<script>
+  // Function to process MathJax when the tooltip is shown
+document.addEventListener('DOMContentLoaded', function () {
+    var footnotes = document.querySelectorAll('.footnote');
+
+    footnotes.forEach(function (footnote) {
+        footnote.addEventListener('mouseover', function () {
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+        });
+    });
+});
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Function to scroll to the element with an offset to avoid the header
+      const scrollToElement = (element) => {
+        const headerHeight = document.querySelector('header').offsetHeight + 30;
+        window.scrollTo({
+          top: element.offsetTop - headerHeight + 20,  // Adjust offset to avoid header overlap
+          behavior: 'smooth'
+        });
+      };
+
+      // Select all anchor links that reference an element (e.g., href="#ref1")
+      const links = document.querySelectorAll('a[href^="#"]');
+
+      links.forEach(link => {
+        link.addEventListener('click', function (e) {
+          const targetId = this.getAttribute('href').substring(1);  // Get the target ID from the href
+          const targetElement = document.getElementById(targetId);  // Find the target element by its ID
+          
+          if (targetElement) {
+            e.preventDefault();  // Prevent the default browser scrolling behavior
+            history.pushState(null, null, `#`);  // Change the URL hash to reflect the anchor link
+            scrollToElement(targetElement);  // Smooth scroll to the element with the offset
+          }
+        });
+      });
+
+      // Handle the browser's back and forward buttons
+      window.addEventListener('popstate', () => {
+        const targetId = location.hash.substring(1);  // Get the ID from the current hash in the URL
+        if (targetId) {
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            scrollToElement(targetElement);  // Scroll to the element if it exists
+          }
+        }
+      });
+    });
+</script>
+
+<script>
+let slideIndices = [0,0, 0, 0, 0, 0, ];
+showDivs(slideIndices);
+
+function plusDivs(idx, n) {
+  slideIndices[idx-1] += n;
+  showDivs(slideIndices);
+}
+
+function showDivs(indices) {
+  let idx;
+  console.log(indices);
+  for(idx=0; idx < indices.length; idx++){
+    
+    // var dates = document.querySelectorAll('[id^="createdOnID"]');
+    let tmp = '[id^="'+(idx+1)+'_slide"]'
+    // console.log(tmp);    
+    var x = document.querySelectorAll(tmp);
+    if(x.length == 0){
+      continue;
+    }
+    var i;    
+    n = slideIndices[idx];
+    if (n > x.length-1) {slideIndices[idx] = 0}
+
+    if (n < 0) {slideIndices[idx] = x.length-1}  
+
+    for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";  
+    }
+    x[slideIndices[idx]].style.display = "block";
+  }
+}
+</script>
+
+
+
+
+  <!-- JavaScript to handle citation clicks and highlight -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Find all citation links
+      const citations = document.querySelectorAll('.citation');
+
+      citations.forEach(function (citation) {
+        citation.addEventListener('click', function (event) {
+          event.preventDefault();  // Prevent default link behavior
+
+          const citationLink = citation.querySelector('a');  // Find the <a> inside the span
+
+          // Get the reference ID from the citation's href (remove the '#')
+          const refId = citationLink.getAttribute('href').substring(1);
+            
+          // Find the corresponding reference element using the ID
+          const refElement = document.getElementById(refId);
+
+          // Remove any previous highlights
+          document.querySelectorAll('.highlight').forEach(function (el) {
+            el.classList.remove('highlight');
+          });
+          document.querySelectorAll('.highlight-citation').forEach(function (el) {
+            el.classList.remove('highlight-citation');
+          });
+
+          if (refElement) {
+            console.log("Here");
+            // Scroll to the reference (smooth scroll)
+            refElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Add highlight to the reference
+            refElement.classList.add('highlight');
+
+            // Add highlight to the citation link
+            citation.classList.add('highlight-citation');
+            
+          }
+        });
+      });
+    });
+  </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    new ClipboardJS('.copy-btn');
+});
+
+</script>
+
+
+
+</html>
