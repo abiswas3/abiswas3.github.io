@@ -13,12 +13,9 @@
   <link rel="stylesheet" href="../static/nav.css">  
   <link rel="stylesheet" href="../static/tags.css">       
 
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
-  <!-- Prism CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css" rel="stylesheet" />
+  <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
+  <script src="/static/es5/tex-svg.js"></script>
 
-  <!-- Prism JS -->
-  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.js"></script>
 
   <title>Notes From The Montgomery Underground</title>      
   </head>
@@ -41,18 +38,26 @@
     <div class="toc" id="toc">      
       <div class="toc-content">
           <ul>
-          <li><a href="#why-do-we-panic" id="toc-why-do-we-panic">Why Do
-          We Panic?</a></li>
-          <li><a href="#why-do-the-tests-now-pass"
-          id="toc-why-do-the-tests-now-pass">Why Do The Tests Now
-          Pass</a>
-          <ul>
+          <li><a href="#background"
+          id="toc-background">Background</a></li>
           <li><a href="#the-cios-algorithm"
-          id="toc-the-cios-algorithm">The CIOS Algorithm</a></li>
+          id="toc-the-cios-algorithm">The CIOS algorithm</a>
+          <ul>
+          <li><a href="#important-sub-routine"
+          id="toc-important-sub-routine">Important Sub-Routine</a></li>
+          <li><a href="#repeat-the-subroutine-n-times"
+          id="toc-repeat-the-subroutine-n-times">Repeat The Subroutine
+          <span class="math inline">\(n\)</span> times</a></li>
+          <li><a href="#why-cant-this-answer-be-greater-than-2p"
+          id="toc-why-cant-this-answer-be-greater-than-2p">Why Can’t
+          This Answer Be Greater Than <span
+          class="math inline">\(2p\)</span> ?</a></li>
+          </ul></li>
           <li><a href="#yuvals-new-multiplication-algorithm"
           id="toc-yuvals-new-multiplication-algorithm">Yuval’s New
           Multiplication Algorithm</a></li>
-          </ul></li>
+          <li><a href="#is-n1p-tight" id="toc-is-n1p-tight">Is <span
+          class="math inline">\((n+1)p\)</span> tight?</a></li>
           </ul>
       </div>
   
@@ -61,8 +66,6 @@
   <br>
   </header>
 
-
-
   <main class="content">
     <h1>Notes From The Montgomery Underground</h1>
     <div class="authors">
@@ -70,13 +73,37 @@
 </div>
 
             <ul class="tag-list">
-                  <li class="tag-item"><a href="/software.html" class="tag-link">software</a></li>
-                  <li class="tag-item"><a href="/cryptography.html" class="tag-link">cryptography</a></li>
+                  <li class="tag-item"><a href="/publish/software.html" class="tag-link">software</a></li>
+                  <li class="tag-item"><a href="/publish/cryptography.html" class="tag-link">cryptography</a></li>
                 </ul>
     
-    <section id="why-do-we-panic" class="level2">
-    <h2>Why Do We Panic?</h2>
-    <p>When we ran
+    <section id="background" class="level2">
+    <h2>Background</h2>
+    <p>In an earlier <a href="mont_mult.html">post</a>, we analysed why
+    the improved Montgomery multiplication algorithm by the folks at
+    Ingoyama was not empirically faster out of the box. Our main finding
+    after disassembling the code was that memory access overhead for 128
+    bit read/writes kills the speedups from having fewer
+    multiplications. These large chunk reads/writes were likely due to
+    intermediate <span class="math inline">\(n+1\)</span> limbed values
+    are stored in contiguous regions of memory (but it doesn’t have to).
+    As a resolution, we found an <a
+    href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/main/src/mul_logjumps_unr_2.rs">alternate</a>
+    implementation by the same folks at Ingoyama. In this implementation
+    all intermediate values are storied in rust variables as opposed to
+    constant sized vecs/arrays. This potentially allows the compiler to
+    optimise the assembly to use more registers (instead of
+    read/writes), and this implementation is empirically faster than the
+    current Arkworks CIOS implementation.</p>
+    <ul class="task-list">
+    <li><label><input type="checkbox" />🗓️🗓️ <strong>TODO</strong>
+    Perhaps a future blog about the differences in assembly between the
+    two code bases</label></li>
+    </ul>
+    <p>We stripped out the <code>mul_logjumps_unr_2.rs</code> function
+    along with constants and helpers from
+    <code>mul_logjumps_unr_2.rs</code> and put it into Arkworks via
+    <code>ff-macros</code> create. Then we ran Jolt. On running
     <code>cargo test -p jolt-core -- sha3_e2e_hyperkzg</code> we get the
     following panic.</p>
     <pre><code>thread &#39;&lt;unnamed&gt;&#39; panicked at /Users/aribiswas3/Work-With-A16z/arkworks-algebra/ff/src/fields/models/fp/montgomery_backend.rs:1360:9:
@@ -87,69 +114,68 @@ failures:
     jolt::vm::rv32i_vm::tests::sha3_e2e_hyperkzg
 
 test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out; finished in 4.79s</code></pre>
-    <p>This is the <a
-    href="https://github.com/abiswas3/arkworks-algebra/blob/19e66617147b3a9779df30522539fb8e8d3217c6/ff/src/fields/models/fp/montgomery_backend.rs#L1348">code</a>
-    for the Conditional Subtraction for Barrett reduction, that causes
-    the <strong>panic</strong>! If you look at <code>line 1360</code>,
-    it specifically needs the Big integer listed as <code>r_tmp</code>
-    not have its high bit set to 1. Now when you multiply two numbers,
-    sometimes it may cause the result to cross over the modulus <span
-    class="math inline">\(p\)</span>. In <a
-    href="https://github.com/abiswas3/arkworks-algebra/blob/19e66617147b3a9779df30522539fb8e8d3217c6/ff-macros/src/montgomery/mul.rs#L286">CIOS</a>
-    this is easily resolved by subtracting <span
-    class="math inline">\(p\)</span> from the product. Which is easily
-    confirmed <a
-    href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/0cc267afa60c87deb632164ff692d783ef6f2109/src/mul_cios_opt_unr_2.rs#L62">here</a>,
-    where the <code>__subtract_modulus(a)</code>simply computes <span
+    <p>The <a
+    href="https://github.com/abiswas3/arkworks-algebra/blob/19e66617147b3a9779df30522539fb8e8d3217c6/ff/src/fields/models/fp/montgomery_backend.rs#L1348">Conditional
+    Subtraction For Barrett Reduction</a> throws an error claiming that
+    the number we passed in was too large. If you look at
+    <code>line 1360</code>, it specifically needs the Big integer listed
+    as <code>r_tmp</code> not have its high bit set to 1. This error
+    goes away when using Arkworks-CIOS as the multiplication
+    algorithm.</p>
+    <p>Why does this happen?</p>
+    <p>Scanning the <a
+    href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/main/src/mul_logjumps_unr_2.rs">lines
+    of code</a> we see that the final answer is not guaranteed to be
+    less than the modulus <span class="math inline">\(p\)</span> (as its
+    never reduced). When you multiply two numbers that are both less
+    than <span class="math inline">\(p\)</span>, The result may still
+    cross over the modulus <span class="math inline">\(p\)</span>.</p>
+    <p>In <a
+    href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/0cc267afa60c87deb632164ff692d783ef6f2109/src/mul_cios_opt_unr_2.rs#L62">Arkworks-CIOS</a>
+    the last line of multiplication involves subtracting <span
+    class="math inline">\(p\)</span> from the final answer if the answer
+    is greater than <span class="math inline">\(p\)</span>. The line
+    <code>__subtract_modulus(a)</code>simply computes <span
     class="math inline">\(p-a\)</span> if <span class="math inline">\(a
     \ge p\)</span>.</p>
+    <p>Ok! No big deal, we stick a <code>__subtract_modulus(a)</code> at
+    the end and all should be good. <strong>It isn’t! </strong></p>
+    <p>We observe that the sometimes the final answer greater than even
+    <span class="math inline">\(2p\)</span>. Fine! stick in two
+    subtracts.</p>
+    <p>Now Jolt passes, and in 100,000 random trials the outputs of
+    Arkworks-CIOS and the new implementation + 2 subtractions are
+    exactly the same.</p>
     <div class="sourceCode" id="cb2"><pre
-    class="sourceCode rust"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">fn</span> __subtract_modulus(a<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> F) <span class="op">{</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> a<span class="op">.</span>is_geq_modulus() <span class="op">{</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        __sub_with_borrow(<span class="op">&amp;</span><span class="kw">mut</span> a<span class="op">.</span><span class="dv">0</span><span class="op">,</span> <span class="op">&amp;</span>#modulus)<span class="op">;</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
-    <p>In <a
-    href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/0cc267afa60c87deb632164ff692d783ef6f2109/src/mul_logjumps_unr_2.rs#L7">Yuval’s
-    new implementation</a>, we find the sometimes the product <span
-    class="math inline">\(ab\)</span> is <strong>two</strong> times
-    larger than <span class="math inline">\(p\)</span>, and might
-    require subtracting <span class="math inline">\(p\)</span> twice.
-    The linked code does not do any subtraction, as this was just
-    benchmarking code.</p>
-    <p>If we use the linked code directly, the current Arkworks library
-    will sometimes complain at <code>Line 1360</code> essentially saying
-    the number passed is too big.</p>
-    <p>Adding this snippet of code to the optimised Montgomery
-    multiplication code resolves this error but at <strong>the cost of
-    some performance when compared to the linked code above</strong> (we
-    are executing more instructions).</p>
-    <div class="sourceCode" id="cb3"><pre
-    class="sourceCode rust"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>__subtract_modulus(ans)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>__subtract_modulus(ans)</span></code></pre></div>
-    <p>In the code for <a
+    class="sourceCode rust"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>__subtract_modulus(ans)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>__subtract_modulus(ans)</span></code></pre></div>
+    <div class="remark"><h3></h3><p>In the code for <a
     href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L1154">world
     coin</a>, notice they have a <code>reduce_ct</code> function. This
-    subtracts <span class="math inline">\(2p\)</span> from <span
-    class="math inline">\(a\)</span> (the Montgomery product) only if
-    the most significant bit of <span class="math inline">\(a\)</span>
+    subtracts <span class="math inline">2<em>p</em></span> from <span
+    class="math inline"><em>a</em></span> (the Montgomery product) only if
+    the most significant bit of <span class="math inline"><em>a</em></span>
     is 1, as described Line</p>
-    <div class="sourceCode" id="cb4"><pre
-    class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> msb <span class="op">=</span> (a[<span class="dv">3</span>] <span class="op">&gt;&gt;</span> <span class="dv">63</span>) <span class="op">&amp;</span> <span class="dv">1</span><span class="op">;</span></span></code></pre></div>
-    <p>This appears to be not strong enough of a condition for Arkworks
-    to not complain :-( The remainder of this post discusses why
-    subtracting twice is sufficient.</p>
-    </section>
-    <section id="why-do-the-tests-now-pass" class="level2">
-    <h2>Why Do The Tests Now Pass</h2>
-    <p>To understand why the tests now pass, we need to first understand
-    how Montgomery multiplication is implemented on computers.</p>
+    <div class="sourceCode" id="cb1"><pre
+    class="sourceCode rust"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> msb <span class="op">=</span> (a[<span class="dv">3</span>] <span class="op">&gt;&gt;</span> <span class="dv">63</span>) <span class="op">&amp;</span> <span class="dv">1</span><span class="op">;</span></span></code></pre></div>
+    <p>This appears to be not strong enough of a condition for Arkworks to
+    not complain :-( Plugging in the World coin code directly also makes
+    Jolt panic!</p></div>
+    <p>So are we done? Two subtractions seem like a hack. How do we know
+    we don’t need 3? 100,000 trials is minuscule when compared to the
+    input space of 256 bit numbers. In what follows we derive a formal
+    guarantee on how large the answer of the new montogmery algorithm
+    can be, therefore establishing the maximum number of subtracts we
+    must employ. ## Montgomery Multiplication Maths</p>
+    <p>We begin with the basics of Montgomery multiplication, and how it
+    is implemented on computers.</p>
     <div class="remark"><h3></h3><p>In what follows, we actually describe the Separated Operand Scanning
     Algorithm (SOS), but deceptively refer to it as the Coarse Integrated
     Operand Scanning (CIOS) algorithm. This is done for ease of exposition
-    only, the claims would hold regardless.</p></div>
-    <section id="the-cios-algorithm" class="level3">
-    <h3>The CIOS Algorithm</h3>
+    only, the claims would hold regardless. We also do not discuss the
+    optimisations made by the <a
+    href="https://hackmd.io/@gnark/modular_multiplication">Gnark</a>
+    team.</p></div>
     <p>Given a <span class="math inline">\(n\)</span> limb modulus <span
     class="math inline">\(p\)</span>, integers <span
     class="math inline">\(a\)</span> and <span
@@ -174,49 +200,53 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     class="math inline">\(r\)</span> are co-prime. Therefore, <span
     class="math inline">\(-p^{-1}\)</span> is well defined, and thus so
     is <span class="math inline">\(m\)</span>.</p>
-    <section id="how-is-cios-actually-computed" class="level4">
-    <h4>How Is CIOS actually computed</h4>
+    <p><strong>Key Idea</strong>:</p>
+    <p>As <span class="math inline">\(R\)</span> is a power of 2, the
+    last division can be done by bit shift operations native to most
+    instruction architectures.</p>
+    </section>
+    <section id="the-cios-algorithm" class="level2">
+    <h2>The CIOS algorithm</h2>
     <p>What we describe above is the pseudocode description of the
-    Montgomery reduction algorithm, but in practice we do not actually
+    Montgomery reduction algorithm. In practice we do not actually
     compute <span class="math inline">\(m\)</span> as a whole, then
     multiply it with <span class="math inline">\(p\)</span> and add it
     to <span class="math inline">\(c\)</span>. We perform the
     computation limb by limb.<br />
-    Borrowing the notation from <a
-    href="https://hackmd.io/@Ingonyama/Barret-Montgomery">Yuval’s
-    blog</a>, <span class="math inline">\(c\)</span> can be written
-    as:</p>
+    <span class="math inline">\(c\)</span> can be written as as <span
+    class="math inline">\(2n\)</span> digit number:</p>
     <p><span class="math display">\[
     \begin{align}
     c &amp;\equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r
-    + c_0) \mod p
+    + c_0) \mod p \\[10pt]
+    cr^{-1} &amp;\equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots
+    + c_1r)r^{-1} + c_0 r^{-1}   \mod p \\[10pt]
     \end{align}
     \]</span></p>
     <p>The limb by limb process follows by repeating the following
     sub-routine <span class="math inline">\(n\)</span> times.</p>
-    </section>
-    <section id="important-sub-routine" class="level4">
-    <h4>Important Sub-Routine</h4>
+    <section id="important-sub-routine" class="level3">
+    <h3>Important Sub-Routine</h3>
     <p>Observe that <span class="math inline">\(c_0r^{-1} \equiv (c_0 +
-    m_0p)r^{-1} \mod p\)</span> where <span
+    mp)r^{-1} \mod p\)</span>, where <span
     class="math inline">\(m\)</span> such that <span
-    class="math inline">\(c_0 + m_0p \equiv 0 \mod r\)</span>. Solving
-    for <span class="math inline">\(m = -p^{-1}c_0 \equiv \mu c_0 \mod
+    class="math inline">\(c_0 + mp \equiv 0 \mod r\)</span>. Solving for
+    <span class="math inline">\(m = -p^{-1}c_0 \equiv \mu c_0 \mod
     r\)</span>. Also as we are working modulo <span
     class="math inline">\(r\)</span>, it suffices to use <span
-    class="math inline">\(m_{0} = \mu_{0}c_0\)</span> discarding any
+    class="math inline">\(m = \mu_{0}c_0\)</span> discarding any
     carries, where <span class="math inline">\(\mu_{0}\)</span> is the
     least significant word of <span
     class="math inline">\(\mu\)</span>.</p>
     <div class="remark"><h3></h3><p>We overload <span class="math inline"><em>m</em></span> a little in
     notation. This <span class="math inline"><em>m</em></span> is NOT the
     same <span class="math inline"><em>m</em></span> as the one defined in
-    the overeall description of the algorithm on top. This <span
+    the pseudocode description on top. This <span
     class="math inline"><em>m</em></span> is just to make <span
     class="math inline"><em>c</em><sub>0</sub> + <em>m</em><em>p</em></span>
     divisible by <span class="math inline"><em>r</em></span>.</p></div>
-    <p>Once we compute <span class="math inline">\(m_0p\)</span>, and
-    add this to <span class="math inline">\(c\)</span> to get <span
+    <p>Once we compute <span class="math inline">\(mp\)</span>, and add
+    this to <span class="math inline">\(c\)</span> to get <span
     class="math inline">\(c^{(1)}\)</span>, this should clear the least
     significant digit based on how we picked <span
     class="math inline">\(m\)</span>. See below</p>
@@ -228,7 +258,7 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     + c_1r)r^{-1} + c_0 r^{-1}   \mod p \\[10pt]
     &amp;\equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots +
     c_1r)r^{-1} + (c_0+ mp)r^{-1}   \mod p \\[10pt]
-    &amp;\equiv (c + m_0p)r^{-1} \\[10pt]
+    &amp;\equiv (c + mp)r^{-1} \mod p \\[10pt]
     &amp;\equiv ( c^{(1)}_{2n-1}r^{2n-1} + \ldots c^{(1)}_1r + 0)r^{-1}
     \mod p \\[10pt]
     &amp;\equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1) \mod p
@@ -236,9 +266,9 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     \end{align}
     \]</span></p>
     </section>
-    <section id="repeat-the-subroutine-n-times" class="level4">
-    <h4>Repeat The Subroutine <span class="math inline">\(n\)</span>
-    times</h4>
+    <section id="repeat-the-subroutine-n-times" class="level3">
+    <h3>Repeat The Subroutine <span class="math inline">\(n\)</span>
+    times</h3>
     <p>Now we can play the subroutine again with <span
     class="math inline">\(c^{(1)}_1\)</span> replacing the role of <span
     class="math inline">\(c_0\)</span>, and the updated value of <span
@@ -261,44 +291,47 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     p\]</span></p>
     <p>To get the final answer.</p>
     </section>
-    <section id="why-cant-this-output-be-greater-than-2p"
-    class="level4">
-    <h4>Why Can’t This Output Be Greater Than <span
-    class="math inline">\(2p\)</span> ?</h4>
+    <section id="why-cant-this-answer-be-greater-than-2p"
+    class="level3">
+    <h3>Why Can’t This Answer Be Greater Than <span
+    class="math inline">\(2p\)</span> ?</h3>
     <p>What did we actually do in the above process ? Over <span
     class="math inline">\(n\)</span> iterations, in each iteration, we
-    added <span class="math inline">\(m_ip\)</span> to <span
+    computed <span class="math inline">\(m\)</span>, added <span
+    class="math inline">\(mp\)</span> to <span
     class="math inline">\(c\)</span> and divided by <span
-    class="math inline">\(r\)</span>. More explicitly,</p>
+    class="math inline">\(r\)</span>. We denote the <span
+    class="math inline">\(m\)</span> in iteration <span
+    class="math inline">\(i\)</span> with <span
+    class="math inline">\(m_i\)</span> here. More explicitly,</p>
     <p><span class="math display">\[
     \begin{align}
     cR^{-1} &amp;\equiv (\ldots((c + m_0p)r^{-1} + m_1p)r^{-1} + \dots +
     m_{n-1}p)r^{-1} \\[10pt]
     &amp;=  \frac{c + p\sum_{i=0}^{n-1} m_ir^{i}}{r^n} \\
-    &amp;=  \frac{c + mp }{R} \\
+    &amp;=  \frac{c + m&#39;p }{R} \\
     &amp;&lt; \frac{Rp + pR}{R}\\
     &amp;= 2p
     \end{align}
     \]</span></p>
-    <p>This is exactly why, if the answer is greater than <span
+    <p>Here <span class="math inline">\(m&#39;\)</span> is some integer
+    expressed using <span class="math inline">\(n\)</span> limbs,
+    therefore strictly less than <span class="math inline">\(R\)</span>.
+    This is exactly why, if the answer is greater than <span
     class="math inline">\(p\)</span>, <strong>one</strong> subtraction
-    suffices. We can verify this <a
-    href="https://github.com/abiswas3/arkworks-algebra/blob/19e66617147b3a9779df30522539fb8e8d3217c6/ff-macros/src/montgomery/mul.rs#L350">here</a>
-    in the current Arkworks implementations.</p>
-    <div class="remark"><h3></h3><p>But when we add one <code>__subtract_modulus</code> after Yuval’s
-    algorithm, and run Jolt tests, Arkworks panics!</p></div>
-    <p>To understand why, we first need to understand the new
-    algorithm.</p>
+    suffices. We NEVER need more than one subtraction!</p>
     </section>
     </section>
-    <section id="yuvals-new-multiplication-algorithm" class="level3">
-    <h3>Yuval’s New Multiplication Algorithm</h3>
+    <section id="yuvals-new-multiplication-algorithm" class="level2">
+    <h2>Yuval’s New Multiplication Algorithm</h2>
     <p>The new algorithm is based on the subtle observation. Quoting the
-    original blog:</p>
+    original <a
+    href="https://hackmd.io/@Ingonyama/Barret-Montgomery">blog</a>:</p>
     <div class="remark"><h3></h3><p>Per round of the Montgomery reduction, we previously computed <span
-    class="math inline"><em>c</em><sub><em>i</em></sub><sup>(<em>i</em>)</sup><em>r</em><sup>−1</sup> mod  <em>p</em></span>
-    using <span class="math inline"><em>n</em> + 1</span> digit
-    multiplications. An alternative method to achieve this, using only <span
+    class="math inline"><em>c</em><sub><em>i</em></sub>
+    <em>r</em><sup>−1</sup> mod  <em>p</em></span> using <span
+    class="math inline"><em>n</em> + 1</span> digit multiplications. An
+    alternative method to achieve this, using only <span
     class="math inline"><em>n</em></span> digit multiplications, is by
     computing <span
     class="math inline"><em>ρ</em><sub>1</sub> = <em>r</em><sup>−1</sup> mod  <em>p</em></span>.
@@ -306,11 +339,13 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     sum is divided by <span class="math inline"><em>𝑟</em></span>, and the
     resulting fraction is converted into an <span
     class="math inline"><em>n</em> + 1</span>-digit number <span
-    class="math inline"><em>c̃</em><em>ρ</em><sub>1</sub></span>, which is
-    then added to the integer part of the division.</p></div>
-    <p>In simple words, earlier we were adding and then dividing, now we
-    first divide and then add things!</p>
-    <p>We start with</p>
+    class="math inline"><em>c</em><sub><em>i</em></sub>
+    <em>ρ</em><sub>1</sub></span>, which is then added to the integer part
+    of the division.</p></div>
+    <p>In simple words, in CIOS we were adding and then dividing<a
+    href="#fn1" class="footnote-ref" id="fnref1"
+    role="doc-noteref"><sup>1</sup></a>, now we first divide and then
+    add things. See below:</p>
     <p><span class="math display">\[ c \equiv (c_{2n-1} r^{2n-1} +
     c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p\]</span> Dividing
     <span class="math inline">\(c\)</span> with <span
@@ -321,24 +356,35 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     c_{n-2}r^{-1} \ldots + c_1r^{-(n-2)}+ c_0r^{-(n-1)} \mod p
     \end{align}
     \]</span></p>
-    <p>If we pre-computed <span class="math inline">\(\rho_i = r^{-i}
-    \mod p\)</span> for all <span class="math inline">\(i \in
-    [n-1]\)</span>, we can re-write the above equation as</p>
+    <p>If we pre-computed<a href="#fn2" class="footnote-ref" id="fnref2"
+    role="doc-noteref"><sup>2</sup></a> <span
+    class="math inline">\(\rho_i \equiv r^{-i} \mod p\)</span> for all
+    <span class="math inline">\(i \in [n-1]\)</span>, we can re-write
+    the above equation as</p>
     <p><span class="math display">\[cr^{-n+1} \equiv \Big(c_{2n-1}r^{n}
     + \ldots +c_{n-1} \Big) + \Big(c_{n-2}\rho_1\Big) \ldots +
     \Big(c_1\rho_{n-2}\Big)+ \Big(c_0\rho_{n-1}\Big) \mod p\]</span></p>
-    <p>Now each of these bracketed terms are <span
-    class="math inline">\(n+1\)</span> limbed numbers that were the
-    fractional part of the division (referencing the quoted text) and
-    <span class="math inline">\(\Big(c_{2n-1}r^{n} + \ldots +c_{n-1}
-    \Big)\)</span> is the integer part of the division – remainder and
-    quotient to be more formal.</p>
+    <p>Barring the left most bracketed term, the remaining bracketed
+    terms are <span class="math inline">\(n+1\)</span> limbed numbers
+    referred to as the fractional part of the division in the quoted
+    text and <span class="math inline">\(\Big(c_{2n-1}r^{n} + \ldots
+    +c_{n-1} \Big)\)</span> is the integer part of the division. Using
+    more standard terminology, the remainder and quotient.</p>
     <p>These can be calculated <strong>independently</strong> and
-    <strong>in parallel</strong><a href="#fn1" class="footnote-ref"
-    id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
-    <div class="thm"><h3>Theorem</h3><p>Let <span
-    class="math inline"><em>s</em> = (<em>c</em><sub>2<em>n</em> − 1</sub><em>r</em><sup><em>n</em></sup> + … + <em>c</em><sub><em>n</em> − 1</sub>) + (<em>c</em><sub><em>n</em> − 2</sub><em>ρ</em><sub>1</sub>)… + (<em>c</em><sub>1</sub><em>ρ</em><sub><em>n</em> − 2</sub>) + (<em>c</em><sub>0</sub><em>ρ</em><sub><em>n</em> − 1</sub>)</span>.
-    We claim that <span
+    <strong>in parallel</strong><a href="#fn3" class="footnote-ref"
+    id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+    <p>Let <span class="math inline">\(s = \Big(c_{2n-1}r^{n} + \ldots
+    +c_{n-1} \Big) + \Big(c_{n-2}\rho_1\Big) \ldots +
+    \Big(c_1\rho_{n-2}\Big)+ \Big(c_0\rho_{n-1}\Big)\)</span>. To
+    compute the final answer, we do the standard thing od adding <span
+    class="math inline">\(mp\)</span> and dividing by <span
+    class="math inline">\(r\)</span> for the last step, where <span
+    class="math inline">\(m= s_0\mu_0\)</span> and <span
+    class="math inline">\(s_0\)</span> is the least significant word of
+    <span class="math inline">\(s\)</span>.</p>
+    <p><span class="math display">\[ cR^{-1} \mod p \equiv (s+
+    mp)/r\]</span></p>
+    <div class="thm"><h3>Theorem</h3><p>We claim that <span
     class="math inline"><em>s</em> &lt; <em>n</em> ⋅ (<em>r</em><em>p</em>)</span>.</p></div>
     <div class="proof">
     <p>Dividing <span class="math inline">\(c\)</span> by <span
@@ -360,30 +406,50 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     <p>Therefore, <span class="math inline">\(Q+R &lt; n\cdot
     rp\)</span></p>
     </div>
-    <p>Now, the final step of the reduction involves computing <span
-    class="math inline">\((s + mp)r^{-1}\)</span> where <span
-    class="math inline">\(m= s_0\mu_0\)</span> and <span
-    class="math inline">\(s_0\)</span> is the least significant word of
-    <span class="math inline">\(s\)</span>.</p>
     <p>From this we can conclude that</p>
     <p><span class="math display">\[ cR^{-1} \mod p \equiv (s+ mp)/r
-    &lt; (nrp + rp)/r &lt; (n+1)p\]</span> Therefore, <strong>it is
-    often not sufficient to subtract <span
+    &lt; (nrp + rp)/r &lt; (n+1)p\]</span></p>
+    <p>Therefore, <strong>it is often not sufficient to subtract <span
     class="math inline">\(p\)</span> from the answer just once</strong>.
     For <span class="math inline">\(n=4\)</span>, this implies that the
     answer will be less than <span
     class="math inline">\(5p\)</span>.</p>
-    <p>So it appears that two <code>_substract_modulus</code> operations
-    were insufficient too, although we were never able to get this to
-    work via fuzzing!</p>
+    <div class="remark"><h3></h3><p>So it appears that two <code>_substract_modulus</code> operations us
+    still insufficient. Although we were never able to break the algorithm
+    by fuzzing.</p></div>
+    <p>At a high level what is going on? When you add and divide – the
+    numbers we add to the current sum are <span
+    class="math inline">\(n\)</span>$ limbed numbers. When you divide
+    and add, the remainder consists of <span
+    class="math inline">\(n-1\)</span> numbers that are all <span
+    class="math inline">\(n+1\)</span> limbs. So we’re adding much
+    bigger numbers to the current sum, which should indicate we should
+    get much larger overflows.</p>
     </section>
+    <section id="is-n1p-tight" class="level2">
+    <h2>Is <span class="math inline">\((n+1)p\)</span> tight?</h2>
+    <p>One might ask – if our analysis is tight? One way to verify our
+    claim is to to find inputs <span class="math inline">\(a, b \in
+    [p-1]\)</span> such that <span class="math inline">\((s + mp)/r &gt;
+    4p\)</span>.</p>
+    <p>Shown below are examples that do this:</p>
+    <ul class="task-list">
+    <li><label><input type="checkbox" />⏳⏳ IN-PROGRESS:</label></li>
+    </ul>
     </section>
     <section id="footnotes" class="footnotes footnotes-end-of-document"
     role="doc-endnotes">
     <hr />
     <ol>
-    <li id="fn1"><p>In the current implementation we do not leverage any
-    form of parallelism.<a href="#fnref1" class="footnote-back"
+    <li id="fn1"><p>First add <span class="math inline">\(mp\)</span> to
+    <span class="math inline">\(c\)</span>, then divide <span
+    class="math inline">\((c+mp)/r\)</span>.<a href="#fnref1"
+    class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+    <li id="fn2"><p>We guarantee that <span class="math inline">\(\rho_i
+    &lt; p\)</span><a href="#fnref2" class="footnote-back"
+    role="doc-backlink">↩︎</a></p></li>
+    <li id="fn3"><p>In the current implementation we do not leverage any
+    form of parallelism.<a href="#fnref3" class="footnote-back"
     role="doc-backlink">↩︎</a></p></li>
     </ol>
     </section>

@@ -5,13 +5,17 @@
 /*  --text: #333333;*/
    --text: #ebdbb2; 
 /*  --heading: #34558b;*/
-  --heading: #fb4934;
+/*  --heading: #fb4934;*/
+  --heading: #fe8019;
+  
   --link: #83a598;
-  --link-hover: #004477 ;
+  --link-hover: salmon;
   --border-color: #e0ddd6;
+  --base-font-size: 1.05rem;
   --base-font-family: 'Chalkboard SE', sans-serif;
-  /* --base-font-family: 'Libertinus Serif', serif; */
-  /* --base-font-family: system-ui, -apple-system, sans-serif; */
+  --base-font-wt: 200;
+   /*--base-font-family: system-ui, -apple-system, sans-serif; 
+   --base-font-wt: normal;*/
 }
 
 html, body {
@@ -21,8 +25,8 @@ html, body {
   color: var(--text);
   font-family: var(--base-font-family);
   overflow-x: hidden; /* prevent page-wide horizontal scroll */
-  font-size: 1rem;
-  font-weight: 200;
+  font-size: var(--base-font-size);
+  font-weight: var(--base-font-wt);
 }
 
 header li{
@@ -65,7 +69,9 @@ h1, h2, h3, h4, h5, h6 {
   font-family: 'Chalkboard SE', sans-serif;
 }
 
-
+strong{
+  color: var(--heading);
+}
 /* Basic styles */
 .nav {
   background: var(--bg);
@@ -103,7 +109,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Nav links */
 .nav-list a {
-  color: var(--link);
+  color: var(--heading);
   text-decoration: none;
   padding: 1rem 0;
   display: block;
