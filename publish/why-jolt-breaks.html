@@ -47,11 +47,8 @@
           id="toc-why-do-the-tests-now-pass">Why Do The Tests Now
           Pass</a>
           <ul>
-          <li><a href="#the-soscios-algorithm"
-          id="toc-the-soscios-algorithm">The SOS/CIOS Algorithm</a></li>
-          <li><a href="#how-is-cios-actually-computed"
-          id="toc-how-is-cios-actually-computed">How Is CIOS actually
-          computed</a></li>
+          <li><a href="#the-cios-algorithm"
+          id="toc-the-cios-algorithm">The CIOS Algorithm</a></li>
           <li><a href="#yuvals-new-multiplication-algorithm"
           id="toc-yuvals-new-multiplication-algorithm">Yuval’s New
           Multiplication Algorithm</a></li>
@@ -72,12 +69,10 @@
   Ari
 </div>
 
-          <p class="post-meta tags">
-        <ul class="tag-list">
+            <ul class="tag-list">
                   <li class="tag-item"><a href="/software.html" class="tag-link">software</a></li>
                   <li class="tag-item"><a href="/cryptography.html" class="tag-link">cryptography</a></li>
                 </ul>
-      </p>
     
     <section id="why-do-we-panic" class="level2">
     <h2>Why Do We Panic?</h2>
@@ -93,17 +88,17 @@ failures:
 
 test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out; finished in 4.79s</code></pre>
     <p>This is the <a
-    href="https://github.com/abiswas3/arkworks-algebra/blob/19e66617147b3a9779df30522539fb8e8d3217c6/ff/src/fields/models/fp/montgomery_backend.rs#L1348"
-    target="_blank">code</a> for the Conditional Subtraction for Barrett
-    reduction, that causes the <strong>panic</strong>! If you look at
-    <code>line 1360</code>, it specifically needs the Big integer listed
-    as <code>r_tmp</code> not have its high bit set to 1. Now when you
-    multiply two numbers, sometimes it may cause the result to cross
-    over the modulus <span class="math inline">\(p\)</span>. In <a
+    href="https://github.com/abiswas3/arkworks-algebra/blob/19e66617147b3a9779df30522539fb8e8d3217c6/ff/src/fields/models/fp/montgomery_backend.rs#L1348">code</a>
+    for the Conditional Subtraction for Barrett reduction, that causes
+    the <strong>panic</strong>! If you look at <code>line 1360</code>,
+    it specifically needs the Big integer listed as <code>r_tmp</code>
+    not have its high bit set to 1. Now when you multiply two numbers,
+    sometimes it may cause the result to cross over the modulus <span
+    class="math inline">\(p\)</span>. In <a
     href="https://github.com/abiswas3/arkworks-algebra/blob/19e66617147b3a9779df30522539fb8e8d3217c6/ff-macros/src/montgomery/mul.rs#L286">CIOS</a>
     this is easily resolved by subtracting <span
     class="math inline">\(p\)</span> from the product. Which is easily
-    confirmd <a
+    confirmed <a
     href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/0cc267afa60c87deb632164ff692d783ef6f2109/src/mul_cios_opt_unr_2.rs#L62">here</a>,
     where the <code>__subtract_modulus(a)</code>simply computes <span
     class="math inline">\(p-a\)</span> if <span class="math inline">\(a
@@ -147,13 +142,19 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     </section>
     <section id="why-do-the-tests-now-pass" class="level2">
     <h2>Why Do The Tests Now Pass</h2>
-    <section id="the-soscios-algorithm" class="level3">
-    <h3>The SOS/CIOS Algorithm</h3>
-    <p>Given <span class="math inline">\(n\)</span> limb modulus <span
-    class="math inline">\(p\)</span>, and integers <span
+    <p>To understand why the tests now pass, we need to first understand
+    how Montgomery multiplication is implemented on computers.</p>
+    <div class="remark"><h3></h3><p>In what follows, we actually describe the Separated Operand Scanning
+    Algorithm (SOS), but deceptively refer to it as the Coarse Integrated
+    Operand Scanning (CIOS) algorithm. This is done for ease of exposition
+    only, the claims would hold regardless.</p></div>
+    <section id="the-cios-algorithm" class="level3">
+    <h3>The CIOS Algorithm</h3>
+    <p>Given a <span class="math inline">\(n\)</span> limb modulus <span
+    class="math inline">\(p\)</span>, integers <span
     class="math inline">\(a\)</span> and <span
-    class="math inline">\(b\)</span> that are smaller than <span
-    class="math inline">\(p\)</span>, Montgomery multiplication
+    class="math inline">\(b\)</span> that are at most <span
+    class="math inline">\(p-1\)</span>, Montgomery multiplication
     computes</p>
     <p><span class="math display">\[ c \equiv abR^{-1} \mod
     p\]</span></p>
@@ -173,210 +174,217 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     class="math inline">\(r\)</span> are co-prime. Therefore, <span
     class="math inline">\(-p^{-1}\)</span> is well defined, and thus so
     is <span class="math inline">\(m\)</span>.</p>
-    <section id="why-subtract-modulus" class="level4">
-    <h4>Why subtract Modulus</h4>
-    <p>Why does one <code>__subtract_modulus</code> suffice for CIOS?
-    The answer can be found in <a
-    href="https://scispace.com/pdf/a-cryptographic-library-for-the-motorola-dsp56000-1vi48bhfpz.pdf">Theorem
-    2 On Page 7</a>. In the original paper, they make an argument for
-    signed integers, but the same argument holds for unsigned integers
-    as well. Note that <span class="math inline">\(c\)</span>, which is
-    a product of two integers <span class="math inline">\(a\)</span> and
-    <span class="math inline">\(b\)</span>, which are both at most <span
-    class="math inline">\(p\)</span>, is at most <span
-    class="math inline">\(p^2\)</span> and <span
-    class="math inline">\(R\)</span> is chosen to be the smallest power
-    of <span class="math inline">\(2\)</span> bigger than <span
-    class="math inline">\(p\)</span>.</p>
-    <p><span class="math display">\[c &lt; p^2 &lt; Rp\]</span>
-    Therefore, <span class="math display">\[c + mp &lt; Rp + mp &lt; Rp
-    + Rp\]</span> Finally, as <span class="math inline">\(c+mp\)</span>
-    is divisible by <span class="math inline">\(R\)</span>, we have
-    <span class="math display">\[(c+mp)/R &lt; 2p\]</span></p>
-    <p>So clearly at the end of adding <span
-    class="math inline">\(mp\)</span> to <span
-    class="math inline">\(c\)</span>, we may go over <span
-    class="math inline">\(p\)</span>, but never over <span
-    class="math inline">\(2p\)</span>. When we do go over <span
-    class="math inline">\(p\)</span>, outputting <span
-    class="math inline">\(c-p\)</span> as the answer, ensures that the
-    answer is always less than <span
-    class="math inline">\(p\)</span>.</p>
-    </section>
-    </section>
-    <section id="how-is-cios-actually-computed" class="level3">
-    <h3>How Is CIOS actually computed</h3>
-    <p>What we describe above is the essence of the Montgomery
-    reduction, but we do not compute <span
-    class="math inline">\(m\)</span> and compute <span
-    class="math inline">\(mp\)</span> directly in practice. Instead
-    perform reductions limb by limb.</p>
-    <div class="remark"><h3></h3><p>Note that performing limb by limb operations, will give us a final
-    value that <span
-    class="math inline"><em>c</em> + <em>m̂</em><em>p</em></span> which is
-    also divisible by <span class="math inline"><em>R</em></span>, but <span
-    class="math inline"><em>m̂</em></span> is not necessarily the same <span
-    class="math inline"><em>m</em></span> above. But that’s not really
-    important, whatever <span class="math inline"><em>m̂</em></span> we get
-    is also less than <span class="math inline"><em>R</em></span>, so the
-    same argument holds: <span
-    class="math inline">(<em>c</em> + <em>m̂</em><em>p</em>)/<em>r</em> &lt; 2<em>p</em></span>.</p></div>
-    <p><span class="math display">\[\begin{align}
+    <section id="how-is-cios-actually-computed" class="level4">
+    <h4>How Is CIOS actually computed</h4>
+    <p>What we describe above is the pseudocode description of the
+    Montgomery reduction algorithm, but in practice we do not actually
+    compute <span class="math inline">\(m\)</span> as a whole, then
+    multiply it with <span class="math inline">\(p\)</span> and add it
+    to <span class="math inline">\(c\)</span>. We perform the
+    computation limb by limb.<br />
+    Borrowing the notation from <a
+    href="https://hackmd.io/@Ingonyama/Barret-Montgomery">Yuval’s
+    blog</a>, <span class="math inline">\(c\)</span> can be written
+    as:</p>
+    <p><span class="math display">\[
+    \begin{align}
     c &amp;\equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r
-    + c_0) \mod p \\
-    cr^{-1} &amp;\equiv ( c_{2n-1}r^{2n-2} + \ldots c_1 + (c_0 r^{-1}
-    \mod p) ) \mod p
-    \end{align}\]</span></p>
-    <p>Next, we describe an important sub-operation that we will need
-    <span class="math inline">\(n\)</span> times.</p>
+    + c_0) \mod p
+    \end{align}
+    \]</span></p>
+    <p>The limb by limb process follows by repeating the following
+    sub-routine <span class="math inline">\(n\)</span> times.</p>
+    </section>
     <section id="important-sub-routine" class="level4">
     <h4>Important Sub-Routine</h4>
-    <p>We have <span class="math inline">\(c_0r^{-1} \equiv (c_0 +
+    <p>Observe that <span class="math inline">\(c_0r^{-1} \equiv (c_0 +
     m_0p)r^{-1} \mod p\)</span> where <span
     class="math inline">\(m\)</span> such that <span
     class="math inline">\(c_0 + m_0p \equiv 0 \mod r\)</span>. Solving
-    for <span class="math inline">\(m_0 = -p^{-1}c_0 \equiv \mu_0 c_0
-    \mod r\)</span>.</p>
-    <p>Also as we are working modulo <span
+    for <span class="math inline">\(m = -p^{-1}c_0 \equiv \mu c_0 \mod
+    r\)</span>. Also as we are working modulo <span
     class="math inline">\(r\)</span>, it suffices to use <span
-    class="math inline">\(m_{0}[0] = c_{0}[0] \times \mu_{0}[0]\)</span>
-    discarding any carries, where <span
-    class="math inline">\(c_{0}[0]\)</span> and <span
-    class="math inline">\(\mu_{0}[0]\)</span> are the least significant
-    words of <span class="math inline">\(c_0\)</span> and <span
-    class="math inline">\(\mu_0\)</span> respectively.</p>
-    <p>Once we compute <span class="math inline">\(c_0 r^{-1} \equiv c_0
-    + m_0[0]p \mod p\)</span>, we add this to <span
-    class="math inline">\(c\)</span>, which should clear the least
-    significant digit i.e. <span class="math inline">\(c^{(1)} =  c +
-    (c_0 + m_0[0]p)\)</span> is divisible by <span
-    class="math inline">\(r\)</span>. Thus,</p>
-    <p><span class="math display">\[\begin{align}
+    class="math inline">\(m_{0} = \mu_{0}c_0\)</span> discarding any
+    carries, where <span class="math inline">\(\mu_{0}\)</span> is the
+    least significant word of <span
+    class="math inline">\(\mu\)</span>.</p>
+    <div class="remark"><h3></h3><p>We overload <span class="math inline"><em>m</em></span> a little in
+    notation. This <span class="math inline"><em>m</em></span> is NOT the
+    same <span class="math inline"><em>m</em></span> as the one defined in
+    the overeall description of the algorithm on top. This <span
+    class="math inline"><em>m</em></span> is just to make <span
+    class="math inline"><em>c</em><sub>0</sub> + <em>m</em><em>p</em></span>
+    divisible by <span class="math inline"><em>r</em></span>.</p></div>
+    <p>Once we compute <span class="math inline">\(m_0p\)</span>, and
+    add this to <span class="math inline">\(c\)</span> to get <span
+    class="math inline">\(c^{(1)}\)</span>, this should clear the least
+    significant digit based on how we picked <span
+    class="math inline">\(m\)</span>. See below</p>
+    <p><span class="math display">\[
+    \begin{align}
     c &amp;\equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r
-    + c_0) \mod p \\
-    cr^{-1} &amp;\equiv ( c_{2n-1}r^{2n-2} + \ldots c_1 + (c_0 r^{-1}
-    \mod p) ) \mod p \\
-    cr^{-1} &amp;\equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1 )
-    \mod p
-    \end{align}\]</span></p>
+    + c_0) \mod p \\[10pt]
+    cr^{-1} &amp;\equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots
+    + c_1r)r^{-1} + c_0 r^{-1}   \mod p \\[10pt]
+    &amp;\equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots +
+    c_1r)r^{-1} + (c_0+ mp)r^{-1}   \mod p \\[10pt]
+    &amp;\equiv (c + m_0p)r^{-1} \\[10pt]
+    &amp;\equiv ( c^{(1)}_{2n-1}r^{2n-1} + \ldots c^{(1)}_1r + 0)r^{-1}
+    \mod p \\[10pt]
+    &amp;\equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1) \mod p
+    \\[10pt]
+    \end{align}
+    \]</span></p>
     </section>
     <section id="repeat-the-subroutine-n-times" class="level4">
     <h4>Repeat The Subroutine <span class="math inline">\(n\)</span>
     times</h4>
     <p>Now we can play the subroutine again with <span
     class="math inline">\(c^{(1)}_1\)</span> replacing the role of <span
-    class="math inline">\(c_0\)</span>.</p>
-    <p><span class="math display">\[\begin{align}
+    class="math inline">\(c_0\)</span>, and the updated value of <span
+    class="math inline">\(m = \mu_0c_1^{(1)}\)</span>
+    (<strong>NOTE</strong> the same <span
+    class="math inline">\(\mu_0\)</span> is always used)</p>
+    <p><span class="math display">\[
+    \begin{align}
     cr^{-1} &amp;\equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1 )
     \mod p \\
-    cr^{-2} &amp;\equiv ( c^{(1)}_{2n-1}r^{2n-3} + \ldots +
-    c_1^{(1)}r^{-2}+ (c_1^{(1)}r^{-1} \mod p) ) \mod p \\
-    &amp;\equiv ( c^{(2)}_{2n-1}r^{2n-3} + \ldots + c_1^{(2)}r^{-2} )
-    \mod p
-    \end{align}\]</span></p>
+    cr^{-2} &amp;\equiv ( c^{(1)}_{2n-1}r^{2n-3} + \ldots + c_1^{(1)}+
+    c_1^{(1)}r^{-1}   \mod p \\
+    &amp;\equiv ( c^{(2)}_{2n-1}r^{2n-3} + \ldots + c_1^{(2)} ) \mod p
+    \end{align}
+    \]</span></p>
     <p>In fact we play this game <span class="math inline">\(n\)</span>
     times</p>
     <p><span class="math display">\[cR^{-1} \equiv cr^{-n} \equiv
     c^{(n)}_{2n-1}r^{n-1} + c^{(n)}_{n+1}r +c^{(n)}_{n} \mod
     p\]</span></p>
-    <p>Finally, if this number is over <span
-    class="math inline">\(p\)</span>, we know it can’t be bigger than
-    <span class="math inline">\(2p\)</span>, we subtract <span
-    class="math inline">\(p\)</span> from it, and we have our answer. <a
-    href="https://github.com/abiswas3/arkworks-algebra/blob/19e66617147b3a9779df30522539fb8e8d3217c6/ff-macros/src/montgomery/mul.rs#L350">See
-    this line</a> to see this is exactly what Arkworks does in its CIOS
+    <p>To get the final answer.</p>
+    </section>
+    <section id="why-cant-this-output-be-greater-than-2p"
+    class="level4">
+    <h4>Why Can’t This Output Be Greater Than <span
+    class="math inline">\(2p\)</span> ?</h4>
+    <p>What did we actually do in the above process ? Over <span
+    class="math inline">\(n\)</span> iterations, in each iteration, we
+    added <span class="math inline">\(m_ip\)</span> to <span
+    class="math inline">\(c\)</span> and divided by <span
+    class="math inline">\(r\)</span>. More explicitly,</p>
+    <p><span class="math display">\[
+    \begin{align}
+    cR^{-1} &amp;\equiv (\ldots((c + m_0p)r^{-1} + m_1p)r^{-1} + \dots +
+    m_{n-1}p)r^{-1} \\[10pt]
+    &amp;=  \frac{c + p\sum_{i=0}^{n-1} m_ir^{i}}{r^n} \\
+    &amp;=  \frac{c + mp }{R} \\
+    &amp;&lt; \frac{Rp + pR}{R}\\
+    &amp;= 2p
+    \end{align}
+    \]</span></p>
+    <p>This is exactly why, if the answer is greater than <span
+    class="math inline">\(p\)</span>, <strong>one</strong> subtraction
+    suffices. We can verify this <a
+    href="https://github.com/abiswas3/arkworks-algebra/blob/19e66617147b3a9779df30522539fb8e8d3217c6/ff-macros/src/montgomery/mul.rs#L350">here</a>
+    in the current Arkworks implementations.</p>
+    <div class="remark"><h3></h3><p>But when we add one <code>__subtract_modulus</code> after Yuval’s
+    algorithm, and run Jolt tests, Arkworks panics!</p></div>
+    <p>To understand why, we first need to understand the new
     algorithm.</p>
     </section>
     </section>
     <section id="yuvals-new-multiplication-algorithm" class="level3">
     <h3>Yuval’s New Multiplication Algorithm</h3>
-    <p>Now the new algorithm is based on this subtle but clever
-    observation that</p>
-    <p><span class="math display">\[ cr^{-n+1} \equiv c_{2n-1}r^{n} +
-    \ldots + c_{n-1} + c_{n-2}r^{-1} \ldots + c_1r^{-n+2}+ c_0r^{-n+1}
-    \mod p\]</span></p>
-    <p>Now if we pre-compute <span class="math inline">\(\rho_i = r^{-i}
+    <p>The new algorithm is based on the subtle observation. Quoting the
+    original blog:</p>
+    <div class="remark"><h3></h3><p>Per round of the Montgomery reduction, we previously computed <span
+    class="math inline"><em>c</em><sub><em>i</em></sub><sup>(<em>i</em>)</sup><em>r</em><sup>−1</sup> mod  <em>p</em></span>
+    using <span class="math inline"><em>n</em> + 1</span> digit
+    multiplications. An alternative method to achieve this, using only <span
+    class="math inline"><em>n</em></span> digit multiplications, is by
+    computing <span
+    class="math inline"><em>ρ</em><sub>1</sub> = <em>r</em><sup>−1</sup> mod  <em>p</em></span>.
+    One way to understand this algorithm is that, in each round, the current
+    sum is divided by <span class="math inline"><em>𝑟</em></span>, and the
+    resulting fraction is converted into an <span
+    class="math inline"><em>n</em> + 1</span>-digit number <span
+    class="math inline"><em>c̃</em><em>ρ</em><sub>1</sub></span>, which is
+    then added to the integer part of the division.</p></div>
+    <p>In simple words, earlier we were adding and then dividing, now we
+    first divide and then add things!</p>
+    <p>We start with</p>
+    <p><span class="math display">\[ c \equiv (c_{2n-1} r^{2n-1} +
+    c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p\]</span> Dividing
+    <span class="math inline">\(c\)</span> with <span
+    class="math inline">\(r^{n-1}\)</span>, we get</p>
+    <p><span class="math display">\[
+    \begin{align}
+    cr^{-(n-1)} &amp;\equiv c_{2n-1}r^{n} + \ldots + c_{n-1} +
+    c_{n-2}r^{-1} \ldots + c_1r^{-(n-2)}+ c_0r^{-(n-1)} \mod p
+    \end{align}
+    \]</span></p>
+    <p>If we pre-computed <span class="math inline">\(\rho_i = r^{-i}
     \mod p\)</span> for all <span class="math inline">\(i \in
     [n-1]\)</span>, we can re-write the above equation as</p>
     <p><span class="math display">\[cr^{-n+1} \equiv \Big(c_{2n-1}r^{n}
     + \ldots +c_{n-1} \Big) + \Big(c_{n-2}\rho_1\Big) \ldots +
     \Big(c_1\rho_{n-2}\Big)+ \Big(c_0\rho_{n-1}\Big) \mod p\]</span></p>
     <p>Now each of these bracketed terms are <span
-    class="math inline">\(n+1\)</span> limbed numbers that can be
-    calculated <strong>independently</strong> and <strong>in
-    parallel</strong><a href="#fn1" class="footnote-ref" id="fnref1"
-    role="doc-noteref"><sup>1</sup></a>.</p>
-    <p>Note that the only thing we have done that is different from CIOS
-    so far is that by pre-computing <span class="math inline">\(\rho_1,
-    \dots, \rho_{n-1}\)</span> we have shaved off the number of
-    multiplications by an additive factor of <span
-    class="math inline">\(n\)</span>. Let <span
-    class="math inline">\(\tilde{R} = r^{-(n-1)}\)</span>, then by the
-    same argument above, <span class="math display">\[s = (c +
-    \tilde{m}p) &lt; 2Rp\]</span></p>
-    <p>For the <code>Bn254</code> curve, <span
-    class="math inline">\(n=4\)</span> and looking at the implementation
-    for <a
-    href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">world
-    coin</a> the above logic is clearly verified (the code uses <span
-    class="math inline">\(t\)</span> instead of <span
-    class="math inline">\(c\)</span>).</p>
-    <p><span class="math inline">\(s_{r1} = c_0 \rho_{3}\)</span></p>
-    <div class="sourceCode" id="cb5"><pre
-    class="sourceCode rust"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">mut</span> s_r1 <span class="op">=</span> [<span class="dv">0_u64</span><span class="op">;</span> <span class="dv">5</span>]<span class="op">;</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>(s_r1[<span class="dv">0</span>]<span class="op">,</span> s_r1[<span class="dv">1</span>]) <span class="op">=</span> carrying_mul_add(t[<span class="dv">0</span>]<span class="op">,</span> U64_I3[<span class="dv">0</span>]<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>(s_r1[<span class="dv">1</span>]<span class="op">,</span> s_r1[<span class="dv">2</span>]) <span class="op">=</span> carrying_mul_add(t[<span class="dv">0</span>]<span class="op">,</span> U64_I3[<span class="dv">1</span>]<span class="op">,</span> s_r1[<span class="dv">1</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>(s_r1[<span class="dv">2</span>]<span class="op">,</span> s_r1[<span class="dv">3</span>]) <span class="op">=</span> carrying_mul_add(t[<span class="dv">0</span>]<span class="op">,</span> U64_I3[<span class="dv">2</span>]<span class="op">,</span> s_r1[<span class="dv">2</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>(s_r1[<span class="dv">3</span>]<span class="op">,</span> s_r1[<span class="dv">4</span>]) <span class="op">=</span> carrying_mul_add(t[<span class="dv">0</span>]<span class="op">,</span> U64_I3[<span class="dv">3</span>]<span class="op">,</span> s_r1[<span class="dv">3</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span></code></pre></div>
-    <p><span class="math inline">\(s_{r_2} = c_1 \rho_2\)</span></p>
-    <div class="sourceCode" id="cb6"><pre
-    class="sourceCode rust"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">mut</span> s_r2 <span class="op">=</span> [<span class="dv">0_u64</span><span class="op">;</span> <span class="dv">5</span>]<span class="op">;</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>(s_r2[<span class="dv">0</span>]<span class="op">,</span> s_r2[<span class="dv">1</span>]) <span class="op">=</span> carrying_mul_add(t[<span class="dv">1</span>]<span class="op">,</span> U64_I2[<span class="dv">0</span>]<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>(s_r2[<span class="dv">1</span>]<span class="op">,</span> s_r2[<span class="dv">2</span>]) <span class="op">=</span> carrying_mul_add(t[<span class="dv">1</span>]<span class="op">,</span> U64_I2[<span class="dv">1</span>]<span class="op">,</span> s_r2[<span class="dv">1</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>(s_r2[<span class="dv">2</span>]<span class="op">,</span> s_r2[<span class="dv">3</span>]) <span class="op">=</span> carrying_mul_add(t[<span class="dv">1</span>]<span class="op">,</span> U64_I2[<span class="dv">2</span>]<span class="op">,</span> s_r2[<span class="dv">2</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>(s_r2[<span class="dv">3</span>]<span class="op">,</span> s_r2[<span class="dv">4</span>]) <span class="op">=</span> carrying_mul_add(t[<span class="dv">1</span>]<span class="op">,</span> U64_I2[<span class="dv">3</span>]<span class="op">,</span> s_r2[<span class="dv">3</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span></code></pre></div>
-    <p><span class="math inline">\(s_{r_3} = c_2 \rho_1\)</span></p>
-    <div class="sourceCode" id="cb7"><pre
-    class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> <span class="kw">mut</span> s_r3 <span class="op">=</span> [<span class="dv">0_u64</span><span class="op">;</span> <span class="dv">5</span>]<span class="op">;</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>(s_r3[<span class="dv">0</span>]<span class="op">,</span> s_r3[<span class="dv">1</span>]) <span class="op">=</span> carrying_mul_add(t[<span class="dv">2</span>]<span class="op">,</span> U64_I1[<span class="dv">0</span>]<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>(s_r3[<span class="dv">1</span>]<span class="op">,</span> s_r3[<span class="dv">2</span>]) <span class="op">=</span> carrying_mul_add(t[<span class="dv">2</span>]<span class="op">,</span> U64_I1[<span class="dv">1</span>]<span class="op">,</span> s_r3[<span class="dv">1</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>(s_r3[<span class="dv">2</span>]<span class="op">,</span> s_r3[<span class="dv">3</span>]) <span class="op">=</span> carrying_mul_add(t[<span class="dv">2</span>]<span class="op">,</span> U64_I1[<span class="dv">2</span>]<span class="op">,</span> s_r3[<span class="dv">2</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>(s_r3[<span class="dv">3</span>]<span class="op">,</span> s_r3[<span class="dv">4</span>]) <span class="op">=</span> carrying_mul_add(t[<span class="dv">2</span>]<span class="op">,</span> U64_I1[<span class="dv">3</span>]<span class="op">,</span> s_r3[<span class="dv">3</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span></code></pre></div>
-    <p>Finally we add all this to get <span class="math inline">\(s =
-    \Big(c_{7}r^{4} + \ldots +c_{3} \Big)+ s_{r3} + s_{r2} +
-    s_{r1}\)</span></p>
-    <div class="sourceCode" id="cb8"><pre
-    class="sourceCode rust"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> s <span class="op">=</span> addv(addv(<span class="pp">subarray!</span>(t<span class="op">,</span> <span class="dv">3</span><span class="op">,</span> <span class="dv">5</span>)<span class="op">,</span> s_r1)<span class="op">,</span> addv(s_r2<span class="op">,</span> s_r3))<span class="op">;</span></span></code></pre></div>
-    <p>Where the <code>subarray!</code> macro just starts at index 3 of
-    array <span class="math inline">\(t\)</span> and slices the next 5
-    higher indices.</p>
-    <p>Now get to <span class="math inline">\(cR^{-1} \equiv sr^{-1}
-    \mod p\)</span>, and <span class="math inline">\(sr^{-1} \equiv (s +
-    mp)/R \mod p\)</span></p>
-    <div class="sourceCode" id="cb9"><pre
-    class="sourceCode rust"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> m <span class="op">=</span> U64_MU0<span class="op">.</span>wrapping_mul(s[<span class="dv">0</span>])<span class="op">;</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> mp <span class="op">=</span> [<span class="dv">0_u64</span><span class="op">;</span> <span class="dv">5</span>]<span class="op">;</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    (mp[<span class="dv">0</span>]<span class="op">,</span> mp[<span class="dv">1</span>]) <span class="op">=</span> carrying_mul_add(m<span class="op">,</span> U64_P[<span class="dv">0</span>]<span class="op">,</span> mp[<span class="dv">0</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    (mp[<span class="dv">1</span>]<span class="op">,</span> mp[<span class="dv">2</span>]) <span class="op">=</span> carrying_mul_add(m<span class="op">,</span> U64_P[<span class="dv">1</span>]<span class="op">,</span> mp[<span class="dv">1</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    (mp[<span class="dv">2</span>]<span class="op">,</span> mp[<span class="dv">3</span>]) <span class="op">=</span> carrying_mul_add(m<span class="op">,</span> U64_P[<span class="dv">2</span>]<span class="op">,</span> mp[<span class="dv">2</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    (mp[<span class="dv">3</span>]<span class="op">,</span> mp[<span class="dv">4</span>]) <span class="op">=</span> carrying_mul_add(m<span class="op">,</span> U64_P[<span class="dv">3</span>]<span class="op">,</span> mp[<span class="dv">3</span>]<span class="op">,</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="pp">subarray!</span>(addv(s<span class="op">,</span> mp)<span class="op">,</span> <span class="dv">1</span><span class="op">,</span> <span class="dv">4</span>)</span></code></pre></div>
-    <p><span class="math inline">\(s + mp &lt; 2Rp + Rp &lt;
-    3Rp\)</span>. Therefore, <strong>two</strong> subtractions
-    suffice.</p>
+    class="math inline">\(n+1\)</span> limbed numbers that were the
+    fractional part of the division (referencing the quoted text) and
+    <span class="math inline">\(\Big(c_{2n-1}r^{n} + \ldots +c_{n-1}
+    \Big)\)</span> is the integer part of the division – remainder and
+    quotient to be more formal.</p>
+    <p>These can be calculated <strong>independently</strong> and
+    <strong>in parallel</strong><a href="#fn1" class="footnote-ref"
+    id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+    <div class="thm"><h3>Theorem</h3><p>Let <span
+    class="math inline"><em>s</em> = (<em>c</em><sub>2<em>n</em> − 1</sub><em>r</em><sup><em>n</em></sup> + … + <em>c</em><sub><em>n</em> − 1</sub>) + (<em>c</em><sub><em>n</em> − 2</sub><em>ρ</em><sub>1</sub>)… + (<em>c</em><sub>1</sub><em>ρ</em><sub><em>n</em> − 2</sub>) + (<em>c</em><sub>0</sub><em>ρ</em><sub><em>n</em> − 1</sub>)</span>.
+    We claim that <span
+    class="math inline"><em>s</em> &lt; <em>n</em> ⋅ (<em>r</em><em>p</em>)</span>.</p></div>
+    <div class="proof">
+    <p>Dividing <span class="math inline">\(c\)</span> by <span
+    class="math inline">\(r^{n-1}\)</span> we get</p>
+    <p><span class="math display">\[
+    \begin{align}
+    \frac{c}{r^{n-1}} &amp;= Q + R
+    \end{align}
+    \]</span> where <span class="math inline">\(R =
+    \Big(c_{n-2}\rho_1\Big) \ldots + \Big(c_1\rho_{n-2}\Big)+
+    \Big(c_0\rho_{n-1}\Big)\)</span> and <span class="math inline">\(Q =
+    \Big(c_{2n-1}r^{n} + \ldots +c_{n-1} \Big)\)</span></p>
+    <p>Now <span class="math inline">\(R &lt; (n-1)rp\)</span> as each
+    bracketted term is at most <span
+    class="math inline">\(rp\)</span>.</p>
+    <p>Also <span class="math inline">\(Q \le \lfloor
+    \frac{c}{r^{n-1}}\rfloor &lt; \frac{p^2}{r^{n-1}} &lt;
+    \frac{r^np}{r^{n-1}} = rp\)</span></p>
+    <p>Therefore, <span class="math inline">\(Q+R &lt; n\cdot
+    rp\)</span></p>
+    </div>
+    <p>Now, the final step of the reduction involves computing <span
+    class="math inline">\((s + mp)r^{-1}\)</span> where <span
+    class="math inline">\(m= s_0\mu_0\)</span> and <span
+    class="math inline">\(s_0\)</span> is the least significant word of
+    <span class="math inline">\(s\)</span>.</p>
+    <p>From this we can conclude that</p>
+    <p><span class="math display">\[ cR^{-1} \mod p \equiv (s+ mp)/r
+    &lt; (nrp + rp)/r &lt; (n+1)p\]</span> Therefore, <strong>it is
+    often not sufficient to subtract <span
+    class="math inline">\(p\)</span> from the answer just once</strong>.
+    For <span class="math inline">\(n=4\)</span>, this implies that the
+    answer will be less than <span
+    class="math inline">\(5p\)</span>.</p>
+    <p>So it appears that two <code>_substract_modulus</code> operations
+    were insufficient too, although we were never able to get this to
+    work via fuzzing!</p>
     </section>
     </section>
     <section id="footnotes" class="footnotes footnotes-end-of-document"
     role="doc-endnotes">
     <hr />
     <ol>
-    <li id="fn1"><p>In our current implementation – we do not leverage
-    this data parallelism in anyway. The <a
-    href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">world
-    coin</a> library has some <code>SIMD</code> code that tries to
-    exploit this. We did not import this.<a href="#fnref1"
-    class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+    <li id="fn1"><p>In the current implementation we do not leverage any
+    form of parallelism.<a href="#fnref1" class="footnote-back"
+    role="doc-backlink">↩︎</a></p></li>
     </ol>
     </section>
   </main>

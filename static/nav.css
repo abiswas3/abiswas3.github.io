@@ -1,12 +1,17 @@
 /* === Theme Colors === */
 :root {
-  --bg: #fefcf9;
-  --text: #1a1a1a;
-  --heading: #34558b;
-  --link: #34558b;
-  --link-hover: #004477;
-  --code-bg: #f5f2eb;
+/*  --bg: #fdf6e3;*/
+   --bg: #282828; 
+/*  --text: #333333;*/
+   --text: #ebdbb2; 
+/*  --heading: #34558b;*/
+  --heading: #fb4934;
+  --link: #83a598;
+  --link-hover: #004477 ;
   --border-color: #e0ddd6;
+  --base-font-family: 'Chalkboard SE', sans-serif;
+  /* --base-font-family: 'Libertinus Serif', serif; */
+  /* --base-font-family: system-ui, -apple-system, sans-serif; */
 }
 
 html, body {
@@ -14,8 +19,10 @@ html, body {
   padding: 0;
   background-color: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--base-font-family);
   overflow-x: hidden; /* prevent page-wide horizontal scroll */
+  font-size: 1rem;
+  font-weight: 200;
 }
 
 header li{
@@ -55,6 +62,7 @@ h1, h2, h3, h4, h5, h6 {
   margin-top: 1.5rem;
   margin-bottom: 1rem;
   line-height: 1.3;
+  font-family: 'Chalkboard SE', sans-serif;
 }
 
 
@@ -95,7 +103,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Nav links */
 .nav-list a {
-  color: #003466;
+  color: var(--link);
   text-decoration: none;
   padding: 1rem 0;
   display: block;
@@ -145,9 +153,8 @@ a {
   font-weight: 600;
   text-decoration: underline;
 }
-
 a:hover, a:focus {
-  background-color: pink;
+  color: var(--link-hover);
   
 }
 
