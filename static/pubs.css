@@ -1,5 +1,5 @@
 .pub-list {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;       /* Centers horizontally */
   padding: 0 1rem;
   display: flex;
@@ -11,7 +11,7 @@
   border-bottom: 1px solid #ddd;
   padding: 1rem 0;
   transition: background-color 0.3s ease;
-  max-width: 800px; /* or 900px if you prefer */
+  max-width: 900px; /* or 900px if you prefer */
 }
 
 .pub-title-text {
@@ -24,18 +24,21 @@
 .pub-header {
   display: flex;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.5rem;
   align-items: baseline;
+  gap: 1rem;
+  flex-wrap: nowrap; /* <- don't allow wrapping */
 }
 
 .pub-title {
   flex: 1 1 auto;
+  min-width: 0; /* necessary for text overflow control */
   font-weight: 600;
   font-size: 1.25rem;
-  margin: 0; /* important to reduce default h3 spacing */
+  margin: 0;
   color: #83a598;
+  overflow-wrap: break-word;
 }
+
 
 .venue {
   flex: 0 0 auto;
@@ -75,7 +78,7 @@
 }
 
 .authors  {
-  color: #0077B6; /* Kon-peki Blue */
+  color: #78A05A; /* Kon-peki Blue */
   font-weight: 600;
   text-decoration: none;
   transition: color 0.3s ease;
