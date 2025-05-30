@@ -16,11 +16,14 @@
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
   <script src="/static/es5/tex-svg.js"></script>
 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
+
 
   <title>Montgomery Multiplication: Theory Vs Practice</title>      
   </head>
 
-  <body class="light-mode">  
+  <body class="dark-mode">  
   <header>          
   <nav class="nav">
     <input type="checkbox" id="nav-toggle" class="nav-toggle" />
@@ -32,7 +35,12 @@
       <li><a href="/publish/">Notes</a></li>
       <li><a href="/publications.html">Publications</a></li>
       <li><a href="/misc.html">Misc</a></li>
+      <li>  <label>
+    <input type="checkbox" id="mode-toggle" />
+    Dark Mode
+  </label></li>
     </ul>
+      
   </nav>
 
     <div class="toc" id="toc">      
@@ -331,7 +339,8 @@ Swap:             0B          0B          0B</code></pre>
      326 static/code/yuval
 
 wc -l static/code/opt                                                                       ─╯
-     280 static/code/opt</code></pre>
+     280 static/code/opt
+</code></pre>
     <p>Shown below is the op code distribution for the optimised CIOS
     algorithm. For <code>g-mult</code>, as expected we see <span
     class="math inline">\(2n^2 + n = 36\)</span> multiplication
@@ -349,7 +358,8 @@ wc -l static/code/opt                                                           
     <p>Further more, there are 36 64-bit read/write operations to
     memory.</p>
     <pre><code>root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks# cat opt|grep -o &#39;[a-z0-9]\+ ptr&#39; | sort|uniq -c
-     36 qword ptr</code></pre>
+     36 qword ptr
+</code></pre>
     <p>For the new algorithm we expect to see fewer multiplications i.e
     <span class="math inline">\(2n^2 + 1 = 33\)</span> multiplication
     opearations, and that’s exactly what we see. <strong>This is what we
@@ -493,6 +503,7 @@ Loading [vdso] 793baee93000
 0x793baeeb6641 mov rbp, rsp
 
 ...
+
 </code></pre>
     <p>The key thing to note is that at virtual address
     <code>0x5e4052170000v</code>of the process executing our program, is
@@ -569,13 +580,14 @@ Loading [vdso] 793baee93000
   </main>
 
 
-  </body>
-
-<!-- JavaScript for Theme Toggle -->
-<script>
-</script>  
 
 
+<!-- Prism Core JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<!-- Add other languages as needed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
 
 <script>
 // var coll = document.getElementsByClassName("collapsible");
@@ -740,6 +752,7 @@ function showDivs(indices) {
 
 </script>
 
+<script src="/static/toggle_bg.js" defer></script>
 
-
+</body>
 </html>

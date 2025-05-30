@@ -13,17 +13,17 @@
   <link rel="stylesheet" href="../static/nav.css">  
   <link rel="stylesheet" href="../static/tags.css">       
 
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
-  <!-- Prism CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.css" rel="stylesheet" />
+  <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
+  <script src="/static/es5/tex-svg.js"></script>
 
-  <!-- Prism JS -->
-  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
+
 
   <title>Resolution Crash Course</title>      
   </head>
 
-  <body class="light-mode">  
+  <body class="dark-mode">  
   <header>          
   <nav class="nav">
     <input type="checkbox" id="nav-toggle" class="nav-toggle" />
@@ -35,7 +35,12 @@
       <li><a href="/publish/">Notes</a></li>
       <li><a href="/publications.html">Publications</a></li>
       <li><a href="/misc.html">Misc</a></li>
+      <li>  <label>
+    <input type="checkbox" id="mode-toggle" />
+    Dark Mode
+  </label></li>
     </ul>
+      
   </nav>
 
     <div class="toc" id="toc">      
@@ -70,11 +75,16 @@
   <br>
   </header>
 
-
-
   <main class="content">
     <h1>Resolution Crash Course</h1>
-    
+    <div class="authors">
+  Ari
+</div>
+
+            <ul class="tag-list">
+                  <li class="tag-item"><a href="/publish/proof-complexity.html" class="tag-link">proof-complexity</a></li>
+                  <li class="tag-item"><a href="/publish/combinatorics.html" class="tag-link">combinatorics</a></li>
+                </ul>
     
     <section id="this-is-the-main-post" class="level1">
     <h1>This is the main post</h1>
@@ -202,11 +212,9 @@
     pigeon must be an onto/surjective function, i.e every hole must get
     a pigeon.</li>
     </ol>
-    <blockquote>
-    Satisfying all 4 axioms, implies that there exists a <strong>perfect
+    <div class="remark"><h3></h3><p>Satisfying all 4 axioms, implies that there exists a <strong>perfect
     matching</strong> in the graph <span
-    class="math inline">\(G\)</span>.
-    </blockquote>
+    class="math inline"><em>G</em></span>.</p></div>
     <p>If we need the function to be an onto function, then we refer to
     the formula as the <strong>onto functional PHP</strong>.</p>
     <p>The final unsatisfiable formula</p>
@@ -461,13 +469,14 @@
   </main>
 
 
-  </body>
-
-<!-- JavaScript for Theme Toggle -->
-<script>
-</script>  
 
 
+<!-- Prism Core JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<!-- Add other languages as needed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
 
 <script>
 // var coll = document.getElementsByClassName("collapsible");
@@ -632,6 +641,7 @@ function showDivs(indices) {
 
 </script>
 
+<script src="/static/toggle_bg.js" defer></script>
 
-
+</body>
 </html>

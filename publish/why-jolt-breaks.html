@@ -16,11 +16,14 @@
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
   <script src="/static/es5/tex-svg.js"></script>
 
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
+
 
   <title>Notes From The Montgomery Underground</title>      
   </head>
 
-  <body class="light-mode">  
+  <body class="dark-mode">  
   <header>          
   <nav class="nav">
     <input type="checkbox" id="nav-toggle" class="nav-toggle" />
@@ -32,7 +35,12 @@
       <li><a href="/publish/">Notes</a></li>
       <li><a href="/publications.html">Publications</a></li>
       <li><a href="/misc.html">Misc</a></li>
+      <li>  <label>
+    <input type="checkbox" id="mode-toggle" />
+    Dark Mode
+  </label></li>
     </ul>
+      
   </nav>
 
     <div class="toc" id="toc">      
@@ -95,19 +103,22 @@
     overhead for 128 bit read/writes kills the speedups from having
     fewer multiplications. These large chunk reads/writes were likely
     due to intermediate <span class="math inline">\(n+1\)</span> limbed
-    values are stored in contiguous regions of memory (but it doesn’t
-    have to). As a resolution, we found an <a
+    values are stored in contiguous regions of memory. This is not
+    required by the algorithm in any way, it’s just an implementation
+    detail.</p>
+    <p>As a resolution, we found an <a
     href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/main/src/mul_logjumps_unr_2.rs">alternate</a>
     implementation tested by Yuval himself. In this implementation all
     intermediate values are storied in rust variables as opposed to
     constant sized vecs/arrays. This probably allows the compiler to
-    optimise the assembly to use more registers (instead of
-    read/writes), and this implementation is empirically faster than the
-    current Arkworks CIOS implementation – the exact amount varies
-    across, but it seems to be consistently faster across trials. We
-    leave it as an exercise for the reader to stare the disassembled
-    version of the two functions and figure out the differences. Cargo
-    asm makes it very easy to look at static assembly.</p>
+    optimise the assembly to use more registers (instead of large
+    read/writes to memory), and this implementation is empirically
+    faster than the current Arkworks CIOS implementation – the exact
+    amount varies across, but it seems to be consistently faster across
+    trials. We leave it as an exercise for the reader to stare at the
+    disassembled version of the two functions and figure out the
+    differences. Cargo asm makes it very easy to look at static
+    assembly.</p>
     <section id="putting-this-faster-code-in-arkworks" class="level3">
     <h3>Putting this faster code in Arkworks</h3>
     <p>We stripped out the <code>mul_logjumps_unr_2.rs</code> function
@@ -116,21 +127,20 @@
     <code>ff-macros</code> crate. This allows the Jolt use to flip a
     flag <code>yd_opt=true</code> to run the new multiplication when
     initialising the finite field structs</p>
-    <div class="sourceCode" id="cb1"><pre
-    class="sourceCode rust"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">use</span> <span class="pp">ark_ff::fields::</span><span class="op">{</span>Fp256<span class="op">,</span> MontBackend<span class="op">,</span> MontConfig<span class="op">};</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>derive<span class="at">(</span>MontConfig<span class="at">)]</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>modulus <span class="op">=</span> <span class="st">&quot;21888242871839275222246405745257275088548364400416034343698204186575808495617&quot;</span><span class="at">]</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>generator <span class="op">=</span> <span class="st">&quot;5&quot;</span><span class="at">]</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>small_subgroup_base <span class="op">=</span> <span class="st">&quot;3&quot;</span><span class="at">]</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>small_subgroup_power <span class="op">=</span> <span class="st">&quot;2&quot;</span><span class="at">]</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="at">#[</span>yd_opt <span class="op">=</span> <span class="st">&quot;true&quot;</span><span class="at">]</span> <span class="op">&lt;-----</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">struct</span> FrConfig<span class="op">;</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">pub</span> <span class="kw">type</span> Fr <span class="op">=</span> Fp256<span class="op">&lt;</span>MontBackend<span class="op">&lt;</span>FrConfig<span class="op">,</span> <span class="dv">4</span><span class="op">&gt;&gt;;</span></span></code></pre></div>
+    <pre class="language-rust"><code>use ark_ff::fields::{Fp256, MontBackend, MontConfig};
+
+#[derive(MontConfig)]
+#[modulus = &quot;21888242871839275222246405745257275088548364400416034343698204186575808495617&quot;]
+#[generator = &quot;5&quot;]
+#[small_subgroup_base = &quot;3&quot;]
+#[small_subgroup_power = &quot;2&quot;]
+#[yd_opt = &quot;true&quot;] &lt;-----
+pub struct FrConfig;
+pub type Fr = Fp256&lt;MontBackend&lt;FrConfig, 4&gt;&gt;;</code></pre>
     <p>Then we ran Jolt. On running
     <code>cargo test -p jolt-core -- sha3_e2e_hyperkzg</code> we get the
     following panic.</p>
-    <pre><code>thread &#39;&lt;unnamed&gt;&#39; panicked at /Users/aribiswas3/Work-With-A16z/arkworks-algebra/ff/src/fields/models/fp/montgomery_backend.rs:1360:9:
+    <pre class="language-bash"><code>thread &#39;&lt;unnamed&gt;&#39; panicked at /Users/aribiswas3/Work-With-A16z/arkworks-algebra/ff/src/fields/models/fp/montgomery_backend.rs:1360:9:
 High limb expected to be 0 if S &gt;= 1 before 2p comparison
 
 
@@ -191,7 +201,13 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     class="math inline"><em>a</em></span> (the Montgomery product) only if
     the most significant bit of <span class="math inline"><em>a</em></span>
     is 1. Plugging in the this reduction instead of 2 conditional subtracts
-    – Jolt tests <strong>fail</strong> again.</p></div>
+    – Jolt tests <strong>fail</strong> again.</p>
+    <p>When we change the code to the following – <strong>all tests
+    pass</strong></p>
+    <pre class="language-rust"><code>
+    //let msb = (a[3] &gt;&gt; 63) &amp; 1;
+    let msb = (greater_than(&amp;a, &amp;U64_P) as u8) + (greater_than(&amp;a, &amp;U64_2P) as u8);
+    </code></pre></div>
     <p>What is going on? Why do we need two subtractions? How do we know
     we don’t need 3 or 4 or 5?</p>
     <p>100,000 trials is minuscule when compared to the input space of
@@ -401,9 +417,10 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     class="math inline">\(\rho_i \equiv r^{-i} \mod p\)</span> for all
     <span class="math inline">\(i \in [n-1]\)</span>, we can re-write
     the above equation as</p>
-    <p><span class="math display">\[cr^{-n+1} \equiv \Big(c_{2n-1}r^{n}
-    + \ldots +c_{n-1} \Big) + \Big(c_{n-2}\rho_1\Big) \ldots +
-    \Big(c_1\rho_{n-2}\Big)+ \Big(c_0\rho_{n-1}\Big) \mod p\]</span></p>
+    <p><span class="math display">\[cr^{-(n-1)} \equiv
+    \Big(c_{2n-1}r^{n} + \ldots +c_{n-1} \Big) + \Big(c_{n-2}\rho_1\Big)
+    \ldots + \Big(c_1\rho_{n-2}\Big)+ \Big(c_0\rho_{n-1}\Big) \mod
+    p\]</span></p>
     <p>Barring the left most bracketed term, the remaining bracketed
     terms are <span class="math inline">\(n+1\)</span> limbed numbers
     referred to as the fractional part of the division in the quoted
@@ -485,13 +502,15 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     class="math inline">\(p\)</span> it might be the case that all the
     <span class="math inline">\(\rho_i\)</span>’s are very very small
     like at most 3. Now instead of <span
-    class="math inline">\(3p\)</span> extra bit <span
-    class="math inline">\(R\)</span> contributes, it’ll $ 3 + 3 +3 = 9$
-    (as the <span class="math inline">\(r\)</span>’s cancel out)</p>
+    class="math inline">\(3p\)</span> which <span
+    class="math inline">\(R\)</span> contributes to the final sum ,
+    <span class="math inline">\(R\)</span> will contribute <span
+    class="math inline">\(3 + 3 +3 = 9\)</span> (in our made up
+    example).</p>
     <p>As always we are dealing with the <code>bn-254</code> curve for
     which we know <span class="math inline">\(p\)</span> and <span
     class="math inline">\(\rho_1, \rho_2, \rho_3\)</span>.</p>
-    <pre class="python3"><code>p = [
+    <pre class="language-python"><code>p = [
     0x43e1f593f0000001,
     0x2833e84879b97091,
     0xb85045b68181585d,
@@ -550,7 +569,7 @@ rho3 = [
     <p><strong>Worst case check</strong>: How do we find such an <span
     class="math inline">\(a\)</span> and <span
     class="math inline">\(b\)</span> ?</p>
-    <pre class="python3"><code># all digits of product a*b as big as possible
+    <pre class="language-python"><code># all digits of product a*b as big as possible
 # c[7] = carry + carry = r-1
 # c[6] = a3*b3 + carry = r-1 mod r
 # c[5] = a3*b2+b3*a2 + carry = r-1 mod r
@@ -589,13 +608,14 @@ rho3 = [
   </main>
 
 
-  </body>
-
-<!-- JavaScript for Theme Toggle -->
-<script>
-</script>  
 
 
+<!-- Prism Core JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<!-- Add other languages as needed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
 
 <script>
 // var coll = document.getElementsByClassName("collapsible");
@@ -760,6 +780,7 @@ function showDivs(indices) {
 
 </script>
 
+<script src="/static/toggle_bg.js" defer></script>
 
-
+</body>
 </html>

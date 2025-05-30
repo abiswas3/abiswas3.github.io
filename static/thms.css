@@ -1,28 +1,63 @@
-:root {
-  /* Light mode colors */
-  --alert-border: #facc15;;
+body.dark-mode {
+  --alert-border: #facc15;
   --alert-bg: #2d1f00;
   --alert-text: #fde68a;
   --alert-shadow: rgba(240, 196, 25, 0.3);
   --alert-icon-stroke: #f0c419;
 
   --quote-text: #83a598;
-  --quote-border: #cccccc;
+  --quote-border: #928374;
   --quote-mark: #83a598;
-  --quote-author: #83a598;
-  --quote-backgound: #319795;
+  --quote-author: #d79921;
+  --quote-backgound: #3c3836;
 
-    /* Remark colors */
   --remark-border: #fe8019; 
   --remark-bg: #3c3836;
-  --remark-text: #83a598;
+  --remark-text: #ebdbb2;
 
-  --def-background:  #32382f;
-  --def-headercolor:  #4d000d;
-  --def-border:  #b8bb26;
-  --thm-border: #fe8019;
-  --thm-background: #3a2a1f;
+  --def-background:  #282828;         /* Gruvbox background */
+  --def-headercolor: #d79921;         /* yellow-ish for visibility */
+  --def-border:      #fabd2f;
+  --thm-border:      #d65d0e;
+  --thm-background:  #3a2a1f;
+
+   --proof-bg: #3c3836;
+  --proof-text: #ebdbb2; /* Gruvbox beige (already body text color) */
 }
+
+body.light-mode {
+  /* Alert colors */
+  --alert-border: #cc241d;
+  --alert-bg: #fdf4c1;
+  --alert-text: #9d0006;
+  --alert-shadow: rgba(204, 36, 29, 0.25);
+  --alert-icon-stroke: #cc241d;
+
+  /* Quote colors */
+  --quote-text: #3c3836;
+  --quote-border: #d5c4a1;
+  --quote-mark: #7c6f64;
+  --quote-author: #504945;
+  --quote-backgound: #fbf1c7;
+
+  /* Remark colors (adjusted for more contrast from thm) */
+  --remark-border: #b16286;          /* Gruvbox purple */
+  --remark-bg: #f2e5f7;              /* Pale lilac-pink */
+  --remark-text: #3c3836;
+
+  /* Definition box */
+  --def-background: #f5e9b8;
+  --def-headercolor: #b57614;
+  --def-border: #98971a;
+
+  /* Theorem box */
+  --thm-border: #d65d0e;             /* Gruvbox orange */
+  --thm-background: #fdebc2;
+
+    --proof-bg: #f5e9b8;   /* Light muted beige */
+  --proof-text: #3c3836; /* Gruvbox dark gray */
+}
+
 
 .def, .thm {
     border-left: 5px solid var(--def-border);
@@ -156,8 +191,8 @@
 
 
 .proof-sketch, .proof, .collapsible-content, .collapsible-proof {
-  background-color: #2a2e24;  /* subtle dark olive green background */
-  color: #a89984;             /* muted beige text */
+  background-color: var(--proof-bg);  /* subtle dark olive green background */
+  color: var(--proof-text);             /* muted beige text */
   padding: 16px 20px;
   margin: 20px 0;
   border-left: 3px solid #504945; /* subtle border */
@@ -172,7 +207,7 @@
   content: "Proof.\A";       /* newline after Proof. */
   white-space: pre;          /* allow \A to render as newline */
   font-weight: bold;
-  color: #ebdbb2;
+  color: var(--heading);
   font-style: normal;
 }
 

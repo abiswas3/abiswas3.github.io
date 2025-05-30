@@ -1,3 +1,19 @@
+body.light-mode{
+  --abstract-colour: gray;
+  --author-text: #34558b;
+  --primary-author-text: #34558b;
+  --primary-author-bg: #fabd2f;
+
+
+}
+
+body.dark-mode{
+  --abstract-colour: lightgray;
+  --author-text: #fabd2f;
+  --primary-author-text: #fabd2f;
+  --primary-author-bg: teal;
+}
+
 .pub-list {
   max-width: 900px;
   margin: 0 auto;       /* Centers horizontally */
@@ -64,12 +80,10 @@
   margin-bottom: 0.3rem;
 }
 
-
-
 /* Authors styling */
 .primary{
-  background-color: #504945;  /* Warm pastel peach */
-  color: #fabd2f;             /* Darker brown for contrast */
+  background-color: var(--primary-author-bg);  /* Warm pastel peach */
+  color: var(--primary-author-text);
   padding: 2px 6px;
   border-radius: 3px;
   font-weight: 700;
@@ -78,11 +92,15 @@
 }
 
 .authors  {
-  color: #78A05A; /* Kon-peki Blue */
+  color: var(--author-text); /* Kon-peki Blue */
   font-weight: 600;
   text-decoration: none;
   transition: color 0.3s ease;
   font-size: 0.80rem;
+}
+
+.authors a{
+  color: var(--author-text);
 }
 
 .authors a:hover {
@@ -200,7 +218,7 @@
   margin-top: 0;
   padding-left: 0.5rem;
   line-height: 1.4;
-  color: lightgray;
+  color: var(--abstract-colour);
   font-size: 0.9rem;
 }
 

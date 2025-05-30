@@ -1,31 +1,40 @@
-@font-face {
+/*@font-face {
   font-family: 'Virgil';
   src: url('/static/Virgil-Regular.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
 }
 @import url('https://fonts.googleapis.com/css2?family=Gloria+Hallelujah&display=swap');
+*/
+
 
 /* === Theme Colors === */
-:root {
-/*  --bg: #fdf6e3;*/
-   --bg: #282828; 
-/*  --text: #333333;*/
-   --text: #ebdbb2; 
-/*  --heading: #34558b;*/
-/*  --heading: #fb4934;*/
-  --heading: #fe8019;
-  --link: #83a598;
-  --link-hover: salmon;
-  --border-color: #e0ddd6;
-  --base-font-size: 1.05rem;
+body.light-mode {  
+/*  --base-font-family: system-ui, -apple-system, sans-serif; */
+/*  --base-font-wt: normal;*/
   --base-font-family: 'Chalkboard SE', sans-serif;
   --base-font-wt: 200;
-/*   --base-font-family: system-ui, -apple-system, sans-serif; 
-   --base-font-wt: normal;*/
+  --heading: #34558b;  
+  --text: #333333;
+  --bg: #fdf6e3;
+  --link: teal; 
+  --border-color: black;
+  --base-font-size: 1.08rem;
 }
 
 
+body.dark-mode{
+--bg: #282828; 
+   --text: #ebdbb2; 
+  --heading: #fabd2f;
+  --link: #83a598;
+  --link-hover: salmon;
+  --border-color: #e0ddd6;
+  --base-font-size: 1.08rem;
+  --base-font-family: 'Chalkboard SE', sans-serif;
+  --base-font-wt: 200;
+
+}
 
 
 html, body {

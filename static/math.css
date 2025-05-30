@@ -1,3 +1,16 @@
+body.light-mode {
+--single-line-code-colour: #586e75;
+--single-line-code-bg: #eee8d5;
+--math-colour: purple;
+}
+
+
+body.dark-mode{
+--single-line-code-colour: #83a598;
+--single-line-code-bg: #504945;
+--math-colour: #e0a5c0;
+}
+
 /* math.css */
 /* MathJax specific styling for better readability in math blog */
 
@@ -43,30 +56,15 @@ mjx-container[jax="SVG"] {
 p code, li code, td code {
   padding: 0.2em 0.4em;
   font-size: 0.92em;
-  background-color: #504945;
-  color: #fabd2f;
+  background-color: var(--single-line-code-bg);
+  color: var(--single-line-code-colour);
   border-radius: 4px;
-}
-
-
-pre, code {
-  font-family: "Fira Code", Consolas, Monaco, "Courier New", monospace;
-  background-color: black;  /* Zenburn dark background */
-  color: #DCDCCC;             /* Zenburn text color */
-  padding: 1em 1.2em;         /* Add padding around text */
-  border-radius: 6px;
-  overflow-x: auto;
-  white-space: pre-wrap;      /* Wrap lines if too long, or use 'pre' for no wrap */
-  tab-size: 4;                /* Set tab width */
   font-size: 0.8rem;
 }
 
-pre {
-  margin: 1.5em 0;
-}
 
 .math{
-  color: #e0a5c0;
+  color: var(--math-colour);
 }
 
 
@@ -77,3 +75,36 @@ a .math, h2  .math{
 .remark .math{
   text-decoration: none;
 }
+
+/* Style horizontal scrollbar for <pre> blocks */
+pre::-webkit-scrollbar {
+  height: 8px;
+}
+
+pre::-webkit-scrollbar-track {
+  background: #2e2e2e; /* match dark background */
+  border-radius: 4px;
+}
+
+pre::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+pre::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+/* Firefox support */
+pre {
+  scrollbar-color: #888 #2e2e2e;
+  scrollbar-width: thin;
+  font-size: 0.3rem;
+}
+
+pre[class*="language-"] code {
+  font-size: 0.8rem !important;
+/*  font-family: system-ui, -apple-system, sans-serif;*/
+
+}
+
