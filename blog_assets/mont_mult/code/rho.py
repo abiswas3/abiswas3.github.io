@@ -35,7 +35,6 @@ print(bigint(rho1)*(2**(1*64)) % bigint(p))
 print(bigint(rho2)*(2**(2*64)) % bigint(p))
 print(bigint(rho3)*(2**(3*64)) % bigint(p))
 print((bigint(rho1)+bigint(rho2)) / bigint(p))
-sys.exit(0)
 def digits(x,N=4):
     s = ("0"*(64*N)+bin(x)[2:])[-64*N:]
     # print(len(s),s)
@@ -46,10 +45,11 @@ print("p",[hex(x) for x in digits(bigint(p))])
 
 maxQ = (bigint(p)-1)**2/(r**(n-1))
 #maxQ = r*bigint(p)
-maxR = (bigint(rho1)+bigint(rho2)+bigint(rho3))*(r-1)
+maxR = (bigint(rho1)+bigint(rho2))*(r-1)
 maxS = maxQ+maxR
+print('MAX ANSWER')
 print(((maxS+(r-1)*bigint(p))/r)/bigint(p))
-
+sys.exit(0)
 print("---")
 a = [2**64-1 for i in range(4)]
 b = [2**63+1 for i in range(4)]

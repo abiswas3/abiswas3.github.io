@@ -80,12 +80,7 @@
           id="toc-a-hybrid-algorithm">A hybrid algorithm</a></li>
           </ul></li>
           <li><a href="#missing-factor-of-1"
-          id="toc-missing-factor-of-1">Missing Factor Of 1</a>
-          <ul>
-          <li><a href="#how-did-we-get-to-that-number"
-          id="toc-how-did-we-get-to-that-number">How Did We Get To That
-          Number?</a></li>
-          </ul></li>
+          id="toc-missing-factor-of-1">Missing Factor Of 1</a></li>
           </ul>
       </div>
   
@@ -581,32 +576,38 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     <li><code>h-mul</code> needs at most 3 subtractions.</li>
     <li><code>c-mul</code> needs at most 1 subtraction.</li>
     </ul>
-    <p>But why does two subtract work out for <code>h-mul</code>?
-    Shouldn’t it be 3? The above bounds come from the following
+    <p>But why does <strong><em>two</em></strong> subtract work out for
+    <code>h-mul</code>? Shouldn’t it be <strong>three</strong>? The
+    above bounds for <code>h-mul</code> come from the following
     analysis:</p>
     <p><span class="math display">\[
     \begin{align}
-    cr^{-2} &amp;\equiv Q  + \rho_2(c_1r + c_0) \\[10pt]
+    cr^{-2} &amp;\equiv \frac{Q}{r^2}  + \rho_2(c_1r + c_0) \\[10pt]
     &amp;&lt; Q + \rho_2(r^2) \\[10pt]
-    cr^{-3} &amp;&lt; Q&#39; + \rho_1r + \rho_2r
+    cr^{-3} &amp;&lt; \frac{Q}{r^3} + \rho_1r + \rho_2r
     \end{align}
     \]</span></p>
     <p>Finally, the last CIOS gives us</p>
-    <p><span class="math display">\[cr^{-4} &lt; \Big(Q&#39; + r(\rho_1
-    + \rho_2) + mp \Big)/r &lt; 4p\]</span></p>
-    <p>The 4 is the 1 improvement from 5 we promised. However, <span
+    <p><span class="math display">\[cr^{-4} &lt; \Big(\frac{Q}{r^3} +
+    r(\rho_1 + \rho_2) + mp \Big)/r &lt; 4p\]</span></p>
+    <p>The 4 is the 1 improvement from the 5 we proved for
+    <code>s-mul</code></p>
+    <p>The reason we get away with at most <strong>three</strong>
+    subtractions and <strong>two</strong> subtractions in practice has
+    to do with the specific value of <span
+    class="math inline">\(p\)</span> for the <code>bn-254</code> scalar
+    field. The real bound comes from However, <span
     class="math inline">\(\rho_1\)</span> and <span
-    class="math inline">\(\rho_2\)</span> are fixed. For the
-    <code>bn-254</code> scalar field prime, the limits of what <span
-    class="math inline">\(p\)</span> and <span
-    class="math inline">\(Q&#39;\)</span> can be mean that max value of
-    <code>s-mul</code> can at most <span
-    class="math inline">\(3.25pr\)</span>.</p>
+    class="math inline">\(\rho_2\)</span> are fixed. The largest value
+    for <span class="math inline">\(Q\)</span> is <span
+    class="math inline">\((p-1)^2\)</span></p>
+    <p><span class="math display">\[cr^{-4} &lt; \frac{p^2}{r^4} +
+    (\rho_1 + \rho_2) + p \]</span></p>
+    <p>This sum turns out to be at most <span
+    class="math inline">\(2.25p\)</span> for <code>h-mul</code> and
+    <span class="math inline">\(3.3p\)</span> for <code>s-mul</code></p>
     <div class="remark"><h3></h3><p>This is why we can always do one subtraction less for
     <code>h-mul</code> and <code>s-mul</code> :-)</p></div>
-    <section id="how-did-we-get-to-that-number" class="level3">
-    <h3>How Did We Get To That Number?</h3>
-    </section>
     </section>
     <section id="footnotes" class="footnotes footnotes-end-of-document"
     role="doc-endnotes">
