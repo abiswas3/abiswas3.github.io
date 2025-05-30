@@ -34,10 +34,7 @@ def bigint(x):
 print(bigint(rho1)*(2**(1*64)) % bigint(p))
 print(bigint(rho2)*(2**(2*64)) % bigint(p))
 print(bigint(rho3)*(2**(3*64)) % bigint(p))
-
-# print((bigint(rho1)+bigint(rho2)+bigint(rho3)) / bigint(p))
-print(bigint(rho2) / bigint(p))
-print(bigint(rho1) / bigint(p))
+print((bigint(rho1)+bigint(rho2)) / bigint(p))
 sys.exit(0)
 def digits(x,N=4):
     s = ("0"*(64*N)+bin(x)[2:])[-64*N:]

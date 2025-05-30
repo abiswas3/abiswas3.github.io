@@ -48,9 +48,9 @@
           <ul>
           <li><a href="#background" id="toc-background">Background</a>
           <ul>
-          <li><a href="#putting-this-faster-code-in-arkworks"
-          id="toc-putting-this-faster-code-in-arkworks">Putting this
-          faster code in Arkworks</a></li>
+          <li><a href="#putting-this-faster-code-into-jolt"
+          id="toc-putting-this-faster-code-into-jolt">Putting this
+          faster code into Jolt</a></li>
           <li><a href="#why-does-this-happen"
           id="toc-why-does-this-happen">Why does this happen?</a></li>
           </ul></li>
@@ -73,8 +73,19 @@
           <li><a href="#yuvals-new-multiplication-algorithm"
           id="toc-yuvals-new-multiplication-algorithm">Yuval’s New
           Multiplication Algorithm</a></li>
-          <li><a href="#is-n1p-tight" id="toc-is-n1p-tight">Is <span
-          class="math inline">\((n+1)p\)</span> tight?</a></li>
+          <li><a href="#why-does-h-mult-pass"
+          id="toc-why-does-h-mult-pass">Why Does h-mult Pass?</a>
+          <ul>
+          <li><a href="#a-hybrid-algorithm"
+          id="toc-a-hybrid-algorithm">A hybrid algorithm</a></li>
+          </ul></li>
+          <li><a href="#missing-factor-of-1"
+          id="toc-missing-factor-of-1">Missing Factor Of 1</a>
+          <ul>
+          <li><a href="#how-did-we-get-to-that-number"
+          id="toc-how-did-we-get-to-that-number">How Did We Get To That
+          Number?</a></li>
+          </ul></li>
           </ul>
       </div>
   
@@ -97,49 +108,56 @@
     <section id="background" class="level2">
     <h2>Background</h2>
     <p>In an earlier <a href="mont_mult.html">post</a>, we analysed why
-    a certain implementation of the improved Montgomery multiplication
-    algorithm by Yuval Domb was not empirically faster out of the box.
-    Our main finding after disassembling the code was that memory access
-    overhead for 128 bit read/writes kills the speedups from having
-    fewer multiplications. These large chunk reads/writes were likely
-    due to intermediate <span class="math inline">\(n+1\)</span> limbed
-    values are stored in contiguous regions of memory. This is not
-    required by the algorithm in any way, it’s just an implementation
+    <a href="">this</a> implementation of the improved <a
+    href="">Montgomery multiplication</a> algorithm by <a href="">Yuval
+    Domb</a> was not empirically faster out of the box. After
+    disassembling the code using the Intel Pin tool, we identified large
+    memory reads/writes as the main source of slower run times. The
+    analysis was specific to x86 architectures, but the empirical
+    findings were consistent on Mac-M2 Air and Intel x86 Digital Ocean
+    servers. This loss of performance, however, is an artefact of the
+    implementation, not the algorithm itself. The new algorithm uses
+    fewer multiplication operations than the <a href="">CIOS
+    algorithm</a>, and therefore, there should be a faster
+    implementation (at least in theory).</p>
+    <p>The large chunk reads and writes were likely due to the
+    high-level Rust code storing intermediate <span
+    class="math inline">\(n+1\)</span> limbed values in contiguous
+    regions of memory. This led to the compiler asking this of the
+    generated assembly code as well. Contiguous memory storage is not
+    required by the algorithm specification, it’s just an implementation
     detail.</p>
     <p>As a resolution, we found an <a
     href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/main/src/mul_logjumps_unr_2.rs">alternate</a>
-    implementation tested by Yuval himself. In this implementation all
-    intermediate values are storied in rust variables as opposed to
-    constant sized vecs/arrays. This probably allows the compiler to
-    optimise the assembly to use more registers (instead of large
-    read/writes to memory), and this implementation is empirically
-    faster than the current Arkworks CIOS implementation – the exact
-    amount varies across, but it seems to be consistently faster across
-    trials. We leave it as an exercise for the reader to stare at the
-    disassembled version of the two functions and figure out the
-    differences. Cargo asm makes it very easy to look at static
-    assembly.</p>
-    <section id="putting-this-faster-code-in-arkworks" class="level3">
-    <h3>Putting this faster code in Arkworks</h3>
-    <p>We stripped out the <code>mul_logjumps_unr_2.rs</code> function
-    along with constants and helpers from
-    <code>mul_logjumps_unr_2.rs</code> and put it into Arkworks via the
-    <code>ff-macros</code> crate. This allows the Jolt use to flip a
-    flag <code>yd_opt=true</code> to run the new multiplication when
-    initialising the finite field structs</p>
-    <pre class="language-rust"><code>use ark_ff::fields::{Fp256, MontBackend, MontConfig};
-
-#[derive(MontConfig)]
-#[modulus = &quot;21888242871839275222246405745257275088548364400416034343698204186575808495617&quot;]
-#[generator = &quot;5&quot;]
-#[small_subgroup_base = &quot;3&quot;]
-#[small_subgroup_power = &quot;2&quot;]
-#[yd_opt = &quot;true&quot;] &lt;-----
-pub struct FrConfig;
-pub type Fr = Fp256&lt;MontBackend&lt;FrConfig, 4&gt;&gt;;</code></pre>
-    <p>Then we ran Jolt. On running
-    <code>cargo test -p jolt-core -- sha3_e2e_hyperkzg</code> we get the
-    following panic.</p>
+    implementation. In this implementation, all intermediate values are
+    stored in Rust variables as opposed to constant-sized vecs/arrays.
+    The code explicitly multiplies limb by limb and then adds them all
+    up. See the figure below for a visual illustration of what this
+    implementation does.</p>
+    <p>This allows the compiler to optimise the assembly to use more
+    registers (instead of large read/writes to memory), and this
+    implementation is empirically faster than the current Arkworks CIOS
+    implementation (the exact amount varies across trials, but it seems
+    to be consistently faster across trials).</p>
+    <div class="remark"><h3></h3><p>This is not the only thing that is different about this
+    implementation, but we will get to that in a bit.</p></div>
+    <p>For the remainder of the post, we refer to the original Arkworks
+    CIOS algorithm for Montgomery multiplication as <code>c-mult</code>,
+    the previous implementation of the new multiplication as
+    <code>s-mult</code>, and the faster implementation as
+    <code>h-mult</code></p>
+    <section id="putting-this-faster-code-into-jolt" class="level3">
+    <h3>Putting this faster code into Jolt</h3>
+    <p>Ignoring speed for a minute, we plugged in the above
+    multiplication algorithms in their native form (unchanged). Then we
+    ran Jolt with the command
+    <code>cargo test -p jolt-core -- sha3_e2e_hyperkzg</code>, and the
+    unit tests <strong>fail</strong> for <strong>both</strong>
+    <code>s-mult</code> and <code>h-mult</code>. <span
+    class="math inline">\(c\)</span> stands for CIOS, <span
+    class="math inline">\(s\)</span> for single and <span
+    class="math inline">\(h\)</span> for hybrid. These naming
+    conventions will soon become clearer.</p>
     <pre class="language-bash"><code>thread &#39;&lt;unnamed&gt;&#39; panicked at /Users/aribiswas3/Work-With-A16z/arkworks-algebra/ff/src/fields/models/fp/montgomery_backend.rs:1360:9:
 High limb expected to be 0 if S &gt;= 1 before 2p comparison
 
@@ -148,7 +166,8 @@ failures:
     jolt::vm::rv32i_vm::tests::sha3_e2e_hyperkzg
 
 test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out; finished in 4.79s</code></pre>
-    <p>The <a
+    <p>Digging deeper, the part of the codebase that fails is code for
+    subtraction. The <a
     href="https://github.com/abiswas3/arkworks-algebra/blob/19e66617147b3a9779df30522539fb8e8d3217c6/ff/src/fields/models/fp/montgomery_backend.rs#L1348">Conditional
     Subtraction For Barrett Reduction</a> throws an error claiming that
     the number we passed in was too large. If you look at
@@ -161,59 +180,70 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     <h3>Why does this happen?</h3>
     <p>Scanning the <a
     href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/main/src/mul_logjumps_unr_2.rs">lines
-    of code</a> from the new implementation, we see that the final
-    answer is not guaranteed to be less than the modulus <span
-    class="math inline">\(p\)</span> (as its never reduced). When you
+    of code</a> for <code>h-mult</code>,we observe that the final answer
+    is not reduced <span class="math inline">\(\mod p\)</span>. When you
     multiply two numbers that are both less than <span
-    class="math inline">\(p\)</span>, The result may still cross over
+    class="math inline">\(p\)</span>, the result may still cross over
     the modulus <span class="math inline">\(p\)</span>.</p>
     <p>In <a
-    href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/0cc267afa60c87deb632164ff692d783ef6f2109/src/mul_cios_opt_unr_2.rs#L62">Arkworks-CIOS</a>
+    href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/0cc267afa60c87deb632164ff692d783ef6f2109/src/mul_cios_opt_unr_2.rs#L62">Arkworks-CIOS</a>,
     the last line of multiplication involves subtracting <span
     class="math inline">\(p\)</span> from the final answer if the answer
     is greater than <span class="math inline">\(p\)</span>. The line
     <code>__subtract_modulus(a)</code>simply computes <span
     class="math inline">\(p-a\)</span> if <span class="math inline">\(a
     \ge p\)</span>.</p>
-    <p><strong>First attempt</strong>: No big deal, we stick a
-    <code>__subtract_modulus(a)</code> at the end of Yuval’s code and
-    all should be good.</p>
+    <p>In the <a
+    href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L1154">multiplication
+    code</a> for <code>s-mul</code>, notice they have a
+    <code>reduce_ct</code> function. Digging deeper, we find that they
+    subtract <span class="math inline">\(2p\)</span> from <span
+    class="math inline">\(a\)</span> (the Montgomery product) only if
+    the most significant bit of <span class="math inline">\(a\)</span>
+    is 1.</p>
+    <p>We have three algorithms, and the final answer for each algorithm
+    is the same (modulo p). But they are not the same numerical value.
+    To summarise:</p>
+    <ul>
+    <li><code>c-mult</code>: that passes unit tests and subtracts <span
+    class="math inline">\(p\)</span> from <span
+    class="math inline">\(a\)</span> when <span class="math inline">\(a
+    \ge p\)</span>.</li>
+    <li><code>h-mult</code>: that fails unit tests and does not do any
+    reduction.</li>
+    <li><code>s-mult</code>: that fails unit tests and subtracts <span
+    class="math inline">\(2p\)</span> from <span
+    class="math inline">\(a\)</span> when the msb of <span
+    class="math inline">\(a\)</span> is 1.</li>
+    </ul>
+    <p><strong>First attempt</strong>: We stick a
+    <code>__subtract_modulus(a)</code> at the end of <code>h-mul</code>
+    and all should be good.</p>
     <p><strong>The tests still panics with the same error
     message</strong></p>
     <p>A few hours of debugging follow, we observe that even after
     subtracting <span class="math inline">\(p\)</span> from the answer,
     the final answer is still sometimes greater than <span
-    class="math inline">\(p\)</span> i.e yuval’s algorithm outputs
-    something that was greater than <span
+    class="math inline">\(p\)</span> i.e <code>c-mul</code> often
+    outputs something outputs something that was greater than <span
     class="math inline">\(2p\)</span>.</p>
-    <p>Fine! stick in two conditional subtracts.</p>
-    <p>Jolt passes. Did we get lucky? One way to check is to try a lot
-    of random inputs and try to break the test. 100,000 randomly seeded
-    inputs, with 10 chained multiplication in each trial the tests
-    <strong>ALWAYS PASS</strong>. Furthermore, the outputs of
-    Arkworks-CIOS and the new implementation + 2 subtractions is exactly
-    the same.</p>
-    <div class="remark"><h3></h3><p>In the multiplication code for <a
-    href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L1154">world
-    coin</a>, notice they have a <code>reduce_ct</code> function. Digging
-    deeper we find that they subtracts <span
-    class="math inline">2<em>p</em></span> from <span
-    class="math inline"><em>a</em></span> (the Montgomery product) only if
-    the most significant bit of <span class="math inline"><em>a</em></span>
-    is 1. Plugging in the this reduction instead of 2 conditional subtracts
-    – Jolt tests <strong>fail</strong> again.</p>
-    <p>When we change the code to the following – <strong>all tests
-    pass</strong></p>
-    <pre class="language-rust"><code>
-    //let msb = (a[3] &gt;&gt; 63) &amp; 1;
-    let msb = (greater_than(&amp;a, &amp;U64_P) as u8) + (greater_than(&amp;a, &amp;U64_2P) as u8);
-    </code></pre></div>
+    <p>Ok, what happens if we put in two instances of
+    <code>__subtract_modulus()</code>?</p>
+    <p><strong>Jolt passes! </strong></p>
+    <p>Did we get lucky? One way to check is to try a lot of random
+    inputs and try to break the test. 100,000 randomly seeded inputs,
+    with 10 chained multiplications in each trial, the numerical value
+    of <code>c-mult</code> and <code>h-mult</code> are
+    <strong>EXACTLY</strong> the same.</p>
+    <div class="remark"><h3></h3><p>However, adding two conditional subtractions to <code>s-mul</code> –
+    Jolt tests <strong>fail</strong> again.<br />
+    But adding 3 conditional subtractions to ``</p></div>
     <p>What is going on? Why do we need two subtractions? How do we know
-    we don’t need 3 or 4 or 5?</p>
-    <p>100,000 trials is minuscule when compared to the input space of
-    256 bit numbers. What if there are edge cases that we can’t catch
+    we don’t need 3 or 4 or 5? Why does 2 work for one and not the
+    other? 100,000 trials is minuscule when compared to the input space
+    of 256-bit numbers. What if there are edge cases that we can’t catch
     via fudging?</p>
-    <p>In what follows we derive a formal guarantee on how large the
+    <p>In what follows, we derive a formal guarantee on how large the
     answer of the new Montgomery algorithm can be, therefore
     establishing the maximum number of conditional subtracts we must
     employ.</p>
@@ -223,13 +253,13 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     <h2>Montgomery Multiplication Maths</h2>
     <p>We begin with the basics of Montgomery multiplication, and then
     describe the CIOS algorithm. This gives all the background needed to
-    get to our answer.</p>
+    get to what is going on.</p>
     <div class="remark"><h3></h3><p>Below we actually describe the Separated Operand Scanning Algorithm
     (SOS), but deceptively refer to it as the Coarse Integrated Operand
     Scanning (CIOS) algorithm. This is done for ease of exposition only, the
     claims would hold regardless. See <a href="papers/Acard.pdf">Acar’s
-    thesis Chapter 2</a>) for more details on these algorithms. We also do
-    not discuss the optimisations made by the <a
+    thesis Chapter 2</a> for more details. We also do not discuss the
+    optimisations made by the <a
     href="https://hackmd.io/@gnark/modular_multiplication">Gnark</a> team as
     they are not relevant in this context.</p></div>
     <p>Given a <span class="math inline">\(n\)</span> limb modulus <span
@@ -256,10 +286,10 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     class="math inline">\(r\)</span> are co-prime. Therefore, <span
     class="math inline">\(-p^{-1}\)</span> is well defined, and thus so
     is <span class="math inline">\(m\)</span>.</p>
-    <p><strong>Key Idea</strong>:</p>
-    <p>As <span class="math inline">\(R\)</span> is a power of 2, the
-    last division can be done by bit shift operations native to most
-    instruction architectures.</p>
+    <p><strong>Key Idea</strong>: As <span
+    class="math inline">\(R\)</span> is a power of 2, the last division
+    can be done by bit shift operations native to most instruction
+    architectures.</p>
     </section>
     <section id="the-cios-algorithm" class="level2">
     <h2>The CIOS algorithm</h2>
@@ -428,8 +458,7 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     +c_{n-1} \Big)\)</span> is the integer part of the division. Using
     more standard terminology, the remainder and quotient.</p>
     <p>These can be calculated <strong>independently</strong> and
-    <strong>in parallel</strong><a href="#fn3" class="footnote-ref"
-    id="fnref3" role="doc-noteref"><sup>3</sup></a>.</p>
+    <strong>in parallel</strong>[^b].</p>
     <p>Let <span class="math inline">\(s = \Big(c_{2n-1}r^{n} + \ldots
     +c_{n-1} \Big) + \Big(c_{n-2}\rho_1\Big) \ldots +
     \Big(c_1\rho_{n-2}\Big)+ \Big(c_0\rho_{n-1}\Big)\)</span>. To
@@ -441,6 +470,8 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     <span class="math inline">\(s\)</span>.</p>
     <p><span class="math display">\[ cR^{-1} \mod p \equiv (s+
     mp)/r\]</span></p>
+    <p>What <code>s-mul</code> does is it implements the above algorithm
+    <strong>exactly</strong> as described above.</p>
     <div class="thm"><h3>Theorem</h3><p>We claim that <span
     class="math inline"><em>s</em> &lt; <em>n</em> ⋅ (<em>r</em><em>p</em>)</span>.</p></div>
     <div class="proof">
@@ -455,7 +486,7 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     \Big(c_0\rho_{n-1}\Big)\)</span> and <span class="math inline">\(Q =
     \Big(c_{2n-1}r^{n} + \ldots +c_{n-1} \Big)\)</span></p>
     <p>Now <span class="math inline">\(R &lt; (n-1)rp\)</span> as each
-    bracketted term is at most <span
+    bracketed term is at most <span
     class="math inline">\(rp\)</span>.</p>
     <p>Also <span class="math inline">\(Q \le \lfloor
     \frac{c}{r^{n-1}}\rfloor &lt; \frac{p^2}{r^{n-1}} &lt;
@@ -463,131 +494,119 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     <p>Therefore, <span class="math inline">\(Q+R &lt; n\cdot
     rp\)</span></p>
     </div>
-    <p>From this we can conclude that</p>
+    <p>From this, we can conclude that</p>
     <p><span class="math display">\[ cR^{-1} \mod p \equiv (s+ mp)/r
     &lt; (nrp + rp)/r &lt; (n+1)p\]</span></p>
     <p>Therefore, <strong>it is often not sufficient to subtract <span
-    class="math inline">\(p\)</span> from the answer just once</strong>.
-    For <span class="math inline">\(n=4\)</span>, this implies that the
-    answer will be less than <span
-    class="math inline">\(5p\)</span>.</p>
-    <div class="remark"><h3></h3><p>So it appears that two <code>_substract_modulus</code> operations us
-    still insufficient. Although we were never able to break the algorithm
-    by fuzzing.</p></div>
-    <p>At a high level what is going on? When you add and divide – the
-    numbers we add to the current sum are <span
-    class="math inline">\(n\)</span>$ limbed numbers. When you divide
-    and add, the remainder consists of <span
-    class="math inline">\(n-1\)</span> numbers that are all <span
-    class="math inline">\(n+1\)</span> limbs. So we’re adding much
-    bigger numbers to the current sum, which should indicate we should
-    get much larger overflows.</p>
+    class="math inline">\(2p\)</span> from the answer, you might have to
+    go as high as subtracting <span
+    class="math inline">\(4p\)</span></strong>.</p>
     </section>
-    <section id="is-n1p-tight" class="level2">
-    <h2>Is <span class="math inline">\((n+1)p\)</span> tight?</h2>
-    <div class="remark"><h3></h3><p>Remember we could not get a random test to fail. This would hint that
-    the analysis could be improved. But 256 bits of input is too large a
-    space to exhaustively test. So what do we do now?</p></div>
-    <p>Firstly, the upper bound actually partially depends <span
-    class="math inline">\(p\)</span>.</p>
-    <p>In our proof we use <span class="math inline">\(R &lt;
-    (n-1)rp\)</span>. The real bound here is <span
-    class="math display">\[ R &lt; r(\rho_1, \dots,
-    \rho_{n-1})\]</span></p>
-    <p><span class="math inline">\(\rho_i \equiv r^{-i} \mod p\)</span>
-    for all <span class="math inline">\(i \in [n-1]\)</span> - this only
-    changes if we change <span class="math inline">\(p\)</span>. For
-    <span class="math inline">\(n=4\)</span>, there are only 3 <span
-    class="math inline">\(\rho\)</span>’s. If for some miraculous <span
-    class="math inline">\(p\)</span> it might be the case that all the
-    <span class="math inline">\(\rho_i\)</span>’s are very very small
-    like at most 3. Now instead of <span
-    class="math inline">\(3p\)</span> which <span
-    class="math inline">\(R\)</span> contributes to the final sum ,
-    <span class="math inline">\(R\)</span> will contribute <span
-    class="math inline">\(3 + 3 +3 = 9\)</span> (in our made up
-    example).</p>
-    <p>As always we are dealing with the <code>bn-254</code> curve for
-    which we know <span class="math inline">\(p\)</span> and <span
-    class="math inline">\(\rho_1, \rho_2, \rho_3\)</span>.</p>
-    <pre class="language-python"><code>p = [
-    0x43e1f593f0000001,
-    0x2833e84879b97091,
-    0xb85045b68181585d,
-    0x30644e72e131a029,
-]
-
-rho1 = [
-    0x2d3e8053e396ee4d,
-    0xca478dbeab3c92cd,
-    0xb2d8f06f77f52a93,
-    0x24d6ba07f7aa8f04,
-]
-rho2 = [
-    0x18ee753c76f9dc6f,
-    0x54ad7e14a329e70f,
-    0x2b16366f4f7684df,
-    0x133100d71fdf3579,
-]
-
-rho3 = [
-    0x9BACB016127CBE4E,
-    0x0B2051FA31944124,
-    0xB064EEA46091C76C,
-    0x2B062AAA49F80C7D,
-]</code></pre>
-    <p>What I’m about to say can be double checked with this <a
-    href="/blog_assets/mont_mult/code/rho.py">code</a>. <strong>This
-    file will change as there is one thing left to do still</strong></p>
-    <p><span class="math inline">\((\rho_1 + \rho_2 + \rho_3)/p =
-    2.0469\)</span></p>
-    <p>So not exact <span class="math inline">\(3p\)</span> but in the
-    worst case when <span class="math inline">\(c_0, c_1, c_2\)</span>
-    are all <span class="math inline">\(r-1\)</span>, we will have to
-    subtract modulus at least 3 times regardless of what <span
-    class="math inline">\(Q\)</span> and <span
-    class="math inline">\(m\)</span> is. So we didn’t get lucky because
-    of <span class="math inline">\(p\)</span> :-(</p>
-    <p>Ok what about <span class="math inline">\(Q\)</span> and <span
-    class="math inline">\(m\)</span> ? <span
-    class="math inline">\(Q\)</span> depends on <span
-    class="math inline">\(c_7, \ldots, c_3\)</span> and in the worst
-    case they can all be <span class="math inline">\(r-1\)</span>. So it
-    seems like there’s no wiggle room there? Or is there?</p>
-    <p>So far all the analysis has hinged on the fact that <span
-    class="math inline">\(c_i = (r-1)\)</span> for all <span
-    class="math inline">\(i\)</span>.</p>
-    <p>Remember <span class="math inline">\(c = ab\)</span> where <span
-    class="math inline">\(a\)</span> and <span
-    class="math inline">\(b\)</span> are numbers that are at most <span
-    class="math inline">\(p\)</span>. Are there actually <span
-    class="math inline">\(a\)</span> and <span
-    class="math inline">\(b\)</span> values that lead to the worst case
-    – all digits of <span class="math inline">\(c\)</span> are <span
-    class="math inline">\(r-1\)</span>. If not what is actually the
-    worst <span class="math inline">\(c\)</span> ?</p>
-    <p><strong>Worst case check</strong>: How do we find such an <span
-    class="math inline">\(a\)</span> and <span
-    class="math inline">\(b\)</span> ?</p>
-    <pre class="language-python"><code># all digits of product a*b as big as possible
-# c[7] = carry + carry = r-1
-# c[6] = a3*b3 + carry = r-1 mod r
-# c[5] = a3*b2+b3*a2 + carry = r-1 mod r
-# c[4] = a3*b1+a2*b2+b3*a1 + carry = r-1 mod r
-# c[3] = a3*b0+a2*b1+a1*b2+a0*b3 + carry= r-1 mod r
-# c[2] = a2*b0+a1*b1+a0*b2 + carry = r-1 mod r
-# c[1] = a1*b0+a0*b1 + carry = r-1 mod r
-# c[0] = a0*b0 = r-1 mod r</code></pre>
-    <div class="remark"><h3></h3><p>This is the system of equations with 8 variables and 7 equations
-    (well kind of the carries make my life a little tedious).</p></div>
-    <p>Analysing this system of equations will tell me what the the
-    worst case values of the limbs of <span
-    class="math inline">\(c\)</span> can be. This in turn will tell us
-    how whether the two subtracts were pure luck, or something more
-    beautiful is going on :-)</p>
-    <p><strong>I will look at this over the next two days, I have not
-    slept in 3 days, but I’m hoping to give you an answer by Friday
-    morning.</strong></p>
+    <section id="why-does-h-mult-pass" class="level2">
+    <h2>Why Does h-mult Pass?</h2>
+    <p>It makes sense why <code>s-mul</code> fails. From the above
+    bounds its very possible that the final answer is much bigger than
+    <span class="math inline">\(p\)</span>. But this does not explain
+    why <code>h-mul</code>, which computes the same thing, passes?</p>
+    <p>The answer to this is that although <code>h-mul</code> are
+    <code>s-mul</code> are based on the same algorithm, they are
+    implemented slightly differently.</p>
+    <section id="a-hybrid-algorithm" class="level3">
+    <h3>A hybrid algorithm</h3>
+    <p>More specifically, <code>h-mul</code> is a hybrid between the
+    completely expanded <code>s-mul</code> algorithm and the
+    <code>c-mul</code> algorithm. We explain this difference in the
+    context of <span class="math inline">\(n=4\)</span>. The
+    <code>h-mul</code> algorithm can be described as an iteration of
+    <span class="math inline">\(\log_2 n\)</span> division operations.
+    At each iteration, we reduce half of the remaining digits. We start
+    with <span class="math inline">\(n=4\)</span>. Half of that is <span
+    class="math inline">\(2\)</span></p>
+    <p><span class="math display">\[
+    \begin{align}
+    cr^{-2} &amp;\equiv \Big(c_{7}r^{5} + \ldots +c_{3}r + c_2 \Big)  +
+    \rho_2(c_1r + c_0)
+    \end{align}
+    \]</span></p>
+    <p>In the next step, we reduce by 1</p>
+    <p><span class="math display">\[
+    \begin{align}
+    cr^{-3} &amp;\equiv \Big(c_{7}r^{4} + \ldots +c_{3} \Big)  +
+    \rho_1(c_2 + \rho_2(c_1r + c_0)) \\
+    &amp;\equiv Q + R
+    \end{align}
+    \]</span></p>
+    <p>From here on with just do CIOS.</p>
+    <p>For each time we involve an iteration, we blow up the current sum
+    by <span class="math inline">\(rp\)</span> We will prove this
+    subsequently. In <code>h-mul</code> we only add twice to <span
+    class="math inline">\(Q\)</span> whereas in <code>s-mul</code> we
+    add three times. <strong>This is why the number of subtractions in
+    <code>h-mul</code> will always be 1 less than the one needed for
+    <code>s-mul</code>.</strong></p>
+    <div class="remark"><h3></h3><p>If you stare at the code long enough, you’ll confirm that
+    <code>s-mul</code> uses 3 precomputed constants
+    <code>U64_I3, U64_I2, U64_I1</code>. On the other hand
+    <code>h-mul</code> uses just <code>U64_I2, U64_I1</code>. These are the
+    <span class="math inline"><em>ρ</em></span>’s.</p></div>
+    <p>We can play with this even further and do just 1 iteration, and
+    then play CIOS.</p>
+    <p><span class="math display">\[
+    \begin{align}
+    cr^{-2} &amp;\equiv \Big(c_{7}r^{5} + \ldots +c_{3}r + c_2 \Big)  +
+    \rho_2(c_1r + c_0) \\[10pt]
+    &amp;\equiv Q +R
+    \end{align}
+    \]</span></p>
+    <p>In this case, the number of subtractions is always 1 less than
+    that of <code>h-mul</code>. Of course, in CIOS we do not play any
+    iteration at all, so we start with CIOS from the beginning.</p>
+    <p>Summarising: CIOS we play no iterations of reductions, in
+    <code>s-mul</code> we play <span class="math inline">\(n-1\)</span>
+    iterations. In other algorithms, we can interpolate with the number
+    of iterations/reductions.</p>
+    <div class="thm"><h3>Theorem</h3><p>If we play the game for <span class="math inline"><em>x</em></span>
+    iterations (number of times we divide the residual sum), then we save
+    <span class="math inline"><em>x</em></span> multiplication operations
+    compared to CIOS, but we add <span class="math inline"><em>x</em></span>
+    extra addition operations compared to CIOS.</p></div>
+    </section>
+    </section>
+    <section id="missing-factor-of-1" class="level2">
+    <h2>Missing Factor Of 1</h2>
+    <p>At this point, there is one question left. We proved that in
+    theory</p>
+    <ul>
+    <li><code>s-mul</code> needs at most 4 subtractions.</li>
+    <li><code>h-mul</code> needs at most 3 subtractions.</li>
+    <li><code>c-mul</code> needs at most 1 subtraction.</li>
+    </ul>
+    <p>But why does two subtract work out for <code>h-mul</code>?
+    Shouldn’t it be 3? The above bounds come from the following
+    analysis:</p>
+    <p><span class="math display">\[
+    \begin{align}
+    cr^{-2} &amp;\equiv Q  + \rho_2(c_1r + c_0) \\[10pt]
+    &amp;&lt; Q + \rho_2(r^2) \\[10pt]
+    cr^{-3} &amp;&lt; Q&#39; + \rho_1r + \rho_2r
+    \end{align}
+    \]</span></p>
+    <p>Finally, the last CIOS gives us</p>
+    <p><span class="math display">\[cr^{-4} &lt; \Big(Q&#39; + r(\rho_1
+    + \rho_2) + mp \Big)/r &lt; 4p\]</span></p>
+    <p>The 4 is the 1 improvement from 5 we promised. However, <span
+    class="math inline">\(\rho_1\)</span> and <span
+    class="math inline">\(\rho_2\)</span> are fixed. For the
+    <code>bn-254</code> scalar field prime, the limits of what <span
+    class="math inline">\(p\)</span> and <span
+    class="math inline">\(Q&#39;\)</span> can be mean that max value of
+    <code>s-mul</code> can at most <span
+    class="math inline">\(3.25pr\)</span>.</p>
+    <div class="remark"><h3></h3><p>This is why we can always do one subtraction less for
+    <code>h-mul</code> and <code>s-mul</code> :-)</p></div>
+    <section id="how-did-we-get-to-that-number" class="level3">
+    <h3>How Did We Get To That Number?</h3>
+    </section>
     </section>
     <section id="footnotes" class="footnotes footnotes-end-of-document"
     role="doc-endnotes">
@@ -599,9 +618,6 @@ rho3 = [
     class="footnote-back" role="doc-backlink">↩︎</a></p></li>
     <li id="fn2"><p>We guarantee that <span class="math inline">\(\rho_i
     &lt; p\)</span><a href="#fnref2" class="footnote-back"
-    role="doc-backlink">↩︎</a></p></li>
-    <li id="fn3"><p>In the current implementation we do not leverage any
-    form of parallelism.<a href="#fnref3" class="footnote-back"
     role="doc-backlink">↩︎</a></p></li>
     </ol>
     </section>
