@@ -1,11 +1,11 @@
+:root{
+  --base-font-family: 'Chalkboard SE', sans-serif;
+  --base-font-wt: 100;  
+}
 /* index.css - for specific index page with link lists */
 /* === Theme Colors === */
 body dark-mode {
-  --bg: #fefcf9;
-  --text: #1a1a1a;
   --heading: #34558b;
-  --link: #005f99;
-  --link-hover: #004477;
   --date-bg: #d6eaf8;
   --date-text: #21618c;
 }
@@ -15,26 +15,11 @@ body dark-mode {
   box-sizing: border-box;
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg);
-  color: var(--text);
-  font-family: system-ui, -apple-system, sans-serif;
-  overflow-x: hidden; 
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-  color: var(--heading); 
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  line-height: 1.3;
-}
 
 /* Content container */
 .content {
   max-width: 800px;
+  line-height: 2rem;
   margin: 0 auto;
   padding: 80px 20px 40px; /* top padding + smaller horizontal + bottom */
 }
@@ -46,18 +31,7 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
-/* Link styles */
-a {
-  color: var(--link);
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
 
-a:hover, a:focus {
-  color: var(--link-hover);
-  text-decoration: underline;
-  outline: none;
-}
 
 /* Images in content */
 .content img {
@@ -81,7 +55,6 @@ ol li {
   gap: 1rem;
 }
 
-/* Date badges */
 .date {
   background-color: var(--date-bg);
   color: var(--date-text);

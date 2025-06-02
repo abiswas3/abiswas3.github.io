@@ -21,7 +21,7 @@
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
-  <title>Your title here</title>      
+  <title>LopSided League</title>      
   </head>
 
   <body class="dark-mode">  
@@ -44,34 +44,90 @@
       
   </nav>
 
+    <div class="toc" id="toc">      
+        <div class="last-updated">
+    Last Page Build: 2025-06-02 17:18:49
+  </div>
+
+      <div class="toc-content">
+          <ul>
+          <li><a href="#fiddler-how-likely-is-a-lopsided-league"
+          id="toc-fiddler-how-likely-is-a-lopsided-league">Fiddler: How
+          Likely is a Lopsided League?</a>
+          <ul>
+          <li><a href="#my-solution-simpler-problem"
+          id="toc-my-solution-simpler-problem">My Solution : Simpler
+          Problem</a></li>
+          </ul></li>
+          </ul>
+      </div>
+  
+  </div>
     <br>
   <br>
   </header>
 
   <main class="content">
-    <h1>Your title here</h1>
+    <h1>LopSided League</h1>
   
       <div class="authors-and-date">
     <div class="authors">
-      The Invisible Man
+      Ari
     </div>
     <div class="published-date">
-      Published: 2025-05-27T15:22:30.162016+01:00
+      Published: 2023-09-18
     </div>
   </div>
     
 
 
           <ul class="tag-list">
-                  <li class="tag-item"><a href="/publish/unfiled.html" class="tag-link">unfiled</a></li>
+                  <li class="tag-item"><a href="/publish/fiddler.html" class="tag-link">fiddler</a></li>
+                  <li class="tag-item"><a href="/publish/puzzles.html" class="tag-link">puzzles</a></li>
                 </ul>
     
-    <ul class="task-list">
-    <li><label><input type="checkbox" />🔥🔥 FIXME</label></li>
-    <li><label><input type="checkbox" />🗓️🗓️ TODO</label></li>
-    <li><label><input type="checkbox" />🕰️🕰️ STALLED</label></li>
-    <li><label><input type="checkbox" />⏳⏳ IN-PROGRESS</label></li>
-    </ul>
+    <section id="fiddler-how-likely-is-a-lopsided-league"
+    class="level1">
+    <h1>Fiddler: How Likely is a Lopsided League?</h1>
+    <p>This weeks Fiddler problem states that</p>
+    <blockquote>
+    <p>Inspired by this surprising fact, suppose Fiddler League Baseball
+    has six divisions, with five teams in each division. For simplicity,
+    further suppose each team has a winning percentage chosen randomly,
+    uniformly, and independently between zero percent and 100
+    percent.</p>
+    Let’s look at two divisions: The Enigma League East division and the
+    Enigma League Central division. What is the probability that every
+    team in the Enigma League East division has a higher winning
+    percentage than every team in the Enigma League Central division?
+    </blockquote>
+    <section id="my-solution-simpler-problem" class="level2">
+    <h2>My Solution : Simpler Problem</h2>
+    <p>Let <span class="math inline">\((Y_1, \dots, Y_5)\)</span> and
+    <span class="math inline">\((X_1, \dots, X_5)\)</span> be the random
+    variables that represent the winning percentage of the teams in the
+    East and Central Division.</p>
+    <p>From the problem definition we know that both <span
+    class="math inline">\(X_i \xleftarrow[]{\$}[0,1]\)</span> and <span
+    class="math inline">\(Y_i \xleftarrow[]{\$}[0,1]\)</span> for all
+    <span class="math inline">\(i \in [5]\)</span> i.e. they are sampled
+    uniformly at random from an interval of <span
+    class="math inline">\([0,1]\)</span>.</p>
+    <p>The problem is essentially asking if I draw all 10 of these
+    random samples what is the probability that the final ordering has
+    <span class="math inline">\(X\)</span>’s in the top 5.</p>
+    <p>There are 10! factorial possible ranking strategies for and <span
+    class="math inline">\(5! \times
+    5!\)</span> ways to arrange the different X’s and Y’s in the first 5
+    and last 5 slots.</p>
+    <p>Thus the first answer is simply <span
+    class="math inline">\(\frac{5!\times5!}{10!} =
+    \frac{1}{252}\)</span>.</p>
+    <p>A monte carlo simulation of drawing process confirms the above
+    result</p>
+    <p><img src="./assets/monte_carlo_lop_side.png" /></p>
+    </section>
+    </section>
   </main>
 
 

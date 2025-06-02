@@ -21,7 +21,7 @@
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
-  <title>Your title here</title>      
+  <title>Baseball Lineups</title>      
   </head>
 
   <body class="dark-mode">  
@@ -44,34 +44,72 @@
       
   </nav>
 
+    <div class="toc" id="toc">      
+        <div class="last-updated">
+    Last Page Build: 2025-06-02 17:18:49
+  </div>
+
+      <div class="toc-content">
+          <ul>
+          <li><a href="#fiddler-optimal-baseball-lineup"
+          id="toc-fiddler-optimal-baseball-lineup">Fiddler: Optimal
+          Baseball Lineup</a>
+          <ul>
+          <li><a href="#example-code" id="toc-example-code">Example
+          Code</a></li>
+          </ul></li>
+          </ul>
+      </div>
+  
+  </div>
     <br>
   <br>
   </header>
 
   <main class="content">
-    <h1>Your title here</h1>
+    <h1>Baseball Lineups</h1>
   
       <div class="authors-and-date">
     <div class="authors">
-      The Invisible Man
+      Ari
     </div>
     <div class="published-date">
-      Published: 2025-05-27T15:22:30.162016+01:00
+      Published: 2023-08-21
     </div>
   </div>
     
 
 
           <ul class="tag-list">
-                  <li class="tag-item"><a href="/publish/unfiled.html" class="tag-link">unfiled</a></li>
+                  <li class="tag-item"><a href="/publish/fiddler.html" class="tag-link">fiddler</a></li>
+                  <li class="tag-item"><a href="/publish/puzzles.html" class="tag-link">puzzles</a></li>
                 </ul>
     
-    <ul class="task-list">
-    <li><label><input type="checkbox" />🔥🔥 FIXME</label></li>
-    <li><label><input type="checkbox" />🗓️🗓️ TODO</label></li>
-    <li><label><input type="checkbox" />🕰️🕰️ STALLED</label></li>
-    <li><label><input type="checkbox" />⏳⏳ IN-PROGRESS</label></li>
-    </ul>
+    <section id="fiddler-optimal-baseball-lineup" class="level1">
+    <h1>Fiddler: Optimal Baseball Lineup</h1>
+    <p>Solution to <a
+    href="https://thefiddler.substack.com/i/136180786/this-weeks-fiddler">this
+    weeks fiddler</a>. I must admit I am not too happy with this
+    solution, which involves simply using monte carlo simulations of all
+    possible slugger starting positions and calculating the one with the
+    best score.</p>
+    <p><strong>Empirical Answer:</strong> The slugger should be <span
+    style="background-color: #FFFF00"> ranked 4th</span>, when the pure
+    hitters take a single with probability <span
+    class="math inline">\(p=1/3\)</span> and the sluggers hit home runs
+    with probability <span class="math inline">\(q=1/10\)</span>. If the
+    pure hitters took singles with <span
+    class="math inline">\(p=2/3\)</span> instead, then surprisingly the
+    optimal position is 9th.</p>
+    <section id="example-code" class="level2">
+    <h2>Example Code</h2>
+    <embed type="text/html" src="Baseball.html" width="100%" height="600">
+    <p><em>There has to be some random walk solution to this problem
+    which involves setting up finite state machines and finding some
+    stationary distribution for each configuration. I’m sure of
+    it!</em></p>
+    </section>
+    </section>
   </main>
 
 

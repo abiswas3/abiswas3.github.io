@@ -6,11 +6,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
     <!-- Base CSS (common styles) -->
+  <link rel="stylesheet" href="../static/nav.css"> 
   <link rel="stylesheet" href="../static/base.css">
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-  <link rel="stylesheet" href="../static/nav.css">  
+   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -44,6 +45,10 @@
   </nav>
 
     <div class="toc" id="toc">      
+        <div class="last-updated">
+    Last Page Build: 2025-06-02 17:18:50
+  </div>
+
       <div class="toc-content">
           <ul>
           <li><a href="#montgomery-multiplication---a-brief-review"
@@ -75,15 +80,30 @@
 
   <main class="content">
     <h1>Montgomery Multiplication: Theory Vs Practice</h1>
+  
+      <div class="authors-and-date">
     <div class="authors">
-  Ari
-</div>
+      Ari
+    </div>
+    <div class="published-date">
+      Published: 2025-05-15
+    </div>
+  </div>
+    
 
-            <ul class="tag-list">
+
+          <ul class="tag-list">
                   <li class="tag-item"><a href="/publish/cryptography.html" class="tag-link">cryptography</a></li>
                   <li class="tag-item"><a href="/publish/benchmarking.html" class="tag-link">benchmarking</a></li>
                 </ul>
     
+    <div class="remark"><h3></h3><p><strong>UPDATE (2025-06-01)</strong>: This post is still relevant as
+    a tutorial for how to use dynamic binary instrumentation to analyse why
+    code is slow – and is still reproducible using the methods described
+    here.</p>
+    <p>More information about the exact details of Montgomery multiplication
+    has been uncovered, and our discussion can be found <a
+    href="why-jolt-breaks.html">here</a></p></div>
     <p>In a recent <a
     href="https://hackmd.io/@Ingonyama/Barret-Montgomery">blog post</a>,
     Yuval Domb describes a subtle, but remarkably clever optimisation
@@ -233,22 +253,25 @@
     in Montgomery form. This implies that the time to convert back and
     forth from standard to Montgomery form is not included in
     benchmarking run times.</p>
-    <pre><code>git clone https://github.com/abiswas3/Montgomery-Benchmarks.git
+    <pre class="language-bash"><code>git clone https://github.com/abiswas3/Montgomery-Benchmarks.git
 cd Montgomery-Benchmarks
 git checkout --track origin/barebones_profiling
 cargo run --release</code></pre>
-    <p>Cargo run release should produce a
-    <code>benchmark_data.csv</code> file for which each line is a trial
-    run of how long a single multiplication took in nano seconds. We
-    then plot a box plot of the distribution to understand run
-    times.</p>
+    <div class="remark"><h3></h3><p><strong>UPDATE: 2025-06-01</strong>: The barebones_profiling has been
+    merged into main, and running <code>cargo bench</code> should give you
+    time stamps for 4 algorithms: the arkworks, and implementation discussed
+    above, plus additionally two different implementations, one of CIOS and
+    one of the new algorithm – written to optimise use of registers. The
+    above code block is now deprecated. The plot below is still consistent
+    with our initial findings. See <a href="why-jolt-breaks.html">more
+    details</a></p></div>
     <figure>
     <img src="/blog_assets/mont_mult/bench.jpeg"
     alt="Benchmark result" />
     <figcaption aria-hidden="true">Benchmark result</figcaption>
     </figure>
-    <div class="remark"><h3></h3><p>This implies that the new algorithm is actually slower than even the
-    SOS algorithm.</p></div>
+    <div class="remark"><h3></h3><p>This implies that the new algorithm is slower than even the SOS
+    algorithm.</p></div>
     </section>
     <section id="computer-information" class="level3">
     <h3>Computer Information</h3>
@@ -258,7 +281,7 @@ cargo run --release</code></pre>
     sufficient to do multiplication. We also ran the code on an M2
     MacBook Air with 8GB of RAM and observed that the relative
     performance trends remained consistent.</p>
-    <pre><code>lscpu
+    <pre class="language-bash"><code>lscpu
 Architecture:             x86_64
   CPU op-mode(s):         32-bit, 64-bit
   Address sizes:          40 bits physical, 48 bits virtual
@@ -296,7 +319,7 @@ Virtualization features:
 Caches (sum of all):
   L1d:                    32 KiB (1 instance)
   L1i:                    32 KiB (1 instance)</code></pre>
-    <pre><code>free -h
+    <pre class="language-bash"><code>free -h
                total        used        free      shared  buff/cache   available
 Mem:           1.9Gi       421Mi       359Mi       5.5Mi       1.3Gi       1.5Gi
 Swap:             0B          0B          0B</code></pre>
@@ -327,7 +350,7 @@ Swap:             0B          0B          0B</code></pre>
     efficiently extract these instructions. For now you can safely trust
     that they are accurately represented in the files described above.
     The format in which the code is expressed is</p>
-    <pre><code>memory address, instruction</code></pre>
+    <pre class="language-bash"><code>memory address, instruction</code></pre>
     <p>Where memory address refers to the virutal memory address at
     which the instruction is stored for the process executing the
     program.</p>
@@ -335,7 +358,7 @@ Swap:             0B          0B          0B</code></pre>
     <h3>Summary Of Findings</h3>
     <p>The arkworks code base executes fewer x86 instructions; 280 vs
     326 to specific.</p>
-    <pre><code>wc -l static/code/yuval                                                                     ─╯
+    <pre class="language-bash"><code>wc -l static/code/yuval                                                                     ─╯
      326 static/code/yuval
 
 wc -l static/code/opt                                                                       ─╯
@@ -345,7 +368,7 @@ wc -l static/code/opt                                                           
     algorithm. For <code>g-mult</code>, as expected we see <span
     class="math inline">\(2n^2 + n = 36\)</span> multiplication
     operations.</p>
-    <pre><code>1 ret
+    <pre class="language-bash"><code>1 ret
 1 setb
 3 lea
 4 imul &lt;--
@@ -357,14 +380,14 @@ wc -l static/code/opt                                                           
 135 mov</code></pre>
     <p>Further more, there are 36 64-bit read/write operations to
     memory.</p>
-    <pre><code>root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks# cat opt|grep -o &#39;[a-z0-9]\+ ptr&#39; | sort|uniq -c
+    <pre class="language-bash"><code>root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks# cat opt|grep -o &#39;[a-z0-9]\+ ptr&#39; | sort|uniq -c
      36 qword ptr
 </code></pre>
     <p>For the new algorithm we expect to see fewer multiplications i.e
     <span class="math inline">\(2n^2 + 1 = 33\)</span> multiplication
     opearations, and that’s exactly what we see. <strong>This is what we
     hoped would give us our speedup.</strong></p>
-    <pre><code>1 imul &lt;---
+    <pre class="language-bash"><code>1 imul &lt;---
 1 ret
 1 shl
 1 shr
@@ -387,7 +410,7 @@ wc -l static/code/opt                                                           
     <p>But the overhead from other instructions, especially read/writes
     to memory seems far worse. We make 74 64-bit read/write operations
     and 6 128-bit/read write operations.</p>
-    <pre><code>root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks# cat yuval|grep -o &#39;[a-z0-9]\+ ptr&#39; | sort|uniq -c
+    <pre class="language-bash"><code>root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks# cat yuval|grep -o &#39;[a-z0-9]\+ ptr&#39; | sort|uniq -c
       2 byte ptr
      74 qword ptr
       6 xmmword ptr</code></pre>
@@ -431,7 +454,7 @@ wc -l static/code/opt                                                           
     directory named <code>t</code>. (We assume that you are running
     Linux as the OS, though there are windows and Mac pin tools
     available on the website)</p>
-    <pre><code>mkdir t &amp;&amp; cd t
+    <pre class="language-bash"><code>mkdir t &amp;&amp; cd t
 wget https://software.intel.com/sites/landingpage/pintool/downloads/pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz
 ls -l 
 total 32232
@@ -442,13 +465,13 @@ total 32232
     will have no human readable strings with debug information. This is
     achieved by updating the <code>.cargo/config.toml</code> file as
     described below.</p>
-    <pre><code>$ cat ~/.cargo/config.toml
+    <pre class="language-bash"><code>$ cat ~/.cargo/config.toml
 [target.x86_64-unknown-linux-gnu]
 rustflags = [ &quot;-C&quot;, &quot;link-args=-Wl,-export-dynamic&quot; ]</code></pre>
     <p>This will allow us to later inspect the binary for the method
     headers we care about. The next step is to update are Cargo.toml
     file with the following lines.</p>
-    <pre><code>[profile.release-with-debug]
+    <pre class="language-bash"><code>[profile.release-with-debug]
 inherits = &quot;release&quot;
 debug = true
    </code></pre>
@@ -457,7 +480,7 @@ debug = true
     and Rust does all its compiler optimisations. Then to builld the
     binary or executable, we run the code with the following
     parameters.</p>
-    <pre><code>$ cargo build --profile release-with-debug</code></pre>
+    <pre class="language-bash"><code>$ cargo build --profile release-with-debug</code></pre>
     <p>This creates a binary file in
     <code>target/release-with-debug</code> directory called
     <code>minimal_mult</code> (<code>minimal_mult</code> is the name we
@@ -477,7 +500,7 @@ debug = true
     address of the functions we care about. These memory addresses
     represent the offset from the first line of the executable (not the
     actual virtual address).</p>
-    <pre><code>$ nm --defined-only target/release-with-debug/minimal_mult|grep scalar
+    <pre class="language-bash"><code>$ nm --defined-only target/release-with-debug/minimal_mult|grep scalar
 
 000000000004b7d0 t _ZN12minimal_mult10yuval_mult10scalar_mul17ha435832ac9fe806eE
 000000000004a790 t _ZN12minimal_mult12vanilla_cios10scalar_mul17h8731c86ebf619ce7E
@@ -485,10 +508,10 @@ debug = true
     <p>It will soon be clear why we need this. Now let’s run the binary,
     but get the pin tool to interject by dumping every x86 instruction
     to a file before it is executed (as described above).</p>
-    <pre><code>$ ../t/pin-external-3.31-98869-gfa6f126a8-gcc-linux/pin -t ../t/pin-external-3.31-98869-gfa6f126a8-gcc-linux/source/tools/ManualExamples/obj-intel64/itrace.so -- ./target/release-with-debug/minimal_mult</code></pre>
+    <pre class="language-bash"><code>$ ../t/pin-external-3.31-98869-gfa6f126a8-gcc-linux/pin -t ../t/pin-external-3.31-98869-gfa6f126a8-gcc-linux/source/tools/ManualExamples/obj-intel64/itrace.so -- ./target/release-with-debug/minimal_mult</code></pre>
     <p>This generates a file file called <code>itrace.out</code>, which
     looks like this.</p>
-    <pre><code>Loading /root/Montgomery-Benchmarks/target/release-with-debug/minimal_mult 5e4052170000v
+    <pre class="language-bash"><code>Loading /root/Montgomery-Benchmarks/target/release-with-debug/minimal_mult 5e4052170000v
 Loading /lib64/ld-linux-x86-64.so.2 793baee95000
 Loading [vdso] 793baee93000
 0x793baeeb5940 mov rdi, rsp
@@ -517,14 +540,14 @@ Loading [vdso] 793baee93000
     simply print from
     <code>0x5e4052170000</code>+<code>0x4b7d0</code>=<code>0x5e40521bb7d0</code>
     to the corresponding ret instruction:</p>
-    <pre><code>cat itrace.out | sed -n &#39;/^0x5e40521bb7d0/,/ret/{p;/ret/q}&#39; &gt; yuval.disas</code></pre>
+    <pre class="language-bash"><code>cat itrace.out | sed -n &#39;/^0x5e40521bb7d0/,/ret/{p;/ret/q}&#39; &gt; yuval.disas</code></pre>
     <p>and similarly</p>
-    <pre><code>cat itrace.out | sed -n &#39;/^0x5e40521bb3a0/,/ret/{p;/ret/q}&#39; &gt; opt.disas</code></pre>
+    <pre class="language-bash"><code>cat itrace.out | sed -n &#39;/^0x5e40521bb3a0/,/ret/{p;/ret/q}&#39; &gt; opt.disas</code></pre>
     <div class="remark"><h3></h3><p>The above sed script is a little bit facile, and works here because
     the functions of interest do not call anything established, as we asked
     the Rust compiler to inline the helpers. A more robust way to extract
     the assembly is to do the following:</p></div>
-    <pre><code>$ objdump -d -Mintel target/release-with-debug/minimal_mult|sed -n &#39;/^0.*scalar_mul/,/ret/{/scalar_mul\|ret/p}&#39;
+    <pre class="language-bash"><code>$ objdump -d -Mintel target/release-with-debug/minimal_mult|sed -n &#39;/^0.*scalar_mul/,/ret/{/scalar_mul\|ret/p}&#39;
 000000000004a790 &lt;_ZN12minimal_mult12vanilla_cios10scalar_mul17h8731c86ebf619ce7E&gt;:
    4ac47:       c3                      ret
 000000000004b3a0 &lt;_ZN12minimal_mult14optimised_cios20scalar_mul_unwrapped17h08a3ba9b5ffe6264E&gt;:
@@ -532,7 +555,7 @@ Loading [vdso] 793baee93000
 000000000004b7d0 &lt;_ZN12minimal_mult10yuval_mult10scalar_mul17ha435832ac9fe806eE&gt;:
    4bce6:       c3                      ret</code></pre>
     <p>and then e.g. for yuval,</p>
-    <pre><code>cat itrace.out | sed -n &#39;/^0x5e40521bb7d0/,/0x5e40521bbce6/{p;/0x5e40521bbce6/q}&#39;</code></pre>
+    <pre class="language-bash"><code>cat itrace.out | sed -n &#39;/^0x5e40521bb7d0/,/0x5e40521bbce6/{p;/0x5e40521bbce6/q}&#39;</code></pre>
     <p>that is, using the address of the ret to figure out when to stop
     printing, and not just searching for the first ret, as this would be
     the return from the first callee of the function of interest and not
@@ -578,6 +601,8 @@ Loading [vdso] 793baee93000
     </ol>
     </section>
   </main>
+
+
 
 
 

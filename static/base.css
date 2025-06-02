@@ -1,12 +1,10 @@
 /* === Theme Colors === */
+body.light-mode{
+  --toc-link: maroon;
+}
 body.dark-mode {
-  --bg: #fefcf9;
-  --text: #1a1a1a;
-  --heading: #34558b;
-  --link: #34558b;
-  --link-hover: #004477;
-  --code-bg: #f5f2eb;
-  --border-color: #e0ddd6;
+  --toc-link: lightgray;
+
 }
 
 /* === Global Resets & Box Model === */
@@ -15,28 +13,33 @@ body.dark-mode {
 }
 
 
-
-.authors {
-  margin-top: 0.4em;
-  font-size: 0.85rem;
-  color: #666; /* soft grey */
+.authors-and-date {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6em;
-  line-height: 1.4;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
 }
 
-.authors a {
-  color: #444;
-  text-decoration: none;
-  border-bottom: 1px dotted #aaa;
-  transition: color 0.2s ease, border-color 0.2s ease;
+.authors {
+  font-weight: 600;
 }
 
-.authors a:hover {
-  color: #000;
-  border-color: #555;
+.published-date {
+  font-style: italic;
+  color: #888;
 }
+
+.last-updated {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--toc-link);
+  margin-top: 0.5rem;
+}
+
+
 
 
 /* Mobile/tablet: TOC normal flow */
@@ -70,15 +73,15 @@ body.dark-mode {
   margin-left: 0.5em;  /* add a little extra indent if you want */
 }
 .toc ul ul ul > li > a::before {
-/*  content: "➡️ ";*/
+  content: "➡️ ";
   margin-left: 1em;
 }
 
 
 /* Optional: Style ToC Links */
 .toc a {
-  text-decoration: underline;
-  color: var(--link);
+  color: var(--toc-link);
+  text-decoration: none;
 }
 
 .toc a:hover {
@@ -109,7 +112,6 @@ body.dark-mode {
     width: 240px;
     max-height: calc(100vh - 3.5rem);
     overflow-y: auto;
-/*    border-right: 1px solid var(--border-color);*/
     border-bottom: none;
     position: sticky;
     top: 3.5rem;

@@ -21,7 +21,7 @@
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
-  <title>Your title here</title>      
+  <title>Counting Trees</title>      
   </head>
 
   <body class="dark-mode">  
@@ -44,34 +44,141 @@
       
   </nav>
 
+    <div class="toc" id="toc">      
+        <div class="last-updated">
+    Last Page Build: 2025-06-02 17:18:49
+  </div>
+
+      <div class="toc-content">
+          <ul>
+          <li><a href="#fiddler-counting-trees"
+          id="toc-fiddler-counting-trees">Fiddler Counting Trees</a>
+          <ul>
+          <li><a href="#can-i-see-through-trees"
+          id="toc-can-i-see-through-trees">Can I See Through
+          Trees?</a></li>
+          </ul></li>
+          </ul>
+      </div>
+  
+  </div>
     <br>
   <br>
   </header>
 
   <main class="content">
-    <h1>Your title here</h1>
+    <h1>Counting Trees</h1>
   
       <div class="authors-and-date">
     <div class="authors">
-      The Invisible Man
+      Ari
     </div>
     <div class="published-date">
-      Published: 2025-05-27T15:22:30.162016+01:00
+      Published: 2023-08-14
     </div>
   </div>
     
 
 
           <ul class="tag-list">
-                  <li class="tag-item"><a href="/publish/unfiled.html" class="tag-link">unfiled</a></li>
+                  <li class="tag-item"><a href="/publish/fiddler.html" class="tag-link">fiddler</a></li>
+                  <li class="tag-item"><a href="/publish/puzzles.html" class="tag-link">puzzles</a></li>
                 </ul>
     
-    <ul class="task-list">
-    <li><label><input type="checkbox" />🔥🔥 FIXME</label></li>
-    <li><label><input type="checkbox" />🗓️🗓️ TODO</label></li>
-    <li><label><input type="checkbox" />🕰️🕰️ STALLED</label></li>
-    <li><label><input type="checkbox" />⏳⏳ IN-PROGRESS</label></li>
-    </ul>
+    <section id="fiddler-counting-trees" class="level1">
+    <h1>Fiddler Counting Trees</h1>
+    <p>Clearly, I can see the 8 trees immediately close to me. So the
+    the number of trees I can see must be at least 8. Also, notice that
+    the grid of trees can be divided into 8 symmetric sets.</p>
+    <p><img src="assets/fiddler_trees_base.png"></img></p>
+    <p>So if I can figure out how many trees I can see in section 1
+    apart from the trees closest to me, I can simply multiply that count
+    by 8 and add 8 (for my immediate trees) to the final score and that
+    gives me how many trees I can see.</p>
+    <p>Counting how many trees I can see in section 1 beyond the
+    immediate trees boils down to asking the following question
+    <code>Given two trees located at (a,b) and (c, d), can I see see through the gap in between the trees (I am positioned at the origin).</code></p>
+    <section id="can-i-see-through-trees" class="level2">
+    <h2>Can I See Through Trees?</h2>
+    <p>Consider the figure below.
+    <img src="assets/example.png" width="600px"></img></p>
+    <p>Given a node, we ask fraction of light gets blocked by it. We
+    will measure fractions in angles. Since we only work in section one,
+    it is fine to look at angles between <span
+    class="math inline">\(\pi/4, 0\)</span>.</p>
+    <p>Given a node at location <span
+    class="math inline">\((a,b)\)</span>, denote <span
+    class="math inline">\(\theta_1\)</span> and <span
+    class="math inline">\(\theta_2\)</span> be as shown below and let
+    <span class="math inline">\(r\)</span> be the radius of the tree.
+    Let <span class="math inline">\(R =
+    \sqrt{a^2 + b^2}\)</span> be the distance of the tree for the origin
+    and <span class="math inline">\(\alpha=\sin^{-1}(r/R)\)</span>. Then
+    we have</p>
+    <p><span class="math display">\[\begin{align}
+    \theta_1 &amp;= \tan^{-1}(b/a) - \alpha
+    \end{align}\]</span></p>
+    <p><span class="math display">\[\begin{align}
+    \theta_2 &amp;= \tan^{-1}(b/a) + \alpha
+    \end{align}\]</span></p>
+    <p>The fraction of light this tree blocks is simply <span
+    class="math inline">\(\theta_2 -
+    \theta_1\)</span>.</p>
+    <p>So now we start at position <span
+    class="math inline">\((0,0)\)</span> and ask how much light is
+    blocked by the nodes <span class="math inline">\((1,1)\)</span> and
+    <span class="math inline">\((1,0)\)</span>. Using the formula above,
+    we get that only rays in between 34.8 degrees and 14.4 degrees pass
+    through (see figure below)</p>
+    <p><img src="assets/start.jpeg" width="300px"></img></p>
+    <p>Now we ask does light go through between <span
+    class="math inline">\((2,1)\)</span> and <span
+    class="math inline">\((2, 0)\)</span>. For light to flow below <span
+    class="math inline">\((2,1)\)</span> we see that the acceptable
+    anble is roughly 20.14 degrees, which is greater than 14.4 degrees
+    from the step above. So we can conclude that light does indeed pass
+    in between <span class="math inline">\((2,1)\)</span> and <span
+    class="math inline">\((2,0)\)</span></p>
+    <p><img src="assets/2.png"></img></p>
+    <p>We repeat the process: <em>What about <span
+    class="math inline">\((3,1)\)</span> and <span
+    class="math inline">\((3,0)\)</span>?</em> Now we see that for light
+    to sneak in under <span class="math inline">\((3,1)\)</span> we need
+    an angle of 13 ish degrees which is smaller than 14.4 so light
+    cannot sneak in under <span class="math inline">\((3,1)\)</span>.
+    <em>What about <span class="math inline">\((2,1)\)</span> and <span
+    class="math inline">\((3, 1)\)</span>:</em> For this to happen,
+    light has to sneak in over <span
+    class="math inline">\((3,1)\)</span>, and for that we need an angle
+    of <span class="math inline">\(22.9\)</span> degrees. But only light
+    at a degree of at most <span class="math inline">\(20.14\)</span>
+    degrees light passed through the under <span
+    class="math inline">\((2,1)\)</span>, so we conclude light does not
+    pass between <span class="math inline">\((2,1)\)</span> and <span
+    class="math inline">\((3, 1)\)</span>.</p>
+    <p><img src="assets/3.png"></img></p>
+    <p>We have found a perimeter to the right, now we need to find how
+    far light reaches to the top.</p>
+    <p>We ask if light reaches in between <span
+    class="math inline">\((1, 1)\)</span> and <span
+    class="math inline">\((2, 1)\)</span>, and the answer is yes. Light
+    rays between <span class="math inline">\(34\)</span> and <span
+    class="math inline">\(32\)</span> degrees pass through. What about
+    <span class="math inline">\((2,2)\)</span> and <span
+    class="math inline">\((3,2)\)</span>. For this to happen, light has
+    to go under <span class="math inline">\((2,2)\)</span> which needs
+    an angle of about 39 degree which is not possible or light has to go
+    over <span class="math inline">\((3,2)\)</span> which needs an angle
+    of at least <span class="math inline">\(37.66\)</span> degrees,
+    which is not possible.</p>
+    <p>So the trees we can see in Section 1 that are not immediate
+    neighbours are <span class="math inline">\((2,1)\)</span>, <span
+    class="math inline">\((3,2)\)</span> and <span
+    class="math inline">\((3,1)\)</span>.</p>
+    <p>Thus the total number of trees is <span class="math inline">\(8*3
+    + 8=32\)</span></p>
+    </section>
+    </section>
   </main>
 
 
