@@ -46,7 +46,7 @@
 
     <div class="toc" id="toc">      
         <div class="last-updated">
-    Last Page Build: 2025-06-03 15:11:02
+    Last Page Build: 2025-06-03 20:13:27
   </div>
 
       <div class="toc-content">
@@ -92,15 +92,15 @@
           <ul>
           <li><a href="#without-subtractions"
           id="toc-without-subtractions">Without Subtractions</a></li>
-          <li><a href="#with-two-conditional-subtractions"
-          id="toc-with-two-conditional-subtractions">With Two
-          Conditional Subtractions</a></li>
+          <li><a href="#putting-in-the-subtractions"
+          id="toc-putting-in-the-subtractions">Putting In The
+          Subtractions</a></li>
           <li><a href="#aside-same-code-two-conclusions"
           id="toc-aside-same-code-two-conclusions">Aside: Same Code Two
           Conclusions</a></li>
+          </ul></li>
           <li><a href="#so-where-do-we-go-now"
           id="toc-so-where-do-we-go-now">So Where Do We Go Now?</a></li>
-          </ul></li>
           </ul>
       </div>
   
@@ -132,60 +132,59 @@
     <h2>Background</h2>
     <p>In an earlier <a href="mont_mult.html">post</a>, we analysed why
     <a
-    href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">this</a>
-    implementation of the improved <a
+    href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">this
+    implementation</a> of the improved <a
     href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication">Montgomery
     multiplication</a> algorithm by <a
     href="https://hackmd.io/@Ingonyama/Barret-Montgomery">Yuval Domb</a>
     was not empirically faster out of the box. After disassembling the
     code using the Intel Pin tool, we identified large memory reads and
-    writes as the primary source of slower run times. The analysis was
-    specific to x86 architectures, but the empirical findings were
-    consistent across Mac M2 Air and Intel x86 Digital Ocean servers.
-    This loss of performance, however, is an artefact of the
-    implementation, not the algorithm itself<a href="#fn1"
+    writes as the primary source of slower run times. Although the
+    analysis was specific to x86 architectures, the empirical findings
+    were consistent across MacBook M2 Laptops and Intel x86 Digital
+    Ocean servers. This loss of performance, however, is an artefact of
+    the implementation, not the algorithm itself<a href="#fn1"
     class="footnote-ref" id="fnref1"
     role="doc-noteref"><sup>1</sup></a>. The new algorithm uses fewer
     multiplication operations than the <a
     href="https://ieeexplore.ieee.org/document/1393267">CIOS
-    algorithm</a>, and therefore, there should be a faster
+    algorithm</a>, and therefore, there should exist a faster
     implementation (at least in theory).</p>
     <p>The large chunk reads and writes were likely due to the
     high-level Rust code storing intermediate <span
     class="math inline">\(2n\)</span> limbed values in contiguous
     regions of memory (<a
     href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L61">see</a>)
-    This likely led to the compiler demanding this of the generated
-    assembly code as well. Contiguous memory storage is not required by
-    the algorithm specification, it’s just an implementation detail.</p>
-    <p>As a resolution, we found an <a
+    This likely led the compiler to demand the same of the generated
+    assembly code as well. The key thing to note here is that the
+    algorithm specification does not require contiguous memory storage;
+    it’s just an implementation detail. As a resolution, we found an <a
     href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/main/src/mul_logjumps_unr_2.rs">alternate</a>
     implementation. In this implementation, all intermediate values are
-    stored in Rust variables as opposed to constant-sized vecs/arrays.
+    stored as Rust variables as opposed to constant-sized vecs/arrays.
     The code explicitly does school-book multiplication, storing all
-    intermediate values in registers, before adding them using
-    school-book addition.</p>
-    <p>This implementation is as close to writing assembly without
-    writing assembly, and probably allows the compiler to optimise to
-    use more registers (instead of large read/writes to memory).</p>
-    <p>We found this implementation is empirically faster than the
-    current Arkworks CIOS implementation (the exact amount varies across
-    trials, but it seems to be consistently faster across trials).</p>
-    <div class="remark"><h3></h3><p>This is not the only thing that is different about this
-    implementation when compared to the other implementation, but we will
-    get to that in a bit.</p></div>
+    intermediate values in registers, before adding them in a long
+    sequence using school-book addition. The code came with
+    <code>cargo bench</code>, and when compared to the current Arkworks
+    CIOS implementation, this code seemed to be 5-10% faster (at least
+    using their bench setup)</p>
+    <div class="remark"><h3></h3><p>The lack of arrays/continuous memory is not the only thing that is
+    different about this alternate implementation when compared to the
+    earlier implementation for World Coin we benchmarked. We will get to
+    that in a bit.</p></div>
     <p>For the remainder of the post, we refer to the original Arkworks
-    CIOS algorithm for Montgomery multiplication as <code>c-mult</code>,
+    CIOS algorithm for Montgomery multiplication as <code>c-mul</code>,
     the previous implementation of the new multiplication as
-    <code>s-mult</code>, and the faster implementation as
-    <code>h-mult</code>. c stands for CIOS, s stands for single step,
-    and h stands for hybrid. The naming convention will soon become
+    <code>s-mul</code>, and the faster implementation as
+    <code>h-mul</code>. c stands for CIOS, s stands for single step, and
+    h stands for hybrid. The naming convention will soon become
     clear.</p>
     <section id="putting-this-faster-code-into-jolt" class="level3">
     <h3>Putting this faster code into Jolt</h3>
     <p>Ignoring speed for a minute, we plugged in the <code>c-mul</code>
-    and <code>smul</code> multiplication algorithms in their native form
-    (unchanged) into Jolt. Then we ran
+    and <code>smul</code> multiplication algorithms in their native
+    form<a href="#fn2" class="footnote-ref" id="fnref2"
+    role="doc-noteref"><sup>2</sup></a> into Jolt. Then we ran
     <code>cargo test -p jolt-core -- sha3_e2e_hyperkzg</code>, and the
     unit tests <strong>fail</strong> for <strong>both</strong>
     <code>s-mult</code> and <code>h-mult</code>.</p>
@@ -211,9 +210,9 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     <h3>Why does this happen?</h3>
     <p>Scanning the <a
     href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/main/src/mul_logjumps_unr_2.rs">lines
-    of code</a> for <code>h-mult</code>,we observe that the final answer
-    is not reduced <span class="math inline">\(\mod p\)</span>. When you
-    multiply two numbers that are both less than <span
+    of code</a> for <code>h-mult</code>, we observe that the final
+    answer is not reduced <span class="math inline">\(\mod p\)</span>.
+    When you multiply two numbers that are both less than <span
     class="math inline">\(p\)</span>, the result may still cross over
     the modulus <span class="math inline">\(p\)</span>.</p>
     <p>In <a
@@ -221,20 +220,23 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     the last line of multiplication involves subtracting <span
     class="math inline">\(p\)</span> from the final answer if the answer
     is greater than <span class="math inline">\(p\)</span>. The line
-    <code>__subtract_modulus(a)</code>simply computes <span
-    class="math inline">\(p-a\)</span> if <span class="math inline">\(a
-    \ge p\)</span>.</p>
+    <code>__subtract_modulus(a)</code>simply outputs <span
+    class="math inline">\(p-a\)</span> if the final output <span
+    class="math inline">\(a \ge p\)</span>, otherwise leaves <span
+    class="math inline">\(a\)</span> unchanged.</p>
     <p>In the <a
     href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L1154">multiplication
     code</a> for <code>s-mul</code>, notice they have a
-    <code>reduce_ct</code> function. Digging deeper, we find that they
+    <code>reduce_ct</code> function. In this function, we find that they
     subtract <span class="math inline">\(2p\)</span> from <span
-    class="math inline">\(a\)</span> (the Montgomery product) only if
-    the most significant bit of <span class="math inline">\(a\)</span>
-    is 1.</p>
-    <p>We have three algorithms, and the final answer for each algorithm
-    is the same (modulo p). But they are not the same numerical value.
-    To summarise:</p>
+    class="math inline">\(a\)</span> only if the most significant bit of
+    <span class="math inline">\(a\)</span> is 1. Thus, we have three
+    algorithms, and although the final answer for each algorithm is the
+    same (modulo p), the exact numerical value is different for all 3
+    algorithms. They are, however, not always different. Sometimes they
+    are the same, sometimes two out of three of them are the same, and
+    at times all three are different.</p>
+    <p>To summarise:</p>
     <ul>
     <li><code>c-mult</code>: that passes unit tests and subtracts <span
     class="math inline">\(p\)</span> from <span
@@ -249,17 +251,17 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     </ul>
     <p><strong>First attempt</strong>: We stick a
     <code>__subtract_modulus(a)</code> at the end of <code>h-mul</code>
-    matching <code>c-mul</code>.</p>
-    <p><strong>The tests still panics with the same error
+    matching the behaviour in <code>c-mul</code>.</p>
+    <p><strong>The tests still panic with the same error
     message</strong></p>
     <p>A few hours of debugging follow, we observe that even after
     subtracting <span class="math inline">\(p\)</span> from the answer,
     the final answer is still sometimes greater than <span
-    class="math inline">\(p\)</span> i.e <code>h-mul</code> often
-    outputs something outputs something that was greater than <span
-    class="math inline">\(2p\)</span>.</p>
+    class="math inline">\(p\)</span>, i.e <code>h-mul</code> often
+    outputs something outputs something that is sometimes greater than
+    <span class="math inline">\(2p\)</span>.</p>
     <p>Ok, what happens if we put in two instances of
-    <code>__subtract_modulus()</code>?</p>
+    <code>__subtract_modulus(a)</code>?</p>
     <p><strong>Jolt passes! </strong></p>
     <p>Did we get lucky? One way to check is to try a lot of random
     inputs and try to break the test. <span
@@ -267,38 +269,40 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     <span class="math inline">\(10\)</span> chained multiplications in
     each trial, the numerical value of <code>c-mult</code> and
     <code>h-mult</code> are <strong>EXACTLY</strong> the same.</p>
-    <div class="remark"><h3></h3><p>However, adding two conditional subtractions to <code>s-mul</code> –
-    Jolt tests <strong>fail</strong> again.<br />
-    But adding 3 conditional subtractions to <code>s-mul</code> makes Jolt
-    pass with <code>s-mul</code></p></div>
+    <p>However, adding two conditional subtractions to
+    <code>s-mul</code> – Jolt tests <strong>fail</strong> again.<br />
+    But adding 3 conditional subtractions to <code>s-mul</code> makes
+    Jolt pass with <code>s-mul</code>, and now all 3 algorithms are the
+    same.</p>
     <p>What is going on? Why do we need one subtraction for one
     algorithm, two and three for the others? How do we know we don’t
     need 3 or 4 or 5? <span class="math inline">\(100000\)</span> trials
-    is minuscule when compared to the input space of 256-bit numbers.
+    are minuscule when compared to the input space of 256-bit numbers.
     What if there are edge cases that we can’t catch via fudging?</p>
     <p>In what follows, we derive a formal guarantee on how large the
-    answer of the new Montgomery algorithm can be, therefore
-    establishing the maximum number of conditional subtracts we must
-    employ. In the process, we establish that there is not just 1 new
-    algorithm for Montgomery multiplication, but a family of algorithms
-    that are all related to each other.</p>
+    answer of these algorithms can be, therefore establishing the
+    maximum number of conditional subtracts we must employ. In the
+    process, we establish that there is not just 1 new algorithm for
+    Montgomery multiplication, but a family of algorithms that are all
+    related to each other, each demonstrating speed for different input
+    distributions.</p>
     </section>
     </section>
     <section id="montgomery-multiplication-maths" class="level2">
     <h2>Montgomery Multiplication Maths</h2>
     <p>We begin with the basics of Montgomery multiplication, and then
     describe the CIOS algorithm. This gives all the background needed to
-    get to what is going on.</p>
+    figure out what is going on.</p>
     <div class="remark"><h3></h3><p>Below, we actually describe the Separated Operand Scanning Algorithm
     (SOS), but deceptively refer to it as the Coarse Integrated Operand
-    Scanning (CIOS) algorithm. This is done for ease of exposition only, the
+    Scanning (CIOS) algorithm. This is done for ease of exposition only; the
     claims would hold regardless. See <a href="papers/Acard.pdf">Acar’s
     thesis Chapter 2</a> for more details. We also do not discuss the
     optimisations made by the <a
     href="https://hackmd.io/@gnark/modular_multiplication">Gnark</a> team as
     they are not relevant in this context.</p></div>
-    <p>Given a <span class="math inline">\(n\)</span> limb<a href="#fn2"
-    class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>
+    <p>Given a <span class="math inline">\(n\)</span> limb<a href="#fn3"
+    class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>
     modulus <span class="math inline">\(p\)</span>, integers <span
     class="math inline">\(a\)</span> and <span
     class="math inline">\(b\)</span> that are at most <span
@@ -467,8 +471,8 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     <em>ρ</em><sub>1</sub></span>, which is then added to the integer part
     of the division.</p></div>
     <p>In simple words, in CIOS we were adding and then dividing<a
-    href="#fn3" class="footnote-ref" id="fnref3"
-    role="doc-noteref"><sup>3</sup></a>, now we first divide and then
+    href="#fn4" class="footnote-ref" id="fnref4"
+    role="doc-noteref"><sup>4</sup></a>, now we first divide and then
     add things. See below:</p>
     <p><span class="math display">\[ c \equiv (c_{2n-1} r^{2n-1} +
     c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p\]</span></p>
@@ -481,8 +485,8 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     c_{n-2}r^{-1} \ldots + c_1r^{-(n-2)}+ c_0r^{-(n-1)} \mod p
     \end{align}
     \]</span></p>
-    <p>If we pre-computed<a href="#fn4" class="footnote-ref" id="fnref4"
-    role="doc-noteref"><sup>4</sup></a> <span
+    <p>If we pre-computed<a href="#fn5" class="footnote-ref" id="fnref5"
+    role="doc-noteref"><sup>5</sup></a> <span
     class="math inline">\(\rho_i \equiv r^{-i} \mod p\)</span> for all
     <span class="math inline">\(i \in [n-1]\)</span>, we can re-write
     the above equation as</p>
@@ -566,14 +570,15 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     <span class="math inline">\(r^{-1}\)</span> before adding things, or
     in <code>c-mul</code> where we NEVER divide before adding.</p>
     <p>In <code>h-mul</code>, at each iteration, we reduce half of the
-    remaining digits. If <span class="math inline">\(n=8\)</span>, we’d
+    remaining digits. If <span class="math inline">\(n=8\)</span>, we
     divide by <span class="math inline">\(r^{-4}, r^{-2},
     r^{-1}\)</span>. If <span class="math inline">\(n=4\)</span>, we
     first divide by <span class="math inline">\(r^{-2} \equiv \rho_2
     \mod p\)</span>, and then we divide by <span
     class="math inline">\(r^{-1}\equiv \rho_1 \mod p\)</span>.</p>
-    <p>So, for our <code>bn-254</code> specific implementation, we first
-    reduce by two digits <span class="math display">\[
+    <p>So, for our <code>bn-254</code> specific implementation, where
+    <span class="math inline">\(n=4\)</span>, we first reduce by two
+    digits <span class="math display">\[
     \begin{align}
     cr^{-2} &amp;\equiv \Big(c_{7}r^{5} + \ldots +c_{3}r + c_2 \Big)  +
     \rho_2(c_1r + c_0)
@@ -587,6 +592,16 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     &amp;\equiv Q + \text{Remainder}
     \end{align}
     \]</span></p>
+    <div class="remark"><h3></h3><p>Note that the total effect is the same as in <code>h-mul</code> where
+    we also divide by <span
+    class="math inline"><em>r</em><sup>−3</sup></span> before adding things.
+    The key difference between <code>h-mul</code> and <code>s-mul</code> is
+    that in <code>s-mul</code> we call do all 3 divisions in parallel,
+    whereas here we first divide by <span
+    class="math inline"><em>r</em><sup>−2</sup></span>, and only then can we
+    divide by <span class="math inline"><em>r</em><sup>−1</sup></span>. So
+    we lose some parallelism in <code>h-mul</code>, but as we will soon see,
+    we minimise the amount of overflow.</p></div>
     <p>From here on with just do CIOS.</p>
     <p>For each division operation, we blow up the current sum by at
     most <span class="math inline">\(rp\)</span>. See below <span
@@ -619,21 +634,28 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     \end{align}
     \]</span></p>
     <p>In this case, the number of subtractions is always 1 less than
-    that of <code>h-mul</code>. Of course, in CIOS we do not play any
-    iteration at all, so we start with CIOS from the beginning. This
-    gives us the following theorem:</p>
+    that of <code>h-mul</code> but one more than <code>c-mul</code>.
+    Thus, <code>s-mul</code> can be thought of as maximising parallel
+    division operations before adding, and <code>c-mul</code> can be
+    thought of as minimising division operations before an add. They are
+    the two extremes of this family of algorithms. Using the above
+    analysis, one can easily show the following:</p>
     <div class="thm"><h3>Theorem</h3><p>Let <span class="math inline"><em>u</em></span> be the number of
-    multiplication operations the CIOS algorithm does, and <span
+    multiplication operations the CIOS algorithm with inputs <span
+    class="math inline"><em>a</em></span> and <span
+    class="math inline"><em>b</em></span> that each at most <span
+    class="math inline"><em>p</em></span>, and <span
     class="math inline"><em>v</em></span> be the number of addition
     operations (including the reduction phase). Then, for any <span
     class="math inline">0 ≤ <em>k</em> ≤ <em>n</em> − 1</span>, if we divide
     <span class="math inline"><em>a</em><em>b</em></span> by <span
     class="math inline"><em>r</em><sup><em>k</em></sup></span> before
     adding, we have <span class="math inline"><em>k</em></span> fewer
-    multiplication operations compared to CIOS. If we use <span
-    class="math inline"><em>m</em></span> precomputed constants to divide,
-    then we have <span class="math inline"><em>m</em></span> more addition
-    operations than CIOS (due to the reduction step).</p></div>
+    multiplication operations compared to CIOS. If we have <span
+    class="math inline"><em>m</em></span> rounds of division, then we have
+    <span class="math inline"><em>m</em></span> more addition operations
+    than CIOS (due to the reduction step of making the answer less than
+    <span class="math inline"><em>p</em></span>).</p></div>
     </section>
     </section>
     <section id="missing-factor-of-1p" class="level2">
@@ -648,7 +670,9 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     <li><code>c-mul</code> needs at most 1 subtraction.</li>
     </ul>
     <p>But why does <strong><em>two</em></strong> subtract work out for
-    <code>h-mul</code>? Shouldn’t it be <strong>three</strong>?</p>
+    <code>h-mul</code>? Shouldn’t it be <strong>three</strong>?
+    Similarly, why did <strong>three</strong> work
+    <code>s-mul</code>?</p>
     <p>Re-examining the analysis for <code>h-mul</code></p>
     <p><span class="math display">\[cr^{-4} &lt; \Big(\frac{Q}{r^3} +
     r(\rho_1 + \rho_2) + mp \Big)/r &lt; 4p\]</span></p>
@@ -663,28 +687,32 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
     analysis, <span class="math inline">\(\rho_1\)</span> and <span
     class="math inline">\(\rho_2\)</span> are fixed. The largest value
     for <span class="math inline">\(Q\)</span> is <span
-    class="math inline">\((p-1)^2\)</span></p>
+    class="math inline">\((p-1)^2\)</span>. Plugging in exact
+    numbers</p>
     <p><span class="math display">\[cr^{-4} &lt; \frac{p^2}{r^4} +
-    (\rho_1 + \rho_2) + p \]</span></p>
-    <p>This sum turns out to be at most <span
-    class="math inline">\(2.25p\)</span> for <code>h-mul</code> and
-    <span class="math inline">\(3.25p\)</span> for
-    <code>s-mul</code></p>
+    (\rho_1 + \rho_2) + p &lt; 2.25p\]</span></p>
+    <p>It turns out to be less than <span
+    class="math inline">\(3.25p\)</span> for <code>s-mul</code></p>
     <div class="remark"><h3></h3><p>It’s the <code>bn-254</code> prime modulus <span
     class="math inline"><em>p</em></span> that allows us to do one
     subtraction less for <code>h-mul</code> and <code>s-mul</code> than what
     theory would suggest for any general prime <span
-    class="math inline"><em>p</em></span>.</p></div>
+    class="math inline"><em>p</em></span>. If <span
+    class="math inline"><em>p</em></span> were only a little smaller than
+    <span class="math inline"><em>r</em><sup><em>n</em></sup></span>, then
+    we’d have to put in one extra reduction for each of these
+    algorithms.</p></div>
     </section>
     <section id="the-need-for-speed" class="level2">
     <h2>The Need For Speed</h2>
     <p>Remember, we began with the goal of speeding up Montgomery
-    multiplication. So far, we have only understood correctness. What is
-    the cost of adding large things ?</p>
+    multiplication. So far, we have only understood correctness to make
+    Jolt unit tests pass. We had to add extra instructions to handle
+    overflow. Do the speedups previously observed still exist?</p>
     <section id="without-subtractions" class="level3">
     <h3>Without Subtractions</h3>
     <p>The first step is to remove all subtractions from all algorithms
-    and observe how fast things are without the final reduction.</p>
+    and observe how fast things are.</p>
     <pre class="language-bash"><code>warning: `minimal_mult` (example &quot;ark-multiplication&quot;) generated 1 warning
     Finished `release` profile [optimized] target(s) in 3.76s
      Running `target/release/examples/ark-multiplication`
@@ -697,15 +725,15 @@ dtype: float64</code></pre>
     <p>We are 11% faster. Note is very difficult to pinpoint if it’s due
     to fewer multiplications or how we wrote the code without using
     contiguous memory, but with 100,000 random inputs and 100 chained
-    multiplications, we appear to be consistently faster.</p>
-    <p>Although fast, this code will not pass – we need the answer to be
-    reduced <span class="math inline">\(\mod p\)</span>.</p>
+    multiplications, we appear to be consistently faster. Although fast,
+    this code will not pass – we need the answer to be reduced <span
+    class="math inline">\(\mod p\)</span>.</p>
     </section>
-    <section id="with-two-conditional-subtractions" class="level3">
-    <h3>With Two Conditional Subtractions</h3>
+    <section id="putting-in-the-subtractions" class="level3">
+    <h3>Putting In The Subtractions</h3>
     <p>Now, for starters, ignoring the fact that <code>h-mul</code>
-    actually needs <strong>two</strong> subtractions, we stick one
-    conditional subtraction for both <code>c-mul</code> and
+    actually needs <strong>two</strong> conditional subtractions, we
+    stick one conditional subtraction for both <code>c-mul</code> and
     <code>h-mul</code>. We should still have a speed advantage, right?
     After all, we had one algorithm faster than the second algorithm,
     and we added the same line of code to both.</p>
@@ -717,30 +745,31 @@ Average Advantage: -5.434536875745394
 C-mult    1791.88866
 H-mult    1889.26951
 dtype: float64</code></pre>
-    <p>We are 5% slower. And with a little thought and <a
+    <p>We are 5% slower. With a little thought and <a
     href="https://www.youtube.com/watch?v=-HNpim5x-IE">listening Matt
-    Godbolt</a>, this observation is not surprising. The answer is
-    branch prediction. The CPU gets it wrong with <code>h-mul</code>.
-    Why? It’s because the line of code we added was</p>
+    Godbolt</a>, this observation is not surprising. As we are writing
+    CPU code, the answer is branch prediction. The CPU gets it wrong a
+    lot for <code>h-mul</code>. Why? It’s because the line of code we
+    added was</p>
     <pre class="language-rust"><code>if a &gt;= p{
     a = p - a
 }</code></pre>
-    <p>Based on theory we’ve built so so far, we know that
-    <code>c-mul</code> overflows much less frequently than
-    <code>h-mul</code> – If things were distributed uniformly<a
-    href="#fn5" class="footnote-ref" id="fnref5"
-    role="doc-noteref"><sup>5</sup></a>, it would imply that 95% of the
-    time, the if statement evaluates to false for <code>c-mul</code>. So
-    the CPU can pretty much always get rid of this line of code, and be
-    wrong only 5% of the time. Instead, in <code>h-mul</code> we
-    overflow about 65% on average. This makes branch prediction close to
-    impossible.</p>
+    <p>Based on our theory so far, we know that <code>c-mul</code>
+    overflows much less frequently than <code>h-mul</code> – With random
+    inputs <span class="math inline">\(\mod p\)</span>, we see that CIOS
+    only overflows above <span class="math inline">\(p\)</span> 5% of
+    the time, whereas <code>h-mul</code> overflows 68% of the time. If
+    things were distributed uniformly<a href="#fn6" class="footnote-ref"
+    id="fnref6" role="doc-noteref"><sup>6</sup></a>, it would imply that
+    95% of the time, the if statement evaluates to false for
+    <code>c-mul</code>. So the CPU can pretty much always get rid of
+    this line of code, and be wrong only 5% of the time.</p>
     <p>If we wish to double down on this theory. We just put the
     <code>if</code> check, but remove the actual subtraction from the
     reduction (this will break correctness, but we’re only checking if
-    our theory is correct). All our speed is recovered. Now, the branch
-    prediction is the same for both code bases. The compiler will just
-    get rid of the comparison.</p>
+    our theory is correct). All our speed is recovered. The branch
+    prediction is the same for both code bases, as the compiler will
+    just get rid of the check in the first place.</p>
     <pre class="language-bash"><code>100000 Trials of 100 chained multiplications
 Benchmarking done
 Average Advantage: 11.633622123165752
@@ -755,9 +784,12 @@ dtype: float64</code></pre>
     <p>As a brief distraction, in this section, we give an example of
     how finicky performance benchmarking can be.</p>
     <p>One of the reasons we embarked on this journey was that
-    preliminary experimentation showed 10-15% speedups. Without the
-    subtractions, we have a clear understanding of why this can be.
-    However, even if we add the requisite subtractions to the <a
+    preliminary experimentation showed 10-15% speedups<a href="#fn7"
+    class="footnote-ref" id="fnref7"
+    role="doc-noteref"><sup>7</sup></a>. Without the subtractions, we
+    have a clear understanding of why this was the case (fewer
+    multiplications and no big read/write chunks). However, even if we
+    add the requisite subtractions to the <a
     href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/cc9dcfb0ed0c36fe1d368d630f1cce1e72361506/src/y_mult_opt.rs#L114">Ingo
     skyscraper code</a> code and run <code>cargo bench</code> based on
     <a
@@ -778,10 +810,11 @@ h-mul (10 chained h-mul, looped)
     <p><code>h-mul</code> is FASTER even with the subtractions!!!!
     <strong>How can this be?</strong> This contradicts everything we
     have discussed so far. In terms of the body of the algorithms – this
-    bench and our tests run the EXACT same code, yet we draw totally
-    different conclusions. A lazy conclusion might be variance – but
-    that’s not true. We can randomise, and bootstrap, build stratified
-    experiments, <code>h-mul</code> is still marginally faster.</p>
+    bench and our tests run the <strong>EXACT</strong> same code, and
+    yet we have totally different outcomes. A lazy conclusion might be
+    variance – but that’s not true. We can randomise, and bootstrap,
+    build stratified experiments, <code>h-mul</code> is still marginally
+    faster.</p>
     <p>The real answer can be found by thinking about the CPU’s branch
     prediction algorithm and then staring at the <a
     href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/0cc267afa60c87deb632164ff692d783ef6f2109/benches/bench.rs#L6">inputs
@@ -792,42 +825,51 @@ h-mul (10 chained h-mul, looped)
     class="math inline">\(p-1\)</span>. In the
     <code>Ingo skyscraper</code> code, the inputs are random <span
     class="math inline">\(\mod r^4\)</span>. This strips away the
-    overflow prevention property of CIOS – therefore, we lose the
-    beautiful branch prediction, which makes things fast. So now the CPU
-    cannot predict the branch, and we are closer to the no-subtraction
-    situation. Of course, we still lose a bit as <code>h-mul</code>
-    needs 2 subtractions and 2 checks as opposed to 1.</p>
+    overflow prevention property of CIOS – therefore, we lose the gains
+    of the branch prediction, which makes CIOS fast in practice. Now the
+    CPU cannot predict the branch, and this is much closer to the
+    no-subtraction situation. Of course, we still lose a bit as
+    <code>h-mul</code> needs 2 subtractions and 2 checks as opposed to 1
+    – hence we don’t see the 11% speedup, but still see some
+    speedup.</p>
     <p>In conclusion, something as innocuous as random inputs can lead
     to completely different conclusions about the real-world performance
     of code.</p>
     </section>
-    <section id="so-where-do-we-go-now" class="level3">
-    <h3>So Where Do We Go Now?</h3>
+    </section>
+    <section id="so-where-do-we-go-now" class="level2">
+    <h2>So Where Do We Go Now?</h2>
     <div class="remark"><h3></h3><p>At this point, where do we stand? We have a family of algorithms for
     Montgomery multiplication. If we are not bothered about reducing <span
-    class="math inline"> mod  <em>p</em></span> – <code>s-mul</code> should
-    be the fastest algorithm, owing to its maximal parallelism (allows
-    maximal for out-of-order execution on the CPU). But we <em>need</em> the
-    final answer to be less than <span class="math inline"><em>p</em></span>
-    for the rest of the Jolt setup to work. Does this mean that for Jolt,
-    CIOS remains the best algorithm to use?</p></div>
-    <p>We try a middle ground. We our the theory so far to come up with
-    an alternate strategy: – We will save 2 multiplications (instead of
-    3). By our analysis and the actual value of <span
+    class="math inline"> mod  <em>p</em></span>, then <code>s-mul</code>
+    should be the fastest algorithm, owing to its maximal parallelism
+    (allows maximal for out-of-order execution on the CPU). But we
+    <em>need</em> the final answer to be less than <span
+    class="math inline"><em>p</em></span> for the rest of the Jolt setup to
+    work. Does this mean that for Jolt, CIOS remains the best algorithm to
+    use?</p></div>
+    <p>We try a middle ground. We use our theory framework so far to
+    come up with an alternate strategy: – We will save 2 multiplications
+    (instead of 3) but also need to reduce one fewer time compared to
+    <code>h-mul</code> By our analysis and the actual value of <span
     class="math inline">\(p\)</span> in <code>bn-254</code>, we will
     need at most one subtraction now as opposed to the two from
     <code>h-mul</code> (just like CIOS). We hope the number of overflows
-    will reduce, and therefore, we save on branching. (Note, it will
-    never be as small as CIOS, but we also have less mults).</p>
+    will reduce, and therefore, we save on branching. Note, it will
+    never be as small as CIOS, but we also have 2 fewer multiplications.
+    We hope that, on average, this gives us speedups we are after</p>
     <p>Unfortunately, we do not have a prior implementation of this
     algorithm that we can fork – so we must write one from scratch. Our
     implementation can be found <a
     href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/main/src/ari_cios.rs">here</a>
-    Let’s call this code <code>a-mul</code>.</p>
-    <p>Without subtractions, <code>a-mul</code> is 9% faster. So as
+    and sticks to the code formatting of Ingo skyscraper implementation,
+    which we found to be fast. Let’s call this code
+    <code>a-mul</code>.</p>
+    <p>Without subtractions, <code>a-mul</code> is 9% faster. As
     expected, we are a little slower than <code>h-mul</code> But as the
-    percentage of times we overflow is much smaller, we should hope not
-    to get killed once we add the subtractions back in.</p>
+    percentage of times we overflow is much smaller - 27% as opposed to
+    68% with random inputs <span class="math inline">\(\mod
+    p\)</span>.</p>
     <pre class="language-bash"><code>100000 Trials of 100 chained multiplications
 Benchmarking done
 Average Advantage: 9.704649409540085
@@ -836,12 +878,10 @@ H-mult         1605.88225
  C-overflow       0.05365
  H-overflow       0.27255
 dtype: float64</code></pre>
-    <p>Putting the multiplications back in. We now match
-    <code>c-mul</code> in the worst case with all the random overflows.
-    Now, what would happen if we could control the inputs to be small?
-    We shouldn’t expect to see overflows, our new implementation should
-    be a little faster, right?</p>
-    <pre class="language-bash"><code>300000 Trials of 100 chained multiplications of random values
+    <p>Putting the subtractions back in. We are marginally faster than
+    <code>c-mul</code> in the worst case with fully random inputs.</p>
+    <pre class="language-bash"><code>
+300000 Trials of 100 chained multiplications of random values
 300000 Trials of 1 chained multiplications of small values
 
 Scanning file: arkworks_multiplication.csv
@@ -851,7 +891,11 @@ H-mult         2168.940067
  C-overflow       0.000000
  H-overflow       0.000000
 dtype: float64
-
+</code></pre>
+    <p>Now, what would happen if we could control the inputs to be
+    small? This will prevent overflows. We should recover speed,
+    right?</p>
+    <pre class="language-bash"><code>
 Scanning file: arkworks_multiplication_small.csv
 Average Advantage (%): 16.30465277384584
 C-mult         28.788490
@@ -866,14 +910,22 @@ dtype: float64</code></pre>
     p\)</span> and <span class="math inline">\(b=b&#39;r \mod
     p\)</span>, <span class="math inline">\(a&#39;\)</span> and <span
     class="math inline">\(b&#39;\)</span> may or may not be small.), We
-    kill overflows, and we get the extreme speedups we were after.</p>
-    <p>But when we run with random numbers again, we’re back to matching
-    the performance of CIOS. The real bottleneck here is not the number
-    of multiplications, but the number of branches the CPU has to do.
-    The gains from multiplication <strong>only kick in</strong> if the
-    CIOS algorithm and new algorithm overflows are <strong>both</strong>
-    small.</p>
-    </section>
+    kill overflows, and we get the speedups we were after. Now the CPU’s
+    branch prediction, which is roughly based on what’s happened most
+    recently, gets it right.</p>
+    <p>But when we run with random numbers again, we’re back to
+    essentially the performance of CIOS. In conclusion, the number of
+    multiplications is one source of slowdown in the real world, but
+    there are factors where CIOS does better. Now, a priori if you knew
+    the input ranges to your algorithm, then you could predict how much
+    each of them with overflow. This would allow you to use the right
+    level of parallelism and pre-computation to get maximal speed. For
+    example, if you know that the inputs are near <span
+    class="math inline">\(p-1\)</span>, you’d likely still use CIOS. If
+    you knew the answers would be very small, then you’d use
+    <code>s-mul</code>. For anything in between you’d want to use the
+    mini-theorem above and figure out how to balance number of
+    multiplications vs overflow.</p>
     </section>
     <section id="footnotes" class="footnotes footnotes-end-of-document"
     role="doc-endnotes">
@@ -883,21 +935,27 @@ dtype: float64</code></pre>
     parallelism instead, looking at all the SIMD code, that’s what it
     seems at least.<a href="#fnref1" class="footnote-back"
     role="doc-backlink">↩︎</a></p></li>
-    <li id="fn2"><p>Limbs here just mean digits. A 4 limb number is a
+    <li id="fn2"><p>unchanged from how we found them in the wild<a
+    href="#fnref2" class="footnote-back"
+    role="doc-backlink">↩︎</a></p></li>
+    <li id="fn3"><p>Limbs here just mean digits. A 4 limb number is a
     4-digit number where each digit is <span
     class="math inline">\(w\)</span> bits large, i.e each digit is
     between 0 and <span class="math inline">\(2^w -1\)</span>.<a
-    href="#fnref2" class="footnote-back"
+    href="#fnref3" class="footnote-back"
     role="doc-backlink">↩︎</a></p></li>
-    <li id="fn3"><p>First add <span class="math inline">\(mp\)</span> to
+    <li id="fn4"><p>First add <span class="math inline">\(mp\)</span> to
     <span class="math inline">\(c\)</span>, then divide <span
-    class="math inline">\((c+mp)/r\)</span>.<a href="#fnref3"
+    class="math inline">\((c+mp)/r\)</span>.<a href="#fnref4"
     class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-    <li id="fn4"><p>We guarantee that <span class="math inline">\(\rho_i
-    &lt; p\)</span><a href="#fnref4" class="footnote-back"
+    <li id="fn5"><p>We guarantee that <span class="math inline">\(\rho_i
+    &lt; p\)</span><a href="#fnref5" class="footnote-back"
     role="doc-backlink">↩︎</a></p></li>
-    <li id="fn5"><p>Which they are not.<a href="#fnref5"
+    <li id="fn6"><p>Which they are not.<a href="#fnref6"
     class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+    <li id="fn7"><p>Remember the bench code in the alternate
+    implementation?<a href="#fnref7" class="footnote-back"
+    role="doc-backlink">↩︎</a></p></li>
     </ol>
     </section>
   </main>
