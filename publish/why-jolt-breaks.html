@@ -46,7 +46,7 @@
 
     <div class="toc" id="toc">      
         <div class="last-updated">
-    Last Page Build: 2025-06-03 20:13:27
+    Last Page Build: 2025-06-07 19:16:16 +0100
   </div>
 
       <div class="toc-content">
@@ -101,6 +101,10 @@
           </ul></li>
           <li><a href="#so-where-do-we-go-now"
           id="toc-so-where-do-we-go-now">So Where Do We Go Now?</a></li>
+          <li><a
+          href="#instructions-for-running-benchmarks-discussed-above"
+          id="toc-instructions-for-running-benchmarks-discussed-above">Instructions
+          For Running Benchmarks Discussed Above</a></li>
           </ul>
       </div>
   
@@ -124,8 +128,9 @@
 
 
           <ul class="tag-list">
-                  <li class="tag-item"><a href="/publish/number-theory.html" class="tag-link">number-theory</a></li>
+                  <li class="tag-item"><a href="/publish/benchmarking.html" class="tag-link">benchmarking</a></li>
                   <li class="tag-item"><a href="/publish/cryptography.html" class="tag-link">cryptography</a></li>
+                  <li class="tag-item"><a href="/publish/number-theory.html" class="tag-link">number-theory</a></li>
                 </ul>
     
     <section id="background" class="level2">
@@ -916,16 +921,30 @@ dtype: float64</code></pre>
     <p>But when we run with random numbers again, we’re back to
     essentially the performance of CIOS. In conclusion, the number of
     multiplications is one source of slowdown in the real world, but
-    there are factors where CIOS does better. Now, a priori if you knew
+    there are factors where CIOS does better. Now, a priori, if you knew
     the input ranges to your algorithm, then you could predict how much
     each of them with overflow. This would allow you to use the right
     level of parallelism and pre-computation to get maximal speed. For
     example, if you know that the inputs are near <span
     class="math inline">\(p-1\)</span>, you’d likely still use CIOS. If
     you knew the answers would be very small, then you’d use
-    <code>s-mul</code>. For anything in between you’d want to use the
-    mini-theorem above and figure out how to balance number of
+    <code>s-mul</code>. For anything in between, you’d want to use the
+    mini-theorem above and figure out how to balance the number of
     multiplications vs overflow.</p>
+    </section>
+    <section id="instructions-for-running-benchmarks-discussed-above"
+    class="level2">
+    <h2>Instructions For Running Benchmarks Discussed Above</h2>
+    <p>To get individual times on chained multiplications</p>
+    <pre class="language-bash"><code>git clone https://github.com/abiswas3/Montgomery-Benchmarks.git
+cd Montgomery-Benchmarks
+cargo bench</code></pre>
+    <p>To get time comparisons inside of arkworks run the following
+    command</p>
+    <pre class="language-bash"><code>cargo run --example ark-multiplication --release &amp;&amp; python3 plotting.py arkworks_multiplication.csv</code></pre>
+    <p>For squaring run (we have not yet optimised the squaring library
+    to use <code>a-mul</code>)</p>
+    <pre class="language-bash"><code>cargo run --example ark-squaring --release &amp;&amp; python3 plotting.py arkworks_squaring.csv</code></pre>
     </section>
     <section id="footnotes" class="footnotes footnotes-end-of-document"
     role="doc-endnotes">

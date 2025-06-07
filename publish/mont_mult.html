@@ -46,7 +46,7 @@
 
     <div class="toc" id="toc">      
         <div class="last-updated">
-    Last Page Build: 2025-06-03 20:13:26
+    Last Page Build: 2025-06-07 19:16:15 +0100
   </div>
 
       <div class="toc-content">
@@ -100,10 +100,11 @@
     <div class="remark"><h3></h3><p><strong>UPDATE (2025-06-01)</strong>: This post is still relevant as
     a tutorial for how to use dynamic binary instrumentation to analyse why
     code is slow – and is still reproducible using the methods described
-    here.</p>
-    <p>More information about the exact details of Montgomery multiplication
-    has been uncovered, and our discussion can be found <a
-    href="why-jolt-breaks.html">here</a></p></div>
+    here. More information about the exact details of Montgomery
+    multiplication has been uncovered, and the discussion can be found <a
+    href="why-jolt-breaks.html">here</a>, where we discuss in detail why we
+    often draw different conclusions from benchmarking the same source of
+    code.</p></div>
     <p>In a recent <a
     href="https://hackmd.io/@Ingonyama/Barret-Montgomery">blog post</a>,
     Yuval Domb describes a subtle, but remarkably clever optimisation
@@ -232,16 +233,15 @@
     href="https://github.com/a16z/arkworks-algebra/blob/7ad88c46e859a94ab8e0b19fd8a217c3dc472f1c/ff-macros/src/montgomery/mul.rs#L77">here</a>.</p>
     <p>To simplify the investigation process, we stripped the code down
     to the essential helper functions and the <code>scalar_mul</code>
-    function. Then we wrote a <a
-    href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/barebones_profiling/src/main.rs">simple
-    script</a> to compare the performance of the two algorithms to see
-    the speedup promised in theory manifested itself in practice. The
-    stripped down code needed to compute the montgomery product with
-    Yuval’s algorithm can be found <a
-    href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/barebones_profiling/src/yuval_mult.rs">here</a>.
-    Similarly, the stripped down code needed to compute the montgomery
+    function. Then we wrote a simple bench script to compare the
+    performance of the two algorithms to see the speedup promised in
+    theory manifested itself in practice. The stripped down code needed
+    to compute the Montgomery product with Yuval’s algorithm can be
+    found <a
+    href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/main/src/world_coin_single.rs">here</a>.
+    Similarly, the stripped down code needed to compute the Montgomery
     product with CIOS can be found <a
-    href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/barebones_profiling/src/optimised_cios.rs">here</a>.</p>
+    href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/main/src/arkworks_cios.rs">here</a>.</p>
     <div class="remark"><h3></h3><p>This entire write-up focuses on <span
     class="math inline"><em>n</em> = 4</span>. It is entirely possible that
     for larger values of <span class="math inline"><em>n</em></span>, the
@@ -255,23 +255,13 @@
     benchmarking run times.</p>
     <pre class="language-bash"><code>git clone https://github.com/abiswas3/Montgomery-Benchmarks.git
 cd Montgomery-Benchmarks
-git checkout --track origin/barebones_profiling
-cargo run --release</code></pre>
+cargo bench</code></pre>
     <div class="remark"><h3></h3><p><strong>UPDATE: 2025-06-01</strong>: The barebones_profiling has been
     merged into main, and running <code>cargo bench</code> should give you
     time stamps for 4 algorithms: the arkworks, and implementation discussed
     above, plus additionally two different implementations, one of CIOS and
-    one of the new algorithm – written to optimise use of registers. The
-    above code block is now deprecated. The plot below is still consistent
-    with our initial findings. See <a href="why-jolt-breaks.html">more
-    details</a></p></div>
-    <figure>
-    <img src="/blog_assets/mont_mult/bench.jpeg"
-    alt="Benchmark result" />
-    <figcaption aria-hidden="true">Benchmark result</figcaption>
-    </figure>
-    <div class="remark"><h3></h3><p>This implies that the new algorithm is slower than even the SOS
-    algorithm.</p></div>
+    one of the new algorithm – written to optimise use of registers. See <a
+    href="why-jolt-breaks.html">more details</a></p></div>
     </section>
     <section id="computer-information" class="level3">
     <h3>Computer Information</h3>
@@ -338,7 +328,7 @@ Swap:             0B          0B          0B</code></pre>
     </ul>
     <p>We do not bother with the SOS dump, as we are only interested in
     comparing the new algorithm with the fastest algorithm. More
-    specifically, shown above are the assembly istructions that are
+    specifically, shown above are the assembly instructions that are
     executed from the time the <code>scalar_mul</code> function is
     invoked, to when it returns control to <code>main</code>. For
     reference, <a
@@ -429,6 +419,11 @@ wc -l static/code/opt                                                           
     </section>
     <section id="how-to-replicate-the-process" class="level2">
     <h2>How To Replicate The Process</h2>
+    <div class="remark"><h3></h3><p><strong>Update: 2025-05-27</strong>: Since this blog was published
+    we’ve cleaned up the benchmarking code. The names of functions are no
+    longer called <code>scalar_mul</code>, but the analysis below will still
+    work with if we replace <code>scalar_mul*</code> with the correct
+    function names.</p></div>
     <p>The remainder of the post is written as a tutorial on how we were
     able to perform the above analysis. To extract assembly we use
     techniques inspired by the field of <a
@@ -445,6 +440,14 @@ wc -l static/code/opt                                                           
     Thus, the files above not only describe assembly instructions
     associated with each algorithm, but they are are listed in time
     order of execution.</p>
+    <div class="remark"><h3></h3><p>This is often strictly more powerful than <code>cargo-asm</code>
+    which just dumps the assembly associated with a function label. If this
+    function has conditional branches, we do not know without feeding real
+    inputs and running the code, how often these branches will be taken.
+    Your CPU tries to predict branch outcomes as an optimisation. So in a
+    way this linear trace of everything that happened can offer more insight
+    than just dumping the assembly associated with a method header using
+    <code>cargo asm</code></p></div>
     <div class="remark"><h3></h3><p>Given that we use the above tool, our techniques only apply when
     executing programs on Intel CPU’s. This dynamic technique for extracting
     assembly instructions by running the binary would not apply to a M
@@ -586,7 +589,7 @@ Loading [vdso] 793baee93000
     overheads – OS code, memory freeing etc.<a href="#fnref4"
     class="footnote-back" role="doc-backlink">↩︎</a></p></li>
     <li id="fn5"><p>The only change we made was we <a
-    href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/0263c89bce53ea62ff7d9cba143020443b763659/src/yuval_mult.rs#L34">unrolled</a>
+    href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/4420b0c9702ca237cb93fc21338575ae855be34b/src/world_coin_single.rs#L20">unrolled</a>
     for <code>addv</code> helper method for <span
     class="math inline">\(n=4\)</span>. This only sped things up.<a
     href="#fnref5" class="footnote-back"

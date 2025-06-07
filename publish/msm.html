@@ -21,7 +21,7 @@
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
-  <title>The Floor</title>      
+  <title>Multi Scalar Operations</title>      
   </head>
 
   <body class="dark-mode">  
@@ -46,13 +46,15 @@
 
     <div class="toc" id="toc">      
         <div class="last-updated">
-    Last Page Build: 2025-06-07 19:16:15 +0100
+    Last Page Build: 2025-06-07 19:16:17 +0100
   </div>
 
       <div class="toc-content">
           <ul>
-          <li><a href="#simulation"
-          id="toc-simulation">Simulation</a></li>
+          <li><a href="#problem-statement"
+          id="toc-problem-statement">Problem Statement</a></li>
+          <li><a href="#the-dumb-way" id="toc-the-dumb-way">The Dumb
+          Way</a></li>
           </ul>
       </div>
   
@@ -62,162 +64,125 @@
   </header>
 
   <main class="content">
-    <h1>The Floor</h1>
+    <h1>Multi Scalar Operations</h1>
   
       <div class="authors-and-date">
     <div class="authors">
       Ari
     </div>
     <div class="published-date">
-      Published: 2024-12-14
+      Published: 2025-06-04T12:29:46.982588+01:00
     </div>
   </div>
     
 
 
           <ul class="tag-list">
-                  <li class="tag-item"><a href="/publish/fiddler.html" class="tag-link">fiddler</a></li>
-                  <li class="tag-item"><a href="/publish/puzzles.html" class="tag-link">puzzles</a></li>
+                  <li class="tag-item"><a href="/publish/cryptography.html" class="tag-link">cryptography</a></li>
+                  <li class="tag-item"><a href="/publish/benchmarking.html" class="tag-link">benchmarking</a></li>
                 </ul>
     
-    <p>Empirical solution to <a
-    href="https://thefiddler.substack.com/p/can-you-survive-the-floor">Fiddler</a>
-    released on December 14, 2024.</p>
-    <section id="simulation" class="level1">
-    <h1>Simulation</h1>
-    <pre class="language-python3"><code>import copy
-from collections import Counter
-import random
-
-import pandas as pd
-import numpy as np
-from utils import get_neighbors, pretty_print_matrix
-
-import pprint as pp
-from pprint import pprint
-from termcolor import colored
-
-HEIGHT= 3
-WIDTH = 3
-A = np.arange(HEIGHT*WIDTH).reshape(HEIGHT, WIDTH)
-player_names = [x for x in range(HEIGHT*WIDTH)]
-players = {}
-idx = 0
-for i in range(A.shape[0]):
-    for j in range(A.shape[1]):
-        players[player_names[idx]] = [(i,j)]
-        A[i,j] = player_names[idx]
-        idx +=1
-A_copy = copy.deepcopy(A)
-
-def get_secondary_cands(A, primary_locs):
-
-    candidates = {}
-    for (x,y) in primary_locs:
-        # These are the neighbours of A that have other people
-        nbrs = [ A[i,j] for (i,j) in get_neighbors(HEIGHT,
-                                                   WIDTH,
-                                                   x,
-                                                   y)
-                 if A[i,j] != A[x,y]]
-
-        for name in nbrs:
-            candidates[name] = None
-
-
-    return candidates
-
-def pick_primary(players):
-
-    res = key, val = random.choice(list(players.items()))
-    return key, val
-
-def single_round(r, A, players):
-
-    primary_name, primary_locs = pick_primary(players)
-    second_cands = get_secondary_cands(A, primary_locs)
-    secondary_name, _ = random.choice(list(second_cands.items()))
-
-    game = [primary_name, secondary_name]
-    loser_idx = 1 if np.random.random() &lt;= 1/2 else 0
-    winner_idx = 1 - loser_idx
-    winner = game[winner_idx]
-    loser = game[loser_idx]
-
-    loser_locs = players.pop(loser)
-    players[winner] +=  loser_locs
-    for (i,j) in loser_locs:
-        A[i,j] = winner
-
-    # print(&quot;Round: {}, Match {} vs {} | Winner - {}&quot;.format(r+1,
-    #                                                        primary_name,
-    #                                                        secondary_name,
-    #                                                        winner))
-    # print(A)
-    # print(&#39;-&#39;*80)
-    # print()
-
-
-def game(A, players, rounds=HEIGHT*WIDTH-1):
-
-    for r in range(rounds):
-        single_round(r, A, players)
-
-    return A, players
-
-
-def highlight(data):
-    # Find the maximum value
-    max_value = max(data.values())
-
-    # Print dictionary with highlights
-    print(&quot;{&quot;)
-    for key, value in data.items():
-        if value == max_value:
-            print(f&quot;  &#39;{key}&#39;: {colored(value, &#39;red&#39;, attrs=[&#39;bold&#39;])},&quot;)
-        else:
-            print(f&quot;  &#39;{key}&#39;: {value},&quot;)
-    print(&quot;}&quot;)
-
-# -----------------------------------
-# A full game
-# -----------------------------------
-
-win_dist = []
-num_games = 300000
-for _ in range(num_games):
-    board, rem_players = game(copy.deepcopy(A), copy.deepcopy(players))
-    win_dist.append(board[0,0])
-pretty_print_matrix(A)
-print(&quot;Prob they don&#39;t win&quot;)
-ranking = pd.Series({x: v/num_games for x,v in Counter(win_dist).items()})
-print(1- ranking.sort_values())
-# -----------------------------------
-
-
-# -----------------------------------
-# R  rounds
-# -----------------------------------
-pretty_print_matrix(A)
-win_dist = {x: 0 for x in player_names}
-num_games = 300000
-# rounds_to_survive = HEIGHT*WIDTH-1 # R
-rounds_to_survive = 1 # R 
-for _ in range(num_games):
-    board, rem_players = game(copy.deepcopy(A),
-                              copy.deepcopy(players),
-                              rounds=rounds_to_survive)
-    # pretty_print_matrix(board)
-    # print()
-    for x in rem_players:
-        win_dist[x] += 1
-        
-print(&quot;Empirical distribution of players that survive round {}&quot;.format(
-    rounds_to_survive))
-ranking = pd.Series(win_dist)/num_games
-print(ranking.sort_values())
-    
-</code></pre>
+    <section id="problem-statement" class="level2">
+    <h2>Problem Statement</h2>
+    <p>Given a set of <span class="math inline">\(n\)</span>-limbed
+    scalars <span class="math inline">\(\{a^{(i)}\}_{i=1}^s\)</span>
+    where each limb uses <span class="math inline">\(w\)</span> bits,
+    and elliptic curve points over finite field <span
+    class="math inline">\(F_p\)</span>, <span
+    class="math inline">\(\{P_i\}_{i=1}^s\)</span>, the goal is to
+    compute <span class="math display">\[ P = \sum_{i=1}^{s} a^{(i)}
+    P_i\]</span> as fast as possible on a computer. Throughout this
+    post, we use notation <span class="math inline">\(r=2^w\)</span> and
+    <span class="math inline">\(R=r^n\)</span>.</p>
+    </section>
+    <section id="the-dumb-way" class="level2">
+    <h2>The Dumb Way</h2>
+    <p>Calculate each <span class="math inline">\(a^{(i)}P_i\)</span>
+    using doubling and addition, then add them all together to get the
+    final result. In the worst case, the double and add<a href="#fn1"
+    class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>
+    take <span class="math inline">\(2\lceil \log_2 R -1 \rceil\)</span>
+    additions, and then the final result requires <span
+    class="math inline">\(n-1\)</span> further addition operations.</p>
+    <div class="remark"><h3></h3><h4 id="example">Example</h4>
+    <p><span class="math inline"><em>r</em> = 2<sup>6</sup> = 64</span> and
+    <span class="math inline"><em>n</em> = 1</span>, say we want to compute
+    <span class="math inline">52<em>P</em></span>. As</p>
+    <p><span
+    class="math display">52 = 0 ⋅ 2<sup>0</sup> + 0 ⋅ 2<sup>1</sup> + 1 ⋅ 2<sup>2</sup> + 0 ⋅ 2<sup>3</sup> + 1 ⋅ 2<sup>4</sup> + 1 ⋅ 2<sup>5</sup></span></p>
+    <table>
+    <thead>
+    <tr>
+    <th>Bit position (i)</th>
+    <th>Bit value</th>
+    <th><span
+    class="math display">2<sup><em>i</em></sup> ⋅ <em>P</em></span></th>
+    <th>Add to result?</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>0</td>
+    <td>0</td>
+    <td><span class="math display">1 ⋅ <em>P</em></span></td>
+    <td>No</td>
+    </tr>
+    <tr>
+    <td>1</td>
+    <td>0</td>
+    <td><span class="math display">2 ⋅ <em>P</em></span></td>
+    <td>No</td>
+    </tr>
+    <tr>
+    <td>2</td>
+    <td>1</td>
+    <td><span class="math display">4 ⋅ <em>P</em></span></td>
+    <td>✅ Yes</td>
+    </tr>
+    <tr>
+    <td>3</td>
+    <td>0</td>
+    <td><span class="math display">8 ⋅ <em>P</em></span></td>
+    <td>No</td>
+    </tr>
+    <tr>
+    <td>4</td>
+    <td>1</td>
+    <td><span class="math display">16 ⋅ <em>P</em></span></td>
+    <td>✅ Yes</td>
+    </tr>
+    <tr>
+    <td>5</td>
+    <td>1</td>
+    <td><span class="math display">32 ⋅ <em>P</em></span></td>
+    <td>✅ Yes</td>
+    </tr>
+    </tbody>
+    </table>
+    <p>This takes 5 doubling operations to get to <span
+    class="math inline">32<em>P</em></span>. In the process we also
+    calculate <span class="math inline">16<em>P</em></span> and <span
+    class="math inline">4<em>P</em></span>. And finally 3 additions</p></div>
+    <ul>
+    <li><a href="https://hackmd.io/@drouyang/msm">Learnings From
+    Z-Prize</a>: Written by some guy with a Phd In Operating
+    systems.</li>
+    <li><a
+    href="https://dspacemainprd01.lib.uwaterloo.ca/server/api/core/bitstreams/3b15ca4c-9125-4e45-9378-c5474eec6a07/content">Why
+    is the Pippenger Algorithm Useful</a>: See Section 2.2 on Page 28 of
+    Pdf.</li>
+    <li></li>
+    </ul>
+    </section>
+    <section id="footnotes" class="footnotes footnotes-end-of-document"
+    role="doc-endnotes">
+    <hr />
+    <ol>
+    <li id="fn1"><p>If the group was represented using multiplicative
+    notation, we would refer to this algorithm as squaring and multiply.
+    ## Basic Resources<a href="#fnref1" class="footnote-back"
+    role="doc-backlink">↩︎</a></p></li>
+    </ol>
     </section>
   </main>
 
