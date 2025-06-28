@@ -11,46 +11,6 @@ body.dark-mode{
 --math-colour: #e0a5c0;
 }
 
-/* math.css */
-/* MathJax specific styling for better readability in math blog */
-
-/* Match the body line height for inline math */
-mjx-container[jax="SVG"] {
-  font-size: 1em !important;
-  line-height: 1.6 !important;
-}
-
-/* Inline math spacing: add slight vertical align and spacing */
-mjx-container[jax="SVG"] > svg {
-  vertical-align: middle;
-  margin: 0 0.1em;
-}
-
-/* Display math blocks styling */
-mjx-container[jax="SVG"][display="true"] {
-  display: block !important;
-  margin: 1.5rem 0 !important; /* vertical spacing around display math */
-  line-height: 2 !important;    /* more line height for formulas */
-
-}
-
-/* Prevent horizontal overflow from wide formulas */
-mjx-container[jax="SVG"] > svg {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Ensure code blocks keep scroll on overflow */
-pre {
-  overflow-x: auto;
-}
-
-/* Optional: tweak math font to match body font */
-mjx-container[jax="SVG"] {
-  font-family: system-ui, -apple-system, sans-serif !important;
-}
-
-
 /*CODE*/
 /* Base styles */
 p code, li code, td code {

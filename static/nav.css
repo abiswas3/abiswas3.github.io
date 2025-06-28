@@ -1,8 +1,8 @@
 :root{
-/*  --base-font-family: system-ui, -apple-system, sans-serif; 
-  --base-font-wt: normal;*/
-  --base-font-family: 'Chalkboard SE', sans-serif;
-  --base-font-wt: 100;  
+--base-font-family: apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+--content-max-width: 760px;
+  /* --base-font-family: 'Chalkboard SE', sans-serif; */
+  /* --base-font-wt: 100;   */
 /*  --base-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
 }
 
@@ -10,7 +10,7 @@
 body.light-mode {  
   --heading: #34558b;  
   --text: #333333;
-  --bg: #fdf6e3;
+  --bg: #FFFF;
   --link: seagreen; 
   --border-color: black;
   --base-font-size: 1.08rem;
@@ -18,8 +18,8 @@ body.light-mode {
 
 
 body.dark-mode{
---bg: #282828; 
-   --text: #ebdbb2; 
+  --bg: #282828; 
+  --text: #ebdbb2; 
   --heading: #fabd2f;
   --link: #83a598;
   --link-hover: salmon;
@@ -52,22 +52,18 @@ header {
   width: 100%;
   height: 56px; /* example header height, adjust as needed */
   background: var(--bg);
-  z-index: 1000;
   padding-top: 1rem;
   padding-left: 1rem;
   padding-bottom: 1.4rem;
   font-size: 1.3rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 1000;
 }
 header a {
   cursor: pointer;
 }
-
 header a:hover {
   text-decoration: underline;
 }
-
-
 /* === Typography === */
 /* Headings styling */
 h1, h2, h3, h4, h5, h6 {
@@ -85,12 +81,11 @@ strong{
 /* Basic styles */
 .nav {
   background: var(--bg);
+  max-width: var(--content-max-width);
   border-bottom: 1px solid var(--border-color);
-  position: sticky;
-  top: 0;
-  z-index: 20;
+  margin: auto;
   padding: 0 1rem;
-  font-family: system-ui, -apple-system, sans-serif;
+  z-index: 1000;
 }
 
 /* Hide checkbox */
