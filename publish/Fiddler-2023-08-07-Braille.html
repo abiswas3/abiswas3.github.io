@@ -5,10 +5,9 @@
 	<meta name="generator" content="pandoc">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-    <!-- Base CSS (common styles) -->
+    <!-- Base CSS (common styles) --> 
   <link rel="stylesheet" href="../static/nav.css"> 
-  <!-- <link rel="stylesheet" href="../static/obsidian.css"> -->
-  <link rel="stylesheet" href="../static/base.css">
+  <link rel="stylesheet" href="../static/blog_index.css">
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
@@ -26,207 +25,155 @@
   </head>
 
   <body class="dark-mode">  
-  <header>          
-  <nav class="nav">
-    <input type="checkbox" id="nav-toggle" class="nav-toggle" />
-    <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle menu">
-      &#9776; <!-- hamburger icon -->
-    </label>
-    <ul class="nav-list">
-      <li><a href="/">Random Walks</a></li>
-      <li><a href="/publish/">Notes</a></li>
-      <li><a href="/publications.html">Publications</a></li>
-      <li><a href="/misc.html">Misc</a></li>
-      <li>  <label>
-    <input type="checkbox" id="mode-toggle" />
-    Dark Mode
-  </label></li>
-    </ul>
-      
-  </nav>
-
-    <div class="toc" id="toc">      
-        <div class="last-updated">
-    Last Page Build: 2025-06-28 01:31:16 +0100
-  </div>
-
-      <div class="toc-content">
-          <ul>
-          <li><a href="#fiddler-braille-problem"
-          id="toc-fiddler-braille-problem">Fiddler – Braille Problem</a>
-          <ul>
-          <li><a href="#what-is-a-translation"
-          id="toc-what-is-a-translation">What Is A Translation
-          ?</a></li>
-          <li><a href="#formalising-the-problem"
-          id="toc-formalising-the-problem">Formalising The Problem</a>
-          <ul>
-          <li><a href="#how-many-configurations-per-rectangle"
-          id="toc-how-many-configurations-per-rectangle">How many
-          configurations per rectangle</a></li>
-          </ul></li>
-          </ul></li>
-          </ul>
-      </div>
-  
-  </div>
-    <br>
-  <br>
-  </header>
+    <header>          
+    <div class="nav-container"> 
+    <div class="nav-title"><a href="/">Ari</a></div>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <nav class="nav-links" id="navMenu">
+      <a href="/publish/">Notes</a>
+      <a href="/publications.html">Publications</a>
+      <a href="/misc.html">Misc</a>
+     <label><input type="checkbox" id="mode-toggle" /><span class="label"></span></label>
+    </nav>
+    </div>
+ 
+ </header>
 
   <main class="content">
-    <h1>Braille</h1>
-  
-      <div class="authors-and-date">
-    <div class="authors">
-      Ari
-    </div>
-    <div class="published-date">
-      Published: 2023-08-07
-    </div>
+  <div class="blog">
+   <h1>Braille</h1> 
+  <section id="fiddler-braille-problem" class="level1">
+  <h1>Fiddler – Braille Problem</h1>
+  <p>The following is my write-up for this weeks <a
+  href="https://thefiddler.substack.com/p/how-many-ways-can-you-raise-the-dots">Fiddler
+  problem</a>, which asks</p>
+  <blockquote>
+  Of the 64 total potential Braille characters, how many are in the
+  largest set such that no two characters consist of raised dot patterns
+  that are translations of each other?
+  </blockquote>
+  <section id="what-is-a-translation" class="level2">
+  <h2>What Is A Translation ?</h2>
+  <p>As described in the problem statement, a Braille character or
+  configuration consists of a <span class="math inline">\(3 \times
+  2\)</span> grid of cells, where each cell can be raised or empty. Let
+  <span class="math inline">\(A\)</span> and <span
+  class="math inline">\(B\)</span> denote two Braille configurations. We
+  say <span class="math inline">\(A \equiv B\)</span> if we can move
+  each raised dot of <span class="math inline">\(A\)</span> by the same
+  distance and in the same direction to get to <span
+  class="math inline">\(B\)</span>. <strong>NOTE</strong>: When moving
+  raised dots, we are not allowed to wrap around the edges of the grid
+  (as clarified in the comments section of the problem). The animation
+  below describes Braille configurations that are equivalent to each
+  other.</p>
+  <p><img src="assets/braille.gif"  alt="funny animation GIF" width="200px"></p>
+  </section>
+  <section id="formalising-the-problem" class="level2">
+  <h2>Formalising The Problem</h2>
+  <p>Given any grid with <span class="math inline">\(r\)</span> rows and
+  <span class="math inline">\(c\)</span> columns there are total of
+  <span class="math inline">\(2^{r\times c} -1\)</span> possible braille
+  configurations<a href="#fn1" class="footnote-ref" id="fnref1"
+  role="doc-noteref"><sup>1</sup></a>. Now consider any mini rectangle
+  of height <span class="math inline">\(1 \leq h \leq r\)</span> and
+  width <span class="math inline">\(1 \leq w
+  \leq c\)</span> inside the main <span class="math inline">\(r \times
+  c\)</span> grid. (See picture below)</p>
+  <p>Given a mini-rectangle of area <span class="math inline">\(h\times
+  w\)</span>, the total number of ways we can slide it around is <span
+  class="math inline">\((r - h +1) \times (c - w + 1)\)</span>. The
+  first term gives the number of ways you can go up/down and the second
+  term describes the number of times you can slide left/right. The plus
+  <span class="math inline">\(+1\)</span> includes the current config if
+  there is no room to slide around.</p>
+  <p>For some configuration of raised dots that fit inside this
+  rectangle – all configurations formed by sliding this rectangle around
+  are equivalent.</p>
+  <p>So the question now becomes: How many such rectangles can we make?
+  This answer is simple- Each <span class="math inline">\(h\)</span> and
+  <span class="math inline">\(w\)</span> is constrained to be in the set
+  <span class="math inline">\(\{1, \dots, r \}\)</span> and <span
+  class="math inline">\(\{1, \dots, c \}\)</span>. Taking the cross
+  product we get <span class="math inline">\(r\times c\)</span> possible
+  rectangles.</p>
+  <p>Ok! But given a rectangle of certain size – how many different
+  Braille configurations can we fit in. Note for the rectangle to have
+  an area <span class="math inline">\(h \times w\)</span>, the max
+  length between any two raised dots inside the rectangle must be <span
+  class="math inline">\(w\)</span> and max height must be <span
+  class="math inline">\(h\)</span> (See picture below).</p>
+  <p><img src="assets/braille_example.png"  alt="funny animation GIF" width="300px"></p>
+  <section id="how-many-configurations-per-rectangle" class="level3">
+  <h3>How many configurations per rectangle</h3>
+  <ul>
+  <li><p>If we have <span class="math inline">\(h=1\)</span>, then for
+  any <span class="math inline">\(w \in \{1, \dots, c\}\)</span> we have
+  the total possible braille configurations that fit inside this
+  rectangle is simply <span class="math inline">\(2^{w-2}\)</span>. (We
+  subtract two because we need to put two dots at the two extremes to
+  ensure the width is <span class="math inline">\(w\)</span>. Once we
+  have placed these two dots, then we can arrange the inner dots any way
+  we want).</p></li>
+  <li><p>Similarly, if we have <span class="math inline">\(w=1\)</span>,
+  then for any <span class="math inline">\(h=\{1, \dots, r\}\)</span>,
+  we have the total possible Braille configurations to be <span
+  class="math inline">\(2^{h-2}\)</span>.</p></li>
+  <li><p>If we have <span class="math inline">\(w=1\)</span> and <span
+  class="math inline">\(h=1\)</span> then there is only one way to fill
+  out the square (NOTE we do not allow the grid with no raised
+  dots)</p></li>
+  </ul>
+  <p>Ok. All the edge cases are done. Next we look at configurations for
+  general <span class="math inline">\(h \geq 2\)</span> and <span
+  class="math inline">\(w \geq 2\)</span>. The following picture
+  summarises the possibilities.</p>
+  <p>As we have to ensure that the width and height of the rectangle is
+  <span class="math inline">\(w\)</span> and <span
+  class="math inline">\(h\)</span>, we have to be careful how we handle
+  the corners. For example, when none of the corners are raised, we have
+  to avoid the top row or bottom row to have the all cells
+  <strong>NOT</strong> raised. As two top corners are blank, there are
+  <span class="math inline">\(2^{w-2}\)</span> ways to configure the top
+  row. However, we must exclude the possibility that all cells are
+  blank, which is included in <span
+  class="math inline">\(2^{w-2}\)</span> possibilities. Hence we get
+  <span class="math inline">\(2^{w-2} -1\)</span> possibilities for the
+  top or bottom row. A similar argument holds for the left and right
+  edges.</p>
+  <p>Next we iterate all the different kinds of corners that are
+  possible and use a similar argument as above to describe how to handle
+  each of these cases (see below):</p>
+  <center>
+  <object data="assets/braille_configs.pdf" width="100%" height="500px">
+  </object>
+  </center>
+  <p>The following lines of code compute the different configurations
+  for a given mini-rectangle.</p>
+  <script src="https://gist.github.com/abiswas3/f6b24ac4bdf912bc057b76bedc30aa9a.js"></script>
+  <p>Finally, to get the total number of configurations we just loop
+  through all possible rectangles and sum the different
+  configurations</p>
+  <script src="https://gist.github.com/abiswas3/b6e060287ea7253bab31d9e23cb82966.js"></script>
+  <p><u><strong>Giving us a solution of 44
+  configurations</strong>.</u></p>
+  <p><strong>Extra Credit</strong>: Replace the <span
+  class="math inline">\(r=6\)</span> and <span
+  class="math inline">\(c=4\)</span> in the above snippet and we get
+  15,499,264.</p>
+  </section>
+  </section>
+  </section>
+  <section id="footnotes" class="footnotes footnotes-end-of-document"
+  role="doc-endnotes">
+  <hr />
+  <ol>
+  <li id="fn1"><p>We subtract by -1 to exclude the configuration without
+  any raised dots.<a href="#fnref1" class="footnote-back"
+  role="doc-backlink">↩︎</a></p></li>
+  </ol>
+  </section>
   </div>
-    
-
-
-          <ul class="tag-list">
-                  <li class="tag-item"><a href="/publish/fiddler.html" class="tag-link">fiddler</a></li>
-                  <li class="tag-item"><a href="/publish/puzzles.html" class="tag-link">puzzles</a></li>
-                </ul>
-    
-    <section id="fiddler-braille-problem" class="level1">
-    <h1>Fiddler – Braille Problem</h1>
-    <p>The following is my write-up for this weeks <a
-    href="https://thefiddler.substack.com/p/how-many-ways-can-you-raise-the-dots">Fiddler
-    problem</a>, which asks</p>
-    <blockquote>
-    Of the 64 total potential Braille characters, how many are in the
-    largest set such that no two characters consist of raised dot
-    patterns that are translations of each other?
-    </blockquote>
-    <section id="what-is-a-translation" class="level2">
-    <h2>What Is A Translation ?</h2>
-    <p>As described in the problem statement, a Braille character or
-    configuration consists of a <span class="math inline">\(3 \times
-    2\)</span> grid of cells, where each cell can be raised or empty.
-    Let <span class="math inline">\(A\)</span> and <span
-    class="math inline">\(B\)</span> denote two Braille configurations.
-    We say <span class="math inline">\(A \equiv B\)</span> if we can
-    move each raised dot of <span class="math inline">\(A\)</span> by
-    the same distance and in the same direction to get to <span
-    class="math inline">\(B\)</span>. <strong>NOTE</strong>: When moving
-    raised dots, we are not allowed to wrap around the edges of the grid
-    (as clarified in the comments section of the problem). The animation
-    below describes Braille configurations that are equivalent to each
-    other.</p>
-    <p><img src="assets/braille.gif"  alt="funny animation GIF" width="200px"></p>
-    </section>
-    <section id="formalising-the-problem" class="level2">
-    <h2>Formalising The Problem</h2>
-    <p>Given any grid with <span class="math inline">\(r\)</span> rows
-    and <span class="math inline">\(c\)</span> columns there are total
-    of <span class="math inline">\(2^{r\times c} -1\)</span> possible
-    braille configurations<a href="#fn1" class="footnote-ref"
-    id="fnref1" role="doc-noteref"><sup>1</sup></a>. Now consider any
-    mini rectangle of height <span class="math inline">\(1 \leq h \leq
-    r\)</span> and width <span class="math inline">\(1 \leq w
-    \leq c\)</span> inside the main <span class="math inline">\(r \times
-    c\)</span> grid. (See picture below)</p>
-    <p>Given a mini-rectangle of area <span
-    class="math inline">\(h\times w\)</span>, the total number of ways
-    we can slide it around is <span class="math inline">\((r - h +1)
-    \times (c - w + 1)\)</span>. The first term gives the number of ways
-    you can go up/down and the second term describes the number of times
-    you can slide left/right. The plus <span
-    class="math inline">\(+1\)</span> includes the current config if
-    there is no room to slide around.</p>
-    <p>For some configuration of raised dots that fit inside this
-    rectangle – all configurations formed by sliding this rectangle
-    around are equivalent.</p>
-    <p>So the question now becomes: How many such rectangles can we
-    make? This answer is simple- Each <span
-    class="math inline">\(h\)</span> and <span
-    class="math inline">\(w\)</span> is constrained to be in the set
-    <span class="math inline">\(\{1, \dots, r \}\)</span> and <span
-    class="math inline">\(\{1, \dots, c \}\)</span>. Taking the cross
-    product we get <span class="math inline">\(r\times c\)</span>
-    possible rectangles.</p>
-    <p>Ok! But given a rectangle of certain size – how many different
-    Braille configurations can we fit in. Note for the rectangle to have
-    an area <span class="math inline">\(h \times w\)</span>, the max
-    length between any two raised dots inside the rectangle must be
-    <span class="math inline">\(w\)</span> and max height must be <span
-    class="math inline">\(h\)</span> (See picture below).</p>
-    <p><img src="assets/braille_example.png"  alt="funny animation GIF" width="300px"></p>
-    <section id="how-many-configurations-per-rectangle" class="level3">
-    <h3>How many configurations per rectangle</h3>
-    <ul>
-    <li><p>If we have <span class="math inline">\(h=1\)</span>, then for
-    any <span class="math inline">\(w \in \{1, \dots, c\}\)</span> we
-    have the total possible braille configurations that fit inside this
-    rectangle is simply <span class="math inline">\(2^{w-2}\)</span>.
-    (We subtract two because we need to put two dots at the two extremes
-    to ensure the width is <span class="math inline">\(w\)</span>. Once
-    we have placed these two dots, then we can arrange the inner dots
-    any way we want).</p></li>
-    <li><p>Similarly, if we have <span
-    class="math inline">\(w=1\)</span>, then for any <span
-    class="math inline">\(h=\{1, \dots, r\}\)</span>, we have the total
-    possible Braille configurations to be <span
-    class="math inline">\(2^{h-2}\)</span>.</p></li>
-    <li><p>If we have <span class="math inline">\(w=1\)</span> and <span
-    class="math inline">\(h=1\)</span> then there is only one way to
-    fill out the square (NOTE we do not allow the grid with no raised
-    dots)</p></li>
-    </ul>
-    <p>Ok. All the edge cases are done. Next we look at configurations
-    for general <span class="math inline">\(h \geq 2\)</span> and <span
-    class="math inline">\(w \geq 2\)</span>. The following picture
-    summarises the possibilities.</p>
-    <p>As we have to ensure that the width and height of the rectangle
-    is <span class="math inline">\(w\)</span> and <span
-    class="math inline">\(h\)</span>, we have to be careful how we
-    handle the corners. For example, when none of the corners are
-    raised, we have to avoid the top row or bottom row to have the all
-    cells <strong>NOT</strong> raised. As two top corners are blank,
-    there are <span class="math inline">\(2^{w-2}\)</span> ways to
-    configure the top row. However, we must exclude the possibility that
-    all cells are blank, which is included in <span
-    class="math inline">\(2^{w-2}\)</span> possibilities. Hence we get
-    <span class="math inline">\(2^{w-2} -1\)</span> possibilities for
-    the top or bottom row. A similar argument holds for the left and
-    right edges.</p>
-    <p>Next we iterate all the different kinds of corners that are
-    possible and use a similar argument as above to describe how to
-    handle each of these cases (see below):</p>
-    <center>
-    <object data="assets/braille_configs.pdf" width="100%" height="500px">
-    </object>
-    </center>
-    <p>The following lines of code compute the different configurations
-    for a given mini-rectangle.</p>
-    <script src="https://gist.github.com/abiswas3/f6b24ac4bdf912bc057b76bedc30aa9a.js"></script>
-    <p>Finally, to get the total number of configurations we just loop
-    through all possible rectangles and sum the different
-    configurations</p>
-    <script src="https://gist.github.com/abiswas3/b6e060287ea7253bab31d9e23cb82966.js"></script>
-    <p><u><strong>Giving us a solution of 44
-    configurations</strong>.</u></p>
-    <p><strong>Extra Credit</strong>: Replace the <span
-    class="math inline">\(r=6\)</span> and <span
-    class="math inline">\(c=4\)</span> in the above snippet and we get
-    15,499,264.</p>
-    </section>
-    </section>
-    </section>
-    <section id="footnotes" class="footnotes footnotes-end-of-document"
-    role="doc-endnotes">
-    <hr />
-    <ol>
-    <li id="fn1"><p>We subtract by -1 to exclude the configuration
-    without any raised dots.<a href="#fnref1" class="footnote-back"
-    role="doc-backlink">↩︎</a></p></li>
-    </ol>
-    </section>
   </main>
 
 
@@ -403,8 +350,6 @@ function showDivs(indices) {
 });
 
 </script>
-
 <script src="/static/toggle_bg.js" defer></script>
-
 </body>
 </html>

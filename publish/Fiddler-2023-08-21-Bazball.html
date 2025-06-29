@@ -5,10 +5,9 @@
 	<meta name="generator" content="pandoc">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-    <!-- Base CSS (common styles) -->
+    <!-- Base CSS (common styles) --> 
   <link rel="stylesheet" href="../static/nav.css"> 
-  <!-- <link rel="stylesheet" href="../static/obsidian.css"> -->
-  <link rel="stylesheet" href="../static/base.css">
+  <link rel="stylesheet" href="../static/blog_index.css">
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
@@ -26,91 +25,48 @@
   </head>
 
   <body class="dark-mode">  
-  <header>          
-  <nav class="nav">
-    <input type="checkbox" id="nav-toggle" class="nav-toggle" />
-    <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle menu">
-      &#9776; <!-- hamburger icon -->
-    </label>
-    <ul class="nav-list">
-      <li><a href="/">Random Walks</a></li>
-      <li><a href="/publish/">Notes</a></li>
-      <li><a href="/publications.html">Publications</a></li>
-      <li><a href="/misc.html">Misc</a></li>
-      <li>  <label>
-    <input type="checkbox" id="mode-toggle" />
-    Dark Mode
-  </label></li>
-    </ul>
-      
-  </nav>
-
-    <div class="toc" id="toc">      
-        <div class="last-updated">
-    Last Page Build: 2025-06-28 01:31:16 +0100
-  </div>
-
-      <div class="toc-content">
-          <ul>
-          <li><a href="#fiddler-optimal-baseball-lineup"
-          id="toc-fiddler-optimal-baseball-lineup">Fiddler: Optimal
-          Baseball Lineup</a>
-          <ul>
-          <li><a href="#example-code" id="toc-example-code">Example
-          Code</a></li>
-          </ul></li>
-          </ul>
-      </div>
-  
-  </div>
-    <br>
-  <br>
-  </header>
+    <header>          
+    <div class="nav-container"> 
+    <div class="nav-title"><a href="/">Ari</a></div>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <nav class="nav-links" id="navMenu">
+      <a href="/publish/">Notes</a>
+      <a href="/publications.html">Publications</a>
+      <a href="/misc.html">Misc</a>
+     <label><input type="checkbox" id="mode-toggle" /><span class="label"></span></label>
+    </nav>
+    </div>
+ 
+ </header>
 
   <main class="content">
-    <h1>Baseball Lineups</h1>
-  
-      <div class="authors-and-date">
-    <div class="authors">
-      Ari
-    </div>
-    <div class="published-date">
-      Published: 2023-08-21
-    </div>
+  <div class="blog">
+   <h1>Baseball Lineups</h1> 
+  <section id="fiddler-optimal-baseball-lineup" class="level1">
+  <h1>Fiddler: Optimal Baseball Lineup</h1>
+  <p>Solution to <a
+  href="https://thefiddler.substack.com/i/136180786/this-weeks-fiddler">this
+  weeks fiddler</a>. I must admit I am not too happy with this solution,
+  which involves simply using monte carlo simulations of all possible
+  slugger starting positions and calculating the one with the best
+  score.</p>
+  <p><strong>Empirical Answer:</strong> The slugger should be <span
+  style="background-color: #FFFF00"> ranked 4th</span>, when the pure
+  hitters take a single with probability <span
+  class="math inline">\(p=1/3\)</span> and the sluggers hit home runs
+  with probability <span class="math inline">\(q=1/10\)</span>. If the
+  pure hitters took singles with <span
+  class="math inline">\(p=2/3\)</span> instead, then surprisingly the
+  optimal position is 9th.</p>
+  <section id="example-code" class="level2">
+  <h2>Example Code</h2>
+  <embed type="text/html" src="Baseball.html" width="100%" height="600">
+  <p><em>There has to be some random walk solution to this problem which
+  involves setting up finite state machines and finding some stationary
+  distribution for each configuration. I’m sure of it!</em></p>
+  </section>
+  </section>
   </div>
-    
-
-
-          <ul class="tag-list">
-                  <li class="tag-item"><a href="/publish/fiddler.html" class="tag-link">fiddler</a></li>
-                  <li class="tag-item"><a href="/publish/puzzles.html" class="tag-link">puzzles</a></li>
-                </ul>
-    
-    <section id="fiddler-optimal-baseball-lineup" class="level1">
-    <h1>Fiddler: Optimal Baseball Lineup</h1>
-    <p>Solution to <a
-    href="https://thefiddler.substack.com/i/136180786/this-weeks-fiddler">this
-    weeks fiddler</a>. I must admit I am not too happy with this
-    solution, which involves simply using monte carlo simulations of all
-    possible slugger starting positions and calculating the one with the
-    best score.</p>
-    <p><strong>Empirical Answer:</strong> The slugger should be <span
-    style="background-color: #FFFF00"> ranked 4th</span>, when the pure
-    hitters take a single with probability <span
-    class="math inline">\(p=1/3\)</span> and the sluggers hit home runs
-    with probability <span class="math inline">\(q=1/10\)</span>. If the
-    pure hitters took singles with <span
-    class="math inline">\(p=2/3\)</span> instead, then surprisingly the
-    optimal position is 9th.</p>
-    <section id="example-code" class="level2">
-    <h2>Example Code</h2>
-    <embed type="text/html" src="Baseball.html" width="100%" height="600">
-    <p><em>There has to be some random walk solution to this problem
-    which involves setting up finite state machines and finding some
-    stationary distribution for each configuration. I’m sure of
-    it!</em></p>
-    </section>
-    </section>
   </main>
 
 
@@ -287,8 +243,6 @@ function showDivs(indices) {
 });
 
 </script>
-
 <script src="/static/toggle_bg.js" defer></script>
-
 </body>
 </html>

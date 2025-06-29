@@ -5,10 +5,9 @@
 	<meta name="generator" content="pandoc">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-    <!-- Base CSS (common styles) -->
+    <!-- Base CSS (common styles) --> 
   <link rel="stylesheet" href="../static/nav.css"> 
-  <!-- <link rel="stylesheet" href="../static/obsidian.css"> -->
-  <link rel="stylesheet" href="../static/base.css">
+  <link rel="stylesheet" href="../static/blog_index.css">
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
@@ -26,109 +25,64 @@
   </head>
 
   <body class="dark-mode">  
-  <header>          
-  <nav class="nav">
-    <input type="checkbox" id="nav-toggle" class="nav-toggle" />
-    <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle menu">
-      &#9776; <!-- hamburger icon -->
-    </label>
-    <ul class="nav-list">
-      <li><a href="/">Random Walks</a></li>
-      <li><a href="/publish/">Notes</a></li>
-      <li><a href="/publications.html">Publications</a></li>
-      <li><a href="/misc.html">Misc</a></li>
-      <li>  <label>
-    <input type="checkbox" id="mode-toggle" />
-    Dark Mode
-  </label></li>
-    </ul>
-      
-  </nav>
-
-    <div class="toc" id="toc">      
-        <div class="last-updated">
-    Last Page Build: 2025-06-28 01:31:16 +0100
-  </div>
-
-      <div class="toc-content">
-          <ul>
-          <li><a href="#fiddler-how-likely-is-a-lopsided-league"
-          id="toc-fiddler-how-likely-is-a-lopsided-league">Fiddler: How
-          Likely is a Lopsided League?</a>
-          <ul>
-          <li><a href="#my-solution-simpler-problem"
-          id="toc-my-solution-simpler-problem">My Solution : Simpler
-          Problem</a></li>
-          </ul></li>
-          </ul>
-      </div>
-  
-  </div>
-    <br>
-  <br>
-  </header>
+    <header>          
+    <div class="nav-container"> 
+    <div class="nav-title"><a href="/">Ari</a></div>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <nav class="nav-links" id="navMenu">
+      <a href="/publish/">Notes</a>
+      <a href="/publications.html">Publications</a>
+      <a href="/misc.html">Misc</a>
+     <label><input type="checkbox" id="mode-toggle" /><span class="label"></span></label>
+    </nav>
+    </div>
+ 
+ </header>
 
   <main class="content">
-    <h1>LopSided League</h1>
-  
-      <div class="authors-and-date">
-    <div class="authors">
-      Ari
-    </div>
-    <div class="published-date">
-      Published: 2023-09-18
-    </div>
+  <div class="blog">
+   <h1>LopSided League</h1> 
+  <section id="fiddler-how-likely-is-a-lopsided-league" class="level1">
+  <h1>Fiddler: How Likely is a Lopsided League?</h1>
+  <p>This weeks Fiddler problem states that</p>
+  <blockquote>
+  <p>Inspired by this surprising fact, suppose Fiddler League Baseball
+  has six divisions, with five teams in each division. For simplicity,
+  further suppose each team has a winning percentage chosen randomly,
+  uniformly, and independently between zero percent and 100 percent.</p>
+  Let’s look at two divisions: The Enigma League East division and the
+  Enigma League Central division. What is the probability that every
+  team in the Enigma League East division has a higher winning
+  percentage than every team in the Enigma League Central division?
+  </blockquote>
+  <section id="my-solution-simpler-problem" class="level2">
+  <h2>My Solution : Simpler Problem</h2>
+  <p>Let <span class="math inline">\((Y_1, \dots, Y_5)\)</span> and
+  <span class="math inline">\((X_1, \dots, X_5)\)</span> be the random
+  variables that represent the winning percentage of the teams in the
+  East and Central Division.</p>
+  <p>From the problem definition we know that both <span
+  class="math inline">\(X_i \xleftarrow[]{\$}[0,1]\)</span> and <span
+  class="math inline">\(Y_i \xleftarrow[]{\$}[0,1]\)</span> for all
+  <span class="math inline">\(i \in [5]\)</span> i.e. they are sampled
+  uniformly at random from an interval of <span
+  class="math inline">\([0,1]\)</span>.</p>
+  <p>The problem is essentially asking if I draw all 10 of these random
+  samples what is the probability that the final ordering has <span
+  class="math inline">\(X\)</span>’s in the top 5.</p>
+  <p>There are 10! factorial possible ranking strategies for and <span
+  class="math inline">\(5! \times
+  5!\)</span> ways to arrange the different X’s and Y’s in the first 5
+  and last 5 slots.</p>
+  <p>Thus the first answer is simply <span
+  class="math inline">\(\frac{5!\times5!}{10!} =
+  \frac{1}{252}\)</span>.</p>
+  <p>A monte carlo simulation of drawing process confirms the above
+  result</p>
+  <p><img src="./assets/monte_carlo_lop_side.png" /></p>
+  </section>
+  </section>
   </div>
-    
-
-
-          <ul class="tag-list">
-                  <li class="tag-item"><a href="/publish/fiddler.html" class="tag-link">fiddler</a></li>
-                  <li class="tag-item"><a href="/publish/puzzles.html" class="tag-link">puzzles</a></li>
-                </ul>
-    
-    <section id="fiddler-how-likely-is-a-lopsided-league"
-    class="level1">
-    <h1>Fiddler: How Likely is a Lopsided League?</h1>
-    <p>This weeks Fiddler problem states that</p>
-    <blockquote>
-    <p>Inspired by this surprising fact, suppose Fiddler League Baseball
-    has six divisions, with five teams in each division. For simplicity,
-    further suppose each team has a winning percentage chosen randomly,
-    uniformly, and independently between zero percent and 100
-    percent.</p>
-    Let’s look at two divisions: The Enigma League East division and the
-    Enigma League Central division. What is the probability that every
-    team in the Enigma League East division has a higher winning
-    percentage than every team in the Enigma League Central division?
-    </blockquote>
-    <section id="my-solution-simpler-problem" class="level2">
-    <h2>My Solution : Simpler Problem</h2>
-    <p>Let <span class="math inline">\((Y_1, \dots, Y_5)\)</span> and
-    <span class="math inline">\((X_1, \dots, X_5)\)</span> be the random
-    variables that represent the winning percentage of the teams in the
-    East and Central Division.</p>
-    <p>From the problem definition we know that both <span
-    class="math inline">\(X_i \xleftarrow[]{\$}[0,1]\)</span> and <span
-    class="math inline">\(Y_i \xleftarrow[]{\$}[0,1]\)</span> for all
-    <span class="math inline">\(i \in [5]\)</span> i.e. they are sampled
-    uniformly at random from an interval of <span
-    class="math inline">\([0,1]\)</span>.</p>
-    <p>The problem is essentially asking if I draw all 10 of these
-    random samples what is the probability that the final ordering has
-    <span class="math inline">\(X\)</span>’s in the top 5.</p>
-    <p>There are 10! factorial possible ranking strategies for and <span
-    class="math inline">\(5! \times
-    5!\)</span> ways to arrange the different X’s and Y’s in the first 5
-    and last 5 slots.</p>
-    <p>Thus the first answer is simply <span
-    class="math inline">\(\frac{5!\times5!}{10!} =
-    \frac{1}{252}\)</span>.</p>
-    <p>A monte carlo simulation of drawing process confirms the above
-    result</p>
-    <p><img src="./assets/monte_carlo_lop_side.png" /></p>
-    </section>
-    </section>
   </main>
 
 
@@ -305,8 +259,6 @@ function showDivs(indices) {
 });
 
 </script>
-
 <script src="/static/toggle_bg.js" defer></script>
-
 </body>
 </html>

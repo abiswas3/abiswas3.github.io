@@ -1,46 +1,10 @@
-/* === Global Resets & Box Model === */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-
 /* Content container */
-.content {
-  max-width: 800px;
-  line-height: 2rem;
-  margin: 0 auto;
-  padding: 80px 20px 40px; /* top padding + smaller horizontal + bottom */
-}
-
-/* Responsive margin tweak for large screens */
-@media (min-width: 1024px) {
-  .content {
-    margin-top: 1rem;
-  }
-}
-
-
-
-/* Images in content */
 .content img {
   max-width: 100%;
   height: auto;
   display: block;
   margin: 1rem 0;
   object-fit: contain;
-}
-
-
-ol {
-  margin-left: 1.5rem;
-  padding-left: 0;
-  margin-bottom: 2.5rem;
-}
-
-ol li {
-  margin-bottom: 0.8rem;
-
-  gap: 1rem;
 }
 
 .date {
@@ -58,17 +22,16 @@ ol li {
 
 /* Responsive adjustments */
 @media (max-width: 480px) {
-  .content {
-    padding: 40px 12px 20px;
-  }
-  ol li {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.3rem;
-  }
   .date {
     min-width: auto;
     font-size: 0.75rem;
+  }
+  .photo-container{
+    display: none;
+    height: 1px;
+  }
+  .content img{
+    display: none;
   }
 }
 
@@ -77,10 +40,10 @@ ol li {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
   max-width: 900px;
   margin: auto;
-  padding: 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .photo-container img {
@@ -110,6 +73,7 @@ ol li {
   .photo-container {
     flex: 1;
     max-width: 320px;
+    padding-right: 1rem;
   }
 }
 

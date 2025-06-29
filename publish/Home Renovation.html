@@ -5,10 +5,9 @@
 	<meta name="generator" content="pandoc">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-    <!-- Base CSS (common styles) -->
+    <!-- Base CSS (common styles) --> 
   <link rel="stylesheet" href="../static/nav.css"> 
-  <!-- <link rel="stylesheet" href="../static/obsidian.css"> -->
-  <link rel="stylesheet" href="../static/base.css">
+  <link rel="stylesheet" href="../static/blog_index.css">
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
@@ -26,47 +25,35 @@
   </head>
 
   <body class="dark-mode">  
-  <header>          
-  <nav class="nav">
-    <input type="checkbox" id="nav-toggle" class="nav-toggle" />
-    <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle menu">
-      &#9776; <!-- hamburger icon -->
-    </label>
-    <ul class="nav-list">
-      <li><a href="/">Random Walks</a></li>
-      <li><a href="/publish/">Notes</a></li>
-      <li><a href="/publications.html">Publications</a></li>
-      <li><a href="/misc.html">Misc</a></li>
-      <li>  <label>
-    <input type="checkbox" id="mode-toggle" />
-    Dark Mode
-  </label></li>
-    </ul>
-      
-  </nav>
-
-    <br>
-  <br>
-  </header>
+    <header>          
+    <div class="nav-container"> 
+    <div class="nav-title"><a href="/">Ari</a></div>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <nav class="nav-links" id="navMenu">
+      <a href="/publish/">Notes</a>
+      <a href="/publications.html">Publications</a>
+      <a href="/misc.html">Misc</a>
+     <label><input type="checkbox" id="mode-toggle" /><span class="label"></span></label>
+    </nav>
+    </div>
+ 
+ </header>
 
   <main class="content">
-    <h1></h1>
-  
-      
-
-
-  
-    <ul class="task-list">
-    <li><label><input type="checkbox" />Put up the blackboards in the
-    Office</label></li>
-    <li><label><input type="checkbox" />FIgure out the standing desk
-    situation (I’ll hold off till I make the msm, and one lean proof
-    work)</label></li>
-    <li><label><input type="checkbox" />Shoe storage, and renovate the
-    outdoor shed for bike storage.</label></li>
-    <li><label><input type="checkbox" />Squat rack in the
-    house.</label></li>
-    </ul>
+  <div class="blog">
+   <h1></h1> 
+  <ul class="task-list">
+  <li><label><input type="checkbox" />Put up the blackboards in the
+  Office</label></li>
+  <li><label><input type="checkbox" />FIgure out the standing desk
+  situation (I’ll hold off till I make the msm, and one lean proof
+  work)</label></li>
+  <li><label><input type="checkbox" />Shoe storage, and renovate the
+  outdoor shed for bike storage.</label></li>
+  <li><label><input type="checkbox" />Squat rack in the
+  house.</label></li>
+  </ul>
+  </div>
   </main>
 
 
@@ -243,8 +230,6 @@ function showDivs(indices) {
 });
 
 </script>
-
 <script src="/static/toggle_bg.js" defer></script>
-
 </body>
 </html>

@@ -6,8 +6,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
     <!-- Base CSS (common styles) -->
-  <link rel="stylesheet" href="/static/blog_index.css">      
+  
   <link rel="stylesheet" href="/static/nav.css">      
+    <link rel="stylesheet" href="/static/blog_index.css">      
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
   <title>Ari Biswas</title>
@@ -16,36 +17,25 @@
 
   <body class="dark-mode">    
     <header>          
-    <nav class="nav">
-      <input type="checkbox" id="nav-toggle" class="nav-toggle" />
-      <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle menu">
-        &#9776; <!-- hamburger icon -->
-      </label>
-      <ul class="nav-list">
-        <li><a href="/">Random Walks</a></li>
-        <li><a href="/publish/">Notes</a></li>
-        <li><a href="/publications.html">Publications</a></li>
-        <li><a href="/misc.html">Misc</a></li>
-        <li>  <label>
-    <input type="checkbox" id="mode-toggle" />
-    Dark Mode
-  </label></li>
-      </ul>
+    <div class="nav-container"> 
+    <div class="nav-title"><a href="/">Ari</a></div>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <nav class="nav-links" id="navMenu">
+      <a href="/publish/">Notes</a>
+      <a href="/publications.html">Publications</a>
+      <a href="/misc.html">Misc</a>
+     <label><input type="checkbox" id="mode-toggle" /><span class="label"></span></label>
     </nav>
-    </header>
+    </div>
+ 
+ </header>
 
-
-
-    <main class="content">
-         
+    <main class="content"> 
     <div class="home-container">
-
       <div class="photo-container">
       <img id="random-photo" alt="Random Photo" />
       </div>
-
       <div class="text-container">
-        <h3>Hello, I'm Ari</h3>   
         <p>I received my undergraduate degree in Computer Engineering
         and Applied Mathematics and Graduate Degree in Computer Science
         from the <a href="https://www.wisc.edu">University of
@@ -63,18 +53,13 @@
         href="https://warwick.ac.uk/services/dc/schols_fund/scholarships_and_funding/chancellors_int/#:~:text=Eligibility,to%20begin%20in%20October%202022%3B&amp;text=Applicants%20may%20be%20from%20any,to%20the%20next%20academic%20year.">Chancellors
         International Scholarship</a>, which supports my doctoral
         studies.</p>
-
-        The best way to contact me is via email: aribiswas3@gmail.com
-
+        The best way to contact me is via email: ari@randomwalks.xyz
         <div class="hero-links" style="margin-top: 1em;">
         <a href="https://github.com/abiswas3" target="_blank" rel="noopener" class="hero-link">GitHub</a> &nbsp;|&nbsp;
         <a href="https://scholar.google.com/citations?user=yGuM3MgAAAAJ&hl=en" target="_blank" rel="noopener" class="hero-link">Google Scholar</a>
-        </div>
-    
+        </div> 
       </div>
     </div>
-
-
     </main>
 
 

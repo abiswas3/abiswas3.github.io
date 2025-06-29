@@ -1,9 +1,8 @@
 :root{
---base-font-family: apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
 --content-max-width: 760px;
-  /* --base-font-family: 'Chalkboard SE', sans-serif; */
+  --base-font-family: apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+  --content-font-family: 'Chalkboard SE', sans-serif;
   /* --base-font-wt: 100;   */
-/*  --base-font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;*/
 }
 
 /* === Theme Colors === */
@@ -16,12 +15,11 @@ body.light-mode {
   --base-font-size: 1.08rem;
 }
 
-
 body.dark-mode{
   --bg: #282828; 
   --text: #ebdbb2; 
   --heading: #fabd2f;
-  --link: #83a598;
+  --link: #66ccff;
   --link-hover: salmon;
   --border-color: #e0ddd6;
   --base-font-size: 1.08rem;
@@ -38,33 +36,55 @@ html, body {
   font-size: var(--base-font-size);
   font-weight: var(--base-font-wt);
 }
-
-header li{
-  font-size: 1rem;
+.content {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  line-height: 2;
 }
-
-/* === Header === */
-/* Fixed header styles */
+.blog{
+  line-height: 2.7;
+}
 header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 56px; /* example header height, adjust as needed */
-  background: var(--bg);
-  padding-top: 1rem;
-  padding-left: 1rem;
-  padding-bottom: 1.4rem;
-  font-size: 1.3rem;
-  z-index: 1000;
+  background-color: var(--bg-color);
+  padding: 1rem 1.25rem;
 }
+input[type=checkbox] {
+  display: none;
+}
+.label {
+  display: inline-block;
+}
+/* Show emoji when checked using ::before */
+input[type="checkbox"]:checked + .label::before {
+  content: "☀️";
+}
+/* Show another emoji when unchecked (optional) */
+input[type="checkbox"]:not(:checked) + .label::before {
+  content: "🌙";
+}
+
+/* header { */
+/*   position: fixed; */
+/*   top: 0; */
+/*   left: 0; */
+/*   width: 100%; */
+/*   height: 56px; /* example header height, adjust as needed */ */
+/*   background: var(--bg); */
+/*   padding-top: 1rem; */
+/*   padding-left: 1rem; */
+/*   padding-bottom: 1.4rem; */
+/*   font-size: 1.3rem; */
+/*   z-index: 1000; */
+/* } */
+
 header a {
   cursor: pointer;
 }
 header a:hover {
   text-decoration: underline;
 }
-/* === Typography === */
+
+
 /* Headings styling */
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
@@ -74,92 +94,8 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.3;
   font-family: var(--base-font-family);
 }
-
-strong{
-  color: var(--heading);
-}
-/* Basic styles */
-.nav {
-  background: var(--bg);
-  max-width: var(--content-max-width);
-  border-bottom: 1px solid var(--border-color);
-  margin: auto;
-  padding: 0 1rem;
-  z-index: 1000;
-}
-
-/* Hide checkbox */
-.nav-toggle {
-  display: none;
-}
-
-/* Hamburger menu label */
-.nav-toggle-label {
-  display: none;
-  font-size: 1.8rem;
-  cursor: pointer;
-  padding: 1rem 0;
-  user-select: none;
-}
-
-/* Horizontal nav list */
-.nav-list {
-  display: flex;
-  gap: 1.5rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  align-items: center;
-}
-
-/* Nav links */
-.nav-list a {
-  color: var(--heading);
-  text-decoration: none;
-  padding: 1rem 0;
-  display: block;
-  transition: color 0.3s;
-  font-size: 1.1rem;
-}
-
-.nav-list a:hover {
-  color: salmon;
-  text-decoration: underline;
-}
-
-/* Responsive - mobile */
-@media (max-width: 768px) {
-  .nav-toggle-label {
-    display: block;
-  }
-
-  .nav-list {
-    flex-direction: column;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-  }
-
-  .nav-toggle:checked + .nav-toggle-label + .nav-list {
-    max-height: 500px; /* large enough to show all links */
-  }
-
-  .nav-list a {
-    padding: 0.8rem 0;
-    border-top: 1px solid var(--border-color);
-  }
-
-  .nav-list a:first-child {
-    border-top: none;
-  }
-
-  .content{
-    padding-top: 60px;
-  }
-}
-
 a {
-  color: #78A05A;  /* lively bamboo green */
+  color: var(--link);  /* lively bamboo green */
   text-decoration: none;
   font-weight: 600;
   text-decoration: underline;
@@ -169,3 +105,65 @@ a:hover, a:focus {
   
 }
 
+strong{
+  color: var(--heading);
+}
+/* Move border and control spacing here */
+.nav-container {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #222;
+  padding-bottom: 0.75rem;  /* ⬅️ Add space between nav text and line */
+}
+
+.nav-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.nav-toggle {
+  display: none;
+  font-size: 1.5rem;
+  background: none;
+  color: #eee;
+  border: none;
+  cursor: pointer;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+}
+
+
+.nav-links a {
+  color: var(--link);
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .nav-toggle {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  .nav-links.show {
+    display: flex;
+  }
+}

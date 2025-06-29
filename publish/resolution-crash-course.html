@@ -5,10 +5,9 @@
 	<meta name="generator" content="pandoc">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-    <!-- Base CSS (common styles) -->
+    <!-- Base CSS (common styles) --> 
   <link rel="stylesheet" href="../static/nav.css"> 
-  <!-- <link rel="stylesheet" href="../static/obsidian.css"> -->
-  <link rel="stylesheet" href="../static/base.css">
+  <link rel="stylesheet" href="../static/blog_index.css">
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
@@ -26,460 +25,395 @@
   </head>
 
   <body class="dark-mode">  
-  <header>          
-  <nav class="nav">
-    <input type="checkbox" id="nav-toggle" class="nav-toggle" />
-    <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle menu">
-      &#9776; <!-- hamburger icon -->
-    </label>
-    <ul class="nav-list">
-      <li><a href="/">Random Walks</a></li>
-      <li><a href="/publish/">Notes</a></li>
-      <li><a href="/publications.html">Publications</a></li>
-      <li><a href="/misc.html">Misc</a></li>
-      <li>  <label>
-    <input type="checkbox" id="mode-toggle" />
-    Dark Mode
-  </label></li>
-    </ul>
-      
-  </nav>
-
-    <div class="toc" id="toc">      
-        <div class="last-updated">
-    Last Page Build: 2025-06-28 01:31:20 +0100
-  </div>
-
-      <div class="toc-content">
-          <ul>
-          <li><a href="#this-is-the-main-post"
-          id="toc-this-is-the-main-post">This is the main post</a>
-          <ul>
-          <li><a href="#resolution-proof-system"
-          id="toc-resolution-proof-system">Resolution Proof
-          System</a></li>
-          <li><a href="#the-pigeon-hole-principle"
-          id="toc-the-pigeon-hole-principle">The Pigeon Hole
-          Principle</a>
-          <ul>
-          <li><a href="#test-header" id="toc-test-header">Test
-          Header</a></li>
-          </ul></li>
-          <li><a
-          href="#what-is-known-lower-bounds-for-resolution-proofs-refuting-php"
-          id="toc-what-is-known-lower-bounds-for-resolution-proofs-refuting-php">What
-          Is Known: Lower Bounds For Resolution Proofs Refuting
-          PHP</a></li>
-          </ul></li>
-          <li><a href="#references"
-          id="toc-references">References</a></li>
-          </ul>
-      </div>
-  
-  </div>
-    <br>
-  <br>
-  </header>
+    <header>          
+    <div class="nav-container"> 
+    <div class="nav-title"><a href="/">Ari</a></div>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <nav class="nav-links" id="navMenu">
+      <a href="/publish/">Notes</a>
+      <a href="/publications.html">Publications</a>
+      <a href="/misc.html">Misc</a>
+     <label><input type="checkbox" id="mode-toggle" /><span class="label"></span></label>
+    </nav>
+    </div>
+ 
+ </header>
 
   <main class="content">
-    <h1>Resolution Crash Course</h1>
-  
-      <div class="authors-and-date">
-    <div class="authors">
-      Ari
-    </div>
-    <div class="published-date">
-      Published: 2025-03-01
-    </div>
+  <div class="blog">
+   <h1>Resolution Crash Course</h1> 
+  <section id="this-is-the-main-post" class="level1">
+  <h1>This is the main post</h1>
+  <section id="resolution-proof-system" class="level2">
+  <h2>Resolution Proof System</h2>
+  <p>Some text after. A Boolean formula <span
+  class="math inline">\(F\)</span> is a CNF formula if <span
+  class="math inline">\(F\)</span> is an AND of clauses <span
+  class="math inline">\(F = C_1 \land \ldots \land C_m\)</span> where
+  each clause <span class="math inline">\(C_i\)</span> is an OR of
+  literals (variables <span class="math inline">\(x_i\)</span> or their
+  negation <span class="math inline">\(\overline{x_i}\)</span>).</p>
+  <p><strong>Resolution Rule</strong>: Given two clauses <span
+  class="math inline">\(C_0\)</span> and <span
+  class="math inline">\(C_1\)</span> of the form <span
+  class="math inline">\(C_0 = A \lor x\)</span> and <span
+  class="math inline">\(C_1 = B \lor \overline{x}\)</span>, the
+  resolution rule allows us to derive a new clause <span
+  class="math inline">\(C&#39;= A \lor B\)</span>. In the literature we
+  denote this rule as <span class="math display">\[
+  \frac{A \vee x \quad \overline{x} \vee B}{A \vee B}
+  \]</span> <span class="math inline">\(x\)</span> is called the
+  resolved variable, and <span class="math inline">\(A \vee B\)</span>
+  is called the resolvent. Sometimes we also allow for the weakening
+  rule, where given a clause <span class="math inline">\(C\)</span>, we
+  can derive clause <span class="math inline">\(D\)</span> where <span
+  class="math inline">\(C \subseteq D\)</span> i.e every literal in
+  <span class="math inline">\(C\)</span> is present in <span
+  class="math inline">\(D\)</span>.</p>
+  <p><span class="math display">\[
+  \frac{C}{D} [C\subseteq D]
+  \]</span></p>
+  <div class="def"><h3>Definition: Resolution
+
+  Proof
+
+  System</h3><p>Given an unsatisfiable CNF formula <span
+  class="math inline"><em>F</em> = ⋀<sub><em>i</em> ∈ [<em>m</em>]</sub><em>C</em><sub><em>i</em></sub></span>
+  over <span class="math inline"><em>n</em></span> variables, a resolution
+  refutation <span class="math inline"><em>π</em></span> is a sequence of
+  clauses <span
+  class="math inline"><em>D</em><sub>1</sub>, …, <em>D</em><sub><em>L</em></sub></span>
+  where</p>
+  <ol type="1">
+  <li><span
+  class="math inline"><em>D</em><sub><em>i</em></sub> = <em>C</em><sub><em>i</em></sub></span>
+  for <span class="math inline">1 ≤ <em>i</em> ≤ <em>m</em></span>.</li>
+  <li><span class="math inline"><em>D</em><sub><em>k</em></sub></span> is
+  a clause derived by applying the resolution (or the weakening) rule to
+  clauses <span class="math inline"><em>D</em><sub><em>i</em></sub></span>
+  and <span class="math inline"><em>D</em><sub><em>j</em></sub></span> for
+  <span
+  class="math inline"><em>i</em>, <em>j</em> ≤ <em>m</em></span>.</li>
+  <li><span class="math inline"><em>D</em><sub><em>L</em></sub> = ∅</span>
+  is the empty clause which is always false.</li>
+  </ol>
+  <p><strong>Size Of A Refutation</strong>: The size of a refutation <span
+  class="math inline">|<em>π</em>|</span> is the number of clauses in the
+  sequence (<span class="math inline"><em>L</em></span> in this case).</p></div>
+  <p><strong>Example</strong></p>
+  <p><img src="assets/Resolution/resolution-example.jpg"></img></p>
+  </section>
+  <section id="the-pigeon-hole-principle" class="level2">
+  <h2>The Pigeon Hole Principle</h2>
+  <p>It is convenient to think of principle in terms of a bipartite
+  graph <span class="math inline">\(G = (V_P \cup V_H, E)\)</span> with
+  pigeons <span class="math inline">\(V_P = [m]\)</span> and holes <span
+  class="math inline">\(V_H = [n]\)</span> for <span
+  class="math inline">\(m \ge n+ 1\)</span>. For a given pigeon <span
+  class="math inline">\(u \in V_P\)</span>, <span
+  class="math inline">\(N_G(u)\)</span> denotes the set of holes pigeon
+  <span class="math inline">\(u\)</span> is allowed to fly into.
+  Similarly, for any hole <span class="math inline">\(v\in V_H\)</span>,
+  <span class="math inline">\(N_G(h)\)</span> denotes the set of pigeons
+  allowed in hole <span class="math inline">\(v\)</span>. If nothing is
+  stated about <span class="math inline">\(G\)</span>, it is safe to
+  assume <span class="math inline">\(G = K_{m,n}\)</span> the complete
+  bipartite graph.</p>
+  <section id="test-header" class="level3">
+  <h3>Test Header</h3>
+  <p>To encode the idea that each hole can accomodate at most 1 pigeon,
+  and as there are not enough holes, it is impossible to assign every
+  pigeon a hole, we use variables <span class="math inline">\(x_{ij} \in
+  bit\)</span> to denote the assignment of pigeon <span
+  class="math inline">\(i\)</span> to hole <span
+  class="math inline">\(j\)</span>. That is if <span
+  class="math inline">\(x_{ij} = 1\)</span> then pigeon <span
+  class="math inline">\(i\)</span> is assigned to hole <span
+  class="math inline">\(j\)</span>. Now, saying that we cannot assign
+  every pigeon a unique hole is equivalent to saying, that there is no
+  assignment <span class="math inline">\(X = \{x_{ij}\}_{(ij)\in
+  E}\)</span> that satisfies the conjuction of the following
+  clauses.</p>
+  <p><span class="math display">\[\begin{align}
+  P_i := \underset{j\in N_G(i)}{\lor}(x_{ij}) &amp;\qquad \forall i \in
+  [m] \tag{a} \\[12pt]
+  H_j^{i,i&#39;} := \overline{x_{ij}} \lor \overline{x_{i&#39;j}}
+  &amp;\qquad \forall i \neq i \in [m], \forall j \in N_G(i) \cap
+  N_G(i&#39;) \tag{b} \\[12pt]
+  F_i^{j,j&#39;} := \overline{x_{ij&#39;}} \lor \overline{x_{ij}}
+  &amp;\qquad \forall i \in [m], \forall j \neq j&#39; \in
+  N_G(i)\tag{c}  \\[12pt]
+      S_j:= \underset{i\in N_G(j)}{\lor}(x_{ij}) &amp;\qquad \forall j
+  \in [n] \tag{d}
+  \end{align}\]</span></p>
+  <ol type="a">
+  <li><p><strong>Pigeon Axioms</strong>: Each pigeon must get a
+  hole.</p></li>
+  <li><p><strong>Hole Axioms</strong>: Every hole can take at most one
+  pigeon</p></li>
+  </ol>
+  <p>If these were the only axioms, then we refer to the formula as the
+  <strong>basic PHP</strong>.</p>
+  <ol start="3" type="a">
+  <li><strong>Functional Axioms</strong>: The map that assigns holes to
+  a pigeon must be a function, i.e the same pigeon cannot get two
+  different holes.</li>
+  </ol>
+  <p>If we require the functional axioms as well, then we refer to the
+  fomulae as the <strong>functional PHP</strong>.</p>
+  <ol start="4" type="a">
+  <li><strong>Onto Axioms</strong>: The map that assigns holes to a
+  pigeon must be an onto/surjective function, i.e every hole must get a
+  pigeon.</li>
+  </ol>
+  <div class="remark"><h3></h3><p>Satisfying all 4 axioms, implies that there exists a <strong>perfect
+  matching</strong> in the graph <span
+  class="math inline"><em>G</em></span>.</p></div>
+  <p>If we need the function to be an onto function, then we refer to
+  the formula as the <strong>onto functional PHP</strong>.</p>
+  <p>The final unsatisfiable formula</p>
+  <p><span class="math display">\[\begin{align}
+  F &amp;= \underset{i \in m}\land P_i \\
+  &amp; \bigwedge  \underset{i\neq i}{\land} \underset{j \in N_G(i) \cap
+  N_G(i&#39;)}{\land} H_j^{i, i&#39;} \\
+  &amp;\bigwedge \underset{i \in [m]}{\land} \underset{j\neq j&#39; \in
+  N_G(i)}{\land}  F_i^{j, j&#39;}\\
+  &amp; \bigwedge\underset{j \in m}\land S_j
+  \end{align}\]</span></p>
+  <blockquote>
+  <p>Clearly any formula that includes constraints (a)-(d) is the MOST
+  constrained system. Therefore, it must be easier to refute than a
+  formula that only requires (a)-(b) or (a)-(c). Thus, lower bounds for
+  <strong>more</strong> constrained systems subsume lower bounds for the
+  rest.</p>
+  Similarly, if we make <span class="math inline">\(m\)</span> very very
+  large, it should be easier to refute the axioms, when compared to when
+  <span class="math inline">\(m=n+1\)</span>. When <span
+  class="math inline">\(m \gg n\)</span> we refer to the formula as the
+  <strong>weak</strong> PHP.
+  </blockquote>
+  </section>
+  </section>
+  <section
+  id="what-is-known-lower-bounds-for-resolution-proofs-refuting-php"
+  class="level2">
+  <h2>What Is Known: Lower Bounds For Resolution Proofs Refuting
+  PHP</h2>
+  <p>The following results are for <span class="math inline">\(G=
+  K_{m,n}\)</span> where every pigeon is allowed to fly into every
+  hole.</p>
+  <ul>
+  <li><p><span class="citation" data-cites="haken1984intractability">(<a
+  href="#ref-haken1984intractability" role="doc-biblioref">Haken,
+  1984</a>)</span>: For all resolution proofs <span
+  class="math inline">\(\pi\)</span> that refute <span
+  class="math inline">\(\text{Onto-PHP}_{n}^{n+1}\)</span>, the size
+  <span class="math inline">\(\left|\pi\right| =
+  \mathsf{exp}\left(\Omega\left(n\right)\right)\)</span></p></li>
+  <li><p>The proof for the above result was <a
+  href="basic-php-resloution-lower-bound.html">simplified</a> by <span
+  class="citation" data-cites="beame1996simplified">(<a
+  href="#ref-beame1996simplified" role="doc-biblioref">Beame and
+  Pitassi, 1996</a>)</span>, and then further generalised by <span
+  class="citation" data-cites="buss1988resolution">(<a
+  href="#ref-buss1988resolution" role="doc-biblioref">Buss and Turán,
+  1988</a>)</span> to <span class="math inline">\(\left|\pi\right| =
+  \mathsf{exp}\left(\Omega\left(\frac{n^2}{m}\right)\right)\)</span>.</p></li>
+  </ul>
+  <blockquote>
+  These lower bounds do not say anything meaningful when <span
+  class="math inline">\(m = \Omega\left(n^2\right)\)</span>.
+  </blockquote>
+  <ul>
+  <li><p>For large values of <span class="math inline">\(m\)</span>, in
+  a breakthrough result by <span class="citation"
+  data-cites="raz2004resolution">(<a href="#ref-raz2004resolution"
+  role="doc-biblioref">Raz, 2004</a>)</span>, he showed that every proof
+  <span class="math inline">\(\pi\)</span> that refutes the basic pigeon
+  hole pricinple <span class="math inline">\(\text{PHP}_{n}^{m}\)</span>
+  has size <span
+  class="math inline">\(\mathsf{exp}\left(\Omega\left(\frac{n}{\log^{10}
+  m}\right)\right)\)</span>.</p></li>
+  <li><p>In <span class="citation"
+  data-cites="razborov2003resolution">(<a
+  href="#ref-razborov2003resolution" role="doc-biblioref">Razborov,
+  2003</a>)</span> and <span class="citation"
+  data-cites="razborov2004resolution">(<a
+  href="#ref-razborov2004resolution" role="doc-biblioref">Razborov,
+  2004</a>)</span>, the above result was strengthed and extended to
+  saying every proof <span class="math inline">\(\pi\)</span> that
+  refutes the onto pigeon hole pricinple <span
+  class="math inline">\(\text{Onto-PHP}_{n}^{m}\)</span> has size <span
+  class="math inline">\(\mathsf{exp}\left(\Omega\left(\frac{n}{\log^2
+  m}\right)\right)\)</span>.</p></li>
+  </ul>
+  <blockquote>
+  Now for even <span class="math inline">\(m\)</span> as large as <span
+  class="math inline">\(m=\mathsf{exp}(O\left(n^{1/3}\right))\)</span>,
+  we have all proofs have size that is <span
+  class="math inline">\(\mathsf{exp}(\Omega\left(n^{1/3}\right))\)</span>.
+  Note if we have <span class="math inline">\(m\)</span> as large as
+  <span
+  class="math inline">\(\mathsf{exp}(O\left(n^{1/3}\right))\)</span>,
+  even writing down all the pigeon, hole, function and onto axioms take
+  <span
+  class="math inline">\(\mathsf{exp}(\Omega\left(n^{1/3}\right))\)</span>
+  clauses worth of space. Thus, there is no point of thinking <span
+  class="math inline">\(m\)</span> any larger. <strong>This problem is
+  pretty much closed for <span
+  class="math inline">\(G=K_{m,n}\)</span></strong>.
+  </blockquote>
+  <p>Now when <span class="math inline">\(G\)</span> is sparse, it might
+  be really easy to refute the PHP. For example, the presence of an
+  isolated vertex leads to short proofs. So now we go into the business
+  of for what kind of “sparse” graphs, is the problem still hard.</p>
+  <p>The graph family we consider is the <span class="math inline">\((r,
+  \Delta, c)\)</span>-boundary expander.</p>
+  <div class="def"><h3>Definition: The
+
+  Boundary
+
+  Expander</h3><p>Given Bipartite graph <span
+  class="math inline"><em>G</em> = (<em>V</em><sub><em>P</em></sub> ∪ <em>V</em><sub><em>H</em></sub>, <em>E</em>)</span>
+  is an <span
+  class="math inline">(<em>r</em>, <em>Δ</em>, <em>c</em>)</span> boundary
+  expander, if <span
+  class="math inline">∀<em>u</em> ∈ <em>V</em><sub><em>P</em></sub></span>
+  we have <span
+  class="math inline">deg<sub><em>G</em></sub>(<em>u</em>) ≤ <em>Δ</em></span>,
+  and for every set <span
+  class="math inline"><em>S</em> ⊆ <em>V</em><sub><em>P</em></sub></span>
+  with size <span class="math inline">|<em>S</em>| ≤ <em>r</em></span> we
+  have</p>
+  <p><span
+  class="math display">|∂(<em>S</em>)| ≥ <em>c</em>|<em>S</em>|</span></p>
+  <p>where the boundary of a set <span
+  class="math inline"><em>S</em> ⊆ <em>V</em><sub><em>P</em></sub></span>,
+  denoted by <span class="math inline">∂(<em>S</em>)</span> is the set of
+  unique neighbours of every <span
+  class="math inline"><em>u</em> ∈ <em>S</em></span> i.e</p>
+  <p><span
+  class="math display">∂(<em>S</em>) = {<em>v</em> ∈ <em>V</em><sub><em>H</em></sub> : |<em>N</em><sub><em>G</em></sub>(<em>v</em>) ∩ <em>S</em>| = 1}</span></p></div>
+  <p>What do we know about refuting PHP in expanders? Not a whole lot,
+  but there are 3 seminal results that consider the extremes:</p>
+  <ul>
+  <li>When <span class="math inline">\(m\)</span> is not too large i.e
+  <span class="math inline">\(m \ll n^2\)</span>, <span class="citation"
+  data-cites="ben1999short">(<a href="#ref-ben1999short"
+  role="doc-biblioref">Ben-Sasson and Wigderson, 1999</a>)</span> showed
+  that for <span class="math inline">\(r = \Omega\left(n/\log
+  m\right)\)</span>, and <span class="math inline">\(\Delta = \log
+  m\)</span>, and <span class="math inline">\(c= \frac{3\log
+  m}{4}\)</span> (this is saying each size of set at most <span
+  class="math inline">\(c\log m\)</span> has <span
+  class="math inline">\(c&#39;\log m\)</span> unique neighbours, thus,
+  each pigeon can go constantly many holes), the size of refuting <span
+  class="math inline">\(\text{FPHP}_{n}^{m}\)</span> is <span
+  class="math inline">\(\mathsf{exp}\left(\Omega\left(\frac{n^2}{m\log
+  m}\right)\right)\)</span>.</li>
+  </ul>
+  <blockquote>
+  Thus, for graph <span
+  class="math inline">\(\text{PHP}_{n}^{m}\)</span> formulas we have
+  exponential lower bounds for on the <span class="math inline">\(m \ll
+  n^2\)</span> pigeons where each pigeon has a constant number of
+  choices for holes that it can fly into.
+  </blockquote>
+  <ul>
+  <li>The other extreme, where <span class="math inline">\(m\)</span>
+  can be arbitrary, but each pigeon also has a lot of holes to go into
+  (high minimal degree) <span class="citation"
+  data-cites="razborov2004resolution">(<a
+  href="#ref-razborov2004resolution" role="doc-biblioref">Razborov,
+  2004</a>)</span> and <span class="citation"
+  data-cites="razborov2003resolution">(<a
+  href="#ref-razborov2003resolution" role="doc-biblioref">Razborov,
+  2003</a>)</span> show that the size is <span
+  class="math inline">\(\mathsf{exp}\left(\Omega\left(\frac{\delta_G}{\log^2
+  m}\right)\right)\)</span>, where <span
+  class="math inline">\(\delta_G\)</span> is the minimum degree of the
+  graph.</li>
+  </ul>
+  <blockquote>
+  For any number of pigeons with a polynomial lower bound <span
+  class="math inline">\(\delta_G = n^{\Omega\left(1\right)}\)</span> on
+  the number holes each pigeon can fly into, we also have exponential
+  size lower bounds.
+  </blockquote>
+  <p>This leaves us asking what happens when when <span
+  class="math inline">\(m \gg n^2\)</span>, but the minimal degree is
+  small <span class="math inline">\(\delta_G =
+  \mathtt{poly}(\log(m))\)</span>?</p>
+  <p><span class="citation" data-cites="rezende2020Exp">(<a
+  href="#ref-rezende2020Exp" role="doc-biblioref">De Rezende et al.,
+  2020</a>)</span> solves this problem, and is the focus of our work.
+  They show for any <span class="math inline">\(G\)</span> that is <span
+  class="math inline">\((r, \Delta, (1-\xi\cdot \frac{\log n}{\log
+  m})\Delta)\)</span>-boundary expander, then you need proofs of size
+  <span
+  class="math inline">\(\mathsf{exp}\left(\Omega\left(\frac{r}{n^{\xi}\log^2
+  m}\right)\right)\)</span></p>
+  <p>They need a very very strong expander i.e <span
+  class="math inline">\(\lim_{n\rightarrow \infty} c = \Delta\)</span>,
+  but would like to show it for <span class="math inline">\(c=(1-
+  \xi)\Delta\)</span> for constant <span class="math inline">\(\xi \in
+  (0,1)\)</span> <strong>This is what we need to show,
+  optimistically</strong>.</p>
+  <hr style="height:3px;border:none;color:#333;background-color:#333;">
+  </hr>
+  </section>
+  </section>
+  <section id="references" class="level1">
+  <h1>References</h1>
+  <hr style="height:3px;border:none;color:#333;background-color:#333;">
+  </hr>
+  <div id="refs" class="references csl-bib-body hanging-indent"
+  data-entry-spacing="0" role="list">
+  <div id="ref-beame1996simplified" class="csl-entry" role="listitem">
+  Beame, P., Pitassi, T., 1996. Simplified and improved resolution lower
+  bounds, in: Proceedings of 37th Conference on Foundations of Computer
+  Science. IEEE, pp. 274–282.
   </div>
-    
-
-
-          <ul class="tag-list">
-                  <li class="tag-item"><a href="/publish/proof-complexity.html" class="tag-link">proof-complexity</a></li>
-                  <li class="tag-item"><a href="/publish/combinatorics.html" class="tag-link">combinatorics</a></li>
-                </ul>
-    
-    <section id="this-is-the-main-post" class="level1">
-    <h1>This is the main post</h1>
-    <section id="resolution-proof-system" class="level2">
-    <h2>Resolution Proof System</h2>
-    <p>Some text after. A Boolean formula <span
-    class="math inline">\(F\)</span> is a CNF formula if <span
-    class="math inline">\(F\)</span> is an AND of clauses <span
-    class="math inline">\(F = C_1 \land \ldots \land C_m\)</span> where
-    each clause <span class="math inline">\(C_i\)</span> is an OR of
-    literals (variables <span class="math inline">\(x_i\)</span> or
-    their negation <span
-    class="math inline">\(\overline{x_i}\)</span>).</p>
-    <p><strong>Resolution Rule</strong>: Given two clauses <span
-    class="math inline">\(C_0\)</span> and <span
-    class="math inline">\(C_1\)</span> of the form <span
-    class="math inline">\(C_0 = A \lor x\)</span> and <span
-    class="math inline">\(C_1 = B \lor \overline{x}\)</span>, the
-    resolution rule allows us to derive a new clause <span
-    class="math inline">\(C&#39;= A \lor B\)</span>. In the literature
-    we denote this rule as <span class="math display">\[
-    \frac{A \vee x \quad \overline{x} \vee B}{A \vee B}
-    \]</span> <span class="math inline">\(x\)</span> is called the
-    resolved variable, and <span class="math inline">\(A \vee B\)</span>
-    is called the resolvent. Sometimes we also allow for the weakening
-    rule, where given a clause <span class="math inline">\(C\)</span>,
-    we can derive clause <span class="math inline">\(D\)</span> where
-    <span class="math inline">\(C \subseteq D\)</span> i.e every literal
-    in <span class="math inline">\(C\)</span> is present in <span
-    class="math inline">\(D\)</span>.</p>
-    <p><span class="math display">\[
-    \frac{C}{D} [C\subseteq D]
-    \]</span></p>
-    <div class="def"><h3>Definition: Resolution
-
-    Proof
-
-    System</h3><p>Given an unsatisfiable CNF formula <span
-    class="math inline"><em>F</em> = ⋀<sub><em>i</em> ∈ [<em>m</em>]</sub><em>C</em><sub><em>i</em></sub></span>
-    over <span class="math inline"><em>n</em></span> variables, a resolution
-    refutation <span class="math inline"><em>π</em></span> is a sequence of
-    clauses <span
-    class="math inline"><em>D</em><sub>1</sub>, …, <em>D</em><sub><em>L</em></sub></span>
-    where</p>
-    <ol type="1">
-    <li><span
-    class="math inline"><em>D</em><sub><em>i</em></sub> = <em>C</em><sub><em>i</em></sub></span>
-    for <span class="math inline">1 ≤ <em>i</em> ≤ <em>m</em></span>.</li>
-    <li><span class="math inline"><em>D</em><sub><em>k</em></sub></span> is
-    a clause derived by applying the resolution (or the weakening) rule to
-    clauses <span class="math inline"><em>D</em><sub><em>i</em></sub></span>
-    and <span class="math inline"><em>D</em><sub><em>j</em></sub></span> for
-    <span
-    class="math inline"><em>i</em>, <em>j</em> ≤ <em>m</em></span>.</li>
-    <li><span class="math inline"><em>D</em><sub><em>L</em></sub> = ∅</span>
-    is the empty clause which is always false.</li>
-    </ol>
-    <p><strong>Size Of A Refutation</strong>: The size of a refutation <span
-    class="math inline">|<em>π</em>|</span> is the number of clauses in the
-    sequence (<span class="math inline"><em>L</em></span> in this case).</p></div>
-    <p><strong>Example</strong></p>
-    <p><img src="assets/Resolution/resolution-example.jpg"></img></p>
-    </section>
-    <section id="the-pigeon-hole-principle" class="level2">
-    <h2>The Pigeon Hole Principle</h2>
-    <p>It is convenient to think of principle in terms of a bipartite
-    graph <span class="math inline">\(G = (V_P \cup V_H, E)\)</span>
-    with pigeons <span class="math inline">\(V_P = [m]\)</span> and
-    holes <span class="math inline">\(V_H = [n]\)</span> for <span
-    class="math inline">\(m \ge n+ 1\)</span>. For a given pigeon <span
-    class="math inline">\(u \in V_P\)</span>, <span
-    class="math inline">\(N_G(u)\)</span> denotes the set of holes
-    pigeon <span class="math inline">\(u\)</span> is allowed to fly
-    into. Similarly, for any hole <span class="math inline">\(v\in
-    V_H\)</span>, <span class="math inline">\(N_G(h)\)</span> denotes
-    the set of pigeons allowed in hole <span
-    class="math inline">\(v\)</span>. If nothing is stated about <span
-    class="math inline">\(G\)</span>, it is safe to assume <span
-    class="math inline">\(G = K_{m,n}\)</span> the complete bipartite
-    graph.</p>
-    <section id="test-header" class="level3">
-    <h3>Test Header</h3>
-    <p>To encode the idea that each hole can accomodate at most 1
-    pigeon, and as there are not enough holes, it is impossible to
-    assign every pigeon a hole, we use variables <span
-    class="math inline">\(x_{ij} \in bit\)</span> to denote the
-    assignment of pigeon <span class="math inline">\(i\)</span> to hole
-    <span class="math inline">\(j\)</span>. That is if <span
-    class="math inline">\(x_{ij} = 1\)</span> then pigeon <span
-    class="math inline">\(i\)</span> is assigned to hole <span
-    class="math inline">\(j\)</span>. Now, saying that we cannot assign
-    every pigeon a unique hole is equivalent to saying, that there is no
-    assignment <span class="math inline">\(X = \{x_{ij}\}_{(ij)\in
-    E}\)</span> that satisfies the conjuction of the following
-    clauses.</p>
-    <p><span class="math display">\[\begin{align}
-    P_i := \underset{j\in N_G(i)}{\lor}(x_{ij}) &amp;\qquad \forall i
-    \in [m] \tag{a} \\[12pt]
-    H_j^{i,i&#39;} := \overline{x_{ij}} \lor \overline{x_{i&#39;j}}
-    &amp;\qquad \forall i \neq i \in [m], \forall j \in N_G(i) \cap
-    N_G(i&#39;) \tag{b} \\[12pt]
-    F_i^{j,j&#39;} := \overline{x_{ij&#39;}} \lor \overline{x_{ij}}
-    &amp;\qquad \forall i \in [m], \forall j \neq j&#39; \in
-    N_G(i)\tag{c}  \\[12pt]
-        S_j:= \underset{i\in N_G(j)}{\lor}(x_{ij}) &amp;\qquad \forall j
-    \in [n] \tag{d}
-    \end{align}\]</span></p>
-    <ol type="a">
-    <li><p><strong>Pigeon Axioms</strong>: Each pigeon must get a
-    hole.</p></li>
-    <li><p><strong>Hole Axioms</strong>: Every hole can take at most one
-    pigeon</p></li>
-    </ol>
-    <p>If these were the only axioms, then we refer to the formula as
-    the <strong>basic PHP</strong>.</p>
-    <ol start="3" type="a">
-    <li><strong>Functional Axioms</strong>: The map that assigns holes
-    to a pigeon must be a function, i.e the same pigeon cannot get two
-    different holes.</li>
-    </ol>
-    <p>If we require the functional axioms as well, then we refer to the
-    fomulae as the <strong>functional PHP</strong>.</p>
-    <ol start="4" type="a">
-    <li><strong>Onto Axioms</strong>: The map that assigns holes to a
-    pigeon must be an onto/surjective function, i.e every hole must get
-    a pigeon.</li>
-    </ol>
-    <div class="remark"><h3></h3><p>Satisfying all 4 axioms, implies that there exists a <strong>perfect
-    matching</strong> in the graph <span
-    class="math inline"><em>G</em></span>.</p></div>
-    <p>If we need the function to be an onto function, then we refer to
-    the formula as the <strong>onto functional PHP</strong>.</p>
-    <p>The final unsatisfiable formula</p>
-    <p><span class="math display">\[\begin{align}
-    F &amp;= \underset{i \in m}\land P_i \\
-    &amp; \bigwedge  \underset{i\neq i}{\land} \underset{j \in N_G(i)
-    \cap N_G(i&#39;)}{\land} H_j^{i, i&#39;} \\
-    &amp;\bigwedge \underset{i \in [m]}{\land} \underset{j\neq j&#39;
-    \in N_G(i)}{\land}  F_i^{j, j&#39;}\\
-    &amp; \bigwedge\underset{j \in m}\land S_j
-    \end{align}\]</span></p>
-    <blockquote>
-    <p>Clearly any formula that includes constraints (a)-(d) is the MOST
-    constrained system. Therefore, it must be easier to refute than a
-    formula that only requires (a)-(b) or (a)-(c). Thus, lower bounds
-    for <strong>more</strong> constrained systems subsume lower bounds
-    for the rest.</p>
-    Similarly, if we make <span class="math inline">\(m\)</span> very
-    very large, it should be easier to refute the axioms, when compared
-    to when <span class="math inline">\(m=n+1\)</span>. When <span
-    class="math inline">\(m \gg n\)</span> we refer to the formula as
-    the <strong>weak</strong> PHP.
-    </blockquote>
-    </section>
-    </section>
-    <section
-    id="what-is-known-lower-bounds-for-resolution-proofs-refuting-php"
-    class="level2">
-    <h2>What Is Known: Lower Bounds For Resolution Proofs Refuting
-    PHP</h2>
-    <p>The following results are for <span class="math inline">\(G=
-    K_{m,n}\)</span> where every pigeon is allowed to fly into every
-    hole.</p>
-    <ul>
-    <li><p><span class="citation"
-    data-cites="haken1984intractability">(<a
-    href="#ref-haken1984intractability" role="doc-biblioref">Haken,
-    1984</a>)</span>: For all resolution proofs <span
-    class="math inline">\(\pi\)</span> that refute <span
-    class="math inline">\(\text{Onto-PHP}_{n}^{n+1}\)</span>, the size
-    <span class="math inline">\(\left|\pi\right| =
-    \mathsf{exp}\left(\Omega\left(n\right)\right)\)</span></p></li>
-    <li><p>The proof for the above result was <a
-    href="basic-php-resloution-lower-bound.html">simplified</a> by <span
-    class="citation" data-cites="beame1996simplified">(<a
-    href="#ref-beame1996simplified" role="doc-biblioref">Beame and
-    Pitassi, 1996</a>)</span>, and then further generalised by <span
-    class="citation" data-cites="buss1988resolution">(<a
-    href="#ref-buss1988resolution" role="doc-biblioref">Buss and Turán,
-    1988</a>)</span> to <span class="math inline">\(\left|\pi\right| =
-    \mathsf{exp}\left(\Omega\left(\frac{n^2}{m}\right)\right)\)</span>.</p></li>
-    </ul>
-    <blockquote>
-    These lower bounds do not say anything meaningful when <span
-    class="math inline">\(m = \Omega\left(n^2\right)\)</span>.
-    </blockquote>
-    <ul>
-    <li><p>For large values of <span class="math inline">\(m\)</span>,
-    in a breakthrough result by <span class="citation"
-    data-cites="raz2004resolution">(<a href="#ref-raz2004resolution"
-    role="doc-biblioref">Raz, 2004</a>)</span>, he showed that every
-    proof <span class="math inline">\(\pi\)</span> that refutes the
-    basic pigeon hole pricinple <span
-    class="math inline">\(\text{PHP}_{n}^{m}\)</span> has size <span
-    class="math inline">\(\mathsf{exp}\left(\Omega\left(\frac{n}{\log^{10}
-    m}\right)\right)\)</span>.</p></li>
-    <li><p>In <span class="citation"
-    data-cites="razborov2003resolution">(<a
-    href="#ref-razborov2003resolution" role="doc-biblioref">Razborov,
-    2003</a>)</span> and <span class="citation"
-    data-cites="razborov2004resolution">(<a
-    href="#ref-razborov2004resolution" role="doc-biblioref">Razborov,
-    2004</a>)</span>, the above result was strengthed and extended to
-    saying every proof <span class="math inline">\(\pi\)</span> that
-    refutes the onto pigeon hole pricinple <span
-    class="math inline">\(\text{Onto-PHP}_{n}^{m}\)</span> has size
-    <span
-    class="math inline">\(\mathsf{exp}\left(\Omega\left(\frac{n}{\log^2
-    m}\right)\right)\)</span>.</p></li>
-    </ul>
-    <blockquote>
-    Now for even <span class="math inline">\(m\)</span> as large as
-    <span
-    class="math inline">\(m=\mathsf{exp}(O\left(n^{1/3}\right))\)</span>,
-    we have all proofs have size that is <span
-    class="math inline">\(\mathsf{exp}(\Omega\left(n^{1/3}\right))\)</span>.
-    Note if we have <span class="math inline">\(m\)</span> as large as
-    <span
-    class="math inline">\(\mathsf{exp}(O\left(n^{1/3}\right))\)</span>,
-    even writing down all the pigeon, hole, function and onto axioms
-    take <span
-    class="math inline">\(\mathsf{exp}(\Omega\left(n^{1/3}\right))\)</span>
-    clauses worth of space. Thus, there is no point of thinking <span
-    class="math inline">\(m\)</span> any larger. <strong>This problem is
-    pretty much closed for <span
-    class="math inline">\(G=K_{m,n}\)</span></strong>.
-    </blockquote>
-    <p>Now when <span class="math inline">\(G\)</span> is sparse, it
-    might be really easy to refute the PHP. For example, the presence of
-    an isolated vertex leads to short proofs. So now we go into the
-    business of for what kind of “sparse” graphs, is the problem still
-    hard.</p>
-    <p>The graph family we consider is the <span
-    class="math inline">\((r, \Delta, c)\)</span>-boundary expander.</p>
-    <div class="def"><h3>Definition: The
-
-    Boundary
-
-    Expander</h3><p>Given Bipartite graph <span
-    class="math inline"><em>G</em> = (<em>V</em><sub><em>P</em></sub> ∪ <em>V</em><sub><em>H</em></sub>, <em>E</em>)</span>
-    is an <span
-    class="math inline">(<em>r</em>, <em>Δ</em>, <em>c</em>)</span> boundary
-    expander, if <span
-    class="math inline">∀<em>u</em> ∈ <em>V</em><sub><em>P</em></sub></span>
-    we have <span
-    class="math inline">deg<sub><em>G</em></sub>(<em>u</em>) ≤ <em>Δ</em></span>,
-    and for every set <span
-    class="math inline"><em>S</em> ⊆ <em>V</em><sub><em>P</em></sub></span>
-    with size <span class="math inline">|<em>S</em>| ≤ <em>r</em></span> we
-    have</p>
-    <p><span
-    class="math display">|∂(<em>S</em>)| ≥ <em>c</em>|<em>S</em>|</span></p>
-    <p>where the boundary of a set <span
-    class="math inline"><em>S</em> ⊆ <em>V</em><sub><em>P</em></sub></span>,
-    denoted by <span class="math inline">∂(<em>S</em>)</span> is the set of
-    unique neighbours of every <span
-    class="math inline"><em>u</em> ∈ <em>S</em></span> i.e</p>
-    <p><span
-    class="math display">∂(<em>S</em>) = {<em>v</em> ∈ <em>V</em><sub><em>H</em></sub> : |<em>N</em><sub><em>G</em></sub>(<em>v</em>) ∩ <em>S</em>| = 1}</span></p></div>
-    <p>What do we know about refuting PHP in expanders? Not a whole lot,
-    but there are 3 seminal results that consider the extremes:</p>
-    <ul>
-    <li>When <span class="math inline">\(m\)</span> is not too large i.e
-    <span class="math inline">\(m \ll n^2\)</span>, <span
-    class="citation" data-cites="ben1999short">(<a
-    href="#ref-ben1999short" role="doc-biblioref">Ben-Sasson and
-    Wigderson, 1999</a>)</span> showed that for <span
-    class="math inline">\(r = \Omega\left(n/\log m\right)\)</span>, and
-    <span class="math inline">\(\Delta = \log m\)</span>, and <span
-    class="math inline">\(c= \frac{3\log m}{4}\)</span> (this is saying
-    each size of set at most <span class="math inline">\(c\log
-    m\)</span> has <span class="math inline">\(c&#39;\log m\)</span>
-    unique neighbours, thus, each pigeon can go constantly many holes),
-    the size of refuting <span
-    class="math inline">\(\text{FPHP}_{n}^{m}\)</span> is <span
-    class="math inline">\(\mathsf{exp}\left(\Omega\left(\frac{n^2}{m\log
-    m}\right)\right)\)</span>.</li>
-    </ul>
-    <blockquote>
-    Thus, for graph <span
-    class="math inline">\(\text{PHP}_{n}^{m}\)</span> formulas we have
-    exponential lower bounds for on the <span class="math inline">\(m
-    \ll n^2\)</span> pigeons where each pigeon has a constant number of
-    choices for holes that it can fly into.
-    </blockquote>
-    <ul>
-    <li>The other extreme, where <span class="math inline">\(m\)</span>
-    can be arbitrary, but each pigeon also has a lot of holes to go into
-    (high minimal degree) <span class="citation"
-    data-cites="razborov2004resolution">(<a
-    href="#ref-razborov2004resolution" role="doc-biblioref">Razborov,
-    2004</a>)</span> and <span class="citation"
-    data-cites="razborov2003resolution">(<a
-    href="#ref-razborov2003resolution" role="doc-biblioref">Razborov,
-    2003</a>)</span> show that the size is <span
-    class="math inline">\(\mathsf{exp}\left(\Omega\left(\frac{\delta_G}{\log^2
-    m}\right)\right)\)</span>, where <span
-    class="math inline">\(\delta_G\)</span> is the minimum degree of the
-    graph.</li>
-    </ul>
-    <blockquote>
-    For any number of pigeons with a polynomial lower bound <span
-    class="math inline">\(\delta_G = n^{\Omega\left(1\right)}\)</span>
-    on the number holes each pigeon can fly into, we also have
-    exponential size lower bounds.
-    </blockquote>
-    <p>This leaves us asking what happens when when <span
-    class="math inline">\(m \gg n^2\)</span>, but the minimal degree is
-    small <span class="math inline">\(\delta_G =
-    \mathtt{poly}(\log(m))\)</span>?</p>
-    <p><span class="citation" data-cites="rezende2020Exp">(<a
-    href="#ref-rezende2020Exp" role="doc-biblioref">De Rezende et al.,
-    2020</a>)</span> solves this problem, and is the focus of our work.
-    They show for any <span class="math inline">\(G\)</span> that is
-    <span class="math inline">\((r, \Delta, (1-\xi\cdot \frac{\log
-    n}{\log m})\Delta)\)</span>-boundary expander, then you need proofs
-    of size <span
-    class="math inline">\(\mathsf{exp}\left(\Omega\left(\frac{r}{n^{\xi}\log^2
-    m}\right)\right)\)</span></p>
-    <p>They need a very very strong expander i.e <span
-    class="math inline">\(\lim_{n\rightarrow \infty} c =
-    \Delta\)</span>, but would like to show it for <span
-    class="math inline">\(c=(1- \xi)\Delta\)</span> for constant <span
-    class="math inline">\(\xi \in (0,1)\)</span> <strong>This is what we
-    need to show, optimistically</strong>.</p>
-    <hr style="height:3px;border:none;color:#333;background-color:#333;">
-    </hr>
-    </section>
-    </section>
-    <section id="references" class="level1">
-    <h1>References</h1>
-    <hr style="height:3px;border:none;color:#333;background-color:#333;">
-    </hr>
-    <div id="refs" class="references csl-bib-body hanging-indent"
-    data-entry-spacing="0" role="list">
-    <div id="ref-beame1996simplified" class="csl-entry" role="listitem">
-    Beame, P., Pitassi, T., 1996. Simplified and improved resolution
-    lower bounds, in: Proceedings of 37th Conference on Foundations of
-    Computer Science. IEEE, pp. 274–282.
-    </div>
-    <div id="ref-ben1999short" class="csl-entry" role="listitem">
-    Ben-Sasson, E., Wigderson, A., 1999. Short proofs are
-    narrow–resolution made simple, in: Proceedings of the Thirty-First
-    Annual ACM Symposium on Theory of Computing. pp. 517–526.
-    </div>
-    <div id="ref-buss1988resolution" class="csl-entry" role="listitem">
-    Buss, S.R., Turán, G., 1988. Resolution proofs of generalized
-    pigeonhole principles. Theoretical Computer Science 62, 311–317.
-    </div>
-    <div id="ref-rezende2020Exp" class="csl-entry" role="listitem">
-    De Rezende, S.F., Nordström, J., Risse, K., Sokolov, D., 2020.
-    Exponential resolution lower bounds for weak pigeonhole principle
-    and perfect matching formulas over sparse graphs, in: 35th
-    Computational Complexity Conference, CCC 2020, July 28–31, 2020,
-    Saarbrücken, Germany, Virtual Conference. Proceedings. Wadern:
-    Schloss Dagstuhl – Leibniz Zentrum f<span>ü</span>r Informatik, p.
-    24. <a
-    href="https://doi.org/10.4230/LIPIcs.CCC.2020.28">https://doi.org/10.4230/LIPIcs.CCC.2020.28</a>
-    </div>
-    <div id="ref-haken1984intractability" class="csl-entry"
-    role="listitem">
-    Haken, A., 1984. The intractability of resolution (complexity) (PhD
-    thesis). University of Illinois at Urbana-Champaign.
-    </div>
-    <div id="ref-raz2004resolution" class="csl-entry" role="listitem">
-    Raz, R., 2004. Resolution lower bounds for the weak pigeonhole
-    principle. Journal of the ACM (JACM) 51, 115–138.
-    </div>
-    <div id="ref-razborov2004resolution" class="csl-entry"
-    role="listitem">
-    Razborov, A.A., 2004. Resolution lower bounds for perfect matching
-    principles. Journal of Computer and System Sciences 69, 3–27.
-    </div>
-    <div id="ref-razborov2003resolution" class="csl-entry"
-    role="listitem">
-    Razborov, A.A., 2003. Resolution lower bounds for the weak
-    functional pigeonhole principle. Theoretical Computer Science 303,
-    233–243.
-    </div>
-    </div>
-    </section>
+  <div id="ref-ben1999short" class="csl-entry" role="listitem">
+  Ben-Sasson, E., Wigderson, A., 1999. Short proofs are
+  narrow–resolution made simple, in: Proceedings of the Thirty-First
+  Annual ACM Symposium on Theory of Computing. pp. 517–526.
+  </div>
+  <div id="ref-buss1988resolution" class="csl-entry" role="listitem">
+  Buss, S.R., Turán, G., 1988. Resolution proofs of generalized
+  pigeonhole principles. Theoretical Computer Science 62, 311–317.
+  </div>
+  <div id="ref-rezende2020Exp" class="csl-entry" role="listitem">
+  De Rezende, S.F., Nordström, J., Risse, K., Sokolov, D., 2020.
+  Exponential resolution lower bounds for weak pigeonhole principle and
+  perfect matching formulas over sparse graphs, in: 35th Computational
+  Complexity Conference, CCC 2020, July 28–31, 2020, Saarbrücken,
+  Germany, Virtual Conference. Proceedings. Wadern: Schloss Dagstuhl –
+  Leibniz Zentrum f<span>ü</span>r Informatik, p. 24. <a
+  href="https://doi.org/10.4230/LIPIcs.CCC.2020.28">https://doi.org/10.4230/LIPIcs.CCC.2020.28</a>
+  </div>
+  <div id="ref-haken1984intractability" class="csl-entry"
+  role="listitem">
+  Haken, A., 1984. The intractability of resolution (complexity) (PhD
+  thesis). University of Illinois at Urbana-Champaign.
+  </div>
+  <div id="ref-raz2004resolution" class="csl-entry" role="listitem">
+  Raz, R., 2004. Resolution lower bounds for the weak pigeonhole
+  principle. Journal of the ACM (JACM) 51, 115–138.
+  </div>
+  <div id="ref-razborov2004resolution" class="csl-entry"
+  role="listitem">
+  Razborov, A.A., 2004. Resolution lower bounds for perfect matching
+  principles. Journal of Computer and System Sciences 69, 3–27.
+  </div>
+  <div id="ref-razborov2003resolution" class="csl-entry"
+  role="listitem">
+  Razborov, A.A., 2003. Resolution lower bounds for the weak functional
+  pigeonhole principle. Theoretical Computer Science 303, 233–243.
+  </div>
+  </div>
+  </section>
+  </div>
   </main>
 
 
@@ -656,8 +590,6 @@ function showDivs(indices) {
 });
 
 </script>
-
 <script src="/static/toggle_bg.js" defer></script>
-
 </body>
 </html>

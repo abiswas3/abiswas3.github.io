@@ -1,3 +1,6 @@
+  function toggleNav() {
+    document.getElementById('navMenu').classList.toggle('show');
+  }
 document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('mode-toggle');
   if (!toggle) return;
