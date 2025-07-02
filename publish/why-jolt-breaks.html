@@ -24,7 +24,7 @@
   <title>Notes From The Montgomery Underground</title>      
   </head>
 
-  <body class="dark-mode">  
+  <body class="light-mode">  
     <header>          
     <div class="nav-container"> 
     <div class="nav-title"><a href="/">Ari</a></div>
@@ -421,8 +421,11 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
   <p>What the code described in the <code>s-mul</code> algorithm does is
   – it implements the above algorithm <strong>exactly</strong> as
   described above.</p>
-  <div class="thm"><h3>Theorem</h3><p>We claim that <span
-  class="math inline"><em>s</em> &lt; <em>n</em> ⋅ (<em>r</em><em>p</em>)</span>.</p></div>
+  <section class="level3 thm">
+  <h3>Thm: Upper Bound</h3>
+  <p>We claim that <span class="math inline">\(s &lt;
+  n\cdot(rp)\)</span>.</p>
+  </section>
   <div class="proof">
   <p>Dividing <span class="math inline">\(c\)</span> by <span
   class="math inline">\(r^{n-1}\)</span> we get</p>
@@ -543,22 +546,26 @@ test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out
   minimising division operations before an add. They are the two
   extremes of this family of algorithms. Using the above analysis, one
   can easily show the following:</p>
-  <div class="thm"><h3>Theorem</h3><p>Let <span class="math inline"><em>u</em></span> be the number of
+  </section>
+  <section class="level3 thm">
+  <h3>Thm: Number of multiplications vs parallelisation vs number of
+  reductions</h3>
+  <p>Let <span class="math inline">\(u\)</span> be the number of
   multiplication operations the CIOS algorithm with inputs <span
-  class="math inline"><em>a</em></span> and <span
-  class="math inline"><em>b</em></span> that each at most <span
-  class="math inline"><em>p</em></span>, and <span
-  class="math inline"><em>v</em></span> be the number of addition
-  operations (including the reduction phase). Then, for any <span
-  class="math inline">0 ≤ <em>k</em> ≤ <em>n</em> − 1</span>, if we divide
-  <span class="math inline"><em>a</em><em>b</em></span> by <span
-  class="math inline"><em>r</em><sup><em>k</em></sup></span> before
-  adding, we have <span class="math inline"><em>k</em></span> fewer
-  multiplication operations compared to CIOS. If we have <span
-  class="math inline"><em>m</em></span> rounds of division, then we have
-  <span class="math inline"><em>m</em></span> more addition operations
-  than CIOS (due to the reduction step of making the answer less than
-  <span class="math inline"><em>p</em></span>).</p></div>
+  class="math inline">\(a\)</span> and <span
+  class="math inline">\(b\)</span> that each at most <span
+  class="math inline">\(p\)</span>, and <span
+  class="math inline">\(v\)</span> be the number of addition operations
+  (including the reduction phase). Then, for any <span
+  class="math inline">\(0 \le k \le n-1\)</span>, if we divide <span
+  class="math inline">\(ab\)</span> by <span
+  class="math inline">\(r^k\)</span> before adding, we have <span
+  class="math inline">\(k\)</span> fewer multiplication operations
+  compared to CIOS. If we have <span class="math inline">\(m\)</span>
+  rounds of division, then we have <span
+  class="math inline">\(m\)</span> more addition operations than CIOS
+  (due to the reduction step of making the answer less than <span
+  class="math inline">\(p\)</span>).</p>
   </section>
   </section>
   <section id="missing-factor-of-1p" class="level2">
@@ -1044,5 +1051,6 @@ function showDivs(indices) {
 
 </script>
 <script src="/static/toggle_bg.js" defer></script>
+<script src="/static/theme-toggle.js"></script>
 </body>
 </html>

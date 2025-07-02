@@ -13,6 +13,7 @@ body.light-mode {
   --link: seagreen; 
   --border-color: black;
   --base-font-size: 1.08rem;
+  --nav-colour: black;
 }
 
 body.dark-mode{
@@ -23,6 +24,7 @@ body.dark-mode{
   --link-hover: salmon;
   --border-color: #e0ddd6;
   --base-font-size: 1.08rem;
+  --nav-colour: #ebdbb2;
 }
 
 
@@ -40,6 +42,8 @@ html, body {
   max-width: var(--content-max-width);
   margin: 0 auto;
   line-height: 2;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 .blog{
   line-height: 2.7;
@@ -94,6 +98,12 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.3;
   font-family: var(--base-font-family);
 }
+
+h2 {
+  border-bottom: 0.5px solid var(--text); /* Customize thickness and color */
+  padding-bottom: 0.2em;
+  margin-bottom: 0.5em;
+}
 a {
   color: var(--link);  /* lively bamboo green */
   text-decoration: none;
@@ -129,7 +139,7 @@ strong{
   display: none;
   font-size: 1.5rem;
   background: none;
-  color: #eee;
+  color: var(--nav-colour);
   border: none;
   cursor: pointer;
 }

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+	<meta name="generator" content="pandoc">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+    <!-- Base CSS (common styles) --> 
+  <link rel="stylesheet" href="../static/nav.css"> 
+  <link rel="stylesheet" href="../static/blog_index.css">
+  <link rel="stylesheet" href="../static/thms.css">
+  <link rel="stylesheet" href="../static/imgs.css">       
+  <link rel="stylesheet" href="../static/math.css">  
+   
+  <link rel="stylesheet" href="../static/tags.css">       
+
+  <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
+  <script src="/static/es5/tex-svg.js"></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
+
+
+  <title>Faster Polynomial Evaluaton</title>      
+  </head>
+
+  <body class="light-mode">  
+    <header>          
+    <div class="nav-container"> 
+    <div class="nav-title"><a href="/">Ari</a></div>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <nav class="nav-links" id="navMenu">
+      <a href="/publish/">Notes</a>
+      <a href="/publications.html">Publications</a>
+      <a href="/misc.html">Misc</a>
+     <label><input type="checkbox" id="mode-toggle" /><span class="label"></span></label>
+    </nav>
+    </div>
+ 
+ </header>
+
+  <main class="content">
+  <div class="blog">
+   <h1>Faster Polynomial Evaluaton</h1> 
+  <section class="level3 remark">
+  <h3>Acknowledgements</h3>
+  <p><a href="https://people.cs.georgetown.edu/jthaler/">Justin
+  Thaler</a> recommended I look into the current implementation, and
+  sketched out the idea to speed up polynomial evaluation. All the
+  algorithmic innovation is his, and all potential technical bugs in the
+  implementation are mine.</p>
+  </section>
+  <section id="problem-statement" class="level2">
+  <h2>Problem Statement</h2>
+  <p>Fix <span class="math inline">\(n \in \mathbb{N}\)</span> and
+  define <span class="math inline">\(N = 2^n\)</span>. In the Jolt
+  codebase there is an <a
+  href="https://github.com/a16z/jolt/blob/574dc265cea8ae525cfb039acd7a64a9840fced9/jolt-core/src/poly/multilinear_polynomial.rs#L619">algorithm</a>
+  that takes as input a vector <span class="math inline">\(f \in
+  \mathbb{F}^N\)</span> and an <span class="math inline">\(\vec{z} \in
+  \mathbb{F}^n\)</span> and outputs <span
+  class="math inline">\(\widetilde{f}(\vec{z})\)</span> where <span
+  class="math inline">\(\widetilde{f}\)</span> is the multilinear
+  extension (MLE) of <span class="math inline">\(f\)</span>. See Chapter
+  3 of <span class="citation" data-cites="thaler2020proofs">(<a
+  href="#ref-thaler2020proofs" role="doc-biblioref">Thaler,
+  2020</a>)</span> for details on how to compute MLE of a vector.</p>
+  <p>More specifically, the current algorithm does the following:</p>
+  <ol type="1">
+  <li><p>Given <span class="math inline">\(\vec{z} \in
+  \mathbb{F}^n\)</span> it computes all <span class="math inline">\(N =
+  2^n\)</span> evaluations of Lagrange basis polynomials <span
+  class="math inline">\(\Big\{\chi_{\vec{w}}(\vec{z})\Big\}_{\vec{w} \in
+  \{0,1 \}^n}\)</span> where <span
+  class="math inline">\(\chi_{\vec{w}}(\vec{z}) = \prod_{k=1}^{n} (1
+  -z_k)(1-w_k) + z_k w_k = eq(\vec{w}, \vec{z})\)</span>. Using the
+  memoisation algorithm described in <span class="citation"
+  data-cites="walfishHybrid">(<a href="#ref-walfishHybrid"
+  role="doc-biblioref">Vu et al., 2013</a>)</span>, this computation
+  require <span class="math inline">\(2^n\)</span> multiplications. See
+  Lemma 3.8 of <span class="citation" data-cites="thaler2020proofs">(<a
+  href="#ref-thaler2020proofs" role="doc-biblioref">Thaler,
+  2020</a>)</span> for a simple exposition and analysis of this
+  algorithm. An implementation can be found <a
+  href="https://github.com/abiswas3/jolt/blob/24bb8a9fdb35f0c2effe9c77cde78c929d9fb235/jolt-core/src/poly/eq_poly.rs#L41">here</a>.</p></li>
+  <li><p>Then to compute the answer we compute a dot product, which
+  requires <span class="math inline">\(2^n\)</span> multiplications.
+  <span class="math display">\[\widetilde{f}(\vec{z}) = \sum_{w \in
+  \{0,1\}^n}f(w)\chi_{\vec{w}}(\vec{z})\]</span></p></li>
+  </ol>
+  <p>In what follows, we describe how to speed up the implementation by
+  a factor of 2.</p>
+  </section>
+  <section id="a-constant-factor-improvement" class="level2">
+  <h2>A Constant Factor Improvement</h2>
+  <p>Re-writing the definition of MLE of <span
+  class="math inline">\(f\)</span> we get <span class="math display">\[
+  \begin{align}
+  \widetilde{f}(\vec{z}) &amp;= \sum_{\vec{w} \in \{0,1\}^n}f(w)\cdot
+  \chi_{\vec{w}}(\vec{z})\\[10pt]
+  &amp;=\sum_{\vec{w} \in \{0,1\}^n} f(\vec{w})\cdot eq(\vec{z},\vec{w})
+  \\[10pt]
+  &amp;= \sum_{w_1 \in \{0,1\} } eq(z_1,w_1) \sum_{w_2 \in \{0,1\} }
+  eq(z_2,w_2) \ldots \sum_{w_n \in \{0, 1\}} eq(z_n,w_n) *
+  f(w_1,...,w_n)
+  \end{align}
+  \]</span></p>
+  <p>Notice that <span class="math display">\[
+  \begin{align}
+  \sum_{w_n \in \{ 0, 1\}} \operatorname{eq}(z_n, w_n) \cdot f(w_1,
+  \ldots, w_n)
+  &amp;= f(w_1, \ldots, w_{n-1}, 0) \notag \\
+  &amp;\quad + z_n \cdot \left(
+      f(w_1, \ldots, w_{n-1}, 1)
+      - f(w_1, \ldots, w_{n-1}, 0)
+  \right)
+  \end{align}
+  \]</span></p>
+  <p>which is one multiplication for every instantiation of <span
+  class="math inline">\((w_1, \ldots, w_{n-1})\)</span>, therefore it is
+  a total of <span class="math inline">\(2^{n-1}\)</span>
+  multiplications.</p>
+  <p>Now if we compute things inside out i.e <span
+  class="math inline">\(j \in \{n, \ldots, 1\}\)</span>,</p>
+  <ul>
+  <li>The first iteration of the loop is <span
+  class="math inline">\(2^{n-1}\)</span> multiplications</li>
+  <li>The second iteration will be <span
+  class="math inline">\(2^{n-2}\)</span> multiplications</li>
+  <li>…</li>
+  <li>The <span class="math inline">\(j\)</span>’th itertion will be
+  <span class="math inline">\(2^{n-j}\)</span> multiplications</li>
+  <li>…</li>
+  <li>The last iteration is just 1 multiplication.</li>
+  </ul>
+  <p>Thus, there is a total of <span class="math inline">\(2^n\)</span>
+  multiplications, instead of the two step process described above, each
+  of which had <span class="math inline">\(2^n\)</span>
+  multiplications.</p>
+  </section>
+  <section id="physical-implementation" class="level2">
+  <h2>Physical Implementation</h2>
+  <p>To verify I did not bungle anything up</p>
+  <pre class="language-bash"><code> cargo test -p jolt-core poly::dense_mlpoly::tests
+argo test -p jolt-core poly::dense_mlpoly::tests                                                                                           ─╯
+warning: Patch `ark-bn254 v0.5.0-alpha.0 (https://github.com/a16z/arkworks-algebra?branch=dev%2Ftwist-shout#efc56e0d)` was not used in the crate graph.
+Check that the patched package version and available features are compatible
+with the dependency requirements. If the patch has a different version from
+what is locked in the Cargo.lock file, run `cargo update` to use the new
+version. This may also occur with an optional dependency that is not enabled.
+   Compiling jolt-core v0.1.0 (/Users/aribiswas3/Work-With-A16z/ari_jolt/jolt-core)
+    Finished `test` profile [optimized + debuginfo] target(s) in 48.98s
+     Running unittests src/lib.rs (target/debug/deps/jolt_core-9e689eac2470ccbd)
+
+running 4 tests
+test poly::dense_mlpoly::tests::fast_evaluation ... ok
+test poly::dense_mlpoly::tests::check_memoized_chis ... ok
+test poly::dense_mlpoly::tests::evaluation ... ok
+test poly::dense_mlpoly::tests::compare_random_evaluations ... ok</code></pre>
+  <p>The main changes are <a
+  href="https://github.com/abiswas3/jolt/blob/24bb8a9fdb35f0c2effe9c77cde78c929d9fb235/jolt-core/src/poly/dense_mlpoly.rs#L259">here</a>,
+  and the benchmarking cam be found <a
+  href="https://github.com/abiswas3/jolt/blob/feat/poly-eval-opts/jolt-core/benches/poly_bench.rs">here</a></p>
+  <pre class="language-bash"><code>git clone https://github.com/abiswas3/jolt.git
+cd jolt
+git checkout feat/poly-eval-opts
+cargo bench -p jolt-core --bench poly_bench
+cargo bench -p jolt-core --bench compact_poly_bench  # This runs the compact polynomial benchmarks for u8 only for now</code></pre>
+  <p>Then run the following script to get the plot below which shows
+  speed for dense polynomial evaluations (Large Scalars). Only because I
+  don’t like the reports <code>criterion</code> generates, and that this
+  plot clearly depicts the constant factor improvement even as we
+  increase the number of variables. <img
+  src="/blog_assets/fast_poly/comparison.png" /></p>
+  <section class="level3 remark">
+  <h3>Note About Script</h3>
+  <p>The following plotting code was generated by chat GPT</p>
+  </section>
+  <pre class="language-python"><code>import json
+import os
+import matplotlib.pyplot as plt
+
+# Path to criterion benchmark output
+base_path = &quot;target/criterion/evals&quot;
+
+# Containers for results
+results = {
+    &quot;dot-product&quot;: {&quot;x&quot;: [], &quot;y&quot;: [], &quot;err&quot;: []},
+    &quot;inside-out&quot;: {&quot;x&quot;: [], &quot;y&quot;: [], &quot;err&quot;: []},
+}
+
+# Iterate over all benchmark subdirectories
+for entry in os.listdir(base_path):
+    subdir = os.path.join(base_path, entry)
+    if not os.path.isdir(subdir):
+        continue
+
+    if entry.startswith(&quot;dot-product-&quot;) or entry.startswith(&quot;inside-out-&quot;):
+        algo, param = entry.rsplit(&quot;-&quot;, 1)
+        try:
+            param = int(param)
+        except ValueError:
+            continue
+
+        path = os.path.join(subdir, &quot;new&quot;, &quot;estimates.json&quot;)
+        if os.path.exists(path):
+            with open(path) as f:
+                data = json.load(f)
+                mean = data[&quot;mean&quot;][&quot;point_estimate&quot;] / 1e6  # ns → ms
+                stderr = data[&quot;mean&quot;][&quot;standard_error&quot;] / 1e6
+
+                results[algo][&quot;x&quot;].append(param)
+                results[algo][&quot;y&quot;].append(mean)
+                results[algo][&quot;err&quot;].append(stderr)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+
+for algo, data in results.items():
+    if data[&quot;x&quot;]:
+        # Sort by param size
+        sorted_data = sorted(zip(data[&quot;x&quot;], data[&quot;y&quot;], data[&quot;err&quot;]))
+        x, y, err = zip(*sorted_data)
+        plt.errorbar(
+            x, y, yerr=err, label=algo, marker=&quot;o&quot;, capsize=4,
+            linestyle=&quot;-&quot;, linewidth=2
+        )
+
+plt.yscale(&quot;log&quot;)
+plt.xlabel(&quot;Param size (log2)&quot;)
+plt.ylabel(&quot;Time (ms, log scale)&quot;)
+plt.title(&quot;Criterion Benchmark: dot-product vs inside-out&quot;)
+plt.legend()
+plt.grid(True, which=&quot;both&quot;, linestyle=&quot;--&quot;, linewidth=0.5)
+plt.tight_layout()
+plt.show()
+</code></pre>
+  </section>
+  <section id="references" class="level2 unnumbered">
+  <h2 class="unnumbered">References</h2>
+  <div id="refs" class="references csl-bib-body hanging-indent"
+  data-entry-spacing="0" role="list">
+  <div id="ref-thaler2020proofs" class="csl-entry" role="listitem">
+  Thaler, J., 2020. <a
+  href="https://people.cs.georgetown.edu/jthaler/ProofsArgsAndZK.pdf">Proofs,
+  arguments, and zero-knowledge</a>.
+  </div>
+  <div id="ref-walfishHybrid" class="csl-entry" role="listitem">
+  Vu, V., Setty, S., Blumberg, A.J., Walfish, M., 2013. <span
+  class="nocase">A Hybrid Architecture for Interactive Verifiable
+  Computation </span>, in: 2012 IEEE Symposium on Security and Privacy.
+  IEEE Computer Society, Los Alamitos, CA, USA, pp. 223–237. <a
+  href="https://doi.org/10.1109/SP.2013.48">https://doi.org/10.1109/SP.2013.48</a>
+  </div>
+  </div>
+  </section>
+  </div>
+  </main>
+
+
+
+
+
+
+<!-- Prism Core JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<!-- Add other languages as needed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+<script>
+// var coll = document.getElementsByClassName("collapsible");
+var coll = document.querySelectorAll('.collapsible, .question, .collapsible-short')
+var i;
+
+console.log(coll);
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
+
+<script>
+  // Function to process MathJax when the tooltip is shown
+document.addEventListener('DOMContentLoaded', function () {
+    var footnotes = document.querySelectorAll('.footnote');
+
+    footnotes.forEach(function (footnote) {
+        footnote.addEventListener('mouseover', function () {
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+        });
+    });
+});
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Function to scroll to the element with an offset to avoid the header
+      const scrollToElement = (element) => {
+        const headerHeight = document.querySelector('header').offsetHeight + 30;
+        window.scrollTo({
+          top: element.offsetTop - headerHeight + 20,  // Adjust offset to avoid header overlap
+          behavior: 'smooth'
+        });
+      };
+
+      // Select all anchor links that reference an element (e.g., href="#ref1")
+      const links = document.querySelectorAll('a[href^="#"]');
+
+      links.forEach(link => {
+        link.addEventListener('click', function (e) {
+          const targetId = this.getAttribute('href').substring(1);  // Get the target ID from the href
+          const targetElement = document.getElementById(targetId);  // Find the target element by its ID
+          
+          if (targetElement) {
+            e.preventDefault();  // Prevent the default browser scrolling behavior
+            history.pushState(null, null, `#`);  // Change the URL hash to reflect the anchor link
+            scrollToElement(targetElement);  // Smooth scroll to the element with the offset
+          }
+        });
+      });
+
+      // Handle the browser's back and forward buttons
+      window.addEventListener('popstate', () => {
+        const targetId = location.hash.substring(1);  // Get the ID from the current hash in the URL
+        if (targetId) {
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            scrollToElement(targetElement);  // Scroll to the element if it exists
+          }
+        }
+      });
+    });
+</script>
+
+<script>
+let slideIndices = [0,0, 0, 0, 0, 0, ];
+showDivs(slideIndices);
+
+function plusDivs(idx, n) {
+  slideIndices[idx-1] += n;
+  showDivs(slideIndices);
+}
+
+function showDivs(indices) {
+  let idx;
+  console.log(indices);
+  for(idx=0; idx < indices.length; idx++){
+    
+    // var dates = document.querySelectorAll('[id^="createdOnID"]');
+    let tmp = '[id^="'+(idx+1)+'_slide"]'
+    // console.log(tmp);    
+    var x = document.querySelectorAll(tmp);
+    if(x.length == 0){
+      continue;
+    }
+    var i;    
+    n = slideIndices[idx];
+    if (n > x.length-1) {slideIndices[idx] = 0}
+
+    if (n < 0) {slideIndices[idx] = x.length-1}  
+
+    for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";  
+    }
+    x[slideIndices[idx]].style.display = "block";
+  }
+}
+</script>
+
+
+
+
+  <!-- JavaScript to handle citation clicks and highlight -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Find all citation links
+      const citations = document.querySelectorAll('.citation');
+
+      citations.forEach(function (citation) {
+        citation.addEventListener('click', function (event) {
+          event.preventDefault();  // Prevent default link behavior
+
+          const citationLink = citation.querySelector('a');  // Find the <a> inside the span
+
+          // Get the reference ID from the citation's href (remove the '#')
+          const refId = citationLink.getAttribute('href').substring(1);
+            
+          // Find the corresponding reference element using the ID
+          const refElement = document.getElementById(refId);
+
+          // Remove any previous highlights
+          document.querySelectorAll('.highlight').forEach(function (el) {
+            el.classList.remove('highlight');
+          });
+          document.querySelectorAll('.highlight-citation').forEach(function (el) {
+            el.classList.remove('highlight-citation');
+          });
+
+          if (refElement) {
+            console.log("Here");
+            // Scroll to the reference (smooth scroll)
+            refElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Add highlight to the reference
+            refElement.classList.add('highlight');
+
+            // Add highlight to the citation link
+            citation.classList.add('highlight-citation');
+            
+          }
+        });
+      });
+    });
+  </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    new ClipboardJS('.copy-btn');
+});
+
+</script>
+<script src="/static/toggle_bg.js" defer></script>
+<script src="/static/theme-toggle.js"></script>
+</body>
+</html>
