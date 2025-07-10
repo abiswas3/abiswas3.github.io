@@ -22,7 +22,7 @@
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
-  <title>Multi Scalar Operations</title>      
+  <title>KZG</title>      
   </head>
 
   <body class="light-mode">  
@@ -42,118 +42,169 @@
 
   <main class="content">
   <div class="blog">
-   <h1>Multi Scalar Operations</h1> 
-  <section id="problem-statement" class="level2">
-  <h2>Problem Statement</h2>
-  <p>Given a set of <span class="math inline">\(n\)</span>-limbed
-  scalars <span class="math inline">\(\{a^{(i)}\}_{i=1}^s\)</span> where
-  each limb uses <span class="math inline">\(w\)</span> bits, and
-  elliptic curve points over finite field <span
-  class="math inline">\(F_p\)</span>, <span
-  class="math inline">\(\{P_i\}_{i=1}^s\)</span>, the goal is to compute
-  <span class="math display">\[ P = \sum_{i=1}^{s} a^{(i)} P_i\]</span>
-  as fast as possible on a computer. Throughout this post, we use
-  notation <span class="math inline">\(r=2^w\)</span> and <span
-  class="math inline">\(R=r^n\)</span>.</p>
+   <h1>KZG</h1> 
+  <section id="the-kzg-commitment-scheme" class="level2">
+  <h2>The KZG Commitment Scheme</h2>
+  <p>Public Information:</p>
+  <p><span class="math inline">\(\mathbb{G}_1, \mathbb{G}_2,
+  \mathbb{G}_T, \mathbb{F}, d, g \in \mathbb{G}_1, h \in
+  \mathbb{G}_2\)</span></p>
   </section>
-  <section id="the-dumb-way" class="level2">
-  <h2>The Dumb Way</h2>
-  <p>Calculate each <span class="math inline">\(a^{(i)}P_i\)</span>
-  using doubling and addition, then add them all together to get the
-  final result. In the worst case, the double and add<a href="#fn1"
-  class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>
-  take <span class="math inline">\(2\lceil \log_2 R -1 \rceil\)</span>
-  additions, and then the final result requires <span
-  class="math inline">\(n-1\)</span> further addition operations.</p>
-  <section id="example" class="level4 remark">
-  <h4>Example</h4>
-  <p><span class="math inline">\(r = 2^6 = 64\)</span> and <span
-  class="math inline">\(n=1\)</span>, say we want to compute <span
-  class="math inline">\(52P\)</span>. As</p>
-  <p><span class="math display">\[ 52 = 0 \cdot 2^0 + 0 \cdot 2^1 + 1
-  \cdot 2^2 + 0 \cdot 2^3 + 1 \cdot 2^4 + 1 \cdot 2^5
-  \]</span></p>
-  <table>
-  <thead>
-  <tr class="header">
-  <th>Bit position (i)</th>
-  <th>Bit value</th>
-  <th><span class="math display">\[2^i \cdot P\]</span></th>
-  <th>Add to result?</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr class="odd">
-  <td>0</td>
-  <td>0</td>
-  <td><span class="math display">\[1 \cdot P\]</span></td>
-  <td>No</td>
-  </tr>
-  <tr class="even">
-  <td>1</td>
-  <td>0</td>
-  <td><span class="math display">\[2 \cdot P\]</span></td>
-  <td>No</td>
-  </tr>
-  <tr class="odd">
-  <td>2</td>
-  <td>1</td>
-  <td><span class="math display">\[4 \cdot P\]</span></td>
-  <td>✅ Yes</td>
-  </tr>
-  <tr class="even">
-  <td>3</td>
-  <td>0</td>
-  <td><span class="math display">\[8 \cdot P\]</span></td>
-  <td>No</td>
-  </tr>
-  <tr class="odd">
-  <td>4</td>
-  <td>1</td>
-  <td><span class="math display">\[16 \cdot P\]</span></td>
-  <td>✅ Yes</td>
-  </tr>
-  <tr class="even">
-  <td>5</td>
-  <td>1</td>
-  <td><span class="math display">\[32 \cdot P\]</span></td>
-  <td>✅ Yes</td>
-  </tr>
-  </tbody>
-  </table>
-  <p>This takes 5 doubling operations to get to <span
-  class="math inline">\(32P\)</span>. In the process we also calculate
-  <span class="math inline">\(16P\)</span> and <span
-  class="math inline">\(4P\)</span>. And finally 3 additions</p>
-  </section>
+  <section id="trusted-setup" class="level2">
+  <h2>Trusted Setup</h2>
   <ul>
-  <li><a href="https://hackmd.io/@drouyang/msm">Learnings From
-  Z-Prize</a>: Written by some guy with a Phd In Operating systems.</li>
-  <li><a
-  href="https://dspacemainprd01.lib.uwaterloo.ca/server/api/core/bitstreams/3b15ca4c-9125-4e45-9378-c5474eec6a07/content">Why
-  is the Pippenger Algorithm Useful</a>: See Section 2.2 on Page 28 of
-  Pdf.</li>
-  <li></li>
+  <li><span class="math inline">\(\alpha
+  \xleftarrow[]{\$}\mathbb{F}\)</span></li>
+  <li><span class="math inline">\((w_0, \ldots, w_{d}) = (g^{\alpha^0},
+  \ldots, g^{\alpha^d})\)</span></li>
+  <li><span class="math inline">\(v_1 = h^{\alpha^1}\)</span></li>
   </ul>
+  <section class="level3 remark">
+  <h3>Prover and Verifier Keys</h3>
+  <p>The prover receives as their key <span
+  class="math inline">\(\mathtt{pk}= (w_0, \ldots, w_{d})\)</span></p>
+  <p>The verifier receives as their key <span
+  class="math inline">\(\mathtt{vk}= v_1\)</span></p>
   </section>
-  <section id="in-jolt-they-completely-implement-msm-from-scratch"
-  class="level2">
-  <h2>In Jolt They Completely Implement MSM From Scratch</h2>
-  <ul class="task-list">
-  <li><input type="checkbox" disabled="" checked="" />
-  how Does arkmsm + jolt + ark5.0 msm’s differ #in-progress [due::
-  2025-06-13] [completion:: 2025-07-03]</li>
+  </section>
+  <section id="commit" class="level2">
+  <h2>Commit</h2>
+  <p><strong>Prover <span class="math inline">\(\rightarrow\)</span>
+  Verifier</strong> : <span class="math inline">\(C_{f}\)</span></p>
+  <p>Let <span class="math inline">\(f\)</span> be a univariate
+  polynomial with degree at most <span class="math inline">\(d\)</span>
+  with coefficients in <span class="math inline">\(\mathbb{F}\)</span>.
+  <span class="math display">\[f(X) = f_0 + f_1X + \ldots +
+  f_dX^d\]</span></p>
+  <p>To commit to a <span class="math inline">\(f\)</span> the prover
+  computes</p>
+  <p><span class="math display">\[C_{f} = \prod_{i=0}^d w_i^{f_i} =
+  g^{f(\alpha)}\]</span></p>
+  <section class="level3 remark">
+  <h3>Prover Cost</h3>
+  <p><span class="math inline">\(d+1\)</span> <span
+  class="math inline">\(\mathbb{G}_1\)</span> exponentiations, <span
+  class="math inline">\(d\)</span> <span
+  class="math inline">\(\mathbb{G}_1\)</span> multiplications</p>
+  </section>
+  </section>
+  <section id="opening" class="level2">
+  <h2>Opening</h2>
+  <ul>
+  <li><strong>Prover <span class="math inline">\(\leftarrow\)</span>
+  Verifier</strong> : <span class="math inline">\(z\)</span></li>
+  <li><strong>Prover <span class="math inline">\(\rightarrow\)</span>
+  Verifier</strong> : <span class="math inline">\(\pi, y\)</span></li>
   </ul>
+  <p>Given <span class="math inline">\(C_{f}\)</span>, the verifier asks
+  the prover to evaluate <span class="math inline">\(f\)</span> at <span
+  class="math inline">\(z\)</span>. The prover responds with an
+  evaluation <span class="math inline">\(y\)</span> and a proof <span
+  class="math inline">\(\pi\)</span> which proves that prover knows an
+  opening <span class="math inline">\(f \in \mathbb{F}[X]\)</span> to
+  <span class="math inline">\(C_{f}\)</span>, with degree <span
+  class="math inline">\(d\)</span> such that <span
+  class="math inline">\(f(z) = y\)</span>.</p>
+  <p>To compute the proof <span class="math inline">\(\pi\)</span>, the
+  prover first computes the quotient polynomial <span
+  class="math inline">\(q(X)\)</span> (See <a
+  href="#why-no-remainder">Why No Remainder</a> for the division below
+  does not have a remainder) <span class="math display">\[
+  \begin{align}
+  q(X) = \frac{f(X) - f(z)}{X-z} = q_0 + q_1X + \ldots + q_{d-1}X^{d-1}
+  \end{align}
+  \]</span> sends <span class="math inline">\(\pi\)</span> as the proof.
+  <span class="math display">\[\pi = C_{q} = \prod_{i=0}^{d-1}
+  w_i^{q_i}\]</span></p>
+  <section class="level3 remark">
+  <h3>Prover Cost</h3>
+  <p><span class="math inline">\(d+1\)</span> <span
+  class="math inline">\(\mathbb{G}_1\)</span> exponentiations, <span
+  class="math inline">\(d\)</span> <span
+  class="math inline">\(\mathbb{G}_1\)</span> multiplications : To
+  generate compute commitment to quotient polynomial.</p>
+  <p>To compute quotient polynomial, use Horners method, and that’s
+  <span class="math inline">\(2d\)</span> Field multiplications and
+  <span class="math inline">\(2d\)</span> Field additions.</p>
   </section>
-  <section class="footnotes footnotes-end-of-document"
-  role="doc-endnotes">
-  <hr />
-  <ol>
-  <li id="fn1" role="doc-endnote"><p>If the group was represented using
-  multiplicative notation, we would refer to this algorithm as squaring
-  and multiply. ## Basic Resources<a href="#fnref1"
-  class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-  </ol>
+  </section>
+  <section id="verification" class="level2">
+  <h2>Verification</h2>
+  <p>The verifier computes</p>
+  <p><span class="math display">\[
+  \begin{align}
+  \mathtt{LHS}&amp;= e(C_{q}, v_1g^{-z}) \\[10pt]
+  \mathtt{RHS}&amp;= e(C_{f}, h) \quad e(g^{-y}, h)
+  \end{align}
+  \]</span></p>
+  <p>Then checks <span class="math inline">\(\mathtt{LHS}=
+  \mathtt{RHS}\)</span>.</p>
+  <p><a href="#verfication">See</a> for a derivation of where the above
+  test comes from</p>
+  <section class="level3 remark">
+  <h3>Verifier Cost</h3>
+  <p>3 pairing operations, 2 <span
+  class="math inline">\(\mathbb{G}_1\)</span> exponentiations 1 random
+  sample <span class="math inline">\(v
+  \xleftarrow[]{\$}\mathbb{F}\)</span></p>
+  </section>
+  </section>
+  <section id="appendix" class="level2">
+  <h2>Appendix</h2>
+  <section id="why-no-remainder" class="level3">
+  <h3>Why No Remainder</h3>
+  <p>Let <span class="math inline">\(f(x)\)</span> be a polynomial, and
+  let <span class="math inline">\(b \in \mathbb{F}\)</span>. Consider
+  the expression:</p>
+  <p><span class="math display">\[
+  \frac{f(x) - f(b)}{x - b}.
+  \]</span></p>
+  <p>To see why this has no remainder (i.e., is a polynomial),
+  define:</p>
+  <p><span class="math display">\[
+  g(x) = f(x) - f(b).
+  \]</span> Then clearly: <span class="math display">\[
+  g(b) = f(b) - f(b) = 0,
+  \]</span> so <span class="math inline">\(x = b\)</span> is a root of
+  <span class="math inline">\(g(x)\)</span>. Therefore, <span
+  class="math inline">\(x - b\)</span> is a factor of <span
+  class="math inline">\(g(x)\)</span>, by the <a
+  href="https://en.wikipedia.org/wiki/Factor_theorem">Factor
+  Theorem</a>. That is, there exists a polynomial <span
+  class="math inline">\(q(x)\)</span> such that: <span
+  class="math display">\[
+  f(x) - f(b) = (x - b)q(x),
+  \]</span></p>
+  <p>where <span class="math inline">\(\deg(q) = \deg(f) - 1\)</span>.
+  Thus,</p>
+  <p><span class="math display">\[
+  \frac{f(x) - f(b)}{x - b} = q(x)
+  \]</span> is a polynomial, and the division has no remainder.</p>
+  </section>
+  <section id="verfication" class="level3">
+  <h3>Verification Equation</h3>
+  <p>Here we derive the completeness of the verification procedure
+  i.e. if the prover does their computations correctly, the verifier’s
+  test will always pass. Therefore, as the prover is honest, we will
+  assume that <span class="math inline">\(f(z) = y\)</span>.</p>
+  <p><span class="math display">\[
+  \begin{align}
+  (X - z)q(X) &amp;= f(X) - f(z) \\[15pt]
+  (\alpha - z)q(\alpha) &amp;= f(\alpha) - f(z) \\[15pt]
+  g^{(\alpha - z)q(\alpha)} &amp;= g^{f(\alpha) - f(z)}\\[15pt]
+  \left(g^{q(\alpha)}\right)^{(\alpha - z)} &amp;=
+  g^{f(\alpha)}g^{-y}\\[15pt]
+  \left(C_{q}\right)^{(\alpha - z)} &amp;= C_{f}g^{-y}\\[15pt]
+  \left(C_{q}\right)^{(\alpha - z)}g^{y} &amp;= C_{f}\\[15pt]
+  e\left(C_{q}^{(\alpha - z)}, h\right) &amp;= e\left(C_{f}g^{-y},
+  h\right)\\[15pt]\\
+  e\left(C_{q}, h^{\alpha}h^{-z}\right) &amp;= e\left(C_{f},
+  h\right)\quad e\left(g^{-y}, h\right)\\[15pt]
+  e\left(C_{q}, v_1h^{-z}\right) &amp;= e\left(C_{f},
+  h\right)e\left(g^{-y}, h\right)\\[15pt]
+  \end{align}
+  \]</span></p>
+  </section>
   </section>
   </div>
   </main>

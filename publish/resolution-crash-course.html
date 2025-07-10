@@ -16,6 +16,7 @@
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
   <script src="/static/es5/tex-svg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
@@ -73,33 +74,28 @@
   <p><span class="math display">\[
   \frac{C}{D} [C\subseteq D]
   \]</span></p>
-  <div class="def"><h3>Definition: Resolution
-
-  Proof
-
-  System</h3><p>Given an unsatisfiable CNF formula <span
-  class="math inline"><em>F</em> = ⋀<sub><em>i</em> ∈ [<em>m</em>]</sub><em>C</em><sub><em>i</em></sub></span>
-  over <span class="math inline"><em>n</em></span> variables, a resolution
-  refutation <span class="math inline"><em>π</em></span> is a sequence of
-  clauses <span
-  class="math inline"><em>D</em><sub>1</sub>, …, <em>D</em><sub><em>L</em></sub></span>
-  where</p>
+  <div class="def" title="Resolution Proof System">
+  <p>Given an unsatisfiable CNF formula <span class="math inline">\(F =
+  \bigwedge_{i \in [m]}C_i\)</span> over <span
+  class="math inline">\(n\)</span> variables, a resolution refutation
+  <span class="math inline">\(\pi\)</span> is a sequence of clauses
+  <span class="math inline">\(D_1, \dots, D_L\)</span> where</p>
   <ol type="1">
-  <li><span
-  class="math inline"><em>D</em><sub><em>i</em></sub> = <em>C</em><sub><em>i</em></sub></span>
-  for <span class="math inline">1 ≤ <em>i</em> ≤ <em>m</em></span>.</li>
-  <li><span class="math inline"><em>D</em><sub><em>k</em></sub></span> is
-  a clause derived by applying the resolution (or the weakening) rule to
-  clauses <span class="math inline"><em>D</em><sub><em>i</em></sub></span>
-  and <span class="math inline"><em>D</em><sub><em>j</em></sub></span> for
-  <span
-  class="math inline"><em>i</em>, <em>j</em> ≤ <em>m</em></span>.</li>
-  <li><span class="math inline"><em>D</em><sub><em>L</em></sub> = ∅</span>
-  is the empty clause which is always false.</li>
+  <li><span class="math inline">\(D_i = C_i\)</span> for <span
+  class="math inline">\(1 \le i \le m\)</span>.</li>
+  <li><span class="math inline">\(D_k\)</span> is a clause derived by
+  applying the resolution (or the weakening) rule to clauses <span
+  class="math inline">\(D_i\)</span> and <span
+  class="math inline">\(D_j\)</span> for <span class="math inline">\(i,j
+  \le m\)</span>.</li>
+  <li><span class="math inline">\(D_L = \emptyset\)</span> is the empty
+  clause which is always false.</li>
   </ol>
-  <p><strong>Size Of A Refutation</strong>: The size of a refutation <span
-  class="math inline">|<em>π</em>|</span> is the number of clauses in the
-  sequence (<span class="math inline"><em>L</em></span> in this case).</p></div>
+  <p><strong>Size Of A Refutation</strong>: The size of a refutation
+  <span class="math inline">\(\left|\pi\right|\)</span> is the number of
+  clauses in the sequence (<span class="math inline">\(L\)</span> in
+  this case).</p>
+  </div>
   <p><strong>Example</strong></p>
   <p><img src="assets/Resolution/resolution-example.jpg"></img></p>
   </section>
@@ -166,9 +162,11 @@
   pigeon must be an onto/surjective function, i.e every hole must get a
   pigeon.</li>
   </ol>
-  <div class="remark"><h3></h3><p>Satisfying all 4 axioms, implies that there exists a <strong>perfect
-  matching</strong> in the graph <span
-  class="math inline"><em>G</em></span>.</p></div>
+  <div class="remark">
+  <p>Satisfying all 4 axioms, implies that there exists a
+  <strong>perfect matching</strong> in the graph <span
+  class="math inline">\(G\)</span>.</p>
+  </div>
   <p>If we need the function to be an onto function, then we refer to
   the formula as the <strong>onto functional PHP</strong>.</p>
   <p>The final unsatisfiable formula</p>
@@ -269,31 +267,24 @@
   of for what kind of “sparse” graphs, is the problem still hard.</p>
   <p>The graph family we consider is the <span class="math inline">\((r,
   \Delta, c)\)</span>-boundary expander.</p>
-  <div class="def"><h3>Definition: The
-
-  Boundary
-
-  Expander</h3><p>Given Bipartite graph <span
-  class="math inline"><em>G</em> = (<em>V</em><sub><em>P</em></sub> ∪ <em>V</em><sub><em>H</em></sub>, <em>E</em>)</span>
-  is an <span
-  class="math inline">(<em>r</em>, <em>Δ</em>, <em>c</em>)</span> boundary
-  expander, if <span
-  class="math inline">∀<em>u</em> ∈ <em>V</em><sub><em>P</em></sub></span>
-  we have <span
-  class="math inline">deg<sub><em>G</em></sub>(<em>u</em>) ≤ <em>Δ</em></span>,
-  and for every set <span
-  class="math inline"><em>S</em> ⊆ <em>V</em><sub><em>P</em></sub></span>
-  with size <span class="math inline">|<em>S</em>| ≤ <em>r</em></span> we
-  have</p>
-  <p><span
-  class="math display">|∂(<em>S</em>)| ≥ <em>c</em>|<em>S</em>|</span></p>
-  <p>where the boundary of a set <span
-  class="math inline"><em>S</em> ⊆ <em>V</em><sub><em>P</em></sub></span>,
-  denoted by <span class="math inline">∂(<em>S</em>)</span> is the set of
-  unique neighbours of every <span
-  class="math inline"><em>u</em> ∈ <em>S</em></span> i.e</p>
-  <p><span
-  class="math display">∂(<em>S</em>) = {<em>v</em> ∈ <em>V</em><sub><em>H</em></sub> : |<em>N</em><sub><em>G</em></sub>(<em>v</em>) ∩ <em>S</em>| = 1}</span></p></div>
+  <div class="def" title="The Boundary Expander">
+  <p>Given Bipartite graph <span class="math inline">\(G = (V_P \cup
+  V_H, E)\)</span> is an <span class="math inline">\((r, \Delta,
+  c)\)</span> boundary expander, if <span class="math inline">\(\forall
+  u \in V_P\)</span> we have <span class="math inline">\(\deg_G(u) \le
+  \Delta\)</span>, and for every set <span class="math inline">\(S
+  \subseteq V_P\)</span> with size <span
+  class="math inline">\(\left|S\right| \le r\)</span> we have</p>
+  <p><span class="math display">\[\left|\partial\left(S\right)\right|
+  \ge c \left|S\right|\]</span></p>
+  <p>where the boundary of a set <span class="math inline">\(S \subseteq
+  V_P\)</span>, denoted by <span
+  class="math inline">\(\partial\left(S\right)\)</span> is the set of
+  unique neighbours of every <span class="math inline">\(u \in
+  S\)</span> i.e</p>
+  <p><span class="math display">\[ \partial\left(S\right) = \{ v \in V_H
+  : \left|N_G(v) \cap S\right| = 1\}\]</span></p>
+  </div>
   <p>What do we know about refuting PHP in expanders? Not a whole lot,
   but there are 3 seminal results that consider the extremes:</p>
   <ul>
@@ -368,22 +359,24 @@
   <hr style="height:3px;border:none;color:#333;background-color:#333;">
   </hr>
   <div id="refs" class="references csl-bib-body hanging-indent"
-  data-entry-spacing="0" role="list">
-  <div id="ref-beame1996simplified" class="csl-entry" role="listitem">
+  role="doc-bibliography">
+  <div id="ref-beame1996simplified" class="csl-entry"
+  role="doc-biblioentry">
   Beame, P., Pitassi, T., 1996. Simplified and improved resolution lower
   bounds, in: Proceedings of 37th Conference on Foundations of Computer
   Science. IEEE, pp. 274–282.
   </div>
-  <div id="ref-ben1999short" class="csl-entry" role="listitem">
+  <div id="ref-ben1999short" class="csl-entry" role="doc-biblioentry">
   Ben-Sasson, E., Wigderson, A., 1999. Short proofs are
   narrow–resolution made simple, in: Proceedings of the Thirty-First
   Annual ACM Symposium on Theory of Computing. pp. 517–526.
   </div>
-  <div id="ref-buss1988resolution" class="csl-entry" role="listitem">
+  <div id="ref-buss1988resolution" class="csl-entry"
+  role="doc-biblioentry">
   Buss, S.R., Turán, G., 1988. Resolution proofs of generalized
   pigeonhole principles. Theoretical Computer Science 62, 311–317.
   </div>
-  <div id="ref-rezende2020Exp" class="csl-entry" role="listitem">
+  <div id="ref-rezende2020Exp" class="csl-entry" role="doc-biblioentry">
   De Rezende, S.F., Nordström, J., Risse, K., Sokolov, D., 2020.
   Exponential resolution lower bounds for weak pigeonhole principle and
   perfect matching formulas over sparse graphs, in: 35th Computational
@@ -393,21 +386,22 @@
   href="https://doi.org/10.4230/LIPIcs.CCC.2020.28">https://doi.org/10.4230/LIPIcs.CCC.2020.28</a>
   </div>
   <div id="ref-haken1984intractability" class="csl-entry"
-  role="listitem">
+  role="doc-biblioentry">
   Haken, A., 1984. The intractability of resolution (complexity) (PhD
   thesis). University of Illinois at Urbana-Champaign.
   </div>
-  <div id="ref-raz2004resolution" class="csl-entry" role="listitem">
+  <div id="ref-raz2004resolution" class="csl-entry"
+  role="doc-biblioentry">
   Raz, R., 2004. Resolution lower bounds for the weak pigeonhole
   principle. Journal of the ACM (JACM) 51, 115–138.
   </div>
   <div id="ref-razborov2004resolution" class="csl-entry"
-  role="listitem">
+  role="doc-biblioentry">
   Razborov, A.A., 2004. Resolution lower bounds for perfect matching
   principles. Journal of Computer and System Sciences 69, 3–27.
   </div>
   <div id="ref-razborov2003resolution" class="csl-entry"
-  role="listitem">
+  role="doc-biblioentry">
   Razborov, A.A., 2003. Resolution lower bounds for the weak functional
   pigeonhole principle. Theoretical Computer Science 303, 233–243.
   </div>
@@ -592,5 +586,7 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
+<!-- <script src="/static/mathjax-config.js"></script> -->
+
 </body>
 </html>
