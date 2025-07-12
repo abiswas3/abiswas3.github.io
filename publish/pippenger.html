@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+	<meta name="generator" content="pandoc">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+    <!-- Base CSS (common styles) -->
+  <link rel="stylesheet" href="../static/nav.css"> 
+  <!-- <link rel="stylesheet" href="../static/obsidian.css"> -->
+  <link rel="stylesheet" href="../static/base.css">
+  <link rel="stylesheet" href="../static/thms.css">
+  <link rel="stylesheet" href="../static/imgs.css">       
+  <link rel="stylesheet" href="../static/math.css">  
+   
+  <link rel="stylesheet" href="../static/tags.css">       
+
+  <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
+  <script src="/static/es5/tex-svg.js"></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
+
+
+  <title>Pippenger For MSM</title>      
+  </head>
+
+  <body class="dark-mode">  
+  <header>          
+  <nav class="nav">
+    <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+    <label for="nav-toggle" class="nav-toggle-label" aria-label="Toggle menu">
+      &#9776; <!-- hamburger icon -->
+    </label>
+    <ul class="nav-list">
+      <li><a href="/">Random Walks</a></li>
+      <li><a href="/publish/">Notes</a></li>
+      <li><a href="/publications.html">Publications</a></li>
+      <li><a href="/misc.html">Misc</a></li>
+      <li>  <label>
+    <input type="checkbox" id="mode-toggle" />
+    Dark Mode
+  </label></li>
+    </ul>
+      
+  </nav>
+
+    <div class="toc" id="toc">      
+        <div class="last-updated">
+    Last Page Build: 2025-06-19 15:05:34 +0100
+  </div>
+
+      <div class="toc-content">
+          <ul>
+          <li><a href="#problem-setting-msm"
+          id="toc-problem-setting-msm">🧮 Problem Setting: MSM</a></li>
+          <li><a
+          href="#naive-double-and-add-per-point-scalar-multiplication"
+          id="toc-naive-double-and-add-per-point-scalar-multiplication">🚶
+          Naive Double-and-Add (Per-Point Scalar
+          Multiplication)</a></li>
+          <li><a href="#pippengers-algorithm-with-window-size-c"
+          id="toc-pippengers-algorithm-with-window-size-c">🪣
+          Pippenger’s Algorithm (with window size <span
+          class="math inline">\(c\)</span>)</a>
+          <ul>
+          <li><a href="#core-idea" id="toc-core-idea">Core
+          Idea:</a></li>
+          <li><a href="#steps" id="toc-steps">Steps:</a></li>
+          <li><a href="#complexity"
+          id="toc-complexity">Complexity:</a></li>
+          </ul></li>
+          <li><a href="#summary-comparison"
+          id="toc-summary-comparison">⚖️ Summary Comparison</a></li>
+          <li><a href="#why-pippenger-is-better"
+          id="toc-why-pippenger-is-better">✅ Why Pippenger is
+          Better:</a></li>
+          <li><a href="#example" id="toc-example">📌 Example:</a></li>
+          </ul>
+      </div>
+  
+  </div>
+    <br>
+  <br>
+  </header>
+
+  <main class="content">
+    <h1>Pippenger For MSM</h1>
+  
+      <div class="authors-and-date">
+    <div class="authors">
+      Ari
+    </div>
+    <div class="published-date">
+      Published: 2025-06-19
+    </div>
+  </div>
+    
+
+
+          <ul class="tag-list">
+                  <li class="tag-item"><a href="/publish/cryptography.html" class="tag-link">cryptography</a></li>
+                  <li class="tag-item"><a href="/publish/benchmarking.html" class="tag-link">benchmarking</a></li>
+                </ul>
+    
+    <hr />
+    <section id="problem-setting-msm" class="level3">
+    <h3>🧮 Problem Setting: MSM</h3>
+    <p>Given <span class="math inline">\(n\)</span> pairs <span
+    class="math inline">\((s_i, P_i)\)</span>, compute:</p>
+    <p><span class="math display">\[
+    \sum_{i=1}^n s_i P_i
+    \]</span></p>
+    <p>Each <span class="math inline">\(s_i\)</span> is a scalar (e.g.,
+    an integer modulo a group order), and each <span
+    class="math inline">\(P_i\)</span> is a point on an elliptic
+    curve.</p>
+    <hr />
+    </section>
+    <section id="naive-double-and-add-per-point-scalar-multiplication"
+    class="level2">
+    <h2>🚶 Naive Double-and-Add (Per-Point Scalar Multiplication)</h2>
+    <p>For each <span class="math inline">\(i\)</span>:</p>
+    <ul>
+    <li>Compute <span class="math inline">\(s_i P_i\)</span> using the
+    binary representation of <span class="math inline">\(s_i\)</span>,
+    applying point doubling and addition.</li>
+    <li>Cost: <span class="math inline">\(O(\log s_i)\)</span> elliptic
+    curve (EC) operations per scalar (e.g., about 256 if using 256-bit
+    scalars).</li>
+    <li>Total cost: <span class="math inline">\(O(n \log s)\)</span> EC
+    operations (doublings and additions mixed).</li>
+    </ul>
+    <p>This method <strong>treats each scalar multiplication
+    independently</strong> and performs no optimization across different
+    points or scalars.</p>
+    <hr />
+    </section>
+    <section id="pippengers-algorithm-with-window-size-c"
+    class="level2">
+    <h2>🪣 Pippenger’s Algorithm (with window size <span
+    class="math inline">\(c\)</span>)</h2>
+    <section id="core-idea" class="level3">
+    <h3>Core Idea:</h3>
+    <p>Exploit the structure of <strong>many scalar multiplications
+    simultaneously</strong> to reduce the number of expensive elliptic
+    curve additions.</p>
+    </section>
+    <section id="steps" class="level3">
+    <h3>Steps:</h3>
+    <ol type="1">
+    <li><strong>Window decomposition:</strong> Split each scalar <span
+    class="math inline">\(s_i\)</span> into chunks (digits) of <span
+    class="math inline">\(c\)</span> bits.
+    <ul>
+    <li>You now have <span class="math inline">\(\ell = \left\lceil
+    \frac{\log s}{c} \right\rceil\)</span> windows per scalar.</li>
+    </ul></li>
+    <li><strong>For each window <span
+    class="math inline">\(j\)</span></strong> (from 0 to <span
+    class="math inline">\(\ell - 1\)</span>):
+    <ul>
+    <li>For each bucket <span class="math inline">\(b \in [1, 2^c -
+    1]\)</span>, accumulate the points <span
+    class="math inline">\(P_i\)</span> whose <span
+    class="math inline">\(j\)</span>-th window value is <span
+    class="math inline">\(b\)</span> into bucket <span
+    class="math inline">\(B_b\)</span>.</li>
+    <li>After bucket accumulation: process buckets in increasing order
+    of <span class="math inline">\(b\)</span>, doing <strong>running
+    sums</strong> to amortize additions (this is Pippenger’s key
+    trick).</li>
+    </ul></li>
+    <li><strong>Shift window contributions:</strong> The contribution
+    from window <span class="math inline">\(j\)</span> must be
+    multiplied by <span class="math inline">\(2^{cj}\)</span>,
+    implemented via a few doublings.</li>
+    </ol>
+    </section>
+    <section id="complexity" class="level3">
+    <h3>Complexity:</h3>
+    <ul>
+    <li><p>Number of EC additions/doublings is reduced to:</p>
+    <p><span class="math display">\[
+    O\left(\frac{n}{c} + 2^c\right)
+    \]</span></p>
+    <p>per window, times <span class="math inline">\(\ell = \left\lceil
+    \frac{\log s}{c} \right\rceil\)</span> windows.</p></li>
+    </ul>
+    <blockquote>
+    <p>[!note] wnaf optimisation We can reduce this to <span
+    class="math inline">\(2^{c-1}\)</span> using signed indices</p>
+    </blockquote>
+    <ul>
+    <li><p>Total complexity:<br />
+    <span class="math display">\[
+    O\left( \left( \frac{n}{c} + 2^c \right) \cdot \frac{\log s}{c}
+    \right)
+    \]</span></p></li>
+    <li><p>For optimal <span class="math inline">\(c \approx \log
+    n\)</span>, this becomes <strong>substantially faster than the naive
+    method</strong>.</p></li>
+    </ul>
+    <hr />
+    </section>
+    </section>
+    <section id="summary-comparison" class="level2">
+    <h2>⚖️ Summary Comparison</h2>
+    <table>
+    <colgroup>
+    <col style="width: 25%" />
+    <col style="width: 34%" />
+    <col style="width: 40%" />
+    </colgroup>
+    <thead>
+    <tr>
+    <th>Feature</th>
+    <th>Naive Double-and-Add</th>
+    <th>Pippenger with Window <span
+    class="math inline">\(c\)</span></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Time per scalar</td>
+    <td><span class="math inline">\(O(\log s)\)</span></td>
+    <td><span class="math inline">\(O\left(\frac{\log
+    s}{c}\right)\)</span> amortized</td>
+    </tr>
+    <tr>
+    <td>Total additions</td>
+    <td><span class="math inline">\(O(n \log s)\)</span></td>
+    <td><span class="math inline">\(O\left( \left( \frac{n}{c} + 2^c
+    \right) \frac{\log s}{c} \right)\)</span></td>
+    </tr>
+    <tr>
+    <td>Parallelizable</td>
+    <td>No</td>
+    <td>Yes (bucket accumulation is parallelizable)</td>
+    </tr>
+    <tr>
+    <td>Memory usage</td>
+    <td>Low</td>
+    <td>Higher (buckets)</td>
+    </tr>
+    <tr>
+    <td>Use case</td>
+    <td>Small <span class="math inline">\(n\)</span>, low
+    concurrency</td>
+    <td>Large <span class="math inline">\(n\)</span>, batched MSM</td>
+    </tr>
+    </tbody>
+    </table>
+    <hr />
+    </section>
+    <section id="why-pippenger-is-better" class="level2">
+    <h2>✅ Why Pippenger is Better:</h2>
+    <ul>
+    <li><strong>Less redundant work:</strong> Pippenger combines
+    contributions across scalars at the same window bits, avoiding
+    separate EC operations for each scalar.</li>
+    <li><strong>Better asymptotics:</strong> Especially as <span
+    class="math inline">\(n\)</span> grows large.</li>
+    <li><strong>Highly parallelizable:</strong> Modern CPUs/GPUs benefit
+    massively.</li>
+    </ul>
+    <hr />
+    </section>
+    <section id="example" class="level2">
+    <h2>📌 Example:</h2>
+    <p>Let’s say:</p>
+    <ul>
+    <li><span class="math inline">\(n = 2^{16} = 65536\)</span></li>
+    <li><span class="math inline">\(\log s = 256\)</span></li>
+    <li><span class="math inline">\(c = 16\)</span></li>
+    </ul>
+    <p>Then:</p>
+    <ul>
+    <li>Naive: <span class="math inline">\(O(65536 \cdot 256) \approx
+    16.7 \times 10^6\)</span> EC operations</li>
+    <li>Pippenger:
+    <ul>
+    <li>Buckets: <span class="math inline">\(2^{16} =
+    65536\)</span></li>
+    <li>Windows: <span class="math inline">\(\frac{256}{16} =
+    16\)</span></li>
+    <li>Total EC operations: roughly <span
+    class="math inline">\(\left(\frac{65536}{16} + 65536\right) \cdot 16
+    \approx 6.9 \times 10^5\)</span> EC operations — <strong>much
+    smaller</strong></li>
+    </ul></li>
+    </ul>
+    <hr />
+    </section>
+  </main>
+
+
+
+
+
+
+<!-- Prism Core JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<!-- Add other languages as needed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+<script>
+// var coll = document.getElementsByClassName("collapsible");
+var coll = document.querySelectorAll('.collapsible, .question, .collapsible-short')
+var i;
+
+console.log(coll);
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
+
+<script>
+  // Function to process MathJax when the tooltip is shown
+document.addEventListener('DOMContentLoaded', function () {
+    var footnotes = document.querySelectorAll('.footnote');
+
+    footnotes.forEach(function (footnote) {
+        footnote.addEventListener('mouseover', function () {
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+        });
+    });
+});
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Function to scroll to the element with an offset to avoid the header
+      const scrollToElement = (element) => {
+        const headerHeight = document.querySelector('header').offsetHeight + 30;
+        window.scrollTo({
+          top: element.offsetTop - headerHeight + 20,  // Adjust offset to avoid header overlap
+          behavior: 'smooth'
+        });
+      };
+
+      // Select all anchor links that reference an element (e.g., href="#ref1")
+      const links = document.querySelectorAll('a[href^="#"]');
+
+      links.forEach(link => {
+        link.addEventListener('click', function (e) {
+          const targetId = this.getAttribute('href').substring(1);  // Get the target ID from the href
+          const targetElement = document.getElementById(targetId);  // Find the target element by its ID
+          
+          if (targetElement) {
+            e.preventDefault();  // Prevent the default browser scrolling behavior
+            history.pushState(null, null, `#`);  // Change the URL hash to reflect the anchor link
+            scrollToElement(targetElement);  // Smooth scroll to the element with the offset
+          }
+        });
+      });
+
+      // Handle the browser's back and forward buttons
+      window.addEventListener('popstate', () => {
+        const targetId = location.hash.substring(1);  // Get the ID from the current hash in the URL
+        if (targetId) {
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            scrollToElement(targetElement);  // Scroll to the element if it exists
+          }
+        }
+      });
+    });
+</script>
+
+<script>
+let slideIndices = [0,0, 0, 0, 0, 0, ];
+showDivs(slideIndices);
+
+function plusDivs(idx, n) {
+  slideIndices[idx-1] += n;
+  showDivs(slideIndices);
+}
+
+function showDivs(indices) {
+  let idx;
+  console.log(indices);
+  for(idx=0; idx < indices.length; idx++){
+    
+    // var dates = document.querySelectorAll('[id^="createdOnID"]');
+    let tmp = '[id^="'+(idx+1)+'_slide"]'
+    // console.log(tmp);    
+    var x = document.querySelectorAll(tmp);
+    if(x.length == 0){
+      continue;
+    }
+    var i;    
+    n = slideIndices[idx];
+    if (n > x.length-1) {slideIndices[idx] = 0}
+
+    if (n < 0) {slideIndices[idx] = x.length-1}  
+
+    for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";  
+    }
+    x[slideIndices[idx]].style.display = "block";
+  }
+}
+</script>
+
+
+
+
+  <!-- JavaScript to handle citation clicks and highlight -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Find all citation links
+      const citations = document.querySelectorAll('.citation');
+
+      citations.forEach(function (citation) {
+        citation.addEventListener('click', function (event) {
+          event.preventDefault();  // Prevent default link behavior
+
+          const citationLink = citation.querySelector('a');  // Find the <a> inside the span
+
+          // Get the reference ID from the citation's href (remove the '#')
+          const refId = citationLink.getAttribute('href').substring(1);
+            
+          // Find the corresponding reference element using the ID
+          const refElement = document.getElementById(refId);
+
+          // Remove any previous highlights
+          document.querySelectorAll('.highlight').forEach(function (el) {
+            el.classList.remove('highlight');
+          });
+          document.querySelectorAll('.highlight-citation').forEach(function (el) {
+            el.classList.remove('highlight-citation');
+          });
+
+          if (refElement) {
+            console.log("Here");
+            // Scroll to the reference (smooth scroll)
+            refElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Add highlight to the reference
+            refElement.classList.add('highlight');
+
+            // Add highlight to the citation link
+            citation.classList.add('highlight-citation');
+            
+          }
+        });
+      });
+    });
+  </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    new ClipboardJS('.copy-btn');
+});
+
+</script>
+
+<script src="/static/toggle_bg.js" defer></script>
+
+</body>
+</html>

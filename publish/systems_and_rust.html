@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+	<meta name="generator" content="pandoc">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+    <!-- Base CSS (common styles) --> 
+  <link rel="stylesheet" href="../static/nav.css"> 
+  <link rel="stylesheet" href="../static/blog_index.css">
+  <link rel="stylesheet" href="../static/thms.css">
+  <link rel="stylesheet" href="../static/imgs.css">       
+  <link rel="stylesheet" href="../static/math.css">  
+   
+  <link rel="stylesheet" href="../static/tags.css">       
+
+  <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
+  <script src="/static/es5/tex-svg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
+
+
+  <title></title>      
+  </head>
+
+  <body class="light-mode">  
+    <header>          
+    <div class="nav-container"> 
+    <div class="nav-title"><a href="/">Ari</a></div>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <nav class="nav-links" id="navMenu">
+      <a href="/publish/">Notes</a>
+      <a href="/publications.html">Publications</a>
+      <a href="/misc.html">Misc</a>
+     <label><input type="checkbox" id="mode-toggle" /><span class="label"></span></label>
+    </nav>
+    </div>
+ 
+ </header>
+
+  <main class="content">
+  <div class="blog">
+   <h1></h1> 
+  <ul class="task-list">
+  <li><label><input type="checkbox" />Consolidate all the notes on Rust
+  so far.</label></li>
+  <li><label><input type="checkbox" />Start reading the perf
+  book.</label></li>
+  </ul>
+  <section id="system-performance" class="level2">
+  <h2>System Performance</h2>
+  <p>Notes made while studying how to speed things up on CPUs.</p>
+  </section>
+  <section id="rust-tips-and-tricks." class="level2">
+  <h2>Rust Tips and Tricks.</h2>
+  <p>Make a series of posts about + Macros + Generics and lifetimes.</p>
+  </section>
+  </div>
+  </main>
+
+
+
+
+
+
+<!-- Prism Core JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<!-- Add other languages as needed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+<script>
+// var coll = document.getElementsByClassName("collapsible");
+var coll = document.querySelectorAll('.collapsible, .question, .collapsible-short')
+var i;
+
+console.log(coll);
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
+
+<script>
+  // Function to process MathJax when the tooltip is shown
+document.addEventListener('DOMContentLoaded', function () {
+    var footnotes = document.querySelectorAll('.footnote');
+
+    footnotes.forEach(function (footnote) {
+        footnote.addEventListener('mouseover', function () {
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+        });
+    });
+});
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Function to scroll to the element with an offset to avoid the header
+      const scrollToElement = (element) => {
+        const headerHeight = document.querySelector('header').offsetHeight + 30;
+        window.scrollTo({
+          top: element.offsetTop - headerHeight + 20,  // Adjust offset to avoid header overlap
+          behavior: 'smooth'
+        });
+      };
+
+      // Select all anchor links that reference an element (e.g., href="#ref1")
+      const links = document.querySelectorAll('a[href^="#"]');
+
+      links.forEach(link => {
+        link.addEventListener('click', function (e) {
+          const targetId = this.getAttribute('href').substring(1);  // Get the target ID from the href
+          const targetElement = document.getElementById(targetId);  // Find the target element by its ID
+          
+          if (targetElement) {
+            e.preventDefault();  // Prevent the default browser scrolling behavior
+            history.pushState(null, null, `#`);  // Change the URL hash to reflect the anchor link
+            scrollToElement(targetElement);  // Smooth scroll to the element with the offset
+          }
+        });
+      });
+
+      // Handle the browser's back and forward buttons
+      window.addEventListener('popstate', () => {
+        const targetId = location.hash.substring(1);  // Get the ID from the current hash in the URL
+        if (targetId) {
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            scrollToElement(targetElement);  // Scroll to the element if it exists
+          }
+        }
+      });
+    });
+</script>
+
+<script>
+let slideIndices = [0,0, 0, 0, 0, 0, ];
+showDivs(slideIndices);
+
+function plusDivs(idx, n) {
+  slideIndices[idx-1] += n;
+  showDivs(slideIndices);
+}
+
+function showDivs(indices) {
+  let idx;
+  console.log(indices);
+  for(idx=0; idx < indices.length; idx++){
+    
+    // var dates = document.querySelectorAll('[id^="createdOnID"]');
+    let tmp = '[id^="'+(idx+1)+'_slide"]'
+    // console.log(tmp);    
+    var x = document.querySelectorAll(tmp);
+    if(x.length == 0){
+      continue;
+    }
+    var i;    
+    n = slideIndices[idx];
+    if (n > x.length-1) {slideIndices[idx] = 0}
+
+    if (n < 0) {slideIndices[idx] = x.length-1}  
+
+    for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";  
+    }
+    x[slideIndices[idx]].style.display = "block";
+  }
+}
+</script>
+
+
+
+
+  <!-- JavaScript to handle citation clicks and highlight -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Find all citation links
+      const citations = document.querySelectorAll('.citation');
+
+      citations.forEach(function (citation) {
+        citation.addEventListener('click', function (event) {
+          event.preventDefault();  // Prevent default link behavior
+
+          const citationLink = citation.querySelector('a');  // Find the <a> inside the span
+
+          // Get the reference ID from the citation's href (remove the '#')
+          const refId = citationLink.getAttribute('href').substring(1);
+            
+          // Find the corresponding reference element using the ID
+          const refElement = document.getElementById(refId);
+
+          // Remove any previous highlights
+          document.querySelectorAll('.highlight').forEach(function (el) {
+            el.classList.remove('highlight');
+          });
+          document.querySelectorAll('.highlight-citation').forEach(function (el) {
+            el.classList.remove('highlight-citation');
+          });
+
+          if (refElement) {
+            console.log("Here");
+            // Scroll to the reference (smooth scroll)
+            refElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Add highlight to the reference
+            refElement.classList.add('highlight');
+
+            // Add highlight to the citation link
+            citation.classList.add('highlight-citation');
+            
+          }
+        });
+      });
+    });
+  </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    new ClipboardJS('.copy-btn');
+});
+
+</script>
+<script src="/static/toggle_bg.js" defer></script>
+<script src="/static/theme-toggle.js"></script>
+<!-- <script src="/static/mathjax-config.js"></script> -->
+
+</body>
+</html>
