@@ -238,12 +238,12 @@
   polynomial <span class="math inline">\(f_i(y) = f_{(i, 0)}y^0 + \ldots
   \textcolor{red}{f_{(i, \ell-1)}} + \ldots + f_{(i,
   \ell-1)}y^{\ell-1}\)</span></p>
-  <p>Define <span class="math display">\[A_i = \prod_{j=0}^{\ell -1}
-  w_j^{f_{i,j}}\]</span> where <span
+  <p>Recall that <span class="math display">\[A_i = \prod_{j=0}^{\ell
+  -1} w_j^{f_{i,j}}\]</span> where <span
   class="math inline">\(\vec{w}\)</span> is as defined in the trusted
-  setup section. We use shorthand notation <span
-  class="math inline">\(\vec{A} = (A_0, \ldots, A_{m-1})\)</span> for
-  the remainder of this post.</p>
+  setup section, which were KZG commitments to the univariate
+  polynomials <span class="math inline">\(f_i \in
+  \mathbb{F}[Y]\)</span>.</p>
   <p>The prover computes <span class="math inline">\(U =
   \prod_{i=0}^{m-1} A_i^{(z_x)^i} \in \mathbb{G}_1\)</span>. Observe
   that <span class="math inline">\(U\)</span> is a KZG commitment to the
@@ -262,7 +262,8 @@
   class="math inline">\(\vec{v}\)</span> and the public vector <span
   class="math inline">\(\vec{z_x} =
   \left[z_x^{i}\right]_{i=0}^{m-1}\)</span>.</p>
-  <p>Here by inner product we mean <span
+  <p>Here we use the term <em>inner product</em>, as that’s what the
+  original authors do, but to be explicit, we mean <span
   class="math inline">\(\langle\vec{A}, \vec{z}_x\rangle =
   \prod_{i=0}^{m-1} A_i^{(z_x)^i}\)</span>, where <span
   class="math inline">\(\vec{A}\)</span> is the opening of <span
@@ -297,10 +298,6 @@
   </section>
   <section id="inner-product-proof-1" class="level2">
   <h2>Inner Product Proof</h2>
-  <p>We say <code>inner product</code> because that’s what the original
-  paper calls it. In this context it is also fine to replace inner
-  product with <code>multi-exponentiation</code> or just simply
-  <code>exponentiation</code> (what’s in a name, and all that).</p>
   <div class="remark">
   <p>A quick reminder, the prover is giving a proof <span
   class="math inline">\(\pi_1\)</span> that <span
@@ -375,13 +372,12 @@
   \pi_1 :=
   \left\{
   \begin{aligned}
-  &amp; A^{(\log m)} \in \mathbb{G}_1, b^{(\log m)} \in
-  \mathbb{F}\\[10pt]
+  &amp; A^{(\log m)} \in \mathbb{G}_1\\[10pt]
   &amp; v^{(\log m)} \in \mathbb{G}_2\\[10pt]
   &amp; \left[ C_{R^{(j)}}, C_{L^{(j)}}\right]_{j=1}^{\log m} \in
-  \mathbb{G}_1\\[10pt]
+  \mathbb{G}_T^{2\log m} \\[10pt]
   &amp;\ \text{KZG evaluation proof for $q$ at challenge $z
-  \xleftarrow[]{\$}\mathbb{F}$}
+  \xleftarrow[]{\$}\mathbb{F}$} \in \mathbb{G}_2
   \end{aligned}
   \right\}
   \]</span></p>
@@ -390,12 +386,11 @@
   The cost of this is 1 KZG opening over <span
   class="math inline">\(\mathbb{G}_2\)</span> – and the degree of the
   <span class="math inline">\(q\)</span> is at most <span
-  class="math inline">\(2m-2\)</span>, the KZG key for this commitment
-  is <span class="math inline">\(\vec{u}\)</span> as defined in the
-  structured setup.</p>
-  <section id="a-note-about-optimising-communication"
+  class="math inline">\(2m-2\)</span>,</p>
+  <section id="a-note-about-optimising-communication-and-defining-q"
   class="level3 remark">
-  <h3>A Note About Optimising Communication</h3>
+  <h3>A Note About Optimising Communication and defining <span
+  class="math inline">\(q\)</span></h3>
   <p>In a naive implementation the prover sends as part of the proof the
   intermediate commitment keys <span
   class="math inline">\(\vec{v}^{(1)}, \ldots, \vec{v}^{(\ell
@@ -403,8 +398,8 @@
   description of the proof, we claim that the prover only sends only
   <span class="math inline">\(\vec{v}^{(\log m)}\)</span> to the
   verifier.</p>
-  <p>This is done to reduce verification time. To be more specific the
-  verifier once the verifier receives <span
+  <p>This is done to reduce verification time. To be more specific, once
+  the verifier receives <span
   class="math inline">\(\vec{v}^{(j)}\)</span> it must use <span
   class="math inline">\(\vec{v}^{(j-1)}\)</span> and <span
   class="math inline">\(r_j\)</span> to check if the prover constructed
@@ -414,9 +409,9 @@
   <p>With a little bit of algebra it is not too hard to see that <span
   class="math inline">\(\vec{v}^{(\log m)}\)</span> is actually a KZG
   commitment to the polynomial <span class="math inline">\(q(x) =
-  \prod_{i=1}^{\log m}(1 + r^{-1}_{(\log m-i+1)}x^{2i})\)</span> as
-  after all <span class="math inline">\(\log m\)</span> folding
-  operations we get</p>
+  \prod_{i=1}^{\log m}(1 + r^{-1}_{(\log m-i+1)}x^{2i})\)</span>. That
+  is after all <span class="math inline">\(\log m\)</span> folding
+  operations the final value of the folded commitment key is</p>
   <p><span class="math display">\[\vec{v}^{(\log m)} = h^{q(\beta)}=
   h^{\prod_{i=1}^{\log m}(1 + r^{-1}_{(\log m-i+1)}\beta^{2i})} \in
   \mathbb{G}_2\]</span></p>
@@ -424,7 +419,7 @@
   and asking the verifier to check if <span
   class="math inline">\(\vec{v}^{(j)}\)</span> was properly constructed
   from <span class="math inline">\(\vec{v}^{(j-1)}\)</span>, it just
-  sends the final shorted commitment key.</p>
+  sends the final shortened commitment key.</p>
   <p>To check the prover did the intermediate calculations correctly, it
   suffices for the prover give a KZG evaluation proof for <span
   class="math inline">\(q\)</span> evaluated at a random challenge point
@@ -439,10 +434,11 @@
   <p>We have <span class="math inline">\(\vec{b} = (b_0, \ldots,
   b_{m-1}) = (1, z_x , \ldots z_x^{m-1})\)</span>. Given <span
   class="math inline">\(T = \prod_{i=0}^{m-1}e(A_i, v_i)\)</span>, the
-  verifier wants to use the proof above <span
-  class="math inline">\(\pi_1\)</span> to verify that opening of <span
-  class="math inline">\(T\)</span> is <span class="math inline">\((A_0,
-  \ldots, A_{m-1}) \in \mathbb{G}_1^m\)</span> such that <span
+  verifier wants to use the proof <span
+  class="math inline">\(\pi_1\)</span> defined above to verify that
+  opening of <span class="math inline">\(T\)</span> is <span
+  class="math inline">\((A_0, \ldots, A_{m-1}) \in
+  \mathbb{G}_1^m\)</span> such that <span
   class="math inline">\(U=\prod_{i=0}^{m-1} A_i^{b_i}\)</span></p>
   <p>The verifier also possesses all the challenges <span
   class="math inline">\(r_1, \ldots, r_{\log m}\)</span> it had sent the
@@ -454,7 +450,9 @@
   <li><strong>Check commitment collapsing</strong>: Define <span
   class="math inline">\(T^{(0)}, U^{(0)} = (T, U)\)</span> where <span
   class="math inline">\(T\)</span> and <span
-  class="math inline">\(U\)</span> are as defined above.</li>
+  class="math inline">\(U\)</span> are the original pairing commitment
+  to <span class="math inline">\(f\)</span> and the KZG commitment to
+  <span class="math inline">\(f(z_x, Y)\)</span> respectively.</li>
   </ol>
   <p><span class="math display">\[
   \begin{align}
@@ -465,25 +463,24 @@
   \end{align}
   \]</span></p>
   <ol start="2" type="1">
-  <li><strong>Compute the foldings of</strong> <span
+  <li><p><strong>Compute the foldings of</strong> <span
   class="math inline">\(\vec{b}\)</span>: If the prover folds all the
   <span class="math inline">\(b_i\)</span>’s correctly, then the final
   check boils down to <span class="math display">\[b&#39;
-  =  \prod_{i=1}^{\log m}(1 + r_i {b}^{j})
-  \textcolor{red}{\overset{?}{=}}b^{(\log m)} \]</span></li>
+  =  \prod_{i=1}^{\log m}(1 + r_i {b}^{j})\]</span></p></li>
+  <li><p><strong>Check folding for commitment keys</strong></p></li>
   </ol>
-  <p>3 . <strong>Check folding for commitment keys</strong></p>
   <ul>
   <li>To check that all commitment keys <span
-  class="math inline">\(\vec{v}^{(1)}, \ldots, \vec{v}^{(\ell
+  class="math inline">\(\vec{v}^{(1)}, \ldots, \vec{v}^{(\log m
   -1)}\)</span> were folded correctly, given <span
-  class="math inline">\(\vec{v}^{(\ell)}\)</span> the prover asks for a
-  KZG opening proof to evaluate <span class="math inline">\(q\)</span>
+  class="math inline">\(\vec{v}^{(\log m)}\)</span> the prover asks for
+  a KZG opening proof to evaluate <span class="math inline">\(q\)</span>
   at <span class="math inline">\(z \xleftarrow[]{\$}\mathbb{F}\)</span>,
   where <span class="math inline">\(q(x) = \prod_{i=1}^{\log m}(1 +
   r^{-1}_{(\log m-i+1)}x^{2i})\)</span></li>
   </ul>
-  <ol start="4" type="1">
+  <ol start="2" type="1">
   <li><strong>Finally check</strong> <span
   class="math display">\[T^{(j)} \quad
   \textcolor{red}{\overset{?}{=}}\quad e(\pi_1.A^{(\log m)},
@@ -494,6 +491,8 @@
   \textcolor{red}{\overset{?}{=}}\quad \left(\pi_1.A^{(\log
   m)}\right)^{b^{&#39;
   }}\]</span></p>
+  <p>where <span class="math inline">\(b&#39;\)</span> was computed in
+  step 2.</p>
   </section>
   <section id="univariate" class="level2">
   <h2>How To Commit To A Univariate Polynomial</h2>
