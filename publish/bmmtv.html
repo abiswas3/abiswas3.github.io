@@ -62,20 +62,47 @@
   <section id="notation" class="level2">
   <h2>Notation</h2>
   <p>Throughout this post we assume that use <span
-  class="math inline">\(m \in \mathbb{N}\)</span> is a power of 2. When
-  describing group operations, we stick with the conventions used in
-  <strong>CITE</strong>, and use multiplicative notation.</p>
+  class="math inline">\(m \in \mathbb{N}\)</span> is a power of 2. As
+  the main content of this post is from <span class="citation"
+  data-cites="bmmtv2021">(<a href="#ref-bmmtv2021"
+  role="doc-biblioref">Bünz et al., 2019</a>)</span>, when describing
+  group operations, we stick with their conventions, and use
+  multiplicative notation.</p>
+  <p><strong>Index Notation</strong>: Usually we index the <span
+  class="math inline">\(i\)</span>’th location of a vector <span
+  class="math inline">\(\vec{a}\)</span> with <span
+  class="math inline">\(a_i\)</span>. Often, however, due to
+  multi-indexing we will index vectors with superscript <span
+  class="math inline">\(a^{(j)}\)</span> instead. We understand this can
+  be confusing, so to ease cognitive load, the reader is asked to
+  remember that</p>
+  <ul>
+  <li><p>When there are parentheses around <span
+  class="math inline">\((i)\)</span> then <span
+  class="math inline">\(a^{(i)}\)</span> is the <span
+  class="math inline">\(i\)</span>’th index of a vector <span
+  class="math inline">\(\vec{a}\)</span>.</p></li>
+  <li><p>When there are <strong>NO</strong> parentheses around <span
+  class="math inline">\(i\)</span> then <span
+  class="math inline">\(a^{i}\)</span> is <span
+  class="math inline">\(a\)</span> raised to the power of <span
+  class="math inline">\(i\)</span>.</p></li>
+  </ul>
   <div class="remark">
-  <p><strong>A note on notation</strong>: This area is ripe with the use
-  of non-standard notation. Sometimes, this is unavoidable to succinctly
-  describe protocols, which can otherwise be quite difficult to
-  describe. Often however, we feel this is unnecessary. So we will do
-  our best to describe everything using standard notation accepted by
-  the wider mathematics community, outside of crypto and snarks.
-  Additionally, we will avoid much of the formalism typically found in
-  the preliminary sections of the papers cited above. We believe this
+  <p><strong>A note on notation</strong>: The original paper by <span
+  class="citation" data-cites="bmmtv2021">(<a href="#ref-bmmtv2021"
+  role="doc-biblioref">Bünz et al., 2019</a>)</span> introduces a lot of
+  non-standard notation. Sometimes, this might be unavoidable to
+  succinctly describe protocols, which can otherwise be quite difficult
+  to describe. Often however, we feel this is unnecessary. In this post,
+  we do our best to describe everything using standard notation accepted
+  by the wider mathematics/tcs community, outside of crypto and snarks.
+  Additionally, we will avoid much of the formalism typically introduced
+  in the preliminary sections of the papers cited above. We believe this
   approach simplifies the exposition significantly without compromising
-  rigour or correctness.</p>
+  rigour or correctness. In place, we give concrete dry run throughs of
+  the protocols for small parameter sizes which aid in understanding,
+  and make it easier to find bugs.</p>
   </div>
   </section>
   <section id="background" class="level2">
@@ -98,7 +125,7 @@
   <li>Using the above two schemes to commit to a bivariate polynomial,
   and then how to use that bivariate scheme to commit to a univariate
   polynomial.</li>
-  <li><a href="/publish/hyper-kzg,html">How to commit to multi-linear
+  <li><a href="/publish/hyper-kzg.html">How to commit to multi-linear
   polynomials using univariate commitments</a></li>
   </ol>
   <div class="remark">
@@ -113,81 +140,61 @@
   inner product commitments.</p>
   </div>
   </section>
-  <section
-  id="inner-product-commitments-from-doubly-homomorphic-commitments"
-  class="level2">
-  <h2>Inner Product Commitments From Doubly Homomorphic Commitments</h2>
-  <p>The original paper describes this section generally to handle a
-  variety of inner product maps using an abstract but general protocol.
-  In this post, as our focus is on performance, we will abandon any
-  abstractions, and describe everything concretely.</p>
-  <section id="the-task-at-hand" class="level3 remark">
-  <h3>The Task At Hand</h3>
-  <p>The prover is given witness <span class="math inline">\(\vec{a} =
-  (a_0, \ldots, a_{m-1}) \in \mathbb{G}_1^m\)</span>, and commitment key
-  <span class="math inline">\(\vec{v} = (v_1, \ldots, v_m) \in
-  \mathbb{G}_2^m\)</span>. To commit to <span
-  class="math inline">\(\vec{a}\)</span>, it computes <span
-  class="math inline">\(C_{\vec{a}}=\prod_{i=0}^{m-1} e(a_i, v_i) \in
-  \mathbb{G}_T\)</span>. This commitment scheme is due to
-  <strong>CITE</strong>.</p>
-  <p><strong>What We Want To Verify</strong>: The verifier is given
-  <span class="math inline">\(C_{\vec{a}} \in \mathbb{G}_T\)</span>, a
-  public vector <span class="math inline">\(\vec{b}^m \in
-  \mathbb{F}^m\)</span> and claimed value <span class="math inline">\(u
-  = \prod_{i=0}^{m-1} a_i^{b_i} \in \mathbb{G}_1\)</span>, and they want
-  to verify that the <span class="math inline">\(u\)</span> is indeed as
-  claimed, and <span class="math inline">\(a_0, \dots, a_{m-1}\)</span>
-  is the opening of <span
-  class="math inline">\(C_{\vec{a}}\)</span>.</p>
-  </section>
-  <p>The rest of this section is devoted to understanding how this
-  verification process works, and quantifying the computational
-  complexity of proving the above statement.</p>
-  <section id="the-protocol" class="level3">
-  <h3>The Protocol</h3>
-  <p>The prover has <span class="math inline">\(\vec{a}, \vec{v},
-  \mathtt{pk}\)</span></p>
-  <p>The verifier has <span class="math inline">\(\vec{b} ,
-  \mathtt{vk}\)</span></p>
-  </section>
-  </section>
   <section id="bi-variate-polynomials" class="level2">
   <h2>Bi-variate Polynomials</h2>
   <p>We are given a bi-variate polynomial <span class="math inline">\(f
-  \in \mathbb{F}[X, Y]\)</span> <span class="math display">\[f(X, Y) =
-  \sum_{i=0}^{m-1} f_i(Y)X^{i}\]</span> where for all <span
-  class="math inline">\(i \in \{0, \ldots, m-1\}\)</span>, <span
-  class="math inline">\(f_i \in \mathbb{F}[Y]\)</span> is a univariate
-  polynomial with degree at most <span class="math inline">\(\ell
-  -1\)</span> i.e <span class="math inline">\(f_i(y) = f_{(i, 0)}y^0 +
-  \ldots + f_{(i, \ell-1)}y^{\ell-1}\)</span> where <span
-  class="math inline">\(f_{i,j} \in \mathbb{F}\)</span> for all <span
-  class="math inline">\(j \in \{0, \ldots, \ell-1\}\)</span></p>
-  <section class="level3 remark">
-  <h3>Setup</h3>
-  <p><span class="math inline">\(g\)</span> is a public generator for
-  <span class="math inline">\(\mathbb{G}_1\)</span> and <span
-  class="math inline">\(h\)</span> is a public generator for <span
-  class="math inline">\(\mathbb{G}_2\)</span>, and <span
-  class="math inline">\(\alpha, \beta \in \mathbb{F}\)</span> are the
-  random secret values sampled by trusted setup.</p>
-  <p>The prover receives <span class="math display">\[
-  \mathtt{pk}:=
-  \left\{
-  \begin{aligned}
-  &amp;\vec{w} = [w_j]_{j=0}^{\ell-1} = \left[ g^{\alpha^i}
-  \right]_{i=0}^{\ell - 1}, \\
-  &amp;\vec{v} = [v_i]_{i=0}^{2m-2} = \left[ h^{\beta^{2i}}
-  \right]_{i=0}^{2m - 2}, \\
-  &amp;\hat{h} \gets \mathbb{G}_2
-  \end{aligned}
-  \right\}
-  \]</span></p>
+  \in \mathbb{F}[X, Y]\)</span></p>
+  <p><span class="math display">\[
+  \begin{align}
+  f(X, Y) &amp;= \sum_{i=0}^{m-1} f_i(Y)X^{i} \tag{i}
+  \end{align}
+  \]</span> where for all <span class="math inline">\(i \in \{0, \ldots,
+  m-1\}\)</span>, <span class="math inline">\(f_i \in
+  \mathbb{F}[Y]\)</span> is a univariate polynomial with degree at most
+  <span class="math inline">\(\ell -1\)</span> i.e <span
+  class="math inline">\(f_i(y) = f_{(i, 0)}y^0 + \ldots + f_{(i,
+  \ell-1)}y^{\ell-1}\)</span> where <span class="math inline">\(f_{i,j}
+  \in \mathbb{F}\)</span> for all <span class="math inline">\(j \in \{0,
+  \ldots, \ell-1\}\)</span></p>
   </section>
+  <section id="trusted-setup" class="level2">
+  <h2>Trusted Setup</h2>
+  <p>Let <span class="math inline">\(g \in \mathbb{G}_1\)</span> and
+  <span class="math inline">\(h \in \mathbb{G}_2\)</span> be group
+  generators.</p>
+  <p>Things that the prover is given</p>
+  <ul>
+  <li><p><span class="math inline">\(\vec{w} = [w_j]_{j=0}^{\ell-1} =
+  \left[ g^{\alpha^i} \right]_{i=0}^{\ell - 1} \in
+  \mathbb{G}_1^m\)</span>, where <span class="math inline">\(\alpha
+  \xleftarrow[]{\$}\mathbb{F}\)</span> is toxic waste of the trusted
+  setup.</p></li>
+  <li><p><span class="math inline">\(\vec{u} =
+  \left[u_i\right]^{2m-2}_{i=0} =
+  \left[h^{\beta^{i}}\right]^{2m-2}_{i=0} \in
+  \mathbb{G}_2^{2m-2}\)</span> where <span class="math inline">\(\beta
+  \xleftarrow[]{\$}\mathbb{F}\)</span> is also toxic waste of the
+  trusted setup.</p></li>
+  </ul>
+  <p>Things that the verifier is given: Just the two group elements that
+  will be needed to open KZG proofs using keys in <span
+  class="math inline">\(\mathbb{G}_1\)</span> and <span
+  class="math inline">\(\mathbb{G}_2\)</span></p>
+  <ul>
+  <li><span class="math inline">\(w_1 = g^{\alpha}\)</span></li>
+  <li><span class="math inline">\(u_1 = h^{\beta}\)</span></li>
+  </ul>
   </section>
-  <section id="how-to-commit" class="level2">
+  <section id="commitIPA" class="level2">
   <h2>How To Commit</h2>
+  <section
+  id="prover-rightarrow-verifier-t-in-mathbbg_t-as-the-commitment-to-f"
+  class="level4">
+  <h4><strong>Prover <span class="math inline">\(\rightarrow\)</span>
+  Verifier</strong>: <span class="math inline">\(T \in
+  \mathbb{G}_T\)</span> as the commitment to <span
+  class="math inline">\(f\)</span></h4>
+  <p>To commit to <span class="math inline">\(f\)</span></p>
   <p>For all <span class="math inline">\(i \in \{0, \ldots,
   m-1\}\)</span> we commit to each univariate polynomial <span
   class="math inline">\(f_{i} \in \mathbb{F}[Y]\)</span> using the KZG
@@ -201,21 +208,22 @@
   -1} \Big(g^{\alpha^j}\Big)^{f_{(i,j)}} =
   g^{\sum_{j=0}^{\ell-1}f_{i,j}\alpha^j}
   \end{align}
-  \]</span> <strong>COST</strong>: These requires <span
-  class="math inline">\(\ell\)</span> <span
-  class="math inline">\(\mathbb{G}_1\)</span> exponentiations and <span
-  class="math inline">\(\ell\)</span> <span
-  class="math inline">\(\mathbb{G}_1\)</span> multiplications.</p>
-  <p>Then we compute the inner pairing commitment under <span
+  \]</span> <strong>COST</strong>: The cost of <span
+  class="math inline">\(m\)</span> KZG commitments for polynomials with
+  degree at most <span class="math inline">\(\ell-1\)</span></p>
+  <p>The commitment key for the pairing commitment is <span
+  class="math inline">\(\vec{v}\)</span> which is the vector constructed
+  from the even indices of <span class="math inline">\(\vec{u}\)</span>
+  in the trusted setup i.e. <span class="math inline">\(\vec{v} = \left[
+  u_{2i} \right]_{i=0}^{m-1} = \left[ h^{\beta^{2i}}
+  \right]_{i=0}^{m-1}\)</span>.</p>
+  <p>Then we compute a pairing commitment under <span
   class="math inline">\(\vec{v}\)</span> using the KZG commitments as
   witness. The final commitment <span class="math inline">\(T \in
   \mathbb{G}_T\)</span> <span class="math display">\[T =
   \prod_{i=0}^{m-1} e(A_j, v_j)\]</span> <strong>COST</strong>: <span
   class="math inline">\(m\)</span> pairing operations</p>
-  <p><strong>Prover <span class="math inline">\(\rightarrow\)</span>
-  Verifier</strong>: <span class="math inline">\(T \in
-  \mathbb{G}_T\)</span> as the commitment to <span
-  class="math inline">\(f \in \mathbb{F}[X, Y]\)</span></p>
+  </section>
   </section>
   <section id="how-to-open" class="level2">
   <h2>How To Open</h2>
@@ -223,96 +231,305 @@
   class="math inline">\(f\)</span> at points <span
   class="math inline">\((z_x, z_y) \in \mathbb{F}\times
   \mathbb{F}\)</span>. As a response the prover</p>
-  <ol type="1">
-  <li>Gives a partial evaluation <span class="math inline">\(U = f(z_x,
-  Y) = \prod_{i=0}^{m-1} A_i^{(z_x)^i}\)</span>. Note that <span
-  class="math inline">\(U\)</span> is a KZG commitment to the univariate
-  polynomial <span class="math inline">\(f(z_x, Y) = \sum_{j=0}^{\ell-1}
-  \Big(\sum_{i=0}^{m-1} f_{i, j}(z_x)^i\Big)Y^j\)</span> (see <a
-  href="">here</a> for the derivation)</li>
-  <li>The prover provides a proof <span
+  <section
+  id="prover-rightarrow-verifier-pi-u-pi_1-pi_2-this-is-opening-proof-and-nu-is-the-evaluation"
+  class="level4">
+  <h4><strong>Prover <span class="math inline">\(\rightarrow\)</span>
+  Verifier</strong>: <span class="math inline">\(\pi = (U, \pi_1,
+  \pi_2)\)</span> this is opening proof and <span
+  class="math inline">\(\nu\)</span> is the evaluation</h4>
+  </section>
+  <section id="commit-to-a-partial-evaluation" class="level3">
+  <h3>1. Commit To A Partial Evaluation</h3>
+  <p>Remember <span
+  class="math inline">\(\textcolor{red}{f_{i,j}}\)</span> is the <span
+  class="math inline">\(j\)</span>’th coefficient of univariate
+  polynomial <span class="math inline">\(f_i(y) = f_{(i, 0)}y^0 + \ldots
+  \textcolor{red}{f_{(i, \ell-1)}} + \ldots + f_{(i,
+  \ell-1)}y^{\ell-1}\)</span></p>
+  <p>Define <span class="math display">\[A_i = \prod_{j=0}^{\ell -1}
+  w_j^{f_{i,j}}\]</span> where <span
+  class="math inline">\(\vec{w}\)</span> is as defined in the trusted
+  setup section. We use shorthand notation <span
+  class="math inline">\(\vec{A} = (A_0, \ldots, A_{m-1})\)</span> for
+  the remainder of this post.</p>
+  <p>The prover computes <span class="math inline">\(U =
+  \prod_{i=0}^{m-1} A_i^{(z_x)^i} \in \mathbb{G}_1\)</span>. Observe
+  that <span class="math inline">\(U\)</span> is a KZG commitment to the
+  univariate polynomial <span class="math inline">\(f(z_x, Y) =
+  \sum_{j=0}^{\ell-1} \Big(\sum_{i=0}^{m-1} f_{i,
+  j}(z_x)^i\Big)Y^j\)</span> (see <a href="">here</a> for the
+  derivation), which is a partial opening of the bivariate
+  polynomial.</p>
+  </section>
+  <section id="inner-product-proof" class="level3">
+  <h3>2. Inner Product Proof</h3>
+  <p>Next the prover provides a proof <span
   class="math inline">\(\pi_1\)</span> that <span
   class="math inline">\(U\)</span> is the inner product of the opening
-  of <span class="math inline">\(T\)</span> and the vector <span
-  class="math inline">\(\vec{z}_x = 1, \ldots, (z_x)^{m-1}\)</span></li>
-  <li>The prover provides a KZG proof <span
-  class="math inline">\(\pi_2\)</span> that <span
-  class="math inline">\(\nu\)</span> is the evaluation of <span
-  class="math inline">\(f(z_x, y)\)</span> at <span
-  class="math inline">\(z_y\)</span> and <span
-  class="math inline">\(U\)</span> is the commitment to univariate
-  polynomial <span class="math inline">\(f(z_x, y)\)</span></li>
-  </ol>
-  <p>In summary, the prover sends to the verifier: <span
-  class="math inline">\(U \in \mathbb{G}_1\)</span>, <span
-  class="math inline">\(\nu \in \mathbb{F}\)</span>, proofs <span
-  class="math inline">\(\pi_1\)</span> and <span
-  class="math inline">\(\pi_2\)</span></p>
-  <p>To open the prover must provide two proofs</p>
+  of <span class="math inline">\(T\)</span> under commitment key <span
+  class="math inline">\(\vec{v}\)</span> and the public vector <span
+  class="math inline">\(\vec{z_x} =
+  \left[z_x^{i}\right]_{i=0}^{m-1}\)</span>.</p>
+  <p>Here by inner product we mean <span
+  class="math inline">\(\langle\vec{A}, \vec{z}_x\rangle =
+  \prod_{i=0}^{m-1} A_i^{(z_x)^i}\)</span>, where <span
+  class="math inline">\(\vec{A}\)</span> is the opening of <span
+  class="math inline">\(T\)</span> under commitment key <span
+  class="math inline">\(\vec{v}\)</span>.</p>
+  <p>First we fully describe the remainder of the opening proof. Then we
+  discuss what <span class="math inline">\(\pi_1\)</span> looks like in
+  detail. This is the <strong>contribution</strong> of <span
+  class="citation" data-cites="bmmtv2021">(<a href="#ref-bmmtv2021"
+  role="doc-biblioref">Bünz et al., 2019</a>)</span>. So we will dive
+  deep into this in a subsequent section. Everything else about the
+  opening proof we already know how to do.</p>
+  </section>
+  <section id="the-full-evaluation-proof" class="level3">
+  <h3>3. The Full Evaluation Proof</h3>
+  <p>Given commitment <span class="math inline">\(U\)</span> to <span
+  class="math inline">\(f(z_x, Y)\)</span>, the prover provides a KZG
+  evaluation proof <span class="math inline">\(\pi_2\)</span> that <span
+  class="math inline">\(\nu = f(z_x, z_y)\)</span> and that it knows an
+  opening <span class="math inline">\(f(z_x, Y)\)</span> of the KZG
+  commitment <span class="math inline">\(U\)</span>.</p>
+  <p><strong>Prover COMPLEXITY/ COST</strong>:</p>
+  <p>So that’s all there is to it. + 1 KZG commitment <span
+  class="math inline">\(U\)</span>,</p>
   <ul>
-  <li><span class="math inline">\(\pi_1\)</span> this is a proof that
-  <span class="math inline">\(T\)</span> is an inner product commitment
-  with witness <span class="math inline">\((A_{0}, \ldots,
-  A_{m-1})\)</span> and <span class="math inline">\((v_0, \ldots,
-  v_{m-1})\)</span>.</li>
-  <li><span class="math inline">\(\pi_2\)</span> is a KZG opening proof
-  that <span class="math inline">\(U\)</span> is a polynomial commitment
-  to <span class="math inline">\(\sum_{i=0}^{m-1} f_i(Y)X^{i}\)</span>
-  and <span class="math inline">\(\nu=f(z_x, z_y)\)</span></li>
+  <li><p>1 KZG opening <span class="math inline">\(\pi_2\)</span> for a
+  univariate polynomial with degree <span class="math inline">\(\ell
+  -1\)</span>.</p></li>
+  <li><p>The cost of constructing <span
+  class="math inline">\(\pi_1\)</span> which is described
+  below.</p></li>
   </ul>
   </section>
-  <section id="how-to-verify" class="level2">
-  <h2>How To Verify</h2>
-  <p>To verify</p>
+  </section>
+  <section id="inner-product-proof-1" class="level2">
+  <h2>Inner Product Proof</h2>
+  <p>We say <code>inner product</code> because that’s what the original
+  paper calls it. In this context it is also fine to replace inner
+  product with <code>multi-exponentiation</code> or just simply
+  <code>exponentiation</code> (what’s in a name, and all that).</p>
+  <div class="remark">
+  <p>A quick reminder, the prover is giving a proof <span
+  class="math inline">\(\pi_1\)</span> that <span
+  class="math inline">\(U \in \mathbb{G}_1\)</span> is the inner product
+  of the opening of <span class="math inline">\(T \in
+  \mathbb{G}_T\)</span> under commitment key <span
+  class="math inline">\(\vec{v} \in \mathbb{G}_2^m\)</span> and the
+  public vector <span class="math inline">\(\vec{z_x} =
+  \left[z_x^{i}\right]_{i=0}^{m-1}\)</span>.</p>
+  </div>
+  <p>The provers witness is <span class="math inline">\(\vec{A} = A_0,
+  \ldots, A_{m-1} \in \mathbb{G}_1^m\)</span>.</p>
+  <p>Define <span class="math inline">\(\vec{b} = (b_0, \ldots, b_{m-1})
+  = (z_x^0, \ldots, z_x^{m-1})\in \mathbb{F}^m\)</span>. This is common
+  knowledge to the prover and the verifier, as the verifier picks <span
+  class="math inline">\(z_x \in \mathbb{F}\)</span>.</p>
+  </section>
+  <section id="opening-proof-for-inner-product-argument"
+  class="level2 def">
+  <h2>Opening Proof For Inner Product Argument</h2>
+  <p>Initialise <span class="math inline">\(\vec{A}^{(0)} =
+  \vec{A},\quad \vec{b}^{(0)} = \vec{b},\quad \vec{v}^{(0)} =
+  \vec{v}\)</span> where <span class="math inline">\(\vec{v}\)</span> is
+  the commitment key used for pairing commitments by the prover (see <a
+  href="#commitIPA">How To Commit</a>)</p>
+  <p>If <span class="math inline">\(m=1\)</span> then we simply
+  return</p>
+  <p><span class="math display">\[\pi_1 =
+  \left(\vec{A}^{(0)},\vec{b}^{(0)}\right), \vec{v}^{(0)}, \{
+  \}\]</span></p>
+  <hr />
+  <p><strong>FOR LOOP STARTS</strong></p>
+  <p>For <span class="math inline">\(j \in 1..{\log_2 m}\)</span></p>
+  <ul>
+  <li>The prover computes<a href="#fn1" class="footnote-ref" id="fnref1"
+  role="doc-noteref"><sup>1</sup></a> commitments <span
+  class="math inline">\(C_{L^{(j)}} \in \mathbb{G}_T\times
+  \mathbb{G}_1\)</span> and <span class="math inline">\(C_{R^{(j)}} \in
+  \mathbb{G}_T\times \mathbb{G}_1\)</span> where</li>
+  </ul>
+  <p><span class="math display">\[
+  C_{L^{(j)}} :=
+  \prod_{i=0}^{m/2-1}e\left(A_{\left(\frac{m}{2}+i\right)},
+  v_{i}\right),
+  \quad\prod_{i=0}^{m/2-1}\left(A_{\left(\frac{m}{2}+i\right)}\right)^{b_i}
+  \]</span></p>
+  <p><span class="math display">\[
+  C_{R^{(j)}} := \prod_{i=0}^{m/2-1}e\left(A_{i},
+  v_{\left(\frac{m}{2}+i\right)}\right), \quad
+  \prod_{i=0}^{m/2-1}\left(A_{i}\right)^{b_{\left(\frac{m}{2}+i\right)}}
+  \]</span></p>
+  <ul>
+  <li><p>It <strong>sends</strong> <span
+  class="math inline">\(C_{L^{(j)}}, C_{R^{(j)}}\)</span> to the
+  verifier.</p></li>
+  <li><p>Verifier <strong>sends</strong> the prover a challenge <span
+  class="math inline">\(r_j\xleftarrow[]{\$}\mathbb{F}\)</span>. Then it
+  folds the witness, public vector of exponents and commitment key to
+  half the size using the verifiers challenge <span
+  class="math inline">\(r_j \in \mathbb{F}\)</span></p></li>
+  </ul>
+  <p><span class="math display">\[\vec{A}^{(j)} = \left[A_i^{(j-1)}
+  \left(A^{(j-1)}_{m/2+i}\right)^{r_j}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span>
+  <span class="math display">\[\vec{b}^{(j)} = \left[b^{(j-1)}_i +
+  \left(b^{(j-1)}_{m/2+i}\right){r_j^{-1}}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span></p>
+  <p><span class="math display">\[\vec{v}^{(j)} = \left[v^{(j-1)}_i
+  \left(v^{(j-1)}_{m/2+i}\right)^{r_j^{-1}}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span></p>
+  <p><strong>FOR LOOP ENDS</strong></p>
+  <hr />
+  <p>After the for loop ends we output as the proof <span
+  class="math inline">\(\pi_1\)</span> <span class="math display">\[
+  \pi_1 :=
+  \left\{
+  \begin{aligned}
+  &amp; A^{(\log m)} \in \mathbb{G}_1, b^{(\log m)} \in
+  \mathbb{F}\\[10pt]
+  &amp; v^{(\log m)} \in \mathbb{G}_2\\[10pt]
+  &amp; \left[ C_{R^{(j)}}, C_{L^{(j)}}\right]_{j=1}^{\log m} \in
+  \mathbb{G}_1\\[10pt]
+  &amp;\ \text{KZG evaluation proof for $q$ at challenge $z
+  \xleftarrow[]{\$}\mathbb{F}$}
+  \end{aligned}
+  \right\}
+  \]</span></p>
+  </section>
+  <p>See below for details about <span class="math inline">\(q\)</span>.
+  The cost of this is 1 KZG opening over <span
+  class="math inline">\(\mathbb{G}_2\)</span> – and the degree of the
+  <span class="math inline">\(q\)</span> is at most <span
+  class="math inline">\(2m-2\)</span>, the KZG key for this commitment
+  is <span class="math inline">\(\vec{u}\)</span> as defined in the
+  structured setup.</p>
+  <section id="a-note-about-optimising-communication"
+  class="level3 remark">
+  <h3>A Note About Optimising Communication</h3>
+  <p>In a naive implementation the prover sends as part of the proof the
+  intermediate commitment keys <span
+  class="math inline">\(\vec{v}^{(1)}, \ldots, \vec{v}^{(\ell
+  -1)}\)</span> to the verifier. But notice that in the above
+  description of the proof, we claim that the prover only sends only
+  <span class="math inline">\(\vec{v}^{(\log m)}\)</span> to the
+  verifier.</p>
+  <p>This is done to reduce verification time. To be more specific the
+  verifier once the verifier receives <span
+  class="math inline">\(\vec{v}^{(j)}\)</span> it must use <span
+  class="math inline">\(\vec{v}^{(j-1)}\)</span> and <span
+  class="math inline">\(r_j\)</span> to check if the prover constructed
+  <span class="math inline">\(\vec{v}^{(j)}\)</span> correctly. This
+  causes the verifiers work to be linear in <span
+  class="math inline">\(m\)</span>.</p>
+  <p>With a little bit of algebra it is not too hard to see that <span
+  class="math inline">\(\vec{v}^{(\log m)}\)</span> is actually a KZG
+  commitment to the polynomial <span class="math inline">\(q(x) =
+  \prod_{i=1}^{\log m}(1 + r^{-1}_{(\log m-i+1)}x^{2i})\)</span> as
+  after all <span class="math inline">\(\log m\)</span> folding
+  operations we get</p>
+  <p><span class="math display">\[\vec{v}^{(\log m)} = h^{q(\beta)}=
+  h^{\prod_{i=1}^{\log m}(1 + r^{-1}_{(\log m-i+1)}\beta^{2i})} \in
+  \mathbb{G}_2\]</span></p>
+  <p>Now instead of the prover sending over all the intermediate keys,
+  and asking the verifier to check if <span
+  class="math inline">\(\vec{v}^{(j)}\)</span> was properly constructed
+  from <span class="math inline">\(\vec{v}^{(j-1)}\)</span>, it just
+  sends the final shorted commitment key.</p>
+  <p>To check the prover did the intermediate calculations correctly, it
+  suffices for the prover give a KZG evaluation proof for <span
+  class="math inline">\(q\)</span> evaluated at a random challenge point
+  <span class="math inline">\(z \xleftarrow[]{\$}\mathbb{F}\)</span>, to
+  check if the prover folded correctly.</p>
+  <p><strong>Lookout for this KZG opening in the
+  verification</strong></p>
+  </section>
+  <section id="how-to-verify-an-inner-product-proof" class="level2">
+  <h2>How To Verify An Inner Product Proof</h2>
+  <div class="remark">
+  <p>We have <span class="math inline">\(\vec{b} = (b_0, \ldots,
+  b_{m-1}) = (1, z_x , \ldots z_x^{m-1})\)</span>. Given <span
+  class="math inline">\(T = \prod_{i=0}^{m-1}e(A_i, v_i)\)</span>, the
+  verifier wants to use the proof above <span
+  class="math inline">\(\pi_1\)</span> to verify that opening of <span
+  class="math inline">\(T\)</span> is <span class="math inline">\((A_0,
+  \ldots, A_{m-1}) \in \mathbb{G}_1^m\)</span> such that <span
+  class="math inline">\(U=\prod_{i=0}^{m-1} A_i^{b_i}\)</span></p>
+  <p>The verifier also possesses all the challenges <span
+  class="math inline">\(r_1, \ldots, r_{\log m}\)</span> it had sent the
+  prover during the proof. In practice, we fiat-shamir these to remove
+  interaction.</p>
+  </div>
+  <p>The verifier performs a sequence of checks:</p>
   <ol type="1">
-  <li><p>Check if <span class="math inline">\(U\)</span> is an inner
-  product of the opening of <span class="math inline">\(T\)</span> and
-  the public vector <span class="math inline">\(\vec{z_x} =( 1, \ldots,
-  (z_x)^{m-1}\)</span>. This is done by the following the steps
-  described in <strong>CITE</strong>.</p></li>
-  <li><p>Next open a KZG commitment.</p></li>
+  <li><strong>Check commitment collapsing</strong>: Define <span
+  class="math inline">\(T^{(0)}, U^{(0)} = (T, U)\)</span> where <span
+  class="math inline">\(T\)</span> and <span
+  class="math inline">\(U\)</span> are as defined above.</li>
   </ol>
-  <p>If both are valid accept.</p>
-  </section>
-  <section id="inner-product-openings" class="level2">
-  <h2>Inner Product Openings</h2>
-  <p>The verifier is given</p>
+  <hr />
+  <p><span class="math inline">\({\forall j \in 1, \ldots
+  \ell}\)</span></p>
+  <p><span class="math display">\[T^{(j)} =
+  C_{L^{j}}^{r_j}T^{(j-1)}C_{R^{j}}^{r_j^{-1}}\]</span> <span
+  class="math display">\[U^{(j)} = C_{L^{j}_1}^{r_j}\cdot U^{(j-1)}\cdot
+  C_{R^{j}_1}^{r_j^{-1}}\]</span></p>
+  <hr />
+  <ol start="2" type="1">
+  <li><strong>Compute the foldings of</strong> <span
+  class="math inline">\(\vec{b}\)</span>: If the prover folds all the
+  <span class="math inline">\(b_i\)</span>’s correctly, then the final
+  check boils down to <span class="math display">\[b&#39;
+  =  \prod_{i=1}^{\log m}(1 + r_i {b}^{j})
+  \textcolor{red}{\overset{?}{=}}b^{(\log m)} \]</span></li>
+  </ol>
+  <p>3 . <strong>Check folding for commitment keys</strong></p>
   <ul>
-  <li><span class="math inline">\(\mathtt{vk}\)</span></li>
-  <li><span class="math inline">\(U \in \mathbb{G}_1\)</span></li>
-  <li><span class="math inline">\(T \in \mathbb{G}_T\)</span></li>
-  <li>A vector <span class="math inline">\(\vec{b}=(b_0, \ldots,
-  b_{m-1}) \in \mathbb{F}^{m}\)</span></li>
+  <li>To check that all commitment keys <span
+  class="math inline">\(\vec{v}^{(1)}, \ldots, \vec{v}^{(\ell
+  -1)}\)</span> were folded correctly, given <span
+  class="math inline">\(\vec{v}^{(\ell)}\)</span> the prover asks for a
+  KZG opening proof to evaluate <span class="math inline">\(q\)</span>
+  at <span class="math inline">\(z \xleftarrow[]{\$}\mathbb{F}\)</span>,
+  where <span class="math inline">\(q(x) = \prod_{i=1}^{\log m}(1 +
+  r^{-1}_{(\log m-i+1)}x^{2i})\)</span></li>
   </ul>
-  <p>told that <span class="math inline">\(U =
-  \prod_{i=0}^{m-1}A_i^{b_i}\)</span> and <span class="math inline">\(T
-  = \prod_{i=0}^{m-1}e(A_i, v_i)\)</span> where <span
-  class="math inline">\(v_i\)</span> is as defined in the setup.</p>
-  <p>where <span class="math inline">\(\vec{A} = (A_0, \ldots, A_{m-1})
-  \in \mathbb{G}_1^m\)</span> is the witness known by the prover.</p>
+  <ol start="4" type="1">
+  <li><strong>Finally check</strong> <span
+  class="math display">\[T^{(j)} \quad
+  \textcolor{red}{\overset{?}{=}}\quad e(\pi_1.A^{(\log m)},
+  \pi_1.v^{\log m})\]</span></li>
+  </ol>
+  <p>and</p>
+  <p><span class="math display">\[U^{(j)} \quad
+  \textcolor{red}{\overset{?}{=}}\quad \left(\pi_1.A^{(\log
+  m)}\right)^{b^{&#39;
+  }}\]</span></p>
   </section>
-  <section id="gipa" class="level2">
-  <h2>GIPA</h2>
-  <section id="common-information" class="level3">
-  <h3>Common Information</h3>
-  <ul>
-  <li>Description of <span class="math inline">\(\mathbb{G}_1\)</span>,
-  <span class="math inline">\(\mathbb{G}_2\)</span>, <span
-  class="math inline">\(\mathbb{G}_T\)</span>, generators <span
-  class="math inline">\(g \in \mathbb{G}_1\)</span>, <span
-  class="math inline">\(h \in \mathbb{G}_2\)</span>.</li>
-  <li><span class="math inline">\(\hat{h}
-  \xleftarrow[]{\$}\mathbb{G}_2\)</span></li>
-  </ul>
-  </section>
-  <section id="what-the-prover-knows" class="level3">
-  <h3>What the prover knows:</h3>
-  <ul>
-  <li><span class="math inline">\(\vec{A} = A_0, \ldots, A_{m-1} \in
-  \mathbb{G}_1^m\)</span></li>
-  <li></li>
-  </ul>
-  </section>
+  <section id="worked-out-example" class="level2">
+  <h2>Worked Out Example</h2>
+  <p><strong>TODO this weekend</strong></p>
+  <p>For ease of understanding we give two concrete examples of the
+  left/right commitments and foldings inside the for loop</p>
+  <div class="remark">
+  <p>As an example, when <span class="math inline">\(m=4\)</span>. we
+  have</p>
+  <p><span class="math display">\[C_{L^{(1)}} = e\left(A_2^{(0)},
+  v_0\right) e\left(A_3^{(0)}, v_0\right), \quad
+  \left(A_2^{(0)}\right)^{b_0}\left(A_3^{(0)}\right)^{b_1}\]</span>
+  <span class="math display">\[C_{R^{(1)}} = e\left(A_0^{(0)},
+  v_2\right) e\left(A_3^{(0)}, v_3\right), \quad
+  \left(A_2^{(0)}\right)^{b_2}\left(A_3^{(0)}\right)^{b_3}\]</span></p>
+  <p><span class="math display">\[\vec{A}^{(1)} =
+  \left[A_0^{(0)}\left(A_2^{(0)}\right)^{r_1},
+  A_1^{(0)}\left(A_3^{(0)}\right)^{r_1} \right]\]</span></p>
+  <p><span class="math display">\[\vec{b}^{(1)} =
+  \left[b_0^{(0)}+{r_1^{-1}}b_2^{(0)}, b_1^{(0)}+{r_1^{-1}}b_3^{(0)}
+  \right]\]</span></p>
+  <p><span class="math display">\[\vec{v}^{(1)} =
+  \left[v_0^{(0)}\left(v_2^{(0)}\right)^{r_1^{-1}}, v_1^{(0)}\left(v_
+  3^{(0)}\right)^{r_1^{-1}} \right]\]</span></p>
+  </div>
   </section>
   <section id="references" class="level2 unnumbered">
   <h2 class="unnumbered">References</h2>
@@ -329,6 +546,26 @@
   Folding-based arguments with efficient (on-chain) verification</a>.
   </div>
   </div>
+  </section>
+  <section class="footnotes footnotes-end-of-document"
+  role="doc-endnotes">
+  <hr />
+  <ol>
+  <li id="fn1" role="doc-endnote"><p>You can read this as a compressed
+  version of <span class="math inline">\(T\)</span> and <span
+  class="math inline">\(U\)</span> using only half the witness and
+  public vector. That is, we split <span class="math inline">\(\vec{A},
+  \vec{v}, \vec{b}\)</span> down the middle into left and right halves.
+  For the first commitment, denoted with <span
+  class="math inline">\(L\)</span> we use the right half of <span
+  class="math inline">\(\vec{A}\)</span> but the left halves of <span
+  class="math inline">\(\vec{b}\)</span> and <span
+  class="math inline">\(\vec{v}\)</span>. For the second commitment we
+  use the left half of <span class="math inline">\(\vec{A}\)</span> and
+  the right halves of <span class="math inline">\(\vec{v}\)</span> and
+  <span class="math inline">\(\vec{b}\)</span>.<a href="#fnref1"
+  class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+  </ol>
   </section>
   </div>
   </main>
