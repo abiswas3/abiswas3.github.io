@@ -111,9 +111,9 @@
   <li><a href="/publish/kzg.html">The KZG commitment scheme</a>: You can
   ignore the section on batching, as that’s not critical for
   understanding inner product arguments.</li>
-  <li>Using the above two schemes to commit to a bivariate polynomial,
-  and then how to use that bivariate scheme to commit to a univariate
-  polynomial.</li>
+  <li>Using the above the KZG commitment scheme, and an inner product
+  commitment scheme which we introduce in this post, we show how to
+  commit to a bivariate polynomial.</li>
   <li><a href="#univariate">How to commit to a univariate polynomial
   using bi-variate commitment</a></li>
   <li>Now that we have a univariate commitment scheme, we can <a
@@ -122,9 +122,8 @@
   </ol>
   <div class="remark">
   <p>As the goal is to understand performance, we ignore
-  soundness/knowledge soundness proofs, and take proofs cited in the
-  above papers as gospel. We do re-prove completeness most of the
-  time</p>
+  soundness/knowledge soundness proofs, and treat claims in the cited
+  papers as gospel.</p>
   <p><strong>Research Question</strong>: Instead of this malarkey of
   going from bi-variate polynomial to a univariate polynomial, and then
   using that univariate polynomial commitment scheme as a blackbox, is
