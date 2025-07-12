@@ -100,9 +100,7 @@
   Additionally, we will avoid much of the formalism typically introduced
   in the preliminary sections of the papers cited above. We believe this
   approach simplifies the exposition significantly without compromising
-  rigour or correctness. In place, we give concrete dry run throughs of
-  the protocols for small parameter sizes which aid in understanding,
-  and make it easier to find bugs.</p>
+  rigour or correctness.</p>
   </div>
   </section>
   <section id="background" class="level2">
@@ -113,20 +111,14 @@
   <li><a href="/publish/kzg.html">The KZG commitment scheme</a>: You can
   ignore the section on batching, as that’s not critical for
   understanding inner product arguments.</li>
-  <li><a href="">MIPP-k</a>: We dive into the details in this post.
-  Given commitments <span class="math inline">\(T \in
-  \mathbb{G}_T\)</span> and <span class="math inline">\(U \in
-  \mathbb{G}_1\)</span>, a public vector <span
-  class="math inline">\(\vec{b} \in \mathbb{F}^m\)</span>, the goal is
-  to prove that the <span class="math inline">\(U = \prod_{i=0}^{m-1}
-  A_i^{b_i}\)</span> where <span class="math inline">\((A_0, \ldots
-  A_{m-1})\)</span> is the message committed to by <span
-  class="math inline">\(T\)</span>.</li>
   <li>Using the above two schemes to commit to a bivariate polynomial,
   and then how to use that bivariate scheme to commit to a univariate
   polynomial.</li>
-  <li><a href="/publish/hyper-kzg.html">How to commit to multi-linear
-  polynomials using univariate commitments</a></li>
+  <li><a href="#univariate">How to commit to a univariate polynomial
+  using bi-variate commitment</a></li>
+  <li>Now that we have a univariate commitment scheme, we can <a
+  href="/publish/hyper-kzg.html">commit to multi-linear polynomials
+  using univariate commitments</a></li>
   </ol>
   <div class="remark">
   <p>As the goal is to understand performance, we ignore
@@ -293,17 +285,15 @@
   class="math inline">\(\nu = f(z_x, z_y)\)</span> and that it knows an
   opening <span class="math inline">\(f(z_x, Y)\)</span> of the KZG
   commitment <span class="math inline">\(U\)</span>.</p>
-  <p><strong>Prover COMPLEXITY/ COST</strong>:</p>
-  <p>So that’s all there is to it. + 1 KZG commitment <span
-  class="math inline">\(U\)</span>,</p>
-  <ul>
-  <li><p>1 KZG opening <span class="math inline">\(\pi_2\)</span> for a
-  univariate polynomial with degree <span class="math inline">\(\ell
-  -1\)</span>.</p></li>
-  <li><p>The cost of constructing <span
-  class="math inline">\(\pi_1\)</span> which is described
-  below.</p></li>
-  </ul>
+  <div class="remark">
+  <p>We know how to compute KZG commitments, and open KZG commitments,
+  and understand well the costs of those two. We do not go over them in
+  this post. For the remainder, we focus on the prover cost of
+  generating <span class="math inline">\(\pi_1\)</span>.</p>
+  </div>
+  <p>To pass verification both <span
+  class="math inline">\(\pi_1\)</span> and <span
+  class="math inline">\(\pi_2\)</span> must pass the verifier tests.</p>
   </section>
   </section>
   <section id="inner-product-proof-1" class="level2">
@@ -467,14 +457,14 @@
   class="math inline">\(T\)</span> and <span
   class="math inline">\(U\)</span> are as defined above.</li>
   </ol>
-  <hr />
-  <p><span class="math inline">\({\forall j \in 1, \ldots
-  \ell}\)</span></p>
-  <p><span class="math display">\[T^{(j)} =
-  C_{L^{j}}^{r_j}T^{(j-1)}C_{R^{j}}^{r_j^{-1}}\]</span> <span
-  class="math display">\[U^{(j)} = C_{L^{j}_1}^{r_j}\cdot U^{(j-1)}\cdot
-  C_{R^{j}_1}^{r_j^{-1}}\]</span></p>
-  <hr />
+  <p><span class="math display">\[
+  \begin{align}
+  \forall j \in 1, \ldots \ell \qquad &amp; T^{(j)} =
+  C_{L^{j}}^{r_j}T^{(j-1)}C_{R^{j}}^{r_j^{-1}} \\[10pt]
+  &amp; U^{(j)} = C_{L^{j}_1}^{r_j}\cdot U^{(j-1)}\cdot
+  C_{R^{j}_1}^{r_j^{-1}}
+  \end{align}
+  \]</span></p>
   <ol start="2" type="1">
   <li><strong>Compute the foldings of</strong> <span
   class="math inline">\(\vec{b}\)</span>: If the prover folds all the
@@ -506,30 +496,50 @@
   m)}\right)^{b^{&#39;
   }}\]</span></p>
   </section>
-  <section id="worked-out-example" class="level2">
-  <h2>Worked Out Example</h2>
-  <p><strong>TODO this weekend</strong></p>
-  <p>For ease of understanding we give two concrete examples of the
-  left/right commitments and foldings inside the for loop</p>
-  <div class="remark">
-  <p>As an example, when <span class="math inline">\(m=4\)</span>. we
-  have</p>
-  <p><span class="math display">\[C_{L^{(1)}} = e\left(A_2^{(0)},
-  v_0\right) e\left(A_3^{(0)}, v_0\right), \quad
-  \left(A_2^{(0)}\right)^{b_0}\left(A_3^{(0)}\right)^{b_1}\]</span>
-  <span class="math display">\[C_{R^{(1)}} = e\left(A_0^{(0)},
-  v_2\right) e\left(A_3^{(0)}, v_3\right), \quad
-  \left(A_2^{(0)}\right)^{b_2}\left(A_3^{(0)}\right)^{b_3}\]</span></p>
-  <p><span class="math display">\[\vec{A}^{(1)} =
-  \left[A_0^{(0)}\left(A_2^{(0)}\right)^{r_1},
-  A_1^{(0)}\left(A_3^{(0)}\right)^{r_1} \right]\]</span></p>
-  <p><span class="math display">\[\vec{b}^{(1)} =
-  \left[b_0^{(0)}+{r_1^{-1}}b_2^{(0)}, b_1^{(0)}+{r_1^{-1}}b_3^{(0)}
-  \right]\]</span></p>
-  <p><span class="math display">\[\vec{v}^{(1)} =
-  \left[v_0^{(0)}\left(v_2^{(0)}\right)^{r_1^{-1}}, v_1^{(0)}\left(v_
-  3^{(0)}\right)^{r_1^{-1}} \right]\]</span></p>
-  </div>
+  <section id="univariate" class="level2">
+  <h2>How To Commit To A Univariate Polynomial</h2>
+  <p>Now we are given <span class="math inline">\(f \in
+  \mathbb{F}[X]\)</span> with degree <span
+  class="math inline">\(d\)</span>. We select <span
+  class="math inline">\(\ell, m\)</span> of roughly equal size such that
+  <span class="math inline">\(\ell m =d\)</span>.</p>
+  <p>Just make sure <span class="math inline">\(m\)</span> is a power of
+  2.</p>
+  <p>Let <span class="math inline">\(f(X) = f_0 + f_1X + \ldots +
+  f_{d}x^d\)</span>. Now we chunk the coefficients of <span
+  class="math inline">\(f\)</span> into a <span
+  class="math inline">\(m\)</span> sets of size <span
+  class="math inline">\(\ell\)</span>, that is</p>
+  <p><span class="math inline">\(f_i(Y) = \sum_{j=0}^{\ell -1} f_{ij +
+  j}Y^j\)</span>, and <span class="math inline">\(p(X,Y) =
+  \sum_{i=0}^{m} f_i(Y)X^{i}\)</span>.</p>
+  <p>This implies that <span class="math inline">\(p(X^\ell, X) =
+  f(X)\)</span>.</p>
+  <p>See worked out example below</p>
+  <section id="example" class="level3 remark">
+  <h3>Example</h3>
+  <p>Let <span class="math inline">\(f(X) = f_0 + \ldots +
+  f_7x^7\)</span>. Let <span class="math inline">\(m=4\)</span> and
+  <span class="math inline">\(\ell = 2\)</span></p>
+  <p><span class="math display">\[
+  \begin{align}
+  f_0(Y) &amp;= f_0 + f_1Y \\[10pt]
+  f_1(Y) &amp;= f_2 + f_3Y \\[10pt]
+  f_2(Y) &amp;= f_4 + f_5Y \\[10pt]
+  f_3(Y) &amp;= f_6 + f_7Y \\[10pt]
+  \end{align}
+  \]</span></p>
+  <p>Let <span class="math display">\[p(X, Y) = \sum_{i=0}^m
+  f_i(Y)X^i\]</span></p>
+  <p>Easy to see that <span class="math inline">\(p(X^2, X) =
+  f(X)\)</span></p>
+  </section>
+  <p>To commit to <span class="math inline">\(f\)</span> we commit to
+  bivariate polynomial <span class="math inline">\(p\)</span>. To
+  evaluate <span class="math inline">\(f\)</span> at <span
+  class="math inline">\(z\)</span> we evaluate <span
+  class="math inline">\(p\)</span> at <span
+  class="math inline">\((z^\ell, z)\)</span>.</p>
   </section>
   <section id="references" class="level2 unnumbered">
   <h2 class="unnumbered">References</h2>
