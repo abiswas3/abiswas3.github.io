@@ -16,6 +16,7 @@
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
   <script src="/static/es5/tex-svg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
@@ -64,19 +65,20 @@
   take <span class="math inline">\(2\lceil \log_2 R -1 \rceil\)</span>
   additions, and then the final result requires <span
   class="math inline">\(n-1\)</span> further addition operations.</p>
-  <div class="remark"><h3></h3><h4 id="example">Example</h4>
-  <p><span class="math inline"><em>r</em> = 2<sup>6</sup> = 64</span> and
-  <span class="math inline"><em>n</em> = 1</span>, say we want to compute
-  <span class="math inline">52<em>P</em></span>. As</p>
-  <p><span
-  class="math display">52 = 0 ⋅ 2<sup>0</sup> + 0 ⋅ 2<sup>1</sup> + 1 ⋅ 2<sup>2</sup> + 0 ⋅ 2<sup>3</sup> + 1 ⋅ 2<sup>4</sup> + 1 ⋅ 2<sup>5</sup></span></p>
+  <section id="example" class="level4 remark">
+  <h4>Example</h4>
+  <p><span class="math inline">\(r = 2^6 = 64\)</span> and <span
+  class="math inline">\(n=1\)</span>, say we want to compute <span
+  class="math inline">\(52P\)</span>. As</p>
+  <p><span class="math display">\[ 52 = 0 \cdot 2^0 + 0 \cdot 2^1 + 1
+  \cdot 2^2 + 0 \cdot 2^3 + 1 \cdot 2^4 + 1 \cdot 2^5
+  \]</span></p>
   <table>
   <thead>
   <tr>
   <th>Bit position (i)</th>
   <th>Bit value</th>
-  <th><span
-  class="math display">2<sup><em>i</em></sup> ⋅ <em>P</em></span></th>
+  <th><span class="math display">\[2^i \cdot P\]</span></th>
   <th>Add to result?</th>
   </tr>
   </thead>
@@ -84,45 +86,46 @@
   <tr>
   <td>0</td>
   <td>0</td>
-  <td><span class="math display">1 ⋅ <em>P</em></span></td>
+  <td><span class="math display">\[1 \cdot P\]</span></td>
   <td>No</td>
   </tr>
   <tr>
   <td>1</td>
   <td>0</td>
-  <td><span class="math display">2 ⋅ <em>P</em></span></td>
+  <td><span class="math display">\[2 \cdot P\]</span></td>
   <td>No</td>
   </tr>
   <tr>
   <td>2</td>
   <td>1</td>
-  <td><span class="math display">4 ⋅ <em>P</em></span></td>
+  <td><span class="math display">\[4 \cdot P\]</span></td>
   <td>✅ Yes</td>
   </tr>
   <tr>
   <td>3</td>
   <td>0</td>
-  <td><span class="math display">8 ⋅ <em>P</em></span></td>
+  <td><span class="math display">\[8 \cdot P\]</span></td>
   <td>No</td>
   </tr>
   <tr>
   <td>4</td>
   <td>1</td>
-  <td><span class="math display">16 ⋅ <em>P</em></span></td>
+  <td><span class="math display">\[16 \cdot P\]</span></td>
   <td>✅ Yes</td>
   </tr>
   <tr>
   <td>5</td>
   <td>1</td>
-  <td><span class="math display">32 ⋅ <em>P</em></span></td>
+  <td><span class="math display">\[32 \cdot P\]</span></td>
   <td>✅ Yes</td>
   </tr>
   </tbody>
   </table>
   <p>This takes 5 doubling operations to get to <span
-  class="math inline">32<em>P</em></span>. In the process we also
-  calculate <span class="math inline">16<em>P</em></span> and <span
-  class="math inline">4<em>P</em></span>. And finally 3 additions</p></div>
+  class="math inline">\(32P\)</span>. In the process we also calculate
+  <span class="math inline">\(16P\)</span> and <span
+  class="math inline">\(4P\)</span>. And finally 3 additions</p>
+  </section>
   <ul>
   <li><a href="https://hackmd.io/@drouyang/msm">Learnings From
   Z-Prize</a>: Written by some guy with a Phd In Operating systems.</li>
@@ -137,8 +140,9 @@
   class="level2">
   <h2>In Jolt They Completely Implement MSM From Scratch</h2>
   <ul class="task-list">
-  <li><label><input type="checkbox" />how Does arkmsm + jolt + ark5.0
-  msm’s differ #in-progress [due:: 2025-06-13]</label></li>
+  <li><label><input type="checkbox" checked="" />how Does arkmsm + jolt
+  + ark5.0 msm’s differ #in-progress [due:: 2025-06-13] [completion::
+  2025-07-03]</label></li>
   </ul>
   </section>
   <section id="footnotes" class="footnotes footnotes-end-of-document"
@@ -330,5 +334,7 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
+<!-- <script src="/static/mathjax-config.js"></script> -->
+
 </body>
 </html>

@@ -16,6 +16,7 @@
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
   <script src="/static/es5/tex-svg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
@@ -47,139 +48,142 @@
   released on December 14, 2024.</p>
   <section id="simulation" class="level1">
   <h1>Simulation</h1>
-  <pre class="language-python3"><code>import copy
-from collections import Counter
-import random
+  <div class="code-container">
+    <pre class="line-numbers language-python3"><code id="codeblock-1" class="language-python3">import copy
+  from collections import Counter
+  import random
 
-import pandas as pd
-import numpy as np
-from utils import get_neighbors, pretty_print_matrix
+  import pandas as pd
+  import numpy as np
+  from utils import get_neighbors, pretty_print_matrix
 
-import pprint as pp
-from pprint import pprint
-from termcolor import colored
+  import pprint as pp
+  from pprint import pprint
+  from termcolor import colored
 
-HEIGHT= 3
-WIDTH = 3
-A = np.arange(HEIGHT*WIDTH).reshape(HEIGHT, WIDTH)
-player_names = [x for x in range(HEIGHT*WIDTH)]
-players = {}
-idx = 0
-for i in range(A.shape[0]):
-    for j in range(A.shape[1]):
-        players[player_names[idx]] = [(i,j)]
-        A[i,j] = player_names[idx]
-        idx +=1
-A_copy = copy.deepcopy(A)
+  HEIGHT= 3
+  WIDTH = 3
+  A = np.arange(HEIGHT*WIDTH).reshape(HEIGHT, WIDTH)
+  player_names = [x for x in range(HEIGHT*WIDTH)]
+  players = {}
+  idx = 0
+  for i in range(A.shape[0]):
+      for j in range(A.shape[1]):
+          players[player_names[idx]] = [(i,j)]
+          A[i,j] = player_names[idx]
+          idx +=1
+  A_copy = copy.deepcopy(A)
 
-def get_secondary_cands(A, primary_locs):
+  def get_secondary_cands(A, primary_locs):
 
-    candidates = {}
-    for (x,y) in primary_locs:
-        # These are the neighbours of A that have other people
-        nbrs = [ A[i,j] for (i,j) in get_neighbors(HEIGHT,
-                                                   WIDTH,
-                                                   x,
-                                                   y)
-                 if A[i,j] != A[x,y]]
+      candidates = {}
+      for (x,y) in primary_locs:
+          # These are the neighbours of A that have other people
+          nbrs = [ A[i,j] for (i,j) in get_neighbors(HEIGHT,
+                                                     WIDTH,
+                                                     x,
+                                                     y)
+                   if A[i,j] != A[x,y]]
 
-        for name in nbrs:
-            candidates[name] = None
-
-
-    return candidates
-
-def pick_primary(players):
-
-    res = key, val = random.choice(list(players.items()))
-    return key, val
-
-def single_round(r, A, players):
-
-    primary_name, primary_locs = pick_primary(players)
-    second_cands = get_secondary_cands(A, primary_locs)
-    secondary_name, _ = random.choice(list(second_cands.items()))
-
-    game = [primary_name, secondary_name]
-    loser_idx = 1 if np.random.random() &lt;= 1/2 else 0
-    winner_idx = 1 - loser_idx
-    winner = game[winner_idx]
-    loser = game[loser_idx]
-
-    loser_locs = players.pop(loser)
-    players[winner] +=  loser_locs
-    for (i,j) in loser_locs:
-        A[i,j] = winner
-
-    # print(&quot;Round: {}, Match {} vs {} | Winner - {}&quot;.format(r+1,
-    #                                                        primary_name,
-    #                                                        secondary_name,
-    #                                                        winner))
-    # print(A)
-    # print(&#39;-&#39;*80)
-    # print()
+          for name in nbrs:
+              candidates[name] = None
 
 
-def game(A, players, rounds=HEIGHT*WIDTH-1):
+      return candidates
 
-    for r in range(rounds):
-        single_round(r, A, players)
+  def pick_primary(players):
 
-    return A, players
+      res = key, val = random.choice(list(players.items()))
+      return key, val
 
+  def single_round(r, A, players):
 
-def highlight(data):
-    # Find the maximum value
-    max_value = max(data.values())
+      primary_name, primary_locs = pick_primary(players)
+      second_cands = get_secondary_cands(A, primary_locs)
+      secondary_name, _ = random.choice(list(second_cands.items()))
 
-    # Print dictionary with highlights
-    print(&quot;{&quot;)
-    for key, value in data.items():
-        if value == max_value:
-            print(f&quot;  &#39;{key}&#39;: {colored(value, &#39;red&#39;, attrs=[&#39;bold&#39;])},&quot;)
-        else:
-            print(f&quot;  &#39;{key}&#39;: {value},&quot;)
-    print(&quot;}&quot;)
+      game = [primary_name, secondary_name]
+      loser_idx = 1 if np.random.random() &lt;= 1/2 else 0
+      winner_idx = 1 - loser_idx
+      winner = game[winner_idx]
+      loser = game[loser_idx]
 
-# -----------------------------------
-# A full game
-# -----------------------------------
+      loser_locs = players.pop(loser)
+      players[winner] +=  loser_locs
+      for (i,j) in loser_locs:
+          A[i,j] = winner
 
-win_dist = []
-num_games = 300000
-for _ in range(num_games):
-    board, rem_players = game(copy.deepcopy(A), copy.deepcopy(players))
-    win_dist.append(board[0,0])
-pretty_print_matrix(A)
-print(&quot;Prob they don&#39;t win&quot;)
-ranking = pd.Series({x: v/num_games for x,v in Counter(win_dist).items()})
-print(1- ranking.sort_values())
-# -----------------------------------
+      # print(&quot;Round: {}, Match {} vs {} | Winner - {}&quot;.format(r+1,
+      #                                                        primary_name,
+      #                                                        secondary_name,
+      #                                                        winner))
+      # print(A)
+      # print(&#39;-&#39;*80)
+      # print()
 
 
-# -----------------------------------
-# R  rounds
-# -----------------------------------
-pretty_print_matrix(A)
-win_dist = {x: 0 for x in player_names}
-num_games = 300000
-# rounds_to_survive = HEIGHT*WIDTH-1 # R
-rounds_to_survive = 1 # R 
-for _ in range(num_games):
-    board, rem_players = game(copy.deepcopy(A),
-                              copy.deepcopy(players),
-                              rounds=rounds_to_survive)
-    # pretty_print_matrix(board)
-    # print()
-    for x in rem_players:
-        win_dist[x] += 1
-        
-print(&quot;Empirical distribution of players that survive round {}&quot;.format(
-    rounds_to_survive))
-ranking = pd.Series(win_dist)/num_games
-print(ranking.sort_values())
+  def game(A, players, rounds=HEIGHT*WIDTH-1):
+
+      for r in range(rounds):
+          single_round(r, A, players)
+
+      return A, players
+
+
+  def highlight(data):
+      # Find the maximum value
+      max_value = max(data.values())
+
+      # Print dictionary with highlights
+      print(&quot;{&quot;)
+      for key, value in data.items():
+          if value == max_value:
+              print(f&quot;  &#39;{key}&#39;: {colored(value, &#39;red&#39;, attrs=[&#39;bold&#39;])},&quot;)
+          else:
+              print(f&quot;  &#39;{key}&#39;: {value},&quot;)
+      print(&quot;}&quot;)
+
+  # -----------------------------------
+  # A full game
+  # -----------------------------------
+
+  win_dist = []
+  num_games = 300000
+  for _ in range(num_games):
+      board, rem_players = game(copy.deepcopy(A), copy.deepcopy(players))
+      win_dist.append(board[0,0])
+  pretty_print_matrix(A)
+  print(&quot;Prob they don&#39;t win&quot;)
+  ranking = pd.Series({x: v/num_games for x,v in Counter(win_dist).items()})
+  print(1- ranking.sort_values())
+  # -----------------------------------
+
+
+  # -----------------------------------
+  # R  rounds
+  # -----------------------------------
+  pretty_print_matrix(A)
+  win_dist = {x: 0 for x in player_names}
+  num_games = 300000
+  # rounds_to_survive = HEIGHT*WIDTH-1 # R
+  rounds_to_survive = 1 # R 
+  for _ in range(num_games):
+      board, rem_players = game(copy.deepcopy(A),
+                                copy.deepcopy(players),
+                                rounds=rounds_to_survive)
+      # pretty_print_matrix(board)
+      # print()
+      for x in rem_players:
+          win_dist[x] += 1
+          
+  print(&quot;Empirical distribution of players that survive round {}&quot;.format(
+      rounds_to_survive))
+  ranking = pd.Series(win_dist)/num_games
+  print(ranking.sort_values())
+      </code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-1" title="Copy code">📋</button>
+  </div>
     
-</code></pre>
   </section>
   </div>
   </main>
@@ -360,5 +364,7 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
+<!-- <script src="/static/mathjax-config.js"></script> -->
+
 </body>
 </html>
