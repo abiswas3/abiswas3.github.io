@@ -471,23 +471,19 @@
   <span class="math inline">\(b_i\)</span>’s correctly, then the final
   check boils down to <span class="math display">\[b&#39;
   =  \prod_{i=1}^{\log m}(1 + r_i {b}^{j})\]</span></p></li>
-  <li><p><strong>Check folding for commitment keys</strong></p></li>
-  </ol>
-  <ul>
-  <li>To check that all commitment keys <span
+  <li><p><strong>Check folding for commitment keys</strong></p>
+  <p>To check that all commitment keys <span
   class="math inline">\(\vec{v}^{(1)}, \ldots, \vec{v}^{(\log m
   -1)}\)</span> were folded correctly, given <span
   class="math inline">\(\vec{v}^{(\log m)}\)</span> the prover asks for
   a KZG opening proof to evaluate <span class="math inline">\(q\)</span>
   at <span class="math inline">\(z \xleftarrow[]{\$}\mathbb{F}\)</span>,
   where <span class="math inline">\(q(x) = \prod_{i=1}^{\log m}(1 +
-  r^{-1}_{(\log m-i+1)}x^{2i})\)</span></li>
-  </ul>
-  <ol start="2" type="1">
-  <li><strong>Finally check</strong> <span
+  r^{-1}_{(\log m-i+1)}x^{2i})\)</span></p></li>
+  <li><p><strong>Finally check</strong> <span
   class="math display">\[T^{(j)} \quad
   \textcolor{red}{\overset{?}{=}}\quad e(\pi_1.A^{(\log m)},
-  \pi_1.v^{\log m})\]</span></li>
+  \pi_1.v^{\log m})\]</span></p></li>
   </ol>
   <p>and</p>
   <p><span class="math display">\[U^{(j)} \quad
