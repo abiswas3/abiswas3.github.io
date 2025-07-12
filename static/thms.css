@@ -65,7 +65,6 @@ body.light-mode {
     padding: 16px 20px;
     margin: 20px 0;
     border-radius: 6px;
-    font-family: 'Chalkboard SE', sans-serif;
 }
 
 .thm{
@@ -125,8 +124,6 @@ body.light-mode {
   padding: 1px 30px;
   margin: 0.2rem 0;
   border-radius: 6px;
-/*  font-family: 'Chalkboard SE', sans-serif;*/
-  font-size: 1.05rem;
 }
 
 .remark strong{
@@ -261,3 +258,21 @@ body.light-mode {
   background-color: #fffb91; /* light yellow highlight */
   transition: background-color 0.5s ease;
 }
+/* Style all MathJax inline math inside .remark or remark-slide-content */
+.remark mjx-container[display="inline"],
+.remark-slide-content mjx-container[display="inline"] {
+  font-family: inherit !important;
+  font-size: 1rem !important;
+  line-height: inherit !important;
+  color: inherit !important;
+  vertical-align: baseline !important;
+}
+/* Make inline math inherit the surrounding font */
+.mjx-math {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-style: inherit !important;
+  font-weight: inherit !important;
+  color: inherit !important;
+}
+
