@@ -104,7 +104,7 @@
   <section id="curves-and-pairings" class="level3 remark">
   <h3>Curves And Pairings</h3>
   <p>Let <span
-  class="math inline">\(\textcolor{orange}{\mathtt{q}}\)</span> be some
+  class="math inline">\(\textcolor{blue}{\mathtt{q}}\)</span> be some
   prime. We highlight this in orange and write in a different font to
   distinguish it from <span class="math inline">\(q(X)\)</span> which is
   used to denote a univariate polynomial later.</p>
@@ -112,20 +112,21 @@
   assume the pairing <span class="math inline">\(e: \mathbb{G}_1\times
   \mathbb{G}_2\rightarrow \mathbb{G}_T\)</span> is constructed from some
   elliptic curve <span
-  class="math inline">\(E/\mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span>.</p>
+  class="math inline">\(E/\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.</p>
   <ul>
   <li><span class="math inline">\(\mathbb{G}_1\)</span> is an order
-  <span class="math inline">\(\textcolor{orange}{\mathtt{q}}\)</span>
+  <span class="math inline">\(\textcolor{blue}{\mathtt{q}}\)</span>
   subgroup of <span
-  class="math inline">\(E(\mathbb{F}_{\textcolor{orange}{\mathtt{q}}})\)</span>.</li>
+  class="math inline">\(E(\mathbb{F}_{\textcolor{blue}{\mathtt{q}}})\)</span>.</li>
   <li><span class="math inline">\(\mathbb{G}_1\)</span> is an order
-  <span class="math inline">\(\textcolor{orange}{\mathtt{q}}\)</span>
+  <span class="math inline">\(\textcolor{blue}{\mathtt{q}}\)</span>
   subgroup of <span
-  class="math inline">\(E(\mathbb{F}_{\textcolor{orange}{\mathtt{q}}^d})\)</span>
+  class="math inline">\(E(\mathbb{F}_{\textcolor{blue}{\mathtt{q}}^d})\)</span>
   for some <span class="math inline">\(d &gt; 1\)</span>.</li>
-  <li><span class="math inline">\(\mathbb{G}_T\)</span> is an order q
+  <li><span class="math inline">\(\mathbb{G}_T\)</span> is an order
+  <span class="math inline">\(\textcolor{blue}{\mathtt{q}}\)</span>
   multiplicative subgroup of the finite field <span
-  class="math inline">\(\mathbb{F}_{\textcolor{orange}{\mathtt{q}}^d}\)</span></li>
+  class="math inline">\(\mathbb{F}_{\textcolor{blue}{\mathtt{q}}^d}\)</span></li>
   </ul>
   </section>
   </section>
@@ -156,19 +157,19 @@
   <section id="bi-variate-polynomials" class="level2">
   <h2>Bi-variate Polynomials</h2>
   <p>We are given a bi-variate polynomial <span class="math inline">\(f
-  \in \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}[X, Y]\)</span></p>
+  \in \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[X, Y]\)</span></p>
   <p><span class="math display">\[
   \begin{align}
   f(X, Y) &amp;= \sum_{i=0}^{m-1} f_i(Y)X^{i} \tag{i}
   \end{align}
   \]</span> where for all <span class="math inline">\(i \in \{0, \ldots,
   m-1\}\)</span>, <span class="math inline">\(f_i \in
-  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}[Y]\)</span> is a
-  univariate polynomial with degree at most <span
-  class="math inline">\(\ell -1\)</span> i.e <span
-  class="math inline">\(f_i(y) = f_{(i, 0)}y^0 + \ldots + f_{(i,
-  \ell-1)}y^{\ell-1}\)</span> where <span class="math inline">\(f_{i,j}
-  \in \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span> for all <span
+  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[Y]\)</span> is a univariate
+  polynomial with degree at most <span class="math inline">\(\ell
+  -1\)</span> i.e <span class="math inline">\(f_i(y) = f_{(i, 0)}y^0 +
+  \ldots + f_{(i, \ell-1)}y^{\ell-1}\)</span> where <span
+  class="math inline">\(f_{i,j} \in
+  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span> for all <span
   class="math inline">\(j \in \{0, \ldots, \ell-1\}\)</span></p>
   </section>
   <section id="trusted-setup" class="level2">
@@ -181,14 +182,14 @@
   <li><p><span class="math inline">\(\vec{w} = [w_j]_{j=0}^{\ell-1} =
   \left[ g^{\alpha^i} \right]_{i=0}^{\ell - 1} \in
   \mathbb{G}_1^m\)</span>, where <span class="math inline">\(\alpha
-  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span>
-  is toxic waste of the trusted setup.</p></li>
+  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span> is
+  toxic waste of the trusted setup.</p></li>
   <li><p><span class="math inline">\(\vec{u} =
   \left[u_i\right]^{2m-2}_{i=0} =
   \left[h^{\beta^{i}}\right]^{2m-2}_{i=0} \in
   \mathbb{G}_2^{2m-2}\)</span> where <span class="math inline">\(\beta
-  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span>
-  is also toxic waste of the trusted setup.</p></li>
+  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span> is
+  also toxic waste of the trusted setup.</p></li>
   </ul>
   <p>Things that the verifier is given: Just the two group elements that
   will be needed to open KZG proofs using keys in <span
@@ -212,7 +213,7 @@
   <p>For all <span class="math inline">\(i \in \{0, \ldots,
   m-1\}\)</span> we commit to each univariate polynomial <span
   class="math inline">\(f_{i} \in
-  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}[Y]\)</span> using the KZG
+  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[Y]\)</span> using the KZG
   commitment scheme with commitment key <span
   class="math inline">\(\vec{w} \in \mathbb{G}_1^m\)</span>. Let <span
   class="math inline">\(A_i \in \mathbb{G}_1\)</span> denote this
@@ -223,9 +224,7 @@
   -1} \Big(g^{\alpha^j}\Big)^{f_{(i,j)}} =
   g^{\sum_{j=0}^{\ell-1}f_{i,j}\alpha^j}
   \end{align}
-  \]</span> <strong>COST</strong>: The cost of <span
-  class="math inline">\(m\)</span> KZG commitments for polynomials with
-  degree at most <span class="math inline">\(\ell-1\)</span></p>
+  \]</span></p>
   <p>The commitment key for the pairing commitment is <span
   class="math inline">\(\vec{v}\)</span> which is the vector constructed
   from the even indices of <span class="math inline">\(\vec{u}\)</span>
@@ -245,9 +244,9 @@
   <p>The verifier asks the prover to open <span
   class="math inline">\(f\)</span> at points <span
   class="math inline">\((z_x, z_y) \in
-  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\times
-  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span>. As a response
-  the prover</p>
+  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\times
+  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>. As a response the
+  prover</p>
   <section
   id="prover-rightarrow-verifier-pi-u-pi_1-pi_2-this-is-opening-proof-and-nu-is-the-evaluation"
   class="level4">
@@ -269,7 +268,7 @@
   class="math inline">\(\vec{w}\)</span> is as defined in the trusted
   setup section, which were KZG commitments to the univariate
   polynomials <span class="math inline">\(f_i \in
-  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}[Y]\)</span>.</p>
+  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[Y]\)</span>.</p>
   <p>The prover computes <span class="math inline">\(U =
   \prod_{i=0}^{m-1} A_i^{(z_x)^i} \in \mathbb{G}_1\)</span>. Observe
   that <span class="math inline">\(U\)</span> is a KZG commitment to the
@@ -338,10 +337,10 @@
   \ldots, A_{m-1} \in \mathbb{G}_1^m\)</span>.</p>
   <p>Define <span class="math inline">\(\vec{b} = (b_0, \ldots, b_{m-1})
   = (z_x^0, \ldots, z_x^{m-1})\in
-  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}^m\)</span>. This is common
+  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}^m\)</span>. This is common
   knowledge to the prover and the verifier, as the verifier picks <span
   class="math inline">\(z_x \in
-  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span>.</p>
+  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.</p>
   </section>
   <section id="opening-proof-for-inner-product-argument"
   class="level2 def">
@@ -382,11 +381,11 @@
   class="math inline">\(C_{L^{(j)}}, C_{R^{(j)}}\)</span> to the
   verifier.</p></li>
   <li><p>Verifier <strong>sends</strong> the prover a challenge <span
-  class="math inline">\(r_j\xleftarrow[]{\$}\mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span>.
+  class="math inline">\(r_j\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.
   Then it folds the witness, public vector of exponents and commitment
   key to half the size using the verifiers challenge <span
   class="math inline">\(r_j \in
-  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span></p></li>
+  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span></p></li>
   </ul>
   <p><span class="math display">\[\vec{A}^{(j)} = \left[A_i^{(j-1)}
   \left(A^{(j-1)}_{m/2+i}\right)^{r_j}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span>
@@ -406,7 +405,7 @@
   &amp; \left[ C_{R^{(j)}}, C_{L^{(j)}}\right]_{j=1}^{\log m} \in
   \mathbb{G}_T^{2\log m} \\[10pt]
   &amp;\ \text{KZG evaluation proof for $q$ at challenge $z
-  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{orange}{\mathtt{q}}}$} \in
+  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}$} \in
   \mathbb{G}_2
   \end{aligned}
   \right\}
@@ -454,7 +453,7 @@
   suffices for the prover give a KZG evaluation proof for <span
   class="math inline">\(q\)</span> evaluated at a random challenge point
   <span class="math inline">\(z
-  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span>,
+  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>,
   to check if the prover folded correctly.</p>
   <p><strong>Lookout for this KZG opening in the
   verification</strong></p>
@@ -506,7 +505,7 @@
   class="math inline">\(\vec{v}^{(\log m)}\)</span> the prover asks for
   a KZG opening proof to evaluate <span class="math inline">\(q\)</span>
   at <span class="math inline">\(z
-  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span>,
+  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>,
   where <span class="math inline">\(q(x) = \prod_{i=1}^{\log m}(1 +
   r^{-1}_{(\log m-i+1)}x^{2i})\)</span></p></li>
   <li><p><strong>Finally check</strong> <span
@@ -525,7 +524,7 @@
   <section id="univariate" class="level2">
   <h2>How To Commit To A Univariate Polynomial</h2>
   <p>Now we are given <span class="math inline">\(f \in
-  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}[X]\)</span> with degree
+  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[X]\)</span> with degree
   <span class="math inline">\(d\)</span>. We select <span
   class="math inline">\(\ell, m\)</span> of roughly equal size such that
   <span class="math inline">\(\ell m =d\)</span>.</p>
@@ -566,6 +565,129 @@
   class="math inline">\(z\)</span> we evaluate <span
   class="math inline">\(p\)</span> at <span
   class="math inline">\((z^\ell, z)\)</span>.</p>
+  </section>
+  <section id="multi-commit" class="level2">
+  <h2>Full Accounting For Prover Costs For Multi-variate Polynomial</h2>
+  <p>To fully understand this accounting please make sure you’ve read
+  this <a href="/publish/hyper-kzg.html">article</a>.</p>
+  <p>We want to commit to a <span class="math inline">\(\log d\)</span>
+  variable multi-linear polynomial <span
+  class="math inline">\(f\)</span>. To commit we compute the univariate
+  encoding of <span class="math inline">\(f\)</span> and we pick <span
+  class="math inline">\(m\)</span> which is a power of 2 and <span
+  class="math inline">\(\ell \in \mathbb{N}\)</span> such that <span
+  class="math inline">\(\ell m = d\)</span>. Then we represent <span
+  class="math inline">\(f\)</span> with the bivariate polynomial <span
+  class="math inline">\(p\)</span> as described above. Typically <span
+  class="math inline">\(\ell, m \in O\left(\sqrt{d}\right)\)</span>.</p>
+  <section id="cost-of-committing-to-p" class="level3 remark">
+  <h3>Cost Of Committing to <span class="math inline">\(p\)</span></h3>
+  <p>To commit to <span class="math inline">\(p\)</span> where <span
+  class="math inline">\(X\)</span> variables have degree at most <span
+  class="math inline">\(m \in O\left(\sqrt{d}\right)\)</span> and <span
+  class="math inline">\(Y\)</span> variables have degree at most <span
+  class="math inline">\(\ell \in O\left(\sqrt{d}\right)\)</span>.</p>
+  <ul>
+  <li><p><span class="math inline">\(m\)</span> KZG commitments for
+  polynomials with degree at most <span
+  class="math inline">\(\ell-1\)</span> to get <span
+  class="math inline">\(A_0, \ldots, A_{m-1}\)</span>. This is <span
+  class="math inline">\(m\)</span> <strong><em>MSMs</em></strong> with
+  where each MSM uses at most <span class="math inline">\(\ell\)</span>
+  <span class="math inline">\(\mathbb{G}_1\)</span> elements.</p></li>
+  <li><p><span class="math inline">\(m\)</span> Pairing operations +
+  <span class="math inline">\(m\)</span> <span
+  class="math inline">\(\mathbb{G}_T\)</span> multiplications</p></li>
+  </ul>
+  </section>
+  <p>Next we discuss the cost of opening a polynomial</p>
+  <p>The cost of opening <span class="math inline">\(f\)</span> at <span
+  class="math inline">\((z_1, \ldots, z_{\log d})\)</span> leads to the
+  prover constructing <span class="math inline">\(\log d\)</span>
+  univariate polynomials <span class="math inline">\(p^{(1)}, \ldots,
+  p^{(\log d)}\)</span> with number of coefficients <span
+  class="math inline">\(d/2, d/4, \ldots, 1\)</span> and committing to
+  these polynomials <span
+  class="math inline">\(\{C_{p^{(i)}}\}_{i=1}^{\log d}\)</span></p>
+  <div class="remark">
+  <p>To commit to each univariate polynomial, set <span
+  class="math inline">\(m_i\ell_i = d/2^{i}\)</span>,</p>
+  <p>This is <span class="math inline">\(m_i\)</span>
+  <strong><em>MSMs</em></strong> each with <span
+  class="math inline">\(\ell_i\)</span> <span
+  class="math inline">\(\mathbb{G}_1\)</span> elements.</p>
+  <p>Then <span class="math inline">\(m_i\)</span> pairing operations
+  followed by <span class="math inline">\(m_i\)</span> <span
+  class="math inline">\(\mathbb{G}_T\)</span> multiplications as
+  described above.</p>
+  </div>
+  <p>Next the prover will have open the above <span
+  class="math inline">\(p^{(1)}, \ldots, p^{(\log d)}\)</span> at <span
+  class="math inline">\(r\)</span> and <span
+  class="math inline">\(-r\)</span> and open <span
+  class="math inline">\(p^{(0)}, \ldots, p^{(\log d -1)}\)</span> at
+  <span class="math inline">\(r^2\)</span>.</p>
+  <p>As the above commitment scheme is <strong>also</strong>
+  homomorphic, the prover constructs a single polynomial <span
+  class="math inline">\(B\)</span> using the verifiers challenge <span
+  class="math inline">\(z_r
+  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.</p>
+  <p><span class="math display">\[B(X) = p^{(0)}(X) + z_r p^{(1)}(X) +
+  z_r^2 p^{(2)}(X) + \ldots + (z_r)^{\log d} p^{(\log
+  d)}(X)\]</span></p>
+  <p>This is not an issue for the verifier as it can construct a
+  commitment for <span class="math inline">\(B\)</span> from <span
+  class="math inline">\(\{C_{p^{(i)}}\}_{i=0}^{\log d}\)</span> (using
+  homomorphism)</p>
+  <p><span class="math inline">\(B\)</span> has <span
+  class="math inline">\(d\)</span> coefficients, and setting <span
+  class="math inline">\(m\ell = d\)</span> we once again get <span
+  class="math inline">\(m, \ell \in O\left(\sqrt{d}\right)\)</span></p>
+  <p>So we have to open at 3 locations – where the cost of evaluating
+  one is given by</p>
+  <section
+  id="cost-of-opening-the-evaluation-of-1-bivariate-polynomial-at-one-location"
+  class="level3 remark">
+  <h3>Cost Of Opening The Evaluation Of 1 Bivariate Polynomial At One
+  Location</h3>
+  <ul>
+  <li><p>1 KZG commitment which is 1 <strong><em>MSM</em></strong> with
+  <span class="math inline">\(m\)</span> <span
+  class="math inline">\(\mathbb{G}_1\)</span> elements to get <span
+  class="math inline">\(U\)</span>.</p></li>
+  <li><p>1 KZG opening for commitment <span
+  class="math inline">\(U\)</span>. This <strong><em>MSM</em></strong>
+  uses <span class="math inline">\(m-1\)</span> <span
+  class="math inline">\(\mathbb{G}_1\)</span> elements and the cost of
+  finding the quotient polynomial <span
+  class="math inline">\(\frac{f(z_x, Y) - f(z_x, z_y)}{Y -
+  z_y}\)</span></p></li>
+  <li><p>1 KZG opening for a <span class="math inline">\(v^{(\log
+  m)}\)</span> is commitment to the quotient polynomial <span
+  class="math inline">\(\frac{q(X) - q(z)}{X - z}\)</span>. This
+  includes the cost of computing the quotient polynomial using Horners
+  rule, and one <strong><em>MSM</em></strong> using at most <span
+  class="math inline">\(2m-1\)</span> <span
+  class="math inline">\(\mathbb{G}_2\)</span> elements to commit to the
+  quotient.</p></li>
+  <li><p><span class="math inline">\(A^{(\log m)}\)</span> requires
+  <span class="math inline">\(m\)</span> <span
+  class="math inline">\(\mathbb{G}_1\)</span> multiplications and
+  exponentiations.</p></li>
+  <li><p><span class="math inline">\(b^{(\log m)}\)</span> requires
+  <span class="math inline">\(m\)</span> <span
+  class="math inline">\(\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>
+  multiplications and additions.</p></li>
+  <li><p><span class="math inline">\(v^{(\log m)}\)</span> requires
+  <span class="math inline">\(m\)</span> <span
+  class="math inline">\(\mathbb{G}_2\)</span> multiplications and
+  exponentiations.</p></li>
+  <li><p>The commitments take <span class="math inline">\(2m\)</span>
+  pairing operations and <span class="math inline">\(2m\)</span> <span
+  class="math inline">\(\mathbb{G}_T\)</span> multiplications.<br />
+  </p></li>
+  </ul>
+  </section>
   </section>
   <section id="references" class="level2 unnumbered">
   <h2 class="unnumbered">References</h2>
