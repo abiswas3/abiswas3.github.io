@@ -48,20 +48,20 @@
   <col style="width: 6%" />
   </colgroup>
   <tbody>
-  <tr>
+  <tr class="odd">
   <td>How to get all flies in a directory with the word
   <code>slides</code> in them</td>
   </tr>
-  <tr>
+  <tr class="even">
   <td><code>zsh find . -type f -name '*slides*'</code> Find all files
   (<code>-f</code>) starting from current directory (<code>.</code>),
   and then look for the name <code>slides</code> and wildcards before or
   after i,e 0 or more characters.</td>
   </tr>
-  <tr>
+  <tr class="odd">
   <td>Now move them to a folder called <code>lecture_notes/</code></td>
   </tr>
-  <tr>
+  <tr class="even">
   <td><code>! -path './lecture_notes/*'</code> excludes any files inside
   <code>lecture_notes</code> from the results. As <code>find</code> is
   recursuve, itll try to copy unto itself.</td>

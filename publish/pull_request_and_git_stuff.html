@@ -178,19 +178,19 @@
   <col style="width: 30%" />
   </colgroup>
   <thead>
-  <tr>
+  <tr class="header">
   <th>Command</th>
   <th>What it does</th>
   <th>Safe on shared branches?</th>
   </tr>
   </thead>
   <tbody>
-  <tr>
+  <tr class="odd">
   <td><code>git revert</code></td>
   <td>Makes a new commit that undoes another one</td>
   <td>✅ Yes</td>
   </tr>
-  <tr>
+  <tr class="even">
   <td><code>git reset</code></td>
   <td>Moves HEAD and changes history</td>
   <td>⚠️ No (on shared branches)</td>
@@ -272,13 +272,13 @@
   love <code>cherry-pick</code> because there is very little magic
   involved and it’s easy to understand.</p>
   <p>Let’s see a demo!</p>
-  <p>![[Screenshot 2025-06-27 at 00.42.57.png]]</p>
+  <p>[[Screenshot 2025-06-27 at 00.42.57.png]]</p>
   <div class="code-container">
     <pre class="line-numbers language-bash"><code id="codeblock-4" class="language-bash">git cherry-pick C2 C4</code></pre>
     <button class="copy-btn" data-clipboard-target="#codeblock-4" title="Copy code">📋</button>
   </div>
     
-  <p>![[Screenshot 2025-06-27 at 00.42.24.png]]</p>
+  <p>[[Screenshot 2025-06-27 at 00.42.24.png]]</p>
   </section>
   <section id="git-interactive-rebase" class="level3">
   <h3>Git Interactive Rebase</h3>
@@ -351,17 +351,17 @@
   <col style="width: 84%" />
   </colgroup>
   <thead>
-  <tr>
+  <tr class="header">
   <th>Command</th>
   <th>Description</th>
   </tr>
   </thead>
   <tbody>
-  <tr>
+  <tr class="odd">
   <td><code>git commit</code></td>
   <td>Create a new commit with the currently staged changes</td>
   </tr>
-  <tr>
+  <tr class="even">
   <td><code>git commit --amend</code></td>
   <td>Replace the last commit with a new commit including staged changes
   and optionally update the commit message</td>
