@@ -22,7 +22,7 @@
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
-  <title>Multi Scalar Operations</title>      
+  <title>Your title here</title>      
   </head>
 
   <body class="light-mode">  
@@ -42,118 +42,151 @@
 
   <main class="content">
   <div class="blog">
-   <h1>Multi Scalar Operations</h1> 
-  <section id="problem-statement" class="level2">
-  <h2>Problem Statement</h2>
-  <p>Given a set of <span class="math inline">\(n\)</span>-limbed
-  scalars <span class="math inline">\(\{a^{(i)}\}_{i=1}^s\)</span> where
-  each limb uses <span class="math inline">\(w\)</span> bits, and
-  elliptic curve points over finite field <span
-  class="math inline">\(F_p\)</span>, <span
-  class="math inline">\(\{P_i\}_{i=1}^s\)</span>, the goal is to compute
-  <span class="math display">\[ P = \sum_{i=1}^{s} a^{(i)} P_i\]</span>
-  as fast as possible on a computer. Throughout this post, we use
-  notation <span class="math inline">\(r=2^w\)</span> and <span
-  class="math inline">\(R=r^n\)</span>.</p>
-  </section>
-  <section id="the-dumb-way" class="level2">
-  <h2>The Dumb Way</h2>
-  <p>Calculate each <span class="math inline">\(a^{(i)}P_i\)</span>
-  using doubling and addition, then add them all together to get the
-  final result. In the worst case, the double and add<a href="#fn1"
-  class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>
-  take <span class="math inline">\(2\lceil \log_2 R -1 \rceil\)</span>
-  additions, and then the final result requires <span
-  class="math inline">\(n-1\)</span> further addition operations.</p>
-  <section id="example" class="level4 remark">
-  <h4>Example</h4>
-  <p><span class="math inline">\(r = 2^6 = 64\)</span> and <span
-  class="math inline">\(n=1\)</span>, say we want to compute <span
-  class="math inline">\(52P\)</span>. As</p>
-  <p><span class="math display">\[ 52 = 0 \cdot 2^0 + 0 \cdot 2^1 + 1
-  \cdot 2^2 + 0 \cdot 2^3 + 1 \cdot 2^4 + 1 \cdot 2^5
-  \]</span></p>
-  <table>
-  <thead>
-  <tr>
-  <th>Bit position (i)</th>
-  <th>Bit value</th>
-  <th><span class="math display">\[2^i \cdot P\]</span></th>
-  <th>Add to result?</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-  <td>0</td>
-  <td>0</td>
-  <td><span class="math display">\[1 \cdot P\]</span></td>
-  <td>No</td>
-  </tr>
-  <tr>
-  <td>1</td>
-  <td>0</td>
-  <td><span class="math display">\[2 \cdot P\]</span></td>
-  <td>No</td>
-  </tr>
-  <tr>
-  <td>2</td>
-  <td>1</td>
-  <td><span class="math display">\[4 \cdot P\]</span></td>
-  <td>✅ Yes</td>
-  </tr>
-  <tr>
-  <td>3</td>
-  <td>0</td>
-  <td><span class="math display">\[8 \cdot P\]</span></td>
-  <td>No</td>
-  </tr>
-  <tr>
-  <td>4</td>
-  <td>1</td>
-  <td><span class="math display">\[16 \cdot P\]</span></td>
-  <td>✅ Yes</td>
-  </tr>
-  <tr>
-  <td>5</td>
-  <td>1</td>
-  <td><span class="math display">\[32 \cdot P\]</span></td>
-  <td>✅ Yes</td>
-  </tr>
-  </tbody>
-  </table>
-  <p>This takes 5 doubling operations to get to <span
-  class="math inline">\(32P\)</span>. In the process we also calculate
-  <span class="math inline">\(16P\)</span> and <span
-  class="math inline">\(4P\)</span>. And finally 3 additions</p>
-  </section>
-  <ul>
-  <li><a href="https://hackmd.io/@drouyang/msm">Learnings From
-  Z-Prize</a>: Written by some guy with a Phd In Operating systems.</li>
-  <li><a
-  href="https://dspacemainprd01.lib.uwaterloo.ca/server/api/core/bitstreams/3b15ca4c-9125-4e45-9378-c5474eec6a07/content">Why
-  is the Pippenger Algorithm Useful</a>: See Section 2.2 on Page 28 of
-  Pdf.</li>
-  <li></li>
-  </ul>
-  </section>
-  <section id="in-jolt-they-completely-implement-msm-from-scratch"
-  class="level2">
-  <h2>In Jolt They Completely Implement MSM From Scratch</h2>
+   <h1>Your title here</h1> 
+  <section id="rust-traits" class="level2">
+  <h2>Rust Traits</h2>
+  <p>I think of traits as literal ly what the dictionary meaning of
+  trait is. For example, a person with the overeating trait, eats a lot.
+  In rust language, this person is some struct, who implements the trait
+  overeating. To fulfil the implementation, it must satisfy the social
+  contract of the trait overeating i.e. that is it must implement the
+  method <code>eat_a_lot</code>.</p>
   <ul class="task-list">
-  <li><label><input type="checkbox" checked="" />how Does arkmsm + jolt
-  + ark5.0 msm’s differ #in-progress [due:: 2025-06-13] [completion::
-  2025-07-03]</label></li>
+  <li><label><input type="checkbox" />Rust toolkit #in-progress</label>
+  <ul class="task-list">
+  <li><label><input type="checkbox" />Understand the functional
+  programming aspect of Rust with Some</label></li>
+  <li><label><input type="checkbox" />Really understand lifetimes,
+  traits and generics</label></li>
+  <li><label><input type="checkbox" />Understand procedural
+  macros</label></li>
+  </ul></li>
   </ul>
+  <div class="code-container">
+    <pre class="line-numbers language-rust"><code id="codeblock-1" class="language-rust">pub struct UnivariateKZG&lt;P: Pairing, G: Group&lt;P&gt; = G1&gt; {
+      _phantom: PhantomData&lt;(P, G)&gt;,
+  }</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-1" title="Copy code">📋</button>
+  </div>
+    
+  <p>Here I have a struct/object called <code>UnivariateKZG</code> which
+  takes aas input two generic types <code>P</code> which implements a
+  <code>Pairing</code> trait. <code>G</code> which implements the Group
+  trait, which takes a generic that implements Pairing. If
+  <code>G</code> is not specified when instantiating the struct – it
+  defaults to G1</p>
   </section>
-  <section id="footnotes" class="footnotes footnotes-end-of-document"
-  role="doc-endnotes">
-  <hr />
-  <ol>
-  <li id="fn1"><p>If the group was represented using multiplicative
-  notation, we would refer to this algorithm as squaring and multiply.
-  ## Basic Resources<a href="#fnref1" class="footnote-back"
-  role="doc-backlink">↩︎</a></p></li>
-  </ol>
+  <section id="why-use-empty-enums" class="level2">
+  <h2>Why Use Empty Enums ?</h2>
+  <p>You’re building a <strong>generic cryptographic algorithm</strong>,
+  like KZG commitments, that can work over: - the <strong>G1</strong>
+  group of a pairing (e.g. BLS12-381),<br />
+  - or the <strong>G2</strong> group.</p>
+  <p>These are different elliptic curves internally — <code>P::G1</code>
+  and <code>P::G2</code>. You don’t want to write the same code
+  twice:</p>
+  <div class="code-container">
+    <pre class="line-numbers language-rust"><code id="codeblock-2" class="language-rust">fn kzg_in_g1(p: P::G1) { ... }
+  fn kzg_in_g2(p: P::G2) { ... }</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-2" title="Copy code">📋</button>
+  </div>
+    
+  <p>You want to write one function</p>
+  <div class="code-container">
+    <pre class="line-numbers language-rust"><code id="codeblock-3" class="language-rust">fn kzg&lt;G: Group&lt;P&gt;&gt;() {
+      let x: G::Curve = ...; // Either P::G1 or P::G2
+  }</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-3" title="Copy code">📋</button>
+  </div>
+    
+  <p>But how do you let the <em>caller</em> choose <strong>at compile
+  time</strong> whether to use G1 or G2?</p>
+  <p>You do it with a trait</p>
+  <div class="code-container">
+    <pre class="line-numbers language-rust"><code id="codeblock-4" class="language-rust">trait Group&lt;P: Pairing&gt; {
+      type Curve;
+  }</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-4" title="Copy code">📋</button>
+  </div>
+    
+  <p>and <code>marker-types</code></p>
+  <div class="code-container">
+    <pre class="line-numbers language-rust"><code id="codeblock-5" class="language-rust">enum G1 {} // can&#39;t be constructed
+  enum G2 {}
+
+  impl&lt;P: Pairing&gt; Group&lt;P&gt; for G1 {
+      type Curve = P::G1;
+  }
+
+  impl&lt;P: Pairing&gt; Group&lt;P&gt; for G2 {
+      type Curve = P::G2;
+  }</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-5" title="Copy code">📋</button>
+  </div>
+    
+  <p>So I’ll never actually physically make <code>G1</code> with</p>
+  <div class="code-container">
+    <pre class="line-numbers language-rust"><code id="codeblock-6" class="language-rust">let x = G1{} // x this will not work</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-6" title="Copy code">📋</button>
+  </div>
+    
+  <p>What I am doing is I am creating a type for <code>P::G1</code> and
+  <code>P::G2</code> where <code>P</code> is a pairing So now the
+  <code>G1</code> and <code>G2</code> are groups, so they have a curve
+  property, and I can access <code>P::G1</code> or or<code>P::G2</code>
+  by just referring to <code>G1</code> or <code>G2</code>.</p>
+  <div class="code-container">
+    <pre class="line-numbers language-rust"><code id="codeblock-7" class="language-rust">fn kzg&lt;G: Group&lt;P&gt;, P: Pairing&gt;() {
+      let point: G::Curve = ...; // Resolved as P::G1 or P::G2
+  }
+
+  // The caller calls kzg using this notation
+  // where Bls12_381 is a struct that implements Pairing trait
+  kzg::&lt;G1, Bls12_381&gt;(); // G::Curve = Bls12_381::G1</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-7" title="Copy code">📋</button>
+  </div>
+    
+  <p>Here is a full working example in
+  <code>learning_rust/examples/empty_enums.rs</code></p>
+  <div class="code-container">
+    <pre class="line-numbers language-rust"><code id="codeblock-8" class="language-rust">use std::marker::PhantomData;
+
+  // Define some fake curve types
+  struct Curve1;
+  struct Curve2;
+
+  // Trait to represent a &quot;group&quot; selector for some curve type
+  trait Group {
+      type Curve;
+  }
+
+  // Define two zero-sized, uninhabited marker types
+  pub enum G1 {} // Uninhabited
+  pub enum G2 {} // Also uninhabited
+
+  // Implement Group for the marker types
+  impl Group for G1 {
+      type Curve = Curve1;
+  }
+
+  impl Group for G2 {
+      type Curve = Curve2;
+  }
+
+  // Generic function that uses the associated type from the Group trait
+  fn do_something&lt;G: Group&gt;() {
+      // Pretend we &quot;use&quot; the associated type, just printing type names
+      println!(&quot;Using curve: {}&quot;, std::any::type_name::&lt;G::Curve&gt;());
+  }
+
+  fn main() {
+      // We NEVER construct G1 or G2 — we just use them as type arguments
+      do_something::&lt;G1&gt;(); // prints: Using curve: Curve1
+      do_something::&lt;G2&gt;(); // prints: Using curve: Curve2
+  }</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-8" title="Copy code">📋</button>
+  </div>
+    
   </section>
   </div>
   </main>

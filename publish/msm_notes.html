@@ -22,7 +22,7 @@
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
-  <title>Multi Scalar Operations</title>      
+  <title>MSM Notes</title>      
   </head>
 
   <body class="light-mode">  
@@ -42,34 +42,42 @@
 
   <main class="content">
   <div class="blog">
-   <h1>Multi Scalar Operations</h1> 
-  <section id="problem-statement" class="level2">
-  <h2>Problem Statement</h2>
+   <h1>MSM Notes</h1> 
+  <hr />
+  <section id="problem-setting-msm" class="level2">
+  <h2>🧮 Problem Setting: MSM</h2>
   <p>Given a set of <span class="math inline">\(n\)</span>-limbed
-  scalars <span class="math inline">\(\{a^{(i)}\}_{i=1}^s\)</span> where
-  each limb uses <span class="math inline">\(w\)</span> bits, and
+  scalars <span class="math inline">\(\{a_{i}\}_{i=1}^n\)</span> and
   elliptic curve points over finite field <span
   class="math inline">\(F_p\)</span>, <span
-  class="math inline">\(\{P_i\}_{i=1}^s\)</span>, the goal is to compute
-  <span class="math display">\[ P = \sum_{i=1}^{s} a^{(i)} P_i\]</span>
-  as fast as possible on a computer. Throughout this post, we use
-  notation <span class="math inline">\(r=2^w\)</span> and <span
-  class="math inline">\(R=r^n\)</span>.</p>
+  class="math inline">\(\{P_i\}_{i=1}^n\)</span>, the goal is to compute
+  <span class="math display">\[ P = \sum_{i=1}^{n} a_{i} P_i\]</span> as
+  fast as possible on a computer.</p>
+  <hr />
   </section>
-  <section id="the-dumb-way" class="level2">
-  <h2>The Dumb Way</h2>
-  <p>Calculate each <span class="math inline">\(a^{(i)}P_i\)</span>
-  using doubling and addition, then add them all together to get the
-  final result. In the worst case, the double and add<a href="#fn1"
+  <section id="naive-double-and-add-per-point-scalar-multiplication"
+  class="level2">
+  <h2>🚶 Naive Double-and-Add (Per-Point Scalar Multiplication)</h2>
+  <p>For each <span class="math inline">\(i\)</span>:</p>
+  <ul>
+  <li>Calculate each <span class="math inline">\(a_{i}P_i\)</span> using
+  doubling and addition, then add them all together to get the final
+  result. In the worst case, each double and add<a href="#fn1"
   class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>
-  take <span class="math inline">\(2\lceil \log_2 R -1 \rceil\)</span>
-  additions, and then the final result requires <span
-  class="math inline">\(n-1\)</span> further addition operations.</p>
-  <section id="example" class="level4 remark">
-  <h4>Example</h4>
-  <p><span class="math inline">\(r = 2^6 = 64\)</span> and <span
-  class="math inline">\(n=1\)</span>, say we want to compute <span
-  class="math inline">\(52P\)</span>. As</p>
+  takes <span class="math inline">\(2\lceil \log_2 |a_i| -1
+  \rceil\)</span> additions.</li>
+  <li>Cost: <span class="math inline">\(O(\log |a_i|)\)</span> elliptic
+  curve (EC) operations per scalar (e.g., about 256 if using 256-bit
+  scalars) where <span class="math inline">\(|x|\)</span> = number of
+  bits needed to represent <span class="math inline">\(x\)</span>.</li>
+  <li>Total cost: <span class="math inline">\(O(n \log R)\)</span> EC
+  operations (doublings and additions mixed) where <span
+  class="math inline">\(R=\max_{i \in [n]} 2^{|a_i|}\)</span>.</li>
+  </ul>
+  <section id="example" class="level3">
+  <h3>📌 Example:</h3>
+  <p>Say we want to compute <span class="math inline">\(52P\)</span>.
+  As</p>
   <p><span class="math display">\[ 52 = 0 \cdot 2^0 + 0 \cdot 2^1 + 1
   \cdot 2^2 + 0 \cdot 2^3 + 1 \cdot 2^4 + 1 \cdot 2^5
   \]</span></p>
@@ -125,7 +133,188 @@
   class="math inline">\(32P\)</span>. In the process we also calculate
   <span class="math inline">\(16P\)</span> and <span
   class="math inline">\(4P\)</span>. And finally 3 additions</p>
+  <hr />
   </section>
+  </section>
+  <section id="pippengers-algorithm-with-window-size-c" class="level2">
+  <h2>🪣 Pippenger’s Algorithm (with window size <span
+  class="math inline">\(c\)</span>)</h2>
+  <section class="level3 info">
+  <h3>Core Idea Exploit the structure of many scalar multiplications
+  simultaneously to reduce the number of expensive elliptic curve
+  additions.</h3>
+  </section>
+  <p>Let’s say the scalars are in field <span
+  class="math inline">\(\mathbb{F}_q\)</span> and the group elements are
+  points on an elliptic curve with base field <span
+  class="math inline">\(\mathbb{F}_p\)</span>.</p>
+  <p>Let <span class="math inline">\(C\)</span> the number of bits
+  needed to represent any scalar in <span
+  class="math inline">\(\mathbb{F_q}\)</span>, and <span
+  class="math inline">\(R=2^C\)</span>. Let <span
+  class="math inline">\(c \in \mathbb{N}\)</span> be the window size.
+  Then any scalar <span class="math inline">\(x \in
+  \mathbb{F}_q\)</span> can be decomposed into <span
+  class="math inline">\(m\)</span> digits, each digit a number between
+  <span class="math inline">\(\{0, \ldots, r-1\}\)</span> where <span
+  class="math inline">\(r = 2^c\)</span>, where <span
+  class="math inline">\(m = \lceil \frac{W}{c} \rceil\)</span></p>
+  <p><span class="math display">\[\vec{x} = x_0 + x_1r + \ldots +
+  x_{m-1}r^{m-1}\]</span><br />
+  <span class="math inline">\(x_i \in \{0, \ldots, r-1\}\)</span> is a
+  <span class="math inline">\(c\)</span> bit number.</p>
+  <p>So this means</p>
+  <p><span class="math display">\[
+  \begin{align}
+  P &amp;= \sum_{i=0}^{n-1} \vec{x_i}P_i \\
+  &amp;= \sum_{i=0}^{n-1} (x_{i, 0} + x_{i, 1}r + \ldots + x_{i,
+  m-1}r^{m-1})P_i \\
+  &amp;= \sum_{i=0}^{n-1}\sum_{j=0}^{m-1}\text{ } x_{i, j}\text{ }r^{j}
+  \text{ }P_i \\
+  &amp;= \sum_{j=0}^{m-1}r^{j} \sum_{i=0}^{n-1}\text{ } x_{i, j}\text{ }
+  \text{ }P_i \\
+  &amp;= \sum_{j=0}^{m-1}r^{j} W_j
+  \end{align}
+  \]</span></p>
+  <p>where <span class="math display">\[
+  \begin{align}
+  W_j &amp;= \sum_{i=0}^{n-1} x_{i,j} P_i\\
+  &amp;= \sum_{t=0}^{r-1} t B_t
+  \end{align}
+  \]</span> where <span class="math inline">\(B_t\)</span> is the sum of
+  all the curve points that need to be added <span
+  class="math inline">\(t\)</span> times. ### Complexity: this is
+  wrong</p>
+  <ul>
+  <li><p>Number of EC additions/doublings is reduced to:</p>
+  <p><span class="math display">\[
+  O\left(\frac{n}{c} + 2^c\right)
+  \]</span></p>
+  <p>We have <span class="math inline">\(m = \left\lceil \frac{\log
+  R}{c} \right\rceil\)</span> windows or digits per scalar. For each
+  window do up to <span class="math inline">\(2^c\)</span> double and
+  adds</p></li>
+  </ul>
+  <section class="level3 note">
+  <h3>wnaf optimisation We can reduce this to 2^{c-1} using signed
+  indices</h3>
+  <p>see more details below.</p>
+  </section>
+  <ul>
+  <li><p>Total complexity:<br />
+  <span class="math display">\[
+  O\left( \left( \frac{n}{c} + 2^c \right) \cdot \frac{\log R}{c}
+  \right)
+  \]</span></p></li>
+  <li><p>For optimal <span class="math inline">\(c \approx \log
+  n\)</span>, this becomes <strong>substantially faster than the naive
+  method</strong>.</p></li>
+  </ul>
+  <hr />
+  <section id="example-1" class="level3">
+  <h3>📌 Example:</h3>
+  <p>Let’s say:</p>
+  <ul>
+  <li>Max number of bits: <span class="math inline">\(C = 256 = \log
+  R\)</span></li>
+  <li>Window size <span class="math inline">\(c = 16\)</span></li>
+  </ul>
+  <p>Then:</p>
+  <ul>
+  <li>Naive: <span class="math inline">\(O(65536 \cdot 256) \approx 16.7
+  \times 10^6\)</span> EC operations</li>
+  <li>Pippenger:
+  <ul>
+  <li>Windows: <span class="math inline">\(c = \frac{256}{16} =
+  16\)</span></li>
+  <li>Bucket size = <span class="math inline">\(r= 2^c =2^{16} =
+  65536\)</span></li>
+  <li>Total EC operations: roughly <span
+  class="math inline">\(\left(\frac{65536}{16} + 65536\right) \cdot 16
+  \approx 6.9 \times 10^5\)</span> EC operations — <strong>much
+  smaller</strong></li>
+  </ul></li>
+  </ul>
+  <hr />
+  </section>
+  </section>
+  <section id="summary-comparison" class="level2">
+  <h2>⚖️ Summary Comparison</h2>
+  <table>
+  <colgroup>
+  <col style="width: 13%" />
+  <col style="width: 24%" />
+  <col style="width: 62%" />
+  </colgroup>
+  <thead>
+  <tr>
+  <th>Feature</th>
+  <th>Naive Double-and-Add</th>
+  <th>Pippenger with Window <span class="math inline">\(c\)</span></th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+  <td>Time per scalar</td>
+  <td><span class="math inline">\(O(\log s)\)</span></td>
+  <td><span class="math inline">\(O\left(\frac{\log
+  s}{c}\right)\)</span> amortized</td>
+  </tr>
+  <tr>
+  <td>Total additions</td>
+  <td><span class="math inline">\(O(n \log s)\)</span></td>
+  <td><span class="math inline">\(O\left( \left( \frac{n}{c} + 2^c
+  \right) \frac{\log s}{c} \right)\)</span></td>
+  </tr>
+  <tr>
+  <td>Parallelizable</td>
+  <td>No</td>
+  <td>Yes (bucket accumulation is parallelizable)</td>
+  </tr>
+  <tr>
+  <td>Memory usage</td>
+  <td>Low</td>
+  <td>Higher (buckets)</td>
+  </tr>
+  <tr>
+  <td>Use case</td>
+  <td>Small <span class="math inline">\(n\)</span>, low concurrency</td>
+  <td>Large <span class="math inline">\(n\)</span>, batched MSM</td>
+  </tr>
+  </tbody>
+  </table>
+  <hr />
+  <section id="why-pippenger-is-better" class="level3">
+  <h3>✅ Why Pippenger is Better:</h3>
+  <ul>
+  <li><strong>Less redundant work:</strong> Pippenger combines
+  contributions across scalars at the same window bits, avoiding
+  separate EC operations for each scalar.</li>
+  <li><strong>Better asymptotics:</strong> Especially as <span
+  class="math inline">\(n\)</span> grows large.</li>
+  <li><strong>Highly parallelizable:</strong> Modern CPUs/GPUs benefit
+  massively.</li>
+  </ul>
+  <hr />
+  </section>
+  </section>
+  <section id="further-optimisations" class="level2">
+  <h2>Further Optimisations</h2>
+  <section id="wnaf-optimisation" class="level3">
+  <h3>Wnaf Optimisation</h3>
+  </section>
+  <section id="glv-optimisation" class="level3">
+  <h3>GLV Optimisation</h3>
+  </section>
+  <section id="batch-additionprojective-form" class="level3">
+  <h3>Batch Addition/Projective Form?</h3>
+  </section>
+  </section>
+  <section id="implementation-details-in-arkworks" class="level2">
+  <h2>Implementation Details In Arkworks</h2>
+  </section>
+  <section id="basic-resources" class="level2">
+  <h2>Basic Resources</h2>
   <ul>
   <li><a href="https://hackmd.io/@drouyang/msm">Learnings From
   Z-Prize</a>: Written by some guy with a Phd In Operating systems.</li>
@@ -136,23 +325,15 @@
   <li></li>
   </ul>
   </section>
-  <section id="in-jolt-they-completely-implement-msm-from-scratch"
-  class="level2">
-  <h2>In Jolt They Completely Implement MSM From Scratch</h2>
-  <ul class="task-list">
-  <li><label><input type="checkbox" checked="" />how Does arkmsm + jolt
-  + ark5.0 msm’s differ #in-progress [due:: 2025-06-13] [completion::
-  2025-07-03]</label></li>
-  </ul>
-  </section>
   <section id="footnotes" class="footnotes footnotes-end-of-document"
   role="doc-endnotes">
   <hr />
   <ol>
   <li id="fn1"><p>If the group was represented using multiplicative
   notation, we would refer to this algorithm as squaring and multiply.
-  ## Basic Resources<a href="#fnref1" class="footnote-back"
-  role="doc-backlink">↩︎</a></p></li>
+  Also we are treating add/double as add, equivalently multiply/square
+  as multiply. We do not differentiate.<a href="#fnref1"
+  class="footnote-back" role="doc-backlink">↩︎</a></p></li>
   </ol>
   </section>
   </div>

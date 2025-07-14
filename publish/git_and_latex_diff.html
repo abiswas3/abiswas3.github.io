@@ -22,7 +22,7 @@
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
-  <title>Multi Scalar Operations</title>      
+  <title></title>      
   </head>
 
   <body class="light-mode">  
@@ -42,118 +42,116 @@
 
   <main class="content">
   <div class="blog">
-   <h1>Multi Scalar Operations</h1> 
-  <section id="problem-statement" class="level2">
-  <h2>Problem Statement</h2>
-  <p>Given a set of <span class="math inline">\(n\)</span>-limbed
-  scalars <span class="math inline">\(\{a^{(i)}\}_{i=1}^s\)</span> where
-  each limb uses <span class="math inline">\(w\)</span> bits, and
-  elliptic curve points over finite field <span
-  class="math inline">\(F_p\)</span>, <span
-  class="math inline">\(\{P_i\}_{i=1}^s\)</span>, the goal is to compute
-  <span class="math display">\[ P = \sum_{i=1}^{s} a^{(i)} P_i\]</span>
-  as fast as possible on a computer. Throughout this post, we use
-  notation <span class="math inline">\(r=2^w\)</span> and <span
-  class="math inline">\(R=r^n\)</span>.</p>
-  </section>
-  <section id="the-dumb-way" class="level2">
-  <h2>The Dumb Way</h2>
-  <p>Calculate each <span class="math inline">\(a^{(i)}P_i\)</span>
-  using doubling and addition, then add them all together to get the
-  final result. In the worst case, the double and add<a href="#fn1"
-  class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>
-  take <span class="math inline">\(2\lceil \log_2 R -1 \rceil\)</span>
-  additions, and then the final result requires <span
-  class="math inline">\(n-1\)</span> further addition operations.</p>
-  <section id="example" class="level4 remark">
-  <h4>Example</h4>
-  <p><span class="math inline">\(r = 2^6 = 64\)</span> and <span
-  class="math inline">\(n=1\)</span>, say we want to compute <span
-  class="math inline">\(52P\)</span>. As</p>
-  <p><span class="math display">\[ 52 = 0 \cdot 2^0 + 0 \cdot 2^1 + 1
-  \cdot 2^2 + 0 \cdot 2^3 + 1 \cdot 2^4 + 1 \cdot 2^5
-  \]</span></p>
-  <table>
-  <thead>
-  <tr>
-  <th>Bit position (i)</th>
-  <th>Bit value</th>
-  <th><span class="math display">\[2^i \cdot P\]</span></th>
-  <th>Add to result?</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-  <td>0</td>
-  <td>0</td>
-  <td><span class="math display">\[1 \cdot P\]</span></td>
-  <td>No</td>
-  </tr>
-  <tr>
-  <td>1</td>
-  <td>0</td>
-  <td><span class="math display">\[2 \cdot P\]</span></td>
-  <td>No</td>
-  </tr>
-  <tr>
-  <td>2</td>
-  <td>1</td>
-  <td><span class="math display">\[4 \cdot P\]</span></td>
-  <td>✅ Yes</td>
-  </tr>
-  <tr>
-  <td>3</td>
-  <td>0</td>
-  <td><span class="math display">\[8 \cdot P\]</span></td>
-  <td>No</td>
-  </tr>
-  <tr>
-  <td>4</td>
-  <td>1</td>
-  <td><span class="math display">\[16 \cdot P\]</span></td>
-  <td>✅ Yes</td>
-  </tr>
-  <tr>
-  <td>5</td>
-  <td>1</td>
-  <td><span class="math display">\[32 \cdot P\]</span></td>
-  <td>✅ Yes</td>
-  </tr>
-  </tbody>
-  </table>
-  <p>This takes 5 doubling operations to get to <span
-  class="math inline">\(32P\)</span>. In the process we also calculate
-  <span class="math inline">\(16P\)</span> and <span
-  class="math inline">\(4P\)</span>. And finally 3 additions</p>
-  </section>
-  <ul>
-  <li><a href="https://hackmd.io/@drouyang/msm">Learnings From
-  Z-Prize</a>: Written by some guy with a Phd In Operating systems.</li>
-  <li><a
-  href="https://dspacemainprd01.lib.uwaterloo.ca/server/api/core/bitstreams/3b15ca4c-9125-4e45-9378-c5474eec6a07/content">Why
-  is the Pippenger Algorithm Useful</a>: See Section 2.2 on Page 28 of
-  Pdf.</li>
-  <li></li>
-  </ul>
-  </section>
-  <section id="in-jolt-they-completely-implement-msm-from-scratch"
-  class="level2">
-  <h2>In Jolt They Completely Implement MSM From Scratch</h2>
-  <ul class="task-list">
-  <li><label><input type="checkbox" checked="" />how Does arkmsm + jolt
-  + ark5.0 msm’s differ #in-progress [due:: 2025-06-13] [completion::
-  2025-07-03]</label></li>
-  </ul>
-  </section>
-  <section id="footnotes" class="footnotes footnotes-end-of-document"
-  role="doc-endnotes">
-  <hr />
-  <ol>
-  <li id="fn1"><p>If the group was represented using multiplicative
-  notation, we would refer to this algorithm as squaring and multiply.
-  ## Basic Resources<a href="#fnref1" class="footnote-back"
-  role="doc-backlink">↩︎</a></p></li>
-  </ol>
+   <h1></h1> 
+  <p>I have a single file <code>perfect-matching.tex</code> and I am now
+  editing it. How to generate latex diff of my current version vs how
+  the file was at the last commit. These commands are tuned for mac, but
+  on linux, you can do just <code>zathura diff.pdf</code></p>
+  <div class="code-container">
+    <pre class="line-numbers language-bash"><code id="codeblock-1" class="language-bash">git show HEAD:perfect-matching.tex &gt; old.tex
+  latexdiff --preamble style.tex old.tex perfect-matching.tex &gt; diff.tex
+  pdflatex diff.tex
+  open diff.pdf</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-1" title="Copy code">📋</button>
+  </div>
+    
+  <p>If we wanted to compare with a specific commit hash
+  like<code>8dd7464c1a300f294006fa9b4608e8b54d2ac8f0</code>, then in the
+  first line of the file we use</p>
+  <div class="code-container">
+    <pre class="line-numbers language-bash"><code id="codeblock-2" class="language-bash">git show 8dd7464c1a300f294006fa9b4608e8b54d2ac8f0:perfect-matching.tex &gt; old.tex
+  latexdiff --math-markup=1 --append-textcmd=\item --append-textcmd=\rajko --exclude-textcmd=\label old.tex perfect-matching.tex &gt; diff.tex
+  sed &#39;/\\DIFdelbegin/,/\\DIFdelend/ s/\\label{[^}]*}//g&#39; diff.tex &gt; diff_patched.tex
+  mv diff_patched.tex diff.tex
+  go run patch_diff.go
+  pdflatex diff.tex
+  bibtex diff      
+  pdflatex diff.tex
+  pdflatex diff.tex
+  open diff.pdf</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-2" title="Copy code">📋</button>
+  </div>
+    
+  <p><code>go run patch_diff.go</code> removed for now</p>
+  <p>To customise colours of diff find
+  <code>\providecommand{\DIFadd}</code> and replace it with you colour
+  of choice.</p>
+  <div class="code-container">
+    <pre class="line-numbers language-go"><code id="codeblock-3" class="language-go">package main
+
+  import (
+      &quot;fmt&quot;
+      &quot;io/ioutil&quot;
+      &quot;log&quot;
+      &quot;regexp&quot;
+      &quot;strings&quot;
+  )
+
+  func main() {
+      filename := &quot;diff.tex&quot;
+
+      data, err := ioutil.ReadFile(filename)
+      if err != nil {
+          log.Fatalf(&quot;Error reading %s: %v&quot;, filename, err)
+      }
+      content := string(data)
+
+      // Replace \providecommand{\DIFadd}[1]{...} with the clean version
+      addPattern := regexp.MustCompile(`(?m)^\\providecommand\{\\DIFadd\}\[1\]\{[^}]*\}`)
+      content = addPattern.ReplaceAllString(content, `\providecommand{\DIFadd}[1]{\textcolor{shin-ryoku}{#1}}%DIF PREAMBLE`)
+
+      // Replace \providecommand{\DIFdel}[1]{...} with the clean version
+      delPattern := regexp.MustCompile(`(?m)^\\providecommand\{\\DIFdel\}\[1\]\{[^}]*\}`)
+      content = delPattern.ReplaceAllString(content, `\providecommand{\DIFdel}[1]{\textcolor{verylightgray}{\sout{#1}}}                      %DIF PREAMBLE`)
+
+      // Check if the required packages are included
+      hasXcolor := regexp.MustCompile(`(?m)^\\usepackage\{xcolor\}`).MatchString(content)
+      hasUlem := regexp.MustCompile(`(?m)^\\usepackage\[normalem\]\{ulem\}`).MatchString(content)
+
+      // Insert missing packages after \documentclass line
+      if !hasXcolor || !hasUlem {
+          lines := strings.Split(content, &quot;\n&quot;)
+          insertPos := -1
+          for i, line := range lines {
+              if strings.HasPrefix(strings.TrimSpace(line), `\documentclass`) {
+                  insertPos = i + 1
+                  break
+              }
+          }
+
+          var packages []string
+          if !hasXcolor {
+              packages = append(packages, `\usepackage{xcolor}`)
+          }
+          if !hasUlem {
+              packages = append(packages, `\usepackage[normalem]{ulem}`)
+          }
+
+          if insertPos == -1 {
+              // No \documentclass found, insert at top
+              content = strings.Join(append(packages, lines...), &quot;\n&quot;)
+          } else {
+              // Insert packages after \documentclass line
+              before := lines[:insertPos]
+              after := lines[insertPos:]
+              newLines := append(before, packages...)
+              newLines = append(newLines, after...)
+              content = strings.Join(newLines, &quot;\n&quot;)
+          }
+      }
+
+      err = ioutil.WriteFile(filename, []byte(content), 0644)
+      if err != nil {
+          log.Fatalf(&quot;Error writing %s: %v&quot;, filename, err)
+      }
+
+      fmt.Println(&quot;Patched diff.tex macros successfully!&quot;)
+  }</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-3" title="Copy code">📋</button>
+  </div>
+    
+  <section id="rebasing" class="level2">
+  <h2>Rebasing</h2>
   </section>
   </div>
   </main>

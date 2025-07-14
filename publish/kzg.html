@@ -45,41 +45,41 @@
    <h1>KZG</h1> 
   <section id="the-kzg-commitment-scheme" class="level2">
   <h2>The KZG Commitment Scheme</h2>
-  <p>Public Information:</p>
-  <p><span class="math inline">\(\mathbb{G}_1, \mathbb{G}_2,
-  \mathbb{G}_T, \mathbb{F}, d, g \in \mathbb{G}_1, h \in
-  \mathbb{G}_2\)</span></p>
+  <p>The notation for bilinear pairings over assymetric groups of order
+  <span class="math inline">\(\textcolor{orange}{\mathtt{q}}\)</span>
+  used in this post are described <a
+  href="/publish/bmmtv.html">here</a></p>
   </section>
   <section id="trusted-setup" class="level2">
   <h2>Trusted Setup</h2>
   <ul>
-  <li><span class="math inline">\(\alpha
-  \xleftarrow[]{\$}\mathbb{F}\)</span></li>
-  <li><span class="math inline">\((w_0, \ldots, w_{d}) = (g^{\alpha^0},
-  \ldots, g^{\alpha^d})\)</span></li>
-  <li><span class="math inline">\(v_1 = h^{\alpha^1}\)</span></li>
+  <li><p>Toxic waste discarded by Trusted Entity <span
+  class="math inline">\(\alpha
+  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span></p></li>
+  <li><p>Provers Key: <span class="math inline">\((w_0, \ldots, w_{d}) =
+  (g^{\alpha^0}, \ldots, g^{\alpha^d})\)</span></p></li>
+  <li><p>Verifiers Key: <span class="math inline">\(v_1 =
+  h^{\alpha^1}\)</span></p></li>
   </ul>
-  <section class="level3 remark">
-  <h3>Prover and Verifier Keys</h3>
-  <p>The prover receives as their key <span
-  class="math inline">\(\mathtt{pk}= (w_0, \ldots, w_{d})\)</span></p>
-  <p>The verifier receives as their key <span
-  class="math inline">\(\mathtt{vk}= v_1\)</span></p>
-  </section>
   </section>
   <section id="commit" class="level2">
   <h2>Commit</h2>
-  <p><strong>Prover <span class="math inline">\(\rightarrow\)</span>
-  Verifier</strong> : <span class="math inline">\(C_{f}\)</span></p>
+  <p>To commit to a <span class="math inline">\(f \in
+  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}[X]\)</span></p>
+  <section id="prover-rightarrow-verifier-c_f" class="level4">
+  <h4><strong>Prover <span class="math inline">\(\rightarrow\)</span>
+  Verifier</strong> : <span class="math inline">\(C_{f}\)</span></h4>
   <p>Let <span class="math inline">\(f\)</span> be a univariate
   polynomial with degree at most <span class="math inline">\(d\)</span>
-  with coefficients in <span class="math inline">\(\mathbb{F}\)</span>.
+  with coefficients in <span
+  class="math inline">\(\mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span>.
   <span class="math display">\[f(X) = f_0 + f_1X + \ldots +
   f_dX^d\]</span></p>
   <p>To commit to a <span class="math inline">\(f\)</span> the prover
   computes</p>
   <p><span class="math display">\[C_{f} = \prod_{i=0}^d w_i^{f_i} =
   g^{f(\alpha)}\]</span></p>
+  </section>
   <section class="level3 remark">
   <h3>Prover Cost</h3>
   <p><span class="math inline">\(d+1\)</span> <span
@@ -90,19 +90,28 @@
   </section>
   <section id="opening" class="level2">
   <h2>Opening</h2>
-  <ul>
-  <li><strong>Prover <span class="math inline">\(\leftarrow\)</span>
-  Verifier</strong> : <span class="math inline">\(z\)</span></li>
-  <li><strong>Prover <span class="math inline">\(\rightarrow\)</span>
-  Verifier</strong> : <span class="math inline">\(\pi, y\)</span></li>
-  </ul>
+  <section id="prover-leftarrow-verifier-point-to-evaluate-z"
+  class="level4">
+  <h4><strong>Prover <span class="math inline">\(\leftarrow\)</span>
+  Verifier</strong> : Point to evaluate <span
+  class="math inline">\(z\)</span></h4>
+  </section>
+  <section
+  id="prover-rightarrow-verifier-y-in-mathbbf_textcolororangemathttq-and-that-pi-that-fzy"
+  class="level4">
+  <h4><strong>Prover <span class="math inline">\(\rightarrow\)</span>
+  Verifier</strong> : <span class="math inline">\(y \in
+  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span>, and that <span
+  class="math inline">\(\pi\)</span>, that <span
+  class="math inline">\(f(z)=y\)</span></h4>
   <p>Given <span class="math inline">\(C_{f}\)</span>, the verifier asks
   the prover to evaluate <span class="math inline">\(f\)</span> at <span
   class="math inline">\(z\)</span>. The prover responds with an
   evaluation <span class="math inline">\(y\)</span> and a proof <span
   class="math inline">\(\pi\)</span> which proves that prover knows an
-  opening <span class="math inline">\(f \in \mathbb{F}[X]\)</span> to
-  <span class="math inline">\(C_{f}\)</span>, with degree <span
+  opening <span class="math inline">\(f \in
+  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}[X]\)</span> to <span
+  class="math inline">\(C_{f}\)</span>, with degree <span
   class="math inline">\(d\)</span> such that <span
   class="math inline">\(f(z) = y\)</span>.</p>
   <p>To compute the proof <span class="math inline">\(\pi\)</span>, the
@@ -116,6 +125,7 @@
   \]</span> sends <span class="math inline">\(\pi\)</span> as the proof.
   <span class="math display">\[\pi = C_{q} = \prod_{i=0}^{d-1}
   w_i^{q_i}\]</span></p>
+  </section>
   <section class="level3 remark">
   <h3>Prover Cost</h3>
   <p><span class="math inline">\(d+1\)</span> <span
@@ -146,7 +156,32 @@
   <p>3 pairing operations, 2 <span
   class="math inline">\(\mathbb{G}_1\)</span> exponentiations 1 random
   sample <span class="math inline">\(v
-  \xleftarrow[]{\$}\mathbb{F}\)</span></p>
+  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span></p>
+  </section>
+  </section>
+  <section id="batching-kzg" class="level2">
+  <h2>Batching KZG</h2>
+  <section id="polynomial-many-points" class="level3">
+  <h3>1 polynomial many points</h3>
+  <p>In the proof above the prover commits to a <strong>single</strong>
+  polynomial, and the verifier wants to evaluate it at a single
+  evaluation point <span class="math inline">\(z\)</span>.</p>
+  <p>Often we want to evaluate the committed polynomial <span
+  class="math inline">\(f\)</span> at <span class="math inline">\(z_1,
+  \ldots, z_k\)</span> where <span class="math inline">\(k&lt;d\)</span>
+  (otherwise we can learn the polynomial).</p>
+  <p>Naively, the prover can send <span class="math inline">\(k\)</span>
+  proofs <span class="math inline">\(\pi_1, \ldots, \pi_k\)</span> but
+  there is a way to batch it all into 1 proof.</p>
+  <p><strong>TOTO THis weekend</strong></p>
+  </section>
+  <section id="many-polynomial-1-point" class="level3">
+  <h3>Many polynomial 1 point</h3>
+  <p><strong>TOTO THis weekend</strong></p>
+  </section>
+  <section id="many-polynomials-many-points" class="level3">
+  <h3>Many polynomials Many Points</h3>
+  <p><strong>TOTO THis weekend</strong></p>
   </section>
   </section>
   <section id="appendix" class="level2">
@@ -154,8 +189,9 @@
   <section id="why-no-remainder" class="level3">
   <h3>Why No Remainder</h3>
   <p>Let <span class="math inline">\(f(x)\)</span> be a polynomial, and
-  let <span class="math inline">\(b \in \mathbb{F}\)</span>. Consider
-  the expression:</p>
+  let <span class="math inline">\(b \in
+  \mathbb{F}_{\textcolor{orange}{\mathtt{q}}}\)</span>. Consider the
+  expression:</p>
   <p><span class="math display">\[
   \frac{f(x) - f(b)}{x - b}.
   \]</span></p>

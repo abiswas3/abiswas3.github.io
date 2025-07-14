@@ -22,7 +22,7 @@
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
-  <title>Multi Scalar Operations</title>      
+  <title></title>      
   </head>
 
   <body class="light-mode">  
@@ -42,118 +42,53 @@
 
   <main class="content">
   <div class="blog">
-   <h1>Multi Scalar Operations</h1> 
-  <section id="problem-statement" class="level2">
-  <h2>Problem Statement</h2>
-  <p>Given a set of <span class="math inline">\(n\)</span>-limbed
-  scalars <span class="math inline">\(\{a^{(i)}\}_{i=1}^s\)</span> where
-  each limb uses <span class="math inline">\(w\)</span> bits, and
-  elliptic curve points over finite field <span
-  class="math inline">\(F_p\)</span>, <span
-  class="math inline">\(\{P_i\}_{i=1}^s\)</span>, the goal is to compute
-  <span class="math display">\[ P = \sum_{i=1}^{s} a^{(i)} P_i\]</span>
-  as fast as possible on a computer. Throughout this post, we use
-  notation <span class="math inline">\(r=2^w\)</span> and <span
-  class="math inline">\(R=r^n\)</span>.</p>
-  </section>
-  <section id="the-dumb-way" class="level2">
-  <h2>The Dumb Way</h2>
-  <p>Calculate each <span class="math inline">\(a^{(i)}P_i\)</span>
-  using doubling and addition, then add them all together to get the
-  final result. In the worst case, the double and add<a href="#fn1"
-  class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>
-  take <span class="math inline">\(2\lceil \log_2 R -1 \rceil\)</span>
-  additions, and then the final result requires <span
-  class="math inline">\(n-1\)</span> further addition operations.</p>
-  <section id="example" class="level4 remark">
-  <h4>Example</h4>
-  <p><span class="math inline">\(r = 2^6 = 64\)</span> and <span
-  class="math inline">\(n=1\)</span>, say we want to compute <span
-  class="math inline">\(52P\)</span>. As</p>
-  <p><span class="math display">\[ 52 = 0 \cdot 2^0 + 0 \cdot 2^1 + 1
-  \cdot 2^2 + 0 \cdot 2^3 + 1 \cdot 2^4 + 1 \cdot 2^5
-  \]</span></p>
-  <table>
-  <thead>
-  <tr>
-  <th>Bit position (i)</th>
-  <th>Bit value</th>
-  <th><span class="math display">\[2^i \cdot P\]</span></th>
-  <th>Add to result?</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr>
-  <td>0</td>
-  <td>0</td>
-  <td><span class="math display">\[1 \cdot P\]</span></td>
-  <td>No</td>
-  </tr>
-  <tr>
-  <td>1</td>
-  <td>0</td>
-  <td><span class="math display">\[2 \cdot P\]</span></td>
-  <td>No</td>
-  </tr>
-  <tr>
-  <td>2</td>
-  <td>1</td>
-  <td><span class="math display">\[4 \cdot P\]</span></td>
-  <td>✅ Yes</td>
-  </tr>
-  <tr>
-  <td>3</td>
-  <td>0</td>
-  <td><span class="math display">\[8 \cdot P\]</span></td>
-  <td>No</td>
-  </tr>
-  <tr>
-  <td>4</td>
-  <td>1</td>
-  <td><span class="math display">\[16 \cdot P\]</span></td>
-  <td>✅ Yes</td>
-  </tr>
-  <tr>
-  <td>5</td>
-  <td>1</td>
-  <td><span class="math display">\[32 \cdot P\]</span></td>
-  <td>✅ Yes</td>
-  </tr>
-  </tbody>
-  </table>
-  <p>This takes 5 doubling operations to get to <span
-  class="math inline">\(32P\)</span>. In the process we also calculate
-  <span class="math inline">\(16P\)</span> and <span
-  class="math inline">\(4P\)</span>. And finally 3 additions</p>
-  </section>
-  <ul>
-  <li><a href="https://hackmd.io/@drouyang/msm">Learnings From
-  Z-Prize</a>: Written by some guy with a Phd In Operating systems.</li>
-  <li><a
-  href="https://dspacemainprd01.lib.uwaterloo.ca/server/api/core/bitstreams/3b15ca4c-9125-4e45-9378-c5474eec6a07/content">Why
-  is the Pippenger Algorithm Useful</a>: See Section 2.2 on Page 28 of
-  Pdf.</li>
-  <li></li>
-  </ul>
-  </section>
-  <section id="in-jolt-they-completely-implement-msm-from-scratch"
-  class="level2">
-  <h2>In Jolt They Completely Implement MSM From Scratch</h2>
+   <h1></h1> 
   <ul class="task-list">
-  <li><label><input type="checkbox" checked="" />how Does arkmsm + jolt
-  + ark5.0 msm’s differ #in-progress [due:: 2025-06-13] [completion::
-  2025-07-03]</label></li>
+  <li><p><label><input type="checkbox" checked="" />Send #justin-thaler
+  everything I’ve done so far #a16z #discuss [due:: 2025-06-07]
+  [completion:: 2025-06-07]</label></p></li>
+  <li><p><label><input type="checkbox" checked="" />[x] Fill
+  benchmarking instructions in [[why-jolt-breaks]] #next #a16z [due::
+  2025-06-07] [completion:: 2025-06-07]</label></p></li>
+  <li><p><label><input type="checkbox" checked="" />[x] Write out the
+  proof for Hyper KZG #in-progress #a16z [due:: 2025-06-09]
+  [completion:: 2025-06-10]</label></p></li>
+  <li><p><label><input type="checkbox" checked="" />Confirm with hyper
+  kzg implementation with code #in-progress #a16z [due:: 2025-06-09]
+  [completion:: 2025-06-10]</label></p></li>
+  <li><p><label><input type="checkbox" checked="" />Get msm to run with
+  arkworks 5.0 and compare speeds #in-progress #a16z [priority:: high]
+  [due:: 2025-06-12]&gt;</label></p>
+  <ul>
+  <li>This currently works with bls381 curve, but not with bn254, cos we
+  don’t have snarkify numbers. TODO: Take snarkifies changes, and put
+  them in one long weekend session</li>
+  </ul></li>
+  </ul>
+  <section id="systems" class="level2">
+  <h2>Systems</h2>
+  <section id="my-notes" class="level3">
+  <h3>My Notes</h3>
+  <ul>
+  <li><p>Notes on Multi-scalar multiplication [[NotesForMe/msm|msm]] ###
+  Published</p></li>
+  <li><p>[[why-jolt-breaks]]</p></li>
+  <li><p>[[mont_mult]] ## Theory</p></li>
+  </ul>
+  <p>So far I’ve understood KZG quite well. These are written on paper,
+  and i don’t think I need to digitise, as there are already quite a few
+  of these notes. <a href="https://risencrypto.github.io/Kate/">See
+  these</a></p>
+  </section>
+  <section id="my-notes-1" class="level3">
+  <h3>My Notes</h3>
+  <ul>
+  <li>Polynomial IOPs [[NotesForMe/polynomial-iop|polynomial-iop]]</li>
+  <li>Sumcheck and PCS – the idea</li>
+  <li>KZG + Merkle Trees</li>
+  <li>[[BlogPosts/hyper-kzg]]</li>
   </ul>
   </section>
-  <section id="footnotes" class="footnotes footnotes-end-of-document"
-  role="doc-endnotes">
-  <hr />
-  <ol>
-  <li id="fn1"><p>If the group was represented using multiplicative
-  notation, we would refer to this algorithm as squaring and multiply.
-  ## Basic Resources<a href="#fnref1" class="footnote-back"
-  role="doc-backlink">↩︎</a></p></li>
-  </ol>
   </section>
   </div>
   </main>

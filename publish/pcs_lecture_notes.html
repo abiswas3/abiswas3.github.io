@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+	<meta name="generator" content="pandoc">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+    <!-- Base CSS (common styles) --> 
+  <link rel="stylesheet" href="../static/nav.css"> 
+  <link rel="stylesheet" href="../static/blog_index.css">
+  <link rel="stylesheet" href="../static/thms.css">
+  <link rel="stylesheet" href="../static/imgs.css">       
+  <link rel="stylesheet" href="../static/math.css">  
+   
+  <link rel="stylesheet" href="../static/tags.css">       
+
+  <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
+  <script src="/static/es5/tex-svg.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+<!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
+
+
+  <title>Polynomial Commitments</title>      
+  </head>
+
+  <body class="light-mode">  
+    <header>          
+    <div class="nav-container"> 
+    <div class="nav-title"><a href="/">Ari</a></div>
+    <button class="nav-toggle" onclick="toggleNav()">☰</button>
+    <nav class="nav-links" id="navMenu">
+      <a href="/publish/">Notes</a>
+      <a href="/publications.html">Publications</a>
+      <a href="/misc.html">Misc</a>
+     <label><input type="checkbox" id="mode-toggle" /><span class="label"></span></label>
+    </nav>
+    </div>
+ 
+ </header>
+
+  <main class="content">
+  <div class="blog">
+   <h1>Polynomial Commitments</h1> 
+  <p>These notes were made to Bring Daniel up to speed to PCS.
+  Specifically, after these, we should be able to prove the soundness of
+  KZG, and hyper-KZG. Note that Knowledge soundness does not have
+  anything to do with ZK. So - [x] Do a small refresher of what it means
+  to do knowledge soundness i.e. The knowledge extractor. [due::
+  2025-06-10] [completion:: 2025-06-11]</p>
+  <p>We start with complexity theory crash course. ## NP Languages</p>
+  <section class="level3 tip">
+  <h3>I am using the finitary version of the definition of Languages
+  here. In reality a language is defined asymptotically in terms of
+  n.</h3>
+  </section>
+  <p>Fix arbitrary <span class="math inline">\(n \in
+  \mathbb{N}\)</span>. A language <span class="math inline">\(L
+  \subseteq \{0, 1\}^{poly(n)}\)</span> is a subset of strings.</p>
+  <section class="level3 examples">
+  <h3>Examples + Graphs on n vertices that admit a 3 colouring, where
+  the graph G is represented using using a the \{0 ,1 \}^{poly(n)}
+  encoding. Think adjacency matrix. + Boolean circuits that have at
+  least one input on which it outputs true + Boolean functions where one
+  row of the truth table output is 1.</h3>
+  </section>
+  <p>Thus, a language is a collection strings (or what we call instances
+  later on this document).</p>
+  <p><span class="math inline">\(NP\)</span> is just a set of
+  languages.</p>
+  <ul class="task-list">
+  <li><label><input type="checkbox" />#todo Add in some background on
+  Turing Machines, and what it means to decide a language. I wonder if
+  we’ll have to do this in Lean,</label></li>
+  </ul>
+  <section class="level3 def">
+  <h3>Def: NP We say a language L is in NP if there exists a
+  “polynomial-time” deterministic Turing Machine M such that: Fix
+  arbitrary x \in L, there exists w \in \{0 ,1\}^{poly(n)}, such that
+  M(x, y) = 1. + Fix arbitrary x \notin L, for all y \in \{0, 1\}^{*},
+  M(x, y) = 0.</h3>
+  </section>
+  <section class="level3 example">
+  <h3>If L is the set of 3 colourable graphs, and x \in L, then w is the
+  3 colouring. The algorithm M runs in polynomial time, and on receiving
+  inputs x, y outputs accept. If a graph x was not 3-colourable, there
+  is no colouring that can get M to accept.</h3>
+  </section>
+  <section id="re-writing-the-above-definitions-in-terms-of-proofs"
+  class="level3">
+  <h3>Re-writing the above definitions in terms of proofs</h3>
+  </section>
+  <section class="level3 quote">
+  <h3>So far we have been thinking of w as a witness or a certificate:
+  This is the satisfying assignment for a boolean formula, or the
+  perfect matching in a graph.</h3>
+  <p>Instead we can think of this witness as an object furnished by an
+  external entity called the prover. Then verification can be viewed as
+  a process: On input <span class="math inline">\(x\)</span>, the
+  verifier <span class="math inline">\(V\)</span> asks to see a proof
+  that <span class="math inline">\(x \in L\)</span>. The prover tries to
+  provide such a proof. If the prover is honest, it will always be able
+  to provide a correct proof (provided it exists). For languages in
+  <span class="math inline">\(NP\)</span> we know it always
+  <strong>exists</strong> The verifier should be
+  <strong>complete</strong>, namely recognize such proofs as correct. On
+  the other hand, if the prover tries to provide a bogus proof (for
+  instance a bad 3 coloring) the verifier should be sound and detect the
+  mistake i.e the proof should be <strong>sound</strong>.</p>
+  <p>–<a href="https://andrejb.net/csi5138/notes/23L09.pdf">Borrowed
+  from Bogdanov’s lectures</a></p>
+  </section>
+  <p>So here’s the same <span class="math inline">\(NP\)</span>
+  definition, described as a proof system.</p>
+  <section class="level3 def">
+  <h3>Def: NP-prover An NP-prover P is any (computationally unbounded)
+  function that maps inputs x ∈ \{0, 1\}^* to proofs \pi \in \{0, 1\}^*
+  . All we mean by computationally unbounded function is that Turing
+  Machine that computes this function can take any number of steps.</h3>
+  </section>
+  <p><strong>Decision Problem</strong>: It’s the task of deciding if
+  <span class="math inline">\(x \in L\)</span> or not.</p>
+  <section class="level3 def">
+  <h3>Def: NP Proof System NP is the class of all decision problems for
+  which there exists a TM - V (called a verifier) whose running time is
+  polynomial in the length of x, and there exists a computationally
+  unbounded function P : \{0,1\}^* \rightarrow \{0,1\}^* (called the
+  honest prover) such that</h3>
+  <ul>
+  <li>If <span class="math inline">\(x \in L \implies V(x, \pi) =
+  1\)</span> where <span class="math inline">\(\pi = P(x)\)</span></li>
+  <li>If <span class="math inline">\(x \notin L \implies V(x, \pi) =
+  0\)</span> where <span class="math inline">\(\pi = P^*(x)\)</span> for
+  <strong>any</strong> <span class="math inline">\(NP\)</span>-prover
+  <span class="math inline">\(P^*\)</span>.</li>
+  </ul>
+  </section>
+  <section id="interactive-proofs" class="level2">
+  <h2>Interactive Proofs</h2>
+  <p>Now assume that after receiving a proof <span
+  class="math inline">\(\pi\)</span> from a prover, the verifier is not
+  convinced. This is not a problem for deciding any language in <span
+  class="math inline">\(NP\)</span>. But imagine there exists other
+  languages which are harder to decide. Just a static certificate is not
+  enough. The verifier might want to ask the prover
+  <strong>MORE</strong> questions. In this setting the prover and
+  verifier are adaptive: The question that the verifier asks at any
+  given round of interaction may depend on the answers it received from
+  the prover in previous rounds. However, the prover himself may choose
+  to adapt his answers based on the previous queries made by the
+  verifier.</p>
+  <p>To formalise this idea – we introduce the idea of an interactive
+  Turing machine.</p>
+  <p>This is a Turing Machine that, in addition to its input <span
+  class="math inline">\(x\)</span>, receives additional inputs <span
+  class="math inline">\((y_1, z_1,\ldots , y_k, z_k)\)</span> which
+  represent the messages sent and received in the first <span
+  class="math inline">\(k\)</span> rounds of interaction. Here, <span
+  class="math inline">\((y_1, \ldots , y_k)\)</span> are the messages
+  sent by the machine itself, and <span
+  class="math inline">\((z_1,\ldots , z_k)\)</span> are the responses
+  received from the other party. On this input, the machine produces the
+  next message <span class="math inline">\(y_{k+1}\)</span> or possibly
+  accepts/rejects</p>
+  <section class="level3 example">
+  <h3>Let’s say we have machines A and B. They both receive common input
+  x. + A goes first so y_1 = A(x). + B’s turn to respond, with z_1 =
+  B(x, y_1). + Now A could either accept/reject or send message y_2 =
+  A(x, y_1, z_1) to B.</h3>
+  <p>The round complexity of this game/proof system is the number of
+  messages <span class="math inline">\(A\)</span> sends before
+  outputting accept or reject.</p>
+  </section>
+  <p>Now the formal definition. We use YES to denote all strings in the
+  language and NO to denote all strings not in language we are trying to
+  decide. We introduce this extra notation, as this plays really well
+  with promise problems. But that’s for later</p>
+  <section class="level3 def">
+  <h3>Def: Deterministic Interactive Proof System A (polynomial-time)
+  deterministic interactive proof for a decision problem (YES, NO) is a
+  pair of Turing Machines (V, P) where V runs in time polynomial in the
+  input x, and + For all x \in YES, (V, P)(x) outputs accepts + For all
+  x \in No, (V, P)(x) outputs reject</h3>
+  </section>
+  <p>So far everything has been deterministic. If the prover is honest,
+  verifier accepts. If the prover cheats, verifier asks it to piss off.
+  If we allow randomness, a magical world opens up.</p>
+  <p>If we give Turing machines a random tape: simply an infinite array
+  where each location is 1 or 0 with probability 1/2. Then we get the
+  following definition.</p>
+  <p>[!def] Interactive Proof System &gt;A (polynomial-time)
+  <strong>deterministic</strong> interactive proof for a decision
+  problem (YES, NO) is a pair of Turing Machines <span
+  class="math inline">\((V, P)\)</span> where <span
+  class="math inline">\(V\)</span> runs in time polynomial in the input
+  <span class="math inline">\(x\)</span>, and &gt;+ For all <span
+  class="math inline">\(x \in YES\)</span>, <span
+  class="math inline">\((V, P)(x)\)</span> outputs accepts with
+  probability at least <span class="math inline">\(2/3\)</span> &gt;+
+  For all <span class="math inline">\(x \in No\)</span>, <span
+  class="math inline">\((V, P)(x)\)</span> outputs accepts with
+  probability at most <span class="math inline">\(1/3\)</span></p>
+  <section class="level3 remark">
+  <h3>Why Bother Ok, I can see why interaction is natural, and
+  randomness might allow you to prove more things. But Language is
+  natural but not in IP?</h3>
+  <p>Here is a decision problem that has a two-round interactive proof,
+  but is not (provably) known to be in NP.</p>
+  </section>
+  <p>Graphs <span class="math inline">\(G_0\)</span> and <span
+  class="math inline">\(G_1\)</span> on <span
+  class="math inline">\(n\)</span> vertices are isomorphic if there
+  exists a permutation <span class="math inline">\(\pi\)</span> of
+  vertices that, when applied to <span
+  class="math inline">\(G_0\)</span>, outputs exactly <span
+  class="math inline">\(G_1\)</span>, namely</p>
+  <p><span class="math display">\[(u, v) \in E(G_0) \iff (\pi(u),
+  \pi(v)) \in E(G_1)\]</span> Given a pair of graphs <span
+  class="math inline">\(G_0\)</span> and <span
+  class="math inline">\(G_1\)</span> as the problem instance – are they
+  isomorphic?</p>
+  <section class="level3 remark">
+  <h3>Arguments Whenever we force the prover to run in poly(|x|) - - the
+  system is called an argument instead of a proof.</h3>
+  </section>
+  </section>
+  <section id="proof-of-knowledge-is-unrelated-to-zk" class="level2">
+  <h2>Proof Of Knowledge (Is Unrelated To ZK)</h2>
+  <p>Now let’s go back to the example of 3-colouring. Now typically one
+  would hope that the way an NP prover gives a proof that the graph is
+  3-colourable is by actually knowing a 3 colouring, and thereby using
+  that 3 colouring in some way.</p>
+  <p>In Zero-Knowledge proofs, the prover is <strong>NOT</strong>
+  allowed to directly tell me the witness (as I’m not supposed to learn
+  anything more than one exists.) In Succinct Proofs, the prover is
+  <strong>NOT</strong> allowed to send the whole witness directly. It
+  can send a small fraction of it at best.</p>
+  <p>Now what I’m about to say might seem bizarre, but we actually do
+  not have a guarantee that the prover that convinces that <span
+  class="math inline">\(x \in L\)</span> actually knows a witness <span
+  class="math inline">\(w\)</span> such that <span
+  class="math inline">\(V(x, w) = 1\)</span>.</p>
+  <p>Here’s a real world example, and then we’ll give a formal
+  example.</p>
+  <section class="level3 example">
+  <h3>Imagine that case of finding the shortest path between city A and
+  city B. You want to give the prover some money, and they’ll tell you
+  the shortest path. But before you pay them, they must prove to you
+  that they actually know the shortest path. A shortest path between
+  cities A and B always exists by definition; but this does not mean
+  that the prover actually knows the path.</h3>
+  </section>
+  <section class="level3 example">
+  <h3>Given some \mathbb{G} where discrete log is hard, a generator g
+  and h \in \mathbb{G} as instance, prove that i know w such that g^w =
+  h.</h3>
+  </section>
+  <p>Here is a valid proof – the prover says YES. <span
+  class="math inline">\(g\)</span> is a generator, therefore for any
+  group element <span class="math inline">\(h&#39; \in
+  \mathbb{G}\)</span>, there exists some <span
+  class="math inline">\(w&#39;\)</span> such that <span
+  class="math inline">\(g^{w&#39;} = h&#39;\)</span>. As long as <span
+  class="math inline">\(h \in \mathbb{G}\)</span> – instance <span
+  class="math inline">\((\mathbb{G}, h, g)\)</span> is in the language.
+  The verifier can check <span class="math inline">\(h \in
+  \mathbb{G}\)</span> and be done. But the prover did not actually know
+  <span class="math inline">\(w\)</span>. This is a meaningless proof
+  system. We want the prover to prove that it actually knows <span
+  class="math inline">\(w\)</span>.</p>
+  <section class="level3 remark">
+  <h3>In many many cases, proof systems that are not proofs of knowledge
+  will use knowledge of the witness. But nothing about the definitions
+  we have used so far, forces it upon the prover to use this knowledge,
+  or prove it had this knowledge.</h3>
+  </section>
+  <section id="knowledge-soundness" class="level3">
+  <h3>Knowledge Soundness</h3>
+  <p><em>Proofs for Knowledge:</em></p>
+  </section>
+  <section class="level3 def">
+  <h3>Def: A proof system has knowledge soundness with error \kappa if
+  there exists a PPT K s.t for every P^* and every x, if P^* convinces V
+  that x \in L where L is NP, with probability \epsilon &gt; \kappa,
+  then K^{P^*(\cdot)}(x) outputs w s.t (x, w) \in R with probability at
+  least \epsilon(|x|) - \kappa(|x|)</h3>
+  </section>
+  <p>Note that knowledge soundness is a property of how the verifier
+  talks to the prover (in contrast to zero-knowledge which is a property
+  of how the prover talks to the verifier.)</p>
+  <p><strong>Alternative Formulation</strong> It always outputs <span
+  class="math inline">\(w\)</span> such that <span
+  class="math inline">\((x,w) \in R\)</span> with probability 1, but the
+  running time is now on <span
+  class="math inline">\(\frac{poly(\kappa)}{\epsilon - \kappa}\)</span>
+  on average.</p>
+  <p>One can show the two definitions are equivalent – as long as <span
+  class="math inline">\(R\)</span> is an NP relation. Original implies
+  alternative: + Run <span class="math inline">\(K\)</span> many times
+  until a witness is output. Since its an NP relation we can verify the
+  output is correct. As prob of success is <span
+  class="math inline">\(\epsilon - \kappa\)</span> we will end in <span
+  class="math inline">\(1/(\epsilon - \kappa)\)</span> tries on
+  average</p>
+  <p>Expecta</p>
+  <section id="simple-example" class="level4">
+  <h4>Simple Example</h4>
+  </section>
+  </section>
+  <section id="pcs-merkle-tree-example" class="level2">
+  <h2>PCS – Merkle Tree Example</h2>
+  </section>
+  <section id="elliptic-curves-refresher-maybe" class="level2">
+  <h2>Elliptic Curves Refresher (Maybe)</h2>
+  </section>
+  <section id="pairings-crash-course" class="level2">
+  <h2>Pairings Crash Course</h2>
+  </section>
+  <section id="kzg-commitment-scheme" class="level2">
+  <h2>KZG Commitment Scheme</h2>
+  <section id="batching" class="level3">
+  <h3>Batching</h3>
+  </section>
+  </section>
+  <section id="hyper-kzg" class="level2">
+  <h2>Hyper KZG</h2>
+  <section class="level3 warning">
+  <h3>All of the above PCS schemes are BAD ## BMMTV</h3>
+  </section>
+  </section>
+  <section id="hyper-bmmtv" class="level2">
+  <h2>Hyper BMMTV</h2>
+  </section>
+  <section id="dory" class="level2">
+  <h2>Dory</h2>
+  </section>
+  </div>
+  </main>
+
+
+
+
+
+
+<!-- Prism Core JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<!-- Add other languages as needed -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-rust.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+<script>
+// var coll = document.getElementsByClassName("collapsible");
+var coll = document.querySelectorAll('.collapsible, .question, .collapsible-short')
+var i;
+
+console.log(coll);
+for (i = 0; i < coll.length; i++) {
+  coll[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+
+    if (content.style.display === "block") {
+      content.style.display = "none";
+    } else {
+      content.style.display = "block";
+    }
+  });
+}
+</script>
+
+<script>
+  // Function to process MathJax when the tooltip is shown
+document.addEventListener('DOMContentLoaded', function () {
+    var footnotes = document.querySelectorAll('.footnote');
+
+    footnotes.forEach(function (footnote) {
+        footnote.addEventListener('mouseover', function () {
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+        });
+    });
+});
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Function to scroll to the element with an offset to avoid the header
+      const scrollToElement = (element) => {
+        const headerHeight = document.querySelector('header').offsetHeight + 30;
+        window.scrollTo({
+          top: element.offsetTop - headerHeight + 20,  // Adjust offset to avoid header overlap
+          behavior: 'smooth'
+        });
+      };
+
+      // Select all anchor links that reference an element (e.g., href="#ref1")
+      const links = document.querySelectorAll('a[href^="#"]');
+
+      links.forEach(link => {
+        link.addEventListener('click', function (e) {
+          const targetId = this.getAttribute('href').substring(1);  // Get the target ID from the href
+          const targetElement = document.getElementById(targetId);  // Find the target element by its ID
+          
+          if (targetElement) {
+            e.preventDefault();  // Prevent the default browser scrolling behavior
+            history.pushState(null, null, `#`);  // Change the URL hash to reflect the anchor link
+            scrollToElement(targetElement);  // Smooth scroll to the element with the offset
+          }
+        });
+      });
+
+      // Handle the browser's back and forward buttons
+      window.addEventListener('popstate', () => {
+        const targetId = location.hash.substring(1);  // Get the ID from the current hash in the URL
+        if (targetId) {
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            scrollToElement(targetElement);  // Scroll to the element if it exists
+          }
+        }
+      });
+    });
+</script>
+
+<script>
+let slideIndices = [0,0, 0, 0, 0, 0, ];
+showDivs(slideIndices);
+
+function plusDivs(idx, n) {
+  slideIndices[idx-1] += n;
+  showDivs(slideIndices);
+}
+
+function showDivs(indices) {
+  let idx;
+  console.log(indices);
+  for(idx=0; idx < indices.length; idx++){
+    
+    // var dates = document.querySelectorAll('[id^="createdOnID"]');
+    let tmp = '[id^="'+(idx+1)+'_slide"]'
+    // console.log(tmp);    
+    var x = document.querySelectorAll(tmp);
+    if(x.length == 0){
+      continue;
+    }
+    var i;    
+    n = slideIndices[idx];
+    if (n > x.length-1) {slideIndices[idx] = 0}
+
+    if (n < 0) {slideIndices[idx] = x.length-1}  
+
+    for (i = 0; i < x.length; i++) {
+      x[i].style.display = "none";  
+    }
+    x[slideIndices[idx]].style.display = "block";
+  }
+}
+</script>
+
+
+
+
+  <!-- JavaScript to handle citation clicks and highlight -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Find all citation links
+      const citations = document.querySelectorAll('.citation');
+
+      citations.forEach(function (citation) {
+        citation.addEventListener('click', function (event) {
+          event.preventDefault();  // Prevent default link behavior
+
+          const citationLink = citation.querySelector('a');  // Find the <a> inside the span
+
+          // Get the reference ID from the citation's href (remove the '#')
+          const refId = citationLink.getAttribute('href').substring(1);
+            
+          // Find the corresponding reference element using the ID
+          const refElement = document.getElementById(refId);
+
+          // Remove any previous highlights
+          document.querySelectorAll('.highlight').forEach(function (el) {
+            el.classList.remove('highlight');
+          });
+          document.querySelectorAll('.highlight-citation').forEach(function (el) {
+            el.classList.remove('highlight-citation');
+          });
+
+          if (refElement) {
+            console.log("Here");
+            // Scroll to the reference (smooth scroll)
+            refElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Add highlight to the reference
+            refElement.classList.add('highlight');
+
+            // Add highlight to the citation link
+            citation.classList.add('highlight-citation');
+            
+          }
+        });
+      });
+    });
+  </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    new ClipboardJS('.copy-btn');
+});
+
+</script>
+<script src="/static/toggle_bg.js" defer></script>
+<script src="/static/theme-toggle.js"></script>
+<!-- <script src="/static/mathjax-config.js"></script> -->
+
+</body>
+</html>
