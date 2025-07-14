@@ -72,11 +72,10 @@
   class="math inline">\(i\)</span>’th location of a vector <span
   class="math inline">\(\vec{a}\)</span> with <span
   class="math inline">\(a_i\)</span>. Often, however, owing to the need
-  for multi-indexing or other reasons, we will index vectors with
-  superscript the super script notation <span
-  class="math inline">\(a^{(j)}\)</span> instead. We understand this can
-  be confusing, so to ease cognitive load, the reader is asked to
-  remember that</p>
+  for multi-indexing or other reasons, we will index vectors with script
+  notation <span class="math inline">\(a^{(j)}\)</span> instead. We
+  understand this can be confusing, so to ease cognitive load, the
+  reader is asked to remember that</p>
   <ul>
   <li><p>When there are parentheses around <span
   class="math inline">\((i)\)</span> then <span
@@ -105,9 +104,10 @@
   <h3>Curves And Pairings</h3>
   <p>Let <span
   class="math inline">\(\textcolor{blue}{\mathtt{q}}\)</span> be some
-  prime. We highlight this in orange and write in a different font to
-  distinguish it from <span class="math inline">\(q(X)\)</span> which is
-  used to denote a univariate polynomial later.</p>
+  prime. We highlight this in blue and write in a different font to
+  distinguish it from univariate polynomial <span
+  class="math inline">\(q\)</span> which is used later in the post to
+  verify if the commitment keys are propelry structured.</p>
   <p>Throughout this post, and the posts hyper-linked here, we will
   assume the pairing <span class="math inline">\(e: \mathbb{G}_1\times
   \mathbb{G}_2\rightarrow \mathbb{G}_T\)</span> is constructed from some
@@ -166,8 +166,8 @@
   m-1\}\)</span>, <span class="math inline">\(f_i \in
   \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[Y]\)</span> is a univariate
   polynomial with degree at most <span class="math inline">\(\ell
-  -1\)</span> i.e <span class="math inline">\(f_i(y) = f_{(i, 0)}y^0 +
-  \ldots + f_{(i, \ell-1)}y^{\ell-1}\)</span> where <span
+  -1\)</span> i.e <span class="math inline">\(f_i(Y) = f_{(i, 0)}Y^0 +
+  \ldots + f_{(i, \ell-1)}Y^{\ell-1}\)</span> where <span
   class="math inline">\(f_{i,j} \in
   \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span> for all <span
   class="math inline">\(j \in \{0, \ldots, \ell-1\}\)</span></p>
@@ -235,8 +235,7 @@
   class="math inline">\(\vec{v}\)</span> using the KZG commitments as
   witness. The final commitment <span class="math inline">\(T \in
   \mathbb{G}_T\)</span> <span class="math display">\[T =
-  \prod_{i=0}^{m-1} e(A_j, v_j)\]</span> <strong>COST</strong>: <span
-  class="math inline">\(m\)</span> pairing operations</p>
+  \prod_{i=0}^{m-1} e(A_j, v_j)\]</span></p>
   </section>
   </section>
   <section id="how-to-open" class="level2">
@@ -260,23 +259,23 @@
   <p>Remember <span
   class="math inline">\(\textcolor{red}{f_{i,j}}\)</span> is the <span
   class="math inline">\(j\)</span>’th coefficient of univariate
-  polynomial <span class="math inline">\(f_i(y) = f_{(i, 0)}y^0 + \ldots
+  polynomial <span class="math inline">\(f_i(Y) = f_{(i, 0)}Y^0 + \ldots
   \textcolor{red}{f_{(i, j)}} + \ldots + f_{(i,
-  \ell-1)}y^{\ell-1}\)</span></p>
+  \ell-1)}Y^{\ell-1}\)</span></p>
   <p>Recall that <span class="math display">\[A_i = \prod_{j=0}^{\ell
-  -1} w_j^{f_{i,j}}\]</span> where <span
-  class="math inline">\(\vec{w}\)</span> is as defined in the trusted
-  setup section, which were KZG commitments to the univariate
+  -1} w_j^{f_{i,j}}\]</span> are KZG commitments to the univariate
   polynomials <span class="math inline">\(f_i \in
-  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[Y]\)</span>.</p>
+  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[Y]\)</span> and <span
+  class="math inline">\(\vec{w}\)</span> is as defined in the trusted
+  setup section.</p>
   <p>The prover computes <span class="math inline">\(U =
   \prod_{i=0}^{m-1} A_i^{(z_x)^i} \in \mathbb{G}_1\)</span>. Observe
   that <span class="math inline">\(U\)</span> is a KZG commitment to the
   univariate polynomial <span class="math inline">\(f(z_x, Y) =
   \sum_{j=0}^{\ell-1} \Big(\sum_{i=0}^{m-1} f_{i,
   j}(z_x)^i\Big)Y^j\)</span> (see <a href="">here</a> for the
-  derivation), which is a partial opening of the bivariate
-  polynomial.</p>
+  derivation), which is a partial opening of <span
+  class="math inline">\(f\)</span>.</p>
   </section>
   <section id="inner-product-proof" class="level3">
   <h3>2. Inner Product Proof</h3>
@@ -294,6 +293,7 @@
   class="math inline">\(\vec{A}\)</span> is the opening of <span
   class="math inline">\(T\)</span> under commitment key <span
   class="math inline">\(\vec{v}\)</span>.</p>
+  <div class="remark">
   <p>First we fully describe the remainder of the opening proof. Then we
   discuss what <span class="math inline">\(\pi_1\)</span> looks like in
   detail. This is the <strong>contribution</strong> of <span
@@ -301,6 +301,7 @@
   role="doc-biblioref">Bünz et al., 2019</a>)</span>. So we will dive
   deep into this in a subsequent section. Everything else about the
   opening proof we already know how to do.</p>
+  </div>
   </section>
   <section id="the-full-evaluation-proof" class="level3">
   <h3>3. The Full Evaluation Proof</h3>
@@ -388,11 +389,11 @@
   \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span></p></li>
   </ul>
   <p><span class="math display">\[\vec{A}^{(j)} = \left[A_i^{(j-1)}
-  \left(A^{(j-1)}_{m/2+i}\right)^{r_j}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span>
+  \left(A^{(j-1)}_{m/2^{j}+i}\right)^{r_j}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span>
   <span class="math display">\[\vec{b}^{(j)} = \left[b^{(j-1)}_i +
-  \left(b^{(j-1)}_{m/2+i}\right){r_j^{-1}}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span></p>
+  \left(b^{(j-1)}_{m/2^{j}+i}\right){r_j^{-1}}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span></p>
   <p><span class="math display">\[\vec{v}^{(j)} = \left[v^{(j-1)}_i
-  \left(v^{(j-1)}_{m/2+i}\right)^{r_j^{-1}}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span></p>
+  \left(v^{(j-1)}_{m/2^{j}+i}\right)^{r_j^{-1}}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span></p>
   <p><strong>FOR LOOP ENDS</strong></p>
   <hr />
   <p>After the for loop ends we output as the proof <span
