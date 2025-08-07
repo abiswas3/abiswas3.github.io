@@ -43,54 +43,134 @@
   <main class="content">
   <div class="blog">
    <h1>Faster Polynomial Evaluaton</h1> 
-  <section class="level3 remark">
-  <h3>Acknowledgements</h3>
-  <p><a href="https://people.cs.georgetown.edu/jthaler/">Justin
-  Thaler</a> recommended I look into the current implementation, and
-  sketched out the idea to speed up polynomial evaluation. All the
-  algorithmic innovation is his, and all potential technical bugs in the
-  implementation are mine.</p>
+  <section id="tracked-data-types" class="level2">
+  <h2>Tracked Data Types</h2>
+  <p>Before, describing optimisations to polynomial evaluation, we
+  discuss an additional tool to debug numerical algebra libraries. In <a
+  href="">Jolt</a> sum-check algorithms, almost invariably the
+  bottleneck in computation is number of field multiplications by large
+  scalars. So it might be helpful to be able to count the number of
+  multiplications your algorithm does, and check if we’re under the
+  theoretical limit.</p>
+  <p>Towards this we introduce <code>TrackedFr</code> data type which is
+  exactly the same as <code>ark_bn254::Fr</code> except for 1 critical
+  difference. <a href="">Implementation here</a></p>
+  <p>Before performing a multiplication operation, we increment a global
+  counter atomically (in a thread safe way). Rust makes this relatively
+  easy to do (it’s remarkable how far libraries have come that prevent
+  us from writing semaphores and mutexes from scratch) See [official
+  docs
+  here]](https://doc.rust-lang.org/std/sync/atomic/struct.AtomicUsize.html)</p>
+  <div class="code-container">
+    <pre class="line-numbers language-rust"><code id="codeblock-1" class="language-rust">use std::sync::atomic::{AtomicUsize, Ordering};
+
+  // A global counter that tracks how many times we&#39;ve use a*b where a, b are ark_bn254::Fr types
+  // see jolt-core::field::tracked_fr::TrackedFr for more details
+  pub static MULT_COUNT: AtomicUsize = AtomicUsize::new(0);
+  </code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-1" title="Copy code">📋</button>
+  </div>
+    
+  <p>We have the ability to reset this counter at any time as well. So
+  now all we need to do if we wanted to see how many multiplications
+  transpired, is to wrap the function being examined with
+  <code>reset_mult_count()</code> and <code>get_mult_count()</code>. See
+  an example of how to use <a href="">here</a>.</p>
+  <p>That’s it! Right now it just tracks multiplications, but you may
+  extend it to <strong>any</strong> operation <code>ark_bn254::Fr</code>
+  does by simply wrapping the operation as follows:</p>
+  <p>For all types of multiplication we do w</p>
+  <div class="code-container">
+    <pre class="line-numbers language-rust"><code id="codeblock-2" class="language-rust">// crate is jolt-core
+  use crate::utils::counters::MULT_COUNT;
+
+  // Owned * owned
+  impl Mul&lt;TrackedFr&gt; for TrackedFr {
+      type Output = TrackedFr;
+      fn mul(self, rhs: TrackedFr) -&gt; Self::Output {
+          MULT_COUNT.fetch_add(1, Ordering::Relaxed);
+          TrackedFr(self.0 * rhs.0)
+      }
+  }
+
+  // Owned * borrowed
+  impl&lt;&#39;a&gt; Mul&lt;&amp;&#39;a TrackedFr&gt; for TrackedFr {
+      type Output = TrackedFr;
+      fn mul(self, rhs: &amp;&#39;a TrackedFr) -&gt; Self::Output {
+          MULT_COUNT.fetch_add(1, Ordering::Relaxed);
+          TrackedFr(self.0 * rhs.0)
+      }
+  }
+
+  // Borrowed * owned
+  impl Mul&lt;TrackedFr&gt; for &amp;TrackedFr {
+      type Output = TrackedFr;
+
+      fn mul(self, rhs: TrackedFr) -&gt; Self::Output {
+          MULT_COUNT.fetch_add(1, Ordering::Relaxed);
+          TrackedFr(self.0 * rhs.0)
+      }
+  }
+
+  #[allow(clippy::needless_lifetimes)]
+  impl&lt;&#39;a, &#39;b&gt; Mul&lt;&amp;&#39;b TrackedFr&gt; for &amp;&#39;a TrackedFr {
+      type Output = TrackedFr;
+      fn mul(self, rhs: &amp;&#39;b TrackedFr) -&gt; Self::Output {
+          MULT_COUNT.fetch_add(1, Ordering::Relaxed);
+          TrackedFr(self.0 * rhs.0)
+      }
+  }</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-2" title="Copy code">📋</button>
+  </div>
+    
   </section>
   <section id="problem-statement" class="level2">
   <h2>Problem Statement</h2>
   <p>Fix <span class="math inline">\(n \in \mathbb{N}\)</span> and
   define <span class="math inline">\(N = 2^n\)</span>. In the Jolt
-  codebase there is an <a
-  href="https://github.com/a16z/jolt/blob/574dc265cea8ae525cfb039acd7a64a9840fced9/jolt-core/src/poly/multilinear_polynomial.rs#L619">algorithm</a>
-  that takes as input a vector <span class="math inline">\(f \in
-  \mathbb{F}^N\)</span> and an <span class="math inline">\(\vec{z} \in
-  \mathbb{F}^n\)</span> and outputs <span
-  class="math inline">\(\widetilde{f}(\vec{z})\)</span> where <span
-  class="math inline">\(\widetilde{f}\)</span> is the multilinear
-  extension (MLE) of <span class="math inline">\(f\)</span>. See Chapter
-  3 of <span class="citation" data-cites="thaler2020proofs">(<a
-  href="#ref-thaler2020proofs" role="doc-biblioref">Thaler,
-  2020</a>)</span> for details on how to compute MLE of a vector.</p>
+  codebase there is an <a href="">algorithm</a> that takes as input a
+  vector <span class="math inline">\(f \in \mathbb{F}^N\)</span> and an
+  <span class="math inline">\(\vec{z} \in \mathbb{F}^n\)</span> and
+  outputs <span class="math inline">\(\widetilde{f}(\vec{z})\)</span>
+  where <span class="math inline">\(\widetilde{f}\)</span> is the
+  multilinear extension (MLE) of <span class="math inline">\(f\)</span>.
+  See Chapter 3 of <span class="citation"
+  data-cites="thaler2020proofs">(<a href="#ref-thaler2020proofs"
+  role="doc-biblioref">Thaler, 2020</a>)</span> for details on how to
+  compute MLE of a vector.</p>
   <p>More specifically, the current algorithm does the following:</p>
   <ol type="1">
-  <li><p>Given <span class="math inline">\(\vec{z} \in
+  <li>Given <span class="math inline">\(\vec{z} \in
   \mathbb{F}^n\)</span> it computes all <span class="math inline">\(N =
   2^n\)</span> evaluations of Lagrange basis polynomials <span
   class="math inline">\(\Big\{\chi_{\vec{w}}(\vec{z})\Big\}_{\vec{w} \in
   \{0,1 \}^n}\)</span> where <span
   class="math inline">\(\chi_{\vec{w}}(\vec{z}) = \prod_{k=1}^{n} (1
-  -z_k)(1-w_k) + z_k w_k = eq(\vec{w}, \vec{z})\)</span>. Using the
-  memoisation algorithm described in <span class="citation"
+  -z_k)(1-w_k) + z_k w_k = eq(\vec{w}, \vec{z})\)</span>.</li>
+  </ol>
+  <p>Using the memoization algorithm described in <span class="citation"
   data-cites="walfishHybrid">(<a href="#ref-walfishHybrid"
   role="doc-biblioref">Vu et al., 2013</a>)</span>, this computation
-  require <span class="math inline">\(2^n\)</span> multiplications. See
+  require <span class="math inline">\(N\)</span> multiplications. See
   Lemma 3.8 of <span class="citation" data-cites="thaler2020proofs">(<a
   href="#ref-thaler2020proofs" role="doc-biblioref">Thaler,
   2020</a>)</span> for a simple exposition and analysis of this
-  algorithm. An implementation can be found <a
-  href="https://github.com/abiswas3/jolt/blob/24bb8a9fdb35f0c2effe9c77cde78c929d9fb235/jolt-core/src/poly/eq_poly.rs#L41">here</a>.</p></li>
-  <li><p>Then to compute the answer we compute a dot product, which
-  requires <span class="math inline">\(2^n\)</span> multiplications.
-  <span class="math display">\[\widetilde{f}(\vec{z}) = \sum_{w \in
-  \{0,1\}^n}f(w)\chi_{\vec{w}}(\vec{z})\]</span></p></li>
+  algorithm. An implementation can be found <a href="">here</a>.</p>
+  <ol start="2" type="1">
+  <li>Then to compute the answer we compute a dot product, which
+  requires <span class="math inline">\(N\)</span> multiplications. <span
+  class="math display">\[\widetilde{f}(\vec{z}) = \sum_{w \in
+  \{0,1\}^n}f(w)\chi_{\vec{w}}(\vec{z})\]</span></li>
   </ol>
   <p>In what follows, we describe how to speed up the implementation by
   a factor of 2.</p>
+  <div class="remark">
+  <p>For a single polynomial evaluation, even if <span
+  class="math inline">\(f(w)\)</span> were to be 0, the current code
+  base still proceeds to do multiplication instead of just returning 0.
+  This is fixed in batched evaluation, but we mention it here, as this
+  will be reflected when performing benchmarks.</p>
+  </div>
   </section>
   <section id="a-constant-factor-improvement" class="level2">
   <h2>A Constant Factor Improvement</h2>
@@ -106,9 +186,10 @@
   f(w_1,...,w_n)
   \end{align}
   \]</span></p>
-  <p>Notice that <span class="math display">\[
+  <p>Notice that for any <span class="math inline">\((w_1, \ldots,
+  w_{n-1}) \in \{ 0, 1\}^{n-1}\)</span> <span class="math display">\[
   \begin{align}
-  \sum_{w_n \in \{ 0, 1\}} \operatorname{eq}(z_n, w_n) \cdot f(w_1,
+  \sum_{w_n \in \{0,1\}} \operatorname{eq}(z_n, w_n) \cdot f(w_1,
   \ldots, w_n)
   &amp;= f(w_1, \ldots, w_{n-1}, 0) \notag \\
   &amp;\quad + z_n \cdot \left(
@@ -134,119 +215,160 @@
   <li>…</li>
   <li>The last iteration is just 1 multiplication.</li>
   </ul>
-  <p>Thus, there is a total of <span class="math inline">\(2^n\)</span>
-  multiplications, instead of the two step process described above, each
-  of which had <span class="math inline">\(2^n\)</span>
-  multiplications.</p>
+  <p>Thus, there is a total of <span class="math inline">\(N
+  =2^n\)</span> multiplications, instead of the two step process
+  described above, each of which had <span
+  class="math inline">\(2N\)</span> multiplications aove</p>
+  <section id="fully-worked-out-example-for-inside-out-algorithm"
+  class="level3 remark">
+  <h3>Fully Worked Out Example For Inside Out Algorithm</h3>
+  <p><strong>Notation</strong>: Bits are written in BigEndian where the
+  left most bit is the MSB.</p>
+  <p>Given all evaluations of multi-linear polynomial <span
+  class="math inline">\(f\)</span> <span class="math display">\[
+  \begin{aligned}
+  f(0, 0, 0) &amp;= 0 \\
+  f(0, 0, 1) &amp;= 0 \\
+  f(0, 1, 0) &amp;= 1 \\
+  f(0, 1, 1) &amp;= 0 \\
+  f(1, 0, 0) &amp;= 0 \\
+  f(1, 0, 1) &amp;= 0 \\
+  f(1, 1, 0) &amp;= 0 \\
+  f(1, 1, 1) &amp;= 1
+  \end{aligned}
+  \]</span></p>
+  <p>We are told to compute <span class="math inline">\(f(4, 3,
+  2)\)</span>,</p>
+  <section id="step-1" class="level4">
+  <h4>Step 1</h4>
+  <p><span class="math display">\[
+  \begin{align*}
+  f(0, 0, 2) &amp;= f(0, 0, 0) + 2(f(0, 0, 1) - f(0, 0, 0)) &amp;= 0 +
+  2(0 - 0) &amp;= 0 \\
+  f(0, 1, 2) &amp;= f(0, 1, 0) + 2(f(0, 1, 1) - f(0, 1, 0)) &amp;= 1 +
+  2(0 - 1) &amp;= -1 \\
+  f(1, 0, 2) &amp;= f(1, 0, 0) + 2(f(1, 0, 1) - f(1, 0, 0)) &amp;= 0 +
+  2(0 - 0) &amp;= 0 \\
+  f(1, 1, 2) &amp;= f(1, 1, 0) + 2(f(1, 1, 1) - f(1, 1, 0)) &amp;= 0 +
+  2(1 - 0) &amp;= 2
+  \end{align*}
+  \]</span></p>
   </section>
-  <section id="physical-implementation" class="level2">
-  <h2>Physical Implementation</h2>
-  <p>To verify I did not bungle anything up</p>
-  <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-1" class="language-bash"> cargo test -p jolt-core poly::dense_mlpoly::tests
-  argo test -p jolt-core poly::dense_mlpoly::tests                                                                                           ─╯
-  warning: Patch `ark-bn254 v0.5.0-alpha.0 (https://github.com/a16z/arkworks-algebra?branch=dev%2Ftwist-shout#efc56e0d)` was not used in the crate graph.
-  Check that the patched package version and available features are compatible
-  with the dependency requirements. If the patch has a different version from
-  what is locked in the Cargo.lock file, run `cargo update` to use the new
-  version. This may also occur with an optional dependency that is not enabled.
-     Compiling jolt-core v0.1.0 (/Users/aribiswas3/Work-With-A16z/ari_jolt/jolt-core)
-      Finished `test` profile [optimized + debuginfo] target(s) in 48.98s
-       Running unittests src/lib.rs (target/debug/deps/jolt_core-9e689eac2470ccbd)
-
-  running 4 tests
-  test poly::dense_mlpoly::tests::fast_evaluation ... ok
-  test poly::dense_mlpoly::tests::check_memoized_chis ... ok
-  test poly::dense_mlpoly::tests::evaluation ... ok
-  test poly::dense_mlpoly::tests::compare_random_evaluations ... ok</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-1" title="Copy code">📋</button>
-  </div>
-    
-  <p>The main changes are <a
-  href="https://github.com/abiswas3/jolt/blob/24bb8a9fdb35f0c2effe9c77cde78c929d9fb235/jolt-core/src/poly/dense_mlpoly.rs#L259">here</a>,
-  and the benchmarking cam be found <a
-  href="https://github.com/abiswas3/jolt/blob/feat/poly-eval-opts/jolt-core/benches/poly_bench.rs">here</a></p>
-  <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-2" class="language-bash">git clone https://github.com/abiswas3/jolt.git
-  cd jolt
-  git checkout feat/poly-eval-opts
-  cargo bench -p jolt-core --bench poly_bench
-  cargo bench -p jolt-core --bench compact_poly_bench  # This runs the compact polynomial benchmarks for u8 only for now</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-2" title="Copy code">📋</button>
-  </div>
-    
-  <p>Then run the following script to get the plot below which shows
-  speed for dense polynomial evaluations (Large Scalars). Only because I
-  don’t like the reports <code>criterion</code> generates, and that this
-  plot clearly depicts the constant factor improvement even as we
-  increase the number of variables. <img
-  src="/blog_assets/fast_poly/comparison.png" /></p>
-  <section class="level3 remark">
-  <h3>Note About Script</h3>
-  <p>The following plotting code was generated by chat GPT</p>
+  <section id="step-2" class="level4">
+  <h4>Step 2:</h4>
+  <p><span class="math display">\[
+  \begin{align*}
+  f(0, 3, 2) &amp;= f(0, 0, 2) + 3(f(0, 1, 2) - f(0, 0, 2)) &amp;= 0 +
+  3(-1 - 0) &amp;= -3 \\
+  f(1, 3, 2) &amp;= f(1, 0, 2) + 3(f(1, 1, 2) - f(1, 0, 2)) &amp;= 0 +
+  3(2 - 0) &amp;= 6
+  \end{align*}
+  \]</span></p>
   </section>
+  <section id="step-3" class="level4">
+  <h4>Step 3</h4>
+  <p><span class="math display">\[
+  \begin{align*}
+  f(4, 3, 2) &amp;= f(0, 3, 2) + 4(f(1, 3, 2) - f(0, 3, 2)) \\
+  &amp;= -3 + 4(6 - (-3)) = -3 + 4 \cdot 9 = -3 + 36 = \boxed{33}
+  \end{align*}
+  \]</span></p>
+  </section>
+  </section>
+  </section>
+  <section id="leveraging-sparsity" class="level2">
+  <h2>Leveraging Sparsity</h2>
+  <p>Now what if told you that <span
+  class="math inline">\(\gamma\)</span> fraction of the evaluations of
+  <span class="math inline">\(\widetilde{f}\)</span> over <span
+  class="math inline">\(\{0, 1\}^n\)</span> are zero. Then the dot
+  product implementation requires :</p>
+  <ul>
+  <li><span class="math inline">\(N + \gamma N\)</span>
+  multiplications.</li>
+  </ul>
+  <div class="remark">
+  <p>The current Jolt Implementation does not leverage sparsity at all.
+  That is even multiplying <code>a*b</code> it does not check if
+  <code>a</code> or <code>b</code> is zero to simply return 0. It goes
+  ahead and does montgomery multiplication.</p>
+  <p><strong>This is not the case with batched evaluation we will
+  discuss later</strong>.</p>
+  </div>
+  <p>An alternative way to implement this dot product algorithm is take
+  <span class="math inline">\(\vec{z} = \vec{z_1} || \vec{z_2}\)</span>
+  and split into 2 halves of size <span
+  class="math inline">\(n/2\)</span> and compute</p>
+  <p><span class="math display">\[\sum_{\vec{x_1} \in \{ 0,
+  1\}^{n/2}}\mathsf{eq}(\vec{z_1}, \vec{x_1})\sum_{\vec{x_2} \in \{ 0,
+  1\}^{n/2}}eq(\vec{z_2}, \vec{x_2})\widetilde{f}(x_1||x_2)\]</span></p>
+  <p>This takes</p>
+  <ul>
+  <li><span class="math inline">\(2\sqrt{N} + \sqrt{N} + \gamma N =
+  3\sqrt{N} + \gamma N\)</span> multiplications</li>
+  </ul>
+  <p>The inside-out evaluation, also leverages sparsity, but in a way
+  that depends on the distribution of 0s. Imagine <span
+  class="math inline">\(N=8\)</span> and the following two arrays</p>
   <div class="code-container">
-    <pre class="line-numbers language-python"><code id="codeblock-3" class="language-python">import json
-  import os
-  import matplotlib.pyplot as plt
-
-  # Path to criterion benchmark output
-  base_path = &quot;target/criterion/evals&quot;
-
-  # Containers for results
-  results = {
-      &quot;dot-product&quot;: {&quot;x&quot;: [], &quot;y&quot;: [], &quot;err&quot;: []},
-      &quot;inside-out&quot;: {&quot;x&quot;: [], &quot;y&quot;: [], &quot;err&quot;: []},
-  }
-
-  # Iterate over all benchmark subdirectories
-  for entry in os.listdir(base_path):
-      subdir = os.path.join(base_path, entry)
-      if not os.path.isdir(subdir):
-          continue
-
-      if entry.startswith(&quot;dot-product-&quot;) or entry.startswith(&quot;inside-out-&quot;):
-          algo, param = entry.rsplit(&quot;-&quot;, 1)
-          try:
-              param = int(param)
-          except ValueError:
-              continue
-
-          path = os.path.join(subdir, &quot;new&quot;, &quot;estimates.json&quot;)
-          if os.path.exists(path):
-              with open(path) as f:
-                  data = json.load(f)
-                  mean = data[&quot;mean&quot;][&quot;point_estimate&quot;] / 1e6  # ns → ms
-                  stderr = data[&quot;mean&quot;][&quot;standard_error&quot;] / 1e6
-
-                  results[algo][&quot;x&quot;].append(param)
-                  results[algo][&quot;y&quot;].append(mean)
-                  results[algo][&quot;err&quot;].append(stderr)
-
-  # Plotting
-  plt.figure(figsize=(10, 6))
-
-  for algo, data in results.items():
-      if data[&quot;x&quot;]:
-          # Sort by param size
-          sorted_data = sorted(zip(data[&quot;x&quot;], data[&quot;y&quot;], data[&quot;err&quot;]))
-          x, y, err = zip(*sorted_data)
-          plt.errorbar(
-              x, y, yerr=err, label=algo, marker=&quot;o&quot;, capsize=4,
-              linestyle=&quot;-&quot;, linewidth=2
-          )
-
-  plt.yscale(&quot;log&quot;)
-  plt.xlabel(&quot;Param size (log2)&quot;)
-  plt.ylabel(&quot;Time (ms, log scale)&quot;)
-  plt.title(&quot;Criterion Benchmark: dot-product vs inside-out&quot;)
-  plt.legend()
-  plt.grid(True, which=&quot;both&quot;, linestyle=&quot;--&quot;, linewidth=0.5)
-  plt.tight_layout()
-  plt.show()</code></pre>
+    <pre class="line-numbers language-rust"><code id="codeblock-3" class="language-rust">[12, 32, 55, 121, 0, 0, 0, 0]
+  [0, 32, 55, 0, 0, 21, 11, 0]</code></pre>
     <button class="copy-btn" data-clipboard-target="#codeblock-3" title="Copy code">📋</button>
   </div>
     
+  <p>In the first case, despite having half the evaluations set to 0,
+  <span class="math inline">\(z(f[i] - f[m2+i])\)</span> is not zero. in
+  the second case, the zero’s align well and we can get rid of two out
+  of 4 multiplications.</p>
+  <p>Below are two plots that show the impact of sparsity on a single
+  polynomial evaluation. The plot on top shows exactly how many
+  multiplications are occurring for each algorithm (note
+  <code>dot_product</code> is not checking for zeros, so it’s <span
+  class="math inline">\(2N\)</span> always). Also shown in a dashed line
+  is the theoretical upper bound for the algorithm that spilts
+  <code>eq</code>, and this confirms that our implementation is
+  efficient,</p>
+  <p><img src="/blog_assets/fast_poly/single_poly_eval_sparsity.png" />
+  <img
+  src="/blog_assets/fast_poly/single_poly_evals_num_vars.png" /></p>
+  <p>The plot below shows the physical times. Notice how the two trends
+  are almost identical, which does confirm that the bottleneck in
+  polynomial evaluation really is field multiplication.</p>
+  <p>How to get these plots yourself:</p>
+  <div class="code-container">
+    <pre class="line-numbers language-rust"><code id="codeblock-4" class="language-rust">cargo run -p jolt-core --example polynomial_evaluation --release</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-4" title="Copy code">📋</button>
+  </div>
+    
+  <p>This should generate a file called <code>results.csv</code> from
+  which the above numbers can be easily calculated.</p>
+  </section>
+  <section id="batched-polynomial-evaluation" class="level2">
+  <h2>Batched Polynomial Evaluation</h2>
+  <p>Now we get to batched evaluations, that is we want to evaluate
+  multilinear polynomials <span class="math inline">\(f_1, \ldots,
+  f_s\)</span> at the same point <span
+  class="math inline">\(\vec{z}\)</span>.</p>
+  <p>Now the cost of computing <span class="math inline">\(eq\)</span>
+  is not as bad as it can be re-used for all <span
+  class="math inline">\(\{f_i\}_{i \in [s]}\)</span>. Still we show
+  splitting <span class="math inline">\(eq\)</span> into <span
+  class="math inline">\(eq_1\)</span> and <span
+  class="math inline">\(eq_2\)</span> can provide time savings.</p>
+  <p>Once again we will measure both the exact number of
+  multiplications, and the actual time it took to multiply things.</p>
+  <p><img
+  src="/blog_assets/fast_poly/batch_poly_eval_sparsity.png" /></p>
+  <p><img
+  src="/blog_assets/fast_poly/batch_poly_evals_num_vars.png" /></p>
+  <p>To get these plots run</p>
+  <div class="code-container">
+    <pre class="line-numbers language-rust"><code id="codeblock-5" class="language-rust">cargo run -p jolt-core --example polynomial_evaluation --release</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-5" title="Copy code">📋</button>
+  </div>
+    
+  <p>and you shall receive a file called
+  <code>batch_results.csv</code></p>
   </section>
   <section id="references" class="level2 unnumbered">
   <h2 class="unnumbered">References</h2>
