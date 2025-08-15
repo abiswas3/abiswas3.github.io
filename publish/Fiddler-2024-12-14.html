@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -19,6 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
@@ -49,7 +49,7 @@
   <section id="simulation" class="level1">
   <h1>Simulation</h1>
   <div class="code-container">
-    <pre class="line-numbers language-python3"><code id="codeblock-1" class="language-python3">import copy
+    <pre class="line-numbers"><code id="codeblock-1" class="language-python3">import copy
   from collections import Counter
   import random
 
@@ -166,7 +166,7 @@
   win_dist = {x: 0 for x in player_names}
   num_games = 300000
   # rounds_to_survive = HEIGHT*WIDTH-1 # R
-  rounds_to_survive = 1 # R 
+  rounds_to_survive = 1 # R
   for _ in range(num_games):
       board, rem_players = game(copy.deepcopy(A),
                                 copy.deepcopy(players),
@@ -175,15 +175,15 @@
       # print()
       for x in rem_players:
           win_dist[x] += 1
-          
+
   print(&quot;Empirical distribution of players that survive round {}&quot;.format(
       rounds_to_survive))
   ranking = pd.Series(win_dist)/num_games
   print(ranking.sort_values())
-      </code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-1" title="Copy code">📋</button>
+  </code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-1" aria-label="Copy code">📋</button>
   </div>
-    
+
   </section>
   </div>
   </main>
@@ -364,7 +364,6 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
-<!-- <script src="/static/mathjax-config.js"></script> -->
 
 </body>
 </html>

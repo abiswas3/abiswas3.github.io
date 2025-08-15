@@ -1,30 +1,53 @@
 :root{
 --content-max-width: 760px;
-  --base-font-family: apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+/*  --base-font-family: apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; */
+  --base-font-family: font-family: system-ui, sans-serif;;
   --content-font-family: 'Chalkboard SE', sans-serif;
   /* --base-font-wt: 100;   */
 }
 
-/* === Theme Colors === */
+/* === NYT-Inspired Theme Colors === */
+
+/* Light Mode */
 body.light-mode {  
-  --heading: #34558b;  
-  --text: #333333;
-  --bg: #FFFF;
-  --link: seagreen; 
-  --border-color: black;
+--bg: #ffffff;        /* page background */
+--masonry-bg: #f9f9f9; /* card background */
+  --text: #111111;             /* dark text for readability */
+  --heading: #222222;          /* slightly stronger than text */
+  --link: #0f3b66;             /* Momiji-inspired soft red */
+  --link-hover: rgba(255, 204, 0, 0.6);;       
+  --border-color: #e0e0e0;    /* subtle borders */
+  --tag-colour: #999999;       /* muted gray for tags */
+  --abstract-colour: #555555;  /* secondary text for abstracts */
+  --author-text: #333333;      /* main author text */
+  --primary-author-bg: var(--link);/* subtle highlight for primary author */
+  --single-line-code-colour: #111111;
+  --single-line-code-bg: #f5f5f5;
+  --math-colour: #111111;
   --base-font-size: 1.08rem;
-  --nav-colour: black;
+  --nav-colour: var(--link);
+  --date-colour: #0f3b66;
 }
 
+/* Dark Mode */
 body.dark-mode{
-  --bg: #282828; 
-  --text: #ebdbb2; 
-  --heading: #fabd2f;
-  --link: #66ccff;
-  --link-hover: salmon;
-  --border-color: #e0ddd6;
+--bg: #1c1c1c;        /* dark background */
+--masonry-bg: #262626; /* slightly lighter card background */
+  --text: #e0e0e0;             /* light text */
+  --heading: #ffffff;          /* headings stand out */
+  --link: #66ccff;             /* light blue links */
+  --link-hover: #339933;       
+  --border-color: #444444;     /* subtle borders */
+  --tag-colour: #aaaaaa;       /* muted tags */
+  --abstract-colour: #cccccc;  /* secondary text */
+  --author-text: #ffffff;      /* author text visible */
+  --primary-author-bg: var(--link);/* highlight for primary author */
+  --single-line-code-colour: #e0e0e0;
+  --single-line-code-bg: #2a2a2a;
+  --math-colour: #f0f0f0;
   --base-font-size: 1.08rem;
-  --nav-colour: #ebdbb2;
+  --nav-colour: var(--link);
+  --date-colour: #53e0d0;
 }
 
 
@@ -34,9 +57,11 @@ html, body {
   background-color: var(--bg);
   color: var(--text);
   font-family: var(--base-font-family);
-  overflow-x: hidden; /* prevent page-wide horizontal scroll */
+  overflow-x: hidden;
   font-size: var(--base-font-size);
-  font-weight: var(--base-font-wt);
+  font-weight: var(--base-font-wt);  
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
 }
 .content {
   max-width: var(--content-max-width);
@@ -105,15 +130,17 @@ h2 {
   margin-bottom: 0.5em;
 }
 a {
-  color: var(--link);  /* lively bamboo green */
+  color: var(--link);  
   text-decoration: none;
   font-weight: 600;
+
+}
+a:hover,
+a:focus {
   text-decoration: underline;
+  background-color: var(--link-hover)
 }
-a:hover, a:focus {
-  color: var(--link-hover);
-  
-}
+
 
 strong{
   color: var(--heading);
@@ -144,11 +171,6 @@ strong{
   cursor: pointer;
 }
 
-.nav-links {
-  display: flex;
-  gap: 1rem;
-}
-
 
 .nav-links a {
   color: var(--link);
@@ -159,6 +181,20 @@ strong{
 .nav-links a:hover {
   text-decoration: underline;
 }
+
+.nav-links {
+  display: flex;
+  align-items: center; /* vertically center everything inside */
+  gap: 1rem;           /* optional: space between links and toggle */
+}
+
+.nav-links label {
+  display: flex;       /* make the label a flex container too */
+  align-items: center; /* vertically center the checkbox inside the label */
+  margin: 0;           /* remove default margin if any */
+  padding: 0;
+}
+
 
 /* Mobile */
 @media (max-width: 600px) {
@@ -180,8 +216,8 @@ strong{
     font-size: 0.8em;
   }
 
-  main{
-    font-size: 12px;
+  main, .remark{
+    font-size: 14px;
   }
 }
 

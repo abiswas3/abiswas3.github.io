@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -19,6 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
@@ -83,7 +83,7 @@
   \]</span></p>
   <table>
   <thead>
-  <tr class="header">
+  <tr>
   <th>Bit position (i)</th>
   <th>Bit value</th>
   <th><span class="math display">\[2^i \cdot P\]</span></th>
@@ -91,37 +91,37 @@
   </tr>
   </thead>
   <tbody>
-  <tr class="odd">
+  <tr>
   <td>0</td>
   <td>0</td>
   <td><span class="math display">\[1 \cdot P\]</span></td>
   <td>No</td>
   </tr>
-  <tr class="even">
+  <tr>
   <td>1</td>
   <td>0</td>
   <td><span class="math display">\[2 \cdot P\]</span></td>
   <td>No</td>
   </tr>
-  <tr class="odd">
+  <tr>
   <td>2</td>
   <td>1</td>
   <td><span class="math display">\[4 \cdot P\]</span></td>
   <td>✅ Yes</td>
   </tr>
-  <tr class="even">
+  <tr>
   <td>3</td>
   <td>0</td>
   <td><span class="math display">\[8 \cdot P\]</span></td>
   <td>No</td>
   </tr>
-  <tr class="odd">
+  <tr>
   <td>4</td>
   <td>1</td>
   <td><span class="math display">\[16 \cdot P\]</span></td>
   <td>✅ Yes</td>
   </tr>
-  <tr class="even">
+  <tr>
   <td>5</td>
   <td>1</td>
   <td><span class="math display">\[32 \cdot P\]</span></td>
@@ -247,36 +247,36 @@
   <col style="width: 62%" />
   </colgroup>
   <thead>
-  <tr class="header">
+  <tr>
   <th>Feature</th>
   <th>Naive Double-and-Add</th>
   <th>Pippenger with Window <span class="math inline">\(c\)</span></th>
   </tr>
   </thead>
   <tbody>
-  <tr class="odd">
+  <tr>
   <td>Time per scalar</td>
   <td><span class="math inline">\(O(\log s)\)</span></td>
   <td><span class="math inline">\(O\left(\frac{\log
   s}{c}\right)\)</span> amortized</td>
   </tr>
-  <tr class="even">
+  <tr>
   <td>Total additions</td>
   <td><span class="math inline">\(O(n \log s)\)</span></td>
   <td><span class="math inline">\(O\left( \left( \frac{n}{c} + 2^c
   \right) \frac{\log s}{c} \right)\)</span></td>
   </tr>
-  <tr class="odd">
+  <tr>
   <td>Parallelizable</td>
   <td>No</td>
   <td>Yes (bucket accumulation is parallelizable)</td>
   </tr>
-  <tr class="even">
+  <tr>
   <td>Memory usage</td>
   <td>Low</td>
   <td>Higher (buckets)</td>
   </tr>
-  <tr class="odd">
+  <tr>
   <td>Use case</td>
   <td>Small <span class="math inline">\(n\)</span>, low concurrency</td>
   <td>Large <span class="math inline">\(n\)</span>, batched MSM</td>
@@ -325,14 +325,14 @@
   <li></li>
   </ul>
   </section>
-  <section class="footnotes footnotes-end-of-document"
+  <section id="footnotes" class="footnotes footnotes-end-of-document"
   role="doc-endnotes">
   <hr />
   <ol>
-  <li id="fn1" role="doc-endnote"><p>If the group was represented using
-  multiplicative notation, we would refer to this algorithm as squaring
-  and multiply. Also we are treating add/double as add, equivalently
-  multiply/square as multiply. We do not differentiate.<a href="#fnref1"
+  <li id="fn1"><p>If the group was represented using multiplicative
+  notation, we would refer to this algorithm as squaring and multiply.
+  Also we are treating add/double as add, equivalently multiply/square
+  as multiply. We do not differentiate.<a href="#fnref1"
   class="footnote-back" role="doc-backlink">↩︎</a></p></li>
   </ol>
   </section>
@@ -515,7 +515,6 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
-<!-- <script src="/static/mathjax-config.js"></script> -->
 
 </body>
 </html>

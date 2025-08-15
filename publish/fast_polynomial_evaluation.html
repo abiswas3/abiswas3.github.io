@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -19,6 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
@@ -58,19 +58,19 @@
   <p>Before performing a multiplication operation, we increment a global
   counter atomically (in a thread safe way). Rust makes this relatively
   easy to do (it’s remarkable how far libraries have come that prevent
-  us from writing semaphores and mutexes from scratch) See [official
-  docs
-  here]](https://doc.rust-lang.org/std/sync/atomic/struct.AtomicUsize.html)</p>
+  us from writing semaphores and mutexes from scratch) See <a
+  href="https://doc.rust-lang.org/std/sync/atomic/struct.AtomicUsize.html">official
+  docs here</a></p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-1" class="language-rust">use std::sync::atomic::{AtomicUsize, Ordering};
+    <pre class="line-numbers"><code id="codeblock-1" class="language-rust">use std::sync::atomic::{AtomicUsize, Ordering};
 
   // A global counter that tracks how many times we&#39;ve use a*b where a, b are ark_bn254::Fr types
   // see jolt-core::field::tracked_fr::TrackedFr for more details
   pub static MULT_COUNT: AtomicUsize = AtomicUsize::new(0);
   </code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-1" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-1" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>We have the ability to reset this counter at any time as well. So
   now all we need to do if we wanted to see how many multiplications
   transpired, is to wrap the function being examined with
@@ -81,7 +81,7 @@
   does by simply wrapping the operation as follows:</p>
   <p>For all types of multiplication we do w</p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-2" class="language-rust">// crate is jolt-core
+    <pre class="line-numbers"><code id="codeblock-2" class="language-rust">// crate is jolt-core
   use crate::utils::counters::MULT_COUNT;
 
   // Owned * owned
@@ -120,9 +120,9 @@
           TrackedFr(self.0 * rhs.0)
       }
   }</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-2" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-2" aria-label="Copy code">📋</button>
   </div>
-    
+
   </section>
   <section id="problem-statement" class="level2">
   <h2>Problem Statement</h2>
@@ -311,15 +311,15 @@
   that depends on the distribution of 0s. Imagine <span
   class="math inline">\(N=8\)</span> and the following two arrays</p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-3" class="language-rust">[12, 32, 55, 121, 0, 0, 0, 0]
+    <pre class="line-numbers"><code id="codeblock-3" class="language-rust">[12, 32, 55, 121, 0, 0, 0, 0]
   [0, 32, 55, 0, 0, 21, 11, 0]</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-3" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-3" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>In the first case, despite having half the evaluations set to 0,
-  <span class="math inline">\(z(f[i] - f[m2+i])\)</span> is not zero. in
-  the second case, the zero’s align well and we can get rid of two out
-  of 4 multiplications.</p>
+  <span class="math inline">\(z(f[i] - f[m/2+i])\)</span> is not zero.
+  in the second case, the zero’s align well and we can get rid of two
+  out of 4 multiplications.</p>
   <p>Below are two plots that show the impact of sparsity on a single
   polynomial evaluation. The plot on top shows exactly how many
   multiplications are occurring for each algorithm (note
@@ -336,10 +336,10 @@
   polynomial evaluation really is field multiplication.</p>
   <p>How to get these plots yourself:</p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-4" class="language-rust">cargo run -p jolt-core --example polynomial_evaluation --release</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-4" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-4" class="language-rust">cargo run -p jolt-core --example polynomial_evaluation --release</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-4" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>This should generate a file called <code>results.csv</code> from
   which the above numbers can be easily calculated.</p>
   </section>
@@ -363,24 +363,23 @@
   src="/blog_assets/fast_poly/batch_poly_evals_num_vars.png" /></p>
   <p>To get these plots run</p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-5" class="language-rust">cargo run -p jolt-core --example polynomial_evaluation --release</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-5" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-5" class="language-rust">cargo run -p jolt-core --example polynomial_evaluation --release</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-5" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>and you shall receive a file called
   <code>batch_results.csv</code></p>
   </section>
   <section id="references" class="level2 unnumbered">
   <h2 class="unnumbered">References</h2>
   <div id="refs" class="references csl-bib-body hanging-indent"
-  role="doc-bibliography">
-  <div id="ref-thaler2020proofs" class="csl-entry"
-  role="doc-biblioentry">
+  data-entry-spacing="0" role="list">
+  <div id="ref-thaler2020proofs" class="csl-entry" role="listitem">
   Thaler, J., 2020. <a
   href="https://people.cs.georgetown.edu/jthaler/ProofsArgsAndZK.pdf">Proofs,
   arguments, and zero-knowledge</a>.
   </div>
-  <div id="ref-walfishHybrid" class="csl-entry" role="doc-biblioentry">
+  <div id="ref-walfishHybrid" class="csl-entry" role="listitem">
   Vu, V., Setty, S., Blumberg, A.J., Walfish, M., 2013. <span
   class="nocase">A Hybrid Architecture for Interactive Verifiable
   Computation </span>, in: 2012 IEEE Symposium on Security and Privacy.
@@ -568,7 +567,6 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
-<!-- <script src="/static/mathjax-config.js"></script> -->
 
 </body>
 </html>

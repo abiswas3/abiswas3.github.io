@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -19,6 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
@@ -102,7 +102,7 @@
   unit tests <strong>fail</strong> for <strong>both</strong>
   <code>s-mult</code> and <code>h-mult</code>.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-1" class="language-bash">thread &#39;&lt;unnamed&gt;&#39; panicked at /Users/aribiswas3/Work-With-A16z/arkworks-algebra/ff/src/fields/models/fp/montgomery_backend.rs:1360:9:
+    <pre class="line-numbers"><code id="codeblock-1" class="language-bash">thread &#39;&lt;unnamed&gt;&#39; panicked at /Users/aribiswas3/Work-With-A16z/arkworks-algebra/ff/src/fields/models/fp/montgomery_backend.rs:1360:9:
   High limb expected to be 0 if S &gt;= 1 before 2p comparison
 
 
@@ -110,9 +110,9 @@
       jolt::vm::rv32i_vm::tests::sha3_e2e_hyperkzg
 
   test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 219 filtered out; finished in 4.79s</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-1" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-1" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>Digging deeper, the part of the Jolt codebase that fails is code
   for subtraction. The <a
   href="https://github.com/abiswas3/arkworks-algebra/blob/19e66617147b3a9779df30522539fb8e8d3217c6/ff/src/fields/models/fp/montgomery_backend.rs#L1348">Conditional
@@ -155,13 +155,13 @@
   times all three are different.</p>
   <p>To summarise:</p>
   <ul>
-  <li><code>c-mult</code>: that passes unit tests and subtracts <span
+  <li><code>c-mult</code>: passes unit tests and subtracts <span
   class="math inline">\(p\)</span> from <span
   class="math inline">\(a\)</span> when <span class="math inline">\(a
   \ge p\)</span>.</li>
-  <li><code>h-mult</code>: that fails unit tests and does not do any
+  <li><code>h-mult</code>: fails unit tests and does not do any
   reduction.</li>
-  <li><code>s-mult</code>: that fails unit tests and subtracts <span
+  <li><code>s-mult</code>: fails unit tests and subtracts <span
   class="math inline">\(2p\)</span> from <span
   class="math inline">\(a\)</span> when the msb of <span
   class="math inline">\(a\)</span> is 1.</li>
@@ -431,6 +431,16 @@
   <p>What the code described in the <code>s-mul</code> algorithm does is
   – it implements the above algorithm <strong>exactly</strong> as
   described above.</p>
+  <div class="thm">
+  <section class="level3">
+  <h3>Thm: </h3>
+  </section>
+  <section id="upper-bound" class="level3">
+  <h3>Upper Bound</h3>
+  <p>We claim that <span class="math inline">\(s &lt;
+  n\cdot(rp)\)</span>.</p>
+  </section>
+  </div>
   <section class="level3 thm">
   <h3>Thm: Upper Bound</h3>
   <p>We claim that <span class="math inline">\(s &lt;
@@ -636,7 +646,7 @@
   <p>The first step is to remove all subtractions from all algorithms
   and observe how fast things are.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-2" class="language-bash">warning: `minimal_mult` (example &quot;ark-multiplication&quot;) generated 1 warning
+    <pre class="line-numbers"><code id="codeblock-2" class="language-bash">warning: `minimal_mult` (example &quot;ark-multiplication&quot;) generated 1 warning
       Finished `release` profile [optimized] target(s) in 3.76s
        Running `target/release/examples/ark-multiplication`
   100000 Trials of 100 chained multiplications
@@ -645,9 +655,9 @@
   C-mult    1779.19279
   H-mult    1567.37109
   dtype: float64</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-2" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-2" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>We are 11% faster. Note is very difficult to pinpoint if it’s due
   to fewer multiplications or how we wrote the code without using
   contiguous memory, but with 100,000 random inputs and 100 chained
@@ -664,7 +674,7 @@
   After all, we had one algorithm faster than the second algorithm, and
   we added the same line of code to both.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-3" class="language-bash">    Finished `release` profile [optimized] target(s) in 0.80s
+    <pre class="line-numbers"><code id="codeblock-3" class="language-bash">    Finished `release` profile [optimized] target(s) in 0.80s
        Running `target/release/examples/ark-multiplication`
   100000 Trials of 100 chained multiplications
   Benchmarking done
@@ -672,9 +682,9 @@
   C-mult    1791.88866
   H-mult    1889.26951
   dtype: float64</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-3" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-3" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>We are 5% slower. With a little thought and <a
   href="https://www.youtube.com/watch?v=-HNpim5x-IE">listening Matt
   Godbolt</a>, this observation is not surprising. As we are writing CPU
@@ -682,12 +692,12 @@
   <code>h-mul</code>. Why? It’s because the line of code we added
   was</p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-4" class="language-rust">if a &gt;= p{
+    <pre class="line-numbers"><code id="codeblock-4" class="language-rust">if a &gt;= p{
       a = p - a
   }</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-4" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-4" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>Based on our theory so far, we know that <code>c-mul</code>
   overflows much less frequently than <code>h-mul</code> – With random
   inputs <span class="math inline">\(\mod p\)</span>, we see that CIOS
@@ -705,7 +715,7 @@
   is the same for both code bases, as the compiler will just get rid of
   the check in the first place.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-5" class="language-bash">100000 Trials of 100 chained multiplications
+    <pre class="line-numbers"><code id="codeblock-5" class="language-bash">100000 Trials of 100 chained multiplications
   Benchmarking done
   Average Advantage: 11.633622123165752
   C-mult         1804.97929
@@ -713,9 +723,9 @@
    C-overflow       0.05428
    H-overflow       0.68088
   dtype: float64</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-5" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-5" aria-label="Copy code">📋</button>
   </div>
-    
+
   </section>
   <section id="aside-same-code-two-conclusions" class="level3">
   <h3>Aside: Same Code Two Conclusions</h3>
@@ -733,7 +743,7 @@
   skyscraper beches</a>, we see something different from what’s
   discussed above.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-6" class="language-bash">test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+    <pre class="line-numbers"><code id="codeblock-6" class="language-bash">test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
 
        Running benches/my_benchmark.rs (target/release/deps/my_benchmark-8968c072d5fb1ae5)
   Arkworks CIOS (10 chained c-mul, looped)
@@ -744,9 +754,9 @@
 
   h-mul (10 chained h-mul, looped)
                           time:   [1.8386 µs 1.8411 µs 1.8442 µs]</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-6" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-6" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p><code>h-mul</code> is FASTER even with the subtractions!!!!
   <strong>How can this be?</strong> This contradicts everything we have
   discussed so far. In terms of the body of the algorithms – this bench
@@ -810,7 +820,7 @@
   of times we overflow is much smaller - 27% as opposed to 68% with
   random inputs <span class="math inline">\(\mod p\)</span>.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-7" class="language-bash">100000 Trials of 100 chained multiplications
+    <pre class="line-numbers"><code id="codeblock-7" class="language-bash">100000 Trials of 100 chained multiplications
   Benchmarking done
   Average Advantage: 9.704649409540085
   C-mult         1778.47723
@@ -818,13 +828,13 @@
    C-overflow       0.05365
    H-overflow       0.27255
   dtype: float64</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-7" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-7" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>Putting the subtractions back in. We are marginally faster than
   <code>c-mul</code> in the worst case with fully random inputs.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-8" class="language-bash">
+    <pre class="line-numbers"><code id="codeblock-8" class="language-bash">
   300000 Trials of 100 chained multiplications of random values
   300000 Trials of 1 chained multiplications of small values
 
@@ -835,13 +845,13 @@
    C-overflow       0.000000
    H-overflow       0.000000
   dtype: float64</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-8" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-8" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>Now, what would happen if we could control the inputs to be small?
   This will prevent overflows. We should recover speed, right?</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-9" class="language-bash">
+    <pre class="line-numbers"><code id="codeblock-9" class="language-bash">
   Scanning file: arkworks_multiplication_small.csv
   Average Advantage (%): 16.30465277384584
   C-mult         28.788490
@@ -849,9 +859,9 @@
    C-overflow     0.000000
    H-overflow     0.000000
   dtype: float64</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-9" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-9" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>It’s exactly what we expect. When we force the inputs <span
   class="math inline">\(a\)</span> and <span
   class="math inline">\(b\)</span> to small values (note small in
@@ -881,56 +891,54 @@
   <h2>Instructions For Running Benchmarks Discussed Above</h2>
   <p>To get individual times on chained multiplications</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-10" class="language-bash">git clone https://github.com/abiswas3/Montgomery-Benchmarks.git
+    <pre class="line-numbers"><code id="codeblock-10" class="language-bash">git clone https://github.com/abiswas3/Montgomery-Benchmarks.git
   cd Montgomery-Benchmarks
   cargo bench</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-10" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-10" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>To get time comparisons inside of arkworks run the following
   command</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-11" class="language-bash">cargo run --example ark-multiplication --release &amp;&amp; python3 plotting.py arkworks_multiplication.csv</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-11" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-11" class="language-bash">cargo run --example ark-multiplication --release &amp;&amp; python3 plotting.py arkworks_multiplication.csv</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-11" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>For squaring run (we have not yet optimised the squaring library to
   use <code>a-mul</code>)</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-12" class="language-bash">cargo run --example ark-squaring --release &amp;&amp; python3 plotting.py arkworks_squaring.csv</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-12" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-12" class="language-bash">cargo run --example ark-squaring --release &amp;&amp; python3 plotting.py arkworks_squaring.csv</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-12" aria-label="Copy code">📋</button>
   </div>
-    
+
   </section>
-  <section class="footnotes footnotes-end-of-document"
+  <section id="footnotes" class="footnotes footnotes-end-of-document"
   role="doc-endnotes">
   <hr />
   <ol>
-  <li id="fn1" role="doc-endnote"><p>This specific implementation is
-  optimised for parallelism instead, looking at all the SIMD code,
-  that’s what it seems at least.<a href="#fnref1" class="footnote-back"
+  <li id="fn1"><p>This specific implementation is optimised for
+  parallelism instead, looking at all the SIMD code, that’s what it
+  seems at least.<a href="#fnref1" class="footnote-back"
   role="doc-backlink">↩︎</a></p></li>
-  <li id="fn2" role="doc-endnote"><p>unchanged from how we found them in
-  the wild<a href="#fnref2" class="footnote-back"
+  <li id="fn2"><p>unchanged from how we found them in the wild<a
+  href="#fnref2" class="footnote-back"
   role="doc-backlink">↩︎</a></p></li>
-  <li id="fn3" role="doc-endnote"><p>Limbs here just mean digits. A 4
-  limb number is a 4-digit number where each digit is <span
+  <li id="fn3"><p>Limbs here just mean digits. A 4 limb number is a
+  4-digit number where each digit is <span
   class="math inline">\(w\)</span> bits large, i.e each digit is between
   0 and <span class="math inline">\(2^w -1\)</span>.<a href="#fnref3"
   class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-  <li id="fn4" role="doc-endnote"><p>First add <span
-  class="math inline">\(mp\)</span> to <span
-  class="math inline">\(c\)</span>, then divide <span
+  <li id="fn4"><p>First add <span class="math inline">\(mp\)</span> to
+  <span class="math inline">\(c\)</span>, then divide <span
   class="math inline">\((c+mp)/r\)</span>.<a href="#fnref4"
   class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-  <li id="fn5" role="doc-endnote"><p>We guarantee that <span
-  class="math inline">\(\rho_i &lt; p\)</span><a href="#fnref5"
-  class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-  <li id="fn6" role="doc-endnote"><p>Which they are not.<a
-  href="#fnref6" class="footnote-back"
+  <li id="fn5"><p>We guarantee that <span class="math inline">\(\rho_i
+  &lt; p\)</span><a href="#fnref5" class="footnote-back"
   role="doc-backlink">↩︎</a></p></li>
-  <li id="fn7" role="doc-endnote"><p>Remember the bench code in the
-  alternate implementation?<a href="#fnref7" class="footnote-back"
+  <li id="fn6"><p>Which they are not.<a href="#fnref6"
+  class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+  <li id="fn7"><p>Remember the bench code in the alternate
+  implementation?<a href="#fnref7" class="footnote-back"
   role="doc-backlink">↩︎</a></p></li>
   </ol>
   </section>
@@ -1113,7 +1121,6 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
-<!-- <script src="/static/mathjax-config.js"></script> -->
 
 </body>
 </html>

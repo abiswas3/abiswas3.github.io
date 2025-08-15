@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -19,6 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
@@ -48,36 +48,36 @@
   the file was at the last commit. These commands are tuned for mac, but
   on linux, you can do just <code>zathura diff.pdf</code></p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-1" class="language-bash">git show HEAD:perfect-matching.tex &gt; old.tex
+    <pre class="line-numbers"><code id="codeblock-1" class="language-bash">git show HEAD:perfect-matching.tex &gt; old.tex
   latexdiff --preamble style.tex old.tex perfect-matching.tex &gt; diff.tex
   pdflatex diff.tex
   open diff.pdf</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-1" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-1" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>If we wanted to compare with a specific commit hash
   like<code>8dd7464c1a300f294006fa9b4608e8b54d2ac8f0</code>, then in the
   first line of the file we use</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-2" class="language-bash">git show 8dd7464c1a300f294006fa9b4608e8b54d2ac8f0:perfect-matching.tex &gt; old.tex
+    <pre class="line-numbers"><code id="codeblock-2" class="language-bash">git show 8dd7464c1a300f294006fa9b4608e8b54d2ac8f0:perfect-matching.tex &gt; old.tex
   latexdiff --math-markup=1 --append-textcmd=\item --append-textcmd=\rajko --exclude-textcmd=\label old.tex perfect-matching.tex &gt; diff.tex
   sed &#39;/\\DIFdelbegin/,/\\DIFdelend/ s/\\label{[^}]*}//g&#39; diff.tex &gt; diff_patched.tex
   mv diff_patched.tex diff.tex
   go run patch_diff.go
   pdflatex diff.tex
-  bibtex diff      
+  bibtex diff
   pdflatex diff.tex
   pdflatex diff.tex
   open diff.pdf</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-2" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-2" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p><code>go run patch_diff.go</code> removed for now</p>
   <p>To customise colours of diff find
   <code>\providecommand{\DIFadd}</code> and replace it with you colour
   of choice.</p>
   <div class="code-container">
-    <pre class="line-numbers language-go"><code id="codeblock-3" class="language-go">package main
+    <pre class="line-numbers"><code id="codeblock-3" class="language-go">package main
 
   import (
       &quot;fmt&quot;
@@ -147,9 +147,8 @@
 
       fmt.Println(&quot;Patched diff.tex macros successfully!&quot;)
   }</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-3" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-3" aria-label="Copy code">📋</button>
   </div>
-    
   </div>
   </main>
 
@@ -329,7 +328,6 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
-<!-- <script src="/static/mathjax-config.js"></script> -->
 
 </body>
 </html>

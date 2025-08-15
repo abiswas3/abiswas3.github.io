@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -19,6 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
@@ -343,9 +343,11 @@
   knowledge to the prover and the verifier, as the verifier picks <span
   class="math inline">\(z_x \in
   \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.</p>
+  <div class="def">
+  <section class="level3">
+  <h3>Def: </h3>
   </section>
-  <section id="opening-proof-for-inner-product-argument"
-  class="level2 def">
+  <section id="opening-proof-for-inner-product-argument" class="level2">
   <h2>Opening Proof For Inner Product Argument</h2>
   <p>Initialise <span class="math inline">\(\vec{A}^{(0)} =
   \vec{A},\quad \vec{b}^{(0)} = \vec{b},\quad \vec{v}^{(0)} =
@@ -413,6 +415,7 @@
   \right\}
   \]</span></p>
   </section>
+  </div>
   <p>See below for details about <span class="math inline">\(q\)</span>.
   The cost of this is 1 KZG opening over <span
   class="math inline">\(\mathbb{G}_2\)</span> – and the degree of the
@@ -459,6 +462,7 @@
   to check if the prover folded correctly.</p>
   <p><strong>Lookout for this KZG opening in the
   verification</strong></p>
+  </section>
   </section>
   <section id="how-to-verify-an-inner-product-proof" class="level2">
   <h2>How To Verify An Inner Product Proof</h2>
@@ -696,25 +700,25 @@
   <section id="references" class="level2 unnumbered">
   <h2 class="unnumbered">References</h2>
   <div id="refs" class="references csl-bib-body hanging-indent"
-  role="doc-bibliography">
-  <div id="ref-bmmtv2021" class="csl-entry" role="doc-biblioentry">
+  data-entry-spacing="0" role="list">
+  <div id="ref-bmmtv2021" class="csl-entry" role="listitem">
   Bünz, B., Maller, M., Mishra, P., Tyagi, N., Vesely, P., 2019. <a
   href="https://eprint.iacr.org/2019/1177">Proofs for inner pairing
   products and applications</a>.
   </div>
-  <div id="ref-micronova2024" class="csl-entry" role="doc-biblioentry">
+  <div id="ref-micronova2024" class="csl-entry" role="listitem">
   Zhao, J., Setty, S., Cui, W., Zaverucha, G., 2024. <a
   href="https://eprint.iacr.org/2024/2099"><span>MicroNova</span>:
   Folding-based arguments with efficient (on-chain) verification</a>.
   </div>
   </div>
   </section>
-  <section class="footnotes footnotes-end-of-document"
+  <section id="footnotes" class="footnotes footnotes-end-of-document"
   role="doc-endnotes">
   <hr />
   <ol>
-  <li id="fn1" role="doc-endnote"><p>You can read this as a compressed
-  version of <span class="math inline">\(T\)</span> and <span
+  <li id="fn1"><p>You can read this as a compressed version of <span
+  class="math inline">\(T\)</span> and <span
   class="math inline">\(U\)</span> using only half the witness and
   public vector. That is, we split <span class="math inline">\(\vec{A},
   \vec{v}, \vec{b}\)</span> down the middle into left and right halves.
@@ -908,7 +912,6 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
-<!-- <script src="/static/mathjax-config.js"></script> -->
 
 </body>
 </html>

@@ -1,15 +1,3 @@
-body.light-mode {
---single-line-code-colour: #586e75;
---single-line-code-bg: #eee8d5;
---math-colour: #333;
-}
-
-
-body.dark-mode{
---single-line-code-colour: #83a598;
---single-line-code-bg: #504945;
---math-colour: #e0a5c0;
-}
 
 /*CODE*/
 /* Base styles */
@@ -62,14 +50,66 @@ pre[class*="language-"] code {
   font-size: 0.8rem !important;
 /*  font-family: system-ui, -apple-system, sans-serif;*/
 }
-  .commitment-block {
-    padding: 0.8em 1em;
-    border-left: 4px solid #5e9ca0;
-    background: #f8f9fa;
-    margin: 1em 0;
-  }
 
-  .commitment-block math {
-    display: block;
-    margin: 0.4em 0;
-  }
+/* ----------------------------- */
+/* Code container (block code) */
+/* ----------------------------- */
+.code-container {
+  position: relative;
+  margin: 1.5em 0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.code-container pre {
+  margin: 0; /* remove default margin, container handles it */
+  padding: 1em 1.2em 1em 1.2em; /* padding inside pre */
+  background-color: var(--code-bg);
+  color: var(--code-colour);
+  font-family: "Fira Code", monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+/* ----------------------------- */
+/* Copy button styling */
+/* ----------------------------- */
+.code-container .copy-btn {
+  position: absolute;
+  top: 0.4em;
+  right: 0.4em;
+  background: rgba(0,0,0,0.05);
+  border: none;
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.code-container .copy-btn:hover {
+  background: rgba(0,0,0,0.1);
+}
+
+/* Optional: make scrollbar consistent inside container */
+.code-container pre::-webkit-scrollbar {
+  height: 8px;
+}
+
+.code-container pre::-webkit-scrollbar-track {
+  background: #2e2e2e;
+  border-radius: 4px;
+}
+
+.code-container pre::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.code-container pre::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+

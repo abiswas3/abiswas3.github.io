@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -19,6 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
@@ -51,10 +51,10 @@ Scheme As A Black Box</h1>
   <section id="how-to-commit" class="level2">
   <h2>How To Commit</h2>
   <p>We are given a multilinear polynomial <span class="math inline">\(f
-  \in \mathbb{F}[X_1, \ldots, X_\ell]\)</span>. To commit to <span
-  class="math inline">\(f\)</span>, we encode <span
-  class="math inline">\(f\)</span> as a univariate polynomial <span
-  class="math inline">\(p^{(0)}\)</span> using <span
+  \in \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[X_1, \ldots,
+  X_\ell]\)</span>. To commit to <span class="math inline">\(f\)</span>,
+  we encode <span class="math inline">\(f\)</span> as a univariate
+  polynomial <span class="math inline">\(p^{(0)}\)</span> using <span
   class="math inline">\(2^\ell\)</span> evaluations of <span
   class="math inline">\(f\)</span> over the boolean hypercube <span
   class="math inline">\(\{ 0, 1\}^\ell\)</span> as coefficients. Then we
@@ -121,9 +121,9 @@ Scheme As A Black Box</h1>
   class="math inline">\(\vec{z}\)</span></h3>
   <p>Now the verifier wants to open at some point <span
   class="math inline">\(\vec{z} = (z_1, \ldots, z_\ell) \in
-  \mathbb{F}^{\ell}\)</span>. The prover claims that <span
-  class="math inline">\(f(\vec{z}) = y\)</span> and constructs the
-  following proof:</p>
+  \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}^{\ell}\)</span>. The prover
+  claims that <span class="math inline">\(f(\vec{z}) = y\)</span> and
+  constructs the following proof:</p>
   <p>Let <span class="math inline">\(p^{(0)}\)</span> denote the
   univariate encoding of <span class="math inline">\(f\)</span>. Now for
   all <span class="math inline">\(j \in \{1, \ell \}\)</span> we define
@@ -203,13 +203,14 @@ Scheme As A Black Box</h1>
   class="math inline">\(\pi\)</span></h3>
   <p>On receiving these commitments the verifier sends the prover a
   challenge <span class="math inline">\(r
-  \xleftarrow[]{\$}\mathbb{F}\)</span></p>
+  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span></p>
   </section>
-  <section id="prover-leftarrow-verifier-r-xleftarrowmathbbf"
+  <section
+  id="prover-leftarrow-verifier-r-xleftarrowmathbbf_textcolorbluemathttq"
   class="level3">
   <h3><strong>Prover <span class="math inline">\(\leftarrow\)</span>
   Verifier</strong>: <span class="math inline">\(r
-  \xleftarrow[]{\$}\mathbb{F}\)</span></h3>
+  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span></h3>
   <p>The prover computes for all <span class="math inline">\(i \in \{1
   \ldots, \ell\}\)</span> 3 univariate polynomial evaluations.</p>
   <p><span class="math display">\[
@@ -229,7 +230,8 @@ Scheme As A Black Box</h1>
   \left\{y^{(i)}_{\text{neg}},
   y^{(i)}_{\text{pos}}\right\}_{i=0}^{\ell-1},\)</span></h3>
   <p>Communication is <span class="math inline">\(3\ell\)</span> <span
-  class="math inline">\(\mathbb{F}\)</span> elements.</p>
+  class="math inline">\(\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>
+  elements.</p>
   </section>
   <section id="verifier-test-1" class="level3">
   <h3><strong>Verifier Test 1</strong></h3>
@@ -330,18 +332,20 @@ Scheme As A Black Box</h1>
   </ul>
   <p>If the commitment scheme is homomorphic, we can do construct a
   single commitment from these. The verifier samples <span
-  class="math inline">\(q \xleftarrow[]{\$}\mathbb{F}\)</span>, and
-  sends this to the prover.</p>
+  class="math inline">\(q
+  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>,
+  and sends this to the prover.</p>
   <p>The verifier then calculates <span class="math inline">\(C_{B} =
   \sum_{i=0}^{\ell} \left(C_{p^{(i)}}\right)^{q^{i}}\)</span>, Then the
   verifier hands over <span class="math inline">\(q\)</span> to the
   prover.</p>
   </section>
-  <section id="verifier-rightarrow-prover-q-xleftarrowmathbbf"
+  <section
+  id="verifier-rightarrow-prover-q-xleftarrowmathbbf_textcolorbluemathttq"
   class="level3">
   <h3>Verifier <span class="math inline">\(\rightarrow\)</span> Prover:
   <span class="math inline">\(q
-  \xleftarrow[]{\$}\mathbb{F}\)</span></h3>
+  \xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span></h3>
   <p>The prover computes</p>
   <p><span class="math display">\[B(X) = \sum_{i=0}^{\ell} q^{i}\cdot
   p^{(i)}(X)\]</span></p>
@@ -370,8 +374,8 @@ Scheme As A Black Box</h1>
   <section id="references" class="level2 unnumbered">
   <h2 class="unnumbered">References</h2>
   <div id="refs" class="references csl-bib-body hanging-indent"
-  role="doc-bibliography">
-  <div id="ref-micronova2024" class="csl-entry" role="doc-biblioentry">
+  data-entry-spacing="0" role="list">
+  <div id="ref-micronova2024" class="csl-entry" role="listitem">
   Zhao, J., Setty, S., Cui, W., Zaverucha, G., 2024. <a
   href="https://eprint.iacr.org/2024/2099"><span>MicroNova</span>:
   Folding-based arguments with efficient (on-chain) verification</a>.
@@ -557,7 +561,6 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
-<!-- <script src="/static/mathjax-config.js"></script> -->
 
 </body>
 </html>

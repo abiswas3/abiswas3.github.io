@@ -1,14 +1,19 @@
   function toggleNav() {
     document.getElementById('navMenu').classList.toggle('show');
   }
-document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('mode-toggle');
   if (!toggle) return;
 
-  // Initialize checkbox state
-  if (document.body.classList.contains('dark-mode')) {
+  // Load theme from localStorage
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+    document.body.classList.remove('light-mode');
     toggle.checked = true;
   } else {
+    document.body.classList.add('light-mode');
+    document.body.classList.remove('dark-mode');
     toggle.checked = false;
   }
 
@@ -17,12 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (toggle.checked) {
       document.body.classList.add('dark-mode');
       document.body.classList.remove('light-mode');
+      localStorage.setItem('theme', 'dark');
     } else {
       document.body.classList.add('light-mode');
       document.body.classList.remove('dark-mode');
+      localStorage.setItem('theme', 'light');
     }
   });
 });
+
 
 
 document.querySelectorAll('a[role="doc-biblioref"]').forEach(link => {

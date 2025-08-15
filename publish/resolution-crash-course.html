@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -19,6 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
@@ -43,8 +43,6 @@
   <main class="content">
   <div class="blog">
    <h1>Resolution Crash Course</h1> 
-  <section id="this-is-the-main-post" class="level1">
-  <h1>This is the main post</h1>
   <section id="resolution-proof-system" class="level2">
   <h2>Resolution Proof System</h2>
   <p>Some text after. A Boolean formula <span
@@ -74,7 +72,8 @@
   <p><span class="math display">\[
   \frac{C}{D} [C\subseteq D]
   \]</span></p>
-  <div class="def" title="Resolution Proof System">
+  <section class="level3 def">
+  <h3>Def: Resolution Proof System</h3>
   <p>Given an unsatisfiable CNF formula <span class="math inline">\(F =
   \bigwedge_{i \in [m]}C_i\)</span> over <span
   class="math inline">\(n\)</span> variables, a resolution refutation
@@ -95,7 +94,7 @@
   <span class="math inline">\(\left|\pi\right|\)</span> is the number of
   clauses in the sequence (<span class="math inline">\(L\)</span> in
   this case).</p>
-  </div>
+  </section>
   <p><strong>Example</strong></p>
   <p><img src="assets/Resolution/resolution-example.jpg"></img></p>
   </section>
@@ -267,7 +266,8 @@
   of for what kind of “sparse” graphs, is the problem still hard.</p>
   <p>The graph family we consider is the <span class="math inline">\((r,
   \Delta, c)\)</span>-boundary expander.</p>
-  <div class="def" title="The Boundary Expander">
+  <section class="level3 def">
+  <h3>Def: The Boundary Expander</h3>
   <p>Given Bipartite graph <span class="math inline">\(G = (V_P \cup
   V_H, E)\)</span> is an <span class="math inline">\((r, \Delta,
   c)\)</span> boundary expander, if <span class="math inline">\(\forall
@@ -284,7 +284,7 @@
   S\)</span> i.e</p>
   <p><span class="math display">\[ \partial\left(S\right) = \{ v \in V_H
   : \left|N_G(v) \cap S\right| = 1\}\]</span></p>
-  </div>
+  </section>
   <p>What do we know about refuting PHP in expanders? Not a whole lot,
   but there are 3 seminal results that consider the extremes:</p>
   <ul>
@@ -353,30 +353,27 @@
   <hr style="height:3px;border:none;color:#333;background-color:#333;">
   </hr>
   </section>
-  </section>
   <section id="references" class="level1">
   <h1>References</h1>
   <hr style="height:3px;border:none;color:#333;background-color:#333;">
   </hr>
   <div id="refs" class="references csl-bib-body hanging-indent"
-  role="doc-bibliography">
-  <div id="ref-beame1996simplified" class="csl-entry"
-  role="doc-biblioentry">
+  data-entry-spacing="0" role="list">
+  <div id="ref-beame1996simplified" class="csl-entry" role="listitem">
   Beame, P., Pitassi, T., 1996. Simplified and improved resolution lower
   bounds, in: Proceedings of 37th Conference on Foundations of Computer
   Science. IEEE, pp. 274–282.
   </div>
-  <div id="ref-ben1999short" class="csl-entry" role="doc-biblioentry">
+  <div id="ref-ben1999short" class="csl-entry" role="listitem">
   Ben-Sasson, E., Wigderson, A., 1999. Short proofs are
   narrow–resolution made simple, in: Proceedings of the Thirty-First
   Annual ACM Symposium on Theory of Computing. pp. 517–526.
   </div>
-  <div id="ref-buss1988resolution" class="csl-entry"
-  role="doc-biblioentry">
+  <div id="ref-buss1988resolution" class="csl-entry" role="listitem">
   Buss, S.R., Turán, G., 1988. Resolution proofs of generalized
   pigeonhole principles. Theoretical Computer Science 62, 311–317.
   </div>
-  <div id="ref-rezende2020Exp" class="csl-entry" role="doc-biblioentry">
+  <div id="ref-rezende2020Exp" class="csl-entry" role="listitem">
   De Rezende, S.F., Nordström, J., Risse, K., Sokolov, D., 2020.
   Exponential resolution lower bounds for weak pigeonhole principle and
   perfect matching formulas over sparse graphs, in: 35th Computational
@@ -386,22 +383,21 @@
   href="https://doi.org/10.4230/LIPIcs.CCC.2020.28">https://doi.org/10.4230/LIPIcs.CCC.2020.28</a>
   </div>
   <div id="ref-haken1984intractability" class="csl-entry"
-  role="doc-biblioentry">
+  role="listitem">
   Haken, A., 1984. The intractability of resolution (complexity) (PhD
   thesis). University of Illinois at Urbana-Champaign.
   </div>
-  <div id="ref-raz2004resolution" class="csl-entry"
-  role="doc-biblioentry">
+  <div id="ref-raz2004resolution" class="csl-entry" role="listitem">
   Raz, R., 2004. Resolution lower bounds for the weak pigeonhole
   principle. Journal of the ACM (JACM) 51, 115–138.
   </div>
   <div id="ref-razborov2004resolution" class="csl-entry"
-  role="doc-biblioentry">
+  role="listitem">
   Razborov, A.A., 2004. Resolution lower bounds for perfect matching
   principles. Journal of Computer and System Sciences 69, 3–27.
   </div>
   <div id="ref-razborov2003resolution" class="csl-entry"
-  role="doc-biblioentry">
+  role="listitem">
   Razborov, A.A., 2003. Resolution lower bounds for the weak functional
   pigeonhole principle. Theoretical Computer Science 303, 233–243.
   </div>
@@ -586,7 +582,6 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
-<!-- <script src="/static/mathjax-config.js"></script> -->
 
 </body>
 </html>

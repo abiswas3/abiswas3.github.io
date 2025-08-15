@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -19,6 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
@@ -114,10 +114,10 @@
   too.</p></li>
   </ul>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-1" class="language-bash">git rebase --onto upstream/feat/twist-shout-integration 773f3b9</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-1" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-1" class="language-bash">git rebase --onto upstream/feat/twist-shout-integration 773f3b9</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-1" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p><strong>What this means</strong>:</p>
   <ul>
   <li><p><code>--onto upstream/feat/twist-shout-integration</code> This
@@ -178,19 +178,19 @@
   <col style="width: 30%" />
   </colgroup>
   <thead>
-  <tr class="header">
+  <tr>
   <th>Command</th>
   <th>What it does</th>
   <th>Safe on shared branches?</th>
   </tr>
   </thead>
   <tbody>
-  <tr class="odd">
+  <tr>
   <td><code>git revert</code></td>
   <td>Makes a new commit that undoes another one</td>
   <td>✅ Yes</td>
   </tr>
-  <tr class="even">
+  <tr>
   <td><code>git reset</code></td>
   <td>Moves HEAD and changes history</td>
   <td>⚠️ No (on shared branches)</td>
@@ -198,7 +198,7 @@
   </tbody>
   </table>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-2" class="language-bash">Before:
+    <pre class="line-numbers"><code id="codeblock-2" class="language-bash">Before:
   A --- B --- C (HEAD)
 
   Command:
@@ -206,13 +206,13 @@
 
   After:
   A (HEAD)</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-2" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-2" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>Commits B and C are now <strong>unreachable</strong> unless
   recovered from reflog.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-3" class="language-bash">
+    <pre class="line-numbers"><code id="codeblock-3" class="language-bash">
   Before:
   A --- B --- C (HEAD)
 
@@ -225,9 +225,9 @@
   A --- B --- C --- D (HEAD)
                 ^
              Revert of B</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-3" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-3" aria-label="Copy code">📋</button>
   </div>
-    
+
   <ul>
   <li><strong><code>git revert B</code></strong> creates a <strong>new
   commit</strong> (D) that <em>undoes the changes introduced by
@@ -272,13 +272,13 @@
   love <code>cherry-pick</code> because there is very little magic
   involved and it’s easy to understand.</p>
   <p>Let’s see a demo!</p>
-  <p>[[Screenshot 2025-06-27 at 00.42.57.png]]</p>
+  <p>![[Screenshot 2025-06-27 at 00.42.57.png]]</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-4" class="language-bash">git cherry-pick C2 C4</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-4" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-4" class="language-bash">git cherry-pick C2 C4</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-4" aria-label="Copy code">📋</button>
   </div>
-    
-  <p>[[Screenshot 2025-06-27 at 00.42.24.png]]</p>
+
+  <p>![[Screenshot 2025-06-27 at 00.42.24.png]]</p>
   </section>
   <section id="git-interactive-rebase" class="level3">
   <h3>Git Interactive Rebase</h3>
@@ -315,11 +315,11 @@
   <section id="merging" class="level2">
   <h2>Merging</h2>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-5" class="language-bash">git checkout A
+    <pre class="line-numbers"><code id="codeblock-5" class="language-bash">git checkout A
   git merge B</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-5" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-5" aria-label="Copy code">📋</button>
   </div>
-    
+
   <ul>
   <li><p>Git tries to merge the changes from branch <code>B</code> into
   branch <code>A</code>.</p></li>
@@ -351,17 +351,17 @@
   <col style="width: 84%" />
   </colgroup>
   <thead>
-  <tr class="header">
+  <tr>
   <th>Command</th>
   <th>Description</th>
   </tr>
   </thead>
   <tbody>
-  <tr class="odd">
+  <tr>
   <td><code>git commit</code></td>
   <td>Create a new commit with the currently staged changes</td>
   </tr>
-  <tr class="even">
+  <tr>
   <td><code>git commit --amend</code></td>
   <td>Replace the last commit with a new commit including staged changes
   and optionally update the commit message</td>
@@ -381,10 +381,10 @@
   amending:</li>
   </ul>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-6" class="language-bash">git push --force</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-6" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-6" class="language-bash">git push --force</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-6" aria-label="Copy code">📋</button>
   </div>
-    
+
   </section>
   <section id="tags" class="level2">
   <h2>Tags</h2>
@@ -402,37 +402,37 @@
   <p>If you already have an <code>upstream</code> remote, you can update
   its URL:</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-7" class="language-bash">git remote set-url upstream https://github.com/a16z/arkworks-algebra</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-7" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-7" class="language-bash">git remote set-url upstream https://github.com/a16z/arkworks-algebra</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-7" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>If no upstream remote exists, add it</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-8" class="language-bash">git remote add upstream https://github.com/a16z/arkworks-algebra</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-8" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-8" class="language-bash">git remote add upstream https://github.com/a16z/arkworks-algebra</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-8" aria-label="Copy code">📋</button>
   </div>
-    
+
   </section>
   <section id="seeing-who-contributed-where" class="level2">
   <h2>Seeing Who Contributed Where</h2>
   <p>If you want to see your fork on github what the status is</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-9" class="language-bash">git shortlog -sne remotes/origin/dev/twist-shout</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-9" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-9" class="language-bash">git shortlog -sne remotes/origin/dev/twist-shout</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-9" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>If you want to know the history on the upstream then</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-10" class="language-bash">git shortlog -sne remotes/upstream/dev/twist-shout</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-10" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-10" class="language-bash">git shortlog -sne remotes/upstream/dev/twist-shout</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-10" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>And locally</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-11" class="language-bash">git shortlog -sne dev/twist-shout</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-11" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-11" class="language-bash">git shortlog -sne dev/twist-shout</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-11" aria-label="Copy code">📋</button>
   </div>
-    
+
   <ul>
   <li><code>-s</code> — <strong>“summary”</strong>: show only the number
   of commits per author (no commit messages).<br />
@@ -443,6 +443,23 @@
   <li><code>-e</code> — <strong>“email”</strong>: show author email
   addresses along with their names.</li>
   </ul>
+  </section>
+  <section id="cargo-bench-stuff" class="level2">
+  <h2>Cargo Bench Stuff</h2>
+  <p>A tool designed to compare Criterion benchmark runs.</p>
+  <div class="code-container">
+    <pre class="line-numbers"><code id="codeblock-12" class="language-bash">cargo install critcmp</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-12" aria-label="Copy code">📋</button>
+  </div>
+
+  <div class="code-container">
+    <pre class="line-numbers"><code id="codeblock-13" class="language-bash">cargo bench --bench my_bench -- --baseline branchA
+  # switch branches
+  cargo bench --bench my_bench -- --baseline branchB
+  critcmp branchA branchB</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-13" aria-label="Copy code">📋</button>
+  </div>
+
   </section>
   </div>
   </main>
@@ -623,7 +640,6 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
-<!-- <script src="/static/mathjax-config.js"></script> -->
 
 </body>
 </html>

@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -19,6 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
@@ -204,12 +204,12 @@
   from standard to Montgomery form is not included in benchmarking run
   times.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-1" class="language-bash">git clone https://github.com/abiswas3/Montgomery-Benchmarks.git
+    <pre class="line-numbers"><code id="codeblock-1" class="language-bash">git clone https://github.com/abiswas3/Montgomery-Benchmarks.git
   cd Montgomery-Benchmarks
   cargo bench</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-1" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-1" aria-label="Copy code">📋</button>
   </div>
-    
+
   <div class="remark">
   <p><strong>UPDATE: 2025-06-01</strong>: The barebones_profiling has
   been merged into main, and running <code>cargo bench</code> should
@@ -229,7 +229,7 @@
   Air with 8GB of RAM and observed that the relative performance trends
   remained consistent.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-2" class="language-bash">lscpu
+    <pre class="line-numbers"><code id="codeblock-2" class="language-bash">lscpu
   Architecture:             x86_64
     CPU op-mode(s):         32-bit, 64-bit
     Address sizes:          40 bits physical, 48 bits virtual
@@ -267,17 +267,17 @@
   Caches (sum of all):
     L1d:                    32 KiB (1 instance)
     L1i:                    32 KiB (1 instance)</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-2" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-2" aria-label="Copy code">📋</button>
   </div>
-    
+
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-3" class="language-bash">free -h
+    <pre class="line-numbers"><code id="codeblock-3" class="language-bash">free -h
                  total        used        free      shared  buff/cache   available
   Mem:           1.9Gi       421Mi       359Mi       5.5Mi       1.3Gi       1.5Gi
   Swap:             0B          0B          0B</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-3" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-3" aria-label="Copy code">📋</button>
   </div>
-    
+
   </section>
   </section>
   <section id="analysis" class="level2">
@@ -306,10 +306,10 @@
   accurately represented in the files described above. The format in
   which the code is expressed is</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-4" class="language-bash">memory address, instruction</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-4" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-4" class="language-bash">memory address, instruction</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-4" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>Where memory address refers to the virutal memory address at which
   the instruction is stored for the process executing the program.</p>
   <section id="summary-of-findings" class="level3">
@@ -317,20 +317,20 @@
   <p>The arkworks code base executes fewer x86 instructions; 280 vs 326
   to specific.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-5" class="language-bash">wc -l static/code/yuval                                                                     ─╯
+    <pre class="line-numbers"><code id="codeblock-5" class="language-bash">wc -l static/code/yuval                                                                     ─╯
        326 static/code/yuval
 
   wc -l static/code/opt                                                                       ─╯
        280 static/code/opt</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-5" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-5" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>Shown below is the op code distribution for the optimised CIOS
   algorithm. For <code>g-mult</code>, as expected we see <span
   class="math inline">\(2n^2 + n = 36\)</span> multiplication
   operations.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-6" class="language-bash">1 ret
+    <pre class="line-numbers"><code id="codeblock-6" class="language-bash">1 ret
   1 setb
   3 lea
   4 imul &lt;--
@@ -340,23 +340,23 @@
   40 add
   52 adc
   135 mov</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-6" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-6" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>Further more, there are 36 64-bit read/write operations to
   memory.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-7" class="language-bash">root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks# cat opt|grep -o &#39;[a-z0-9]\+ ptr&#39; | sort|uniq -c
+    <pre class="line-numbers"><code id="codeblock-7" class="language-bash">root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks# cat opt|grep -o &#39;[a-z0-9]\+ ptr&#39; | sort|uniq -c
        36 qword ptr</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-7" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-7" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>For the new algorithm we expect to see fewer multiplications i.e
   <span class="math inline">\(2n^2 + 1 = 33\)</span> multiplication
   opearations, and that’s exactly what we see. <strong>This is what we
   hoped would give us our speedup.</strong></p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-8" class="language-bash">1 imul &lt;---
+    <pre class="line-numbers"><code id="codeblock-8" class="language-bash">1 imul &lt;---
   1 ret
   1 shl
   1 shr
@@ -376,20 +376,20 @@
   37 add
   56 adc
   152 mov</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-8" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-8" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>But the overhead from other instructions, especially read/writes to
   memory seems far worse. We make 74 64-bit read/write operations and 6
   128-bit/read write operations.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-9" class="language-bash">root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks# cat yuval|grep -o &#39;[a-z0-9]\+ ptr&#39; | sort|uniq -c
+    <pre class="line-numbers"><code id="codeblock-9" class="language-bash">root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks# cat yuval|grep -o &#39;[a-z0-9]\+ ptr&#39; | sort|uniq -c
         2 byte ptr
        74 qword ptr
         6 xmmword ptr</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-9" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-9" aria-label="Copy code">📋</button>
   </div>
-    
+
   <div class="remark">
   <p>So it seems that the gains from having fewer multiplications is
   being drowned out by the heavier read/write operations, and the
@@ -450,14 +450,14 @@
   as the OS, though there are windows and Mac pin tools available on the
   website)</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-10" class="language-bash">mkdir t &amp;&amp; cd t
+    <pre class="line-numbers"><code id="codeblock-10" class="language-bash">mkdir t &amp;&amp; cd t
   wget https://software.intel.com/sites/landingpage/pintool/downloads/pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz
-  ls -l 
+  ls -l
   total 32232
   -rw-r--r-- 1 root  root  32994324 May  8 21:45 pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-10" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-10" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>After unzipping the contents, the next step is to make sure that
   the <code>rustc</code> linker includes all the symbols in the binary.
   If we do not do this, binary created by the rust compiler will have no
@@ -465,33 +465,33 @@
   updating the <code>.cargo/config.toml</code> file as described
   below.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-11" class="language-bash">$ cat ~/.cargo/config.toml
+    <pre class="line-numbers"><code id="codeblock-11" class="language-bash">$ cat ~/.cargo/config.toml
   [target.x86_64-unknown-linux-gnu]
   rustflags = [ &quot;-C&quot;, &quot;link-args=-Wl,-export-dynamic&quot; ]</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-11" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-11" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>This will allow us to later inspect the binary for the method
   headers we care about. The next step is to update are Cargo.toml file
   with the following lines.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-12" class="language-bash">[profile.release-with-debug]
+    <pre class="line-numbers"><code id="codeblock-12" class="language-bash">[profile.release-with-debug]
   inherits = &quot;release&quot;
   debug = true
-     </code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-12" title="Copy code">📋</button>
+  </code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-12" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>This makes it so that we can build with debug information, but
   still in release-mode. So we still efficiency when running the code,
   and Rust does all its compiler optimisations. Then to builld the
   binary or executable, we run the code with the following
   parameters.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-13" class="language-bash">$ cargo build --profile release-with-debug</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-13" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-13" class="language-bash">$ cargo build --profile release-with-debug</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-13" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>This creates a binary file in
   <code>target/release-with-debug</code> directory called
   <code>minimal_mult</code> (<code>minimal_mult</code> is the name we
@@ -511,26 +511,26 @@
   offset from the first line of the executable (not the actual virtual
   address).</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-14" class="language-bash">$ nm --defined-only target/release-with-debug/minimal_mult|grep scalar
+    <pre class="line-numbers"><code id="codeblock-14" class="language-bash">$ nm --defined-only target/release-with-debug/minimal_mult|grep scalar
 
   000000000004b7d0 t _ZN12minimal_mult10yuval_mult10scalar_mul17ha435832ac9fe806eE
   000000000004a790 t _ZN12minimal_mult12vanilla_cios10scalar_mul17h8731c86ebf619ce7E
   000000000004b3a0 t _ZN12minimal_mult14optimised_cios20scalar_mul_unwrapped17h08a3ba9b5ffe6264E</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-14" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-14" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>It will soon be clear why we need this. Now let’s run the binary,
   but get the pin tool to interject by dumping every x86 instruction to
   a file before it is executed (as described above).</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-15" class="language-bash">$ ../t/pin-external-3.31-98869-gfa6f126a8-gcc-linux/pin -t ../t/pin-external-3.31-98869-gfa6f126a8-gcc-linux/source/tools/ManualExamples/obj-intel64/itrace.so -- ./target/release-with-debug/minimal_mult</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-15" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-15" class="language-bash">$ ../t/pin-external-3.31-98869-gfa6f126a8-gcc-linux/pin -t ../t/pin-external-3.31-98869-gfa6f126a8-gcc-linux/source/tools/ManualExamples/obj-intel64/itrace.so -- ./target/release-with-debug/minimal_mult</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-15" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>This generates a file file called <code>itrace.out</code>, which
   looks like this.</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-16" class="language-bash">Loading /root/Montgomery-Benchmarks/target/release-with-debug/minimal_mult 5e4052170000v
+    <pre class="line-numbers"><code id="codeblock-16" class="language-bash">Loading /root/Montgomery-Benchmarks/target/release-with-debug/minimal_mult 5e4052170000v
   Loading /lib64/ld-linux-x86-64.so.2 793baee95000
   Loading [vdso] 793baee93000
   0x793baeeb5940 mov rdi, rsp
@@ -546,9 +546,9 @@
 
   ...
   </code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-16" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-16" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>The key thing to note is that at virtual address
   <code>0x5e4052170000v</code>of the process executing our program, is
   where the code for our binary is loaded. Thus the yuval::scalar_mul
@@ -562,16 +562,16 @@
   <code>0x5e4052170000</code>+<code>0x4b7d0</code>=<code>0x5e40521bb7d0</code>
   to the corresponding ret instruction:</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-17" class="language-bash">cat itrace.out | sed -n &#39;/^0x5e40521bb7d0/,/ret/{p;/ret/q}&#39; &gt; yuval.disas</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-17" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-17" class="language-bash">cat itrace.out | sed -n &#39;/^0x5e40521bb7d0/,/ret/{p;/ret/q}&#39; &gt; yuval.disas</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-17" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>and similarly</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-18" class="language-bash">cat itrace.out | sed -n &#39;/^0x5e40521bb3a0/,/ret/{p;/ret/q}&#39; &gt; opt.disas</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-18" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-18" class="language-bash">cat itrace.out | sed -n &#39;/^0x5e40521bb3a0/,/ret/{p;/ret/q}&#39; &gt; opt.disas</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-18" aria-label="Copy code">📋</button>
   </div>
-    
+
   <div class="remark">
   <p>The above sed script is a little bit facile, and works here because
   the functions of interest do not call anything established, as we
@@ -579,22 +579,22 @@
   extract the assembly is to do the following:</p>
   </div>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-19" class="language-bash">$ objdump -d -Mintel target/release-with-debug/minimal_mult|sed -n &#39;/^0.*scalar_mul/,/ret/{/scalar_mul\|ret/p}&#39;
+    <pre class="line-numbers"><code id="codeblock-19" class="language-bash">$ objdump -d -Mintel target/release-with-debug/minimal_mult|sed -n &#39;/^0.*scalar_mul/,/ret/{/scalar_mul\|ret/p}&#39;
   000000000004a790 &lt;_ZN12minimal_mult12vanilla_cios10scalar_mul17h8731c86ebf619ce7E&gt;:
      4ac47:       c3                      ret
   000000000004b3a0 &lt;_ZN12minimal_mult14optimised_cios20scalar_mul_unwrapped17h08a3ba9b5ffe6264E&gt;:
      4b7c6:       c3                      ret
   000000000004b7d0 &lt;_ZN12minimal_mult10yuval_mult10scalar_mul17ha435832ac9fe806eE&gt;:
      4bce6:       c3                      ret</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-19" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-19" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>and then e.g. for yuval,</p>
   <div class="code-container">
-    <pre class="line-numbers language-bash"><code id="codeblock-20" class="language-bash">cat itrace.out | sed -n &#39;/^0x5e40521bb7d0/,/0x5e40521bbce6/{p;/0x5e40521bbce6/q}&#39;</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-20" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-20" class="language-bash">cat itrace.out | sed -n &#39;/^0x5e40521bb7d0/,/0x5e40521bbce6/{p;/0x5e40521bbce6/q}&#39;</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-20" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>that is, using the address of the ret to figure out when to stop
   printing, and not just searching for the first ret, as this would be
   the return from the first callee of the function of interest and not
@@ -603,40 +603,39 @@
   that was executed when we call the different Montgomery multiplication
   algorithms.</p>
   </section>
-  <section class="footnotes footnotes-end-of-document"
+  <section id="footnotes" class="footnotes footnotes-end-of-document"
   role="doc-endnotes">
   <hr />
   <ol>
-  <li id="fn1" role="doc-endnote"><p>The terms word, digit, limbs are
-  all interchangeable. For everything we discuss here, the word size is
-  64-bits. So a 2-limb integer is just an integer that takes 2<span
+  <li id="fn1"><p>The terms word, digit, limbs are all interchangeable.
+  For everything we discuss here, the word size is 64-bits. So a 2-limb
+  integer is just an integer that takes 2<span
   class="math inline">\(\times\)</span> 64 bits to describe.<a
   href="#fnref1" class="footnote-back"
   role="doc-backlink">↩︎</a></p></li>
-  <li id="fn2" role="doc-endnote"><p>A description of this algorithm can
-  be found in <a href="papers/Acard.pdf">Chapter 1 of Acar’s Phd
-  thesis</a>.<a href="#fnref2" class="footnote-back"
+  <li id="fn2"><p>A description of this algorithm can be found in <a
+  href="papers/Acard.pdf">Chapter 1 of Acar’s Phd thesis</a>.<a
+  href="#fnref2" class="footnote-back"
   role="doc-backlink">↩︎</a></p></li>
-  <li id="fn3" role="doc-endnote"><p>This is usually because most CPU’s
-  do not directly offer a modulo instruction natively.<a href="#fnref3"
+  <li id="fn3"><p>This is usually because most CPU’s do not directly
+  offer a modulo instruction natively.<a href="#fnref3"
   class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-  <li id="fn4" role="doc-endnote"><p>These are the operations that the
-  algorithms need. When running code on an actual CPU, there are other
-  instructional overheads – OS code, memory freeing etc.<a
-  href="#fnref4" class="footnote-back"
-  role="doc-backlink">↩︎</a></p></li>
-  <li id="fn5" role="doc-endnote"><p>The only change we made was we <a
+  <li id="fn4"><p>These are the operations that the algorithms need.
+  When running code on an actual CPU, there are other instructional
+  overheads – OS code, memory freeing etc.<a href="#fnref4"
+  class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+  <li id="fn5"><p>The only change we made was we <a
   href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/4420b0c9702ca237cb93fc21338575ae855be34b/src/world_coin_single.rs#L20">unrolled</a>
   for <code>addv</code> helper method for <span
   class="math inline">\(n=4\)</span>. This only sped things up.<a
   href="#fnref5" class="footnote-back"
   role="doc-backlink">↩︎</a></p></li>
-  <li id="fn6" role="doc-endnote"><p>The CIOS algorithm description can
-  also be found Acar’s thesis.<a href="#fnref6" class="footnote-back"
+  <li id="fn6"><p>The CIOS algorithm description can also be found
+  Acar’s thesis.<a href="#fnref6" class="footnote-back"
   role="doc-backlink">↩︎</a></p></li>
-  <li id="fn7" role="doc-endnote"><p>The comments claim that this is
-  CIOS, but if you refer to the algorithms in Acar’s thesis, this is
-  defined as SOS.<a href="#fnref7" class="footnote-back"
+  <li id="fn7"><p>The comments claim that this is CIOS, but if you refer
+  to the algorithms in Acar’s thesis, this is defined as SOS.<a
+  href="#fnref7" class="footnote-back"
   role="doc-backlink">↩︎</a></p></li>
   </ol>
   </section>
@@ -819,7 +818,6 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
-<!-- <script src="/static/mathjax-config.js"></script> -->
 
 </body>
 </html>

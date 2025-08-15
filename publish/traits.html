@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -19,6 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
@@ -53,10 +53,10 @@
   </section>
   <p>In <code>field/ark.rs</code>.</p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-1" class="language-rust">impl JoltField for ark_bn254::Fr {const NUM_BYTES: usize = 32;     type SmallValueLookupTables = [Vec&lt;Self&gt;; 2]; }</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-1" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-1" class="language-rust">impl JoltField for ark_bn254::Fr {const NUM_BYTES: usize = 32;     type SmallValueLookupTables = [Vec&lt;Self&gt;; 2]; }</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-1" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>And as long as this module is part of the crate’s module tree
   (i.e., you have <code>pub mod field;</code> and
   <code>pub mod ark;</code> inside <code>field/mod.rs</code>),
@@ -66,7 +66,7 @@
   global.</strong></p>
   <p>Therefore in :</p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-2" class="language-rust">use ark_bn254::{Bn254, Fr};
+    <pre class="line-numbers"><code id="codeblock-2" class="language-rust">use ark_bn254::{Bn254, Fr};
   use ark_serialize::CanonicalSerialize;
   use jolt_core::poly::commitment::hyperkzg::{
       HyperKZG, HyperKZGProverKey, HyperKZGSRS, HyperKZGVerifierKey,
@@ -74,9 +74,9 @@
   use jolt_core::poly::multilinear_polynomial::MultilinearPolynomial;
   use jolt_core::utils::transcript::{KeccakTranscript, Transcript};
   use rand_core::SeedableRng;</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-2" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-2" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>Although, I never bring in <code>JoltField</code>–
   <code>ark_bn254::Fr</code> implements Jolt Field because in my module
   tree aka <code>crate::</code> there is public field module, which
@@ -87,10 +87,10 @@
   </section>
   <p>In <code>msm/mod.rs</code>, we find this line</p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-3" class="language-rust">impl&lt;F: JoltField, G: CurveGroup&lt;ScalarField = F&gt; + Icicle&gt; VariableBaseMSM for G {}</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-3" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-3" class="language-rust">impl&lt;F: JoltField, G: CurveGroup&lt;ScalarField = F&gt; + Icicle&gt; VariableBaseMSM for G {}</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-3" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>is a <strong>blanket implementation</strong> that says:</p>
   <blockquote>
   <p>Any group type <code>G</code> that: 1. Implements
@@ -102,10 +102,10 @@
   </blockquote>
   <p>In <code>commitment/kzg.rs</code></p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-4" class="language-rust">use crate::msm::{use_icicle, GpuBaseType, Icicle, VariableBaseMSM};</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-4" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-4" class="language-rust">use crate::msm::{use_icicle, GpuBaseType, Icicle, VariableBaseMSM};</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-4" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>Now <code>P::G1</code> does implement <code>CurveGroup</code>; and
   because in <code>msm/mod.rs</code> we explicitly made every curve
   group implements trait <code>VariableBaseMSM</code></p>
@@ -115,15 +115,15 @@
   ``<code>See</code>LearningRust/examples
   function_overloading_via_traits.rs`</p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-5" class="language-rust">let c = &lt;P::G1 as VariableBaseMSM&gt;::msm(
+    <pre class="line-numbers"><code id="codeblock-5" class="language-rust">let c = &lt;P::G1 as VariableBaseMSM&gt;::msm(
               &amp;pk.g1_powers()[..poly.original_len()],
               pk.gpu_g1().map(|g| &amp;g[..poly.original_len()]),
               poly,
               None,
           )?;</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-5" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-5" aria-label="Copy code">📋</button>
   </div>
-    
+
   <section class="level3 hint">
   <h3>So if a struct X implements traits A, B – and say the struct has
   method score, and trait A also has method score but different
@@ -135,21 +135,21 @@
   <p>Note that we do not use Icicle as a feature, and because of that
   the compiler runs the follwoing</p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-6" class="language-rust">pub trait Icicle {}
+    <pre class="line-numbers"><code id="codeblock-6" class="language-rust">pub trait Icicle {}
   #[cfg(not(feature = &quot;icicle&quot;))]
   impl&lt;T: ark_ec::short_weierstrass::SWCurveConfig&gt; Icicle
       for ark_ec::short_weierstrass::Projective&lt;T&gt;
   {
   }</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-6" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-6" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>Any <code>ark_ec::short_weierstrass::Projective&lt;T&gt;</code>
   where <code>T: ark_ec::short_weierstrass::SWCurveConfig</code> will
   also implement icicle.</p>
   <p>Now the Pairing we use is <code>Bn&lt;BnConfig&gt;</code></p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-7" class="language-rust">pub type Bn254 = Bn&lt;Config&gt;;
+    <pre class="line-numbers"><code id="codeblock-7" class="language-rust">pub type Bn254 = Bn&lt;Config&gt;;
 
 
   pub struct Config;
@@ -179,13 +179,13 @@
       type G1Config = g1::Config;
       type G2Config = g2::Config;
   }</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-7" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-7" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>Here is where we see that G1 is specified to be be a
   <code>G1Projective</code></p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-8" class="language-rust">impl&lt;P: BnConfig&gt; Pairing for Bn&lt;P&gt; {
+    <pre class="line-numbers"><code id="codeblock-8" class="language-rust">impl&lt;P: BnConfig&gt; Pairing for Bn&lt;P&gt; {
       type BaseField = &lt;P::G1Config as CurveConfig&gt;::BaseField;
       type ScalarField = &lt;P::G1Config as CurveConfig&gt;::ScalarField;
       type G1 = G1Projective&lt;P&gt;; // SO THIS G1Projective
@@ -196,19 +196,19 @@
       type G2Prepared = G2Prepared&lt;P&gt;;
       type TargetField = Fp12&lt;P::Fp12Config&gt;;
   ...</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-8" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-8" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>where <code>P=BnConfig</code> struct form above</p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-9" class="language-rust">pub type G1Projective&lt;P&gt; = Projective&lt;&lt;P as BnConfig&gt;::G1Config&gt;;</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-9" title="Copy code">📋</button>
+    <pre class="line-numbers"><code id="codeblock-9" class="language-rust">pub type G1Projective&lt;P&gt; = Projective&lt;&lt;P as BnConfig&gt;::G1Config&gt;;</code></pre>
+    <button class="copy-btn" data-clipboard-target="#codeblock-9" aria-label="Copy code">📋</button>
   </div>
-    
+
   <p>and in file Any <code>ark_ec::short_weierstrass::group.rs</code>,
   we find</p>
   <div class="code-container">
-    <pre class="line-numbers language-rust"><code id="codeblock-10" class="language-rust">#[derive(Educe)]
+    <pre class="line-numbers"><code id="codeblock-10" class="language-rust">#[derive(Educe)]
   #[educe(Copy, Clone)]
   #[must_use]
   pub struct Projective&lt;P: SWCurveConfig&gt; {
@@ -219,9 +219,9 @@
       /// Projective multiplicative inverse. Will be `0` only at infinity.
       pub z: P::BaseField,
   }</code></pre>
-    <button class="copy-btn" data-clipboard-target="#codeblock-10" title="Copy code">📋</button>
+    <button class="copy-btn" data-clipboard-target="#codeblock-10" aria-label="Copy code">📋</button>
   </div>
-    
+
   <section class="level3 summary">
   <h3>So this BN&lt;BnConfig&gt; is the pairing and we are really using
   the first group of this pairing.</h3>
@@ -406,7 +406,6 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
-<!-- <script src="/static/mathjax-config.js"></script> -->
 
 </body>
 </html>

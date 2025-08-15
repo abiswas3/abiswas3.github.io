@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="../static/thms.css">
   <link rel="stylesheet" href="../static/imgs.css">       
   <link rel="stylesheet" href="../static/math.css">  
-   
   <link rel="stylesheet" href="../static/tags.css">       
 
   <!-- <script src="/static/tex-mml-chtml.js" defer></script> -->
@@ -19,6 +18,7 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
+
 <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-tomorrow.min.css" rel="stylesheet" /> -->
 
 
@@ -44,25 +44,39 @@
   <div class="blog">
    <h1></h1> 
   <ul class="task-list">
-  <li><p><input type="checkbox" disabled="" checked="" />
-  Send #justin-thaler everything I’ve done so far #a16z #discuss [due::
-  2025-06-07] [completion:: 2025-06-07]</p></li>
-  <li><p><input type="checkbox" disabled="" checked="" />
-  [x] Fill benchmarking instructions in [[why-jolt-breaks]] #next #a16z
-  [due:: 2025-06-07] [completion:: 2025-06-07]</p></li>
-  <li><p><input type="checkbox" disabled="" checked="" />
-  [x] Write out the proof for Hyper KZG #in-progress #a16z [due::
-  2025-06-09] [completion:: 2025-06-10]</p></li>
-  <li><p><input type="checkbox" disabled="" checked="" />
-  Confirm with hyper kzg implementation with code #in-progress #a16z
-  [due:: 2025-06-09] [completion:: 2025-06-10]</p></li>
-  <li><p><input type="checkbox" disabled="" checked="" />
-  Get msm to run with arkworks 5.0 and compare speeds #in-progress #a16z
-  [priority:: high] [due:: 2025-06-12]&gt;</p><ul>
+  <li><p><label><input type="checkbox" checked="" />Send #justin-thaler
+  everything I’ve done so far #a16z #discuss [due:: 2025-06-07]
+  [completion:: 2025-06-07]</label></p></li>
+  <li><p><label><input type="checkbox" checked="" />[x] Fill
+  benchmarking instructions in [[why-jolt-breaks]] #next #a16z [due::
+  2025-06-07] [completion:: 2025-06-07]</label></p></li>
+  <li><p><label><input type="checkbox" checked="" />[x] Write out the
+  proof for Hyper KZG #in-progress #a16z [due:: 2025-06-09]
+  [completion:: 2025-06-10]</label></p></li>
+  <li><p><label><input type="checkbox" checked="" />Confirm with hyper
+  kzg implementation with code #in-progress #a16z [due:: 2025-06-09]
+  [completion:: 2025-06-10]</label></p></li>
+  <li><p><label><input type="checkbox" checked="" />Get msm to run with
+  arkworks 5.0 and compare speeds #in-progress #a16z [priority:: high]
+  [due:: 2025-06-12]&gt;</label></p>
+  <ul>
   <li>This currently works with bls381 curve, but not with bn254, cos we
   don’t have snarkify numbers. TODO: Take snarkifies changes, and put
   them in one long weekend session</li>
   </ul></li>
+  <li><p><label><input type="checkbox" />Clean up BMMTV writeup and do a
+  review with Daniel #a16z #in-progress</label></p></li>
+  <li><p><label><input type="checkbox" />Clean up Hyper KZG writeup and
+  do a review with Daniel #a16z #in-progress<br />
+  </label></p></li>
+  <li><p><label><input type="checkbox" />Understand what needs to be
+  done to bring in Sum-check optimisations into Jolt #a16z #in-progress
+  [[NotesForMe/sum-check-optimisations]]</label></p></li>
+  <li><p><label><input type="checkbox" />Start thinking about the
+  research question – lower bound</label></p></li>
+  <li><p><label><input type="checkbox" checked="" />Make A PR to switch
+  out evaluation_optimised with evaluation #a16z [due:: 2025-07-14]
+  [completion:: 2025-07-16]</label></p></li>
   </ul>
   <section id="systems" class="level2">
   <h2>Systems</h2>
@@ -72,21 +86,33 @@
   <li><p>Notes on Multi-scalar multiplication [[NotesForMe/msm|msm]] ###
   Published</p></li>
   <li><p>[[why-jolt-breaks]]</p></li>
-  <li><p>[[mont_mult]] ## Theory</p></li>
+  <li><p>[[mont_mult]]</p></li>
+  <li><p>[[fast_polynomial_evaluation| Polynomial
+  Optimisation]]</p></li>
+  <li></li>
+  <li><p><a href="">Dory</a>: Todo ## Theory</p></li>
   </ul>
-  <p>So far I’ve understood KZG quite well. These are written on paper,
-  and i don’t think I need to digitise, as there are already quite a few
-  of these notes. <a href="https://risencrypto.github.io/Kate/">See
-  these</a></p>
   </section>
   <section id="my-notes-1" class="level3">
   <h3>My Notes</h3>
   <ul>
   <li>Polynomial IOPs [[NotesForMe/polynomial-iop|polynomial-iop]]</li>
   <li>Sumcheck and PCS – the idea</li>
-  <li>KZG + Merkle Trees</li>
-  <li>[[BlogPosts/hyper-kzg]]</li>
+  <li>[[kzg| KZG]]</li>
+  <li>[[BlogPosts/hyper-kzg| Hyper KZG]]</li>
+  <li><a
+  href="Analysis%20of%20what%20it%20costs%20to%20commit%20to%20a%20multi-linear%20polynomial">[bmmtv|
+  Hyper BMMTV]</a></li>
   </ul>
+  </section>
+  </section>
+  <section id="research-questions" class="level2">
+  <h2>Research Questions</h2>
+  <section class="level3 remark">
+  <h3>Lower Bounds For Twist Prover</h3>
+  <p>I’d say my main research question that no one has had time to work
+  on is whether the Twist prover can run in time faster than <span
+  class="math inline">\(T \log K\)</span></p>
   </section>
   </section>
   </div>
@@ -268,7 +294,6 @@ function showDivs(indices) {
 </script>
 <script src="/static/toggle_bg.js" defer></script>
 <script src="/static/theme-toggle.js"></script>
-<!-- <script src="/static/mathjax-config.js"></script> -->
 
 </body>
 </html>
