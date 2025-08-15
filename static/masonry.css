@@ -1,0 +1,108 @@
+.masonry {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* --- Masonry Items --- */
+.masonry-item {
+  background: var(--masonry-bg);
+  color: var(--text);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.masonry-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.masonry-item .content {
+  padding: 1rem;
+}
+
+.masonry-item h2 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: var(--heading);
+}
+
+.masonry-item p {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+/* --- Post Meta --- */
+.post-meta {
+  font-size: 0.85rem;
+  color: var(--abstract-colour);
+  line-height: 1.4rem;
+}
+
+
+/* --- Post Meta --- */
+.post-meta {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.4rem;
+}
+
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem; /* spacing between tags */
+  margin-bottom: 0.5rem; /* spacing below tags */
+}
+
+.post-tags a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--tag-colour); /* thin border */
+  color: var(--tag-colour);            /* text same as border */
+  padding: 0.15rem 0.4rem;             /* smaller padding */
+  border-radius: 8px;                   /* subtle rounding */
+  font-size: 0.9rem;                    /* much smaller font */
+  font-weight: 400;                     /* normal weight */
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.post-tags a:hover {
+  background: var(--tag-colour);
+  color: var(--bg);
+}
+
+
+.post-date {
+  margin-top: 0.5rem;
+  color: var(--date-colour);
+}
+
+.post-authors span {
+  display: inline-block;
+  margin-top: 0.2rem;
+  color: var(--primary-author-bg);
+}
+
+/* Links */
+.masonry-item a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.masonry-item a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  .masonry {
+    grid-template-columns: 1fr;
+  }
+}
