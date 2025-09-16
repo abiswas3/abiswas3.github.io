@@ -1,3 +1,4 @@
+
 .masonry {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -5,9 +6,11 @@
   max-width: 1200px;
   margin: 2rem auto;
   padding: 0 1rem;
+
+  /* Important for masonry JS */
+  grid-auto-rows: 10px; /* small base unit for row height */
 }
 
-/* --- Masonry Items --- */
 .masonry-item {
   background: var(--masonry-bg);
   color: var(--text);
@@ -15,8 +18,11 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
-}
 
+  /* optional: smooth resizing */
+  display: flex;
+  flex-direction: column;
+}
 .masonry-item:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
