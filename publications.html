@@ -1,374 +1,574 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en" data-theme="dark">
   <head>
-    <meta charset="utf-8">
-	<meta name="generator" content="pandoc">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-
-    <link rel="stylesheet" href="/static/nav.css">      
-    <link rel="stylesheet" href="/static/blog_index.css">      
-    <link rel="stylesheet" href="/static/pubs.css">      
-    
-
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
-
-  <title></title>
-      
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title> - On A Tangent Ltd.</title>
+    <link rel="stylesheet" href="css/style.css" />
   </head>
-
-    <body class="light-mode">    
- <header>          
-    <div class="nav-container"> 
-        <div class="nav-title"><a href="/">Ari</a></div>
-    <button class="nav-toggle" onclick="toggleNav()">☰</button>
-    <nav class="nav-links" id="navMenu">
-      <a href="/publish/">Notes</a>
-      <a href="/publications.html">Publications</a>
-      <a href="/misc.html">Misc</a>
-     <label><input type="checkbox" id="mode-toggle" /><span class="label"></span></label>
-    </nav>
-    </div>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <h1 class="site-title"><a href="/index.html">Ari</a></h1>
+        <button class="menu-toggle">☰</button>
+        <div class="nav-group">
+          <nav class="main-nav">
+            <ul>
+              <li><a href="/index.html">Home</a></li>
+              <li><a href="/blog.html">Blog</a></li>
+              <li><a href="/about.html">Random Walks</a></li>
+              <li>
+                <a
+                  href="#"
+                  class="email-copy"
+                  data-email="on.a.tangent@randomwalks.xyz"
+                >
+                  <span class="email-icon">&#9993;</span> Contact
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <button class="theme-toggle">
+            <span class="theme-toggle-light">&#9728;&#65039;</span>
+            <span class="theme-toggle-dark" style="display: none">&#127769;</span>
+          </button>
+        </div>
+      </div>
+      <style>
+        .email-icon {
+          font-size: 0.9em;
+          margin-right: 0.25em;
+        }
+      </style>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const emailLink = document.querySelector(".email-copy");
+          if (emailLink) {
+            emailLink.onclick = function (e) {
+              e.preventDefault();
+              const email = this.getAttribute("data-email");
+              navigator.clipboard
+                .writeText(email)
+                .then(() => {
+                  const original = this.innerHTML;
+                  this.innerHTML = '<span class="email-icon">✓</span> Copied!';
+                  setTimeout(() => {
+                    this.innerHTML = original;
+                  }, 2000);
+                })
+                .catch(() => {
+                  window.location.href = "mailto:" + email;
+                });
+            };
+          }
+        });
+      </script>
     </header>
-   
-    <main class="content">
-    Authors are listed in alphabetical order of last name.
-    Safe to assume <underline>equal</underline> contribution unless the primary author is <span class="primary">highlighted</span> explicitly.
-    <div class="pub-list">
-    <h1>
-    Publications
-    </h1>
-    <div class="pub">
-    <div class="pub-header">
-    <h3 class="pub-title">
-    Interactive Proofs For Distribution Testing With Conditional Oracles
-    </h3>
-    <div class="venue">
-    <a href="">In Submission</a>
-    </div>
-    </div>
-    <div class="authors">
-    Ari Biswas    <a href="https://cs-people.bu.edu/mbun/">Mark Bun</a>
-       <a href="https://ccanonne.github.io/">Clément Cannone</a>   
-    <a href="https://sites.google.com/view/satchit/home">Satchit
-    Sivakumar</a>
-    </div>
-    <div class="abstract-container">
-    <input type="checkbox" id="abstract-toggle-0" class="abstract-toggle" />
-    <label for="abstract-toggle-0" class="abstract-label">Abstract</label>
-    <div class="abstract-text">
-    <p>We revisit the framework of interactive proofs for distribution
-    testing, first introduced by Chiesa and Gur (ITCS 2018), which has
-    recently experienced a surge in interest, accompanied by notable
-    progress (e.g., Herman and Rothblum, STOC 2022, FOCS 2023; Herman,
-    RANDOM~2024). In this model, a data-poor verifier determines whether
-    a probability distribution has a property of interest by interacting
-    with an all-powerful, data-rich but untrusted prover bent on
-    convincing them that it has the property. While prior work gave
-    sample-, time-, and communication-efficient protocols for a testing
-    and estimating a range of distribution properties, it all suffers
-    from an inherent issue: for most interesting properties of
-    distributions over a domain of size <span
-    class="math inline">\(N\)</span>, the verifier must draw at least
-    <span class="math inline">\(\Omega(\sqrt{N})\)</span> samples of its
-    own. While sublinear in <span class="math inline">\(N\)</span>, this
-    is still prohibitive for large domains encountered in practice.</p>
-    <p>In this work, we circumvent this limitation by augmenting the
-    verifier with the ability to perform an exponentially smaller number
-    of more powerful (but reasonable) queries, effectively enabling them
-    to perform ``local comparison checks’’ of the prover’s claims. We
-    systematically investigate the landscape of interactive proofs in
-    this new setting, giving polylogarithmic query and sample protocols
-    for (tolerantly) testing all properties, thus demonstrating
-    exponential savings without compromising on communication, for this
-    large and fundamental class of testing tasks.</p>
-    </div>
-    </div>
-    <div>
-
-    </div>
-    </div>
-    <div class="pub">
-    <div class="pub-header">
-    <h3 class="pub-title">
-    Refutations of Perfect Matchings In Expanders Is Hard
-    </h3>
-    <div class="venue">
-    <a href="">In Submission</a>
-    </div>
-    </div>
-    <div class="authors">
-    Ari Biswas    <a href="https://sites.google.com/view/rajkon">Rajko
-    Nenadov</a>
-    </div>
-    <div class="abstract-container">
-    <input type="checkbox" id="abstract-toggle-1" class="abstract-toggle" />
-    <label for="abstract-toggle-1" class="abstract-label">Abstract</label>
-    <div class="abstract-text">
-    This work studies the complexity of refuting the existence of a
-    perfect matching in spectral expanders with an odd number of
-    vertices, in the Polynomial Calculus (PC) and Sum of Squares (SoS)
-    proof system. Austrin and Risse [SODA, 2021] showed that refuting
-    perfect matchings in sparse <span
-    class="math inline">\(d\)</span>-regular <em>random</em> graphs in
-    the above proof systems requires proofs with degree <span
-    class="math inline">\(\Omega(n/\log n)\)</span> on average. We
-    extend their result by showing the same lower bound holds for
-    <strong>all</strong> <span class="math inline">\(d\)</span>-regular
-    graphs with a mild spectral gap.Additionally, as Austrin and Risse
-    do for random graphs, we show that the hardness of refuting a more
-    general class of formulae, which includes both perfect matchings and
-    <em>even-colouring</em> formulas, also reduces to the hardness of
-    refuting perfect matchings in spectral expanders, thereby settling
-    an open problem of Buss and Nordstrom.
-    </div>
-    </div>
-    <div class="artefacts">
-    <a href="https://arxiv.org/abs/2506.07700" style="margin-right:1rem; color:#007acc;">Arxiv</a>
-    </div>
-    <div>
-
-    </div>
-    </div>
-    <div class="pub">
-    <div class="pub-header">
-    <h3 class="pub-title">
-    Differentially Private Hierarchical Heavy Hitters
-    </h3>
-    <div class="venue">
-    <a href="https://2025.sigmod.org/">PODS 2025</a>
-    </div>
-    </div>
-    <div class="authors">
-    <span class="primary">Ari Biswas</span>   
-    <a href="https://warwick.ac.uk/fac/sci/dcs/people/graham_cormode/">Graham
-    Cormode</a>   
-    <a href="https://www.linkedin.com/in/yaron-kanza-27897642/">Yaron
-    Kanza</a>    <a href="https://divesh.net/">Divesh Srivastava</a>   
-    <a href="https://dblp.org/pid/166/5104.html">Zhengyi Zhou</a>
-    </div>
-    <div class="abstract-container">
-    <input type="checkbox" id="abstract-toggle-2" class="abstract-toggle" />
-    <label for="abstract-toggle-2" class="abstract-label">Abstract</label>
-    <div class="abstract-text">
-    The task of finding Hierarchical Heavy Hitters (HHH) was introduced
-    by Cormode et al. [12] as a generalisation of the heavy hitter
-    problem. While finding HHH in data streams has been studied
-    extensively, the question of releasing HHH when the underlying data
-    is private remains unexplored. In this paper, we formalise and study
-    the notion of differentially private HHH, in both the streaming and
-    non-streaming setting. In the non-streaming setting, we show the
-    surprising result that the relative error in estimating the count
-    for any prefix is independent of the height of the hierarchy and the
-    number of heavy hitters in the stream. Additionally, our algorithms
-    also improve the error guarantees of Ghazi et al. [24] for the
-    problem of counting over trees. Meanwhile, in the streaming setting,
-    the main issue is that although the exact version of HHH has low
-    global sensitivity (as counting queries are 1-sensitive), the
-    approximation functions due to streaming have high global
-    sensitivity, linear in the available space. Despite this obstacle,
-    we show that the absolute error for estimating frequencies in the
-    streaming setting is independent of the available space.
-    </div>
-    </div>
-    <div class="artefacts">
-    <a href="/papers/dp-hhh-camera-ready.pdf" style="margin-right:1rem; color:#007acc;">Conference
-    paper</a>
-    <a href="slides/DP_HHH_Poster.pdf" style="margin-right:1rem; color:#007acc;">Poster</a>
-    <a href="slides/DP_HHH_Slides.pptx" style="margin-right:1rem; color:#007acc;">Slides</a>
-    </div>
-    <div class="note-container">
-    The poster appeared at
-    <a href='https://tpdp.journalprivacyconfidentiality.org/2024/'>TPDP
-    2024</a>. Graham gave the conference talk @ PODS.
-    </div>
-    <div>
-
-    </div>
-    </div>
-    <div class="pub">
-    <div class="pub-header">
-    <h3 class="pub-title">
-    Interactive Proofs For Differentially Private Counting
-    </h3>
-    <div class="venue">
-    <a href="https://www.sigsac.org/ccs/CCS2023/">CCS 2023</a>
-    </div>
-    </div>
-    <div class="authors">
-    <span class="primary">Ari Biswas</span>   
-    <a href="https://warwick.ac.uk/fac/sci/dcs/people/graham_cormode/">Graham
-    Cormode</a>
-    </div>
-    <div class="abstract-container">
-    <input type="checkbox" id="abstract-toggle-3" class="abstract-toggle" />
-    <label for="abstract-toggle-3" class="abstract-label">Abstract</label>
-    <div class="abstract-text">
-    Differential Privacy (DP) is often presented as a strong
-    privacy-enhancing technology with broad applicability and advocated
-    as a de facto standard for releasing aggregate statistics on
-    sensitive data. However, in many embodiments, DP introduces a new
-    attack surface: a malicious entity entrusted with releasing
-    statistics could manipulate the results and use the randomness of DP
-    as a convenient smokescreen to mask its nefariousness. Since
-    revealing the random noise would obviate the purpose of introducing
-    it, the miscreant may have a perfect alibi. To close this loophole,
-    we introduce the idea of Interactive Proofs For Differential
-    Privacy, which requires the publishing entity to output a zero
-    knowledge proof that convinces an efficient verifier that the output
-    is both DP and reliable. Such a definition might seem unachievable,
-    as a verifier must validate that DP randomness was generated
-    faithfully without learning anything about the randomness itself. We
-    resolve this paradox by carefully mixing private and public
-    randomness to compute verifiable DP counting queries with
-    theoretical guarantees and show that it is also practical for
-    real-world deployment. We also demonstrate that computational
-    assumptions are necessary by showing a separation between
-    information-theoretic DP and computational DP under our definition
-    of verifiability.
-    </div>
-    </div>
-    <div class="artefacts">
-    <a href="https://dl.acm.org/doi/10.1145/3576915.3616681" style="margin-right:1rem; color:#007acc;">Conference
-    paper</a>
-    <a href="https://abiswas3.github.io/papers/TpDpAbstract.pdf" style="margin-right:1rem; color:#007acc;">Extended
-    Abstract</a>
-    <a href="slides/CCS_Short.pdf" style="margin-right:1rem; color:#007acc;">Slides</a>
-    <a href="https://youtu.be/hRiGMDKYZoU" style="margin-right:1rem; color:#007acc;">Talk</a>
-    <a href="https://github.com/abiswas3/Verifiable-Differential-Privacy" style="margin-right:1rem; color:#007acc;">Code</a>
-    </div>
-    <div class="note-container">
-    The extended abstract appeared at
-    <a href='https://tpdp.journalprivacyconfidentiality.org/2023/'>TPDP
-    2023</a>
-    </div>
-    <div>
-
-    </div>
-    </div>
-    <div class="pub">
-    <div class="pub-header">
-    <h3 class="pub-title">
-    Seeker: Real-Time Interactive Search
-    </h3>
-    <div class="venue">
-    <a href="https://www.kdd.org/kdd2019/">KDD 2019</a>
-    </div>
-    </div>
-    <div class="authors">
-    <span class="primary">Ari Biswas</span>   
-    <a href="https://scholar.google.com/">Thai Pham</a>   
-    <a href="https://pages.cs.wisc.edu/~hous21/index.html">Houssam
-    Nassif</a>   
-    <a href="https://www.linkedin.com/in/benjamin-snyder-3b777b10">Ben
-    Snyder</a>   
-    <a href="https://www.linkedin.com/in/michael-vogelsong-524b2080/">Michael
-    Vogelsong</a>
-    </div>
-    <div class="abstract-container">
-    <input type="checkbox" id="abstract-toggle-4" class="abstract-toggle" />
-    <label for="abstract-toggle-4" class="abstract-label">Abstract</label>
-    <div class="abstract-text">
-    This paper introduces Seeker, a system that allows users to
-    interactively refine search rankings in real time, through feedback
-    in the form of likes and dislikes. When searching online, users may
-    not know how to accurately describe their product of choice in
-    words. An alternative approach is to search an embedding space,
-    allowing the user to query using a representation of the item (like
-    a tune for a song, or a picture for an object). However, this
-    approach requires the user to possess an example representation of
-    their desired item. Additionally, most current search systems do not
-    allow the user to dynamically adapt the results with further
-    feedback. On the other hand, users often have a mental picture of
-    the desired item and are able to answer ordinal questions of the
-    form: Is this item similar to what you have in mind? With this
-    assumption, our algorithm allows for users to provide sequential
-    feedback on search results to adapt the search feed. We show that
-    our proposed approach works well both qualitatively and
-    quantitatively. Unlike most previous representation-based search
-    systems, we can quantify the quality of our algorithm by evaluating
-    humans-in-the-loop experiments.
-    </div>
-    </div>
-    <div class="artefacts">
-    <a href="https://dl.acm.org/doi/10.1145/3292500.3330733" style="margin-right:1rem; color:#007acc;">Conference
-    Paper</a>
-    <a href="https://arxiv.org/abs/1905.13125" style="margin-right:1rem; color:#007acc;">Arxiv</a>
-    </div>
-    <div>
-
-    </div>
-    </div>
-    <div class="pub">
-    <div class="pub-header">
-    <h3 class="pub-title">
-    Adversarial Principal Component Analysis
-    </h3>
-    <div class="venue">
-    <a href="https://isit2017.org/">ISIT 2017</a>
-    </div>
-    </div>
-    <div class="authors">
-    Ari Biswas   
-    <a class="primary" href="https://danielpimentel.github.io/">Daniel
-    Pimentel</a>    <a href="https://solislemuslab.github.io/">Claudia
-    Solís-Lemus</a>
-    </div>
-    <div class="abstract-container">
-    <input type="checkbox" id="abstract-toggle-5" class="abstract-toggle" />
-    <label for="abstract-toggle-5" class="abstract-label">Abstract</label>
-    <div class="abstract-text">
-    This paper studies the following question: where should an adversary
-    place an outlier of a given magnitude in order to maximize the error
-    of the subspace estimated by PCA? We give the exact location of this
-    worst possible outlier, and the exact expression of the maximum
-    possible error. Equivalently, we determine the information-theoretic
-    bounds on how much an outlier can tilt a subspace in its direction.
-    This in turn provides universal (worst-case) error bounds for PCA
-    under arbitrary noisy settings. Our results also have several
-    implications on adaptive PCA, online PCA, and rank-one updates. We
-    illustrate our results with a subspace tracking experiment.
-    </div>
-    </div>
-    <div class="artefacts">
-    <a href="https://ieeexplore.ieee.org/document/8006952" style="margin-right:1rem; color:#007acc;">Conference
-    Paper</a>
-    </div>
-    <div>
-
-    </div>
-    </div>
-    <div class="pub">
-    <div class="pub-header">
-    <h3 class="pub-title">
-    Hands-on Introduction To Computer Science At The Freshman Level
-    </h3>
-    <div class="venue">
-    <a href="https://dl.acm.org/doi/proceedings/10.1145/2538862">SIGCSE
-    2014</a>
-    </div>
-    </div>
-    <div class="authors">
-    Ari Biswas    <a href="https://www.linkedin.com/in/tgirgin">Timur
-    Girgin</a>    <a href="https://karu.sites.cs.wisc.edu/wiki/">Karu
-    Sankaralingam</a>   
-    <a href="https://www.linkedin.com/in/zach-york-9511a359">Zach
-    York</a>   
-    <a class="primary" href="https://scholar.google.com/citations?user=7PCO-DEAAAAJ&amp;hl=en">Raghuraman
-    Balasubramanian</a>
-    </div>
-    <div class="artefacts">
-    <a href="https://dl.acm.org/doi/10.1145/2538862.2538889" style="margin-right:1rem; color:#007acc;">Conference
-    paper</a>
-    </div>
-    <div>
-
-    </div>
-    </div>
-    </div>
+    <main class="page-content">
+      <div class="page-header"></div>
+      <article>Authors are listed in alphabetical order of last name.
+Safe to assume <underline>equal</underline> contribution unless the
+primary author is <span class="primary">highlighted</span> explicitly.
+<div class="pub-list">
+<br>
+<div class="pub">
+<h3 class="pub-title">
+Interactive Proofs For Distribution Testing With Conditional Oracles
+</h3>
+<div class="venue">
+<p>
+In Submission
+</p>
+</div>
+<div class="authors">
+<p>
+Ari Biswas    <a href="https://cs-people.bu.edu/mbun/">Mark Bun</a>   
+<a href="https://ccanonne.github.io/">Clément Cannone</a>   
+<a href="https://sites.google.com/view/satchit/home">Satchit
+Sivakumar</a>
+</p>
+</div>
+<input type="checkbox" id="abstract-toggle-0" class="abstract-toggle">
+<label for="abstract-toggle-0" class="abstract-label">Abstract</label>
+<div class="abstract-text">
+<p>We revisit the framework of interactive proofs for distribution
+testing, first introduced by Chiesa and Gur (ITCS 2018), which has
+recently experienced a surge in interest, accompanied by notable
+progress (e.g., Herman and Rothblum, STOC 2022, FOCS 2023; Herman,
+RANDOM~2024). In this model, a data-poor verifier determines whether a
+probability distribution has a property of interest by interacting with
+an all-powerful, data-rich but untrusted prover bent on convincing them
+that it has the property. While prior work gave sample-, time-, and
+communication-efficient protocols for a testing and estimating a range
+of distribution properties, it all suffers from an inherent issue: for
+most interesting properties of distributions over a domain of size <span
+class="math inline"><em>N</em></span>, the verifier must draw at least
+<span class="math inline"><em>Ω</em>(<em>N</em><sup>1/2</sup>)</span>
+samples of its own. While sublinear in <span
+class="math inline"><em>N</em></span>, this is still prohibitive for
+large domains encountered in practice.In this work, we circumvent this
+limitation by augmenting the verifier with the ability to perform an
+exponentially smaller number of more powerful (but reasonable)
+<strong>pairwise conditional queries</strong>, effectively enabling them
+to perform ``local comparison checks’’ of the prover’s claims.We
+systematically investigate the landscape of interactive proofs in this
+new setting, giving polylogarithmic query and sample protocols for
+(tolerantly) testing all <strong>label-invariant</strong> properties,
+thus demonstrating exponential savings without compromising on
+communication, for this large and fundamental class of testing
+tasks.</p>
+</div>
+</div>
+<div class="pub">
+<h3 class="pub-title">
+Refutations of Perfect Matchings In Expanders Is Hard
+</h3>
+<div class="venue">
+<p>
+In Submission
+</p>
+</div>
+<div class="authors">
+<p>
+Ari Biswas    <a href="https://sites.google.com/view/rajkon">Rajko
+Nenadov</a>
+</p>
+</div>
+<input type="checkbox" id="abstract-toggle-1" class="abstract-toggle">
+<label for="abstract-toggle-1" class="abstract-label">Abstract</label>
+<div class="abstract-text">
+<p>This work studies the complexity of refuting the existence of a
+perfect matching in spectral expanders with an odd number of vertices,
+in the Polynomial Calculus (PC) and Sum of Squares (SoS) proof system.
+Austrin and Risse [SODA, 2021] showed that refuting perfect matchings in
+sparse <span class="math inline"><em>d</em></span>-regular
+<em>random</em> graphs in the above proof systems requires proofs with
+degree <span
+class="math inline"><em>Ω</em>(<em>n</em>/log <em>n</em>)</span> on
+average. We extend their result by showing the same lower bound holds
+for <strong>all</strong> <span
+class="math inline"><em>d</em></span>-regular graphs with a mild
+spectral gap.Additionally, as Austrin and Risse do for random graphs, we
+show that the hardness of refuting a more general class of formulae,
+which includes both perfect matchings and <em>even-colouring</em>
+formulas, also reduces to the hardness of refuting perfect matchings in
+spectral expanders, thereby settling an open problem of Buss and
+Nordstrom.</p>
+</div>
+<div class="artefacts">
+<p>
+<a href="https://arxiv.org/abs/2506.07700" style="margin-right:1rem; color:#007acc;">Arxiv</a>
+</p>
+</div>
+</div>
+<div class="pub">
+<h3 class="pub-title">
+Differentially Private Hierarchical Heavy Hitters
+</h3>
+<div class="venue">
+<p>
+<a href="https://2025.sigmod.org/">PODS 2025</a>
+</p>
+</div>
+<div class="authors">
+<p>
+<span class="primary">Ari Biswas</span>   
+<a href="https://warwick.ac.uk/fac/sci/dcs/people/graham_cormode/">Graham
+Cormode</a>   
+<a href="https://www.linkedin.com/in/yaron-kanza-27897642/">Yaron
+Kanza</a>    <a href="https://divesh.net/">Divesh Srivastava</a>   
+<a href="https://dblp.org/pid/166/5104.html">Zhengyi Zhou</a>
+</p>
+</div>
+<input type="checkbox" id="abstract-toggle-2" class="abstract-toggle">
+<label for="abstract-toggle-2" class="abstract-label">Abstract</label>
+<div class="abstract-text">
+<p>The task of finding Hierarchical Heavy Hitters (HHH) was introduced
+by Cormode et al. [12] as a generalisation of the heavy hitter problem.
+While finding HHH in data streams has been studied extensively, the
+question of releasing HHH when the underlying data is private remains
+unexplored. In this paper, we formalise and study the notion of
+differentially private HHH, in both the streaming and non-streaming
+setting. In the non-streaming setting, we show the surprising result
+that the relative error in estimating the count for any prefix is
+independent of the height of the hierarchy and the number of heavy
+hitters in the stream. Additionally, our algorithms also improve the
+error guarantees of Ghazi et al. [24] for the problem of counting over
+trees. Meanwhile, in the streaming setting, the main issue is that
+although the exact version of HHH has low global sensitivity (as
+counting queries are 1-sensitive), the approximation functions due to
+streaming have high global sensitivity, linear in the available space.
+Despite this obstacle, we show that the absolute error for estimating
+frequencies in the streaming setting is independent of the available
+space.</p>
+</div>
+<div class="artefacts">
+<p>
+<a href="/papers/dp-hhh-camera-ready.pdf" style="margin-right:1rem; color:#007acc;">Conference
+paper</a>
+<a href="slides/DP_HHH_Poster.pdf" style="margin-right:1rem; color:#007acc;">Poster</a>
+<a href="slides/DP_HHH_Slides.pptx" style="margin-right:1rem; color:#007acc;">Slides</a>
+</p>
+</div>
+<div class="note-container">
+<p>
+The poster appeared at
+<a href='https://tpdp.journalprivacyconfidentiality.org/2024/'>TPDP
+2024</a>. Graham gave the conference talk @ PODS.
+</p>
+</div>
+</div>
+<div class="pub">
+<h3 class="pub-title">
+Interactive Proofs For Differentially Private Counting
+</h3>
+<div class="venue">
+<p>
+<a href="https://www.sigsac.org/ccs/CCS2023/">CCS 2023</a>
+</p>
+</div>
+<div class="authors">
+<p>
+<span class="primary">Ari Biswas</span>   
+<a href="https://warwick.ac.uk/fac/sci/dcs/people/graham_cormode/">Graham
+Cormode</a>
+</p>
+</div>
+<input type="checkbox" id="abstract-toggle-3" class="abstract-toggle">
+<label for="abstract-toggle-3" class="abstract-label">Abstract</label>
+<div class="abstract-text">
+<p>Differential Privacy (DP) is often presented as a strong
+privacy-enhancing technology with broad applicability and advocated as a
+de facto standard for releasing aggregate statistics on sensitive data.
+However, in many embodiments, DP introduces a new attack surface: a
+malicious entity entrusted with releasing statistics could manipulate
+the results and use the randomness of DP as a convenient smokescreen to
+mask its nefariousness. Since revealing the random noise would obviate
+the purpose of introducing it, the miscreant may have a perfect alibi.
+To close this loophole, we introduce the idea of Interactive Proofs For
+Differential Privacy, which requires the publishing entity to output a
+zero knowledge proof that convinces an efficient verifier that the
+output is both DP and reliable. Such a definition might seem
+unachievable, as a verifier must validate that DP randomness was
+generated faithfully without learning anything about the randomness
+itself. We resolve this paradox by carefully mixing private and public
+randomness to compute verifiable DP counting queries with theoretical
+guarantees and show that it is also practical for real-world deployment.
+We also demonstrate that computational assumptions are necessary by
+showing a separation between information-theoretic DP and computational
+DP under our definition of verifiability.</p>
+</div>
+<div class="artefacts">
+<p>
+<a href="https://dl.acm.org/doi/10.1145/3576915.3616681" style="margin-right:1rem; color:#007acc;">Conference
+paper</a>
+<a href="https://abiswas3.github.io/papers/TpDpAbstract.pdf" style="margin-right:1rem; color:#007acc;">Extended
+Abstract</a>
+<a href="slides/CCS_Short.pdf" style="margin-right:1rem; color:#007acc;">Slides</a>
+<a href="https://youtu.be/hRiGMDKYZoU" style="margin-right:1rem; color:#007acc;">Talk</a>
+<a href="https://github.com/abiswas3/Verifiable-Differential-Privacy" style="margin-right:1rem; color:#007acc;">Code</a>
+</p>
+</div>
+<div class="note-container">
+<p>
+The extended abstract appeared at
+<a href='https://tpdp.journalprivacyconfidentiality.org/2023/'>TPDP
+2023</a>
+</p>
+</div>
+</div>
+<div class="pub">
+<h3 class="pub-title">
+Seeker: Real-Time Interactive Search
+</h3>
+<div class="venue">
+<p>
+<a href="https://www.kdd.org/kdd2019/">KDD 2019</a>
+</p>
+</div>
+<div class="authors">
+<p>
+<span class="primary">Ari Biswas</span>   
+<a href="https://scholar.google.com/">Thai Pham</a>   
+<a href="https://pages.cs.wisc.edu/~hous21/index.html">Houssam
+Nassif</a>   
+<a href="https://www.linkedin.com/in/benjamin-snyder-3b777b10">Ben
+Snyder</a>   
+<a href="https://www.linkedin.com/in/michael-vogelsong-524b2080/">Michael
+Vogelsong</a>
+</p>
+</div>
+<input type="checkbox" id="abstract-toggle-4" class="abstract-toggle">
+<label for="abstract-toggle-4" class="abstract-label">Abstract</label>
+<div class="abstract-text">
+<p>This paper introduces Seeker, a system that allows users to
+interactively refine search rankings in real time, through feedback in
+the form of likes and dislikes. When searching online, users may not
+know how to accurately describe their product of choice in words. An
+alternative approach is to search an embedding space, allowing the user
+to query using a representation of the item (like a tune for a song, or
+a picture for an object). However, this approach requires the user to
+possess an example representation of their desired item. Additionally,
+most current search systems do not allow the user to dynamically adapt
+the results with further feedback. On the other hand, users often have a
+mental picture of the desired item and are able to answer ordinal
+questions of the form: Is this item similar to what you have in mind?
+With this assumption, our algorithm allows for users to provide
+sequential feedback on search results to adapt the search feed. We show
+that our proposed approach works well both qualitatively and
+quantitatively. Unlike most previous representation-based search
+systems, we can quantify the quality of our algorithm by evaluating
+humans-in-the-loop experiments.</p>
+</div>
+<div class="artefacts">
+<p>
+<a href="https://dl.acm.org/doi/10.1145/3292500.3330733" style="margin-right:1rem; color:#007acc;">Conference
+Paper</a>
+<a href="https://arxiv.org/abs/1905.13125" style="margin-right:1rem; color:#007acc;">Arxiv</a>
+</p>
+</div>
+</div>
+<div class="pub">
+<h3 class="pub-title">
+Adversarial Principal Component Analysis
+</h3>
+<div class="venue">
+<p>
+<a href="https://isit2017.org/">ISIT 2017</a>
+</p>
+</div>
+<div class="authors">
+<p>
+Ari Biswas   
+<a class="primary" href="https://danielpimentel.github.io/">Daniel
+Pimentel</a>    <a href="https://solislemuslab.github.io/">Claudia
+Solís-Lemus</a>
+</p>
+</div>
+<input type="checkbox" id="abstract-toggle-5" class="abstract-toggle">
+<label for="abstract-toggle-5" class="abstract-label">Abstract</label>
+<div class="abstract-text">
+<p>This paper studies the following question: where should an adversary
+place an outlier of a given magnitude in order to maximize the error of
+the subspace estimated by PCA? We give the exact location of this worst
+possible outlier, and the exact expression of the maximum possible
+error. Equivalently, we determine the information-theoretic bounds on
+how much an outlier can tilt a subspace in its direction. This in turn
+provides universal (worst-case) error bounds for PCA under arbitrary
+noisy settings. Our results also have several implications on adaptive
+PCA, online PCA, and rank-one updates. We illustrate our results with a
+subspace tracking experiment.</p>
+</div>
+<div class="artefacts">
+<p>
+<a href="https://ieeexplore.ieee.org/document/8006952" style="margin-right:1rem; color:#007acc;">Conference
+Paper</a>
+</p>
+</div>
+</div>
+<div class="pub">
+<h3 class="pub-title">
+Hands-on Introduction To Computer Science At The Freshman Level
+</h3>
+<div class="venue">
+<p>
+<a href="https://dl.acm.org/doi/proceedings/10.1145/2538862">SIGCSE
+2014</a>
+</p>
+</div>
+<div class="authors">
+<p>
+Ari Biswas    <a href="https://www.linkedin.com/in/tgirgin">Timur
+Girgin</a>    <a href="https://karu.sites.cs.wisc.edu/wiki/">Karu
+Sankaralingam</a>   
+<a href="https://www.linkedin.com/in/zach-york-9511a359">Zach York</a>
+  
+<a class="primary" href="https://scholar.google.com/citations?user=7PCO-DEAAAAJ&hl=en">Raghuraman
+Balasubramanian</a>
+</p>
+</div>
+<div class="artefacts">
+<p>
+<a href="https://dl.acm.org/doi/10.1145/2538862.2538889" style="margin-right:1rem; color:#007acc;">Conference
+paper</a>
+</p>
+</div>
+</div>
+</div></article>
     </main>
+    <footer class="site-footer"><p>&copy; 2025 On A Tangent Ltd.</p></footer>
+    <script>
+      const t = document.querySelector(".theme-toggle"),
+        h = document.documentElement,
+        l = document.querySelector(".theme-toggle-light"),
+        d = document.querySelector(".theme-toggle-dark"),
+        s =
+          localStorage.getItem("theme") ||
+          (matchMedia("(prefers-color-scheme:dark)").matches
+            ? "dark"
+            : "light");
+      h.setAttribute("data-theme", s);
+      s === "dark"
+        ? ((l.style.display = "none"), (d.style.display = "block"))
+        : ((l.style.display = "block"), (d.style.display = "none"));
+      t.onclick = () => {
+        const n = h.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        h.setAttribute("data-theme", n);
+        localStorage.setItem("theme", n);
+        n === "dark"
+          ? ((l.style.display = "none"), (d.style.display = "block"))
+          : ((l.style.display = "block"), (d.style.display = "none"));
+      };
+      document.querySelector(".menu-toggle").onclick = () =>
+        document.querySelector(".nav-group").classList.toggle("is-active");
 
-<script src="/static/toggle_bg.js" defer></script>
-    </body>
+      // Auto-highlight current page
+      (function () {
+        const path = window.location.pathname;
+        const page = path.split("/").pop() || "index.html";
+        document.querySelectorAll(".main-nav a").forEach((link) => {
+          const href = link.getAttribute("href").replace("../", "");
+          if (
+            href === page ||
+            (page === "index.html" && href === "index.html")
+          ) {
+            link.classList.add("active");
+          }
+        });
+      })();
+      const media = [
+        {
+          type: "video",
+          src: "assets/me/video2.mp4",
+          caption: "North Devon (Coastal Path), England",
+        },
+        {
+          type: "video",
+          src: "assets/me/video4.mp4",
+          caption: "Snowdon, Wales",
+        },
+        {
+          type: "video",
+          src: "assets/me/video4.mp4",
+          caption: "Snowdon, Wales",
+        },
+        {
+          type: "video",
+          src: "assets/me/video4.mp4",
+          caption: "Snowdon, Wales",
+        },
+        {
+          type: "video",
+          src: "assets/me/video4.mp4",
+          caption: "Snowdon, Wales",
+        },
+        {
+          type: "video",
+          src: "assets/me/video4.mp4",
+          caption: "Snowdon, Wales",
+        },
+        {
+          type: "video",
+          src: "assets/me/video4.mp4",
+          caption: "Snowdon, Wales",
+        },
+        {
+          type: "video",
+          src: "assets/me/video4.mp4",
+          caption: "Snowdon, Wales",
+        },
+        {
+          type: "video",
+          src: "assets/me/video1.mp4",
+          caption: "Lake Bohinj, Slovenia",
+        },
+        {
+          type: "image",
+          src: "assets/me/snowdon.jpg",
+          caption: "Snowdon, Wales",
+        },
+        {
+          type: "image",
+          src: "assets/me/london.jpg",
+          caption: "Jubilee Line, London",
+        },
+        {
+          type: "image",
+          src: "assets/me/berkeley.jpg",
+          caption: "Simons Institute, Berkeley",
+        },
+      ];
 
-<script src="/static/theme-toggle.js"></script>
+      const container = document.getElementById("profile-media-container");
+
+      function loadRandomMedia() {
+        if (!container) {
+          console.error("Profile media container not found");
+          return;
+        }
+
+        if (media.length === 0) {
+          console.error("No media files configured");
+          return;
+        }
+
+        const randomMedia = media[Math.floor(Math.random() * media.length)];
+
+        if (randomMedia.type === "video") {
+          const video = document.createElement("video");
+          video.autoplay = true;
+          video.loop = true;
+          video.muted = true;
+          video.playsInline = true;
+          video.className = "profile-video";
+
+          const source = document.createElement("source");
+          source.src = randomMedia.src;
+          source.type = "video/mp4";
+
+          video.appendChild(source);
+          container.appendChild(video);
+
+          video.onerror = () => {
+            console.error(`Failed to load video: `);
+            loadFallbackMedia();
+          };
+        } else {
+          const img = document.createElement("img");
+          img.src = randomMedia.src;
+          img.alt = "Profile";
+          img.className = "profile-video";
+
+          img.onerror = () => {
+            console.error(`Failed to load image: `);
+            loadFallbackMedia();
+          };
+
+          container.appendChild(img);
+        }
+
+        // Add caption if it exists
+        if (randomMedia.caption) {
+          const caption = document.createElement("p");
+          caption.className = "profile-caption";
+          caption.textContent = randomMedia.caption;
+          container.appendChild(caption);
+        }
+      }
+
+      function loadFallbackMedia() {
+        const fallbackIndex =
+          (media.findIndex((m) => m.src === container.firstChild?.src) + 1) %
+          media.length;
+        if (fallbackIndex < media.length) {
+          container.innerHTML = "";
+          loadRandomMedia();
+        } else {
+          container.innerHTML = '<div class="profile-placeholder">🎭</div>';
+        }
+      }
+
+      loadRandomMedia();
+    </script>
+  </body>
 </html>

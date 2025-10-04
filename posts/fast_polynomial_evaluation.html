@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Faster Polynomial Evaluaton - On A Tangent Ltd.</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <script
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <h1 class="site-title"><a href="/index.html">Ari</a></h1>
+        <button class="menu-toggle">☰</button>
+        <div class="nav-group">
+          <nav class="main-nav">
+            <ul>
+              <li><a href="/index.html">Home</a></li>
+              <li><a href="/blog.html">Blog</a></li>
+              <li><a href="/about.html">Random Walks</a></li>
+              <li>
+                <a
+                  href="#"
+                  class="email-copy"
+                  data-email="on.a.tangent@randomwalks.xyz"
+                >
+                  <span class="email-icon">&#9993;</span> Contact
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <button class="theme-toggle">
+            <span class="theme-toggle-light">&#9728;&#65039;</span>
+            <span class="theme-toggle-dark" style="display: none">&#127769;</span>
+          </button>
+        </div>
+      </div>
+      <style>
+        .email-icon {
+          font-size: 0.9em;
+          margin-right: 0.25em;
+        }
+      </style>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const emailLink = document.querySelector(".email-copy");
+          if (emailLink) {
+            emailLink.onclick = function (e) {
+              e.preventDefault();
+              const email = this.getAttribute("data-email");
+              navigator.clipboard
+                .writeText(email)
+                .then(() => {
+                  const original = this.innerHTML;
+                  this.innerHTML = '<span class="email-icon">✓</span> Copied!';
+                  setTimeout(() => {
+                    this.innerHTML = original;
+                  }, 2000);
+                })
+                .catch(() => {
+                  window.location.href = "mailto:" + email;
+                });
+            };
+          }
+        });
+      </script>
+    </header>
+    <main class="article-content">
+      <header class="article-header">
+        <h1>Faster Polynomial Evaluaton</h1>
+        <div class="article-meta">
+          <div class="meta-left">
+                         <span class="category-tag">jolt</span>
+             
+          </div>
+          <div class="meta-right">
+            <time>2025-07-02</time>             <span class="authors"
+              >By  Ari</span
+            >
+                      </div>
+        </div>
+      </header>
+            <nav id="TOC">
+        <h2>Contents</h2>
+        <ul>
+        <li><a href="#tracked-data-types"
+        id="toc-tracked-data-types">Tracked Data Types</a></li>
+        <li><a href="#problem-statement"
+        id="toc-problem-statement">Problem Statement</a></li>
+        <li><a href="#a-constant-factor-improvement"
+        id="toc-a-constant-factor-improvement">A Constant Factor
+        Improvement</a>
+        <ul>
+        <li><a href="#fully-worked-out-example-for-inside-out-algorithm"
+        id="toc-fully-worked-out-example-for-inside-out-algorithm">Fully
+        Worked Out Example For Inside Out Algorithm</a></li>
+        </ul></li>
+        <li><a href="#leveraging-sparsity"
+        id="toc-leveraging-sparsity">Leveraging Sparsity</a></li>
+        <li><a href="#batched-polynomial-evaluation"
+        id="toc-batched-polynomial-evaluation">Batched Polynomial
+        Evaluation</a></li>
+        <li><a href="#references"
+        id="toc-references">References</a></li>
+        </ul>
+      </nav>
+            <article><section id="tracked-data-types" class="level2">
+<h2>Tracked Data Types</h2>
+<p>Before, describing optimisations to polynomial evaluation, we discuss
+an additional tool to debug numerical algebra libraries. In <a
+href="">Jolt</a> sum-check algorithms, almost invariably the bottleneck
+in computation is number of field multiplications by large scalars. So
+it might be helpful to be able to count the number of multiplications
+your algorithm does, and check if we’re under the theoretical limit.</p>
+<p>Towards this we introduce <code>TrackedFr</code> data type which is
+exactly the same as <code>ark_bn254::Fr</code> except for 1 critical
+difference. <a href="">Implementation here</a></p>
+<p>Before performing a multiplication operation, we increment a global
+counter atomically (in a thread safe way). Rust makes this relatively
+easy to do (it’s remarkable how far libraries have come that prevent us
+from writing semaphores and mutexes from scratch) See <a
+href="https://doc.rust-lang.org/std/sync/atomic/struct.AtomicUsize.html">official
+docs here</a></p>
+<div class="highlight"><pre><span></span><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">sync</span><span class="p">::</span><span class="n">atomic</span><span class="p">::{</span><span class="nf">AtomicUsize</span><span class="p">,</span><span class="w"> </span><span class="nf">Ordering</span><span class="p">};</span>
+
+<span class="c1">// A global counter that tracks how many times we&#39;ve use a*b where a, b are ark_bn254::Fr types</span>
+<span class="c1">// see jolt-core::field::tracked_fr::TrackedFr for more details</span>
+<span class="k">pub</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="nf">MULT_COUNT</span><span class="p">:</span><span class="w"> </span><span class="nc">AtomicUsize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">AtomicUsize</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+</pre></div>
+
+<p>We have the ability to reset this counter at any time as well. So now
+all we need to do if we wanted to see how many multiplications
+transpired, is to wrap the function being examined with
+<code>reset_mult_count()</code> and <code>get_mult_count()</code>. See
+an example of how to use <a href="">here</a>.</p>
+<p>That’s it! Right now it just tracks multiplications, but you may
+extend it to <strong>any</strong> operation <code>ark_bn254::Fr</code>
+does by simply wrapping the operation as follows:</p>
+<p>For all types of multiplication we do w</p>
+<div class="highlight"><pre><span></span><span class="c1">// crate is jolt-core</span>
+<span class="k">use</span><span class="w"> </span><span class="k">crate</span><span class="p">::</span><span class="n">utils</span><span class="p">::</span><span class="n">counters</span><span class="p">::</span><span class="nf">MULT_COUNT</span><span class="p">;</span>
+
+<span class="c1">// Owned * owned</span>
+<span class="k">impl</span><span class="w"> </span><span class="nf">Mul</span><span class="o">&lt;</span><span class="nf">TrackedFr</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">type</span><span class="w"> </span><span class="nc">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="p">;</span>
+<span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">mul</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span><span class="p">:</span><span class="w"> </span><span class="nc">TrackedFr</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">Self</span><span class="p">::</span><span class="nf">Output</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nf">MULT_COUNT</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nf">Ordering</span><span class="p">::</span><span class="nf">Relaxed</span><span class="p">);</span>
+<span class="w">        </span><span class="nf">TrackedFr</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rhs</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Owned * borrowed</span>
+<span class="k">impl</span><span class="o">&lt;&#39;</span><span class="na">a</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">Mul</span><span class="o">&lt;&amp;&#39;</span><span class="na">a</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">type</span><span class="w"> </span><span class="nc">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="p">;</span>
+<span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">mul</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="o">&#39;</span><span class="na">a</span><span class="w"> </span><span class="nc">TrackedFr</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">Self</span><span class="p">::</span><span class="nf">Output</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nf">MULT_COUNT</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nf">Ordering</span><span class="p">::</span><span class="nf">Relaxed</span><span class="p">);</span>
+<span class="w">        </span><span class="nf">TrackedFr</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rhs</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Borrowed * owned</span>
+<span class="k">impl</span><span class="w"> </span><span class="nf">Mul</span><span class="o">&lt;</span><span class="nf">TrackedFr</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="o">&amp;</span><span class="nf">TrackedFr</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">type</span><span class="w"> </span><span class="nc">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">mul</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span><span class="p">:</span><span class="w"> </span><span class="nc">TrackedFr</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">Self</span><span class="p">::</span><span class="nf">Output</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nf">MULT_COUNT</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nf">Ordering</span><span class="p">::</span><span class="nf">Relaxed</span><span class="p">);</span>
+<span class="w">        </span><span class="nf">TrackedFr</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rhs</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+
+<span class="cp">#[allow(clippy::needless_lifetimes)]</span>
+<span class="k">impl</span><span class="o">&lt;&#39;</span><span class="na">a</span><span class="p">,</span><span class="w"> </span><span class="o">&#39;</span><span class="na">b</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">Mul</span><span class="o">&lt;&amp;&#39;</span><span class="na">b</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="o">&amp;&#39;</span><span class="na">a</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">type</span><span class="w"> </span><span class="nc">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="p">;</span>
+<span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">mul</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="o">&#39;</span><span class="na">b</span><span class="w"> </span><span class="nc">TrackedFr</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">Self</span><span class="p">::</span><span class="nf">Output</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nf">MULT_COUNT</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nf">Ordering</span><span class="p">::</span><span class="nf">Relaxed</span><span class="p">);</span>
+<span class="w">        </span><span class="nf">TrackedFr</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rhs</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+</section>
+<section id="problem-statement" class="level2">
+<h2>Problem Statement</h2>
+<p>Fix <span class="math inline">\(n \in \mathbb{N}\)</span> and define
+<span class="math inline">\(N = 2^n\)</span>. In the Jolt codebase there
+is an <a href="">algorithm</a> that takes as input a vector <span
+class="math inline">\(f \in \mathbb{F}^N\)</span> and an <span
+class="math inline">\(\vec{z} \in \mathbb{F}^n\)</span> and outputs
+<span class="math inline">\(\widetilde{f}(\vec{z})\)</span> where <span
+class="math inline">\(\widetilde{f}\)</span> is the multilinear
+extension (MLE) of <span class="math inline">\(f\)</span>. See Chapter 3
+of <span class="citation-inline"><span class="citation"
+data-cites="thaler2020proofs">(<a href="#ref-thaler2020proofs"
+role="doc-biblioref">Thaler 2020</a>)</span></span> for details on how
+to compute MLE of a vector.</p>
+<p>More specifically, the current algorithm does the following:</p>
+<ol type="1">
+<li>Given <span class="math inline">\(\vec{z} \in \mathbb{F}^n\)</span>
+it computes all <span class="math inline">\(N = 2^n\)</span> evaluations
+of Lagrange basis polynomials <span
+class="math inline">\(\Big\{\chi_{\vec{w}}(\vec{z})\Big\}_{\vec{w} \in
+\{0,1 \}^n}\)</span> where <span
+class="math inline">\(\chi_{\vec{w}}(\vec{z}) = \prod_{k=1}^{n} (1
+-z_k)(1-w_k) + z_k w_k = eq(\vec{w}, \vec{z})\)</span>.</li>
+</ol>
+<p>Using the memoization algorithm described in <span
+class="citation-inline"><span class="citation"
+data-cites="walfishHybrid">(<a href="#ref-walfishHybrid"
+role="doc-biblioref">Vu et al. 2013</a>)</span></span>, this computation
+require <span class="math inline">\(N\)</span> multiplications. See
+Lemma 3.8 of <span class="citation-inline"><span class="citation"
+data-cites="thaler2020proofs">(<a href="#ref-thaler2020proofs"
+role="doc-biblioref">Thaler 2020</a>)</span></span> for a simple
+exposition and analysis of this algorithm. An implementation can be
+found <a href="">here</a>.</p>
+<ol start="2" type="1">
+<li>Then to compute the answer we compute a dot product, which requires
+<span class="math inline">\(N\)</span> multiplications. <span
+class="math display">\[\widetilde{f}(\vec{z}) = \sum_{w \in
+\{0,1\}^n}f(w)\chi_{\vec{w}}(\vec{z})\]</span></li>
+</ol>
+<p>In what follows, we describe how to speed up the implementation by a
+factor of 2.</p>
+<div class="remark">
+<p>For a single polynomial evaluation, even if <span
+class="math inline">\(f(w)\)</span> were to be 0, the current code base
+still proceeds to do multiplication instead of just returning 0. This is
+fixed in batched evaluation, but we mention it here, as this will be
+reflected when performing benchmarks.</p>
+</div>
+</section>
+<section id="a-constant-factor-improvement" class="level2">
+<h2>A Constant Factor Improvement</h2>
+<p>Re-writing the definition of MLE of <span
+class="math inline">\(f\)</span> we get</p>
+<p><span class="math display">\[
+\begin{align}
+\widetilde{f}(\vec{z}) &amp;= \sum_{\vec{w} \in \{0,1\}^n}f(w)\cdot
+\chi_{\vec{w}}(\vec{z})\\[10pt]
+&amp;=\sum_{\vec{w} \in \{0,1\}^n} f(\vec{w})\cdot eq(\vec{z},\vec{w})
+\\[10pt]
+&amp;= \sum_{w_1 \in \{0,1\} } eq(z_1,w_1) \sum_{w_2 \in \{0,1\} }
+eq(z_2,w_2) \ldots \sum_{w_n \in \{0, 1\}} eq(z_n,w_n) * f(w_1,...,w_n)
+\end{align}
+\]</span></p>
+<p>Notice that for any <span class="math inline">\((w_1, \ldots,
+w_{n-1}) \in \{ 0, 1\}^{n-1}\)</span></p>
+<p><span class="math display">\[
+\begin{align}
+\sum_{w_n \in \{0,1\}} \operatorname{eq}(z_n, w_n) \cdot f(w_1, \ldots,
+w_n)
+&amp;= f(w_1, \ldots, w_{n-1}, 0) \notag \\
+&amp;\quad + z_n \cdot \left(
+    f(w_1, \ldots, w_{n-1}, 1)
+    - f(w_1, \ldots, w_{n-1}, 0)
+\right)
+\end{align}
+\]</span></p>
+<p>which is one multiplication for every instantiation of <span
+class="math inline">\((w_1, \ldots, w_{n-1})\)</span>, therefore it is a
+total of <span class="math inline">\(2^{n-1}\)</span>
+multiplications.</p>
+<p>Now if we compute things inside out i.e <span class="math inline">\(j
+\in \{n, \ldots, 1\}\)</span>,</p>
+<ul>
+<li>The first iteration of the loop is <span
+class="math inline">\(2^{n-1}\)</span> multiplications</li>
+<li>The second iteration will be <span
+class="math inline">\(2^{n-2}\)</span> multiplications</li>
+<li>…</li>
+<li>The <span class="math inline">\(j\)</span>’th itertion will be <span
+class="math inline">\(2^{n-j}\)</span> multiplications</li>
+<li>…</li>
+<li>The last iteration is just 1 multiplication.</li>
+</ul>
+<p>Thus, there is a total of <span class="math inline">\(N =2^n\)</span>
+multiplications, instead of the two step process described above, each
+of which had <span class="math inline">\(2N\)</span> multiplications
+aove</p>
+<section id="fully-worked-out-example-for-inside-out-algorithm"
+class="level3 remark">
+<h3>Fully Worked Out Example For Inside Out Algorithm</h3>
+<p><strong>Notation</strong>: Bits are written in BigEndian where the
+left most bit is the MSB.</p>
+<p>Given all evaluations of multi-linear polynomial <span
+class="math inline">\(f\)</span></p>
+<p><span class="math display">\[
+\begin{aligned}
+f(0, 0, 0) &amp;= 0 \\
+f(0, 0, 1) &amp;= 0 \\
+f(0, 1, 0) &amp;= 1 \\
+f(0, 1, 1) &amp;= 0 \\
+f(1, 0, 0) &amp;= 0 \\
+f(1, 0, 1) &amp;= 0 \\
+f(1, 1, 0) &amp;= 0 \\
+f(1, 1, 1) &amp;= 1
+\end{aligned}
+\]</span></p>
+<p>We are told to compute <span class="math inline">\(f(4, 3,
+2)\)</span>,</p>
+<section id="step-1" class="level4">
+<h4>Step 1</h4>
+<p><span class="math display">\[
+\begin{align*}
+f(0, 0, 2) &amp;= f(0, 0, 0) + 2(f(0, 0, 1) - f(0, 0, 0)) &amp;= 0 + 2(0
+- 0) &amp;= 0 \\
+f(0, 1, 2) &amp;= f(0, 1, 0) + 2(f(0, 1, 1) - f(0, 1, 0)) &amp;= 1 + 2(0
+- 1) &amp;= -1 \\
+f(1, 0, 2) &amp;= f(1, 0, 0) + 2(f(1, 0, 1) - f(1, 0, 0)) &amp;= 0 + 2(0
+- 0) &amp;= 0 \\
+f(1, 1, 2) &amp;= f(1, 1, 0) + 2(f(1, 1, 1) - f(1, 1, 0)) &amp;= 0 + 2(1
+- 0) &amp;= 2
+\end{align*}
+\]</span></p>
+</section>
+<section id="step-2" class="level4">
+<h4>Step 2:</h4>
+<p><span class="math display">\[
+\begin{align*}
+f(0, 3, 2) &amp;= f(0, 0, 2) + 3(f(0, 1, 2) - f(0, 0, 2)) &amp;= 0 +
+3(-1 - 0) &amp;= -3 \\
+f(1, 3, 2) &amp;= f(1, 0, 2) + 3(f(1, 1, 2) - f(1, 0, 2)) &amp;= 0 + 3(2
+- 0) &amp;= 6
+\end{align*}
+\]</span></p>
+</section>
+<section id="step-3" class="level4">
+<h4>Step 3</h4>
+<p><span class="math display">\[
+\begin{align*}
+f(4, 3, 2) &amp;= f(0, 3, 2) + 4(f(1, 3, 2) - f(0, 3, 2)) \\
+&amp;= -3 + 4(6 - (-3)) = -3 + 4 \cdot 9 = -3 + 36 = \boxed{33}
+\end{align*}
+\]</span></p>
+</section>
+</section>
+</section>
+<section id="leveraging-sparsity" class="level2">
+<h2>Leveraging Sparsity</h2>
+<p>Now what if told you that <span class="math inline">\(\gamma\)</span>
+fraction of the evaluations of <span
+class="math inline">\(\widetilde{f}\)</span> over <span
+class="math inline">\(\{0, 1\}^n\)</span> are zero. Then the dot product
+implementation requires :</p>
+<ul>
+<li><span class="math inline">\(N + \gamma N\)</span>
+multiplications.</li>
+</ul>
+<div class="remark">
+<p>The current Jolt Implementation does not leverage sparsity at all.
+That is even multiplying <code>a*b</code> it does not check if
+<code>a</code> or <code>b</code> is zero to simply return 0. It goes
+ahead and does montgomery multiplication.</p>
+<p><strong>This is not the case with batched evaluation we will discuss
+later</strong>.</p>
+</div>
+<p>An alternative way to implement this dot product algorithm is take
+<span class="math inline">\(\vec{z} = \vec{z_1} || \vec{z_2}\)</span>
+and split into 2 halves of size <span class="math inline">\(n/2\)</span>
+and compute</p>
+<p><span class="math display">\[\sum_{\vec{x_1} \in \{ 0,
+1\}^{n/2}}\mathsf{eq}(\vec{z_1}, \vec{x_1})\sum_{\vec{x_2} \in \{ 0,
+1\}^{n/2}}eq(\vec{z_2}, \vec{x_2})\widetilde{f}(x_1||x_2)\]</span></p>
+<p>This takes</p>
+<ul>
+<li><span class="math inline">\(2\sqrt{N} + \sqrt{N} + \gamma N =
+3\sqrt{N} + \gamma N\)</span> multiplications</li>
+</ul>
+<p>The inside-out evaluation, also leverages sparsity, but in a way that
+depends on the distribution of 0s. Imagine <span
+class="math inline">\(N=8\)</span> and the following two arrays</p>
+<div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">55</span><span class="p">,</span><span class="w"> </span><span class="mi">121</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">55</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">21</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+<p>In the first case, despite having half the evaluations set to 0,
+<span class="math inline">\(z(f[i] - f[m/2+i])\)</span> is not zero. in
+the second case, the zero’s align well and we can get rid of two out of
+4 multiplications.</p>
+<p>Below are two plots that show the impact of sparsity on a single
+polynomial evaluation. The plot on top shows exactly how many
+multiplications are occurring for each algorithm (note
+<code>dot_product</code> is not checking for zeros, so it’s <span
+class="math inline">\(2N\)</span> always). Also shown in a dashed line
+is the theoretical upper bound for the algorithm that spilts
+<code>eq</code>, and this confirms that our implementation is
+efficient,</p>
+<p><img src="/assets/fast_poly/single_poly_eval_sparsity.png" /> <img
+src="/assets/fast_poly/single_poly_evals_num_vars.png" /></p>
+<p>The plot below shows the physical times. Notice how the two trends
+are almost identical, which does confirm that the bottleneck in
+polynomial evaluation really is field multiplication.</p>
+<p>How to get these plots yourself:</p>
+<div class="highlight"><pre><span></span><span class="n">cargo</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="n">jolt</span><span class="o">-</span><span class="n">core</span><span class="w"> </span><span class="o">--</span><span class="n">example</span><span class="w"> </span><span class="n">polynomial_evaluation</span><span class="w"> </span><span class="o">--</span><span class="n">release</span>
+</pre></div>
+
+<p>This should generate a file called <code>results.csv</code> from
+which the above numbers can be easily calculated.</p>
+</section>
+<section id="batched-polynomial-evaluation" class="level2">
+<h2>Batched Polynomial Evaluation</h2>
+<p>Now we get to batched evaluations, that is we want to evaluate
+multilinear polynomials <span class="math inline">\(f_1, \ldots,
+f_s\)</span> at the same point <span
+class="math inline">\(\vec{z}\)</span>.</p>
+<p>Now the cost of computing <span class="math inline">\(eq\)</span> is
+not as bad as it can be re-used for all <span
+class="math inline">\(\{f_i\}_{i \in [s]}\)</span>. Still we show
+splitting <span class="math inline">\(eq\)</span> into <span
+class="math inline">\(eq_1\)</span> and <span
+class="math inline">\(eq_2\)</span> can provide time savings.</p>
+<p>Once again we will measure both the exact number of multiplications,
+and the actual time it took to multiply things.</p>
+<p><img src="/assets/fast_poly/batch_poly_eval_sparsity.png" /></p>
+<p><img src="/assets/fast_poly/batch_poly_evals_num_vars.png" /></p>
+<p>To get these plots run</p>
+<div class="highlight"><pre><span></span><span class="n">cargo</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="n">jolt</span><span class="o">-</span><span class="n">core</span><span class="w"> </span><span class="o">--</span><span class="n">example</span><span class="w"> </span><span class="n">polynomial_evaluation</span><span class="w"> </span><span class="o">--</span><span class="n">release</span>
+</pre></div>
+
+<p>and you shall receive a file called
+<code>batch_results.csv</code></p>
+</section>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered">References</h2>
+<div id="refs" class="references csl-bib-body hanging-indent"
+role="list">
+<div id="ref-thaler2020proofs" class="csl-entry" role="listitem">
+Thaler, Justin. 2020. <em>Proofs, Arguments, and Zero-Knowledge</em>. <a
+href="https://people.cs.georgetown.edu/jthaler/ProofsArgsAndZK.pdf">https://people.cs.georgetown.edu/jthaler/ProofsArgsAndZK.pdf</a>.
+</div>
+<div id="ref-walfishHybrid" class="csl-entry" role="listitem">
+Vu, Victor, Srinath Setty, Andrew J. Blumberg, and Michael Walfish.
+2013. <span>“<span class="nocase">A Hybrid Architecture for Interactive
+Verifiable Computation </span>.”</span> <em>2012 IEEE Symposium on
+Security and Privacy</em> (Los Alamitos, CA, USA), May, 223–37. <a
+href="https://doi.org/10.1109/SP.2013.48">https://doi.org/10.1109/SP.2013.48</a>.
+</div>
+</div>
+</section></article>
+    </main>
+    <footer class="site-footer"><p>&copy; 2025 On A Tangent Ltd.</p></footer>
+
+    <script>
+      // Theme toggle
+      const t = document.querySelector(".theme-toggle"),
+        h = document.documentElement,
+        l = document.querySelector(".theme-toggle-light"),
+        d = document.querySelector(".theme-toggle-dark"),
+        s =
+          localStorage.getItem("theme") ||
+          (matchMedia("(prefers-color-scheme:dark)").matches
+            ? "dark"
+            : "light");
+
+      h.setAttribute("data-theme", s);
+      s === "dark"
+        ? ((l.style.display = "none"), (d.style.display = "block"))
+        : ((l.style.display = "block"), (d.style.display = "none"));
+
+      t.onclick = () => {
+        const n = h.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        h.setAttribute("data-theme", n);
+        localStorage.setItem("theme", n);
+        n === "dark"
+          ? ((l.style.display = "none"), (d.style.display = "block"))
+          : ((l.style.display = "block"), (d.style.display = "none"));
+      };
+
+      // Mobile menu toggle
+      document.querySelector(".menu-toggle").onclick = () =>
+        document.querySelector(".nav-group").classList.toggle("is-active");
+
+      // Auto-highlight current page
+      (function () {
+        const path = window.location.pathname;
+        const page = path.split("/").pop() || "index.html";
+        document.querySelectorAll(".main-nav a").forEach((link) => {
+          const href = link.getAttribute("href").replace("../", "");
+          if (
+            href === page ||
+            (page === "index.html" && href === "index.html")
+          ) {
+            link.classList.add("active");
+          }
+        });
+      })();
+
+      // Citation tooltips
+      document.addEventListener("DOMContentLoaded", function () {
+        const refs = document.querySelector("#refs");
+        if (!refs) return;
+
+        document
+          .querySelectorAll('.citation a[href^="#ref-"]')
+          .forEach(function (cite) {
+            const refId = cite.getAttribute("href").substring(1);
+            const refItem = document.getElementById(refId);
+
+            if (refItem) {
+              const urlLink = refItem.querySelector('a[href^="http"]');
+              if (urlLink) {
+                cite.addEventListener("click", function (e) {
+                  e.preventDefault();
+                  window.open(urlLink.href, "_blank");
+                });
+                cite.style.cursor = "pointer";
+                cite.title = "Click to open source";
+              }
+
+              const tooltip = document.createElement("div");
+              tooltip.className = "citation-tooltip";
+              const cslEntry = refItem.querySelector(".csl-entry");
+              tooltip.textContent = cslEntry
+                ? cslEntry.textContent
+                : refItem.textContent;
+              document.body.appendChild(tooltip);
+
+              cite.addEventListener("mouseenter", function (e) {
+                const rect = cite.getBoundingClientRect();
+                tooltip.style.display = "block";
+                tooltip.style.left =
+                  Math.min(rect.left, window.innerWidth - 420) + "px";
+                tooltip.style.top = rect.bottom + 5 + "px";
+              });
+
+              cite.addEventListener("mouseleave", function () {
+                tooltip.style.display = "none";
+              });
+            }
+          });
+      });
+
+      // Add copy buttons to code blocks
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".highlight").forEach(function (block) {
+          // Create copy button
+          const btn = document.createElement("button");
+          btn.className = "copy-btn";
+          btn.textContent = "Copy";
+          btn.setAttribute("aria-label", "Copy code to clipboard");
+
+          // Insert button as first child of highlight div
+          block.insertBefore(btn, block.firstChild);
+
+          const code = block.querySelector("pre");
+
+          btn.addEventListener("click", async function () {
+            const text = code.textContent;
+
+            try {
+              await navigator.clipboard.writeText(text);
+              btn.textContent = "Copied!";
+              btn.style.background = "#10b981";
+
+              setTimeout(() => {
+                btn.textContent = "Copy";
+                btn.style.background = "";
+              }, 2000);
+            } catch (err) {
+              // Fallback for older browsers
+              const textarea = document.createElement("textarea");
+              textarea.value = text;
+              textarea.style.position = "fixed";
+              textarea.style.opacity = "0";
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand("copy");
+              document.body.removeChild(textarea);
+
+              btn.textContent = "Copied!";
+              setTimeout(() => {
+                btn.textContent = "Copy";
+              }, 2000);
+            }
+          });
+        });
+      });
+
+      // Add data-tag to category tags
+      document.querySelectorAll(".category-tag").forEach((tag) => {
+        const tagName = tag.textContent.trim().toLowerCase();
+        tag.setAttribute("data-tag", tagName);
+      });
+
+      // Extract authors and create author tags
+      const authorSpan = document.querySelector(
+        '.article-meta span:has-text("By")',
+      );
+      if (authorSpan) {
+        const authorText = authorSpan.textContent.replace("By ", "").trim();
+        const authors = authorText.split(",").map((a) => a.trim());
+
+        authors.forEach((author) => {
+          const tag = document.createElement("span");
+          tag.className = "category-tag";
+          tag.textContent = author;
+          tag.setAttribute("data-tag", author.toLowerCase());
+          authorSpan.parentElement.appendChild(tag);
+        });
+      }
+    </script>
+  </body>
+</html>

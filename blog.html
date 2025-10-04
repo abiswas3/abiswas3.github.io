@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-7" />
+    <meta name="viewport" content="width=device-width, initial-scale=2.0" />
+    <title>Blog - On A Tangent Ltd.</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <h1 class="site-title"><a href="/index.html">Ari</a></h1>
+        <button class="menu-toggle">☰</button>
+        <div class="nav-group">
+          <nav class="main-nav">
+            <ul>
+              <li><a href="/index.html">Home</a></li>
+              <li><a href="/blog.html">Blog</a></li>
+              <li><a href="/about.html">Random Walks</a></li>
+              <li>
+                <a
+                  href="#"
+                  class="email-copy"
+                  data-email="on.a.tangent@randomwalks.xyz"
+                >
+                  <span class="email-icon">&#9993;</span> Contact
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <button class="theme-toggle">
+            <span class="theme-toggle-light">&#9728;&#65039;</span>
+            <span class="theme-toggle-dark" style="display: none">&#127769;</span>
+          </button>
+        </div>
+      </div>
+      <style>
+        .email-icon {
+          font-size: 0.9em;
+          margin-right: 0.25em;
+        }
+      </style>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const emailLink = document.querySelector(".email-copy");
+          if (emailLink) {
+            emailLink.onclick = function (e) {
+              e.preventDefault();
+              const email = this.getAttribute("data-email");
+              navigator.clipboard
+                .writeText(email)
+                .then(() => {
+                  const original = this.innerHTML;
+                  this.innerHTML = '<span class="email-icon">✓</span> Copied!';
+                  setTimeout(() => {
+                    this.innerHTML = original;
+                  }, 2000);
+                })
+                .catch(() => {
+                  window.location.href = "mailto:" + email;
+                });
+            };
+          }
+        });
+      </script>
+    </header>
+    <main class="page-content">
+      <div class="page-header"></div>
+      <div class="blog-filters">
+      <button class="filter-btn active" data-category="all">All</button>
+      <button class="filter-btn" data-category="algebra">Algebra</button>
+      <button class="filter-btn" data-category="benchmarking">Benchmarking</button>
+      <button class="filter-btn" data-category="draft (incomplete)">Draft (Incomplete)</button>
+      <button class="filter-btn" data-category="jolt">Jolt</button>
+      <button class="filter-btn" data-category="music">Music</button>
+      </div>
+      <ul class="posts-list">
+      <li class="post-item" data-categories="jolt,algebra,benchmarking">
+        <time class="post-date" datetime="2025-10-04">2025-10-04</time>
+        <div class="post-content">
+          <h2><a href="posts/small-scalar-binding.html">Smaller Sumcheck Challenges In Jolt</a></h2>
+          <div class="post-meta">
+            <span class="category-tag" data-tag="jolt">jolt</span>
+            <span class="category-tag" data-tag="algebra">algebra</span>
+            <span class="category-tag" data-tag="benchmarking">benchmarking</span>
+            <span class="separator">|</span>
+            <span class="author">Ari</span>
+          </div>
+        </div>
+      </li>
+      <li class="post-item" data-categories="jolt">
+        <time class="post-date" datetime="2025-07-02">2025-07-02</time>
+        <div class="post-content">
+          <h2><a href="posts/fast_polynomial_evaluation.html">Faster Polynomial Evaluaton</a></h2>
+          <div class="post-meta">
+            <span class="category-tag" data-tag="jolt">jolt</span>
+            <span class="separator">|</span>
+            <span class="author">Ari</span>
+          </div>
+        </div>
+      </li>
+      <li class="post-item" data-categories="jolt,algebra,benchmarking">
+        <time class="post-date" datetime="2025-05-24">2025-05-24</time>
+        <div class="post-content">
+          <h2><a href="posts/why-jolt-breaks.html">Notes From The Montgomery Underground</a></h2>
+          <div class="post-meta">
+            <span class="category-tag" data-tag="jolt">jolt</span>
+            <span class="category-tag" data-tag="algebra">algebra</span>
+            <span class="category-tag" data-tag="benchmarking">benchmarking</span>
+            <span class="separator">|</span>
+            <span class="author">Ari</span>
+          </div>
+        </div>
+      </li>
+      <li class="post-item" data-categories="jolt,algebra,benchmarking">
+        <time class="post-date" datetime="2025-05-15">2025-05-15</time>
+        <div class="post-content">
+          <h2><a href="posts/mont_mult.html">Montgomery Multiplication: Theory Vs Practice</a></h2>
+          <div class="post-meta">
+            <span class="category-tag" data-tag="jolt">jolt</span>
+            <span class="category-tag" data-tag="algebra">algebra</span>
+            <span class="category-tag" data-tag="benchmarking">benchmarking</span>
+            <span class="separator">|</span>
+            <span class="author">Ari, The Squirrel</span>
+          </div>
+        </div>
+      </li>
+      <li class="post-item" data-categories="music,draft (incomplete)">
+        <time class="post-date" datetime="2020-12-25">2020-12-25</time>
+        <div class="post-content">
+          <h2><a href="posts/lockdown-project.html">The Lockdown Music Project (DRAFT/ INCOMPLETE)</a></h2>
+          <div class="post-meta">
+            <span class="category-tag" data-tag="music">music</span>
+            <span class="category-tag" data-tag="draft (incomplete)">draft (incomplete)</span>
+            <span class="separator">|</span>
+            <span class="author">Ari, David Smith</span>
+          </div>
+        </div>
+      </li>
+      </ul>
+    </main>
+    <footer class="site-footer"><p>&copy; 2026 On A Tangent Ltd.</p></footer>
+    <script>
+      document.querySelectorAll(".filter-btn").forEach(
+        (b) =>
+          (b.onclick = function () {
+            const c = this.getAttribute("data-category");
+            document
+              .querySelectorAll(".filter-btn")
+              .forEach((x) => x.classList.remove("active"));
+            this.classList.add("active");
+            document.querySelectorAll(".post-item").forEach((p) => {
+              c === "all"
+                ? p.classList.remove("hidden")
+                : p.getAttribute("data-categories").split(",").includes(c)
+                  ? p.classList.remove("hidden")
+                  : p.classList.add("hidden");
+            });
+          }),
+      );
+      const t = document.querySelector(".theme-toggle"),
+        h = document.documentElement,
+        l = document.querySelector(".theme-toggle-light"),
+        d = document.querySelector(".theme-toggle-dark"),
+        s =
+          localStorage.getItem("theme") ||
+          (matchMedia("(prefers-color-scheme:dark)").matches
+            ? "dark"
+            : "light");
+      h.setAttribute("data-theme", s);
+      s === "dark"
+        ? ((l.style.display = "none"), (d.style.display = "block"))
+        : ((l.style.display = "block"), (d.style.display = "none"));
+      t.onclick = () => {
+        const n = h.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        h.setAttribute("data-theme", n);
+        localStorage.setItem("theme", n);
+        n === "dark"
+          ? ((l.style.display = "none"), (d.style.display = "block"))
+          : ((l.style.display = "block"), (d.style.display = "none"));
+      };
+      document.querySelector(".menu-toggle").onclick = () =>
+        document.querySelector(".nav-group").classList.toggle("is-active");
+    </script>
+  </body>
+</html>

@@ -1,0 +1,213 @@
+/* Syntax highlighting colors from gendignoux.com */
+:root {
+  --color-code-1: #2a7d7d; /* Comments - deeper teal */
+  --color-code-2: #087f23; /* Strings - richer green */
+  --color-code-3: #5a5a5a; /* Punctuation - darker gray */
+  --color-code-4: #c4630c; /* Numbers - warmer orange */
+  --color-code-11: #c41748; /* Keywords - deeper red */
+  --color-code-12: #a91e1e; /* Errors - darker red */
+  --color-code-14: #6d7e0a; /* Docstrings - olive green */
+  --color-code-15: #0033cc; /* Built-ins - true blue */
+  --color-code-17: #8b1fa3; /* Functions - purple */
+  --color-code-20: #d63900; /* Operators - burnt orange */
+  --color-code-21: #1a1570; /* Classes - deep indigo */
+  --color-code-23: #a0561b; /* Decorators - warm brown */
+  --color-code-24: #a94467; /* Variables - mauve */
+}
+
+/*LIGHT MODE*/
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-code-1: #59b2b2;
+    --color-code-2: #59b259;
+    --color-code-3: #999999;
+    --color-code-4: #e58500;
+    --color-code-11: #e52d71;
+    --color-code-12: #d85656;
+    --color-code-14: #9ab231;
+    --color-code-15: #0033cc;
+    --color-code-17: #ce7fff;
+    --color-code-20: #ed7647;
+    --color-code-21: #7f7fff;
+    --color-code-23: #bb6622;
+    --color-code-24: green;
+  }
+}
+[data-theme="dark"] {
+  --color-code-1: #59b2b2;
+  --color-code-2: #59b259;
+  --color-code-3: #999999;
+  --color-code-4: #e58500;
+  --color-code-11: #e52d71;
+  --color-code-12: #d85656;
+  --color-code-14: #9ab231;
+  --color-code-15: #9999ff;
+  --color-code-17: #ce7fff;
+  --color-code-20: #ed7647;
+  --color-code-21: #7f7fff;
+  --color-code-23: #bb6622;
+  --color-code-24: #bb6688;
+}
+/* Inline code */
+p code,
+li code {
+  color: var(--text-inline-code);
+  background-color: var(--bg-code-inline);
+  border: 1px solid var(--text-inline-code);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  white-space: break-spaces;
+  margin: 4px;
+}
+
+/* Code blocks */
+code {
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+}
+
+pre {
+  background-color: var(--bg-code-block);
+  padding: 9.5px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: auto;
+  margin: 1em 0;
+  font-size: 0.85em;
+  line-height: 1.42857143; /* Tighter line spacing */
+}
+
+pre code {
+  font-size: inherit;
+  padding: 0;
+  line-height: 1.42857143;
+  background: none;
+  border: none;
+}
+
+/* Pygments syntax highlighting classes */
+.c,
+.cd,
+.c1,
+.cm {
+  color: var(--color-code-1);
+  font-style: italic;
+}
+.k {
+  color: var(--color-code-2);
+  font-weight: bold;
+}
+.o {
+  color: var(--color-code-3);
+}
+.cp,
+.cpf {
+  color: var(--color-code-4);
+}
+.kt {
+  color: var(--color-code-11);
+}
+.m,
+.mi,
+.mf,
+.mh,
+.mo,
+.mb {
+  color: var(--color-code-12);
+}
+.s,
+.s1,
+.s2,
+.sb,
+.sc,
+.sd,
+.dl,
+.sh {
+  color: var(--color-code-12);
+}
+.na {
+  color: var(--color-code-14);
+}
+.nb {
+  color: var(--color-code-2);
+}
+.nc {
+  color: var(--color-code-15);
+  font-weight: bold;
+}
+.nd {
+  color: var(--color-code-17);
+}
+.nf {
+  color: var(--color-code-15);
+}
+.nl {
+  color: var(--color-code-20);
+}
+.nn {
+  color: var(--color-code-15);
+  font-weight: bold;
+}
+.p {
+  color: var(--text-primary);
+}
+.n {
+  color: var(--text-primary);
+}
+.kc,
+.kd,
+.kn,
+.kp,
+.kr {
+  color: var(--color-code-2);
+  font-weight: bold;
+}
+.nt {
+  color: var(--color-code-2);
+  font-weight: bold;
+}
+.nv {
+  color: var(--color-code-21);
+}
+.se {
+  color: var(--color-code-23);
+  font-weight: bold;
+}
+.si,
+.sd {
+  color: var(--color-code-24);
+  font-weight: bold;
+}
+
+.highlight {
+  position: relative;
+  margin: 3rem 0 0.1rem 0;
+}
+
+.copy-btn {
+  position: absolute;
+  top: -1.9rem;
+  right: 0;
+  padding: 0.4rem 0.8rem;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--text-primary);
+  /*border-radius: 0.375rem;*/
+  font-size: 0.875rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.copy-btn:hover {
+  background: rgba(37, 99, 235, 0.9);
+  transform: translateY(-1px);
+}
+
+.copy-btn:active {
+  transform: translateY(0);
+}
+

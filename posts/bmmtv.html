@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hyper BMMTV Costs - On A Tangent Ltd.</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <script
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <h1 class="site-title"><a href="/index.html">Ari</a></h1>
+        <button class="menu-toggle">☰</button>
+        <div class="nav-group">
+          <nav class="main-nav">
+            <ul>
+              <li><a href="/index.html">Home</a></li>
+              <li><a href="/blog.html">Blog</a></li>
+              <li><a href="/about.html">Random Walks</a></li>
+              <li>
+                <a
+                  href="#"
+                  class="email-copy"
+                  data-email="on.a.tangent@randomwalks.xyz"
+                >
+                  <span class="email-icon">&#9993;</span> Contact
+                </a>
+              </li>
+            </ul>
+          </nav>
+          <button class="theme-toggle">
+            <span class="theme-toggle-light">&#9728;&#65039;</span>
+            <span class="theme-toggle-dark" style="display: none">&#127769;</span>
+          </button>
+        </div>
+      </div>
+      <style>
+        .email-icon {
+          font-size: 0.9em;
+          margin-right: 0.25em;
+        }
+      </style>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const emailLink = document.querySelector(".email-copy");
+          if (emailLink) {
+            emailLink.onclick = function (e) {
+              e.preventDefault();
+              const email = this.getAttribute("data-email");
+              navigator.clipboard
+                .writeText(email)
+                .then(() => {
+                  const original = this.innerHTML;
+                  this.innerHTML = '<span class="email-icon">✓</span> Copied!';
+                  setTimeout(() => {
+                    this.innerHTML = original;
+                  }, 2000);
+                })
+                .catch(() => {
+                  window.location.href = "mailto:" + email;
+                });
+            };
+          }
+        });
+      </script>
+    </header>
+    <main class="article-content">
+      <header class="article-header">
+        <h1>Hyper BMMTV Costs</h1>
+        <div class="article-meta">
+          <div class="meta-left">
+                         <span class="category-tag">notes (draft)</span>
+             
+          </div>
+          <div class="meta-right">
+            <time>2025-01-01</time>             <span class="authors"
+              >By  Ari</span
+            >
+                      </div>
+        </div>
+      </header>
+            <nav id="TOC">
+        <h2>Contents</h2>
+        <ul>
+        <li><a href="#notation" id="toc-notation">Notation</a>
+        <ul>
+        <li><a href="#curves-and-pairings"
+        id="toc-curves-and-pairings">Curves And Pairings</a></li>
+        </ul></li>
+        <li><a href="#background"
+        id="toc-background">Background</a></li>
+        <li><a href="#bi-variate-polynomials"
+        id="toc-bi-variate-polynomials">Bi-variate Polynomials</a></li>
+        <li><a href="#trusted-setup" id="toc-trusted-setup">Trusted
+        Setup</a></li>
+        <li><a href="#commitIPA" id="toc-commitIPA">How To
+        Commit</a></li>
+        <li><a href="#how-to-open" id="toc-how-to-open">How To Open</a>
+        <ul>
+        <li><a href="#commit-to-a-partial-evaluation"
+        id="toc-commit-to-a-partial-evaluation">1. Commit To A Partial
+        Evaluation</a></li>
+        <li><a href="#inner-product-proof"
+        id="toc-inner-product-proof">2. Inner Product Proof</a></li>
+        <li><a href="#the-full-evaluation-proof"
+        id="toc-the-full-evaluation-proof">3. The Full Evaluation
+        Proof</a></li>
+        </ul></li>
+        <li><a href="#inner-product-proof-1"
+        id="toc-inner-product-proof-1">Inner Product Proof</a>
+        <ul>
+        <li><a
+        href="#a-note-about-optimising-communication-and-defining-q"
+        id="toc-a-note-about-optimising-communication-and-defining-q">A
+        Note About Optimising Communication and defining <span
+        class="math inline">\(q\)</span></a></li>
+        </ul></li>
+        <li><a href="#how-to-verify-an-inner-product-proof"
+        id="toc-how-to-verify-an-inner-product-proof">How To Verify An
+        Inner Product Proof</a></li>
+        <li><a href="#univariate" id="toc-univariate">How To Commit To A
+        Univariate Polynomial</a>
+        <ul>
+        <li><a href="#example" id="toc-example">Example</a></li>
+        </ul></li>
+        <li><a href="#multi-commit" id="toc-multi-commit">Full
+        Accounting For Prover Costs For Multi-variate Polynomial</a>
+        <ul>
+        <li><a href="#cost-of-committing-to-p0"
+        id="toc-cost-of-committing-to-p0">Cost Of Committing to <span
+        class="math inline">\(p^{(0)}\)</span></a></li>
+        </ul></li>
+        </ul>
+      </nav>
+            <article>.
+<p>The purpose of this post is to understand the computational costs of
+committing to an <span class="math inline">\(\ell\)</span> variate
+multi-linear polynomial using the inner product commitment scheme
+prescribed by <span class="citation-inline"><span class="citation"
+data-cites="bmmtv2021">(<a href="#ref-bmmtv2021"
+role="doc-biblioref">Bünz et al. 2019</a>)</span></span>.</p>
+<p>Note that <span class="citation-inline"><span class="citation"
+data-cites="bmmtv2021">(<a href="#ref-bmmtv2021"
+role="doc-biblioref">Bünz et al. 2019</a>)</span></span> only describes
+how to commit to a univariate polynomial or a bi-variate polynomial
+explicitly.<br />
+To commit to a multi-linear polynomial, we feed the univariate
+polynomial scheme as a blackbox to the reduction of knowledge technique
+described in Section 6 of <span class="citation-inline"><span
+class="citation" data-cites="micronova2024">(<a
+href="#ref-micronova2024" role="doc-biblioref">Zhao et al.
+2024</a>)</span></span> (titled hyper-kzg).</p>
+<section id="notation" class="level2">
+<h2>Notation</h2>
+<p>Throughout this post we assume that use <span class="math inline">\(m
+\in \mathbb{N}\)</span> is a power of 2. As the main content of this
+post is from <span class="citation-inline"><span class="citation"
+data-cites="bmmtv2021">(<a href="#ref-bmmtv2021"
+role="doc-biblioref">Bünz et al. 2019</a>)</span></span>, when
+describing group operations, we stick with their conventions and use
+multiplicative notation.</p>
+<p><strong>Index Notation</strong>: Usually we index the <span
+class="math inline">\(i\)</span>’th location of a vector <span
+class="math inline">\(\vec{a}\)</span> with <span
+class="math inline">\(a_i\)</span>. Often, however, owing to the need
+for multi-indexing or other reasons, we will index vectors with script
+notation <span class="math inline">\(a^{(j)}\)</span> instead. We
+understand this can be confusing, so to ease cognitive load, the reader
+is asked to remember that</p>
+<ul>
+<li><p>When there are parentheses around <span
+class="math inline">\((i)\)</span> then <span
+class="math inline">\(a^{(i)}\)</span> is the <span
+class="math inline">\(i\)</span>’th index of a vector <span
+class="math inline">\(\vec{a}\)</span>.</p></li>
+<li><p>When there are <strong>NO</strong> parentheses around <span
+class="math inline">\(i\)</span> then <span
+class="math inline">\(a^{i}\)</span> is <span
+class="math inline">\(a\)</span> raised to the power of <span
+class="math inline">\(i\)</span>.</p></li>
+</ul>
+<p>The original manuscript by <span class="citation-inline"><span
+class="citation" data-cites="bmmtv2021">(<a href="#ref-bmmtv2021"
+role="doc-biblioref">Bünz et al. 2019</a>)</span></span> introduces a
+lot of non-standard notation. We feel that most of that notation is not
+needed to accurately describe the protocols. Therefore, in this post, we
+describe everything using standard notation accepted by the wider
+mathematics/TCS community, outside of crypto and snarks (at the cost of
+sometimes being a little bit more verbose). As we do not go into
+security proofs, we also abandon most of the formalism introduced in the
+preliminary sections of the original manuscript. We believe this
+approach simplifies the exposition significantly without compromising
+rigour or correctness.</p>
+<section id="curves-and-pairings" class="level3 remark">
+<h3>Curves And Pairings</h3>
+<p>Let <span class="math inline">\(\textcolor{blue}{\mathtt{q}}\)</span>
+be some prime. We highlight this in blue and write in a different font
+to distinguish it from univariate polynomial <span
+class="math inline">\(q\)</span> which is used later in the post to
+verify if the commitment keys are propelry structured.</p>
+<p>Throughout this post, and the posts hyper-linked here, we will assume
+the pairing <span class="math inline">\(e: \mathbb{G}_1\times
+\mathbb{G}\_2\rightarrow \mathbb{G}\_T\)</span> is constructed from some
+elliptic curve <span
+class="math inline">\(E/\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.</p>
+<ul>
+<li><span class="math inline">\(\mathbb{G}_1\)</span> is an order <span
+class="math inline">\(\textcolor{blue}{\mathtt{q}}\)</span> subgroup of
+<span
+class="math inline">\(E(\mathbb{F}_{\textcolor{blue}{\mathtt{q}}})\)</span>.</li>
+<li><span class="math inline">\(\mathbb{G}_1\)</span> is an order <span
+class="math inline">\(\textcolor{blue}{\mathtt{q}}\)</span> subgroup of
+<span
+class="math inline">\(E(\mathbb{F}_{\textcolor{blue}{\mathtt{q}}^d})\)</span>
+for some <span class="math inline">\(d &gt; 1\)</span>.</li>
+<li><span class="math inline">\(\mathbb{G}\_T\)</span> is an order <span
+class="math inline">\(\textcolor{blue}{\mathtt{q}}\)</span>
+multiplicative subgroup of the finite field <span
+class="math inline">\(\mathbb{F}_{\textcolor{blue}{\mathtt{q}}^d}\)</span></li>
+</ul>
+</section>
+</section>
+<section id="background" class="level2">
+<h2>Background</h2>
+<p>To fully make sense of the commitment scheme, we need to understand 4
+sub-components</p>
+<ol type="1">
+<li><a href="/publish/kzg.html">The KZG commitment scheme</a>: You can
+ignore the section on batching, as that’s not critical for understanding
+inner product arguments.</li>
+<li>We introduce the “inner product” or “multi-exponentiation” argument,
+which is the main contribution of <span class="citation-inline"><span
+class="citation" data-cites="bmmtv2021">(<a href="#ref-bmmtv2021"
+role="doc-biblioref">Bünz et al. 2019</a>)</span></span>. Using KZG and
+the inner product argument, we show how to commit to a bivariate
+polynomial. <strong>This is the new stuff</strong>!.</li>
+<li>Finally, we show <a href="#univariate">how to commit to a univariate
+polynomial using bi-variate commitment scheme</a></li>
+<li>Now that we have a univariate commitment scheme, we can <a
+href="/publish/hyper-kzg.html">commit to multi-linear polynomials using
+univariate commitments</a> using the black box reduction of knowledge
+scheme from <span class="citation-inline"><span class="citation"
+data-cites="micronova2024">(<a href="#ref-micronova2024"
+role="doc-biblioref">Zhao et al. 2024</a>)</span></span>.</li>
+</ol>
+</section>
+<section id="bi-variate-polynomials" class="level2">
+<h2>Bi-variate Polynomials</h2>
+<p>We are given a bi-variate polynomial <span class="math inline">\(f
+\in \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[X, Y]\)</span></p>
+<p><span class="math display">\[
+\begin{align}
+f(X, Y) &amp;= \sum_{i=0}^{m-1} f_i(Y)X^{i} \tag{i}
+\end{align}
+\]</span> where for all <span class="math inline">\(i \in \{0, \ldots,
+m-1\}\)</span>, <span class="math inline">\(f_i \in
+\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[Y]\)</span> is a univariate
+polynomial with degree at most <span class="math inline">\(\ell
+-1\)</span> i.e <span class="math inline">\(f_i(Y) = f_{(i, 0)}Y^0 +
+\ldots + f_{(i, \ell-1)}Y^{\ell-1}\)</span> where <span
+class="math inline">\(f_{i,j} \in
+\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span> for all <span
+class="math inline">\(j \in \{0, \ldots, \ell-1\}\)</span></p>
+</section>
+<section id="trusted-setup" class="level2">
+<h2>Trusted Setup</h2>
+<p>Let <span class="math inline">\(g \in \mathbb{G}_1\)</span> and <span
+class="math inline">\(h \in \mathbb{G}\_2\)</span> be group
+generators.</p>
+<p>Things that the prover is given</p>
+<ul>
+<li><p><span class="math inline">\(\vec{w} = [w_j]_{j=0}^{\ell-1} =
+\left[ g^{\alpha^i} \right]_{i=0}^{\ell - 1} \in
+\mathbb{G}_1^m\)</span>, where <span class="math inline">\(\alpha
+\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span> is
+toxic waste of the trusted setup.</p></li>
+<li><p><span class="math inline">\(\vec{u} =
+\left[u_i\right]^{2m-2}_{i=0} = \left[h^{\beta^{i}}\right]^{2m-2}_{i=0}
+\in \mathbb{G}\_2^{2m-2}\)</span> where <span
+class="math inline">\(\beta
+\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span> is
+also toxic waste of the trusted setup.</p></li>
+</ul>
+<p>Things that the verifier is given: Just the two group elements that
+will be needed to open KZG proofs using keys in <span
+class="math inline">\(\mathbb{G}_1\)</span> and <span
+class="math inline">\(\mathbb{G}\_2\)</span></p>
+<ul>
+<li><span class="math inline">\(w_1 = g^{\alpha}\)</span></li>
+<li><span class="math inline">\(u_1 = h^{\beta}\)</span></li>
+</ul>
+</section>
+<section id="commitIPA" class="level2">
+<h2>How To Commit</h2>
+<section
+id="prover-rightarrow-verifier-t-in-mathbbg_t-as-the-commitment-to-f"
+class="level4">
+<h4><strong>Prover <span class="math inline">\(\rightarrow\)</span>
+Verifier</strong>: <span class="math inline">\(T \in
+\mathbb{G}\_T\)</span> as the commitment to <span
+class="math inline">\(f\)</span></h4>
+<p>To commit to <span class="math inline">\(f\)</span></p>
+<p>For all <span class="math inline">\(i \in \{0, \ldots, m-1\}\)</span>
+we commit to each univariate polynomial <span
+class="math inline">\(f_{i} \in
+\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[Y]\)</span> using the KZG
+commitment scheme with commitment key <span
+class="math inline">\(\vec{w} \in \mathbb{G}_1^m\)</span>. Let <span
+class="math inline">\(A_i \in \mathbb{G}_1\)</span> denote this
+commitment. i.e.</p>
+<p>$$</p>
+<p><span class="math display">\[\begin{align}
+A*i &amp;= \prod*{j=0}^{\ell -1} w*j^{f*{(i,j)}} = \prod*{j=0}^{\ell -1}
+\Big(g^{\alpha^j}\Big)^{f*{(i,j)}} =
+g^{\sum*{j=0}^{\ell-1}f*{i,j}\alpha^j}
+\end{align}\]</span></p>
+<p>$$</p>
+<p>The commitment key for the pairing commitment is <span
+class="math inline">\(\vec{v}\)</span> which is the vector constructed
+from the even indices of <span class="math inline">\(\vec{u}\)</span> in
+the trusted setup i.e. <span class="math inline">\(\vec{v} = \left[
+u_{2i} \right]_{i=0}^{m-1} = \left[ h^{\beta^{2i}}
+\right]_{i=0}^{m-1}\)</span>.</p>
+<p>Then we compute a pairing commitment under <span
+class="math inline">\(\vec{v}\)</span> using the KZG commitments as
+witness. The final commitment <span class="math inline">\(T \in
+\mathbb{G}\_T\)</span> <span class="math display">\[T =
+\prod_{i=0}^{m-1} e(A_j, v_j)\]</span></p>
+</section>
+</section>
+<section id="how-to-open" class="level2">
+<h2>How To Open</h2>
+<p>The verifier asks the prover to open <span
+class="math inline">\(f\)</span> at points <span
+class="math inline">\((z_x, z_y) \in
+\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\times
+\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>. As a response the
+prover</p>
+<section
+id="prover-rightarrow-verifier-pi-u-pi_1-pi_2-this-is-opening-proof-and-nu-is-the-evaluation"
+class="level4">
+<h4><strong>Prover <span class="math inline">\(\rightarrow\)</span>
+Verifier</strong>: <span class="math inline">\(\pi = (U, \pi_1,
+\pi_2)\)</span> this is opening proof and <span
+class="math inline">\(\nu\)</span> is the evaluation</h4>
+</section>
+<section id="commit-to-a-partial-evaluation" class="level3">
+<h3>1. Commit To A Partial Evaluation</h3>
+<p>Remember <span
+class="math inline">\(\textcolor{red}{f_{i,j}}\)</span> is the <span
+class="math inline">\(j\)</span>’th coefficient of univariate polynomial
+<span class="math inline">\(f_i(Y) = f_{(i, 0)}Y^0 + \ldots
+\textcolor{red}{f_{(i, j)}} + \ldots + f_{(i,
+\ell-1)}Y^{\ell-1}\)</span></p>
+<p>Recall that <span class="math display">\[A_i = \prod_{j=0}^{\ell -1}
+w_j^{f_{i,j}}\]</span> are KZG commitments to the univariate polynomials
+<span class="math inline">\(f_i \in
+\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[Y]\)</span> and <span
+class="math inline">\(\vec{w}\)</span> is as defined in the trusted
+setup section.</p>
+<p>The prover computes <span class="math inline">\(U = \prod_{i=0}^{m-1}
+A_i^{(z_x)^i} \in \mathbb{G}_1\)</span>. Observe that <span
+class="math inline">\(U\)</span> is a KZG commitment to the univariate
+polynomial <span class="math inline">\(f(z_x, Y) = \sum_{j=0}^{\ell-1}
+\Big(\sum_{i=0}^{m-1} f_{i, j}(z_x)^i\Big)Y^j\)</span> (see <a
+href="">here</a> for the derivation), which is a partial opening of
+<span class="math inline">\(f\)</span>.</p>
+</section>
+<section id="inner-product-proof" class="level3">
+<h3>2. Inner Product Proof</h3>
+<p>Next the prover provides a proof <span
+class="math inline">\(\pi_1\)</span> that <span
+class="math inline">\(U\)</span> is the inner product of the opening of
+<span class="math inline">\(T\)</span> under commitment key <span
+class="math inline">\(\vec{v}\)</span> and the public vector <span
+class="math inline">\(\vec{z_x} =
+\left[z_x^{i}\right]_{i=0}^{m-1}\)</span>.</p>
+<p>Here we use the term <em>inner product</em>, as that’s what the
+original authors do, but to be explicit, we mean <span
+class="math inline">\(\langle\vec{A}, \vec{z}_x\rangle =
+\prod_{i=0}^{m-1} A_i^{(z_x)^i}\)</span>, where <span
+class="math inline">\(\vec{A}\)</span> is the opening of <span
+class="math inline">\(T\)</span> under commitment key <span
+class="math inline">\(\vec{v}\)</span>.</p>
+<div class="remark">
+<p>First we fully describe the remainder of the opening proof. Then we
+discuss what <span class="math inline">\(\pi_1\)</span> looks like in
+detail. This is the <strong>contribution</strong> of <span
+class="citation-inline"><span class="citation"
+data-cites="bmmtv2021">(<a href="#ref-bmmtv2021"
+role="doc-biblioref">Bünz et al. 2019</a>)</span></span>. So we will
+dive deep into this in a subsequent section. Everything else about the
+opening proof we already know how to do.</p>
+</div>
+</section>
+<section id="the-full-evaluation-proof" class="level3">
+<h3>3. The Full Evaluation Proof</h3>
+<p>Given commitment <span class="math inline">\(U\)</span> to <span
+class="math inline">\(f(z_x, Y)\)</span>, the prover provides a KZG
+evaluation proof <span class="math inline">\(\pi_2\)</span> that <span
+class="math inline">\(\nu = f(z_x, z_y)\)</span> and that it knows an
+opening <span class="math inline">\(f(z_x, Y)\)</span> of the KZG
+commitment <span class="math inline">\(U\)</span>.</p>
+<div class="remark">
+<p>We know how to compute KZG commitments, and open KZG commitments, and
+understand well the costs of those two. We do not go over them in this
+post. For the remainder, we focus on the prover cost of generating <span
+class="math inline">\(\pi_1\)</span>.</p>
+</div>
+<p>To pass verification both <span class="math inline">\(\pi_1\)</span>
+and <span class="math inline">\(\pi_2\)</span> must pass the verifier
+tests.</p>
+</section>
+</section>
+<section id="inner-product-proof-1" class="level2">
+<h2>Inner Product Proof</h2>
+<div class="remark">
+<p>A quick reminder, the prover is giving a proof <span
+class="math inline">\(\pi_1\)</span> that <span class="math inline">\(U
+\in \mathbb{G}_1\)</span> is the inner product of the opening of <span
+class="math inline">\(T \in \mathbb{G}\_T\)</span> under commitment key
+<span class="math inline">\(\vec{v} \in \mathbb{G}\_2^m\)</span> and the
+public vector <span class="math inline">\(\vec{z_x} =
+\left[z_x^{i}\right]_{i=0}^{m-1}\)</span>.</p>
+</div>
+<p>The provers witness is <span class="math inline">\(\vec{A} = A_0,
+\ldots, A_{m-1} \in \mathbb{G}_1^m\)</span>.</p>
+<p>Define <span class="math inline">\(\vec{b} = (b_0, \ldots, b_{m-1}) =
+(z_x^0, \ldots, z_x^{m-1})\in
+\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}^m\)</span>. This is common
+knowledge to the prover and the verifier, as the verifier picks <span
+class="math inline">\(z_x \in
+\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.</p>
+<div class="def">
+<section class="level4">
+<h4><span class="callout-label">Definition:</span></h4>
+</section>
+<section id="opening-proof-for-inner-product-argument" class="level2">
+<h2>Opening Proof For Inner Product Argument</h2>
+<p>Initialise <span class="math inline">\(\vec{A}^{(0)} = \vec{A},\quad
+\vec{b}^{(0)} = \vec{b},\quad \vec{v}^{(0)} = \vec{v}\)</span> where
+<span class="math inline">\(\vec{v}\)</span> is the commitment key used
+for pairing commitments by the prover (see <a href="#commitIPA">How To
+Commit</a>)</p>
+<p>If <span class="math inline">\(m=1\)</span> then we simply return</p>
+<p><span class="math display">\[\pi_1 =
+\left(\vec{A}^{(0)},\vec{b}^{(0)}\right), \vec{v}^{(0)}, \{
+\}\]</span></p>
+<hr />
+<p><strong>FOR LOOP STARTS</strong></p>
+<p>For <span class="math inline">\(j \in 1..{\log_2 m}\)</span></p>
+<ul>
+<li>The prover computes<a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a> commitments <span
+class="math inline">\(C_{L^{(j)}} \in \mathbb{G}\_T\times
+\mathbb{G}_1\)</span> and <span class="math inline">\(C_{R^{(j)}} \in
+\mathbb{G}\_T\times \mathbb{G}_1\)</span> where</li>
+</ul>
+<p>$$</p>
+<p> := <sup>{m/2</sup>{j}-1}e(A<sup>{(j-1)}*{(\frac{m}{2</sup>{j}}+i)},
+v^{(j-1)}<em>{i}),
+</em>{i=0}<sup>{m/2</sup>{j}-1}(A<sup>{{(j-1)}}_{(\frac{m}{2</sup>{j}}+i)})<sup>{b_i</sup>{{(j-1)}}}</p>
+<p>$$</p>
+<p>$$</p>
+<p> := <sup>{m/2</sup>{j}-1}e(A^{(j-1)}*{i},
+v<sup>{(j-1)}_{(\frac{m}{2</sup>{j}}+i)}),
+_{i=0}<sup>{m/2</sup>{j}-1}(A<sup>{(j-1)}_{i})</sup>{b<sup>{(j-1)}_{(\frac{m}{2</sup>{j}}+i)}}</p>
+<p>$$</p>
+<ul>
+<li><p>It <strong>sends</strong> <span
+class="math inline">\(C_{L^{(j)}}, C_{R^{(j)}}\)</span> to the
+verifier.</p></li>
+<li><p>Verifier <strong>sends</strong> the prover a challenge <span
+class="math inline">\(r_j\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.
+Then it folds the witness, public vector of exponents and commitment key
+to half the size using the verifiers challenge <span
+class="math inline">\(r_j \in
+\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span></p></li>
+</ul>
+<p><span class="math display">\[\vec{A}^{(j)} = \left[A_i^{(j-1)}
+\left(A^{(j-1)}_{m/2^{j}+i}\right)^{r_j}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span>
+<span class="math display">\[\vec{b}^{(j)} = \left[b^{(j-1)}_i +
+\left(b^{(j-1)}_{m/2^{j}+i}\right){r_j^{-1}}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span></p>
+<p><span class="math display">\[\vec{v}^{(j)} = \left[v^{(j-1)}_i
+\left(v^{(j-1)}_{m/2^{j}+i}\right)^{r_j^{-1}}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span></p>
+<p><strong>FOR LOOP ENDS</strong></p>
+<hr />
+<p>After the for loop ends we output as the proof <span
+class="math inline">\(\pi_1\)</span> $$</p>
+:= {
+<span class="math display">\[\begin{aligned}
+&amp; A^{(\log m)} \in \mathbb{G}_1\\[10pt]
+&amp; v^{(\log m)} \in \mathbb{G}\_2\\[10pt]
+&amp; \left[ C_{R^{(j)}}, C_{L^{(j)}}\right]*{j=1}^{\log m} \in
+\mathbb{G}\_T^{2\log m} \\[10pt]
+&amp;\ \text{KZG evaluation proof for $q$ at challenge $z
+\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}$} \in
+\mathbb{G}\_2
+\end{aligned}\]</span>
+<p>}</p>
+<p>$$</p>
+</section>
+</div>
+<p>See below for details about <span class="math inline">\(q\)</span>.
+The cost of this is 1 KZG opening over <span
+class="math inline">\(\mathbb{G}\_2\)</span> – and the degree of the
+<span class="math inline">\(q\)</span> is at most <span
+class="math inline">\(2m-2\)</span>,</p>
+<section id="a-note-about-optimising-communication-and-defining-q"
+class="level3 remark">
+<h3>A Note About Optimising Communication and defining <span
+class="math inline">\(q\)</span></h3>
+<p>In a naive implementation the prover sends as part of the proof the
+intermediate commitment keys <span class="math inline">\(\vec{v}^{(1)},
+\ldots, \vec{v}^{(\ell -1)}\)</span> to the verifier. But notice that in
+the above description of the proof, we claim that the prover only sends
+only <span class="math inline">\(\vec{v}^{(\log m)}\)</span> to the
+verifier.</p>
+<p>This is done to reduce verification time. To be more specific, once
+the verifier receives <span class="math inline">\(\vec{v}^{(j)}\)</span>
+it must use <span class="math inline">\(\vec{v}^{(j-1)}\)</span> and
+<span class="math inline">\(r_j\)</span> to check if the prover
+constructed <span class="math inline">\(\vec{v}^{(j)}\)</span>
+correctly. This causes the verifiers work to be linear in <span
+class="math inline">\(m\)</span>.</p>
+<p>With a little bit of algebra it is not too hard to see that <span
+class="math inline">\(\vec{v}^{(\log m)}\)</span> is actually a KZG
+commitment to the polynomial <span class="math inline">\(q(x) =
+\prod_{i=1}^{\log m}(1 + r^{-1}_{(\log m-i+1)}x^{2i})\)</span>. That is
+after all <span class="math inline">\(\log m\)</span> folding operations
+the final value of the folded commitment key is</p>
+<p><span class="math display">\[\vec{v}^{(\log m)} = h^{q(\beta)}=
+h^{\prod_{i=1}^{\log m}(1 + r^{-1}_{(\log m-i+1)}\beta^{2i})} \in
+\mathbb{G}\_2\]</span></p>
+<p>Now instead of the prover sending over all the intermediate keys, and
+asking the verifier to check if <span
+class="math inline">\(\vec{v}^{(j)}\)</span> was properly constructed
+from <span class="math inline">\(\vec{v}^{(j-1)}\)</span>, it just sends
+the final shortened commitment key.</p>
+<p>To check the prover did the intermediate calculations correctly, it
+suffices for the prover give a KZG evaluation proof for <span
+class="math inline">\(q\)</span> evaluated at a random challenge point
+<span class="math inline">\(z
+\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>, to
+check if the prover folded correctly.</p>
+<p><strong>Lookout for this KZG opening in the verification</strong></p>
+</section>
+</section>
+<section id="how-to-verify-an-inner-product-proof" class="level2">
+<h2>How To Verify An Inner Product Proof</h2>
+<div class="remark">
+<p>We have <span class="math inline">\(\vec{b} = (b_0, \ldots, b_{m-1})
+= (1, z_x , \ldots z_x^{m-1})\)</span>. Given <span
+class="math inline">\(T = \prod_{i=0}^{m-1}e(A_i, v_i)\)</span>, the
+verifier wants to use the proof <span
+class="math inline">\(\pi_1\)</span> defined above to verify that
+opening of <span class="math inline">\(T\)</span> is <span
+class="math inline">\((A_0, \ldots, A_{m-1}) \in \mathbb{G}_1^m\)</span>
+such that <span class="math inline">\(U=\prod_{i=0}^{m-1}
+A_i^{b_i}\)</span></p>
+<p>The verifier also possesses all the challenges <span
+class="math inline">\(r_1, \ldots, r_{\log m}\)</span> it had sent the
+prover during the proof. In practice, we fiat-shamir these to remove
+interaction.</p>
+</div>
+<p>The verifier performs a sequence of checks:</p>
+<ol type="1">
+<li><strong>Check commitment collapsing</strong>: Define <span
+class="math inline">\(T^{(0)}, U^{(0)} = (T, U)\)</span> where <span
+class="math inline">\(T\)</span> and <span
+class="math inline">\(U\)</span> are the original pairing commitment to
+<span class="math inline">\(f\)</span> and the KZG commitment to <span
+class="math inline">\(f(z_x, Y)\)</span> respectively.</li>
+</ol>
+<p>$$</p>
+<p><span class="math display">\[\begin{align}
+\forall j \in 1, \ldots \ell \qquad &amp; T^{(j)} =
+C_{L^{j}}^{r_j}T^{(j-1)}C_{R^{j}}^{r_j^{-1}} \\[10pt]
+&amp; U^{(j)} = C_{L^{j}\_1}^{r_j}\cdot U^{(j-1)}\cdot
+C_{R^{j}\_1}^{r_j^{-1}}
+\end{align}\]</span></p>
+<p>$$</p>
+<ol start="2" type="1">
+<li><p><strong>Compute the foldings of</strong> <span
+class="math inline">\(\vec{b}\)</span>: If the prover folds all the
+<span class="math inline">\(b_i\)</span>’s correctly, then the final
+check boils down to <span class="math display">\[b&#39;
+=  \prod_{i=1}^{\log m}(1 + r_i {b}^{j})\]</span></p></li>
+<li><p><strong>Check folding for commitment keys</strong></p>
+<p>To check that all commitment keys <span
+class="math inline">\(\vec{v}^{(1)}, \ldots, \vec{v}^{(\log m
+-1)}\)</span> were folded correctly, given <span
+class="math inline">\(\vec{v}^{(\log m)}\)</span> the prover asks for a
+KZG opening proof to evaluate <span class="math inline">\(q\)</span> at
+<span class="math inline">\(z
+\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>,
+where <span class="math inline">\(q(x) = \prod_{i=1}^{\log m}(1 +
+r^{-1}_{(\log m-i+1)}x^{2i})\)</span></p></li>
+<li><p><strong>Finally check</strong> <span
+class="math display">\[T^{(j)} \quad
+\textcolor{red}{\overset{?}{=}}\quad e(\pi_1.A^{(\log m)}, \pi_1.v^{\log
+m})\]</span></p></li>
+</ol>
+<p>and</p>
+<p><span class="math display">\[U^{(j)} \quad
+\textcolor{red}{\overset{?}{=}}\quad \left(\pi_1.A^{(\log
+m)}\right)^{b^{&#39;
+}}
+\]</span></p>
+<p>where <span class="math inline">\(b&#39;\)</span> was computed in
+step 2.</p>
+</section>
+<section id="univariate" class="level2">
+<h2>How To Commit To A Univariate Polynomial</h2>
+<p>Now we are given <span class="math inline">\(f \in
+\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[X]\)</span> with degree <span
+class="math inline">\(d\)</span>. We select <span
+class="math inline">\(\ell, m\)</span> of roughly equal size such that
+<span class="math inline">\(\ell m =d\)</span>.</p>
+<p>Just make sure <span class="math inline">\(m\)</span> is a power of
+2.</p>
+<p>Let <span class="math inline">\(f(X) = f_0 + f_1X + \ldots +
+f_{d}x^d\)</span>. Now we chunk the coefficients of <span
+class="math inline">\(f\)</span> into a <span
+class="math inline">\(m\)</span> sets of size <span
+class="math inline">\(\ell\)</span>, that is</p>
+<p><span class="math inline">\(f_i(Y) = \sum_{j=0}^{\ell -1} f_{i\ell +
+j}Y^j\)</span>, and <span class="math inline">\(p(X,Y) = \sum_{i=0}^{m}
+f_i(Y)X^{i}\)</span>.</p>
+<p>This implies that <span class="math inline">\(p(X^\ell, X) =
+f(X)\)</span>.</p>
+<p>See worked out example below</p>
+<section id="example" class="level3 remark">
+<h3>Example</h3>
+<p>Let <span class="math inline">\(f(X) = f_0 + \ldots +
+f_7x^7\)</span>. Let <span class="math inline">\(m=4\)</span> and <span
+class="math inline">\(\ell = 2\)</span></p>
+<p><span class="math display">\[
+\begin{align}
+f_0(Y) &amp;= f_0 + f_1Y \\[10pt]
+f_1(Y) &amp;= f_2 + f_3Y \\[10pt]
+f_2(Y) &amp;= f_4 + f_5Y \\[10pt]
+f_3(Y) &amp;= f_6 + f_7Y \\[10pt]
+\end{align}
+\]</span></p>
+<p>Let <span class="math display">\[p(X, Y) = \sum_{i=0}^m
+f_i(Y)X^i\]</span></p>
+<p>Easy to see that <span class="math inline">\(p(X^2, X) =
+f(X)\)</span></p>
+</section>
+<p>To commit to <span class="math inline">\(f\)</span> we commit to
+bivariate polynomial <span class="math inline">\(p\)</span>. To evaluate
+<span class="math inline">\(f\)</span> at <span
+class="math inline">\(z\)</span> we evaluate <span
+class="math inline">\(p\)</span> at <span class="math inline">\((z^\ell,
+z)\)</span>.</p>
+</section>
+<section id="multi-commit" class="level2">
+<h2>Full Accounting For Prover Costs For Multi-variate Polynomial</h2>
+<p>To fully understand this accounting please make sure you’ve read this
+<a href="/publish/hyper-kzg.html">article</a>.</p>
+<p>We want to commit to a <span class="math inline">\(\log d\)</span>
+variable multi-linear polynomial <span class="math inline">\(f\)</span>.
+To commit we compute the univariate encoding of <span
+class="math inline">\(f\)</span> and we pick <span
+class="math inline">\(m\)</span> which is a power of 2 and <span
+class="math inline">\(\ell \in \mathbb{N}\)</span> such that <span
+class="math inline">\(\ell m = d\)</span>. Then we represent <span
+class="math inline">\(f\)</span> with the bivariate polynomial <span
+class="math inline">\(p^{(0)}\)</span> as described above. Typically
+<span class="math inline">\(\ell, m \in
+O\left(\sqrt{d}\right)\)</span>.</p>
+<section id="cost-of-committing-to-p0" class="level3 remark">
+<h3>Cost Of Committing to <span
+class="math inline">\(p^{(0)}\)</span></h3>
+<p>To commit to <span class="math inline">\(p\)</span> where <span
+class="math inline">\(X\)</span> variables have degree at most <span
+class="math inline">\(m \in O\left(\sqrt{d}\right)\)</span> and <span
+class="math inline">\(Y\)</span> variables have degree at most <span
+class="math inline">\(\ell \in O\left(\sqrt{d}\right)\)</span>.</p>
+<ul>
+<li><p><span class="math inline">\(m\)</span> KZG commitments for
+polynomials with degree at most <span
+class="math inline">\(\ell-1\)</span> to get <span
+class="math inline">\(A_0, \ldots, A_{m-1}\)</span>. This is <span
+class="math inline">\(m\)</span> <strong><em>MSMs</em></strong> with
+where each MSM uses at most <span class="math inline">\(\ell\)</span>
+<span class="math inline">\(\mathbb{G}_1\)</span> elements.</p></li>
+<li><p><span class="math inline">\(m\)</span> Pairing operations + <span
+class="math inline">\(m\)</span> <span
+class="math inline">\(\mathbb{G}\_T\)</span> multiplications</p></li>
+</ul>
+</section>
+<p>Next we discuss the cost of opening a polynomial</p>
+<p>The cost of opening <span class="math inline">\(f\)</span> at <span
+class="math inline">\((z_1, \ldots, z_{\log d})\)</span> leads to the
+prover constructing <span class="math inline">\(\log d\)</span>
+univariate polynomials <span class="math inline">\(p^{(1)}, \ldots,
+p^{(\log d)}\)</span> with number of coefficients <span
+class="math inline">\(d/2, d/4, \ldots, 1\)</span> and committing to
+these polynomials <span
+class="math inline">\(\{C_{p^{(i)}}\}_{i=1}^{\log d}\)</span></p>
+<div class="remark">
+<p>To commit to each univariate polynomial, set <span
+class="math inline">\(m_i\ell_i = d/2^{i}\)</span>,</p>
+<p>This is <span class="math inline">\(m_i\)</span>
+<strong><em>MSMs</em></strong> each with <span
+class="math inline">\(\ell_i\)</span> <span
+class="math inline">\(\mathbb{G}_1\)</span> elements.</p>
+<p>Then <span class="math inline">\(m_i\)</span> pairing operations
+followed by <span class="math inline">\(m_i\)</span> <span
+class="math inline">\(\mathbb{G}\_T\)</span> multiplications as
+described above.</p>
+</div>
+<p>Next the prover will have open the above <span
+class="math inline">\(p^{(1)}, \ldots, p^{(\log d)}\)</span> at <span
+class="math inline">\(r\)</span> and <span
+class="math inline">\(-r\)</span> and open <span
+class="math inline">\(p^{(0)}, \ldots, p^{(\log d -1)}\)</span> at <span
+class="math inline">\(r^2\)</span>.</p>
+<p>As the above commitment scheme is <strong>also</strong> homomorphic,
+the prover constructs a single polynomial <span
+class="math inline">\(B\)</span> using the verifiers challenge <span
+class="math inline">\(z_r
+\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.</p>
+<p><span class="math display">\[B(X) = p^{(0)}(X) + z_r p^{(1)}(X) +
+z_r^2 p^{(2)}(X) + \ldots + (z_r)^{\log d} p^{(\log d)}(X)\]</span></p>
+<p>This is not an issue for the verifier as it can construct a
+commitment for <span class="math inline">\(B\)</span> from <span
+class="math inline">\(\{C_{p^{(i)}}\}_{i=0}^{\log d}\)</span> (using
+homomorphism)</p>
+<p><span class="math inline">\(B\)</span> has <span
+class="math inline">\(d\)</span> coefficients, and setting <span
+class="math inline">\(m\ell = d\)</span> we once again get <span
+class="math inline">\(m, \ell \in O\left(\sqrt{d}\right)\)</span></p>
+<p>So we have to open at 3 locations – where the cost of evaluating one
+is given by</p>
+<div class="remark">
+<section
+id="cost-of-opening-the-evaluation-of-1-bivariate-polynomial-at-one-location"
+class="level3">
+<h3>Cost Of Opening The Evaluation Of 1 Bivariate Polynomial At One
+Location</h3>
+<ul>
+<li><p>1 KZG commitment which is 1 <strong><em>MSM</em></strong> with
+<span class="math inline">\(m\)</span> <span
+class="math inline">\(\mathbb{G}_1\)</span> elements to get <span
+class="math inline">\(U\)</span>.</p></li>
+<li><p>1 KZG opening for commitment <span
+class="math inline">\(U\)</span>. This <strong><em>MSM</em></strong>
+uses <span class="math inline">\(m-1\)</span> <span
+class="math inline">\(\mathbb{G}_1\)</span> elements and the cost of
+finding the quotient polynomial <span class="math inline">\(\frac{f(z_x,
+Y) - f(z_x, z_y)}{Y - z_y}\)</span></p></li>
+<li><p>1 KZG opening for a <span class="math inline">\(v^{(\log
+m)}\)</span> is commitment to the quotient polynomial <span
+class="math inline">\(\frac{q(X) - q(z)}{X - z}\)</span>. This includes
+the cost of computing the quotient polynomial using Horners rule, and
+one <strong><em>MSM</em></strong> using at most <span
+class="math inline">\(2m-1\)</span> <span
+class="math inline">\(\mathbb{G}\_2\)</span> elements to commit to the
+quotient.</p></li>
+<li><p><span class="math inline">\(A^{(\log m)}\)</span> requires <span
+class="math inline">\(m\)</span> <span
+class="math inline">\(\mathbb{G}_1\)</span> multiplications and
+exponentiations.</p></li>
+<li><p><span class="math inline">\(b^{(\log m)}\)</span> requires <span
+class="math inline">\(m\)</span> <span
+class="math inline">\(\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>
+multiplications and additions.</p></li>
+<li><p><span class="math inline">\(v^{(\log m)}\)</span> requires <span
+class="math inline">\(m\)</span> <span
+class="math inline">\(\mathbb{G}\_2\)</span> multiplications and
+exponentiations.</p></li>
+<li><p>The commitments take <span class="math inline">\(2m\)</span>
+pairing operations and <span class="math inline">\(2m\)</span> <span
+class="math inline">\(\mathbb{G}\_T\)</span> multiplications.</p>
+<p>:::</p></li>
+</ul>
+</section>
+<section id="references" class="level2">
+<h2>References</h2>
+</section>
+</div>
+<div id="refs" class="references csl-bib-body hanging-indent"
+role="list">
+<div id="ref-bmmtv2021" class="csl-entry" role="listitem">
+Bünz, Benedikt, Mary Maller, Pratyush Mishra, Nirvan Tyagi, and Psi
+Vesely. 2019. <em>Proofs for Inner Pairing Products and
+Applications</em>. Cryptology <span>ePrint</span> Archive, Paper
+2019/1177. <a
+href="https://eprint.iacr.org/2019/1177">https://eprint.iacr.org/2019/1177</a>.
+</div>
+<div id="ref-micronova2024" class="csl-entry" role="listitem">
+Zhao, Jiaxing, Srinath Setty, Weidong Cui, and Greg Zaverucha. 2024.
+<em><span>MicroNova</span>: Folding-Based Arguments with Efficient
+(on-Chain) Verification</em>. Cryptology <span>ePrint</span> Archive,
+Paper 2024/2099. <a
+href="https://eprint.iacr.org/2024/2099">https://eprint.iacr.org/2024/2099</a>.
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>You can read this as a compressed version of <span
+class="math inline">\(T\)</span> and <span
+class="math inline">\(U\)</span> using only half the witness and public
+vector. That is, we split <span class="math inline">\(\vec{A}, \vec{v},
+\vec{b}\)</span> down the middle into left and right halves. For the
+first commitment, denoted with <span class="math inline">\(L\)</span> we
+use the right half of <span class="math inline">\(\vec{A}\)</span> but
+the left halves of <span class="math inline">\(\vec{b}\)</span> and
+<span class="math inline">\(\vec{v}\)</span>. For the second commitment
+we use the left half of <span class="math inline">\(\vec{A}\)</span> and
+the right halves of <span class="math inline">\(\vec{v}\)</span> and
+<span class="math inline">\(\vec{b}\)</span>.<a href="#fnref1"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></article>
+    </main>
+    <footer class="site-footer"><p>&copy; 2025 On A Tangent Ltd.</p></footer>
+
+    <script>
+      // Theme toggle
+      const t = document.querySelector(".theme-toggle"),
+        h = document.documentElement,
+        l = document.querySelector(".theme-toggle-light"),
+        d = document.querySelector(".theme-toggle-dark"),
+        s =
+          localStorage.getItem("theme") ||
+          (matchMedia("(prefers-color-scheme:dark)").matches
+            ? "dark"
+            : "light");
+
+      h.setAttribute("data-theme", s);
+      s === "dark"
+        ? ((l.style.display = "none"), (d.style.display = "block"))
+        : ((l.style.display = "block"), (d.style.display = "none"));
+
+      t.onclick = () => {
+        const n = h.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        h.setAttribute("data-theme", n);
+        localStorage.setItem("theme", n);
+        n === "dark"
+          ? ((l.style.display = "none"), (d.style.display = "block"))
+          : ((l.style.display = "block"), (d.style.display = "none"));
+      };
+
+      // Mobile menu toggle
+      document.querySelector(".menu-toggle").onclick = () =>
+        document.querySelector(".nav-group").classList.toggle("is-active");
+
+      // Auto-highlight current page
+      (function () {
+        const path = window.location.pathname;
+        const page = path.split("/").pop() || "index.html";
+        document.querySelectorAll(".main-nav a").forEach((link) => {
+          const href = link.getAttribute("href").replace("../", "");
+          if (
+            href === page ||
+            (page === "index.html" && href === "index.html")
+          ) {
+            link.classList.add("active");
+          }
+        });
+      })();
+
+      // Citation tooltips
+      document.addEventListener("DOMContentLoaded", function () {
+        const refs = document.querySelector("#refs");
+        if (!refs) return;
+
+        document
+          .querySelectorAll('.citation a[href^="#ref-"]')
+          .forEach(function (cite) {
+            const refId = cite.getAttribute("href").substring(1);
+            const refItem = document.getElementById(refId);
+
+            if (refItem) {
+              const urlLink = refItem.querySelector('a[href^="http"]');
+              if (urlLink) {
+                cite.addEventListener("click", function (e) {
+                  e.preventDefault();
+                  window.open(urlLink.href, "_blank");
+                });
+                cite.style.cursor = "pointer";
+                cite.title = "Click to open source";
+              }
+
+              const tooltip = document.createElement("div");
+              tooltip.className = "citation-tooltip";
+              const cslEntry = refItem.querySelector(".csl-entry");
+              tooltip.textContent = cslEntry
+                ? cslEntry.textContent
+                : refItem.textContent;
+              document.body.appendChild(tooltip);
+
+              cite.addEventListener("mouseenter", function (e) {
+                const rect = cite.getBoundingClientRect();
+                tooltip.style.display = "block";
+                tooltip.style.left =
+                  Math.min(rect.left, window.innerWidth - 420) + "px";
+                tooltip.style.top = rect.bottom + 5 + "px";
+              });
+
+              cite.addEventListener("mouseleave", function () {
+                tooltip.style.display = "none";
+              });
+            }
+          });
+      });
+
+      // Add copy buttons to code blocks
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".highlight").forEach(function (block) {
+          // Create copy button
+          const btn = document.createElement("button");
+          btn.className = "copy-btn";
+          btn.textContent = "Copy";
+          btn.setAttribute("aria-label", "Copy code to clipboard");
+
+          // Insert button as first child of highlight div
+          block.insertBefore(btn, block.firstChild);
+
+          const code = block.querySelector("pre");
+
+          btn.addEventListener("click", async function () {
+            const text = code.textContent;
+
+            try {
+              await navigator.clipboard.writeText(text);
+              btn.textContent = "Copied!";
+              btn.style.background = "#10b981";
+
+              setTimeout(() => {
+                btn.textContent = "Copy";
+                btn.style.background = "";
+              }, 2000);
+            } catch (err) {
+              // Fallback for older browsers
+              const textarea = document.createElement("textarea");
+              textarea.value = text;
+              textarea.style.position = "fixed";
+              textarea.style.opacity = "0";
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand("copy");
+              document.body.removeChild(textarea);
+
+              btn.textContent = "Copied!";
+              setTimeout(() => {
+                btn.textContent = "Copy";
+              }, 2000);
+            }
+          });
+        });
+      });
+
+      // Add data-tag to category tags
+      document.querySelectorAll(".category-tag").forEach((tag) => {
+        const tagName = tag.textContent.trim().toLowerCase();
+        tag.setAttribute("data-tag", tagName);
+      });
+
+      // Extract authors and create author tags
+      const authorSpan = document.querySelector(
+        '.article-meta span:has-text("By")',
+      );
+      if (authorSpan) {
+        const authorText = authorSpan.textContent.replace("By ", "").trim();
+        const authors = authorText.split(",").map((a) => a.trim());
+
+        authors.forEach((author) => {
+          const tag = document.createElement("span");
+          tag.className = "category-tag";
+          tag.textContent = author;
+          tag.setAttribute("data-tag", author.toLowerCase());
+          authorSpan.parentElement.appendChild(tag);
+        });
+      }
+    </script>
+  </body>
+</html>
