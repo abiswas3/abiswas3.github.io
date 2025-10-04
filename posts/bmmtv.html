@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hyper BMMTV Costs - On A Tangent Ltd.</title>
+    <title>Hyper BMMTV Costs</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script
       async
@@ -121,7 +121,7 @@
           </div>
           <div class="meta-right">
             <time>2025-01-01</time>             <span class="authors"
-              >By  Ari</span
+              >By Ari</span
             >
                       </div>
         </div>
@@ -248,13 +248,11 @@ verify if the commitment keys are propelry structured.</p>
 <p>Throughout this post, and the posts hyper-linked here, we will assume
 the pairing <span class="math inline">\(e: \mathbb{G}_1\times
 \mathbb{G}\_2\rightarrow \mathbb{G}\_T\)</span> is constructed from some
-elliptic curve <span
-class="math inline">\(E/\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.</p>
+elliptic curve <span class="math inline">\(E/\mathbb{F}\)</span>.</p>
 <ul>
 <li><span class="math inline">\(\mathbb{G}_1\)</span> is an order <span
 class="math inline">\(\textcolor{blue}{\mathtt{q}}\)</span> subgroup of
-<span
-class="math inline">\(E(\mathbb{F}_{\textcolor{blue}{\mathtt{q}}})\)</span>.</li>
+<span class="math inline">\(E(\mathbb{F})\)</span>.</li>
 <li><span class="math inline">\(\mathbb{G}_1\)</span> is an order <span
 class="math inline">\(\textcolor{blue}{\mathtt{q}}\)</span> subgroup of
 <span
@@ -294,20 +292,19 @@ role="doc-biblioref">Zhao et al. 2024</a>)</span></span>.</li>
 <section id="bi-variate-polynomials" class="level2">
 <h2>Bi-variate Polynomials</h2>
 <p>We are given a bi-variate polynomial <span class="math inline">\(f
-\in \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[X, Y]\)</span></p>
+\in \mathbb{F}[X, Y]\)</span></p>
 <p><span class="math display">\[
 \begin{align}
 f(X, Y) &amp;= \sum_{i=0}^{m-1} f_i(Y)X^{i} \tag{i}
 \end{align}
 \]</span> where for all <span class="math inline">\(i \in \{0, \ldots,
 m-1\}\)</span>, <span class="math inline">\(f_i \in
-\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[Y]\)</span> is a univariate
-polynomial with degree at most <span class="math inline">\(\ell
--1\)</span> i.e <span class="math inline">\(f_i(Y) = f_{(i, 0)}Y^0 +
-\ldots + f_{(i, \ell-1)}Y^{\ell-1}\)</span> where <span
-class="math inline">\(f_{i,j} \in
-\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span> for all <span
-class="math inline">\(j \in \{0, \ldots, \ell-1\}\)</span></p>
+\mathbb{F}[Y]\)</span> is a univariate polynomial with degree at most
+<span class="math inline">\(\ell -1\)</span> i.e <span
+class="math inline">\(f_i(Y) = f_{(i, 0)}Y^0 + \ldots + f_{(i,
+\ell-1)}Y^{\ell-1}\)</span> where <span class="math inline">\(f_{i,j}
+\in \mathbb{F}\)</span> for all <span class="math inline">\(j \in \{0,
+\ldots, \ell-1\}\)</span></p>
 </section>
 <section id="trusted-setup" class="level2">
 <h2>Trusted Setup</h2>
@@ -319,14 +316,13 @@ generators.</p>
 <li><p><span class="math inline">\(\vec{w} = [w_j]_{j=0}^{\ell-1} =
 \left[ g^{\alpha^i} \right]_{i=0}^{\ell - 1} \in
 \mathbb{G}_1^m\)</span>, where <span class="math inline">\(\alpha
-\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span> is
-toxic waste of the trusted setup.</p></li>
+\xleftarrow[]{\$}\mathbb{F}\)</span> is toxic waste of the trusted
+setup.</p></li>
 <li><p><span class="math inline">\(\vec{u} =
 \left[u_i\right]^{2m-2}_{i=0} = \left[h^{\beta^{i}}\right]^{2m-2}_{i=0}
 \in \mathbb{G}\_2^{2m-2}\)</span> where <span
-class="math inline">\(\beta
-\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span> is
-also toxic waste of the trusted setup.</p></li>
+class="math inline">\(\beta \xleftarrow[]{\$}\mathbb{F}\)</span> is also
+toxic waste of the trusted setup.</p></li>
 </ul>
 <p>Things that the verifier is given: Just the two group elements that
 will be needed to open KZG proofs using keys in <span
@@ -349,8 +345,7 @@ class="math inline">\(f\)</span></h4>
 <p>To commit to <span class="math inline">\(f\)</span></p>
 <p>For all <span class="math inline">\(i \in \{0, \ldots, m-1\}\)</span>
 we commit to each univariate polynomial <span
-class="math inline">\(f_{i} \in
-\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[Y]\)</span> using the KZG
+class="math inline">\(f_{i} \in \mathbb{F}[Y]\)</span> using the KZG
 commitment scheme with commitment key <span
 class="math inline">\(\vec{w} \in \mathbb{G}_1^m\)</span>. Let <span
 class="math inline">\(A_i \in \mathbb{G}_1\)</span> denote this
@@ -379,10 +374,8 @@ witness. The final commitment <span class="math inline">\(T \in
 <h2>How To Open</h2>
 <p>The verifier asks the prover to open <span
 class="math inline">\(f\)</span> at points <span
-class="math inline">\((z_x, z_y) \in
-\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\times
-\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>. As a response the
-prover</p>
+class="math inline">\((z_x, z_y) \in \mathbb{F}\times
+\mathbb{F}\)</span>. As a response the prover</p>
 <section
 id="prover-rightarrow-verifier-pi-u-pi_1-pi_2-this-is-opening-proof-and-nu-is-the-evaluation"
 class="level4">
@@ -401,8 +394,7 @@ class="math inline">\(j\)</span>’th coefficient of univariate polynomial
 \ell-1)}Y^{\ell-1}\)</span></p>
 <p>Recall that <span class="math display">\[A_i = \prod_{j=0}^{\ell -1}
 w_j^{f_{i,j}}\]</span> are KZG commitments to the univariate polynomials
-<span class="math inline">\(f_i \in
-\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[Y]\)</span> and <span
+<span class="math inline">\(f_i \in \mathbb{F}[Y]\)</span> and <span
 class="math inline">\(\vec{w}\)</span> is as defined in the trusted
 setup section.</p>
 <p>The prover computes <span class="math inline">\(U = \prod_{i=0}^{m-1}
@@ -473,11 +465,9 @@ public vector <span class="math inline">\(\vec{z_x} =
 <p>The provers witness is <span class="math inline">\(\vec{A} = A_0,
 \ldots, A_{m-1} \in \mathbb{G}_1^m\)</span>.</p>
 <p>Define <span class="math inline">\(\vec{b} = (b_0, \ldots, b_{m-1}) =
-(z_x^0, \ldots, z_x^{m-1})\in
-\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}^m\)</span>. This is common
+(z_x^0, \ldots, z_x^{m-1})\in \mathbb{F}^m\)</span>. This is common
 knowledge to the prover and the verifier, as the verifier picks <span
-class="math inline">\(z_x \in
-\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.</p>
+class="math inline">\(z_x \in \mathbb{F}\)</span>.</p>
 <div class="def">
 <section class="level4">
 <h4><span class="callout-label">Definition:</span></h4>
@@ -518,11 +508,10 @@ _{i=0}<sup>{m/2</sup>{j}-1}(A<sup>{(j-1)}_{i})</sup>{b<sup>{(j-1)}_{(\frac{m}{2<
 class="math inline">\(C_{L^{(j)}}, C_{R^{(j)}}\)</span> to the
 verifier.</p></li>
 <li><p>Verifier <strong>sends</strong> the prover a challenge <span
-class="math inline">\(r_j\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.
-Then it folds the witness, public vector of exponents and commitment key
-to half the size using the verifiers challenge <span
-class="math inline">\(r_j \in
-\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span></p></li>
+class="math inline">\(r_j\xleftarrow[]{\$}\mathbb{F}\)</span>. Then it
+folds the witness, public vector of exponents and commitment key to half
+the size using the verifiers challenge <span class="math inline">\(r_j
+\in \mathbb{F}\)</span></p></li>
 </ul>
 <p><span class="math display">\[\vec{A}^{(j)} = \left[A_i^{(j-1)}
 \left(A^{(j-1)}_{m/2^{j}+i}\right)^{r_j}  \right]_{i=0}^{\frac{m}{2^{j}}-1}\]</span>
@@ -541,8 +530,7 @@ class="math inline">\(\pi_1\)</span> $$</p>
 &amp; \left[ C_{R^{(j)}}, C_{L^{(j)}}\right]*{j=1}^{\log m} \in
 \mathbb{G}\_T^{2\log m} \\[10pt]
 &amp;\ \text{KZG evaluation proof for $q$ at challenge $z
-\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}$} \in
-\mathbb{G}\_2
+\xleftarrow[]{\$}\mathbb{F}$} \in \mathbb{G}\_2
 \end{aligned}\]</span>
 <p>}</p>
 <p>$$</p>
@@ -587,8 +575,7 @@ the final shortened commitment key.</p>
 <p>To check the prover did the intermediate calculations correctly, it
 suffices for the prover give a KZG evaluation proof for <span
 class="math inline">\(q\)</span> evaluated at a random challenge point
-<span class="math inline">\(z
-\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>, to
+<span class="math inline">\(z \xleftarrow[]{\$}\mathbb{F}\)</span>, to
 check if the prover folded correctly.</p>
 <p><strong>Lookout for this KZG opening in the verification</strong></p>
 </section>
@@ -639,8 +626,7 @@ class="math inline">\(\vec{v}^{(1)}, \ldots, \vec{v}^{(\log m
 -1)}\)</span> were folded correctly, given <span
 class="math inline">\(\vec{v}^{(\log m)}\)</span> the prover asks for a
 KZG opening proof to evaluate <span class="math inline">\(q\)</span> at
-<span class="math inline">\(z
-\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>,
+<span class="math inline">\(z \xleftarrow[]{\$}\mathbb{F}\)</span>,
 where <span class="math inline">\(q(x) = \prod_{i=1}^{\log m}(1 +
 r^{-1}_{(\log m-i+1)}x^{2i})\)</span></p></li>
 <li><p><strong>Finally check</strong> <span
@@ -660,7 +646,7 @@ step 2.</p>
 <section id="univariate" class="level2">
 <h2>How To Commit To A Univariate Polynomial</h2>
 <p>Now we are given <span class="math inline">\(f \in
-\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[X]\)</span> with degree <span
+\mathbb{F}[X]\)</span> with degree <span
 class="math inline">\(d\)</span>. We select <span
 class="math inline">\(\ell, m\)</span> of roughly equal size such that
 <span class="math inline">\(\ell m =d\)</span>.</p>
@@ -768,8 +754,7 @@ class="math inline">\(r^2\)</span>.</p>
 <p>As the above commitment scheme is <strong>also</strong> homomorphic,
 the prover constructs a single polynomial <span
 class="math inline">\(B\)</span> using the verifiers challenge <span
-class="math inline">\(z_r
-\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>.</p>
+class="math inline">\(z_r \xleftarrow[]{\$}\mathbb{F}\)</span>.</p>
 <p><span class="math display">\[B(X) = p^{(0)}(X) + z_r p^{(1)}(X) +
 z_r^2 p^{(2)}(X) + \ldots + (z_r)^{\log d} p^{(\log d)}(X)\]</span></p>
 <p>This is not an issue for the verifier as it can construct a
@@ -813,8 +798,8 @@ class="math inline">\(\mathbb{G}_1\)</span> multiplications and
 exponentiations.</p></li>
 <li><p><span class="math inline">\(b^{(\log m)}\)</span> requires <span
 class="math inline">\(m\)</span> <span
-class="math inline">\(\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>
-multiplications and additions.</p></li>
+class="math inline">\(\mathbb{F}\)</span> multiplications and
+additions.</p></li>
 <li><p><span class="math inline">\(v^{(\log m)}\)</span> requires <span
 class="math inline">\(m\)</span> <span
 class="math inline">\(\mathbb{G}\_2\)</span> multiplications and
@@ -871,28 +856,36 @@ class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 
     <script>
       // Theme toggle
-      const t = document.querySelector(".theme-toggle"),
-        h = document.documentElement,
-        l = document.querySelector(".theme-toggle-light"),
-        d = document.querySelector(".theme-toggle-dark"),
-        s =
-          localStorage.getItem("theme") ||
-          (matchMedia("(prefers-color-scheme:dark)").matches
-            ? "dark"
-            : "light");
+      const themeToggle = document.querySelector(".theme-toggle");
+      const html = document.documentElement;
+      const lightIcon = document.querySelector(".theme-toggle-light");
+      const darkIcon = document.querySelector(".theme-toggle-dark");
+      const currentTheme =
+        localStorage.getItem("theme") ||
+        (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
 
-      h.setAttribute("data-theme", s);
-      s === "dark"
-        ? ((l.style.display = "none"), (d.style.display = "block"))
-        : ((l.style.display = "block"), (d.style.display = "none"));
+      html.setAttribute("data-theme", currentTheme);
+      if (currentTheme === "dark") {
+        lightIcon.style.display = "none";
+        darkIcon.style.display = "block";
+      } else {
+        lightIcon.style.display = "block";
+        darkIcon.style.display = "none";
+      }
 
-      t.onclick = () => {
-        const n = h.getAttribute("data-theme") === "dark" ? "light" : "dark";
-        h.setAttribute("data-theme", n);
-        localStorage.setItem("theme", n);
-        n === "dark"
-          ? ((l.style.display = "none"), (d.style.display = "block"))
-          : ((l.style.display = "block"), (d.style.display = "none"));
+      themeToggle.onclick = () => {
+        const newTheme =
+          html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+
+        if (newTheme === "dark") {
+          lightIcon.style.display = "none";
+          darkIcon.style.display = "block";
+        } else {
+          lightIcon.style.display = "block";
+          darkIcon.style.display = "none";
+        }
       };
 
       // Mobile menu toggle
@@ -900,75 +893,68 @@ class="footnote-back" role="doc-backlink">↩︎</a></p></li>
         document.querySelector(".nav-group").classList.toggle("is-active");
 
       // Auto-highlight current page
-      (function () {
-        const path = window.location.pathname;
-        const page = path.split("/").pop() || "index.html";
-        document.querySelectorAll(".main-nav a").forEach((link) => {
-          const href = link.getAttribute("href").replace("../", "");
-          if (
-            href === page ||
-            (page === "index.html" && href === "index.html")
-          ) {
-            link.classList.add("active");
-          }
-        });
-      })();
-
-      // Citation tooltips
-      document.addEventListener("DOMContentLoaded", function () {
-        const refs = document.querySelector("#refs");
-        if (!refs) return;
-
-        document
-          .querySelectorAll('.citation a[href^="#ref-"]')
-          .forEach(function (cite) {
-            const refId = cite.getAttribute("href").substring(1);
-            const refItem = document.getElementById(refId);
-
-            if (refItem) {
-              const urlLink = refItem.querySelector('a[href^="http"]');
-              if (urlLink) {
-                cite.addEventListener("click", function (e) {
-                  e.preventDefault();
-                  window.open(urlLink.href, "_blank");
-                });
-                cite.style.cursor = "pointer";
-                cite.title = "Click to open source";
-              }
-
-              const tooltip = document.createElement("div");
-              tooltip.className = "citation-tooltip";
-              const cslEntry = refItem.querySelector(".csl-entry");
-              tooltip.textContent = cslEntry
-                ? cslEntry.textContent
-                : refItem.textContent;
-              document.body.appendChild(tooltip);
-
-              cite.addEventListener("mouseenter", function (e) {
-                const rect = cite.getBoundingClientRect();
-                tooltip.style.display = "block";
-                tooltip.style.left =
-                  Math.min(rect.left, window.innerWidth - 420) + "px";
-                tooltip.style.top = rect.bottom + 5 + "px";
-              });
-
-              cite.addEventListener("mouseleave", function () {
-                tooltip.style.display = "none";
-              });
-            }
-          });
+      const currentPath = window.location.pathname;
+      const currentPage = currentPath.split("/").pop() || "index.html";
+      document.querySelectorAll(".main-nav a").forEach((link) => {
+        const href = link.getAttribute("href").replace("../", "");
+        if (
+          href === currentPage ||
+          (currentPage === "index.html" && href === "index.html")
+        ) {
+          link.classList.add("active");
+        }
       });
 
-      // Add copy buttons to code blocks
       document.addEventListener("DOMContentLoaded", function () {
+        // Citation tooltips
+        const refs = document.querySelector("#refs");
+        if (refs) {
+          document
+            .querySelectorAll('.citation a[href^="#ref-"]')
+            .forEach(function (cite) {
+              const refId = cite.getAttribute("href").substring(1);
+              const refItem = document.getElementById(refId);
+
+              if (refItem) {
+                const urlLink = refItem.querySelector('a[href^="http"]');
+                if (urlLink) {
+                  cite.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    window.open(urlLink.href, "_blank");
+                  });
+                  cite.style.cursor = "pointer";
+                  cite.title = "Click to open source";
+                }
+
+                const tooltip = document.createElement("div");
+                tooltip.className = "citation-tooltip";
+                const cslEntry = refItem.querySelector(".csl-entry");
+                tooltip.textContent = cslEntry
+                  ? cslEntry.textContent
+                  : refItem.textContent;
+                document.body.appendChild(tooltip);
+
+                cite.addEventListener("mouseenter", function (e) {
+                  const rect = cite.getBoundingClientRect();
+                  tooltip.style.display = "block";
+                  tooltip.style.left =
+                    Math.min(rect.left, window.innerWidth - 420) + "px";
+                  tooltip.style.top = rect.bottom + 5 + "px";
+                });
+
+                cite.addEventListener("mouseleave", function () {
+                  tooltip.style.display = "none";
+                });
+              }
+            });
+        }
+
+        // Add copy buttons to code blocks
         document.querySelectorAll(".highlight").forEach(function (block) {
-          // Create copy button
           const btn = document.createElement("button");
           btn.className = "copy-btn";
           btn.textContent = "Copy";
           btn.setAttribute("aria-label", "Copy code to clipboard");
-
-          // Insert button as first child of highlight div
           block.insertBefore(btn, block.firstChild);
 
           const code = block.querySelector("pre");
@@ -986,7 +972,6 @@ class="footnote-back" role="doc-backlink">↩︎</a></p></li>
                 btn.style.background = "";
               }, 2000);
             } catch (err) {
-              // Fallback for older browsers
               const textarea = document.createElement("textarea");
               textarea.value = text;
               textarea.style.position = "fixed";
@@ -1003,30 +988,34 @@ class="footnote-back" role="doc-backlink">↩︎</a></p></li>
             }
           });
         });
-      });
 
-      // Add data-tag to category tags
-      document.querySelectorAll(".category-tag").forEach((tag) => {
-        const tagName = tag.textContent.trim().toLowerCase();
-        tag.setAttribute("data-tag", tagName);
-      });
-
-      // Extract authors and create author tags
-      const authorSpan = document.querySelector(
-        '.article-meta span:has-text("By")',
-      );
-      if (authorSpan) {
-        const authorText = authorSpan.textContent.replace("By ", "").trim();
-        const authors = authorText.split(",").map((a) => a.trim());
-
-        authors.forEach((author) => {
-          const tag = document.createElement("span");
-          tag.className = "category-tag";
-          tag.textContent = author;
-          tag.setAttribute("data-tag", author.toLowerCase());
-          authorSpan.parentElement.appendChild(tag);
+        // Add data-tag to category tags
+        document.querySelectorAll(".category-tag").forEach((tag) => {
+          const tagName = tag.textContent.trim().toLowerCase();
+          tag.setAttribute("data-tag", tagName);
         });
-      }
+
+        // Convert author text to styled tags
+        const authorSpan = document.querySelector(".article-meta .authors");
+        if (authorSpan) {
+          const authorText = authorSpan.textContent.replace("By ", "").trim();
+          const authors = authorText.split(",").map((a) => a.trim());
+
+          authorSpan.textContent = "By ";
+
+          authors.forEach((author, index) => {
+            const tag = document.createElement("span");
+            tag.className = "category-tag";
+            tag.textContent = author;
+            tag.setAttribute("data-tag", author.toLowerCase());
+            authorSpan.appendChild(tag);
+
+            if (index < authors.length - 1) {
+              authorSpan.appendChild(document.createTextNode(", "));
+            }
+          });
+        }
+      });
     </script>
   </body>
 </html>

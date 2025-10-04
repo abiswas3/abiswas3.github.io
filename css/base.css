@@ -19,6 +19,9 @@
   --text-muted: #778492;
   --text-link: #006ccc;
   --text-inline-code: #3f0099;
+  --bg-math-inline: #fffbeb; /* soft pale yellow */
+  --bg-math-block: #fef7e0; /* slightly warmer yellow */
+  --text-math: #1a1570; /* warm brown-gold */
 
   /* Background colors */
   --bg-primary: #fff;
@@ -105,7 +108,9 @@
   --bg-code-inline: #19332e;
   --bg-code-block: #151e1d;
   --bg-callout: #004e66;
-
+  --bg-math-inline: #2a2416; /* warm dark yellow-brown */
+  --bg-math-block: #252016; /* slightly darker for display math */
+  --text-math: #f4d97f; /* soft golden yellow */
   --border: #999;
   --border-light: #666;
 
@@ -134,7 +139,6 @@ body {
   color: var(--text-primary);
   background: var(--bg-primary);
   margin: 0;
-  font-weight: 300;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -182,7 +186,7 @@ ul,
 ol {
   margin: var(--space-md) 0;
   padding-left: var(--space-xl);
-  line-height: 1.5;
+  line-height: 2;
 }
 
 li {
@@ -222,4 +226,52 @@ hr {
 
 code {
   font-family: var(--font-mono);
+}
+
+/* Math inline text color */
+.math.inline,
+span.math.inline,
+.math.inline mjx-container,
+span.math.inline mjx-container {
+  color: var(--text-math);
+}
+
+/* Math display (block) text color */
+.math.display,
+span.math.display,
+.math.display mjx-container,
+span.math.display mjx-container {
+  color: var(--text-math);
+}
+
+strong {
+  color: var(--color-code-20);
+  font-weight: 800;
+}
+
+.svg-container svg {
+  width: 100%;
+  height: auto;
+}
+
+.svg-text-container {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.svg-column {
+  flex: 1;
+  min-width: 0; /* prevents overflow */
+}
+
+.text-column {
+  flex: 1;
+}
+
+/* Make it stack on mobile */
+@media (max-width: 768px) {
+  .svg-text-container {
+    flex-direction: column;
+  }
 }

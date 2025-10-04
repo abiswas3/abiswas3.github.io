@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Faster Polynomial Evaluaton - On A Tangent Ltd.</title>
+    <title>Faster Polynomial Evaluaton</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script
       async
@@ -121,7 +121,7 @@
           </div>
           <div class="meta-right">
             <time>2025-07-02</time>             <span class="authors"
-              >By  Ari</span
+              >By Ari</span
             >
                       </div>
         </div>
@@ -129,8 +129,6 @@
             <nav id="TOC">
         <h2>Contents</h2>
         <ul>
-        <li><a href="#tracked-data-types"
-        id="toc-tracked-data-types">Tracked Data Types</a></li>
         <li><a href="#problem-statement"
         id="toc-problem-statement">Problem Statement</a></li>
         <li><a href="#a-constant-factor-improvement"
@@ -150,83 +148,7 @@
         id="toc-references">References</a></li>
         </ul>
       </nav>
-            <article><section id="tracked-data-types" class="level2">
-<h2>Tracked Data Types</h2>
-<p>Before, describing optimisations to polynomial evaluation, we discuss
-an additional tool to debug numerical algebra libraries. In <a
-href="">Jolt</a> sum-check algorithms, almost invariably the bottleneck
-in computation is number of field multiplications by large scalars. So
-it might be helpful to be able to count the number of multiplications
-your algorithm does, and check if we’re under the theoretical limit.</p>
-<p>Towards this we introduce <code>TrackedFr</code> data type which is
-exactly the same as <code>ark_bn254::Fr</code> except for 1 critical
-difference. <a href="">Implementation here</a></p>
-<p>Before performing a multiplication operation, we increment a global
-counter atomically (in a thread safe way). Rust makes this relatively
-easy to do (it’s remarkable how far libraries have come that prevent us
-from writing semaphores and mutexes from scratch) See <a
-href="https://doc.rust-lang.org/std/sync/atomic/struct.AtomicUsize.html">official
-docs here</a></p>
-<div class="highlight"><pre><span></span><span class="k">use</span><span class="w"> </span><span class="n">std</span><span class="p">::</span><span class="n">sync</span><span class="p">::</span><span class="n">atomic</span><span class="p">::{</span><span class="nf">AtomicUsize</span><span class="p">,</span><span class="w"> </span><span class="nf">Ordering</span><span class="p">};</span>
-
-<span class="c1">// A global counter that tracks how many times we&#39;ve use a*b where a, b are ark_bn254::Fr types</span>
-<span class="c1">// see jolt-core::field::tracked_fr::TrackedFr for more details</span>
-<span class="k">pub</span><span class="w"> </span><span class="k">static</span><span class="w"> </span><span class="nf">MULT_COUNT</span><span class="p">:</span><span class="w"> </span><span class="nc">AtomicUsize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">AtomicUsize</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
-
-</pre></div>
-
-<p>We have the ability to reset this counter at any time as well. So now
-all we need to do if we wanted to see how many multiplications
-transpired, is to wrap the function being examined with
-<code>reset_mult_count()</code> and <code>get_mult_count()</code>. See
-an example of how to use <a href="">here</a>.</p>
-<p>That’s it! Right now it just tracks multiplications, but you may
-extend it to <strong>any</strong> operation <code>ark_bn254::Fr</code>
-does by simply wrapping the operation as follows:</p>
-<p>For all types of multiplication we do w</p>
-<div class="highlight"><pre><span></span><span class="c1">// crate is jolt-core</span>
-<span class="k">use</span><span class="w"> </span><span class="k">crate</span><span class="p">::</span><span class="n">utils</span><span class="p">::</span><span class="n">counters</span><span class="p">::</span><span class="nf">MULT_COUNT</span><span class="p">;</span>
-
-<span class="c1">// Owned * owned</span>
-<span class="k">impl</span><span class="w"> </span><span class="nf">Mul</span><span class="o">&lt;</span><span class="nf">TrackedFr</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">type</span><span class="w"> </span><span class="nc">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="p">;</span>
-<span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">mul</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span><span class="p">:</span><span class="w"> </span><span class="nc">TrackedFr</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">Self</span><span class="p">::</span><span class="nf">Output</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nf">MULT_COUNT</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nf">Ordering</span><span class="p">::</span><span class="nf">Relaxed</span><span class="p">);</span>
-<span class="w">        </span><span class="nf">TrackedFr</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rhs</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c1">// Owned * borrowed</span>
-<span class="k">impl</span><span class="o">&lt;&#39;</span><span class="na">a</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">Mul</span><span class="o">&lt;&amp;&#39;</span><span class="na">a</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">type</span><span class="w"> </span><span class="nc">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="p">;</span>
-<span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">mul</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="o">&#39;</span><span class="na">a</span><span class="w"> </span><span class="nc">TrackedFr</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">Self</span><span class="p">::</span><span class="nf">Output</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nf">MULT_COUNT</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nf">Ordering</span><span class="p">::</span><span class="nf">Relaxed</span><span class="p">);</span>
-<span class="w">        </span><span class="nf">TrackedFr</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rhs</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c1">// Borrowed * owned</span>
-<span class="k">impl</span><span class="w"> </span><span class="nf">Mul</span><span class="o">&lt;</span><span class="nf">TrackedFr</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="o">&amp;</span><span class="nf">TrackedFr</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">type</span><span class="w"> </span><span class="nc">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="p">;</span>
-
-<span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">mul</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span><span class="p">:</span><span class="w"> </span><span class="nc">TrackedFr</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">Self</span><span class="p">::</span><span class="nf">Output</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nf">MULT_COUNT</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nf">Ordering</span><span class="p">::</span><span class="nf">Relaxed</span><span class="p">);</span>
-<span class="w">        </span><span class="nf">TrackedFr</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rhs</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-
-<span class="cp">#[allow(clippy::needless_lifetimes)]</span>
-<span class="k">impl</span><span class="o">&lt;&#39;</span><span class="na">a</span><span class="p">,</span><span class="w"> </span><span class="o">&#39;</span><span class="na">b</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">Mul</span><span class="o">&lt;&amp;&#39;</span><span class="na">b</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="o">&amp;&#39;</span><span class="na">a</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">type</span><span class="w"> </span><span class="nc">Output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">TrackedFr</span><span class="p">;</span>
-<span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">mul</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">rhs</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="o">&#39;</span><span class="na">b</span><span class="w"> </span><span class="nc">TrackedFr</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">Self</span><span class="p">::</span><span class="nf">Output</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nf">MULT_COUNT</span><span class="p">.</span><span class="n">fetch_add</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="nf">Ordering</span><span class="p">::</span><span class="nf">Relaxed</span><span class="p">);</span>
-<span class="w">        </span><span class="nf">TrackedFr</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="mi">0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">rhs</span><span class="p">.</span><span class="mi">0</span><span class="p">)</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-
-</section>
-<section id="problem-statement" class="level2">
+            <article><section id="problem-statement" class="level2">
 <h2>Problem Statement</h2>
 <p>Fix <span class="math inline">\(n \in \mathbb{N}\)</span> and define
 <span class="math inline">\(N = 2^n\)</span>. In the Jolt codebase there
@@ -489,28 +411,36 @@ href="https://doi.org/10.1109/SP.2013.48">https://doi.org/10.1109/SP.2013.48</a>
 
     <script>
       // Theme toggle
-      const t = document.querySelector(".theme-toggle"),
-        h = document.documentElement,
-        l = document.querySelector(".theme-toggle-light"),
-        d = document.querySelector(".theme-toggle-dark"),
-        s =
-          localStorage.getItem("theme") ||
-          (matchMedia("(prefers-color-scheme:dark)").matches
-            ? "dark"
-            : "light");
+      const themeToggle = document.querySelector(".theme-toggle");
+      const html = document.documentElement;
+      const lightIcon = document.querySelector(".theme-toggle-light");
+      const darkIcon = document.querySelector(".theme-toggle-dark");
+      const currentTheme =
+        localStorage.getItem("theme") ||
+        (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
 
-      h.setAttribute("data-theme", s);
-      s === "dark"
-        ? ((l.style.display = "none"), (d.style.display = "block"))
-        : ((l.style.display = "block"), (d.style.display = "none"));
+      html.setAttribute("data-theme", currentTheme);
+      if (currentTheme === "dark") {
+        lightIcon.style.display = "none";
+        darkIcon.style.display = "block";
+      } else {
+        lightIcon.style.display = "block";
+        darkIcon.style.display = "none";
+      }
 
-      t.onclick = () => {
-        const n = h.getAttribute("data-theme") === "dark" ? "light" : "dark";
-        h.setAttribute("data-theme", n);
-        localStorage.setItem("theme", n);
-        n === "dark"
-          ? ((l.style.display = "none"), (d.style.display = "block"))
-          : ((l.style.display = "block"), (d.style.display = "none"));
+      themeToggle.onclick = () => {
+        const newTheme =
+          html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+
+        if (newTheme === "dark") {
+          lightIcon.style.display = "none";
+          darkIcon.style.display = "block";
+        } else {
+          lightIcon.style.display = "block";
+          darkIcon.style.display = "none";
+        }
       };
 
       // Mobile menu toggle
@@ -518,75 +448,68 @@ href="https://doi.org/10.1109/SP.2013.48">https://doi.org/10.1109/SP.2013.48</a>
         document.querySelector(".nav-group").classList.toggle("is-active");
 
       // Auto-highlight current page
-      (function () {
-        const path = window.location.pathname;
-        const page = path.split("/").pop() || "index.html";
-        document.querySelectorAll(".main-nav a").forEach((link) => {
-          const href = link.getAttribute("href").replace("../", "");
-          if (
-            href === page ||
-            (page === "index.html" && href === "index.html")
-          ) {
-            link.classList.add("active");
-          }
-        });
-      })();
-
-      // Citation tooltips
-      document.addEventListener("DOMContentLoaded", function () {
-        const refs = document.querySelector("#refs");
-        if (!refs) return;
-
-        document
-          .querySelectorAll('.citation a[href^="#ref-"]')
-          .forEach(function (cite) {
-            const refId = cite.getAttribute("href").substring(1);
-            const refItem = document.getElementById(refId);
-
-            if (refItem) {
-              const urlLink = refItem.querySelector('a[href^="http"]');
-              if (urlLink) {
-                cite.addEventListener("click", function (e) {
-                  e.preventDefault();
-                  window.open(urlLink.href, "_blank");
-                });
-                cite.style.cursor = "pointer";
-                cite.title = "Click to open source";
-              }
-
-              const tooltip = document.createElement("div");
-              tooltip.className = "citation-tooltip";
-              const cslEntry = refItem.querySelector(".csl-entry");
-              tooltip.textContent = cslEntry
-                ? cslEntry.textContent
-                : refItem.textContent;
-              document.body.appendChild(tooltip);
-
-              cite.addEventListener("mouseenter", function (e) {
-                const rect = cite.getBoundingClientRect();
-                tooltip.style.display = "block";
-                tooltip.style.left =
-                  Math.min(rect.left, window.innerWidth - 420) + "px";
-                tooltip.style.top = rect.bottom + 5 + "px";
-              });
-
-              cite.addEventListener("mouseleave", function () {
-                tooltip.style.display = "none";
-              });
-            }
-          });
+      const currentPath = window.location.pathname;
+      const currentPage = currentPath.split("/").pop() || "index.html";
+      document.querySelectorAll(".main-nav a").forEach((link) => {
+        const href = link.getAttribute("href").replace("../", "");
+        if (
+          href === currentPage ||
+          (currentPage === "index.html" && href === "index.html")
+        ) {
+          link.classList.add("active");
+        }
       });
 
-      // Add copy buttons to code blocks
       document.addEventListener("DOMContentLoaded", function () {
+        // Citation tooltips
+        const refs = document.querySelector("#refs");
+        if (refs) {
+          document
+            .querySelectorAll('.citation a[href^="#ref-"]')
+            .forEach(function (cite) {
+              const refId = cite.getAttribute("href").substring(1);
+              const refItem = document.getElementById(refId);
+
+              if (refItem) {
+                const urlLink = refItem.querySelector('a[href^="http"]');
+                if (urlLink) {
+                  cite.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    window.open(urlLink.href, "_blank");
+                  });
+                  cite.style.cursor = "pointer";
+                  cite.title = "Click to open source";
+                }
+
+                const tooltip = document.createElement("div");
+                tooltip.className = "citation-tooltip";
+                const cslEntry = refItem.querySelector(".csl-entry");
+                tooltip.textContent = cslEntry
+                  ? cslEntry.textContent
+                  : refItem.textContent;
+                document.body.appendChild(tooltip);
+
+                cite.addEventListener("mouseenter", function (e) {
+                  const rect = cite.getBoundingClientRect();
+                  tooltip.style.display = "block";
+                  tooltip.style.left =
+                    Math.min(rect.left, window.innerWidth - 420) + "px";
+                  tooltip.style.top = rect.bottom + 5 + "px";
+                });
+
+                cite.addEventListener("mouseleave", function () {
+                  tooltip.style.display = "none";
+                });
+              }
+            });
+        }
+
+        // Add copy buttons to code blocks
         document.querySelectorAll(".highlight").forEach(function (block) {
-          // Create copy button
           const btn = document.createElement("button");
           btn.className = "copy-btn";
           btn.textContent = "Copy";
           btn.setAttribute("aria-label", "Copy code to clipboard");
-
-          // Insert button as first child of highlight div
           block.insertBefore(btn, block.firstChild);
 
           const code = block.querySelector("pre");
@@ -604,7 +527,6 @@ href="https://doi.org/10.1109/SP.2013.48">https://doi.org/10.1109/SP.2013.48</a>
                 btn.style.background = "";
               }, 2000);
             } catch (err) {
-              // Fallback for older browsers
               const textarea = document.createElement("textarea");
               textarea.value = text;
               textarea.style.position = "fixed";
@@ -621,30 +543,34 @@ href="https://doi.org/10.1109/SP.2013.48">https://doi.org/10.1109/SP.2013.48</a>
             }
           });
         });
-      });
 
-      // Add data-tag to category tags
-      document.querySelectorAll(".category-tag").forEach((tag) => {
-        const tagName = tag.textContent.trim().toLowerCase();
-        tag.setAttribute("data-tag", tagName);
-      });
-
-      // Extract authors and create author tags
-      const authorSpan = document.querySelector(
-        '.article-meta span:has-text("By")',
-      );
-      if (authorSpan) {
-        const authorText = authorSpan.textContent.replace("By ", "").trim();
-        const authors = authorText.split(",").map((a) => a.trim());
-
-        authors.forEach((author) => {
-          const tag = document.createElement("span");
-          tag.className = "category-tag";
-          tag.textContent = author;
-          tag.setAttribute("data-tag", author.toLowerCase());
-          authorSpan.parentElement.appendChild(tag);
+        // Add data-tag to category tags
+        document.querySelectorAll(".category-tag").forEach((tag) => {
+          const tagName = tag.textContent.trim().toLowerCase();
+          tag.setAttribute("data-tag", tagName);
         });
-      }
+
+        // Convert author text to styled tags
+        const authorSpan = document.querySelector(".article-meta .authors");
+        if (authorSpan) {
+          const authorText = authorSpan.textContent.replace("By ", "").trim();
+          const authors = authorText.split(",").map((a) => a.trim());
+
+          authorSpan.textContent = "By ";
+
+          authors.forEach((author, index) => {
+            const tag = document.createElement("span");
+            tag.className = "category-tag";
+            tag.textContent = author;
+            tag.setAttribute("data-tag", author.toLowerCase());
+            authorSpan.appendChild(tag);
+
+            if (index < authors.length - 1) {
+              authorSpan.appendChild(document.createTextNode(", "));
+            }
+          });
+        }
+      });
     </script>
   </body>
 </html>

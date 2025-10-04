@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Commit To Multilinear Polynomials Using A Univariate
-Commitment Scheme As A Black Box - On A Tangent Ltd.</title>
+Commitment Scheme As A Black Box</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script
       async
@@ -123,7 +123,7 @@ Commitment Scheme As A Black Box</h1>
           </div>
           <div class="meta-right">
             <time>2025-06-09</time>             <span class="authors"
-              >By  Ari</span
+              >By Ari</span
             >
                       </div>
         </div>
@@ -159,12 +159,11 @@ Commitment Scheme As A Black Box</h1>
         Verifier</strong>: Prover sends evaluation <span
         class="math inline">\(y\)</span> and proof <span
         class="math inline">\(\pi\)</span></a></li>
-        <li><a
-        href="#prover-leftarrow-verifier-r-xleftarrowmathbbf_textcolorbluemathttq"
-        id="toc-prover-leftarrow-verifier-r-xleftarrowmathbbf_textcolorbluemathttq"><strong>Prover
+        <li><a href="#prover-leftarrow-verifier-r-xleftarrowmathbbf"
+        id="toc-prover-leftarrow-verifier-r-xleftarrowmathbbf"><strong>Prover
         <span class="math inline">\(\leftarrow\)</span>
         Verifier</strong>: <span class="math inline">\(r
-        \xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span></a></li>
+        \xleftarrow[]{\$}\mathbb{F}\)</span></a></li>
         <li><a
         href="#prover-rightarrow-verifier-leftyiright_i1ell-leftyi_textneg-yi_textposright_i0ell-1"
         id="toc-prover-rightarrow-verifier-leftyiright_i1ell-leftyi_textneg-yi_textposright_i0ell-1"><strong>Prover
@@ -182,12 +181,11 @@ Commitment Scheme As A Black Box</h1>
         <li><a href="#verifier-test-2"
         id="toc-verifier-test-2"><strong>Verifier Test
         2</strong></a></li>
-        <li><a
-        href="#verifier-rightarrow-prover-q-xleftarrowmathbbf_textcolorbluemathttq"
-        id="toc-verifier-rightarrow-prover-q-xleftarrowmathbbf_textcolorbluemathttq">Verifier
+        <li><a href="#verifier-rightarrow-prover-q-xleftarrowmathbbf"
+        id="toc-verifier-rightarrow-prover-q-xleftarrowmathbbf">Verifier
         <span class="math inline">\(\rightarrow\)</span> Prover: <span
         class="math inline">\(q
-        \xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span></a></li>
+        \xleftarrow[]{\$}\mathbb{F}\)</span></a></li>
         </ul></li>
         <li><a href="#references"
         id="toc-references">References</a></li>
@@ -200,10 +198,10 @@ works.</p>
 <section id="how-to-commit" class="level2">
 <h2>How To Commit</h2>
 <p>We are given a multilinear polynomial <span class="math inline">\(f
-\in \mathbb{F}_{\textcolor{blue}{\mathtt{q}}}[X_1, \ldots,
-X_\ell]\)</span>. To commit to <span class="math inline">\(f\)</span>,
-we encode <span class="math inline">\(f\)</span> as a univariate
-polynomial <span class="math inline">\(p^{(0)}\)</span> using <span
+\in \mathbb{F}[X_1, \ldots, X_\ell]\)</span>. To commit to <span
+class="math inline">\(f\)</span>, we encode <span
+class="math inline">\(f\)</span> as a univariate polynomial <span
+class="math inline">\(p^{(0)}\)</span> using <span
 class="math inline">\(2^\ell\)</span> evaluations of <span
 class="math inline">\(f\)</span> over the boolean hypercube <span
 class="math inline">\(\{ 0, 1\}^\ell\)</span> as coefficients. Then we
@@ -225,7 +223,7 @@ p_{2^\ell-1}^{(0)}X^{2^\ell-1}\\
 \rangle\_{2}\)</span> be the representation of <span
 class="math inline">\(x\)</span> in binary.</p>
 <section class="level4 remark">
-<h4><span class="callout-label">:</span> Example</h4>
+<h4><span class="callout-label">Remark:</span> Example</h4>
 <p>Supposed we are given the following multi-linear polynomial</p>
 <p><span class="math display">\[
 \begin{align}
@@ -270,9 +268,9 @@ Verifier</strong>: Verifier wants to open at <span
 class="math inline">\(\vec{z}\)</span></h3>
 <p>Now the verifier wants to open at some point <span
 class="math inline">\(\vec{z} = (z_1, \ldots, z_\ell) \in
-\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}^{\ell}\)</span>. The prover
-claims that <span class="math inline">\(f(\vec{z}) = y\)</span> and
-constructs the following proof:</p>
+\mathbb{F}^{\ell}\)</span>. The prover claims that <span
+class="math inline">\(f(\vec{z}) = y\)</span> and constructs the
+following proof:</p>
 <p>Let <span class="math inline">\(p^{(0)}\)</span> denote the
 univariate encoding of <span class="math inline">\(f\)</span>. Now for
 all <span class="math inline">\(j \in \{1, \ell \}\)</span> we define
@@ -352,14 +350,13 @@ class="math inline">\(y\)</span> and proof <span
 class="math inline">\(\pi\)</span></h3>
 <p>On receiving these commitments the verifier sends the prover a
 challenge <span class="math inline">\(r
-\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span></p>
+\xleftarrow[]{\$}\mathbb{F}\)</span></p>
 </section>
-<section
-id="prover-leftarrow-verifier-r-xleftarrowmathbbf_textcolorbluemathttq"
+<section id="prover-leftarrow-verifier-r-xleftarrowmathbbf"
 class="level3">
 <h3><strong>Prover <span class="math inline">\(\leftarrow\)</span>
 Verifier</strong>: <span class="math inline">\(r
-\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span></h3>
+\xleftarrow[]{\$}\mathbb{F}\)</span></h3>
 <p>The prover computes for all <span class="math inline">\(i \in \{1
 \ldots, \ell\}\)</span> 3 univariate polynomial evaluations.</p>
 <p>$$</p>
@@ -379,8 +376,7 @@ class="math inline">\(\left\{y^{(i)}\right\}_{i=1}^{\ell},
 \left\{y^{(i)}_{\text{neg}},
 y^{(i)}_{\text{pos}}\right\}_{i=0}^{\ell-1},\)</span></h3>
 <p>Communication is <span class="math inline">\(3\ell\)</span> <span
-class="math inline">\(\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>
-elements.</p>
+class="math inline">\(\mathbb{F}\)</span> elements.</p>
 </section>
 <section id="verifier-test-1" class="level3">
 <h3><strong>Verifier Test 1</strong></h3>
@@ -480,20 +476,17 @@ p^{(\ell-1)}(-r)\)</span></p></li>
 </ul>
 <p>If the commitment scheme is homomorphic, we can do construct a single
 commitment from these. The verifier samples <span
-class="math inline">\(q
-\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span>, and
-sends this to the prover.</p>
+class="math inline">\(q \xleftarrow[]{\$}\mathbb{F}\)</span>, and sends
+this to the prover.</p>
 <p>The verifier then calculates <span class="math inline">\(C_{B} =
 \sum_{i=0}^{\ell} \left(C_{p^{(i)}}\right)^{q^{i}}\)</span>, Then the
 verifier hands over <span class="math inline">\(q\)</span> to the
 prover.</p>
 </section>
-<section
-id="verifier-rightarrow-prover-q-xleftarrowmathbbf_textcolorbluemathttq"
+<section id="verifier-rightarrow-prover-q-xleftarrowmathbbf"
 class="level3">
 <h3>Verifier <span class="math inline">\(\rightarrow\)</span> Prover:
-<span class="math inline">\(q
-\xleftarrow[]{\$}\mathbb{F}_{\textcolor{blue}{\mathtt{q}}}\)</span></h3>
+<span class="math inline">\(q \xleftarrow[]{\$}\mathbb{F}\)</span></h3>
 <p>The prover computes</p>
 <p><span class="math display">\[B(X) = \sum_{i=0}^{\ell} q^{i}\cdot
 p^{(i)}(X)\]</span></p>
@@ -505,13 +498,15 @@ get 3 evaluations proofs for each evaluation.</p>
 commitment scheme as a blackbox. Below we mention some advantages of
 using KZG.</p>
 <section class="level4 remark">
-<h4><span class="callout-label">:</span> KZG Specific Optimisations</h4>
+<h4><span class="callout-label">Remark:</span> KZG Specific
+Optimisations</h4>
 <p>We could have used KZG’s batching to make this a single proof, but
 the original authors choose not to. As the number is only 3, it’s not a
 big computational advantage.</p>
 </section>
 <section class="level4 remark">
-<h4><span class="callout-label">:</span> KZG Specific Optimisations</h4>
+<h4><span class="callout-label">Remark:</span> KZG Specific
+Optimisations</h4>
 <p>A second optimisation is that although we get 3 proofs, each KZG
 proof consists of a check of the form <span class="math inline">\(e(L,
 R)= e(L&#39;, R&#39;)\)</span>. We can batch them together and do one
@@ -538,28 +533,36 @@ href="https://eprint.iacr.org/2024/2099">https://eprint.iacr.org/2024/2099</a>.
 
     <script>
       // Theme toggle
-      const t = document.querySelector(".theme-toggle"),
-        h = document.documentElement,
-        l = document.querySelector(".theme-toggle-light"),
-        d = document.querySelector(".theme-toggle-dark"),
-        s =
-          localStorage.getItem("theme") ||
-          (matchMedia("(prefers-color-scheme:dark)").matches
-            ? "dark"
-            : "light");
+      const themeToggle = document.querySelector(".theme-toggle");
+      const html = document.documentElement;
+      const lightIcon = document.querySelector(".theme-toggle-light");
+      const darkIcon = document.querySelector(".theme-toggle-dark");
+      const currentTheme =
+        localStorage.getItem("theme") ||
+        (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
 
-      h.setAttribute("data-theme", s);
-      s === "dark"
-        ? ((l.style.display = "none"), (d.style.display = "block"))
-        : ((l.style.display = "block"), (d.style.display = "none"));
+      html.setAttribute("data-theme", currentTheme);
+      if (currentTheme === "dark") {
+        lightIcon.style.display = "none";
+        darkIcon.style.display = "block";
+      } else {
+        lightIcon.style.display = "block";
+        darkIcon.style.display = "none";
+      }
 
-      t.onclick = () => {
-        const n = h.getAttribute("data-theme") === "dark" ? "light" : "dark";
-        h.setAttribute("data-theme", n);
-        localStorage.setItem("theme", n);
-        n === "dark"
-          ? ((l.style.display = "none"), (d.style.display = "block"))
-          : ((l.style.display = "block"), (d.style.display = "none"));
+      themeToggle.onclick = () => {
+        const newTheme =
+          html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+
+        if (newTheme === "dark") {
+          lightIcon.style.display = "none";
+          darkIcon.style.display = "block";
+        } else {
+          lightIcon.style.display = "block";
+          darkIcon.style.display = "none";
+        }
       };
 
       // Mobile menu toggle
@@ -567,75 +570,68 @@ href="https://eprint.iacr.org/2024/2099">https://eprint.iacr.org/2024/2099</a>.
         document.querySelector(".nav-group").classList.toggle("is-active");
 
       // Auto-highlight current page
-      (function () {
-        const path = window.location.pathname;
-        const page = path.split("/").pop() || "index.html";
-        document.querySelectorAll(".main-nav a").forEach((link) => {
-          const href = link.getAttribute("href").replace("../", "");
-          if (
-            href === page ||
-            (page === "index.html" && href === "index.html")
-          ) {
-            link.classList.add("active");
-          }
-        });
-      })();
-
-      // Citation tooltips
-      document.addEventListener("DOMContentLoaded", function () {
-        const refs = document.querySelector("#refs");
-        if (!refs) return;
-
-        document
-          .querySelectorAll('.citation a[href^="#ref-"]')
-          .forEach(function (cite) {
-            const refId = cite.getAttribute("href").substring(1);
-            const refItem = document.getElementById(refId);
-
-            if (refItem) {
-              const urlLink = refItem.querySelector('a[href^="http"]');
-              if (urlLink) {
-                cite.addEventListener("click", function (e) {
-                  e.preventDefault();
-                  window.open(urlLink.href, "_blank");
-                });
-                cite.style.cursor = "pointer";
-                cite.title = "Click to open source";
-              }
-
-              const tooltip = document.createElement("div");
-              tooltip.className = "citation-tooltip";
-              const cslEntry = refItem.querySelector(".csl-entry");
-              tooltip.textContent = cslEntry
-                ? cslEntry.textContent
-                : refItem.textContent;
-              document.body.appendChild(tooltip);
-
-              cite.addEventListener("mouseenter", function (e) {
-                const rect = cite.getBoundingClientRect();
-                tooltip.style.display = "block";
-                tooltip.style.left =
-                  Math.min(rect.left, window.innerWidth - 420) + "px";
-                tooltip.style.top = rect.bottom + 5 + "px";
-              });
-
-              cite.addEventListener("mouseleave", function () {
-                tooltip.style.display = "none";
-              });
-            }
-          });
+      const currentPath = window.location.pathname;
+      const currentPage = currentPath.split("/").pop() || "index.html";
+      document.querySelectorAll(".main-nav a").forEach((link) => {
+        const href = link.getAttribute("href").replace("../", "");
+        if (
+          href === currentPage ||
+          (currentPage === "index.html" && href === "index.html")
+        ) {
+          link.classList.add("active");
+        }
       });
 
-      // Add copy buttons to code blocks
       document.addEventListener("DOMContentLoaded", function () {
+        // Citation tooltips
+        const refs = document.querySelector("#refs");
+        if (refs) {
+          document
+            .querySelectorAll('.citation a[href^="#ref-"]')
+            .forEach(function (cite) {
+              const refId = cite.getAttribute("href").substring(1);
+              const refItem = document.getElementById(refId);
+
+              if (refItem) {
+                const urlLink = refItem.querySelector('a[href^="http"]');
+                if (urlLink) {
+                  cite.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    window.open(urlLink.href, "_blank");
+                  });
+                  cite.style.cursor = "pointer";
+                  cite.title = "Click to open source";
+                }
+
+                const tooltip = document.createElement("div");
+                tooltip.className = "citation-tooltip";
+                const cslEntry = refItem.querySelector(".csl-entry");
+                tooltip.textContent = cslEntry
+                  ? cslEntry.textContent
+                  : refItem.textContent;
+                document.body.appendChild(tooltip);
+
+                cite.addEventListener("mouseenter", function (e) {
+                  const rect = cite.getBoundingClientRect();
+                  tooltip.style.display = "block";
+                  tooltip.style.left =
+                    Math.min(rect.left, window.innerWidth - 420) + "px";
+                  tooltip.style.top = rect.bottom + 5 + "px";
+                });
+
+                cite.addEventListener("mouseleave", function () {
+                  tooltip.style.display = "none";
+                });
+              }
+            });
+        }
+
+        // Add copy buttons to code blocks
         document.querySelectorAll(".highlight").forEach(function (block) {
-          // Create copy button
           const btn = document.createElement("button");
           btn.className = "copy-btn";
           btn.textContent = "Copy";
           btn.setAttribute("aria-label", "Copy code to clipboard");
-
-          // Insert button as first child of highlight div
           block.insertBefore(btn, block.firstChild);
 
           const code = block.querySelector("pre");
@@ -653,7 +649,6 @@ href="https://eprint.iacr.org/2024/2099">https://eprint.iacr.org/2024/2099</a>.
                 btn.style.background = "";
               }, 2000);
             } catch (err) {
-              // Fallback for older browsers
               const textarea = document.createElement("textarea");
               textarea.value = text;
               textarea.style.position = "fixed";
@@ -670,30 +665,34 @@ href="https://eprint.iacr.org/2024/2099">https://eprint.iacr.org/2024/2099</a>.
             }
           });
         });
-      });
 
-      // Add data-tag to category tags
-      document.querySelectorAll(".category-tag").forEach((tag) => {
-        const tagName = tag.textContent.trim().toLowerCase();
-        tag.setAttribute("data-tag", tagName);
-      });
-
-      // Extract authors and create author tags
-      const authorSpan = document.querySelector(
-        '.article-meta span:has-text("By")',
-      );
-      if (authorSpan) {
-        const authorText = authorSpan.textContent.replace("By ", "").trim();
-        const authors = authorText.split(",").map((a) => a.trim());
-
-        authors.forEach((author) => {
-          const tag = document.createElement("span");
-          tag.className = "category-tag";
-          tag.textContent = author;
-          tag.setAttribute("data-tag", author.toLowerCase());
-          authorSpan.parentElement.appendChild(tag);
+        // Add data-tag to category tags
+        document.querySelectorAll(".category-tag").forEach((tag) => {
+          const tagName = tag.textContent.trim().toLowerCase();
+          tag.setAttribute("data-tag", tagName);
         });
-      }
+
+        // Convert author text to styled tags
+        const authorSpan = document.querySelector(".article-meta .authors");
+        if (authorSpan) {
+          const authorText = authorSpan.textContent.replace("By ", "").trim();
+          const authors = authorText.split(",").map((a) => a.trim());
+
+          authorSpan.textContent = "By ";
+
+          authors.forEach((author, index) => {
+            const tag = document.createElement("span");
+            tag.className = "category-tag";
+            tag.textContent = author;
+            tag.setAttribute("data-tag", author.toLowerCase());
+            authorSpan.appendChild(tag);
+
+            if (index < authors.length - 1) {
+              authorSpan.appendChild(document.createTextNode(", "));
+            }
+          });
+        }
+      });
     </script>
   </body>
 </html>
