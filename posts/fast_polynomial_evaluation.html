@@ -145,18 +145,18 @@
         <li><a href="#batched-polynomial-evaluation"
         id="toc-batched-polynomial-evaluation">Batched Polynomial
         Evaluation</a></li>
-        <li><a href="#references"
-        id="toc-references">References</a></li>
         </ul>
       </nav>
             <article><section id="problem-statement" class="level2">
 <h2>Problem Statement</h2>
 <p>Fix <span class="math inline">\(n \in \mathbb{N}\)</span> and define
-<span class="math inline">\(N = 2^n\)</span>. In the Jolt codebase there
-is an <a href="">algorithm</a> that takes as input a vector <span
-class="math inline">\(f \in \mathbb{F}^N\)</span> and an <span
-class="math inline">\(\vec{z} \in \mathbb{F}^n\)</span> and outputs
-<span class="math inline">\(\widetilde{f}(\vec{z})\)</span> where <span
+<span class="math inline">\(N = 2^n\)</span>. :In the Jolt codebase
+there is an <a
+href="https://github.com/abiswas3/jolt/blob/be67370024174cf048b1a388e988ace72d9467a8/jolt-core/src/poly/multilinear_polynomial.rs#L241">algorithm</a>
+that takes as input a vector <span class="math inline">\(f \in
+\mathbb{F}^N\)</span> and an <span class="math inline">\(\vec{z} \in
+\mathbb{F}^n\)</span> and outputs <span
+class="math inline">\(\widetilde{f}(\vec{z})\)</span> where <span
 class="math inline">\(\widetilde{f}\)</span> is the multilinear
 extension (MLE) of <span class="math inline">\(f\)</span>. See Chapter 3
 of <span class="citation-inline"><span class="citation"
@@ -191,13 +191,6 @@ class="math display">\[\widetilde{f}(\vec{z}) = \sum_{w \in
 </ol>
 <p>In what follows, we describe how to speed up the implementation by a
 factor of 2.</p>
-<div class="remark">
-<p>For a single polynomial evaluation, even if <span
-class="math inline">\(f(w)\)</span> were to be 0, the current code base
-still proceeds to do multiplication instead of just returning 0. This is
-fixed in batched evaluation, but we mention it here, as this will be
-reflected when performing benchmarks.</p>
-</div>
 </section>
 <section id="a-constant-factor-improvement" class="level2">
 <h2>A Constant Factor Improvement</h2>
@@ -317,12 +310,17 @@ implementation requires :</p>
 multiplications.</li>
 </ul>
 <div class="remark">
-<p>The current Jolt Implementation does not leverage sparsity at all.
-That is even multiplying <code>a*b</code> it does not check if
-<code>a</code> or <code>b</code> is zero to simply return 0. It goes
-ahead and does montgomery multiplication.</p>
+<p>The <a
+href="https://github.com/abiswas3/jolt/blob/be67370024174cf048b1a388e988ace72d9467a8/jolt-core/src/utils/mod.rs#L113">current
+Jolt Implementation</a> did not leverage sparsity at all. That is even
+multiplying <code>a*b</code> it does not check if <code>a</code> or
+<code>b</code> is zero to simply return 0. It goes ahead and does
+montgomery multiplication anyway, which is wasteful.</p>
 <p><strong>This is not the case with batched evaluation we will discuss
-later</strong>.</p>
+later which uses <code>01_optimised_mul</code>to get rid of this
+inefficiency. <a
+href="https://github.com/abiswas3/jolt/blob/be67370024174cf048b1a388e988ace72d9467a8/jolt-core/src/poly/dense_mlpoly.rs#L406">Code</a>:
+</strong>.</p>
 </div>
 <p>An alternative way to implement this dot product algorithm is take
 <span class="math inline">\(\vec{z} = \vec{z_1} || \vec{z_2}\)</span>
@@ -334,7 +332,9 @@ and compute</p>
 <p>This takes</p>
 <ul>
 <li><span class="math inline">\(2\sqrt{N} + \sqrt{N} + \gamma N =
-3\sqrt{N} + \gamma N\)</span> multiplications</li>
+3\sqrt{N} + \gamma N\)</span> multiplications as opposed to the <span
+class="math inline">\(N + \gamma N\)</span> approach taken by
+<code>01_optimised_mul</code> discussed above.</li>
 </ul>
 <p>The inside-out evaluation, also leverages sparsity, but in a way that
 depends on the distribution of 0s. Imagine <span
@@ -354,18 +354,20 @@ multiplications are occurring for each algorithm (note
 class="math inline">\(2N\)</span> always). Also shown in a dashed line
 is the theoretical upper bound for the algorithm that spilts
 <code>eq</code>, and this confirms that our implementation is
-efficient,</p>
+efficient.</p>
 <p><img src="/assets/fast_poly/single_poly_eval_sparsity.png" /> <img
 src="/assets/fast_poly/single_poly_evals_num_vars.png" /></p>
-<p>The plot below shows the physical times. Notice how the two trends
-are almost identical, which does confirm that the bottleneck in
-polynomial evaluation really is field multiplication.</p>
-<p>How to get these plots yourself:</p>
+<p>The plot below shows the physical times. We use <a
+href="/posts/tracked-types.html">Tracked Types</a> to count the exact
+number of multiplications being done, and the dotted line describes what
+we expect to see in theory (as a sanity check for inefficiencies).</p>
+<p>Notice how the two trends are almost identical, which does confirm
+that the bottleneck in polynomial evaluation really is field
+multiplication.</p>
+<p>#TODO: Make these SVGS so they look better.</p>
 <div class="highlight"><pre><span></span><span class="n">cargo</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="n">jolt</span><span class="o">-</span><span class="n">core</span><span class="w"> </span><span class="o">--</span><span class="n">example</span><span class="w"> </span><span class="n">polynomial_evaluation</span><span class="w"> </span><span class="o">--</span><span class="n">release</span>
 </pre></div>
 
-<p>This should generate a file called <code>results.csv</code> from
-which the above numbers can be easily calculated.</p>
 </section>
 <section id="batched-polynomial-evaluation" class="level2">
 <h2>Batched Polynomial Evaluation</h2>
@@ -387,11 +389,7 @@ and the actual time it took to multiply things.</p>
 <div class="highlight"><pre><span></span><span class="n">cargo</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="n">p</span><span class="w"> </span><span class="n">jolt</span><span class="o">-</span><span class="n">core</span><span class="w"> </span><span class="o">--</span><span class="n">example</span><span class="w"> </span><span class="n">polynomial_evaluation</span><span class="w"> </span><span class="o">--</span><span class="n">release</span>
 </pre></div>
 
-<p>and you shall receive a file called
-<code>batch_results.csv</code></p>
-</section>
-<section id="references" class="level2 unnumbered">
-<h2 class="unnumbered">References</h2>
+<pre><code>## References</code></pre>
 <div id="refs" class="references csl-bib-body hanging-indent"
 role="list">
 <div id="ref-thaler2020proofs" class="csl-entry" role="listitem">
