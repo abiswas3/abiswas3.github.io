@@ -20,10 +20,11 @@
             <ul>
               <li><a href="/index.html">Home</a></li>
               <li><a href="/blog.html">Blog</a></li>
+              <li><a href="/publications.html">Research</a></li>
               <li><a href="/about.html">Random Walks</a></li>
               <li>
                 <a
-                  href="https://github.com/YOUR_USERNAME"
+                  href="https://github.com/abiswas3"
                   target="_blank"
                   rel="noopener"
                   class="icon-link"
@@ -135,11 +136,7 @@
         <li><a href="#sum-check-recapa"
         id="toc-sum-check-recapa">Sum-Check Recap</a></li>
         <li><a href="#the-set-s" id="toc-the-set-s">The Set <span
-        class="math inline">\(S\)</span></a>
-        <ul>
-        <li><a href="#why-is-this-set-nice"
-        id="toc-why-is-this-set-nice">Why Is This Set Nice?</a></li>
-        </ul></li>
+        class="math inline">\(S\)</span></a></li>
         </ul>
       </nav>
             <article><section id="tldr" class="level2">
@@ -359,25 +356,9 @@ protocol, which results in a 1.3x speedup per round of sum-check.</p>
 filtering by the last 2 bits (approximately 1/4 of elements have both
 bits zero).</p>
 </section>
-<section id="why-is-this-set-nice" class="level3">
-<h3>Why Is This Set Nice?</h3>
-<div class="svg-container">
-<p><img src="/assets/small-scalar-binding/diag.svg" /></p>
-</div>
-<div class="svg-text-container">
-<div class="svg-column">
-<img src="/assets/small-scalar-binding/diag.svg" />
-</div>
-<div class="text-column">
-<p>Your markdown text here…</p>
-<pre><code>- Point 1
-- Point 2
-- Point 3</code></pre>
-</div>
-</div>
-<style>
-</style>
-</section>
+<p>The short answer to why we this set is to nice, is that it saves us
+10 multiplication operations per field operation. We first briefly
+review the <a href="">CIOS</a> algorithm, to illustrate our point.</p>
 </section>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
