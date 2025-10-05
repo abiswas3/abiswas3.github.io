@@ -10,7 +10,7 @@
 .site-header-inner {
   max-width: var(--max-width-wide);
   margin: 0 auto;
-  padding: var(--space-lg) var(--space-xl);
+  padding: var(--space-md) var(--space-xl); /* reduced from lg to md */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -26,6 +26,7 @@
 .site-title a:hover {
   color: var(--accent);
 }
+
 .nav-group {
   display: flex;
   align-items: center;
@@ -36,20 +37,27 @@
   margin: 0;
   padding: 0;
   display: flex;
-  gap: var(--space-xl);
+  gap: var(--space-lg);
 }
 .main-nav li {
   margin: 0;
 }
 .main-nav a {
   color: var(--text-secondary);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold); /* bumped from medium */
+  text-transform: uppercase; /* makes them stand out */
+  letter-spacing: 0.05em; /* breathing room */
+  font-size: var(--font-sm); /* slightly smaller, punchier */
+  transition: var(--transition);
 }
 .main-nav a:hover {
   color: var(--text-primary);
+  transform: translateY(-1px); /* subtle lift */
 }
 .main-nav a.active {
   color: var(--accent);
+  border-bottom: 2px solid var(--accent); /* underline active */
+  padding-bottom: 2px;
 }
 .theme-toggle {
   background: none;
