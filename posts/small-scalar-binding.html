@@ -171,7 +171,7 @@ which we do all operations.)</p>
 <p><strong>NOTE:</strong> This now reduces the soundness error from
 <span class="math inline">\(1/2^{254}\)</span> to <span
 class="math inline">\(1/2^{125}\)</span>, but this is not a concern as
-currently Jolt commitments use the <code>bn256</code> curve which offers
+currently Jolt commitments use the <code>bn254</code> curve which offers
 110 bits of security anyway.</p>
 </section>
 <p>What does this mean for end to end performance? – We’ve sped up
@@ -198,14 +198,14 @@ role="doc-noteref"><sup>1</sup></a>.</p>
 <p>Let <span class="math inline">\(g \in \mathbb{F}[X_1, \ldots,
 X_m]\)</span> be a polynomial over <span
 class="math inline">\(\mathbb{F}\)</span> with the following structure.
-<span class="math display">\[ g(X_1, \ldots, X_m) = \prod_{j=1}^d
-q_j(X_1, \ldots, X_m)\]</span> where all <span
+<span class="math display">\[ g(X*1, \ldots, X_m) = \prod*{j=1}^d
+q*j(X_1, \ldots, X_m)\]</span> where all <span
 class="math inline">\(q_j(X)\)</span>’s are multi-linear polynomials
 over <span class="math inline">\(\mathbb{F}\)</span>. The sum-check
 algorithm an interactive protocol<a href="#fn2" class="footnote-ref"
 id="fnref2" role="doc-noteref"><sup>2</sup></a> where the prover is
-trying to convince a verifier that <span class="math inline">\(\sum_{b_1
-\in \{ 0, 1\}} \ldots \sum_{b_m \in \{ 0, 1\}} g(b_1, \ldots,
+trying to convince a verifier that <span class="math inline">\(\sum*{b*1
+\in \{ 0, 1\}} \ldots \sum*{b*m \in \{ 0, 1\}} g(b_1, \ldots,
 b_m)\)</span> evaluates to <span class="math inline">\(c \in
 \mathbb{F}\)</span>.<br />
 In each round <span class="math inline">\(i\)</span> the prover does the
@@ -213,7 +213,7 @@ following things - (1) It sends the verifier a univariate polynomial
 <span class="math inline">\(p_i(X_i)\)</span>. (2) The verifier samples
 <span class="math inline">\(r_i \xleftarrow[]{\$}S\)</span> uniformly at
 random, and the prover computes the polynomial <span
-class="math inline">\(g(r_1, \ldots, r_i, X_{i+1}, \ldots,
+class="math inline">\(g(r_1, \ldots, r_i, X*{i+1}, \ldots,
 X_m)\)</span>. Typically <span class="math inline">\(S =
 \mathbb{F}\)</span>. We expand more below:</p>
 <ol type="1">
@@ -539,10 +539,10 @@ class="math inline">\(n^2\)</span> multiplications.</li>
 <p>Next we illustrate how sampling <span
 class="math inline">\(\widetilde{b} \xleftarrow[]{\$}S\)</span> saves us
 multiplications.</p>
-Firstly when 2 digits are 0 we we only need <span
+<p>Firstly when 2 digits are 0 we we only need <span
 class="math inline">\(n \times (n-2)\)</span> multiplications, which
 allows us to save 8 multiplications when <span
-class="math inline">\(n=4\)</span>.
+class="math inline">\(n=4\)</span>.</p>
 <div class="svg-container">
 <p><img src="/assets/small-scalar-binding/diag.svg" /></p>
 </div>
@@ -573,13 +573,13 @@ takes.</p>
 <li><span class="math inline">\(S\)</span> is 2 least significant digits
 0’d out.</li>
 </ul>
-<div class="highlight"><pre><span></span>cargo<span class="w"> </span>bench<span class="w"> </span>-p<span class="w"> </span>jolt-core<span class="w"> </span>--bench<span class="w"> </span>challenge_mult_performance<span class="w"> </span>
+<div class="highlight"><pre><span></span>cargo<span class="w"> </span>bench<span class="w"> </span>-p<span class="w"> </span>jolt-core<span class="w"> </span>--bench<span class="w"> </span>challenge_mult_performance
 </pre></div>
 
 <p><img src="/assets/small-scalar-binding/mul-bench.png" /></p>
 <p>Next we show that this improved multiplication does indeed speed up
 polynomial binding</p>
-<div class="highlight"><pre><span></span>cargo<span class="w"> </span>bench<span class="w"> </span>-p<span class="w"> </span>jolt-core<span class="w"> </span>--bench<span class="w"> </span>binding<span class="w"> </span>
+<div class="highlight"><pre><span></span>cargo<span class="w"> </span>bench<span class="w"> </span>-p<span class="w"> </span>jolt-core<span class="w"> </span>--bench<span class="w"> </span>binding
 cargo<span class="w"> </span>bench<span class="w"> </span>-p<span class="w"> </span>jolt-core<span class="w"> </span>--bench<span class="w"> </span>binding<span class="w"> </span>--features<span class="w"> </span>challenge-254-bit
 </pre></div>
 
@@ -596,7 +596,7 @@ fast multiplication.</p>
 <section id="some-implementation-details" class="level2">
 <h2>Some Implementation Details</h2>
 <p>we use <span class="math inline">\(256\)</span> bits to represent big
-integers and our challenge and the modulus for <code>ark-bn256</code>
+integers and our challenge and the modulus for <code>ark-bn254</code>
 uses <span class="math inline">\(254\)</span> bits. Thus, if sampled a 2
 limbed <span class="math inline">\(128\)</span> bit integer <span
 class="math inline">\(x\)</span> and used that as the challenge as is
