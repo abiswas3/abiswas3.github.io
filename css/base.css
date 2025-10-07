@@ -26,8 +26,8 @@
 
   /* Background colors */
   --bg-primary: whitesmoke;
-  --bg-secondary: #f5f5f5;
-  --bg-tertiary: #fff;
+  --bg-secondary: #eeeeee;
+  --bg-tertiary: #dceeff;
   --bg-code-inline: #f0e5ff;
   --bg-code-block: #fffdf0;
   --bg-callout: #e0f8ff;
@@ -129,7 +129,20 @@
 * {
   box-sizing: border-box;
 }
+/* Works on WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 12px;
+}
 
+::-webkit-scrollbar-track {
+  background: var(--bg-primary) /* track color matches your theme */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--bg-primary); /* thumb color */
+  border-radius: 6px;
+  border: 3px solid var(--bg-primary)/* matches track to create padding */
+}
 html {
   transition: background-color var(--transition);
   background-color: var(--bg-tertiary); /* Solid fallback color */
