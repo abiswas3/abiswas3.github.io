@@ -24,9 +24,9 @@
   --text-math: #1a1570; /* warm brown-gold */
 
   /* Background colors */
-  --bg-primary: #fff;
+  --bg-primary: whitesmoke;
   --bg-secondary: #f5f5f5;
-  --bg-tertiary: #dae3e7;
+  --bg-tertiary: #fff;
   --bg-code-inline: #f0e5ff;
   --bg-code-block: #fffdf0;
   --bg-callout: #e0f8ff;
@@ -130,6 +130,8 @@
 
 html {
   transition: background-color var(--transition);
+  background-color: var(--bg-tertiary); /* Solid fallback color */
+  min-height: 100vh;
 }
 
 body {
@@ -139,6 +141,7 @@ body {
   color: var(--text-primary);
   margin: 0;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
   background: radial-gradient(
     ellipse 120% 150% at 30% 20%,
     var(--bg-primary) 0%,
@@ -147,18 +150,6 @@ body {
     var(--bg-tertiary) 80%,
     var(--bg-tertiary) 100%
   );
-  /* background: linear-gradient( */
-  /*   to bottom, */
-  /*   var(--bg-tertiary) 0%, */
-  /*   var(--bg-tertiary) 15%, */
-  /*   var(--bg-secondary) 25%, */
-  /*   var(--bg-primary) 35%, */
-  /*   var(--bg-primary) 65%, */
-  /*   var(--bg-secondary) 75%, */
-  /*   var(--bg-tertiary) 85%, */
-  /*   var(--bg-tertiary) 100% */
-  /* ); */
-  min-height: 100vh;
 }
 
 a {
