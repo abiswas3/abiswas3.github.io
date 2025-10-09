@@ -239,6 +239,7 @@ class="math inline">\(q_j(r_1, \ldots, r_{i-1}, Z, \vec{b})\)</span> for
 <span class="math inline">\(q_j\)</span> is multi-linear – this can be
 computed by linear-interpolation.</li>
 </ol>
+<div id="hello" style="overflow-x: auto; max-width: 100%;">
 <p><span class="math display">\[
     \begin{aligned}
         q_j(r_1, \ldots, r_{i-1}, Z, \vec{b}) = &amp; (1-Z) \,q_j(r_1,
@@ -247,6 +248,7 @@ computed by linear-interpolation.</li>
 \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m)
     \end{aligned}
 \]</span></p>
+</div>
 <p>As <span class="math inline">\(d\)</span> is a small constant number,
 computing the above value requires <strong>no multiplication
 operations</strong>. We can compute it via a running sum. See pseudocode
@@ -273,8 +275,8 @@ below</p>
 multi-linear polynomial <span class="math inline">\(g\)</span> to <span
 class="math inline">\(r_i\)</span>, that is to say it computes a new
 multi-linear polynomial in <span class="math inline">\(m-i\)</span>
-variables <span class="math inline">\(g_i(X_{i+1}, \ldots, X_{m}) =
-g(r_1, \ldots, r_{i-1}, X_{i+1}, \ldots, X_{m})\)</span>. This involves
+variables <span class="math display">\[g_i(X_{i+1}, \ldots, X_{m}) =
+g(r_1, \ldots, r_{i-1}, X_{i+1}, \ldots, X_{m})\]</span>. This involves
 storing all evaluations of <span class="math inline">\(g_i\)</span> over
 the hyper cube <span class="math inline">\(\{0, 1\}^{m-i}\)</span>, but
 unlike the above step <span class="math inline">\(r_i\)</span> is
@@ -323,10 +325,11 @@ protocol, which results in a 1.3x speedup per round of sum-check.</p>
 </section>
 <section id="the-challenge-set-s" class="level2">
 <h2>The Challenge Set <span class="math inline">\(S\)</span></h2>
-<p>Define the set <span class="math inline">\(S \subset
-\mathbb{F}\)</span> where <span class="math inline">\(S = \{ x \in
-\mathbb{F}: \text{the least 2 significant digits of $x$ in Montgomery
-form are 0} \}\)</span>.</p>
+<p>Define the set</p>
+<p><span class="math display">\[
+S \subset \mathbb{F}\text{where} S = \{ x \in \mathbb{F}: \text{the
+least 2 significant digits of $x$ in Montgomery form are 0} \}
+\]</span></p>
 <section id="worked-out-example" class="level4">
 <h4>Worked Out Example:</h4>
 <p>Prime Field <span class="math inline">\(\mathbb{F}=
