@@ -42,7 +42,7 @@
               </li>
               <li>
                 <a
-                  href="https://scholar.google.com/citations?user=YOUR_ID"
+                  href="https://scholar.google.com/citations?user=yGuM3MgAAAAJ&hl=en&authuser=1"
                   target="_blank"
                   rel="noopener"
                   class="icon-link"
@@ -159,20 +159,26 @@
             <article><section id="tldr---just-tell-us-what-you-did"
 class="level2">
 <h2>TL;DR - Just Tell Us What You Did</h2>
-<section id="faster-sum-checks-in-jolt" class="level4 remark">
-<h4>Faster Sum-checks in jolt</h4>
+<div class="remark">
+<section class="level4">
+<h4><span class="callout-label"></span></h4>
+</section>
+<section id="faster-sumcheck-in-jolt" class="level4">
+<h4>Faster Sumcheck In Jolt</h4>
 <p>By sampling the verifiers random challenges from a set <span
 class="math inline">\(S \subset \mathbb{F}\)</span> of size roughly
 <span class="math inline">\(\sqrt{|\mathbb{F}|}\)</span>, we speed up
-sum-check binding by 1.6x from baseline (where challenges are sampled
-over the whole field <span class="math inline">\(\mathbb{F}\)</span> on
-which we do all operations.)</p>
+sum-check binding by <strong>1.6x</strong> from baseline (where
+challenges are sampled over the whole field <span
+class="math inline">\(\mathbb{F}\)</span> – the field over which
+polynomials are defined. )</p>
 <p><strong>NOTE:</strong> This now reduces the soundness error from
 <span class="math inline">\(1/2^{254}\)</span> to <span
 class="math inline">\(1/2^{125}\)</span>, but this is not a concern as
-currently Jolt commitments use the <code>bn254</code> curve which offers
-110 bits of security anyway.</p>
+currently Jolt usess the <code>bn256</code> curve to commit to
+polynomials, which offers 110 bits of security anyway.</p>
 </section>
+</div>
 <p>What does this mean for end to end performance? – We’ve sped up
 sum-check, that should speed up everything right? The answer is Yes – in
 theory, but we cannot yet materialise these improvements in our end to
@@ -200,21 +206,8 @@ class="math inline">\(\mathbb{F}\)</span> with the following structure.
 <span class="math display">\[ g(X_1, \ldots, X_m) = \prod_{j=1}^d
 q_j(X_1, \ldots, X_m)\]</span> where all <span
 class="math inline">\(q_j(X)\)</span>’s are multi-linear polynomials
-over <span class="math inline">\(\mathbb{F}\)</span>. The sum-check
-algorithm an interactive protocol<a href="#fn2" class="footnote-ref"
-id="fnref2" role="doc-noteref"><sup>2</sup></a> where the prover is
-trying to convince a verifier that <span class="math inline">\(\sum_{b_1
-\in \{ 0, 1\}} \ldots \sum_{b_m \in \{ 0, 1\}} g(b_1, \ldots,
-b_m)\)</span> evaluates to <span class="math inline">\(c \in
-\mathbb{F}\)</span>. In each round <span
-class="math inline">\(i\)</span> the prover does the following things -
-(1) It sends the verifier a univariate polynomial <span
-class="math inline">\(p_i(X_i)\)</span>. (2) The verifier samples <span
-class="math inline">\(r_i \xleftarrow[]{\$}S\)</span> uniformly at
-random, and the prover computes the polynomial <span
-class="math inline">\(g(r_1, \ldots, r_i, X_{i+1}, \ldots,
-X_m)\)</span>. Typically <span class="math inline">\(S =
-\mathbb{F}\)</span>. We expand more below:</p>
+over <span class="math inline">\(\mathbb{F}\)</span>. &gt; &gt; &gt;
+&gt; &gt; &gt; &gt; We expand more below:</p>
 <ol type="1">
 <li><strong>Polynomial evaluation</strong> The prover computes the
 following univariate polynomial, using the following steps <span
@@ -256,14 +249,14 @@ below</p>
 <div class="highlight"><pre><span></span><span class="sd">/// Compute q_j(Z) = (1-Z) * q_j(0) + Z * q_j(1)</span>
 <span class="sd">/// using only additions</span>
 <span class="sd">/// when Z is a small integer.</span>
-<span class="k">fn</span><span class="w"> </span><span class="nf">compute_q_j_running_sum</span><span class="p">(</span><span class="n">z</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="n">q_at_0</span><span class="p">:</span><span class="w"> </span><span class="nc">JoltField</span><span class="p">,</span><span class="w"> </span><span class="n">q_at_1</span><span class="p">:</span><span class="w"> </span><span class="nc">JoltField</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">JoltField</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">compute_q_j_running_sum</span><span class="p">(</span><span class="n">z</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="n">q_at_0</span><span class="p">:</span><span class="w"> </span><span class="nc">JoltField</span><span class="p">,</span><span class="w"> </span><span class="n">q_at_1</span><span class="p">:</span><span class="w"> </span><span class="nc">JoltField</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">JoltField</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">diff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">q_at_1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">q_at_0</span><span class="p">;</span>
 
 <span class="w">        </span><span class="c1">// Compute Z * diff using repeated addition (running sum)</span>
 <span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">z_times_diff</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">JoltField</span><span class="p">::</span><span class="n">zero</span><span class="p">();</span>
 <span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">z</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="n">z_times_diff</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">diff</span><span class="p">;</span>
-<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="n">z_times_diff</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">diff</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
 
 <span class="w">        </span><span class="n">q_at_0</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">z_times_diff</span>
 
@@ -271,7 +264,7 @@ below</p>
 </pre></div>
 
 <ol start="2" type="1">
-<li><strong>Binding Phase</strong> Thee prover needs to binds the
+<li><p><strong>Binding Phase</strong> Thee prover needs to binds the
 multi-linear polynomial <span class="math inline">\(g\)</span> to <span
 class="math inline">\(r_i\)</span>, that is to say it computes a new
 multi-linear polynomial in <span class="math inline">\(m-i\)</span>
@@ -282,18 +275,17 @@ the hyper cube <span class="math inline">\(\{0, 1\}^{m-i}\)</span>, but
 unlike the above step <span class="math inline">\(r_i\)</span> is
 <strong>NOT</strong> guaranteed to be a small number. Therefore the
 running sum described in the pseudocode above is no good to use. We need
-to use actual multiplication here.</li>
-</ol>
-<p><span class="math display">\[
-    \begin{aligned}
-        q_j(r_1, \ldots, r_{i-1}, \textcolor{orange}{r_i}, \vec{b}) =
-&amp; (1-\textcolor{orange}{r_i}) \,q_j(r_1, \ldots, r_{i-1}, 0,
-b_{i+1}, \ldots, b_m) \\[10pt]
-                                                                      &amp;
+to use actual multiplication here.</p>
+<span class="math display">\[\begin{aligned}
+    q_j(r_1, \ldots, r_{i-1}, \textcolor{orange}{r_i}, \vec{b}) = &amp;
+(1-\textcolor{orange}{r_i}) \,q_j(r_1, \ldots, r_{i-1}, 0, b_{i+1},
+\ldots, b_m) \\[10pt]
+                                                                  &amp;
 + \textcolor{orange}{r_i}\, q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1},
 \ldots, b_m)
-    \end{aligned}
-\]</span></p>
+\end{aligned}\]</span>
+<p>$$</p></li>
+</ol>
 <p>Now <span class="math inline">\(q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1},
 \ldots, b_m) \in \mathbb{F}\)</span>, and traditionally the set <span
 class="math inline">\(S\)</span> from which we sample <span
@@ -522,8 +514,8 @@ c_1^{(2)} ) \mod p
 times</p>
 <p><span class="math display">\[cR^{-1} \equiv cr^{-n} \equiv
 c^{(n)}_{2n-1}r^{n-1} + c^{(n)}_{n+1}r +c^{(n)}_{n} \mod p\]</span></p>
-<p>To get the final answer<a href="#fn3" class="footnote-ref"
-id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+<p>To get the final answer<a href="#fn2" class="footnote-ref"
+id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
 <div class="remark">
 <section class="level4">
 <h4><span class="callout-label"></span></h4>
@@ -548,10 +540,10 @@ class="math inline">\(n^2\)</span> multiplications.</li>
 <p>Next we illustrate how sampling <span
 class="math inline">\(\widetilde{b} \xleftarrow[]{\$}S\)</span> saves us
 multiplications.</p>
-Firstly when 2 digits are 0 we we only need <span
+<p>Firstly when 2 digits are 0 we we only need <span
 class="math inline">\(n \times (n-2)\)</span> multiplications, which
 allows us to save 8 multiplications when <span
-class="math inline">\(n=4\)</span>.
+class="math inline">\(n=4\)</span>.</p>
 <div class="svg-container">
 <p><img src="/assets/small-scalar-binding/diag.svg" /></p>
 </div>
@@ -562,12 +554,11 @@ class="math inline">\(m_1p\)</span> anymore.</p>
 <div class="svg-container">
 <p><img src="/assets/small-scalar-binding/diag2.svg" /></p>
 </div>
-<section class="level4 remark">
-<h4><span class="callout-label"></span></h4>
+<div class="remark">
 <p>This saves us <span class="math inline">\(8 + 2 + 8= 20\)</span>
 multiplications, which leaves with only <span
 class="math inline">\(16\)</span> multiplications</p>
-</section>
+</div>
 <p>If multiplications were the only thing that cost us CPU cycles we
 should see roughly <strong>2x</strong> speedup. However, additions and
 bit shifts – although significantly cheaper, are not <em>free</em>.
@@ -605,9 +596,17 @@ fast multiplication.</p>
 <section id="some-implementation-details" class="level2">
 <h2>Some Implementation Details</h2>
 <p>we use <span class="math inline">\(256\)</span> bits to represent big
-integers and our challenge and the modulus for <code>ark-bn254</code>
+integers and our challenge and the modulus for <code>ark-bn256</code>
 uses <span class="math inline">\(254\)</span> bits. Thus, if sampled a 2
 limbed <span class="math inline">\(128\)</span> bit integer <span
+class="math inline">\(x\)</span> and used that as the challenge as is
+<code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that <span
+class="math inline">\(x &lt; p\)</span> which the CIOS algorithm
+assumes. we use <span class="math inline">\(256\)</span> bits to
+represent big integers and our challenge and the modulus for
+<code>ark-bn254</code> uses <span class="math inline">\(254\)</span>
+bits. Thus, if sampled a 2 limbed <span
+class="math inline">\(128\)</span> bit integer <span
 class="math inline">\(x\)</span> and used that as the challenge as is
 <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that <span
 class="math inline">\(x &lt; p\)</span> which the CIOS algorithm
@@ -660,30 +659,27 @@ role="doc-endnotes">
 the optimisations discussed in this note still apply, so for the sake of
 simplicity, we describe the Sum-check protocol in its simplest form.<a
 href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>In practice, these protocols are implemented
-non-interactively using the Fiat-Shamir transform. The verifiers work is
-restricted to sampling random values.<a href="#fnref2"
-class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>We have to conditionally subtract from <span
+<li id="fn2"><p>We have to conditionally subtract from <span
 class="math inline">\(p\)</span> to get the actual right answer, but
 this operation is common to both the baseline and our optimisation, so
-we do not focus on this.<a href="#fnref3" class="footnote-back"
+we do not focus on this.<a href="#fnref2" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></article>
     </main>
-
     <footer class="site-footer">
-    <p class="attribution">
-      Website template colors inspired by
-      <a
-        href="https://gendignoux.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-        >Guillaume Endignoux</a
-      >
-    </p>
+      <p>&copy; 2025 On A Tangent Ltd.</p>
+      <p class="attribution">
+        Website template colors inspired by
+        <a
+          href="https://gendignoux.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Guillaume Endignoux</a
+        >
+      </p>
     </footer>
+
 
     <script>
       // Theme toggle
