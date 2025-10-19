@@ -134,16 +134,13 @@
         id="toc-problem-statement">Problem Statement</a></li>
         <li><a href="#jolts-parallelisation-problem"
         id="toc-jolts-parallelisation-problem">Jolt’s Parallelisation
-        Problem</a>
-        <ul>
-        <li><a href="#a-closer-look-into-the-problem"
-        id="toc-a-closer-look-into-the-problem">A Closer Look Into The
         Problem</a></li>
-        <li><a href="#a-thing-to-try" id="toc-a-thing-to-try">A Thing To
-        Try</a></li>
+        <li><a href="#the-actual-problem"
+        id="toc-the-actual-problem">The Actual Problem</a>
+        <ul>
+        <li><a href="#why-are-we-losing-20"
+        id="toc-why-are-we-losing-20">Why Are We Losing 20%</a></li>
         </ul></li>
-        <li><a href="#whats-next" id="toc-whats-next">What’s
-        next</a></li>
         </ul>
       </nav>
             <article><section id="problem-statement" class="level2">
@@ -218,30 +215,29 @@ experiment in the
 <span class="w">        </span><span class="nf">MultilinearPolynomial</span><span class="p">::</span><span class="nf">U128Scalars</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">poly</span><span class="p">.</span><span class="n">bind</span><span class="p">(</span><span class="n">r</span><span class="p">,</span><span class="w"> </span><span class="n">order</span><span class="p">),</span>
 <span class="w">        </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="fm">unimplemented!</span><span class="p">(</span><span class="s">&quot;Unexpected MultilinearPolynomial variant&quot;</span><span class="p">),</span>
 <span class="w">    </span><span class="p">}</span>
-<span class="w">        </span><span class="c1">//match self {</span>
-<span class="w">        </span><span class="c1">//    MultilinearPolynomial::LargeScalars(poly) =&gt; poly.bind_parallel(r, order),</span>
-<span class="w">        </span><span class="c1">//    MultilinearPolynomial::U8Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
-<span class="w">        </span><span class="c1">//    MultilinearPolynomial::U16Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
-<span class="w">        </span><span class="c1">//    MultilinearPolynomial::U32Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
-<span class="w">        </span><span class="c1">//    MultilinearPolynomial::U64Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
-<span class="w">        </span><span class="c1">//    MultilinearPolynomial::I64Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
-<span class="w">        </span><span class="c1">//    MultilinearPolynomial::I128Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
-<span class="w">        </span><span class="c1">//    MultilinearPolynomial::U128Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
-<span class="w">        </span><span class="c1">//    _ =&gt; unimplemented!(&quot;Unexpected MultilinearPolynomial variant&quot;),</span>
-<span class="w">        </span><span class="c1">//}</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="c1">//match self {</span>
+<span class="w">    </span><span class="c1">//    MultilinearPolynomial::LargeScalars(poly) =&gt; poly.bind_parallel(r, order),</span>
+<span class="w">    </span><span class="c1">//    MultilinearPolynomial::U8Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
+<span class="w">    </span><span class="c1">//    MultilinearPolynomial::U16Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
+<span class="w">    </span><span class="c1">//    MultilinearPolynomial::U32Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
+<span class="w">    </span><span class="c1">//    MultilinearPolynomial::U64Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
+<span class="w">    </span><span class="c1">//    MultilinearPolynomial::I64Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
+<span class="w">    </span><span class="c1">//    MultilinearPolynomial::I128Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
+<span class="w">    </span><span class="c1">//    MultilinearPolynomial::U128Scalars(poly) =&gt; poly.bind_parallel(r, order),</span>
+<span class="w">    </span><span class="c1">//    _ =&gt; unimplemented!(&quot;Unexpected MultilinearPolynomial variant&quot;),</span>
+<span class="w">    </span><span class="c1">//}</span>
+<span class="p">}</span>
 </pre></div>
 
 <section class="level4 remark">
 <h4><span class="callout-label"></span> How To Read The Screenshots
 below</h4>
-<p>In what follows, <code>Trace 1</code> will always refer to running
-Jolt <strong>without</strong> small challenges, and <code>Trace 2</code>
-refers to our small challenge optimisation. We will run both the
-settings with parallel and sequential binding.</p>
+<p>In what follows, unless otherwise stated, <code>Trace 1</code> will
+always refer to running Jolt <strong>without</strong> small challenges,
+and <code>Trace 2</code> refers to our small challenge optimisation. We
+will run both the settings with parallel and sequential binding.</p>
 </section>
-<p>As shown below, with parallel code, Jolt does not see the benefits of
-our optimisation.</p>
+<p>Jolt does not see the benefits of our optimisation.</p>
 <figure>
 <img src="/assets/parallelism/mle-bind-parallel.png"
 alt="Current version of Jolt, where binding is implemented using rayon." />
@@ -251,151 +247,65 @@ implemented using rayon.</figcaption>
 <p>Changing binding to being single threaded leads to 20% empirical
 improvement in sum-check binding (aligned with our original
 expectations) in the end to end traces. This hints that something fishy
-is possibly going on with how we use <code>rayon</code>.</p>
+is possibly going on with how we use <code>rayon</code>. Based on the <a
+href="/posts/small_scalar_binding.html">analysis</a>, this number should
+be higher than 20% – our micro-benches indicated that this number should
+be closer to 40-50%. This 20% loss in performance can be attributed to
+caching.</p>
 <figure>
 <img src="/assets/parallelism/mle-bind-seq.png"
 alt="In the figure above, multi linear polynomial binding is a single threaded algorithm" />
 <figcaption aria-hidden="true">In the figure above, multi linear
 polynomial binding is a single threaded algorithm</figcaption>
 </figure>
-<p>But here’s something that’s even more bizarre - sequential binding is
-<strong>faster</strong> than our implementation of parallel binding.
-Note, this is is definitely not because the iterable objects are too
-small. In Jolt, we only use parallel binding if the number of variables
-of the multi-linear polynomial is greater than 16, which means the
-arrays are at least of size <span class="math inline">\(2^{16}\)</span>.
-That should be plenty large for parallelisation to show benefits. In
-fact we know this definitively, as when we run our micro-benches, our
-speedup is linear in the number of available CPU cores.</p>
-<p>One might ask, if there’s all there is to it – change binds to
-sequential in one place, and we are done? Unfortunately, not quite! Even
-after making the minimal change described above we are still not any
-faster. Shown below is a summary of <em>every</em> bind operation in
-Jolt with a sequential multilinear polynomial bind.</p>
-<p><img src="/assets/parallelism/all_bind_seq.png" /></p>
-<p>We see a lot of green, which is good, but the end result is
-uninspiring. The difference, even after making
-<code>multilinear::bind_parallel</code> sequential, is a paltry 1%.</p>
-<section id="a-closer-look-into-the-problem" class="level3">
-<h3>A Closer Look Into The Problem</h3>
-<p>There’s a simple answer to thigs why this is happening – the lines of
-code we changed do not actually constitute the main bind code path.
-Staring at the above output, we see that
-<code>InstructionReadRafSumcheck::bind</code> is the main player in
-these binds. And we are not seeing any improvements here. We dig into
-the source code, and once again we find <code>rayon</code> code. It
-appears that every time we have multi-threading via <code>rayon</code>,
-all other factors are nullified,</p>
-<div class="highlight"><pre><span></span>
-<span class="w">    </span><span class="cp">#[tracing::instrument(skip_all, name = </span><span class="s">&quot;InstructionReadRafSumcheck::bind&quot;</span><span class="cp">)]</span>
-<span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">bind</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">r_j</span><span class="p">:</span><span class="w"> </span><span class="nc">F</span><span class="p">::</span><span class="nf">Challenge</span><span class="p">,</span><span class="w"> </span><span class="n">round</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">ps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">prover_state</span><span class="p">.</span><span class="n">as_mut</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span>
-<span class="w">        </span><span class="n">ps</span><span class="p">.</span><span class="n">r</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="n">r_j</span><span class="p">);</span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">round</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="nf">LOG_K</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">rayon</span><span class="p">::</span><span class="n">scope</span><span class="p">(</span><span class="o">|</span><span class="n">s</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="n">s</span><span class="p">.</span><span class="n">spawn</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                    </span><span class="n">ps</span><span class="p">.</span><span class="n">suffix_polys</span><span class="p">.</span><span class="n">par_iter_mut</span><span class="p">().</span><span class="n">for_each</span><span class="p">(</span><span class="o">|</span><span class="n">polys</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                        </span><span class="n">polys</span>
-<span class="w">                            </span><span class="p">.</span><span class="n">par_iter_mut</span><span class="p">()</span>
-<span class="w">                            </span><span class="p">.</span><span class="n">for_each</span><span class="p">(</span><span class="o">|</span><span class="n">poly</span><span class="o">|</span><span class="w"> </span><span class="n">poly</span><span class="p">.</span><span class="n">bind_parallel</span><span class="p">(</span><span class="n">r_j</span><span class="p">,</span><span class="w"> </span><span class="nf">BindingOrder</span><span class="p">::</span><span class="nf">HighToLow</span><span class="p">))</span>
-<span class="w">                    </span><span class="p">});</span>
-<span class="w">                </span><span class="p">});</span>
-<span class="w">                </span><span class="n">s</span><span class="p">.</span><span class="n">spawn</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="n">ps</span><span class="p">.</span><span class="n">identity_ps</span><span class="p">.</span><span class="n">bind</span><span class="p">(</span><span class="n">r_j</span><span class="p">));</span>
-<span class="w">                </span><span class="n">s</span><span class="p">.</span><span class="n">spawn</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="n">ps</span><span class="p">.</span><span class="n">right_operand_ps</span><span class="p">.</span><span class="n">bind</span><span class="p">(</span><span class="n">r_j</span><span class="p">));</span>
-<span class="w">                </span><span class="n">s</span><span class="p">.</span><span class="n">spawn</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="n">ps</span><span class="p">.</span><span class="n">left_operand_ps</span><span class="p">.</span><span class="n">bind</span><span class="p">(</span><span class="n">r_j</span><span class="p">));</span>
-<span class="w">                </span><span class="n">s</span><span class="p">.</span><span class="n">spawn</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="n">ps</span><span class="p">.</span><span class="n">v</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">r_j</span><span class="p">));</span>
-<span class="w">            </span><span class="p">});</span>
-<span class="w">            </span><span class="p">{</span>
-<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="n">ps</span><span class="p">.</span><span class="n">r</span><span class="p">.</span><span class="n">len</span><span class="p">().</span><span class="n">is_multiple_of</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                    </span><span class="nf">Prefixes</span><span class="p">::</span><span class="n">update_checkpoints</span><span class="p">::</span><span class="o">&lt;</span><span class="nf">XLEN</span><span class="p">,</span><span class="w"> </span><span class="nf">F</span><span class="p">,</span><span class="w"> </span><span class="nf">F</span><span class="p">::</span><span class="nf">Challenge</span><span class="o">&gt;</span><span class="p">(</span>
-<span class="w">                        </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ps</span><span class="p">.</span><span class="n">prefix_checkpoints</span><span class="p">,</span>
-<span class="w">                        </span><span class="n">ps</span><span class="p">.</span><span class="n">r</span><span class="p">[</span><span class="n">ps</span><span class="p">.</span><span class="n">r</span><span class="p">.</span><span class="n">len</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">2</span><span class="p">],</span>
-<span class="w">                        </span><span class="n">ps</span><span class="p">.</span><span class="n">r</span><span class="p">[</span><span class="n">ps</span><span class="p">.</span><span class="n">r</span><span class="p">.</span><span class="n">len</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">],</span>
-<span class="w">                        </span><span class="n">round</span><span class="p">,</span>
-<span class="w">                    </span><span class="p">);</span>
-<span class="w">                </span><span class="p">}</span>
-<span class="w">            </span><span class="p">}</span>
+</section>
+<section id="the-actual-problem" class="level2">
+<h2>The Actual Problem</h2>
+<p>Diving deep into what’s actually happening, we show that the issue is
+not parallelisation, but moreso pure utilisation of cache lines. Our
+starting point is the following piece of code for binding multi-linear
+polynomials. From the outset looks perfectly fine, and aligns with
+exactly what rayon experts would recommend we do.</p>
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">bound_poly_var_top_zero_optimized</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">F</span><span class="p">::</span><span class="nf">Challenge</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">len</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
 
-<span class="w">            </span><span class="c1">// check if this is the last round in the phase</span>
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">round</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">).</span><span class="n">is_multiple_of</span><span class="p">(</span><span class="nf">LOG_M</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="n">phase</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">round</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nf">LOG_M</span><span class="p">;</span>
-<span class="w">                </span><span class="n">ps</span><span class="p">.</span><span class="n">cache_phase</span><span class="p">(</span><span class="n">phase</span><span class="p">);</span>
-<span class="w">                </span><span class="c1">// if not last phase, init next phase</span>
-<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="n">phase</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="nf">PHASES</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                    </span><span class="n">ps</span><span class="p">.</span><span class="n">init_phase</span><span class="p">(</span><span class="n">phase</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
-<span class="w">                </span><span class="p">}</span>
-<span class="w">            </span><span class="p">}</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="nf">Z</span><span class="p">.</span><span class="n">split_at_mut</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
 
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">round</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nf">LOG_K</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="n">ps</span><span class="p">.</span><span class="n">init_log_t_rounds</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">gamma</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">gamma_squared</span><span class="p">);</span>
-<span class="w">            </span><span class="p">}</span>
-<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="c1">// log(T) rounds</span>
+<span class="w">    </span><span class="n">left</span><span class="p">.</span><span class="n">par_iter_mut</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="n">zip</span><span class="p">(</span><span class="n">right</span><span class="p">.</span><span class="n">par_iter</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="n">filter</span><span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">b</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">for_each</span><span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="o">*</span><span class="n">a</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">*</span><span class="n">r</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">b</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">*</span><span class="n">a</span><span class="p">);</span>
+<span class="w">        </span><span class="p">});</span>
 
-<span class="w">            </span><span class="p">[</span>
-<span class="w">                </span><span class="n">ps</span><span class="p">.</span><span class="n">ra</span><span class="p">.</span><span class="n">as_mut</span><span class="p">().</span><span class="n">unwrap</span><span class="p">(),</span>
-<span class="w">                </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">ps</span><span class="p">.</span><span class="n">eq_r_cycle</span><span class="p">,</span>
-<span class="w">                </span><span class="n">ps</span><span class="p">.</span><span class="n">combined_val_polynomial</span><span class="p">.</span><span class="n">as_mut</span><span class="p">().</span><span class="n">unwrap</span><span class="p">(),</span>
-<span class="w">            </span><span class="p">]</span>
-<span class="w">            </span><span class="p">.</span><span class="n">par_iter_mut</span><span class="p">()</span>
-<span class="w">            </span><span class="p">.</span><span class="n">for_each</span><span class="p">(</span><span class="o">|</span><span class="n">poly</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="n">poly</span><span class="p">.</span><span class="n">bind_parallel</span><span class="p">(</span><span class="n">r_j</span><span class="p">,</span><span class="w"> </span><span class="nf">BindingOrder</span><span class="p">::</span><span class="nf">HighToLow</span><span class="p">);</span>
-<span class="w">            </span><span class="p">});</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="bp">self</span><span class="p">.</span><span class="n">num_vars</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="bp">self</span><span class="p">.</span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="p">}</span>
 </pre></div>
 
+<p>We make one line of change</p>
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">bound_poly_var_top_zero_optimized</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">F</span><span class="p">::</span><span class="nf">Challenge</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">len</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="nf">Z</span><span class="p">.</span><span class="n">split_at_mut</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">left</span><span class="p">.</span><span class="n">par_iter_mut</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="n">zip</span><span class="p">(</span><span class="n">right</span><span class="p">.</span><span class="n">par_iter</span><span class="p">())</span>
+<span class="w">        </span><span class="p">.</span><span class="n">with_min_len</span><span class="p">(</span><span class="mi">4096</span><span class="p">)</span><span class="w"> </span><span class="c1">// &lt;-- Only change to the code base </span>
+<span class="w">        </span><span class="p">.</span><span class="n">filter</span><span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">b</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">for_each</span><span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="o">*</span><span class="n">a</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">*</span><span class="n">r</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">b</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">*</span><span class="n">a</span><span class="p">);</span>
+<span class="w">        </span><span class="p">});</span>
+
+<span class="w">    </span><span class="bp">self</span><span class="p">.</span><span class="n">num_vars</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="w">    </span><span class="bp">self</span><span class="p">.</span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>And observe what happens TODO: put picture in here</p>
+<section id="why-are-we-losing-20" class="level3">
+<h3>Why Are We Losing 20%</h3>
 </section>
-<section id="a-thing-to-try" class="level3">
-<h3>A Thing To Try</h3>
-<p>At the outset this snippet looks a fair bit more complex than our
-simple parallel bind code, where we changed one word per line. If we can
-sequentialise this, and manifiest our speedup, we get even more
-conclusive evidence that</p>
-<ol type="1">
-<li><p>rayon is not the right tool for our problem
-<em>(unlikely)</em></p></li>
-<li><p>we are using rayon incorrectly <em>(likely)</em></p></li>
-<li><p>there is really nothing we can do, parallel code is too hard
-<em>(possibly, but I am not willing to give in just yet)</em>.</p></li>
-</ol>
-</section>
-</section>
-<section id="whats-next" class="level2">
-<h2>What’s next</h2>
-<p>After all this work, the thing that is clear, is nothing is clear. I
-do not have an definitive answer as what about our use of Rayon
-nullifies low level multiplication optimisations.</p>
-<ol type="1">
-<li><p>A low hanging fruit is to have a sequential version of every
-bind, and then check which ones improve the overall end to end speed.
-This might work in the short term but this is not sustainable. As Jolt
-evolves and improves, the number of permutations of which binds to keep
-sequential, and which binds to keep parallel will explode
-exponentially.</p></li>
-<li><p>Over the last week, we went ahead studied the <a href="">Rayon
-source</a> code. We first outline our <a href="">working
-understanding</a> (this will shortly be added) of how Rayon works, with
-experiments to back up our understanding. A critical feature of
-<code>rayon</code> is that it is optimistically parallel. That is to
-say, given how “work-stealing” is implemented, if the threads are busy,
-rayon just works like a sequential algorithm, with very minimal
-overhead. However, our observations described above do not align this
-claim. Two things are possible – the overhead is really not that minimal
-(especially, when our optimisations are at the multiplication level, and
-we are counting assembly instructions). Alternatively, the way we are
-using <code>rayon</code> is sub-optimal. There is a third possibility
-that rayon is not the right tool for Jolt, but I find this highly
-unlikely.</p></li>
-<li><p>With our working understanding, we have to develop the tools to
-measure sub-optimal parallelisation. Right now, we can just measure
-<code>elapsed time</code>. We need to look at cpu counters, and
-<code>strace</code> reports to see how often the threads are spinning,
-or if there are stragglers. Perhaps we can implement some dynamic
-instrumentation to focus our CPU counter collection only during some
-functions. This gives us a much clearer picture as to how
-multi-threading could be a bottleneck.</p></li>
-</ol>
 </section>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">
