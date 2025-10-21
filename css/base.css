@@ -6,7 +6,7 @@
   --text-muted: #6c6f85;
   --text-link: #EB879D;
   --text-inline-code: #8839ef;
-  --text-math: #008000;
+  --text-math: #6c6f85;
   
   /* Background colors */
   --bg-primary: #FFFF;
@@ -53,7 +53,7 @@
   /* Typography */
   --font-xs: 0.65rem;
   --font-sm: 0.875rem;
-  --font-base: 1.2rem;
+  --font-base: 1rem;
   --font-lg: 1.125rem;
   --font-xl: 1.25rem;
   --font-2xl: 1.5rem;
@@ -83,7 +83,7 @@
 [data-theme="dark"] {
   /* Text colors - Catppuccin Mocha */
   --text-primary: #cdd6f4;
-  --text-secondary: var(--text-math);
+  --text-secondary: #f2cdcd;
   --text-muted: #a6adc8;
   --text-link: #89dceb;
   --text-inline-code: #94e2d5;
@@ -297,6 +297,9 @@ svg {
 
 /* Make it stack on mobile */
 @media (max-width: 768px) {
+  .body{
+    font-size: 0.95rem;
+  }
   .svg-text-container {
     flex-direction: column;
   }
