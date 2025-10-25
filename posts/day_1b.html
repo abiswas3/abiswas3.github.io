@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Title</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <script
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <h1 class="site-title"><a href="/index.html">Ari</a></h1>
+        <button class="menu-toggle">☰</button>
+        <div class="nav-group">
+          <nav class="main-nav">
+            <ul>
+              <li><a href="/publications.html">Research</a></li>
+              <li><a href="/blog.html">Blog</a></li>
+              <li><a href="/about.html">Random Walks</a></li>
+              <li>
+                <a
+                  href="https://github.com/abiswas3"
+                  target="_blank"
+                  rel="noopener"
+                  class="icon-link"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+                    />
+                  </svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://scholar.google.com/citations?user=yGuM3MgAAAAJ&hl=en&authuser=1"
+                  target="_blank"
+                  rel="noopener"
+                  class="icon-link"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M12 24a7 7 0 110-14 7 7 0 010 14zm0-24L0 9.5l4.838 3.94A8 8 0 0112 9a8 8 0 017.162 4.44L24 9.5z"
+                    />
+                  </svg>
+                </a>
+              </li>
+              <!-- <li> -->
+              <!--   <a -->
+              <!--     href="#" -->
+              <!--     class="email-copy" -->
+              <!--     data-email="on.a.tangent@randomwalks.xyz" -->
+              <!--   > -->
+              <!--     <span class="email-icon">&#9993;</span> -->
+              <!--   </a> -->
+              <!-- </li> -->
+            </ul>
+          </nav>
+          <button class="theme-toggle">
+            <span class="theme-toggle-light">&#9728;&#65039;</span>
+            <span class="theme-toggle-dark" style="display: none">&#127769;</span>
+          </button>
+        </div>
+      </div>
+      <style>
+        .email-icon {
+          font-size: 1em;
+          margin-right: 0.25em;
+        }
+      </style>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const emailLink = document.querySelector(".email-copy");
+          if (emailLink) {
+            emailLink.onclick = function (e) {
+              e.preventDefault();
+              const email = this.getAttribute("data-email");
+              navigator.clipboard
+                .writeText(email)
+                .then(() => {
+                  const original = this.innerHTML;
+                  this.innerHTML = '<span class="email-icon">✓</span> Copied!';
+                  setTimeout(() => {
+                    this.innerHTML = original;
+                  }, 2000);
+                })
+                .catch(() => {
+                  window.location.href = "mailto:" + email;
+                });
+            };
+          }
+        });
+      </script>
+      <script
+        data-goatcounter="https://randomwalks.goatcounter.com/count"
+        async
+        src="//gc.zgo.at/count.js"
+      ></script>
+    </header>
+    <main class="article-content">
+      <header class="article-header">
+        <h1>Title</h1>
+        <div class="article-meta">
+          <div class="meta-left">
+                         <span class="category-tag">category</span>
+             
+          </div>
+          <div class="meta-right">
+            <time>2025-10-24</time>             <span class="authors"
+              >By Your Name</span
+            >
+                      </div>
+        </div>
+      </header>
+            <nav id="TOC">
+        <h2>Contents</h2>
+        <ul>
+        <li><a href="#meat-and-potatoes" id="toc-meat-and-potatoes">Meat
+        And Potatoes</a></li>
+        </ul>
+      </nav>
+            <article><p>We shift focus to more critical portions of
+Jolt</p>
+<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">jolt_proof</span><span class="p">,</span><span class="w"> </span><span class="n">program_io</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">JoltRV64IMAC</span><span class="p">::</span><span class="n">prove</span><span class="p">(</span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">preprocessing</span><span class="p">,</span><span class="w"> </span><span class="c1">// some crypto commitment mallarkey which we choose to ignore for now</span>
+<span class="w">            </span><span class="n">elf_contents</span><span class="p">,</span><span class="w"> </span><span class="c1">// the binary file in bytes</span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">serialized_input</span><span class="p">,</span><span class="w"> </span><span class="c1">// This is the postcard thing we called fib with see part a of day 1 post</span>
+<span class="w">            </span><span class="o">&amp;</span><span class="p">[],</span><span class="w"> </span><span class="c1">// no trusted or untrusted advice for now</span>
+<span class="w">            </span><span class="o">&amp;</span><span class="p">[],</span>
+<span class="w">            </span><span class="nb">None</span><span class="p">,</span>
+<span class="w">        </span><span class="p">);</span>
+</pre></div>
+
+<p>First we do some bookkeeping</p>
+<p>Count how many virtual instructions vs real instructions there
+are</p>
+<div class="highlight"><pre><span></span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">num_riscv_cycles</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trace</span>
+<span class="w">            </span><span class="p">.</span><span class="n">par_iter</span><span class="p">()</span>
+<span class="w">            </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">cycle</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// Count the cycle if the instruction is not part of a inline sequence</span>
+<span class="w">                </span><span class="c1">// (`virtual_sequence_remaining` is `None`) or if it&#39;s the first instruction</span>
+<span class="w">                </span><span class="c1">// in a inline sequence (`virtual_sequence_remaining` is `Some(0)`)</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">virtual_sequence_remaining</span><span class="p">)</span><span class="w"> </span><span class="o">=</span>
+<span class="w">                    </span><span class="n">cycle</span><span class="p">.</span><span class="n">instruction</span><span class="p">().</span><span class="n">normalize</span><span class="p">().</span><span class="n">virtual_sequence_remaining</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="n">virtual_sequence_remaining</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">                    </span><span class="p">}</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">                </span><span class="mi">1</span>
+<span class="w">            </span><span class="p">})</span>
+<span class="w">            </span><span class="p">.</span><span class="n">sum</span><span class="p">();</span>
+<span class="w">        </span><span class="n">tracing</span><span class="p">::</span><span class="n">info</span><span class="o">!</span><span class="p">(</span>
+<span class="w">            </span><span class="s">&quot;{num_riscv_cycles} raw RISC-V instructions + {} virtual instructions = {} total cycles&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="n">trace</span><span class="p">.</span><span class="n">len</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">num_riscv_cycles</span><span class="p">,</span>
+<span class="w">            </span><span class="n">trace</span><span class="p">.</span><span class="n">len</span><span class="p">(),</span>
+<span class="w">        </span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Setup trace length and padding</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">trace_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trace</span><span class="p">.</span><span class="n">len</span><span class="p">();</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">padded_trace_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">trace</span><span class="p">.</span><span class="n">len</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">).</span><span class="n">next_power_of_two</span><span class="p">();</span>
+<span class="w">        </span><span class="n">trace</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">padded_trace_length</span><span class="p">,</span><span class="w"> </span><span class="nf">Cycle</span><span class="p">::</span><span class="nf">NoOp</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// truncate trailing zeros on device outputs</span>
+<span class="w">        </span><span class="n">program_io</span><span class="p">.</span><span class="n">outputs</span><span class="p">.</span><span class="n">truncate</span><span class="p">(</span>
+<span class="w">            </span><span class="n">program_io</span>
+<span class="w">                </span><span class="p">.</span><span class="n">outputs</span>
+<span class="w">                </span><span class="p">.</span><span class="n">iter</span><span class="p">()</span>
+<span class="w">                </span><span class="p">.</span><span class="n">rposition</span><span class="p">(</span><span class="o">|&amp;</span><span class="n">b</span><span class="o">|</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">                </span><span class="p">.</span><span class="n">map_or</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">|</span><span class="n">pos</span><span class="o">|</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
+<span class="w">        </span><span class="p">);</span>
+</pre></div>
+
+<p>We intialise the prover state with all the data they’d ever need:</p>
+<ul>
+<li>The pre-processing needed to commit to things, which we treat like a
+magic black box for now.</li>
+<li>The trace which we explained in <a
+href="/posts/day_1a.html">detail</a></li>
+<li>the <code>program_io</code> (which we will explain shortly)</li>
+<li>we had no trusted_advice so safe to ignore this</li>
+<li>finally the final memory state after the program has done
+running.</li>
+</ul>
+<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">state_manager</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">StateManager</span><span class="p">::</span><span class="n">new_prover</span><span class="p">(</span>
+<span class="w">                </span><span class="n">preprocessing</span><span class="p">,</span>
+<span class="w">                </span><span class="n">trace</span><span class="p">,</span>
+<span class="w">                </span><span class="n">program_io</span><span class="p">.</span><span class="n">clone</span><span class="p">(),</span>
+<span class="w">                </span><span class="n">trusted_advice_commitment</span><span class="p">,</span>
+<span class="w">                </span><span class="n">final_memory_state</span><span class="p">,</span>
+<span class="w">            </span><span class="p">);</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">proof</span><span class="p">,</span><span class="w"> </span><span class="n">debug_info</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">JoltDAG</span><span class="p">::</span><span class="n">prove</span><span class="p">(</span><span class="n">state_manager</span><span class="p">).</span><span class="n">ok</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">prove_duration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">start</span><span class="p">.</span><span class="n">elapsed</span><span class="p">();</span>
+<span class="w">            </span><span class="n">tracing</span><span class="p">::</span><span class="n">info</span><span class="o">!</span><span class="p">(</span>
+<span class="w">                </span><span class="s">&quot;Proved in {:.1}s ({:.1} kHz / padded {:.1} kHz)&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="n">prove_duration</span><span class="p">.</span><span class="n">as_secs_f64</span><span class="p">(),</span>
+<span class="w">                </span><span class="n">trace_length</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">prove_duration</span><span class="p">.</span><span class="n">as_secs_f64</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000.0</span><span class="p">,</span>
+<span class="w">                </span><span class="n">padded_trace_length</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">prove_duration</span><span class="p">.</span><span class="n">as_secs_f64</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000.0</span><span class="p">,</span>
+<span class="w">            </span><span class="p">);</span>
+<span class="w">            </span><span class="p">(</span><span class="n">proof</span><span class="p">,</span><span class="w"> </span><span class="n">debug_info</span><span class="p">,</span><span class="w"> </span><span class="n">prove_duration</span><span class="p">)</span>
+</pre></div>
+
+<p>Diving into the <code>DAG</code> prove bit we get here (we will
+ignore a lot of the commitment specific stuff here. It’s impossible to
+not include the some references to commitment code as the it’s the
+polynomials we are committing to.</p>
+<p>It’s ok if a lot of this makes no sense of the bat. We’ll clear
+things slowly.</p>
+<div class="highlight"><pre><span></span><span class="w">    </span><span class="n">state_manager</span><span class="p">.</span><span class="n">fiat_shamir_preamble</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Initialize DoryGlobals at the beginning to keep it alive for the entire proof</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">preprocessing</span><span class="p">,</span><span class="w"> </span><span class="n">trace</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_manager</span><span class="p">.</span><span class="n">get_prover_data</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">trace_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trace</span><span class="p">.</span><span class="n">len</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">padded_trace_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trace_length</span><span class="p">.</span><span class="n">next_power_of_two</span><span class="p">();</span>
+
+<span class="w">    </span><span class="n">tracing</span><span class="p">::</span><span class="n">info</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;bytecode size: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">preprocessing</span><span class="p">.</span><span class="n">shared</span><span class="p">.</span><span class="n">bytecode</span><span class="p">.</span><span class="n">code_size</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Thesea are dynamically calculated based on how much memory the assembly uses, and how many </span>
+<span class="w">    </span><span class="c1">// lines of instructions there. </span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">ram_K</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_manager</span><span class="p">.</span><span class="n">ram_K</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">bytecode_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">preprocessing</span><span class="p">.</span><span class="n">shared</span><span class="p">.</span><span class="n">bytecode</span><span class="p">.</span><span class="n">d</span><span class="p">;</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">_guard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="nf">DoryGlobals</span><span class="p">::</span><span class="n">initialize</span><span class="p">(</span><span class="nf">DTH_ROOT_OF_K</span><span class="p">,</span><span class="w"> </span><span class="n">padded_trace_length</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">AllCommittedPolynomials</span><span class="p">::</span><span class="n">initialize</span><span class="p">(</span><span class="n">compute_d_parameter</span><span class="p">(</span><span class="n">ram_K</span><span class="p">),</span><span class="w"> </span><span class="n">bytecode_d</span><span class="p">),</span><span class="w"> </span><span class="c1">// &lt;--- Focus here</span>
+<span class="p">);</span>
+
+<span class="c1">// Generate and commit to all witness polynomials</span>
+<span class="c1">// FINALLY WE GET TO POLYNOMIALS</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">opening_proof_hints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">Self</span><span class="p">::</span><span class="n">generate_and_commit_polynomials</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">state_manager</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
+</pre></div>
+
+<section id="meat-and-potatoes" class="level2">
+<h2>Meat And Potatoes</h2>
+<p>The things I will commit to</p>
+<p>Mapping to jolt <code>trace_len</code> is <span
+class="math inline">\(T\)</span></p>
+<div class="highlight"><pre><span></span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">left_instruction_input</span><span class="p">:</span><span class="w"> </span><span class="nc">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">],</span>
+<span class="w">            </span><span class="n">right_instruction_input</span><span class="p">:</span><span class="w"> </span><span class="nc">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">],</span>
+<span class="w">            </span><span class="n">rd_inc</span><span class="p">:</span><span class="w"> </span><span class="nc">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">],</span>
+<span class="w">            </span><span class="n">ram_inc</span><span class="p">:</span><span class="w"> </span><span class="nc">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">],</span>
+
+<span class="w">            </span><span class="n">instruction_ra</span><span class="p">:</span><span class="w"> </span><span class="nc">array</span><span class="p">::</span><span class="n">from_fn</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="nb">None</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">]),</span>
+<span class="w">            </span><span class="n">bytecode_ra</span><span class="p">:</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="n">bytecode_d</span><span class="p">).</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="nb">None</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">]).</span><span class="n">collect</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">ram_ra</span><span class="p">:</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="n">ram_d</span><span class="p">).</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="nb">None</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">]).</span><span class="n">collect</span><span class="p">(),</span>
+<span class="w">        </span><span class="p">}</span>
+</pre></div>
+
+</section></article>
+    </main>
+    <footer class="site-footer">
+      <p>&copy; 2025 On A Tangent Ltd.</p>
+      <p class="attribution">
+        Website template colors inspired by
+        <a
+          href="https://gendignoux.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Guillaume Endignoux</a
+        >
+      </p>
+    </footer>
+
+
+    <script>
+      // Theme toggle
+      const themeToggle = document.querySelector(".theme-toggle");
+      const html = document.documentElement;
+      const lightIcon = document.querySelector(".theme-toggle-light");
+      const darkIcon = document.querySelector(".theme-toggle-dark");
+      const currentTheme =
+        localStorage.getItem("theme") ||
+        (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
+
+      html.setAttribute("data-theme", currentTheme);
+      if (currentTheme === "dark") {
+        lightIcon.style.display = "none";
+        darkIcon.style.display = "block";
+      } else {
+        lightIcon.style.display = "block";
+        darkIcon.style.display = "none";
+      }
+
+      themeToggle.onclick = () => {
+        const newTheme =
+          html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+
+        if (newTheme === "dark") {
+          lightIcon.style.display = "none";
+          darkIcon.style.display = "block";
+        } else {
+          lightIcon.style.display = "block";
+          darkIcon.style.display = "none";
+        }
+      };
+
+      // Mobile menu toggle
+      document.querySelector(".menu-toggle").onclick = () =>
+        document.querySelector(".nav-group").classList.toggle("is-active");
+
+      // Auto-highlight current page
+      const currentPath = window.location.pathname;
+      const currentPage = currentPath.split("/").pop() || "index.html";
+      document.querySelectorAll(".main-nav a").forEach((link) => {
+        const href = link.getAttribute("href").replace("../", "");
+        if (
+          href === currentPage ||
+          (currentPage === "index.html" && href === "index.html")
+        ) {
+          link.classList.add("active");
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Citation tooltips
+        const refs = document.querySelector("#refs");
+        if (refs) {
+          document
+            .querySelectorAll('.citation a[href^="#ref-"]')
+            .forEach(function (cite) {
+              const refId = cite.getAttribute("href").substring(1);
+              const refItem = document.getElementById(refId);
+
+              if (refItem) {
+                const urlLink = refItem.querySelector('a[href^="http"]');
+                if (urlLink) {
+                  cite.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    window.open(urlLink.href, "_blank");
+                  });
+                  cite.style.cursor = "pointer";
+                  cite.title = "Click to open source";
+                }
+
+                const tooltip = document.createElement("div");
+                tooltip.className = "citation-tooltip";
+                const cslEntry = refItem.querySelector(".csl-entry");
+                tooltip.textContent = cslEntry
+                  ? cslEntry.textContent
+                  : refItem.textContent;
+                document.body.appendChild(tooltip);
+
+                cite.addEventListener("mouseenter", function (e) {
+                  const rect = cite.getBoundingClientRect();
+                  tooltip.style.display = "block";
+                  tooltip.style.left =
+                    Math.min(rect.left, window.innerWidth - 420) + "px";
+                  tooltip.style.top = rect.bottom + 5 + "px";
+                });
+
+                cite.addEventListener("mouseleave", function () {
+                  tooltip.style.display = "none";
+                });
+              }
+            });
+        }
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll(".highlight").forEach(function (block) {
+          const btn = document.createElement("button");
+          btn.className = "copy-btn";
+          btn.textContent = "Copy";
+          btn.setAttribute("aria-label", "Copy code to clipboard");
+          block.insertBefore(btn, block.firstChild);
+
+          const code = block.querySelector("pre");
+
+          btn.addEventListener("click", async function () {
+            const text = code.textContent;
+
+            try {
+              await navigator.clipboard.writeText(text);
+              btn.textContent = "Copied!";
+              btn.style.background = "#10b981";
+
+              setTimeout(() => {
+                btn.textContent = "Copy";
+                btn.style.background = "";
+              }, 2000);
+            } catch (err) {
+              const textarea = document.createElement("textarea");
+              textarea.value = text;
+              textarea.style.position = "fixed";
+              textarea.style.opacity = "0";
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand("copy");
+              document.body.removeChild(textarea);
+
+              btn.textContent = "Copied!";
+              setTimeout(() => {
+                btn.textContent = "Copy";
+              }, 2000);
+            }
+          });
+        });
+
+        // Add data-tag to category tags
+        document.querySelectorAll(".category-tag").forEach((tag) => {
+          const tagName = tag.textContent.trim().toLowerCase();
+          tag.setAttribute("data-tag", tagName);
+        });
+
+        // Convert author text to styled tags
+        const authorSpan = document.querySelector(".article-meta .authors");
+        if (authorSpan) {
+          const authorText = authorSpan.textContent.replace("By ", "").trim();
+          const authors = authorText.split(",").map((a) => a.trim());
+
+          authorSpan.textContent = "By ";
+
+          authors.forEach((author, index) => {
+            const tag = document.createElement("span");
+            tag.className = "category-tag";
+            tag.textContent = author;
+            tag.setAttribute("data-tag", author.toLowerCase());
+            authorSpan.appendChild(tag);
+
+            if (index < authors.length - 1) {
+              authorSpan.appendChild(document.createTextNode(", "));
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Understanding Rayon</title>
+    <title>Emprical Evaluation Of Rayon</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script
       async
@@ -113,15 +113,14 @@
     </header>
     <main class="article-content">
       <header class="article-header">
-        <h1>Understanding Rayon</h1>
+        <h1>Emprical Evaluation Of Rayon</h1>
         <div class="article-meta">
           <div class="meta-left">
                          <span class="category-tag">rust</span>
-                        <span class="category-tag">parallel-programming</span>
              
           </div>
           <div class="meta-right">
-            <time>2025-10-10</time>             <span class="authors"
+            <time>2025-10-14</time>             <span class="authors"
               >By Ivan Bliminse</span
             >
                       </div>
@@ -130,64 +129,13 @@
             <nav id="TOC">
         <h2>Contents</h2>
         <ul>
-        <li><a href="#references" id="toc-references">References</a>
-        <ul>
-        <li><a href="#niko-matsakis" id="toc-niko-matsakis">Niko
-        Matsakis</a></li>
-        <li><a href="#guillaume-endignoux"
-        id="toc-guillaume-endignoux">Guillaume Endignoux</a></li>
-        </ul></li>
+        <li><a href="#dot-product-benchmarks"
+        id="toc-dot-product-benchmarks">Dot Product Benchmarks</a></li>
         </ul>
       </nav>
-            <article><div class="remark">
-<p><strong>CONTEXT</strong>: As of writing, the ZK-VM <a
-href="">Jolt</a> seems to have unexpected behaviour when running things
-in parallel. See <a href="">this post</a> for more details. In an
-attempt to understand why, we first try to understand the <a
-href="">Rayon</a> library, which we heavily rely upon, all throughout
-jolt. These notes are study notes that use a mixture of blog posts,
-official documentation and source code to try and explain the reason
-behind Jolt’s inconsistent performance.</p>
-</div>
-<ol type="a">
-<li><a href="/posts/empirics.html">Empirics With Basic
-Workloads</a></li>
-</ol>
-<ol type="1">
-<li><a href="/posts/sequential-iterators.html">Sequential
-Iterators</a></li>
-<li><a href="/posts/producers.html">Parallel Producers</a></li>
-</ol>
-<section id="references" class="level2">
-<h2>References</h2>
-<section id="niko-matsakis" class="level3">
-<h3>Niko Matsakis</h3>
-<ol type="1">
-<li><a
-href="https://smallcultfollowing.com/babysteps/blog/2015/12/18/rayon-data-parallelism-in-rust/#rayons-core-primitive-join">The
-Join Primitive</a></li>
-<li><a
-href="https://smallcultfollowing.com/babysteps//blog/2016/02/19/parallel-iterators-part-1-foundations/">How
-sequential Iterators work</a></li>
-<li><a
-href="https://smallcultfollowing.com/babysteps//blog/2016/02/25/parallel-iterators-part-2-producers/">How
-Parallel producers work</a></li>
-<li><a
-href="https://smallcultfollowing.com/babysteps/blog/2016/11/14/parallel-iterators-part-3-consumers/">Parallel
-consumers, or the flat map</a></li>
-</ol>
-</section>
-<section id="guillaume-endignoux" class="level3">
-<h3>Guillaume Endignoux</h3>
-<ol type="1">
-<li><a
-href="https://gendignoux.com/blog/2024/11/18/rust-rayon-optimized.html#how-does-rayon-work">How
-Does Rayon Work</a></li>
-<li><a
-href="https://gendignoux.com/blog/2024/12/02/rust-data-oriented-design.html">Beating
-Rayon</a></li>
-</ol>
-</section>
+            <article><section id="dot-product-benchmarks"
+class="level2">
+<h2>Dot Product Benchmarks</h2>
 </section></article>
     </main>
     <footer class="site-footer">

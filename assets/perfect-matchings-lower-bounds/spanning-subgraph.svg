@@ -1,0 +1,115 @@
+<svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Title -->
+  <text x="400" y="30" font-size="24" font-weight="bold" text-anchor="middle" fill="#3DBBFF">
+    f-Regular Spanning Subgraph (f = 2)
+  </text>
+  
+  <!-- Original Graph G -->
+  <g id="graph-G">
+    <text x="200" y="70" font-size="18" font-weight="bold" text-anchor="middle" fill="#3DBBFF">
+      Original Graph G
+    </text>
+    
+    <!-- Edges of G -->
+    <line x1="200" y1="100" x2="200" y2="180" stroke="#888" stroke-width="2"/>
+    <line x1="200" y1="100" x2="120" y2="220" stroke="#888" stroke-width="2"/>
+    <line x1="200" y1="100" x2="280" y2="220" stroke="#888" stroke-width="2"/>
+    <line x1="200" y1="180" x2="120" y2="220" stroke="#888" stroke-width="2"/>
+    <line x1="200" y1="180" x2="280" y2="220" stroke="#888" stroke-width="2"/>
+    <line x1="120" y1="220" x2="280" y2="220" stroke="#888" stroke-width="2"/>
+    <line x1="120" y1="300" x2="200" y2="340" stroke="#888" stroke-width="2"/>
+    <line x1="280" y1="300" x2="200" y2="340" stroke="#888" stroke-width="2"/>
+    <line x1="120" y1="220" x2="120" y2="300" stroke="#888" stroke-width="2"/>
+    <line x1="280" y1="220" x2="280" y2="300" stroke="#888" stroke-width="2"/>
+    
+    <!-- Vertices of G -->
+    <circle cx="200" cy="100" r="8" fill="#5AB9EA" stroke="#3DBBFF" stroke-width="2"/>
+    <circle cx="200" cy="180" r="8" fill="#5AB9EA" stroke="#3DBBFF" stroke-width="2"/>
+    <circle cx="120" cy="220" r="8" fill="#5AB9EA" stroke="#3DBBFF" stroke-width="2"/>
+    <circle cx="280" cy="220" r="8" fill="#5AB9EA" stroke="#3DBBFF" stroke-width="2"/>
+    <circle cx="120" cy="300" r="8" fill="#5AB9EA" stroke="#3DBBFF" stroke-width="2"/>
+    <circle cx="280" cy="300" r="8" fill="#5AB9EA" stroke="#3DBBFF" stroke-width="2"/>
+    <circle cx="200" cy="340" r="8" fill="#5AB9EA" stroke="#3DBBFF" stroke-width="2"/>
+    
+    <!-- Vertex labels -->
+    <text x="215" y="105" font-size="12" fill="#3DBBFF">v₁</text>
+    <text x="215" y="185" font-size="12" fill="#3DBBFF">v₂</text>
+    <text x="105" y="225" font-size="12" fill="#3DBBFF">v₃</text>
+    <text x="295" y="225" font-size="12" fill="#3DBBFF">v₄</text>
+    <text x="105" y="305" font-size="12" fill="#3DBBFF">v₅</text>
+    <text x="295" y="305" font-size="12" fill="#3DBBFF">v₆</text>
+    <text x="215" y="345" font-size="12" fill="#3DBBFF">v₇</text>
+    
+    <!-- Degree annotations -->
+    <text x="200" y="365" font-size="11" text-anchor="middle" fill="#999" font-style="italic">
+      (vertices have varying degrees)
+    </text>
+  </g>
+  
+  <!-- Arrow -->
+  <g>
+    <line x1="360" y1="220" x2="430" y2="220" stroke="#888" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <text x="395" y="210" font-size="14" text-anchor="middle" fill="#999">select edges</text>
+  </g>
+  
+  <!-- Spanning Subgraph G' -->
+  <g id="graph-G-prime">
+    <text x="600" y="70" font-size="18" font-weight="bold" text-anchor="middle" fill="#FF6B9D">
+      Spanning Subgraph G' (2-regular)
+    </text>
+    
+    <!-- Edges of G' (selected to make 2-regular) - forms a cycle through all 7 vertices -->
+    <line x1="600" y1="100" x2="600" y2="180" stroke="#FF6B9D" stroke-width="3"/>
+    <line x1="600" y1="180" x2="680" y2="220" stroke="#FF6B9D" stroke-width="3"/>
+    <line x1="680" y1="220" x2="680" y2="300" stroke="#FF6B9D" stroke-width="3"/>
+    <line x1="680" y1="300" x2="600" y2="340" stroke="#FF6B9D" stroke-width="3"/>
+    <line x1="600" y1="340" x2="520" y2="300" stroke="#FF6B9D" stroke-width="3"/>
+    <line x1="520" y1="300" x2="520" y2="220" stroke="#FF6B9D" stroke-width="3"/>
+    <line x1="520" y1="220" x2="600" y2="100" stroke="#FF6B9D" stroke-width="3"/>
+    
+    <!-- Removed edges (shown faint) -->
+    <line x1="600" y1="100" x2="680" y2="220" stroke="#666" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="600" y1="180" x2="520" y2="220" stroke="#666" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="520" y1="220" x2="680" y2="220" stroke="#666" stroke-width="1" stroke-dasharray="4,4"/>
+    
+    <!-- Vertices of G' (ALL vertices, each with degree 2!) -->
+    <circle cx="600" cy="100" r="8" fill="#FF8FB3" stroke="#FF6B9D" stroke-width="2"/>
+    <circle cx="600" cy="180" r="8" fill="#FF8FB3" stroke="#FF6B9D" stroke-width="2"/>
+    <circle cx="520" cy="220" r="8" fill="#FF8FB3" stroke="#FF6B9D" stroke-width="2"/>
+    <circle cx="680" cy="220" r="8" fill="#FF8FB3" stroke="#FF6B9D" stroke-width="2"/>
+    <circle cx="520" cy="300" r="8" fill="#FF8FB3" stroke="#FF6B9D" stroke-width="2"/>
+    <circle cx="680" cy="300" r="8" fill="#FF8FB3" stroke="#FF6B9D" stroke-width="2"/>
+    <circle cx="600" cy="340" r="8" fill="#FF8FB3" stroke="#FF6B9D" stroke-width="2"/>
+    
+    <!-- Vertex labels -->
+    <text x="615" y="105" font-size="12" fill="#FF6B9D">v₁</text>
+    <text x="615" y="185" font-size="12" fill="#FF6B9D">v₂</text>
+    <text x="505" y="225" font-size="12" fill="#FF6B9D">v₃</text>
+    <text x="695" y="225" font-size="12" fill="#FF6B9D">v₄</text>
+    <text x="505" y="305" font-size="12" fill="#FF6B9D">v₅</text>
+    <text x="695" y="305" font-size="12" fill="#FF6B9D">v₆</text>
+    <text x="615" y="345" font-size="12" fill="#FF6B9D">v₇</text>
+    
+    <!-- Degree annotations -->
+    <text x="600" y="365" font-size="11" text-anchor="middle" fill="#FF6B9D" font-weight="bold">
+      Every vertex has degree 2
+    </text>
+  </g>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#888" />
+    </marker>
+  </defs>
+  
+  <!-- Legend -->
+  <g id="legend">
+    <rect x="20" y="370" width="760" height="25" fill="#00000000" stroke="#888" stroke-width="1" rx="4"/>
+    <text x="30" y="387" font-size="12" fill="#999">
+      <tspan font-weight="bold">Key:</tspan> G' keeps <tspan font-weight="bold">all vertices</tspan> (spanning), 
+      uses <tspan fill="#FF6B9D" font-weight="bold">some edges</tspan> so each vertex has 
+      <tspan font-weight="bold">exactly f = 2 neighbors</tspan> (2-regular)
+    </text>
+  </g>
+</svg>

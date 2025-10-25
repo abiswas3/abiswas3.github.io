@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Understanding Rayon</title>
+    <title>Reviewer Comments</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script
       async
@@ -113,82 +113,206 @@
     </header>
     <main class="article-content">
       <header class="article-header">
-        <h1>Understanding Rayon</h1>
+        <h1>Reviewer Comments</h1>
         <div class="article-meta">
           <div class="meta-left">
-                         <span class="category-tag">rust</span>
-                        <span class="category-tag">parallel-programming</span>
+                         <span class="category-tag">proof-complexity</span>
              
           </div>
           <div class="meta-right">
-            <time>2025-10-10</time>             <span class="authors"
-              >By Ivan Bliminse</span
+            <time>2025-10-25</time>             <span class="authors"
+              >By Ari, RN</span
             >
                       </div>
         </div>
       </header>
-            <nav id="TOC">
-        <h2>Contents</h2>
-        <ul>
-        <li><a href="#references" id="toc-references">References</a>
-        <ul>
-        <li><a href="#niko-matsakis" id="toc-niko-matsakis">Niko
-        Matsakis</a></li>
-        <li><a href="#guillaume-endignoux"
-        id="toc-guillaume-endignoux">Guillaume Endignoux</a></li>
-        </ul></li>
-        </ul>
-      </nav>
-            <article><div class="remark">
-<p><strong>CONTEXT</strong>: As of writing, the ZK-VM <a
-href="">Jolt</a> seems to have unexpected behaviour when running things
-in parallel. See <a href="">this post</a> for more details. In an
-attempt to understand why, we first try to understand the <a
-href="">Rayon</a> library, which we heavily rely upon, all throughout
-jolt. These notes are study notes that use a mixture of blog posts,
-official documentation and source code to try and explain the reason
-behind Jolt’s inconsistent performance.</p>
-</div>
-<ol type="a">
-<li><a href="/posts/empirics.html">Empirics With Basic
-Workloads</a></li>
-</ol>
-<ol type="1">
-<li><a href="/posts/sequential-iterators.html">Sequential
-Iterators</a></li>
-<li><a href="/posts/producers.html">Parallel Producers</a></li>
-</ol>
-<section id="references" class="level2">
-<h2>References</h2>
-<section id="niko-matsakis" class="level3">
-<h3>Niko Matsakis</h3>
-<ol type="1">
-<li><a
-href="https://smallcultfollowing.com/babysteps/blog/2015/12/18/rayon-data-parallelism-in-rust/#rayons-core-primitive-join">The
-Join Primitive</a></li>
-<li><a
-href="https://smallcultfollowing.com/babysteps//blog/2016/02/19/parallel-iterators-part-1-foundations/">How
-sequential Iterators work</a></li>
-<li><a
-href="https://smallcultfollowing.com/babysteps//blog/2016/02/25/parallel-iterators-part-2-producers/">How
-Parallel producers work</a></li>
-<li><a
-href="https://smallcultfollowing.com/babysteps/blog/2016/11/14/parallel-iterators-part-3-consumers/">Parallel
-consumers, or the flat map</a></li>
-</ol>
-</section>
-<section id="guillaume-endignoux" class="level3">
-<h3>Guillaume Endignoux</h3>
-<ol type="1">
-<li><a
-href="https://gendignoux.com/blog/2024/11/18/rust-rayon-optimized.html#how-does-rayon-work">How
-Does Rayon Work</a></li>
-<li><a
-href="https://gendignoux.com/blog/2024/12/02/rust-data-oriented-design.html">Beating
-Rayon</a></li>
-</ol>
-</section>
-</section></article>
+            <article><p>Thank you for your detailed feedback. We have
+addressed the typographic issues in the paper as recommended. For the
+technical questions, we’ve addressed them in the main paper, and also
+left short comments describing our changes below:</p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />why are you not claiming
+lower bounds for the bounded depth Frege system? –</label></li>
+</ul>
+<p><strong>The lower bounds do indeed apply to bounded depth Frege
+system, but as we did not do anything specific to the Frege proof
+system, we decided to focus on just the semi-algebraic proof systems for
+brevity. We thought this made the preliminary section shorter and
+cleaner. We have revised the manuscript, and added a footnote to mention
+that the lower bounds would extend to the extended Frege system as
+well.</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />for some equations you
+have periods at the end and for others (where they would be needed, eg,
+(23)-(25)) they are missing. Either remove all or (what I would prefer)
+add them where appropriate.</label></li>
+</ul>
+<p><strong>We have removed all of them</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />1:-13: coNP=NP -&gt;
+P=NP? Are you sure this holds? Usually one only claims that the poly
+hierarchy collapses to the level where an equality has been
+shown?</label></li>
+</ul>
+<p><strong>You are correct, we apologise for the misstatement – this
+should have been PH = NP. </strong></p>
+<ul class="task-list">
+<li><p><label><input type="checkbox" checked="" />1:-6: “In PC, the
+coefficients” maybe replace coefficients with equations since the
+equations are over the field and not just the
+coefficients?</label></p></li>
+<li><p><label><input type="checkbox" checked="" />1:-5: “arbitrary
+field” maybe arbitrary but fixed field; the choice should not depend on
+the equation/coefficient.</label></p></li>
+<li><p><label><input type="checkbox" checked="" />1:-2: Two common
+measures… Note that the measure of a degree only makes sense in
+semi-algebraic proof systems and not even everywhere there. So more
+precise would be: Two common measures of the complexity of
+semi-algebraic proofs are…</label></p></li>
+<li><p><label><input type="checkbox" checked="" />TODO: 2:2: you should
+mention that size lower bounds only follow for degree lower bounds much
+larger than sqrt(n). Consider stating the size lower bounds below the
+theorem statements.</label></p></li>
+<li><p><label><input type="checkbox" checked="" />2:20: Tseitin formulae
+<em>are</em></label></p></li>
+<li><p><label><input type="checkbox" checked="" />2:24: graphs with
+<em>an</em> odd…</label></p></li>
+<li><p><label><input type="checkbox" checked="" />3:2: what is ? Not
+defined so the comment about an odd value of t makes no sense to
+me.</label></p></li>
+<li><p><label><input type="checkbox" checked="" />3:-17: Austrin and
+Risse is also similar… this makes no sense. maybe also -&gt;
+a?</label></p></li>
+<li><p><label><input type="checkbox" checked="" />TODO: 3:-16:
+“underlying graph being random” theorem 3.3 of [5] does not rely on any
+randomness – only on pseudorandom properties.</label></p></li>
+</ul>
+<p><strong>You are right the embedding theorem by itself does not
+require randomness. Austrin and Risse rely on the the contiguity
+property of random regular graphs to show G’ (the remaining graph) <span
+class="math inline">\((t-1)\)</span>-regular spanning subgraph. We have
+changed the writeup to reflect this.</strong></p>
+<p>TODO: - [x] 3:-15: since theorem 3.3 of [5] does not require spectral
+expansion but vertex expansion plus two other properties it is
+non-obvious to me that such graphs are also spectral expanders? Are you
+sure that you subsume it in all cases? I mean morally I understand that
+the other statement should not be used but rather yours. But formally
+this is non-obvious to me. If you want to keep this statement as-is I
+expect at the least a proof sketch.</p>
+<p><strong>We have removed the original statement. The accurate
+description is they rely on randomness for using the contiguity
+property, which is needed to prove hardness for Card(G, t). We do not
+require randomness. They can use our technique to extend their result on
+vertex expanders instead.</strong></p>
+<ul class="task-list">
+<li><p><label><input type="checkbox" checked="" />3:-7: the rest of the
+document as is.. drop the as. Also the following sentence needs some
+attention.</label></p></li>
+<li><p><label><input type="checkbox" checked="" />4: def2.1: pi is a
+sequence not a set? This is stated a few times on this
+page.</label></p></li>
+<li><p><label><input type="checkbox" checked="" />4: before def 2.2:
+polynomials equations: drop the first plural to polynomial
+equations</label></p></li>
+<li><p><label><input type="checkbox" checked="" />4: below def 2.2:
+state that PC operates over a fixed field F.</label></p></li>
+<li><p><label><input type="checkbox" checked="" />4: def 2.3: Q over
+<em>F</em> is…</label></p></li>
+<li><p><label><input type="checkbox" checked="" />4: def2.3: same as
+above; pi is a sequence not a set. Also maybe add brackets around t_1,
+…, t_l</label></p></li>
+<li><p><label><input type="checkbox" checked="" />5:1: boolean -&gt;
+Boolean</label></p></li>
+<li><p><label><input type="checkbox" />Lemma 2.4; 2.5: giving credit to
+[5] for 2.5 is very generous; it is the same as lemma 2.4. [5] at most
+observed that the same construction also works for SoS.</label></p></li>
+<li><p><label><input type="checkbox" checked="" />5: first paragraph of
+2.1.1: constraint q_i in Q is satisfied i.e. p_i(alpha)=0. I suspect p_i
+should be q_i.</label></p></li>
+<li><p><label><input type="checkbox" checked="" />5:-3: G with
+<em>an</em> odd <em>number of</em> vertices woth: woth -&gt;
+with</label></p></li>
+<li><p><label><input type="checkbox" checked="" />7:2.14: this lemma is
+lemma 4.3 of [5].</label></p></li>
+<li><p><label><input type="checkbox" checked="" />8:(1): do you need the
+equation number (1); it is in the theorem statement so maybe drop it?
+also, I believe it is not referenced.</label></p></li>
+<li><p><label><input type="checkbox" checked="" />9:9: <em>the</em>
+embedding theorem</label></p></li>
+<li><p><label><input type="checkbox" checked="" />9:16: <em>the</em>
+expander mixing lemma</label></p></li>
+<li><p><label><input type="checkbox" checked="" />9:20: by <em>the</em>
+embedding theorem</label></p></li>
+<li><p><label><input type="checkbox" checked="" />10: final line of the
+proof: comes <em>from</em> the assumption</label></p></li>
+<li><p><label><input type="checkbox" checked="" />11:4: for
+C=(1/100)^{2/3} your claim eps &lt; 1/50 is certainly false. Do you want
+C&gt;1?</label></p></li>
+</ul>
+<p><strong>We have been a little sloppy with assigning numeric values
+where constants for which “large enough” is good. In this case yes,
+<span class="math inline">\(C &gt; 1\)</span> is needed. Downstream,
+when this lemma is invoked, C=5 so this change is not
+destructive</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />11:-6: ..comes from eps
+&lt; 1/100C^{3/2}. Are you sure this is enough? We want that <span
+class="math inline">\(d/4 + 1 + \epsilon d/2 &lt; d/2 - C4\)</span> or
+with eps substituted that 0 &lt; d(50 C^{3/2} - 1) - 200(C^{5/2} +
+C^{3/2}). For this to hold you probably also want that (1) C &gt; 1, and
+(2) that d &gt;= d_0 is large enough.</label></li>
+</ul>
+<p><strong>We were a little sloppy here, and the conditions stated above
+were assumed. C should be thought of as the number of edges we delete
+from G to get G’. First we are given C, then we choose <span
+class="math inline">\(d_0\)</span> large enough such that deleting C
+edges still keeps 90 percent of the edges. If <span
+class="math inline">\(d_0\)</span> iis large enough, then d is large
+enough. We have updated the document to reflect that this step is a
+result of 3 things 1. The upper bound on eps, 2. C &gt; 1 and 3. d_0 is
+large enough.</strong></p>
+<ul class="task-list">
+<li><p><label><input type="checkbox" checked="" />11:5: why are you
+stating that <em>{G’} d-C 9d/10? By assumption we have that </em>{G’}
+9d/10. <strong>We’ve cleaned up the writeup to be less confusing. As C
+is maximum the number of edges we delete, the minimum degree of G is at
+least d - C, and therefore greater than 9d/10 (which we ensure by making
+d_0 large enough.)</strong></label></p></li>
+<li><p><label><input type="checkbox" checked="" />11:-7: Maybe state
+that in case 2 you are using that f &gt;= 2 similarly to how you stated
+the upper bound in case 1? <strong>fixed</strong></label></p></li>
+<li><p><label><input type="checkbox" checked="" />11:-6: the math
+display starts with f|S| but equation 18,17 read |S|f. Maybe swap f and
+|S|?</label></p></li>
+<li><p><label><input type="checkbox" checked="" />11:-4: e_{G} -&gt;
+e_{G’}<br />
+</label></p></li>
+<li><p><label><input type="checkbox" checked="" />TODO: 12:3: what is D,
+what is c? The initial inequality may be chosen to be strict since
+lambda &lt; eps d. I do not follow the rest of the computation. Please
+elaborate and make the steps explicit.</label></p></li>
+<li><p><label><input type="checkbox" checked="" />12: the end of proof
+symbol is two lines lower than the final sentence. Is there some text
+which we cannot see? Or just an oversight? <strong>The enumerate
+environment causes weird spacing. There’s no
+text</strong></label></p></li>
+<li><p><label><input type="checkbox" checked="" />12:15: B=G-&gt;
+B=V(G)</label></p></li>
+<li><p><label><input type="checkbox" checked="" />nd/20 = Cn fixes C =
+d/20. Since C is also equal to 6 we get that d = 120? Seems a bit
+weird.<br />
+<strong>We apologise for the confusion. The two C’s were unrelated, and
+we’ve removed this to remove confusion.</strong></label></p></li>
+<li><p><label><input type="checkbox" checked="" />12:footnote: hardness
+<em>of</em> refuting PM(G).</label></p></li>
+<li><p><label><input type="checkbox" checked="" />13:3: <em>the</em>
+regular subgraph lemma</label></p></li>
+<li><p><label><input type="checkbox" checked="" />13:conclusion: one
+reference has a question mark; is missing.</label></p></li>
+<li><p><label><input type="checkbox" checked="" />13:-10: “makes the
+graphs are sparse” something is wrong with this
+sentence.</label></p></li>
+</ul></article>
     </main>
     <footer class="site-footer">
       <p>&copy; 2025 On A Tangent Ltd.</p>

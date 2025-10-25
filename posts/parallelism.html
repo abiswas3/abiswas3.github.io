@@ -136,11 +136,9 @@
         id="toc-jolts-parallelisation-problem">Jolt’s Parallelisation
         Problem</a></li>
         <li><a href="#the-actual-problem"
-        id="toc-the-actual-problem">The Actual Problem</a>
-        <ul>
-        <li><a href="#why-are-we-losing-20"
-        id="toc-why-are-we-losing-20">Why Are We Losing 20%</a></li>
-        </ul></li>
+        id="toc-the-actual-problem">The Actual Problem</a></li>
+        <li><a href="#whats-next" id="toc-whats-next">What’s
+        next</a></li>
         </ul>
       </nav>
             <article><section id="problem-statement" class="level2">
@@ -284,28 +282,60 @@ exactly what rayon experts would recommend we do.</p>
 </pre></div>
 
 <p>We make one line of change</p>
-<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">bound_poly_var_top_zero_optimized</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">r</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="nc">F</span><span class="p">::</span><span class="nf">Challenge</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">len</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<p>```rust pub fn bound_poly_var_top_zero_optimized(&amp;mut self, r:
+&amp;F::Challenge) { let n = self.len() / 2;</p>
+<pre><code>let (left, right) = self.Z.split_at_mut(n);
 
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">left</span><span class="p">,</span><span class="w"> </span><span class="n">right</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="nf">Z</span><span class="p">.</span><span class="n">split_at_mut</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
-
-<span class="w">    </span><span class="n">left</span><span class="p">.</span><span class="n">par_iter_mut</span><span class="p">()</span>
-<span class="w">        </span><span class="p">.</span><span class="n">zip</span><span class="p">(</span><span class="n">right</span><span class="p">.</span><span class="n">par_iter</span><span class="p">())</span>
-<span class="w">        </span><span class="p">.</span><span class="n">with_min_len</span><span class="p">(</span><span class="mi">4096</span><span class="p">)</span><span class="w"> </span><span class="c1">// &lt;-- Only change to the code base </span>
-<span class="w">        </span><span class="p">.</span><span class="n">filter</span><span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">b</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">b</span><span class="p">)</span>
-<span class="w">        </span><span class="p">.</span><span class="n">for_each</span><span class="p">(</span><span class="o">|</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="o">*</span><span class="n">a</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="o">*</span><span class="n">r</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="n">b</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="o">*</span><span class="n">a</span><span class="p">);</span>
-<span class="w">        </span><span class="p">});</span>
-
-<span class="w">    </span><span class="bp">self</span><span class="p">.</span><span class="n">num_vars</span><span class="w"> </span><span class="o">-=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">    </span><span class="bp">self</span><span class="p">.</span><span class="n">len</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">n</span><span class="p">;</span>
-<span class="p">}</span>
-</pre></div>
-
-<p>And observe what happens TODO: put picture in here</p>
-<section id="why-are-we-losing-20" class="level3">
-<h3>Why Are We Losing 20%</h3>
+left.par_iter_mut()
+    .zip(right.par_iter())
+    .with_min_len(4096) // &lt;-- Only change to the code base 
+    .filter(|(&amp;mut a, &amp;b)| a != b)
+    .for_each(|(a, b)| {
+        *a += *r * (*b - *a);
+    });</code></pre>
+<ol start="3" type="1">
+<li>there is really nothing we can do, parallel code is too hard
+<em>(possibly, but I am not willing to give in just yet)</em>.</li>
+</ol>
+<p>So we went ahead and sequentialised the expensive path of the code
+path. The results are shown below. Unsurprisingly, the overeall bind
+time is worse. However, it’s only <strong>2x</strong> worse.</p>
 </section>
+<section id="whats-next" class="level2">
+<h2>What’s next</h2>
+<p>After all this work, the thing that is clear, is nothing is clear. I
+do not have an definitive answer as what about our use of Rayon
+nullifies low level multiplication optimisations.</p>
+<ol type="1">
+<li><p>A low hanging fruit is to have a sequential version of every
+bind, and then check which ones improve the overall end to end speed.
+This might work in the short term but this is not sustainable. As Jolt
+evolves and improves, the number of permutations of which binds to keep
+sequential, and which binds to keep parallel will explode
+exponentially.</p></li>
+<li><p>Over the last week, we went ahead studied the <a href="">Rayon
+source</a> code. We first outline our <a href="">working
+understanding</a> (this will shortly be added) of how Rayon works, with
+experiments to back up our understanding. A critical feature of
+<code>rayon</code> is that it is optimistically parallel. That is to
+say, given how “work-stealing” is implemented, if the threads are busy,
+rayon just works like a sequential algorithm, with very minimal
+overhead. However, our observations described above do not align this
+claim. Two things are possible – the overhead is really not that minimal
+(especially, when our optimisations are at the multiplication level, and
+we are counting assembly instructions). Alternatively, the way we are
+using <code>rayon</code> is sub-optimal. There is a third possibility
+that rayon is not the right tool for Jolt, but I find this highly
+unlikely.</p></li>
+<li><p>With our working understanding, we have to develop the tools to
+measure sub-optimal parallelisation. Right now, we can just measure
+<code>elapsed time</code>. We need to look at cpu counters, and
+<code>strace</code> reports to see how often the threads are spinning,
+or if there are stragglers. Perhaps we can implement some dynamic
+instrumentation to focus our CPU counter collection only during some
+functions. This gives us a much clearer picture as to how
+multi-threading could be a bottleneck.</p></li>
+</ol>
 </section>
 <section id="footnotes" class="footnotes footnotes-end-of-document"
 role="doc-endnotes">

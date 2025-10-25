@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Understanding Rayon</title>
+    <title>Advent Of Jolt</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script
       async
@@ -113,16 +113,15 @@
     </header>
     <main class="article-content">
       <header class="article-header">
-        <h1>Understanding Rayon</h1>
+        <h1>Advent Of Jolt</h1>
         <div class="article-meta">
           <div class="meta-left">
-                         <span class="category-tag">rust</span>
-                        <span class="category-tag">parallel-programming</span>
+                         <span class="category-tag">jolt</span>
              
           </div>
           <div class="meta-right">
-            <time>2025-10-10</time>             <span class="authors"
-              >By Ivan Bliminse</span
+            <time>2025-10-24</time>             <span class="authors"
+              >By Ari</span
             >
                       </div>
         </div>
@@ -130,64 +129,35 @@
             <nav id="TOC">
         <h2>Contents</h2>
         <ul>
-        <li><a href="#references" id="toc-references">References</a>
-        <ul>
-        <li><a href="#niko-matsakis" id="toc-niko-matsakis">Niko
-        Matsakis</a></li>
-        <li><a href="#guillaume-endignoux"
-        id="toc-guillaume-endignoux">Guillaume Endignoux</a></li>
-        </ul></li>
+        <li><a href="#before-proving" id="toc-before-proving">Before
+        Proving</a></li>
+        <li><a href="#the-proving-process"
+        id="toc-the-proving-process">The Proving Process</a></li>
+        <li><a href="#verification"
+        id="toc-verification">Verification</a></li>
         </ul>
       </nav>
-            <article><div class="remark">
-<p><strong>CONTEXT</strong>: As of writing, the ZK-VM <a
-href="">Jolt</a> seems to have unexpected behaviour when running things
-in parallel. See <a href="">this post</a> for more details. In an
-attempt to understand why, we first try to understand the <a
-href="">Rayon</a> library, which we heavily rely upon, all throughout
-jolt. These notes are study notes that use a mixture of blog posts,
-official documentation and source code to try and explain the reason
-behind Jolt’s inconsistent performance.</p>
-</div>
-<ol type="a">
-<li><a href="/posts/empirics.html">Empirics With Basic
-Workloads</a></li>
-</ol>
+            <article><p><code>A ZK-VM takes in a program as input, and outputs a proof that it ran the program correctly</code>.</p>
+<p>The above definition is too abstract for the uninitiated (such as
+me). As an attempt to educate myself, I attempt to go from jolt-ignorant
+to jolt-enlightened. Hopefully, I learn something, and others find the
+artifacts I leave behind useful.</p>
+<section id="before-proving" class="level2">
+<h2>Before Proving</h2>
 <ol type="1">
-<li><a href="/posts/sequential-iterators.html">Sequential
-Iterators</a></li>
-<li><a href="/posts/producers.html">Parallel Producers</a></li>
-</ol>
-<section id="references" class="level2">
-<h2>References</h2>
-<section id="niko-matsakis" class="level3">
-<h3>Niko Matsakis</h3>
-<ol type="1">
-<li><a
-href="https://smallcultfollowing.com/babysteps/blog/2015/12/18/rayon-data-parallelism-in-rust/#rayons-core-primitive-join">The
-Join Primitive</a></li>
-<li><a
-href="https://smallcultfollowing.com/babysteps//blog/2016/02/19/parallel-iterators-part-1-foundations/">How
-sequential Iterators work</a></li>
-<li><a
-href="https://smallcultfollowing.com/babysteps//blog/2016/02/25/parallel-iterators-part-2-producers/">How
-Parallel producers work</a></li>
-<li><a
-href="https://smallcultfollowing.com/babysteps/blog/2016/11/14/parallel-iterators-part-3-consumers/">Parallel
-consumers, or the flat map</a></li>
+<li><a href="/posts/day_1a.html">Day 1a: The Trace And The
+Witness</a></li>
+<li><a href="/posts/day_1b.html">Day 1b: The Proof</a></li>
 </ol>
 </section>
-<section id="guillaume-endignoux" class="level3">
-<h3>Guillaume Endignoux</h3>
-<ol type="1">
-<li><a
-href="https://gendignoux.com/blog/2024/11/18/rust-rayon-optimized.html#how-does-rayon-work">How
-Does Rayon Work</a></li>
-<li><a
-href="https://gendignoux.com/blog/2024/12/02/rust-data-oriented-design.html">Beating
-Rayon</a></li>
+<section id="the-proving-process" class="level2">
+<h2>The Proving Process</h2>
+<ol start="3" type="1">
+<li><a href="">Day 2: Sumcheck central (Part I)</a></li>
 </ol>
 </section>
+<section id="verification" class="level2">
+<h2>Verification</h2>
 </section></article>
     </main>
     <footer class="site-footer">

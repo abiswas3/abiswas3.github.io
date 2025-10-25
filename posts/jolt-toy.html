@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jolt zkVM Architecture (Pedagogical)</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <script
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <h1 class="site-title"><a href="/index.html">Ari</a></h1>
+        <button class="menu-toggle">☰</button>
+        <div class="nav-group">
+          <nav class="main-nav">
+            <ul>
+              <li><a href="/publications.html">Research</a></li>
+              <li><a href="/blog.html">Blog</a></li>
+              <li><a href="/about.html">Random Walks</a></li>
+              <li>
+                <a
+                  href="https://github.com/abiswas3"
+                  target="_blank"
+                  rel="noopener"
+                  class="icon-link"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+                    />
+                  </svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://scholar.google.com/citations?user=yGuM3MgAAAAJ&hl=en&authuser=1"
+                  target="_blank"
+                  rel="noopener"
+                  class="icon-link"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M12 24a7 7 0 110-14 7 7 0 010 14zm0-24L0 9.5l4.838 3.94A8 8 0 0112 9a8 8 0 017.162 4.44L24 9.5z"
+                    />
+                  </svg>
+                </a>
+              </li>
+              <!-- <li> -->
+              <!--   <a -->
+              <!--     href="#" -->
+              <!--     class="email-copy" -->
+              <!--     data-email="on.a.tangent@randomwalks.xyz" -->
+              <!--   > -->
+              <!--     <span class="email-icon">&#9993;</span> -->
+              <!--   </a> -->
+              <!-- </li> -->
+            </ul>
+          </nav>
+          <button class="theme-toggle">
+            <span class="theme-toggle-light">&#9728;&#65039;</span>
+            <span class="theme-toggle-dark" style="display: none">&#127769;</span>
+          </button>
+        </div>
+      </div>
+      <style>
+        .email-icon {
+          font-size: 1em;
+          margin-right: 0.25em;
+        }
+      </style>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const emailLink = document.querySelector(".email-copy");
+          if (emailLink) {
+            emailLink.onclick = function (e) {
+              e.preventDefault();
+              const email = this.getAttribute("data-email");
+              navigator.clipboard
+                .writeText(email)
+                .then(() => {
+                  const original = this.innerHTML;
+                  this.innerHTML = '<span class="email-icon">✓</span> Copied!';
+                  setTimeout(() => {
+                    this.innerHTML = original;
+                  }, 2000);
+                })
+                .catch(() => {
+                  window.location.href = "mailto:" + email;
+                });
+            };
+          }
+        });
+      </script>
+      <script
+        data-goatcounter="https://randomwalks.goatcounter.com/count"
+        async
+        src="//gc.zgo.at/count.js"
+      ></script>
+    </header>
+    <main class="article-content">
+      <header class="article-header">
+        <h1>Jolt zkVM Architecture (Pedagogical)</h1>
+        <div class="article-meta">
+          <div class="meta-left">
+                         <span class="category-tag">jolt</span>
+                        <span class="category-tag">snarks</span>
+             
+          </div>
+          <div class="meta-right">
+            <time>2025-10-18</time>             <span class="authors"
+              >By Ari</span
+            >
+                      </div>
+        </div>
+      </header>
+            <nav id="TOC">
+        <h2>Contents</h2>
+        <ul>
+        <li><a href="#overview" id="toc-overview">Overview</a></li>
+        <li><a href="#pedagogical-simplifications"
+        id="toc-pedagogical-simplifications">Pedagogical
+        Simplifications</a></li>
+        <li><a href="#jolts-three-components"
+        id="toc-jolts-three-components">Jolt’s Three Components</a></li>
+        <li><a href="#the-example-program"
+        id="toc-the-example-program">The Example Program</a></li>
+        <li><a href="#the-r1cs-witness-vector-simplified"
+        id="toc-the-r1cs-witness-vector-simplified">The R1CS Witness
+        Vector (Simplified)</a></li>
+        <li><a href="#cycle-1-load-r1-3"
+        id="toc-cycle-1-load-r1-3">Cycle 1: <code>LOAD r1, 3</code></a>
+        <ul>
+        <li><a href="#module-operations"
+        id="toc-module-operations">Module Operations</a></li>
+        <li><a href="#witness-vector-z₁"
+        id="toc-witness-vector-z₁">Witness Vector z₁</a></li>
+        </ul></li>
+        <li><a href="#cycle-2-load-r2-5"
+        id="toc-cycle-2-load-r2-5">Cycle 2:
+        <code>LOAD r2, 5</code></a></li>
+        <li><a href="#cycle-3-add-r3-r1-r2"
+        id="toc-cycle-3-add-r3-r1-r2">Cycle 3:
+        <code>ADD r3, r1, r2</code> ⭐</a>
+        <ul>
+        <li><a href="#module-operations-1"
+        id="toc-module-operations-1">Module Operations</a></li>
+        <li><a href="#witness-vector-z₃"
+        id="toc-witness-vector-z₃">Witness Vector z₃</a></li>
+        <li><a href="#data-flow" id="toc-data-flow">Data Flow</a></li>
+        <li><a href="#r1cs-constraints" id="toc-r1cs-constraints">R1CS
+        Constraints</a></li>
+        </ul></li>
+        <li><a href="#cycle-4-store-r3-100r1"
+        id="toc-cycle-4-store-r3-100r1">Cycle 4:
+        <code>STORE r3, 100(r1)</code></a>
+        <ul>
+        <li><a href="#module-operations-2"
+        id="toc-module-operations-2">Module Operations</a></li>
+        <li><a href="#witness-vector-z₄"
+        id="toc-witness-vector-z₄">Witness Vector z₄</a></li>
+        <li><a href="#r1cs-constraints-1"
+        id="toc-r1cs-constraints-1">R1CS Constraints</a></li>
+        </ul></li>
+        <li><a href="#attack-scenario-1-wrong-ram-address"
+        id="toc-attack-scenario-1-wrong-ram-address">Attack Scenario 1:
+        Wrong RAM Address</a>
+        <ul>
+        <li><a href="#evil-witness" id="toc-evil-witness">Evil
+        Witness</a></li>
+        <li><a href="#what-each-module-sees"
+        id="toc-what-each-module-sees">What Each Module Sees</a></li>
+        </ul></li>
+        <li><a href="#attack-scenario-2-the-225-bug"
+        id="toc-attack-scenario-2-the-225-bug">Attack Scenario 2: The
+        2+2=5 Bug</a>
+        <ul>
+        <li><a href="#evil-witness-1" id="toc-evil-witness-1">Evil
+        Witness</a></li>
+        <li><a href="#what-each-module-sees-1"
+        id="toc-what-each-module-sees-1">What Each Module Sees</a></li>
+        </ul></li>
+        <li><a href="#why-r1cs-is-glue" id="toc-why-r1cs-is-glue">Why
+        R1CS is “Glue”</a>
+        <ul>
+        <li><a href="#without-r1cs" id="toc-without-r1cs">Without
+        R1CS</a></li>
+        <li><a href="#with-r1cs" id="toc-with-r1cs">With R1CS</a></li>
+        </ul></li>
+        <li><a href="#complete-4-cycle-trace"
+        id="toc-complete-4-cycle-trace">Complete 4-Cycle Trace</a></li>
+        <li><a href="#summary" id="toc-summary">Summary</a>
+        <ul>
+        <li><a href="#key-takeaways" id="toc-key-takeaways">Key
+        Takeaways</a></li>
+        </ul></li>
+        </ul>
+      </nav>
+            <article><section id="overview" class="level2">
+<h2>Overview</h2>
+<div class="remark">
+<p><strong>Jolt’s architecture has three components:</strong></p>
+<ol type="1">
+<li><strong>Shout</strong> (read-only memory) - Bytecode fetching +
+instruction lookups</li>
+<li><strong>Twist</strong> (read-write memory) - Register + RAM temporal
+consistency</li>
+<li><strong>R1CS</strong> (glue) - Enforces arithmetic + forces modules
+to agree</li>
+</ol>
+<p><strong>R1CS doesn’t prove computation correctness.</strong> It
+proves <strong>consistency</strong> by forcing Twist and Shout to use
+the same witness values and enforcing arithmetic relationships.</p>
+</div>
+</section>
+<section id="pedagogical-simplifications" class="level2">
+<h2>Pedagogical Simplifications</h2>
+<p>This document uses a <strong>simplified witness vector z</strong> to
+teach core concepts. The real system: - Twist maintains large sparse
+matrices (T×K) internally - Shout maintains bytecode and lookup tables
+internally<br />
+- R1CS witness (~20 values/cycle) is just the <strong>interface</strong>
+between modules</p>
+<p>For details on the real implementation, see the companion document:
+<a href="jolt-full.html">From Pedagogical Model to Real Jolt</a></p>
+</section>
+<section id="jolts-three-components" class="level2">
+<h2>Jolt’s Three Components</h2>
+<p>At a high level Jolt can be thought to be composed of two components
+glued together by a third component.</p>
+<p><strong>Shout (read-only memory):</strong> - Fetches instructions
+from bytecode - Queries lookup tables (e.g., ADD, SUB operations) -
+Tables can be huge (<span class="math inline">\(2^128\)</span> entries)
+but there are ways to handle that efficiently, without materialising
+these massive tables in practice. We don’t conern ourselves with those
+details for now.</p>
+<p><strong>Twist (read-write memory):</strong> - Tracks register + RAM
+state evolution - Proves “reads return last written value” - Uses sparse
+matrices (only ~1 access per cycle out of millions of locations)</p>
+<p><strong>R1CS (arithmetic glue):</strong> - Forces Shout and Twist to
+agree on shared values - Enforces arithmetic (e.g., address = base +
+offset) - Updates program counter</p>
+</section>
+<section id="the-example-program" class="level2">
+<h2>The Example Program</h2>
+<p>Toy assembly language <code>RISK-99</code> with 4 instructions:</p>
+<div class="highlight"><pre><span></span><span class="nf">Cycle</span><span class="w"> </span><span class="mi">1</span><span class="p">:</span><span class="w">  </span><span class="no">LOAD</span><span class="w"> </span><span class="no">r1</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="w">        </span><span class="c1"># Put 3 in register 1</span>
+<span class="nf">Cycle</span><span class="w"> </span><span class="mi">2</span><span class="p">:</span><span class="w">  </span><span class="no">LOAD</span><span class="w"> </span><span class="no">r2</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="w">        </span><span class="c1"># Put 5 in register 2</span>
+<span class="nf">Cycle</span><span class="w"> </span><span class="mi">3</span><span class="p">:</span><span class="w">  </span><span class="no">ADD</span><span class="w">  </span><span class="no">r3</span><span class="p">,</span><span class="w"> </span><span class="no">r1</span><span class="p">,</span><span class="w"> </span><span class="no">r2</span><span class="w">   </span><span class="c1"># r3 = r1 + r2</span>
+<span class="nf">Cycle</span><span class="w"> </span><span class="mi">4</span><span class="p">:</span><span class="w">  </span><span class="no">STORE</span><span class="w"> </span><span class="no">r3</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">(</span><span class="no">r1</span><span class="p">)</span><span class="w"> </span><span class="c1"># Store r3 to RAM[r1 + 100]</span>
+</pre></div>
+
+<p><strong>Expected result:</strong> <code>r3 = 8</code>,
+<code>RAM[103] = 8</code></p>
+<section class="level4 important">
+<h4><span class="callout-label"></span> One instruction = One cycle =
+One R1CS witness vector z</h4>
+</section>
+<hr />
+</section>
+<section id="the-r1cs-witness-vector-simplified" class="level2">
+<h2>The R1CS Witness Vector (Simplified)</h2>
+<p>The R1CS witness is the <strong>interface</strong> between Twist and
+Shout. Each cycle has:</p>
+<table>
+<thead>
+<tr>
+<th>Index</th>
+<th>Variable</th>
+<th>Source</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>z[0]</td>
+<td>1</td>
+<td>Constant</td>
+<td>Always 1</td>
+</tr>
+<tr>
+<td>z[1]</td>
+<td>PC</td>
+<td>Shout</td>
+<td>Program Counter</td>
+</tr>
+<tr>
+<td>z[2]</td>
+<td>rs1</td>
+<td>Shout</td>
+<td>Register NUMBER for source 1</td>
+</tr>
+<tr>
+<td>z[3]</td>
+<td>rs2</td>
+<td>Shout</td>
+<td>Register NUMBER for source 2</td>
+</tr>
+<tr>
+<td>z[4]</td>
+<td>rd</td>
+<td>Shout</td>
+<td>Register NUMBER for destination</td>
+</tr>
+<tr>
+<td>z[5]</td>
+<td>Imm</td>
+<td>Shout</td>
+<td>Immediate value</td>
+</tr>
+<tr>
+<td>z[6]</td>
+<td>RS1_Read</td>
+<td>Twist</td>
+<td>VALUE read from register rs1</td>
+</tr>
+<tr>
+<td>z[7]</td>
+<td>RS2_Read</td>
+<td>Twist</td>
+<td>VALUE read from register rs2</td>
+</tr>
+<tr>
+<td>z[8]</td>
+<td>RD_Write</td>
+<td>Twist</td>
+<td>VALUE to write to rd</td>
+</tr>
+<tr>
+<td>z[9]</td>
+<td>RAM_Addr</td>
+<td>R1CS</td>
+<td>RAM address (computed)</td>
+</tr>
+<tr>
+<td>z[10]</td>
+<td>RAM_Read</td>
+<td>Twist</td>
+<td>Value read from RAM</td>
+</tr>
+<tr>
+<td>z[11]</td>
+<td>RAM_Write</td>
+<td>Twist</td>
+<td>Value to write to RAM</td>
+</tr>
+<tr>
+<td>z[12]</td>
+<td>LookupOp1</td>
+<td>Interface</td>
+<td>First operand to Shout</td>
+</tr>
+<tr>
+<td>z[13]</td>
+<td>LookupOp2</td>
+<td>Interface</td>
+<td>Second operand to Shout</td>
+</tr>
+<tr>
+<td>z[14]</td>
+<td>LookupOut</td>
+<td>Shout</td>
+<td>Result from Shout</td>
+</tr>
+<tr>
+<td>z[15]</td>
+<td>NextPC</td>
+<td>R1CS</td>
+<td>Next PC</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><code>z[2,3,4]</code> = Which registers (addresses: r1, r2,
+r3…)</li>
+<li><code>z[6,7,8]</code> = What values those registers contain</li>
+</ul>
+<p><strong>What’s hidden:</strong> - Twist’s sparse matrices:
+<code>ra[j,k], wa[j,k], val[j,k]</code> (T×K size) - Shout’s tables:
+Bytecode, lookup tables (2^128+ entries)</p>
+<hr />
+</section>
+<section id="cycle-1-load-r1-3" class="level2">
+<h2>Cycle 1: <code>LOAD r1, 3</code></h2>
+<section id="module-operations" class="level3">
+<h3>Module Operations</h3>
+<p><strong>Shout:</strong></p>
+<ol type="1">
+<li>Fetches bytecode at PC=0 → decodes “LOAD rd=1, imm=3”</li>
+<li>Lookup: MOVE(3) → 3</li>
+</ol>
+<p><strong>Twist:</strong> - Writes value 3 to register #1</p>
+<p><strong>R1CS:</strong> - Enforces: <code>LookupOut = RD_Write</code>
+(z[14] = z[8]) - Updates PC: NextPC = 4</p>
+</section>
+<section id="witness-vector-z₁" class="level3">
+<h3>Witness Vector z₁</h3>
+<pre><code>z₁ = [1,  0,  0,  0,  1,  3,  0,  0,  3,  0,  0,  0,  3,  0,  3,  4]</code></pre>
+<p>Key values: - z₁[4] = 1 (rd = register 1) - z₁[5] = 3 (immediate) -
+z₁[8] = 3 (write value) - z₁[14] = 3 (lookup result)</p>
+<p><strong>R1CS constraint:</strong> z₁[14] = z₁[8] → 3 = 3 ✓</p>
+<hr />
+</section>
+</section>
+<section id="cycle-2-load-r2-5" class="level2">
+<h2>Cycle 2: <code>LOAD r2, 5</code></h2>
+<p>Similar to Cycle 1, but writing 5 to register 2.</p>
+<pre><code>z₂ = [1,  4,  0,  0,  2,  5,  0,  0,  5,  0,  0,  0,  5,  0,  5,  8]</code></pre>
+<p><strong>R1CS constraints:</strong> - z₂[14] = z₂[8] → 5 = 5 ✓ (lookup
+= write) - z₁[15] = z₂[1] → 4 = 4 ✓ (PC continuity)</p>
+<hr />
+</section>
+<section id="cycle-3-add-r3-r1-r2" class="level2">
+<h2>Cycle 3: <code>ADD r3, r1, r2</code> ⭐</h2>
+<p>This cycle shows all three modules working together!</p>
+<section id="module-operations-1" class="level3">
+<h3>Module Operations</h3>
+<p><strong>Shout:</strong> 1. Fetches bytecode at PC=8 → decodes “ADD
+rs1=1, rs2=2, rd=3” 2. Waits for operand values from interface 3.
+Lookup: ADD(3, 5) → 8</p>
+<p><strong>Twist:</strong> 1. Reads register #1 → proves value is 3 2.
+Reads register #2 → proves value is 5 3. Later writes 8 to register
+#3</p>
+<p><strong>R1CS:</strong> - Routes: Twist’s reads → Shout’s inputs
+(z[6]→z[12], z[7]→z[13]) - Routes: Shout’s output → Twist’s write
+(z[14]→z[8]) - Can optionally verify: z[13] = z[6] + z[7] (arithmetic
+check)</p>
+</section>
+<section id="witness-vector-z₃" class="level3">
+<h3>Witness Vector z₃</h3>
+<pre><code>z₃ = [1,  8,  1,  2,  3,  0,  3,  5,  8,  0,  0,  0,  3,  5,  8,  12]
+      │   │   │   │   │   │   │   │   │   │   │   │   │   │   │   │
+      0   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15</code></pre>
+<p>Key values: - z₃[2]=1, z₃[3]=2, z₃[4]=3 (which registers - from
+Shout) - z₃[6]=3, z₃[7]=5 (register values - from Twist) - z₃[12]=3,
+z₃[13]=5 (lookup inputs) - z₃[14]=8 (lookup output - from Shout) -
+z₃[8]=8 (write value - to Twist)</p>
+</section>
+<section id="data-flow" class="level3">
+<h3>Data Flow</h3>
+<pre><code>Shout (bytecode) → Decodes: ADD rs1=1, rs2=2, rd=3
+                       ↓
+Twist (memory)   → Reads: r1=3, r2=5
+                       ↓ (via R1CS interface)
+Shout (lookup)   → Computes: ADD(3,5) = 8
+                       ↓ (via R1CS interface)
+Twist (memory)   → Writes: r3 = 8</code></pre>
+</section>
+<section id="r1cs-constraints" class="level3">
+<h3>R1CS Constraints</h3>
+<pre><code>1. Operand routing:
+   z₃[6] = z₃[12]  →  3 = 3 ✓  (rs1_read → lookup_op1)
+   z₃[7] = z₃[13]  →  5 = 5 ✓  (rs2_read → lookup_op2)
+
+2. Optional arithmetic check:
+   z₃[13] = z₃[6] + z₃[7]  →  5 = 3+5 ✓  (verify ADD in R1CS too)
+
+3. Result routing:
+   z₃[14] = z₃[8]  →  8 = 8 ✓  (lookup_out → rd_write)</code></pre>
+<section class="level4 important">
+<h4><span class="callout-label"></span> What Each Module Proves Shout:
+“ADD(3,5)=8 per lookup table” + “bytecode has ADD instruction” Twist:
+“r1 contains 3, r2 contains 5” + “wrote 8 to r3” R1CS: “Values flow
+correctly” + “arithmetic is correct”</h4>
+</section>
+<hr />
+</section>
+</section>
+<section id="cycle-4-store-r3-100r1" class="level2">
+<h2>Cycle 4: <code>STORE r3, 100(r1)</code></h2>
+<p>This cycle shows RAM operations and R1CS computing addresses!</p>
+<section id="module-operations-2" class="level3">
+<h3>Module Operations</h3>
+<p><strong>Shout:</strong> - Fetches bytecode at PC=12 → decodes “STORE
+rs1=1, rs2=3, imm=100” - No lookup needed (STORE is just memory
+operation)</p>
+<p><strong>Twist:</strong> 1. Reads register #1 → proves value is 3 2.
+Reads register #3 → proves value is 8 3. Waits for R1CS to compute RAM
+address 4. Writes 8 to RAM[103]</p>
+<p><strong>R1CS:</strong> - <strong>Computes:</strong> RAM_Address =
+RS1_Read + Imm = 3 + 100 = 103 - Routes: RS2_Read → RAM_Write (z[7] →
+z[11])</p>
+</section>
+<section id="witness-vector-z₄" class="level3">
+<h3>Witness Vector z₄</h3>
+<pre><code>z₄ = [1, 12, 1, 3, 0, 100, 3, 8, 0, 103, 0, 8, 0, 0, 0, 16]</code></pre>
+<p>Key values: - z₄[2]=1, z₄[3]=3 (reading r1 and r3) - z₄[5]=100
+(immediate offset) - z₄[6]=3, z₄[7]=8 (values from registers) -
+z₄[9]=103 (RAM address - computed by R1CS!) - z₄[11]=8 (RAM write
+value)</p>
+</section>
+<section id="r1cs-constraints-1" class="level3">
+<h3>R1CS Constraints</h3>
+<pre><code>1. Address calculation (R1CS does arithmetic!):
+   z₄[9] = z₄[6] + z₄[5]
+   103 = 3 + 100 ✓
+
+2. Value routing:
+   z₄[11] = z₄[7]
+   8 = 8 ✓</code></pre>
+<section class="level4 tip">
+<h4><span class="callout-label"></span> Key Insight R1CS performs
+address arithmetic! Neither Shout nor Twist compute “3+100=103”. R1CS
+enforces this constraint, and Twist trusts the result.</h4>
+</section>
+<hr />
+</section>
+</section>
+<section id="attack-scenario-1-wrong-ram-address" class="level2">
+<h2>Attack Scenario 1: Wrong RAM Address</h2>
+<section id="evil-witness" class="level3">
+<h3>Evil Witness</h3>
+<pre><code>z₄_evil = [1, 12, 1, 3, 0, 100, 3, 8, 0, 200, 0, 8, 0, 0, 0, 16]
+                                         ↑↑↑
+                              Prover claims 200 instead of 103!</code></pre>
+</section>
+<section id="what-each-module-sees" class="level3">
+<h3>What Each Module Sees</h3>
+<p><strong>Shout:</strong> ✓ “Bytecode says STORE with offset 100”<br />
+<strong>Twist:</strong> ✓ “Read r1→3, r3→8, wrote 8 to RAM[200]”
+(temporally consistent!)</p>
+<p><strong>R1CS catches it:</strong></p>
+<pre><code>Constraint: z₄[6] + z₄[5] = z₄[9]
+            3 + 100 = 200?
+            103 ≠ 200  ❌
+
+VERIFICATION FAILS!</code></pre>
+<hr />
+</section>
+</section>
+<section id="attack-scenario-2-the-225-bug" class="level2">
+<h2>Attack Scenario 2: The 2+2=5 Bug</h2>
+<section id="evil-witness-1" class="level3">
+<h3>Evil Witness</h3>
+<pre><code>z₃_evil = [1, 8, 1, 2, 3, 0, 3, 5, 99, 0, 0, 0, 3, 5, 8, 12]
+                                  ↑↑             ↑
+                            Write 99!      Lookup=8</code></pre>
+</section>
+<section id="what-each-module-sees-1" class="level3">
+<h3>What Each Module Sees</h3>
+<p><strong>Shout:</strong> ✓ “ADD(3,5)=8 per table” + ✓ “Bytecode is
+ADD”<br />
+<strong>Twist:</strong> ✓ “Read r1→3, r2→5, wrote 99 to r3”
+(consistent!)</p>
+<p><strong>R1CS catches it:</strong></p>
+<pre><code>Constraint: z₃[14] = z₃[8]
+            8 = 99?
+            8 ≠ 99  ❌
+
+VERIFICATION FAILS!</code></pre>
+<section class="level4 important">
+<h4><span class="callout-label"></span> Why All Three Are Needed - Shout
+alone: Can’t verify memory consistency - Twist alone: Can’t verify
+computation correctness - R1CS alone: Can’t verify individual
+operations</h4>
+<p><strong>Together:</strong> Provably correct execution!</p>
+</section>
+<hr />
+</section>
+</section>
+<section id="why-r1cs-is-glue" class="level2">
+<h2>Why R1CS is “Glue”</h2>
+<section id="without-r1cs" class="level3">
+<h3>Without R1CS</h3>
+<pre><code>Shout:  &quot;ADD(3,5)=8&quot; ✓
+Twist:  &quot;Wrote 99&quot;   ✓
+
+Both verify independently, but answer is wrong!</code></pre>
+</section>
+<section id="with-r1cs" class="level3">
+<h3>With R1CS</h3>
+<pre><code>┌──────────────┐      R1CS forces      ┌──────────────┐
+│ Shout:       │       agreement        │ Twist:       │
+│ Lookup=8     │ ◄─────────────────────►│ Write=8      │
+└──────────────┘   z[14] MUST = z[8]   └──────────────┘</code></pre>
+<p>R1CS proves consistency by: 1. Forcing same witness vector z for all
+modules 2. Enforcing arithmetic relationships 3. Routing values between
+modules</p>
+<hr />
+</section>
+</section>
+<section id="complete-4-cycle-trace" class="level2">
+<h2>Complete 4-Cycle Trace</h2>
+<pre><code>z₁ = [1, 0,  0, 0, 1, 3,   0, 0, 3, 0,   0, 0, 3, 0, 3,  4]   ← LOAD r1, 3
+z₂ = [1, 4,  0, 0, 2, 5,   0, 0, 5, 0,   0, 0, 5, 0, 5,  8]   ← LOAD r2, 5
+z₃ = [1, 8,  1, 2, 3, 0,   3, 5, 8, 0,   0, 0, 3, 5, 8, 12]   ← ADD r3, r1, r2
+z₄ = [1, 12, 1, 3, 0, 100, 3, 8, 0, 103, 0, 8, 0, 0, 0, 16]   ← STORE r3, 100(r1)
+
+Legend:
+[1, PC, rs1, rs2, rd, imm, RS1_Read, RS2_Read, RD_Write, 
+ RAM_Addr, RAM_Read, RAM_Write, LookupOp1, LookupOp2, LookupOut, NextPC]</code></pre>
+<p><strong>Final state:</strong> r3 = 8 ✓, RAM[103] = 8 ✓</p>
+<hr />
+</section>
+<section id="summary" class="level2">
+<h2>Summary</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Component</th>
+<th>What it proves</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Shout</strong></td>
+<td>Correct bytecode + computation</td>
+<td>Read-only memory sum-checks</td>
+</tr>
+<tr>
+<td><strong>Twist</strong></td>
+<td>Memory temporal consistency</td>
+<td>Read-write memory sum-checks</td>
+</tr>
+<tr>
+<td><strong>R1CS</strong></td>
+<td>Arithmetic + inter-module consistency</td>
+<td>~60 constraints per cycle</td>
+</tr>
+</tbody>
+</table>
+<section id="key-takeaways" class="level3">
+<h3>Key Takeaways</h3>
+<ol type="1">
+<li><p><strong>Three-layer architecture:</strong> Shout (read-only),
+Twist (read-write), R1CS (glue)</p></li>
+<li><p><strong>R1CS witness is the interface:</strong> The z vector
+(~16-20 values) is what crosses module boundaries. Internal witnesses
+are much larger (T×K matrices, 2^128 tables).</p></li>
+<li><p><strong>Division of labor:</strong></p>
+<ul>
+<li>Shout proves: “Fetched right instruction, lookup correct”</li>
+<li>Twist proves: “Memory reads/writes consistent”</li>
+<li>R1CS proves: “Modules agree on values, arithmetic correct”</li>
+</ul></li>
+<li><p><strong>Attack resistance:</strong> Each module’s proof can
+verify independently, but R1CS catches inconsistencies between
+modules.</p></li>
+<li><p><strong>One cycle = One z:</strong> Each instruction gets its own
+R1CS witness vector with the same structure (“uniform” R1CS).</p></li>
+</ol>
+<section class="level4 tip">
+<h4><span class="callout-label"></span> Next Steps To see how the real
+system differs from this pedagogical model, read the companion document:
+“From Pedagogical Model to Real Jolt”</h4>
+<p>Key differences: - Twist uses sparse matrices <code>ra[j,k]</code>,
+<code>wa[j,k]</code>, <code>val[j,k]</code> internally - Memory evolves
+via increments: <code>inc[j,k] = wa[j,k]·(wv[j,k] - val[j,k])</code> -
+Lookup tables can be 2^128 entries (but structured) - Everything
+expressed as multilinear extensions (MLEs)</p>
+</section>
+</section>
+</section></article>
+    </main>
+    <footer class="site-footer">
+      <p>&copy; 2025 On A Tangent Ltd.</p>
+      <p class="attribution">
+        Website template colors inspired by
+        <a
+          href="https://gendignoux.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Guillaume Endignoux</a
+        >
+      </p>
+    </footer>
+
+
+    <script>
+      // Theme toggle
+      const themeToggle = document.querySelector(".theme-toggle");
+      const html = document.documentElement;
+      const lightIcon = document.querySelector(".theme-toggle-light");
+      const darkIcon = document.querySelector(".theme-toggle-dark");
+      const currentTheme =
+        localStorage.getItem("theme") ||
+        (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
+
+      html.setAttribute("data-theme", currentTheme);
+      if (currentTheme === "dark") {
+        lightIcon.style.display = "none";
+        darkIcon.style.display = "block";
+      } else {
+        lightIcon.style.display = "block";
+        darkIcon.style.display = "none";
+      }
+
+      themeToggle.onclick = () => {
+        const newTheme =
+          html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+
+        if (newTheme === "dark") {
+          lightIcon.style.display = "none";
+          darkIcon.style.display = "block";
+        } else {
+          lightIcon.style.display = "block";
+          darkIcon.style.display = "none";
+        }
+      };
+
+      // Mobile menu toggle
+      document.querySelector(".menu-toggle").onclick = () =>
+        document.querySelector(".nav-group").classList.toggle("is-active");
+
+      // Auto-highlight current page
+      const currentPath = window.location.pathname;
+      const currentPage = currentPath.split("/").pop() || "index.html";
+      document.querySelectorAll(".main-nav a").forEach((link) => {
+        const href = link.getAttribute("href").replace("../", "");
+        if (
+          href === currentPage ||
+          (currentPage === "index.html" && href === "index.html")
+        ) {
+          link.classList.add("active");
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Citation tooltips
+        const refs = document.querySelector("#refs");
+        if (refs) {
+          document
+            .querySelectorAll('.citation a[href^="#ref-"]')
+            .forEach(function (cite) {
+              const refId = cite.getAttribute("href").substring(1);
+              const refItem = document.getElementById(refId);
+
+              if (refItem) {
+                const urlLink = refItem.querySelector('a[href^="http"]');
+                if (urlLink) {
+                  cite.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    window.open(urlLink.href, "_blank");
+                  });
+                  cite.style.cursor = "pointer";
+                  cite.title = "Click to open source";
+                }
+
+                const tooltip = document.createElement("div");
+                tooltip.className = "citation-tooltip";
+                const cslEntry = refItem.querySelector(".csl-entry");
+                tooltip.textContent = cslEntry
+                  ? cslEntry.textContent
+                  : refItem.textContent;
+                document.body.appendChild(tooltip);
+
+                cite.addEventListener("mouseenter", function (e) {
+                  const rect = cite.getBoundingClientRect();
+                  tooltip.style.display = "block";
+                  tooltip.style.left =
+                    Math.min(rect.left, window.innerWidth - 420) + "px";
+                  tooltip.style.top = rect.bottom + 5 + "px";
+                });
+
+                cite.addEventListener("mouseleave", function () {
+                  tooltip.style.display = "none";
+                });
+              }
+            });
+        }
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll(".highlight").forEach(function (block) {
+          const btn = document.createElement("button");
+          btn.className = "copy-btn";
+          btn.textContent = "Copy";
+          btn.setAttribute("aria-label", "Copy code to clipboard");
+          block.insertBefore(btn, block.firstChild);
+
+          const code = block.querySelector("pre");
+
+          btn.addEventListener("click", async function () {
+            const text = code.textContent;
+
+            try {
+              await navigator.clipboard.writeText(text);
+              btn.textContent = "Copied!";
+              btn.style.background = "#10b981";
+
+              setTimeout(() => {
+                btn.textContent = "Copy";
+                btn.style.background = "";
+              }, 2000);
+            } catch (err) {
+              const textarea = document.createElement("textarea");
+              textarea.value = text;
+              textarea.style.position = "fixed";
+              textarea.style.opacity = "0";
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand("copy");
+              document.body.removeChild(textarea);
+
+              btn.textContent = "Copied!";
+              setTimeout(() => {
+                btn.textContent = "Copy";
+              }, 2000);
+            }
+          });
+        });
+
+        // Add data-tag to category tags
+        document.querySelectorAll(".category-tag").forEach((tag) => {
+          const tagName = tag.textContent.trim().toLowerCase();
+          tag.setAttribute("data-tag", tagName);
+        });
+
+        // Convert author text to styled tags
+        const authorSpan = document.querySelector(".article-meta .authors");
+        if (authorSpan) {
+          const authorText = authorSpan.textContent.replace("By ", "").trim();
+          const authors = authorText.split(",").map((a) => a.trim());
+
+          authorSpan.textContent = "By ";
+
+          authors.forEach((author, index) => {
+            const tag = document.createElement("span");
+            tag.className = "category-tag";
+            tag.textContent = author;
+            tag.setAttribute("data-tag", author.toLowerCase());
+            authorSpan.appendChild(tag);
+
+            if (index < authors.length - 1) {
+              authorSpan.appendChild(document.createTextNode(", "));
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
