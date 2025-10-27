@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Advent Of Jolt</title>
+    <title>Sumcheck Central</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script
       async
@@ -113,37 +113,80 @@
     </header>
     <main class="article-content">
       <header class="article-header">
-        <h1>Advent Of Jolt</h1>
+        <h1>Sumcheck Central</h1>
         <div class="article-meta">
           <div class="meta-left">
                          <span class="category-tag">jolt</span>
              
           </div>
           <div class="meta-right">
-            <time>2025-10-24</time>             <span class="authors"
+            <time>2025-10-25</time>             <span class="authors"
               >By Ari</span
             >
                       </div>
         </div>
       </header>
-            <article><p>The objective of this post is to take following
-figure from the <a href="https://jolt.a16zcrypto.com">Jolt</a>
-documentation, and walk the reader through an actual real example of the
-proving in action.</p>
-<div class="svg-container" style="max-width: 400px;">
-<p><img src="/assets/jolt-working-notes/jolt-prover-overview.svg" /></p>
-</div>
-<p>For each component, we will explicitly describe the input and output
-components, and detail exactly how we compute them. We start with the
-setup before we get to actually proving claims.</p>
-<ol type="1">
-<li><a href="/posts/day_1a.html">Day 1: The Bytecode and The
-Trace</a></li>
-<li><a href="/posts/day_1b.html">Day 2: The Committed
-Polynomials</a></li>
-<li><a href="">Day 3-4: The Sumcheccks and Their DAGS</a></li>
-<li><a href="">Day 5: Verification</a></li>
-</ol></article>
+            <nav id="TOC">
+        <h2>Contents</h2>
+        <ul>
+        <li><a href="#stage-1-sumcheck" id="toc-stage-1-sumcheck">Stage
+        1 Sumcheck</a></li>
+        </ul>
+      </nav>
+            <article><p>Meet the players</p>
+<div class="highlight"><pre><span></span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">spartan_dag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">SpartanDag</span><span class="p">::</span><span class="o">&lt;</span><span class="nf">F</span><span class="o">&gt;</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">padded_trace_length</span><span class="p">);</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">lookups_dag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">LookupsDag</span><span class="p">::</span><span class="n">default</span><span class="p">();</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">registers_dag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">RegistersDag</span><span class="p">::</span><span class="n">default</span><span class="p">();</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">ram_dag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">RamDag</span><span class="p">::</span><span class="n">new_prover</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state_manager</span><span class="p">);</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">bytecode_dag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">BytecodeDag</span><span class="p">::</span><span class="n">default</span><span class="p">();</span><span class="w"> </span>
+</pre></div>
+
+<section id="stage-1-sumcheck" class="level2">
+<h2>Stage 1 Sumcheck</h2>
+<div class="highlight"><pre><span></span><span class="n">tracing</span><span class="p">::</span><span class="n">info</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Stage 1 proving (univariate skip first round)&quot;</span><span class="p">);</span>
+<span class="n">spartan_dag</span>
+<span class="w">    </span><span class="p">.</span><span class="n">stage1_prover_uni_skip</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">state_manager</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">context</span><span class="p">(</span><span class="s">&quot;Stage 1 univariate skip first round&quot;</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
+
+<span class="c1">// Batch the stage1 remainder instances (outer-remaining + extras)</span>
+<span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">remainder_instances</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">spartan_dag</span>
+<span class="w">    </span><span class="p">.</span><span class="n">stage1_prover_instances</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">state_manager</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">into_iter</span><span class="p">()</span>
+<span class="w">    </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">remainder_instances_mut</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;&amp;</span><span class="k">mut</span><span class="w"> </span><span class="k">dyn</span><span class="w"> </span><span class="nf">SumcheckInstance</span><span class="o">&lt;</span><span class="nf">F</span><span class="p">,</span><span class="w"> </span><span class="nf">ProofTranscript</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">remainder_instances</span>
+<span class="w">        </span><span class="p">.</span><span class="n">iter_mut</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">instance</span><span class="o">|</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="o">**</span><span class="n">instance</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="k">dyn</span><span class="w"> </span><span class="nf">SumcheckInstance</span><span class="o">&lt;</span><span class="nf">F</span><span class="p">,</span><span class="w"> </span><span class="nf">ProofTranscript</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="w">        </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span>
+
+<span class="kd">let</span><span class="w"> </span><span class="n">transcript</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_manager</span><span class="p">.</span><span class="n">get_transcript</span><span class="p">();</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">accumulator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_manager</span><span class="p">.</span><span class="n">get_prover_accumulator</span><span class="p">();</span>
+<span class="n">tracing</span><span class="p">::</span><span class="n">info</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Stage 1 proving (remainder batch)&quot;</span><span class="p">);</span>
+<span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">stage1_remainder_proof</span><span class="p">,</span><span class="w"> </span><span class="n">_r_stage1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">BatchedSumcheck</span><span class="p">::</span><span class="n">prove</span><span class="p">(</span>
+<span class="w">    </span><span class="n">remainder_instances_mut</span><span class="p">,</span>
+<span class="w">    </span><span class="nb">Some</span><span class="p">(</span><span class="n">accumulator</span><span class="p">.</span><span class="n">clone</span><span class="p">()),</span>
+<span class="w">    </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="o">*</span><span class="n">transcript</span><span class="p">.</span><span class="n">borrow_mut</span><span class="p">(),</span>
+<span class="p">);</span>
+
+<span class="n">state_manager</span><span class="p">.</span><span class="n">proofs</span><span class="p">.</span><span class="n">borrow_mut</span><span class="p">().</span><span class="n">insert</span><span class="p">(</span>
+<span class="w">    </span><span class="nf">ProofKeys</span><span class="p">::</span><span class="nf">Stage1Sumcheck</span><span class="p">,</span>
+<span class="w">    </span><span class="nf">ProofData</span><span class="p">::</span><span class="nf">SumcheckProof</span><span class="p">(</span><span class="n">stage1_remainder_proof</span><span class="p">),</span>
+<span class="p">);</span>
+</pre></div>
+
+<p>Initial Observations Looking at this code, I can see:</p>
+<p>SpartanDag Structure: Acts as a state machine managing different
+sumcheck stages</p>
+<p>Holds a cached UniformSpartanKey (derived from padded_trace_length)
+Has a uni_skip_state that gets passed between stages</p>
+<p>Three Stages Visible:</p>
+<p>Stage 1: Outer sumcheck (with univariate-skip first round) Stage 2:
+Product virtualization Stage 3: Shift, instruction input, and product
+virtual inner checks</p>
+<p>Pattern per Stage:</p>
+<p>Uni-skip first round (for stages 1 &amp; 2 only) Then remainder
+sumcheck instances</p>
+</section></article>
     </main>
     <footer class="site-footer">
       <p>&copy; 2025 On A Tangent Ltd.</p>

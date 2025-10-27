@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Advent Of Jolt</title>
+    <title>Instruction Ra</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script
       async
@@ -113,37 +113,251 @@
     </header>
     <main class="article-content">
       <header class="article-header">
-        <h1>Advent Of Jolt</h1>
+        <h1>Instruction Ra</h1>
         <div class="article-meta">
           <div class="meta-left">
-                         <span class="category-tag">jolt</span>
+                         <span class="category-tag">category</span>
              
           </div>
           <div class="meta-right">
-            <time>2025-10-24</time>             <span class="authors"
+            <time>2025-10-27</time>             <span class="authors"
               >By Ari</span
             >
                       </div>
         </div>
       </header>
-            <article><p>The objective of this post is to take following
-figure from the <a href="https://jolt.a16zcrypto.com">Jolt</a>
-documentation, and walk the reader through an actual real example of the
-proving in action.</p>
-<div class="svg-container" style="max-width: 400px;">
-<p><img src="/assets/jolt-working-notes/jolt-prover-overview.svg" /></p>
-</div>
-<p>For each component, we will explicitly describe the input and output
-components, and detail exactly how we compute them. We start with the
-setup before we get to actually proving claims.</p>
-<ol type="1">
-<li><a href="/posts/day_1a.html">Day 1: The Bytecode and The
-Trace</a></li>
-<li><a href="/posts/day_1b.html">Day 2: The Committed
-Polynomials</a></li>
-<li><a href="">Day 3-4: The Sumcheccks and Their DAGS</a></li>
-<li><a href="">Day 5: Verification</a></li>
-</ol></article>
+            <nav id="TOC">
+        <h2>Contents</h2>
+        <ul>
+        <li><a href="#concrete-examples-with-real-data"
+        id="toc-concrete-examples-with-real-data">Concrete Examples with
+        Real Data</a>
+        <ul>
+        <li><a href="#example-1-addi-type-1---arithmetic"
+        id="toc-example-1-addi-type-1---arithmetic">Example 1: ADDI
+        (Type 1 - Arithmetic)</a></li>
+        <li><a href="#example-2-mul-type-1---arithmetic"
+        id="toc-example-2-mul-type-1---arithmetic">Example 2: MUL (Type
+        1 - Arithmetic)</a></li>
+        <li><a href="#example-3-andi-type-2---bitwise"
+        id="toc-example-3-andi-type-2---bitwise">Example 3: ANDI (Type 2
+        - Bitwise)</a></li>
+        <li><a href="#example-4-beq-type-2---comparison"
+        id="toc-example-4-beq-type-2---comparison">Example 4: BEQ (Type
+        2 - Comparison)</a></li>
+        </ul></li>
+        <li><a href="#visual-the-chunking-process"
+        id="toc-visual-the-chunking-process">Visual: The Chunking
+        Process</a></li>
+        </ul>
+      </nav>
+            <article><section id="concrete-examples-with-real-data"
+class="level2">
+<h2>Concrete Examples with Real Data</h2>
+<section id="example-1-addi-type-1---arithmetic" class="level3">
+<h3>Example 1: ADDI (Type 1 - Arithmetic)</h3>
+<p><strong>From the trace:</strong></p>
+<pre><code>Cycle 1: ADDI {
+    operands: { rd: 2, rs1: 2, imm: 288 }
+    register_state: {
+        rd: (2147487744, 2147488032),  // before → after
+        rs1: 2147487744
+    }
+}</code></pre>
+<p><strong>What happens:</strong></p>
+<pre><code>Step 1: Get inputs
+   rs1 = 2147487744
+   imm = 288
+
+Step 2: Compute in field (addition is cheap!)
+   result = 2147487744 + 288 = 2147488032
+
+Step 3: Form lookup address
+   address = result = 2147488032
+           = 0x80001120
+
+Step 4: Chunk into 16 bytes
+   0x00 00 00 00 00 00 00 00 00 00 00 00 80 00 11 20
+   └─┬─┘                           └─┬─┘ └─┬─┘ └─┬─┘
+    b0                              b12   b14   b15</code></pre>
+<p><strong>InstructionRa values for cycle 1:</strong></p>
+<pre><code>InstructionRa[0][1]  = 0    (0x00)
+InstructionRa[1][1]  = 0    (0x00)
+...
+InstructionRa[11][1] = 0    (0x00)
+InstructionRa[12][1] = 128  (0x80)
+InstructionRa[13][1] = 0    (0x00)
+InstructionRa[14][1] = 17   (0x11)
+InstructionRa[15][1] = 32   (0x20)</code></pre>
+<p><strong>Reconstructed address:</strong></p>
+<pre><code>0×256¹⁵ + 0×256¹⁴ + ... + 128×256³ + 0×256² + 17×256¹ + 32×256⁰
+= 2147488032 ✓
+
+This equals the RESULT!</code></pre>
+</section>
+<section id="example-2-mul-type-1---arithmetic" class="level3">
+<h3>Example 2: MUL (Type 1 - Arithmetic)</h3>
+<p><strong>From the trace:</strong></p>
+<pre><code>Cycle 14: MUL {
+    operands: { rd: 13, rs1: 34, rs2: 36 }
+    register_state: {
+        rd: (0, 144115188075855872),    // before → after
+        rs1: 2,
+        rs2: 72057594037927936
+    }
+}</code></pre>
+<p><strong>What happens:</strong></p>
+<pre><code>Step 1: Get inputs
+   rs1 = 2
+   rs2 = 72057594037927936 = 0x0100000000000000 (2⁵⁶)
+
+Step 2: Compute (multiplication is done in field)
+   result = 2 × 72057594037927936 = 144115188075855872
+          = 0x0200000000000000 (2⁵⁷)
+
+Step 3: Form lookup address
+   address = result = 144115188075855872
+
+Step 4: Chunk into bytes
+   0x00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00
+                           └─┬─┘
+                             b8</code></pre>
+<p><strong>InstructionRa values for cycle 14:</strong></p>
+<pre><code>InstructionRa[0][14]  = 0
+InstructionRa[1][14]  = 0
+...
+InstructionRa[7][14]  = 0
+InstructionRa[8][14]  = 2    (0x02) ← The product is here!
+InstructionRa[9][14]  = 0
+...
+InstructionRa[15][14] = 0</code></pre>
+<p><strong>Reconstructed address:</strong></p>
+<pre><code>2 × 256⁷ = 2 × 72057594037927936 = 144115188075855872 ✓
+
+This equals the RESULT of 2 × 72057594037927936!</code></pre>
+</section>
+<section id="example-3-andi-type-2---bitwise" class="level3">
+<h3>Example 3: ANDI (Type 2 - Bitwise)</h3>
+<p><strong>From the trace:</strong></p>
+<pre><code>Cycle 9: ANDI {
+    operands: { rd: 33, rs1: 32, imm: 0xFFFFFFFFFFFFFFF8 }
+    register_state: {
+        rd: (0, 2147459072),
+        rs1: 2147459072
+    }
+}</code></pre>
+<p><strong>What happens:</strong></p>
+<pre><code>Step 1: Get inputs
+   rs1 = 2147459072  = 0x000000007FFFA000
+   imm = -8 (as u64) = 0xFFFFFFFFFFFFFFF8
+
+Step 2: CAN&#39;T compute AND efficiently in field!
+   Need to look up: (rs1, imm) → result
+
+Step 3: Form lookup address by INTERLEAVING inputs
+   Interleave bits of (imm, rs1)  [note: order is (y, x)]
+   
+   rs1 = 0x000000007FFFA000
+       = 0000...0111111111111111101000000000000
+   
+   imm = 0xFFFFFFFFFFFFFFF8
+       = 1111...1111111111111111111111111000
+   
+   Interleaved (alternating bits: imm₀ rs1₀ imm₁ rs1₁ ...):
+       = 0x55555555555555557FFFFFFFDD555540
+
+Step 4: Chunk this interleaved value</code></pre>
+<p><strong>InstructionRa values for cycle 9:</strong></p>
+<pre><code>Address: 0x55555555555555557FFFFFFFDD555540
+         └────────────────────┬──────────────┘
+         These are the interleaved input bits!
+
+NOT the result (which would be 0x7FFFA000)</code></pre>
+</section>
+<section id="example-4-beq-type-2---comparison" class="level3">
+<h3>Example 4: BEQ (Type 2 - Comparison)</h3>
+<p><strong>From the trace:</strong></p>
+<pre><code>Cycle 7: BEQ {
+    operands: { rs1: 10, rs2: 12, imm: 84 }
+    register_state: {
+        rs1: 18446744073709551615,  // -1 as unsigned (all 1s)
+        rs2: 4
+    }
+}</code></pre>
+<p><strong>What happens:</strong></p>
+<pre><code>Step 1: Get inputs
+   rs1 = 18446744073709551615 = 0xFFFFFFFFFFFFFFFF (all 1s)
+   rs2 = 4                    = 0x0000000000000004
+
+Step 2: CAN&#39;T compute equality efficiently
+   Need to check: does rs1 == rs2?
+
+Step 3: Form lookup address by INTERLEAVING
+   rs1 = 1111111111111111111111111111111111111111111111111111111111111111
+   rs2 = 0000000000000000000000000000000000000000000000000000000000000100
+   
+   Interleave (rs2, rs1):
+   = 1010101010101010101010101010101010101010101010101010101010111010
+   = 0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA
+
+Step 4: Chunk this interleaved value</code></pre>
+<p><strong>InstructionRa values for cycle 7:</strong></p>
+<pre><code>InstructionRa[0][7]  = 170  (0xAA = 10101010)
+InstructionRa[1][7]  = 170  (0xAA)
+InstructionRa[2][7]  = 170  (0xAA)
+...
+InstructionRa[14][7] = 170  (0xAA)
+InstructionRa[15][7] = 186  (0xBA = 10111010)
+
+Pattern: 0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA
+         └──────────────┬──────────────────┘
+         Interleaved input bits!</code></pre>
+<p><strong>The lookup:</strong></p>
+<pre><code>Address: 0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA
+         = interleave(4, 0xFFFFFFFFFFFFFFFF)
+
+### Example 5: AND (Type 2 - Bitwise R-format)
+
+**From the trace:**</code></pre>
+<pre><code>Cycle 58: AND {
+    operands: { rd: 37, rs1: 37, rs2: 36 }
+    register_state: {
+        rd: (1, 1),
+        rs1: 1,
+        rs2: 255
+    }
+}</code></pre>
+<p><strong>What happens:</strong></p>
+<pre><code>Inputs: rs1 = 1, rs2 = 255
+Result: 1 &amp; 255 = 1
+
+InstructionRa stores:
+   interleave(rs2, rs1) = interleave(255, 1)
+   = 0x0000000000000000000000000000000000000000000000000000000000005557</code></pre>
+</section>
+</section>
+<section id="visual-the-chunking-process" class="level2">
+<h2>Visual: The Chunking Process</h2>
+<p>Regardless of type, the 128-bit address gets chunked into 16
+bytes:</p>
+<pre><code>128-bit Lookup Address
+┌──────────────────────────────────────────────────────────────┐
+│ Either: RESULT (Type 1) or INTERLEAVED_INPUTS (Type 2)      │
+└──────────────────────────────────────────────────────────────┘
+                           │
+                           │ Split into 16 chunks
+                           ▼
+    ┌────┬────┬────┬────┬────┬─  ─┬────┬────┐
+    │ b0 │ b1 │ b2 │ b3 │ b4 │ ... │b14 │b15 │
+    └────┴────┴────┴────┴────┴─  ─┴────┴────┘
+     8bit 8bit 8bit 8bit 8bit      8bit 8bit
+
+Each byte goes into one polynomial:
+InstructionRa[0][cycle] = b0  (high byte)
+InstructionRa[1][cycle] = b1
+...
+InstructionRa[15][cycle] = b15 (low byte)</code></pre>
+</section></article>
     </main>
     <footer class="site-footer">
       <p>&copy; 2025 On A Tangent Ltd.</p>

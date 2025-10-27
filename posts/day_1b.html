@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Title</title>
+    <title>Advent Of Jolt (Day 2): The Committed Polynomials</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script
       async
@@ -113,15 +113,15 @@
     </header>
     <main class="article-content">
       <header class="article-header">
-        <h1>Title</h1>
+        <h1>Advent Of Jolt (Day 2): The Committed Polynomials</h1>
         <div class="article-meta">
           <div class="meta-left">
-                         <span class="category-tag">category</span>
+                         <span class="category-tag">jolt</span>
              
           </div>
           <div class="meta-right">
-            <time>2025-10-24</time>             <span class="authors"
-              >By Your Name</span
+            <time>2025-10-26</time>             <span class="authors"
+              >By Ari</span
             >
                       </div>
         </div>
@@ -129,63 +129,435 @@
             <nav id="TOC">
         <h2>Contents</h2>
         <ul>
-        <li><a href="#meat-and-potatoes" id="toc-meat-and-potatoes">Meat
-        And Potatoes</a></li>
+        <li><a href="#from-trace-to-polynomials"
+        id="toc-from-trace-to-polynomials">From Trace To
+        Polynomials</a></li>
+        <li><a href="#pre-processing"
+        id="toc-pre-processing">Pre-Processing</a>
+        <ul>
+        <li><a href="#byte-code-preprocessing"
+        id="toc-byte-code-preprocessing">Byte Code
+        Preprocessing</a></li>
+        <li><a href="#worked-out-examples"
+        id="toc-worked-out-examples">Worked Out Examples</a></li>
+        <li><a href="#ram-pre-processing"
+        id="toc-ram-pre-processing">RAM Pre-processing</a></li>
+        </ul></li>
+        <li><a href="#we-are-done-with-pre-processing-now-polynomials"
+        id="toc-we-are-done-with-pre-processing-now-polynomials">We are
+        done with pre-processing; Now Polynomials</a></li>
+        <li><a href="#details-about-how-we-compute-each-polynomial"
+        id="toc-details-about-how-we-compute-each-polynomial">Details
+        about how we compute each polynomial</a></li>
         </ul>
       </nav>
-            <article><p>We shift focus to more critical portions of
-Jolt</p>
+            <article><p><strong>Quick Recap</strong></p>
+<p>In the <a href="/posts/day_1a.md">last post</a> we took a rust
+program, and transformed it into a RISC-V Binary. Using this binary file
+as input, we generate two intermediate representations : 1. The Bytecode
+object 2. The Jolt Execution trace. The byte code is just a vetor of
+<code>Instruction</code> <a
+href="https://github.com/abiswas3/jolt/blob/c5c1e7bc62cfa50fcd17350e5b014e9cc943a6e5/tracer/src/instruction/mod.rs#L379">structs</a>,
+where <code>Instruction</code> is a data structure we defined to
+represent one assembly instruction<a href="#fn1" class="footnote-ref"
+id="fnref1" role="doc-noteref"><sup>1</sup></a>. The exectution trace is
+a vector of <code>Cycle</code> <a
+href="https://github.com/abiswas3/jolt/blob/c5c1e7bc62cfa50fcd17350e5b014e9cc943a6e5/tracer/src/instruction/mod.rs#L393">structs</a>
+where <code>Cycle</code> is a jolt specific data structure which
+contains an assembly instruction, and a description of the machine state
+before and after the execution of the instruction.</p>
+<p>In this post, we go from a jolt-trace (and some pre-processing) to
+polynomials, and commitments.</p>
+<div class="remark">
+<p>For brevity, and mostly my sanity, I will skip all the commitment
+specific details of Jolt. Perhaps, later I can convice <a
+href="">Markos</a> to write a guest post, outlining his Dory Tales. For
+now, we will gingerly step around commitment code – and just assume any
+Rust vector of finite field elements can be committed to.</p>
+</div>
+<section id="from-trace-to-polynomials" class="level2">
+<h2>From Trace To Polynomials</h2>
+<p>In this post we describe how we go from Jolt data structures which
+describe assembly instructions and machine state, to polynomials over
+256 bit fields that describe the same. That is we focus on this phase of
+the architecture.</p>
+** TODO: fix this **
+<div class="svg-container" style="width:400px;">
+<p><img src="/assets/jolt-working-notes/step4.svg" /></p>
+</div>
+<p>Our object of study is still this program that practically
+nothing.</p>
+<div class="highlight"><pre><span></span><span class="cp">#[jolt::provable(memory_size = 10240, max_trace_length = 65536)]</span>
+<span class="k">fn</span><span class="w"> </span><span class="nf">fib</span><span class="p">(</span><span class="n">n</span><span class="p">:</span><span class="w"> </span><span class="kt">u32</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kt">u128</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="p">:</span><span class="w"> </span><span class="kt">u128</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">b</span><span class="p">:</span><span class="w"> </span><span class="kt">u128</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">start_cycle_tracking</span><span class="p">(</span><span class="s">&quot;fib_loop&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Use `start_cycle_tracking(&quot;{name}&quot;)` to start a cycle span</span>
+<span class="w">    </span><span class="n">b</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">;</span>
+<span class="w">    </span><span class="n">end_cycle_tracking</span><span class="p">(</span><span class="s">&quot;fib_loop&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// Use `end_cycle_tracking(&quot;{name}&quot;)` to end a cycle span</span>
+<span class="w">    </span><span class="n">b</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Our inputs will be</p>
+<ol type="1">
+<li><a href="">Dynamic Trace</a></li>
+<li>Program input <code>n</code> which we do not use (so you can ignore
+this for most of this post).</li>
+<li>Some pre-processing, which we detail below.</li>
+</ol>
+<div class="remark">
+<p>Throughout this series, and most Jolt papers, when I say polynomials,
+what I really mean is vectors. The polynomial in question will be the
+multi-linear extension of said vector, which representst the evaluation
+of said polynomial over the boolean hypercube.</p>
+</div>
+</section>
+<section id="pre-processing" class="level2">
+<h2>Pre-Processing</h2>
+<p>As mentioned earlier, I will dance around commitment specific details
+here, and only focus on items I need to later explain the sum-check
+proving for later in the series. In my opinion, the commitment bit
+(although an essential non-trivial component of the proof system) is
+only interesting if one wants to understand algorithmic decisions like
+“why did we introduce the parameter <span
+class="math inline">\(d\)</span>” and “what should <span
+class="math inline">\(d\)</span> be?”. Here, we are just trying to
+understand how the jolt prover works, and the commitment scheme is a
+little bit of a distraction. Note: you do not have to know what <span
+class="math inline">\(d\)</span> means. For now it’s just some small
+integer like 2 or 16.</p>
+<p>Our first object of study begins here on Line 261 of
+<code>jolt/jolt-core/benches/e2e_profiling.rs</code></p>
+<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">preprocessing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">JoltRV64IMAC</span><span class="p">::</span><span class="n">prover_preprocess</span><span class="p">(</span>
+<span class="w">        </span><span class="n">bytecode</span><span class="p">.</span><span class="n">clone</span><span class="p">(),</span><span class="w"> </span><span class="c1">// We have already described this </span>
+<span class="w">        </span><span class="n">program_io</span><span class="p">.</span><span class="n">memory_layout</span><span class="p">.</span><span class="n">clone</span><span class="p">(),</span><span class="w"> </span><span class="c1">// See below</span>
+<span class="w">        </span><span class="n">init_memory_state</span><span class="p">,</span><span class="w"> </span><span class="c1">//`vec&lt;(u64, u8)&gt;` of address value pairs.</span>
+<span class="w">        </span><span class="n">trace</span><span class="p">.</span><span class="n">len</span><span class="p">().</span><span class="n">next_power_of_two</span><span class="p">(),</span><span class="w"> </span><span class="c1">// This will be 64 for us given we had 63 virtual instructions. </span>
+<span class="w">    </span><span class="p">);</span>
+</pre></div>
+
+<p>Memory layout looks like the following with most of the keys being
+self explanatory</p>
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">MemoryLayout</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="sd">/// The total size of the elf&#39;s sections, including the .text, .data, .rodata, and .bss sections.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">program_size</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">max_trusted_advice_size</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">trusted_advice_start</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">trusted_advice_end</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">max_untrusted_advice_size</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">untrusted_advice_start</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">untrusted_advice_end</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">max_input_size</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">max_output_size</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">input_start</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">input_end</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">output_start</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">output_end</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">stack_size</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Stack starts from (RAM_START_ADDRESS + `program_size` + `stack_size`) and grows in descending addresses by `stack_size` bytes.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">stack_end</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">memory_size</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Heap starts just after the start of the stack and is `memory_size` bytes.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">memory_end</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">panic</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">termination</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// End of the memory region containing inputs, outputs, the panic bit,</span>
+<span class="w">    </span><span class="sd">/// and the termination bit</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">io_end</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>and the initial memory state is given by
+<code>vec&lt;(u64, u8)&gt;</code> of address value pairs. Diving deeper
+into pre-processing gets us to :</p>
+<p>Line 240 <code>jolt/jolt-core/src/zkvm/mod.rs</code></p>
+<div class="highlight"><pre><span></span><span class="w">    </span><span class="cp">#[tracing::instrument(skip_all, name = </span><span class="s">&quot;Jolt::prover_preprocess&quot;</span><span class="cp">)]</span>
+<span class="w">    </span><span class="k">fn</span><span class="w"> </span><span class="nf">prover_preprocess</span><span class="p">(</span>
+<span class="w">        </span><span class="n">bytecode</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nf">Instruction</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">memory_layout</span><span class="p">:</span><span class="w"> </span><span class="nc">MemoryLayout</span><span class="p">,</span>
+<span class="w">        </span><span class="n">memory_init</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="kt">u64</span><span class="p">,</span><span class="w"> </span><span class="kt">u8</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">max_trace_length</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">JoltProverPreprocessing</span><span class="o">&lt;</span><span class="nf">F</span><span class="p">,</span><span class="w"> </span><span class="nf">PCS</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">shared</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">Self</span><span class="p">::</span><span class="n">shared_preprocess</span><span class="p">(</span><span class="n">bytecode</span><span class="p">,</span><span class="w"> </span><span class="n">memory_layout</span><span class="p">,</span><span class="w"> </span><span class="n">memory_init</span><span class="p">);</span><span class="w"> </span><span class="c1">// &lt;- we care about this only</span>
+
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">max_T</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">max_trace_length</span><span class="p">.</span><span class="n">next_power_of_two</span><span class="p">();</span>
+
+<span class="w">        </span><span class="c1">// Ignored for this post</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">generators</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">PCS</span><span class="p">::</span><span class="n">setup_prover</span><span class="p">(</span><span class="nf">DTH_ROOT_OF_K</span><span class="p">.</span><span class="n">log_2</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">max_T</span><span class="p">.</span><span class="n">log_2</span><span class="p">());</span>
+
+<span class="w">        </span><span class="nf">JoltProverPreprocessing</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">generators</span><span class="p">,</span><span class="w"> </span><span class="n">shared</span><span class="w"> </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+</pre></div>
+
+<p>We only focus on the shared portion of the pre-processing, so</p>
+<div class="highlight"><pre><span></span><span class="k">fn</span><span class="w"> </span><span class="nf">shared_preprocess</span><span class="p">(</span>
+<span class="w">        </span><span class="n">bytecode</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nf">Instruction</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">        </span><span class="n">memory_layout</span><span class="p">:</span><span class="w"> </span><span class="nc">MemoryLayout</span><span class="p">,</span>
+<span class="w">        </span><span class="n">memory_init</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="kt">u64</span><span class="p">,</span><span class="w"> </span><span class="kt">u8</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">JoltSharedPreprocessing</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">bytecode_preprocessing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">BytecodePreprocessing</span><span class="p">::</span><span class="n">preprocess</span><span class="p">(</span><span class="n">bytecode</span><span class="p">);</span><span class="w"> </span><span class="c1">// LINE 1 </span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">ram_preprocessing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">RAMPreprocessing</span><span class="p">::</span><span class="n">preprocess</span><span class="p">(</span><span class="n">memory_init</span><span class="p">);</span><span class="w"> </span><span class="c1">// LINE 2</span>
+
+<span class="w">        </span><span class="nf">JoltSharedPreprocessing</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">memory_layout</span><span class="p">,</span>
+<span class="w">            </span><span class="n">bytecode</span><span class="p">:</span><span class="w"> </span><span class="nc">bytecode_preprocessing</span><span class="p">,</span>
+<span class="w">            </span><span class="n">ram</span><span class="p">:</span><span class="w"> </span><span class="nc">ram_preprocessing</span><span class="p">,</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+</pre></div>
+
+<p>We already know what <code>MemoryLayout</code> is so we focus on the
+remaining two outputs.</p>
+<section id="byte-code-preprocessing" class="level3">
+<h3>Byte Code Preprocessing</h3>
+<p>This pre-processings stage outputs a struct of the following type</p>
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">BytecodePreprocessing</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">code_size</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">bytecode</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nf">Instruction</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Maps the memory address of each instruction in the bytecode to its &quot;virtual&quot; address.</span>
+<span class="w">    </span><span class="sd">/// See Section 6.1 of the Jolt paper, &quot;Reflecting the program counter&quot;. The virtual address</span>
+<span class="w">    </span><span class="sd">/// is the one used to keep track of the next (potentially virtual) instruction to execute.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">pc_map</span><span class="p">:</span><span class="w"> </span><span class="nc">BytecodePCMapper</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">d</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Roughly it does the following:</p>
+<ol type="1">
+<li>Computes <code>Bytecode_ra_d</code> parameter used for chunking one
+hot encodings (we will get to this). For our program, as it is so small
+it is we have <span class="math inline">\(d=1\)</span>.</li>
+<li>Constructs the <code>pc_map</code> object which is of
+<code>BytecodePcMapper</code> which looks like <a
+href="/assets/jolt-tutorial/byte-code-map.txt">this</a> for our
+program.</li>
+<li>Computes how much memory byte code needs.</li>
+</ol>
+<p>The interesting object in this pre-processing phase is the following
+object.</p>
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">BytecodePCMapper</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="sd">/// Stores the mapping of the PC at the beginning of each inline sequence</span>
+<span class="w">    </span><span class="sd">/// and the maximum number of the inline sequence</span>
+<span class="w">    </span><span class="sd">/// Indexed by the address of instruction unmapped divided by 2</span>
+<span class="w">    </span><span class="n">indices</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Option</span><span class="o">&lt;</span><span class="p">(</span><span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="kt">u16</span><span class="p">)</span><span class="o">&gt;&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+
+<section id="how-to-interpret-each-position-of-indices"
+class="level4 remark">
+<h4>How to Interpret Each Position of indices</h4>
+<p>Each index position <code>i</code> represents a specific memory
+address in your program:</p>
+<div class="highlight"><pre><span></span><span class="n">address</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0x80000000</span>
+</pre></div>
+
+<p>This is the reverse of <code>get_index()</code> which we will explain
+shortly.</p>
+<p>Examples:</p>
+<div class="highlight"><pre><span></span><span class="n">rustindices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w">  </span><span class="err">→</span><span class="w"> </span><span class="nf">Reserved</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nf">NOOP</span>
+<span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w">  </span><span class="err">→</span><span class="w"> </span><span class="n">address</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0x80000000</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x80000000</span>
+<span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w">  </span><span class="err">→</span><span class="w"> </span><span class="n">address</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0x80000000</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x80000002</span>
+<span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w">  </span><span class="err">→</span><span class="w"> </span><span class="n">address</span><span class="w"> </span><span class="p">(</span><span class="mi">3</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0x80000000</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x80000004</span>
+<span class="n">indices</span><span class="p">[</span><span class="mi">34</span><span class="p">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">address</span><span class="w"> </span><span class="p">(</span><span class="mi">34</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0x80000000</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x80000042</span>
+<span class="n">indices</span><span class="p">[</span><span class="mi">76</span><span class="p">]</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="n">address</span><span class="w"> </span><span class="p">(</span><span class="mi">76</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mh">0x80000000</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x80000096</span>
+</pre></div>
+
+<p>What the value means:</p>
+<p><code>indices[3] = Some((2, 0))</code> → “At address 0x80000004,
+bytecode position 2, no virtual sequence”
+<code>indices[34] = Some((36, 7))</code> → “At address 0x80000042,
+bytecode position 36, 8-step virtual sequence”
+<code>indices[2] = None →</code> “No instruction at address
+0x80000002”</p>
+<p>So the array is a direct map: Index → Address → Bytecode Position</p>
+</section>
+<p>In more detail, the input to the creating of this map is the <a
+href="/assets/jolt-tutorial/bytecode.fib.txt">bytecode</a> which is just
+a <code>Vec&lt;Instruction&gt;</code> object representing the entire
+program’s bytecode in ascending order by memory address:</p>
+<pre><code>// Line 1
+AUIPC { address: 2147483648, virtual_sequence_remaining: None, ... }
+// Line 2  
+ADDI { address: 2147483652, virtual_sequence_remaining: None, ... }
+// Line 3
+AUIPC { address: 2147483656, virtual_sequence_remaining: None, ... }
+// ...
+// Lines 36-43: Virtual sequence at same address
+ADDI { address: 2147483714, virtual_sequence_remaining: Some(7), ... }
+ANDI { address: 2147483714, virtual_sequence_remaining: Some(6), ... }
+LD { address: 2147483714, virtual_sequence_remaining: Some(5), ... }
+// ... (5 more at same address)</code></pre>
+<p>The output is a BytecodePCMapper containing a sparse array that maps
+instruction addresses to bytecode positions:</p>
+<div class="highlight"><pre><span></span><span class="nf">BytecodePCMapper</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">indices</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nb">Option</span><span class="o">&lt;</span><span class="p">(</span><span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="kt">u16</span><span class="p">)</span><span class="o">&gt;&gt;</span>
+<span class="w">    </span><span class="c1">//        ^^^^^^^^^^^^^^^^^^^^^^^^</span>
+<span class="w">    </span><span class="c1">//        (bytecode_position, virtual_sequence_remaining)</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>where <strong>The Address-to-Index Formula</strong> is given by</p>
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">get_index</span><span class="p">(</span><span class="n">address</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">(</span><span class="n">address</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nf">RAM_START_ADDRESS</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nf">ALIGNMENT_FACTOR_BYTECODE</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span>
+<span class="p">}</span>
+<span class="k">where</span><span class="w"> </span>
+<span class="nf">RAM_START_ADDRESS</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mh">0x80000000</span><span class="w"> </span><span class="p">(</span><span class="mi">2147483648</span><span class="p">)</span>
+<span class="nf">ALIGNMENT_FACTOR_BYTECODE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">(</span><span class="mi">2</span><span class="o">-</span><span class="n">byte</span><span class="w"> </span><span class="n">alignment</span><span class="p">)</span>
+</pre></div>
+
+<p><strong>The formula in more detail:</strong> Subtract
+<code>RAM_START_ADDRESS</code> to get offset from program start Divide
+by 2 because instructions are on even addresses Add 1 because index 0 is
+reserved for <code>NOOP</code></p>
+<p>The length of this array is given by taking the last instruction in
+the bytecode array, and pulling its physucal address and computing the
+index, which gives us the size the array (as bytecode stores
+instructions in ascending order of memory).</p>
+</section>
+<section id="worked-out-examples" class="level3">
+<h3>Worked Out Examples</h3>
+<section id="example-1-simple-instruction" class="level4">
+<h4>Example 1: Simple Instruction</h4>
+<p>The second <code>Instruction</code> in Bytecode</p>
+<pre><code>rustADDI { 
+    address: 2147483652,  // 0x80000004
+    virtual_sequence_remaining: None,
+    ...
+}</code></pre>
+<p>Calculation:</p>
+<pre><code>address = 2147483652
+offset = 2147483652 - 2147483648 = 4
+index = 4 / 2 + 1 = 3</code></pre>
+<p>Result:</p>
+<div class="highlight"><pre><span></span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Some</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">))</span>
+<span class="c1">//               |   |</span>
+<span class="c1">//               |   └─ No virtual sequence (0)</span>
+<span class="c1">//               └───── Bytecode position 2</span>
+</pre></div>
+
+<p><strong>Interpretation:</strong> The instruction at address
+0x80000004 is located at bytecode position 2, with no virtual
+expansion.</p>
+</section>
+<section id="example-2-none-entry-address-gap" class="level4">
+<h4>Example 2: None Entry (Address Gap)</h4>
+<p>Address <code>0x80000002</code> (2147483650): Calculation:</p>
+<pre><code>address = 2147483650
+offset = 2147483650 - 2147483648 = 2
+index = 2 / 2 + 1 = 2</code></pre>
+<p>Result:</p>
+<div class="highlight"><pre><span></span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">None</span>
+</pre></div>
+
+<p>Why <code>None</code>? The array is initialised with
+<code>None</code> values. Then as we iterate through the bytecode, for
+each instruction address we update the corresponding index of the
+mapper. Some indices of the mapper never have instructions. Instructions
+appear at 0x80000000, then 0x80000004—the even addresses. The addresses
+between them (like 0x80000002) have no code, so their indices remain
+None. This creates a sparse array where gaps represent unused memory
+addresses.</p>
+</section>
+<section id="example-3-virtual-instruction-sequence" class="level4">
+<h4>Example 3: Virtual Instruction Sequence</h4>
+<p>Bytecode Lines 36-43:</p>
+<div class="highlight"><pre><span></span><span class="c1">// Line 36</span>
+<span class="nf">ADDI</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">address</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483714</span><span class="p">,</span><span class="w"> </span><span class="n">virtual_sequence_remaining</span><span class="p">:</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">7</span><span class="p">),</span><span class="w"> </span><span class="o">..</span><span class="p">.</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// Line 37</span>
+<span class="nf">ANDI</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">address</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483714</span><span class="p">,</span><span class="w"> </span><span class="n">virtual_sequence_remaining</span><span class="p">:</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span><span class="w"> </span><span class="o">..</span><span class="p">.</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// Line 38</span>
+<span class="nf">LD</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">address</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483714</span><span class="p">,</span><span class="w"> </span><span class="n">virtual_sequence_remaining</span><span class="p">:</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span><span class="w"> </span><span class="o">..</span><span class="p">.</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// Line 39</span>
+<span class="nf">XORI</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">address</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483714</span><span class="p">,</span><span class="w"> </span><span class="n">virtual_sequence_remaining</span><span class="p">:</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span><span class="w"> </span><span class="o">..</span><span class="p">.</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// Line 40</span>
+<span class="nf">VirtualMULI</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">address</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483714</span><span class="p">,</span><span class="w"> </span><span class="n">virtual_sequence_remaining</span><span class="p">:</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span><span class="w"> </span><span class="o">..</span><span class="p">.</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// Line 41</span>
+<span class="nf">VirtualPow2</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">address</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483714</span><span class="p">,</span><span class="w"> </span><span class="n">virtual_sequence_remaining</span><span class="p">:</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="o">..</span><span class="p">.</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// Line 42</span>
+<span class="nf">MUL</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">address</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483714</span><span class="p">,</span><span class="w"> </span><span class="n">virtual_sequence_remaining</span><span class="p">:</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span><span class="w"> </span><span class="o">..</span><span class="p">.</span><span class="w"> </span><span class="p">}</span>
+<span class="c1">// Line 43</span>
+<span class="nf">VirtualSRAI</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">address</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483714</span><span class="p">,</span><span class="w"> </span><span class="n">virtual_sequence_remaining</span><span class="p">:</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="o">..</span><span class="p">.</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+
+<p>All 8 instructions share address <code>0x80000042</code>
+(2147483714). Calculation:</p>
+<pre><code>address = 2147483714
+offset = 2147483714 - 2147483648 = 66
+index = 66 / 2 + 1 = 34</code></pre>
+<p>Result:</p>
+<div class="highlight"><pre><span></span><span class="n">indices</span><span class="p">[</span><span class="mi">34</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Some</span><span class="p">((</span><span class="mi">36</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">))</span>
+<span class="c1">//                 |   |</span>
+<span class="c1">//                 |   └─ 7 more virtual steps follow this one (8 total)</span>
+<span class="c1">//                 └───── Bytecode position 36 (first instruction)</span>
+</pre></div>
+
+<p><strong>Interpretation:</strong></p>
+<p>Address <code>0x80000042</code> maps to bytecode position 36 This
+starts an 8-step virtual sequence To execute this instruction, read
+bytecode positions 36-43 consecutively The mapper stores only the first
+position, not all 8</p>
+<p>And that’s all the bytecode pre-processing we do. Next we get to RAM
+-pre processing</p>
+</section>
+</section>
+<section id="ram-pre-processing" class="level3">
+<h3>RAM Pre-processing</h3>
+<div class="highlight"><pre><span></span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="n">ram_preprocessing</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">RAMPreprocessing</span><span class="p">::</span><span class="n">preprocess</span><span class="p">(</span><span class="n">memory_init</span><span class="p">);</span>
+</pre></div>
+
+<p>This simply returns a struct of type</p>
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">RAMPreprocessing</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">min_bytecode_address</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">bytecode_words</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">u64</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+
+<p><strong>Input</strong>:
+<code>memory_init: Vec&lt;(u64, u8)&gt;</code> - List of
+<code>(address, byte)</code> pairs representing initial RAM state
+Output: <code>RAMPreprocessing</code> with:</p>
+<p><code>min_bytecode_address</code>: Starting address of memory region
+<code>bytecode_words</code>: Dense array of 64-bit words</p>
+which is illustrated with the following picture (note the final lower
+addresses go at the end)
+<div class="svg-container">
+<p><img src="/assets/jolt-working-notes/ram-preprocess.svg" /></p>
+</div>
+<p>It takes the memory which a sequence of bytes and chunks it into a
+sequence of words (64 bits).</p>
+</section>
+</section>
+<section id="we-are-done-with-pre-processing-now-polynomials"
+class="level2">
+<h2>We are done with pre-processing; Now Polynomials</h2>
+<p>Now we know exactly what the inputs are and we are ready to generate
+polynomials. The right entry point for this seeing how polynomials are
+generated starts here.</p>
 <div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">jolt_proof</span><span class="p">,</span><span class="w"> </span><span class="n">program_io</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">JoltRV64IMAC</span><span class="p">::</span><span class="n">prove</span><span class="p">(</span>
-<span class="w">            </span><span class="o">&amp;</span><span class="n">preprocessing</span><span class="p">,</span><span class="w"> </span><span class="c1">// some crypto commitment mallarkey which we choose to ignore for now</span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">preprocessing</span><span class="p">,</span><span class="w"> </span><span class="c1">// what we discussed above + crypto commitment mallarkey</span>
 <span class="w">            </span><span class="n">elf_contents</span><span class="p">,</span><span class="w"> </span><span class="c1">// the binary file in bytes</span>
-<span class="w">            </span><span class="o">&amp;</span><span class="n">serialized_input</span><span class="p">,</span><span class="w"> </span><span class="c1">// This is the postcard thing we called fib with see part a of day 1 post</span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">serialized_input</span><span class="p">,</span><span class="w"> </span><span class="c1">// This is the postcard thing we called fib with see part a of day 1 post i.e n </span>
 <span class="w">            </span><span class="o">&amp;</span><span class="p">[],</span><span class="w"> </span><span class="c1">// no trusted or untrusted advice for now</span>
 <span class="w">            </span><span class="o">&amp;</span><span class="p">[],</span>
 <span class="w">            </span><span class="nb">None</span><span class="p">,</span>
 <span class="w">        </span><span class="p">);</span>
 </pre></div>
 
-<p>First we do some bookkeeping</p>
-<p>Count how many virtual instructions vs real instructions there
-are</p>
-<div class="highlight"><pre><span></span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">num_riscv_cycles</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trace</span>
-<span class="w">            </span><span class="p">.</span><span class="n">par_iter</span><span class="p">()</span>
-<span class="w">            </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">cycle</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="c1">// Count the cycle if the instruction is not part of a inline sequence</span>
-<span class="w">                </span><span class="c1">// (`virtual_sequence_remaining` is `None`) or if it&#39;s the first instruction</span>
-<span class="w">                </span><span class="c1">// in a inline sequence (`virtual_sequence_remaining` is `Some(0)`)</span>
-<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">virtual_sequence_remaining</span><span class="p">)</span><span class="w"> </span><span class="o">=</span>
-<span class="w">                    </span><span class="n">cycle</span><span class="p">.</span><span class="n">instruction</span><span class="p">().</span><span class="n">normalize</span><span class="p">().</span><span class="n">virtual_sequence_remaining</span>
-<span class="w">                </span><span class="p">{</span>
-<span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="n">virtual_sequence_remaining</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                        </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">                    </span><span class="p">}</span>
-<span class="w">                </span><span class="p">}</span>
-<span class="w">                </span><span class="mi">1</span>
-<span class="w">            </span><span class="p">})</span>
-<span class="w">            </span><span class="p">.</span><span class="n">sum</span><span class="p">();</span>
-<span class="w">        </span><span class="n">tracing</span><span class="p">::</span><span class="n">info</span><span class="o">!</span><span class="p">(</span>
-<span class="w">            </span><span class="s">&quot;{num_riscv_cycles} raw RISC-V instructions + {} virtual instructions = {} total cycles&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="n">trace</span><span class="p">.</span><span class="n">len</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">num_riscv_cycles</span><span class="p">,</span>
-<span class="w">            </span><span class="n">trace</span><span class="p">.</span><span class="n">len</span><span class="p">(),</span>
-<span class="w">        </span><span class="p">);</span>
-
-<span class="w">        </span><span class="c1">// Setup trace length and padding</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">trace_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trace</span><span class="p">.</span><span class="n">len</span><span class="p">();</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">padded_trace_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">trace</span><span class="p">.</span><span class="n">len</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">).</span><span class="n">next_power_of_two</span><span class="p">();</span>
-<span class="w">        </span><span class="n">trace</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="n">padded_trace_length</span><span class="p">,</span><span class="w"> </span><span class="nf">Cycle</span><span class="p">::</span><span class="nf">NoOp</span><span class="p">);</span>
-
-<span class="w">        </span><span class="c1">// truncate trailing zeros on device outputs</span>
-<span class="w">        </span><span class="n">program_io</span><span class="p">.</span><span class="n">outputs</span><span class="p">.</span><span class="n">truncate</span><span class="p">(</span>
-<span class="w">            </span><span class="n">program_io</span>
-<span class="w">                </span><span class="p">.</span><span class="n">outputs</span>
-<span class="w">                </span><span class="p">.</span><span class="n">iter</span><span class="p">()</span>
-<span class="w">                </span><span class="p">.</span><span class="n">rposition</span><span class="p">(</span><span class="o">|&amp;</span><span class="n">b</span><span class="o">|</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
-<span class="w">                </span><span class="p">.</span><span class="n">map_or</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="o">|</span><span class="n">pos</span><span class="o">|</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">),</span>
-<span class="w">        </span><span class="p">);</span>
-</pre></div>
-
+<p>Digging in further: the code is divided into the following logical
+sections:</p>
+<ol type="1">
+<li>Bookkeeping (not very interesting): It does things like count number
+of actual Risc-V cycles in the trace, and how many virtual cycles. Pads
+the trace appropriately to make things nice powers of 2. Truncate zeros
+on program on device outputs. We don’t detail this any further.<br />
+</li>
+<li>Commitment setup (<strong>won’t bother with this</strong>)</li>
+<li>Generation of polynomials. <strong>Our focus</strong></li>
+<li>Committing of the polynomials (<strong>we won’t go
+here</strong>)</li>
+<li>Rest of proving (which we will get to later in the series)</li>
+</ol>
 <p>We intialise the prover state with all the data they’d ever need:</p>
 <ul>
 <li>The pre-processing needed to commit to things, which we treat like a
@@ -198,70 +570,180 @@ href="/posts/day_1a.html">detail</a></li>
 running.</li>
 </ul>
 <div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">state_manager</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">StateManager</span><span class="p">::</span><span class="n">new_prover</span><span class="p">(</span>
-<span class="w">                </span><span class="n">preprocessing</span><span class="p">,</span>
-<span class="w">                </span><span class="n">trace</span><span class="p">,</span>
-<span class="w">                </span><span class="n">program_io</span><span class="p">.</span><span class="n">clone</span><span class="p">(),</span>
-<span class="w">                </span><span class="n">trusted_advice_commitment</span><span class="p">,</span>
-<span class="w">                </span><span class="n">final_memory_state</span><span class="p">,</span>
+<span class="w">                </span><span class="n">preprocessing</span><span class="p">,</span><span class="w"> </span><span class="c1">// what we discussed above</span>
+<span class="w">                </span><span class="n">trace</span><span class="p">,</span><span class="w"> </span><span class="c1">// the dynamic trace discussed in detail in part 1</span>
+<span class="w">                </span><span class="n">program_io</span><span class="p">.</span><span class="n">clone</span><span class="p">(),</span><span class="w"> </span><span class="c1">// see above</span>
+<span class="w">                </span><span class="n">trusted_advice_commitment</span><span class="p">,</span><span class="w"> </span><span class="c1">// There was no trusted advice in our example</span>
+<span class="w">                </span><span class="n">final_memory_state</span><span class="p">,</span><span class="w"> </span><span class="c1">// The final Vec&lt;(u64)&gt; state of memory</span>
 <span class="w">            </span><span class="p">);</span>
+<span class="w">            </span><span class="c1">// We will spend ALOT of time here</span>
 <span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">proof</span><span class="p">,</span><span class="w"> </span><span class="n">debug_info</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">JoltDAG</span><span class="p">::</span><span class="n">prove</span><span class="p">(</span><span class="n">state_manager</span><span class="p">).</span><span class="n">ok</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span>
-<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">prove_duration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">start</span><span class="p">.</span><span class="n">elapsed</span><span class="p">();</span>
-<span class="w">            </span><span class="n">tracing</span><span class="p">::</span><span class="n">info</span><span class="o">!</span><span class="p">(</span>
-<span class="w">                </span><span class="s">&quot;Proved in {:.1}s ({:.1} kHz / padded {:.1} kHz)&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="n">prove_duration</span><span class="p">.</span><span class="n">as_secs_f64</span><span class="p">(),</span>
-<span class="w">                </span><span class="n">trace_length</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">prove_duration</span><span class="p">.</span><span class="n">as_secs_f64</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000.0</span><span class="p">,</span>
-<span class="w">                </span><span class="n">padded_trace_length</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">f64</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">prove_duration</span><span class="p">.</span><span class="n">as_secs_f64</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000.0</span><span class="p">,</span>
-<span class="w">            </span><span class="p">);</span>
-<span class="w">            </span><span class="p">(</span><span class="n">proof</span><span class="p">,</span><span class="w"> </span><span class="n">debug_info</span><span class="p">,</span><span class="w"> </span><span class="n">prove_duration</span><span class="p">)</span>
+<span class="w">            </span><span class="err">```</span>
+
+<span class="k">where</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="err">`</span><span class="n">program_io</span><span class="err">`</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">given</span><span class="w"> </span><span class="n">by</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">following</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span>
+<span class="err">```</span><span class="n">rust</span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">JoltDevice</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">inputs</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="c1">// the post card bit of our input n</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">trusted_advice</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="c1">// These were []</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">untrusted_advice</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="c1">// These were []</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">outputs</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="kt">u8</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="c1">// the final answer b</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">panic</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">memory_layout</span><span class="p">:</span><span class="w"> </span><span class="nc">MemoryLayout</span><span class="p">,</span>
+<span class="p">}</span>
 </pre></div>
 
-<p>Diving into the <code>DAG</code> prove bit we get here (we will
-ignore a lot of the commitment specific stuff here. It’s impossible to
-not include the some references to commitment code as the it’s the
-polynomials we are committing to.</p>
 <p>It’s ok if a lot of this makes no sense of the bat. We’ll clear
-things slowly.</p>
-<div class="highlight"><pre><span></span><span class="w">    </span><span class="n">state_manager</span><span class="p">.</span><span class="n">fiat_shamir_preamble</span><span class="p">();</span>
-
-<span class="w">    </span><span class="c1">// Initialize DoryGlobals at the beginning to keep it alive for the entire proof</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">preprocessing</span><span class="p">,</span><span class="w"> </span><span class="n">trace</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_manager</span><span class="p">.</span><span class="n">get_prover_data</span><span class="p">();</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">trace_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trace</span><span class="p">.</span><span class="n">len</span><span class="p">();</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">padded_trace_length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">trace_length</span><span class="p">.</span><span class="n">next_power_of_two</span><span class="p">();</span>
-
-<span class="w">    </span><span class="n">tracing</span><span class="p">::</span><span class="n">info</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;bytecode size: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">preprocessing</span><span class="p">.</span><span class="n">shared</span><span class="p">.</span><span class="n">bytecode</span><span class="p">.</span><span class="n">code_size</span><span class="p">);</span>
-
-<span class="w">    </span><span class="c1">// Thesea are dynamically calculated based on how much memory the assembly uses, and how many </span>
-<span class="w">    </span><span class="c1">// lines of instructions there. </span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">ram_K</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_manager</span><span class="p">.</span><span class="n">ram_K</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">bytecode_d</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">preprocessing</span><span class="p">.</span><span class="n">shared</span><span class="p">.</span><span class="n">bytecode</span><span class="p">.</span><span class="n">d</span><span class="p">;</span>
-
-<span class="kd">let</span><span class="w"> </span><span class="n">_guard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span>
-<span class="w">    </span><span class="nf">DoryGlobals</span><span class="p">::</span><span class="n">initialize</span><span class="p">(</span><span class="nf">DTH_ROOT_OF_K</span><span class="p">,</span><span class="w"> </span><span class="n">padded_trace_length</span><span class="p">),</span>
+things slowly. The main body which we focus on is the following:</p>
+<div class="highlight"><pre><span></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">_guard</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span>
 <span class="w">    </span><span class="nf">AllCommittedPolynomials</span><span class="p">::</span><span class="n">initialize</span><span class="p">(</span><span class="n">compute_d_parameter</span><span class="p">(</span><span class="n">ram_K</span><span class="p">),</span><span class="w"> </span><span class="n">bytecode_d</span><span class="p">),</span><span class="w"> </span><span class="c1">// &lt;--- Focus here</span>
 <span class="p">);</span>
 
-<span class="c1">// Generate and commit to all witness polynomials</span>
-<span class="c1">// FINALLY WE GET TO POLYNOMIALS</span>
 <span class="kd">let</span><span class="w"> </span><span class="n">opening_proof_hints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">Self</span><span class="p">::</span><span class="n">generate_and_commit_polynomials</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">state_manager</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
 </pre></div>
 
-<section id="meat-and-potatoes" class="level2">
-<h2>Meat And Potatoes</h2>
-<p>The things I will commit to</p>
-<p>Mapping to jolt <code>trace_len</code> is <span
-class="math inline">\(T\)</span></p>
-<div class="highlight"><pre><span></span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">left_instruction_input</span><span class="p">:</span><span class="w"> </span><span class="nc">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">],</span>
-<span class="w">            </span><span class="n">right_instruction_input</span><span class="p">:</span><span class="w"> </span><span class="nc">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">],</span>
-<span class="w">            </span><span class="n">rd_inc</span><span class="p">:</span><span class="w"> </span><span class="nc">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">],</span>
-<span class="w">            </span><span class="n">ram_inc</span><span class="p">:</span><span class="w"> </span><span class="nc">vec</span><span class="o">!</span><span class="p">[</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">],</span>
-
-<span class="w">            </span><span class="n">instruction_ra</span><span class="p">:</span><span class="w"> </span><span class="nc">array</span><span class="p">::</span><span class="n">from_fn</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="nb">None</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">]),</span>
-<span class="w">            </span><span class="n">bytecode_ra</span><span class="p">:</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="n">bytecode_d</span><span class="p">).</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="nb">None</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">]).</span><span class="n">collect</span><span class="p">(),</span>
-<span class="w">            </span><span class="n">ram_ra</span><span class="p">:</span><span class="w"> </span><span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="n">ram_d</span><span class="p">).</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span><span class="nb">None</span><span class="p">;</span><span class="w"> </span><span class="n">trace_len</span><span class="p">]).</span><span class="n">collect</span><span class="p">(),</span>
-<span class="w">        </span><span class="p">}</span>
+<p>Before we can fill in our polynomials with the right values that
+match the trace, we need to allocate space in memory for them. This is
+exactly what <code>initialize</code> does. The work is done in</p>
+<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">opening_proof_hints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">Self</span><span class="p">::</span><span class="n">generate_and_commit_polynomials</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">state_manager</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
 </pre></div>
 
+<p>which generates the following vectors (from which we can get
+polynomials).</p>
+<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">polynomials</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="fm">vec!</span><span class="p">[</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">RdInc</span><span class="p">,</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">RamInc</span><span class="p">,</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">7</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">8</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">9</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">11</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">12</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">13</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">14</span><span class="p">),</span>
+<span class="w">    </span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">InstructionRa</span><span class="p">(</span><span class="mi">15</span><span class="p">),</span>
+<span class="p">];</span>
+<span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">ram_d</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">polynomials</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">RamRa</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+<span class="p">}</span>
+<span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">bytecode_d</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">polynomials</span><span class="p">.</span><span class="n">push</span><span class="p">(</span><span class="nf">CommittedPolynomial</span><span class="p">::</span><span class="nf">BytecodeRa</span><span class="p">(</span><span class="n">i</span><span class="p">));</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>So this is the image you should have for what is committed to:</p>
+<ol type="1">
+<li><p><code>RdInc</code> and <code>RamInc</code> are
+<code>Vec&lt;i128&gt;</code> of size <span
+class="math inline">\(T\)</span> where <span
+class="math inline">\(T\)</span> is the number of cycles in our dynamic
+trace rounded to the next power of 2 (so 64 for our case).</p></li>
+<li><p><code>bytecode_ra</code>, <code>instruction_ra</code> and
+<code>ram_ra</code> are have the same structure: they consists of <span
+class="math inline">\(d_1, 16, d_2\)</span> matrices. Each matrix has
+<span class="math inline">\(T\)</span> rows and <span
+class="math inline">\(255\)</span> columns. For every row exactly 1
+column is to set 1 based on the logic discussed below. <span
+class="math inline">\(d_1\)</span> and <span
+class="math inline">\(d_2\)</span> are dynamically calculated based on
+the trace.</p></li>
+</ol>
+</section>
+<section id="details-about-how-we-compute-each-polynomial"
+class="level2">
+<h2>Details about how we compute each polynomial</h2>
+<section id="the-rdinc-polynomial" class="level4">
+<h4>The RdInc Polynomial</h4>
+<p>For each cycle <span class="math inline">\(i \in [T]\)</span> if
+register was written to store the difference between the value before
+and after write. Simple enough!</p>
+<div class="highlight"><pre><span></span><span class="n">batch_ref</span><span class="p">.</span><span class="n">rd_inc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">post_rd</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i128</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">pre_rd</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i128</span><span class="p">;</span>
+</pre></div>
+
+</section>
+<section id="the-raminc-polynomial" class="level4">
+<h4>The RamInc Polynomial</h4>
+<p>Quite simple, for each cycle, if the trace does not touch ram store
+0, otherwise, if it writes to RAM at some address, then store the
+difference in value before and after write.</p>
+<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="n">ram_inc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="n">cycle</span><span class="p">.</span><span class="n">ram_access</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">tracer</span><span class="p">::</span><span class="n">instruction</span><span class="p">::</span><span class="nf">RAMAccess</span><span class="p">::</span><span class="nf">Write</span><span class="p">(</span><span class="n">write</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">write</span><span class="p">.</span><span class="n">post_value</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i128</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">write</span><span class="p">.</span><span class="n">pre_value</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">i128</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">            </span><span class="n">_</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="p">};</span>
+
+<span class="n">batch_ref</span><span class="p">.</span><span class="n">ram_inc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ram_inc</span><span class="p">;</span>
+</pre></div>
+
+<p>Finally we get to all the one hot encoded polynomials</p>
+</section>
+<section id="one-hot-encoded-polynomials" class="level4">
+<h4>One Hot Encoded Polynomials</h4>
+<p>Click on the links below to see detailed worked out examples of how
+we get to the polynomials using the trace and the pc-mapper. 1. <a
+href="/posts/bytecode_ra.html">BytecodeRa</a></p>
+<div class="highlight"><pre><span></span><span class="c1">// BytecodeRa indices</span>
+<span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">((</span><span class="n">d</span><span class="p">,</span><span class="w"> </span><span class="n">log_K_chunk</span><span class="p">,</span><span class="w"> </span><span class="nf">K_chunk</span><span class="p">))</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bytecode_constants</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">pc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">preprocessing</span><span class="p">.</span><span class="n">shared</span><span class="p">.</span><span class="n">bytecode</span><span class="p">.</span><span class="n">get_pc</span><span class="p">(</span><span class="n">cycle</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">bytecode_d</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">pc</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">log_K_chunk</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">d</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">j</span><span class="p">)))</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="nf">K_chunk</span><span class="p">;</span>
+<span class="w">        </span><span class="n">batch_ref</span><span class="p">.</span><span class="n">bytecode_ra</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">index</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<ol start="2" type="1">
+<li><a href="/posts/instruction_ra.html">InstructionRa</a></li>
+</ol>
+<div class="highlight"><pre><span></span><span class="c1">// InstructionRa indices</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">lookup_index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">LookupQuery</span><span class="p">::</span><span class="o">&lt;</span><span class="nf">XLEN</span><span class="o">&gt;</span><span class="p">::</span><span class="n">to_lookup_index</span><span class="p">(</span><span class="n">cycle</span><span class="p">);</span>
+<span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">instruction_lookups</span><span class="p">::</span><span class="nf">D</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">lookup_index</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">instruction_ra_shifts</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+<span class="w">        </span><span class="o">%</span><span class="w"> </span><span class="n">instruction_lookups</span><span class="p">::</span><span class="nf">K_CHUNK</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u128</span><span class="p">;</span>
+<span class="w">    </span><span class="n">batch_ref</span><span class="p">.</span><span class="n">instruction_ra</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">k</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+
+<ol start="3" type="1">
+<li><a href="/posts/ram-ra.html">RamRa</a></li>
+</ol>
+<div class="highlight"><pre><span></span><span class="c1">// RamRa indices</span>
+<span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">dth_log</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dth_root_log</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">address_opt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">remap_address</span><span class="p">(</span>
+<span class="w">        </span><span class="n">cycle</span><span class="p">.</span><span class="n">ram_access</span><span class="p">().</span><span class="n">address</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="n">preprocessing</span><span class="p">.</span><span class="n">shared</span><span class="p">.</span><span class="n">memory_layout</span><span class="p">,</span>
+<span class="w">    </span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">ram_d</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">index</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">address_opt</span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">address</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="p">((</span><span class="n">address</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="p">(</span><span class="n">dth_log</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">ram_d</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">j</span><span class="p">)))</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="nf">DTH_ROOT_OF_K</span><span class="p">)</span>
+<span class="w">                </span><span class="k">as</span><span class="w"> </span><span class="kt">u8</span>
+<span class="w">        </span><span class="p">});</span>
+<span class="w">        </span><span class="n">batch_ref</span><span class="p">.</span><span class="n">ram_ra</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">index</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+</section>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document"
+role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1"><p>To be precise, we should say 1 virtual assembly
+instruction. In jolt some RISC-V instructions such as division are
+represented by a sequence of virtual instructions. See memory
+instruction in previous example for a physical example.<a href="#fnref1"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
 </section></article>
     </main>
     <footer class="site-footer">

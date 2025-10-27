@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Graph Theory Tricks From Perfect Matchings Paper</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <script
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+  </head>
+  <body>
+    
+    <main class="article-content">
+      <header class="article-header">
+        <h1>Graph Theory Tricks From Perfect Matchings Paper</h1>
+        <div class="article-meta">
+          <div class="meta-left">
+                         <span class="category-tag">proof-complexity</span>
+             
+          </div>
+          <div class="meta-right">
+            <time>2025-10-25</time>             <span class="authors"
+              >By Ari</span
+            >
+                      </div>
+        </div>
+      </header>
+            <article><section class="level4 thm">
+<h4><span class="callout-label">Theorem:</span> Tutte's Generalised
+Criterion</h4>
+<p> Let <span class="math inline">\(f \in \mathbb{N}\)</span> be even.
+Suppose <span class="math inline">\(G\)</span> is a graph such that for
+every pair of disjoint sets <span class="math inline">\(S, T \subseteq
+V(G)\)</span> the following holds:</p>
+<p><span class="math display">\[ q\left(G \setminus (S \cup T)\right)
+\le |S|f - \sum_{w \in T} (f - \left|\Gamma_{G}(G){w} \setminus
+S\right|)\]</span></p>
+<p>Then <span class="math inline">\(G\)</span> contains a spanning
+subgraph <span class="math inline">\(G&#39; \subseteq G\)</span> which
+if <span class="math inline">\(f\)</span>-regular.</p>
+</section>
+<p>When <span class="math inline">\(G\)</span> is an <span
+class="math inline">\((n,d, \lambda)\)</span> graph, we will we make use
+of Theorem <span class="math inline">\(\ref{thm:embedding_top}\)</span>
+to show that <span class="math inline">\(G\)</span> satisfies the
+required properties, thereby contains <span
+class="math inline">\(H\)</span> as a topological minor. This gives us
+the following corollary.</p>
+<section class="level4 thm">
+<h4><span class="callout-label">Theorem:</span> Embedding Theorem</h4>
+<p>For every <span class="math inline">\(D \in \mathbb{N}\)</span> there
+exist <span class="math inline">\(d_0, n_0 \in \mathbb{N}, \epsilon,
+\alpha \in (0,1)\)</span>, such that the following holds. Suppose <span
+class="math inline">\(G\)</span> is an <span
+class="math inline">\((n,d,\lambda)\)</span>-graph where <span
+class="math inline">\(d \ge d_0\)</span>, and <span
+class="math inline">\(\lambda &lt; \epsilon d\)</span>, and <span
+class="math inline">\(n \ge n_0\)</span>. Let <span
+class="math inline">\(B \subseteq V(G)\)</span> be a subset of size
+<span class="math inline">\(|B| \ge n/20\)</span>, and <span
+class="math inline">\(H\)</span> is any graph with maximum degree at
+most <span class="math inline">\(D\)</span> and at most <span
+class="math inline">\(\alpha \frac{n}{\log n}\)</span> vertices. Then
+the induced sub-graph <span class="math inline">\(G[B]\)</span> contains
+<span class="math inline">\(H^{\sigma}\)</span> such that <span
+class="math inline">\(\sigma(e)\)</span> is odd for every <span
+class="math inline">\(e \in E(H)\)</span>.</p>
+</section>
+<div class="proof">
+<p>Let <span class="math inline">\(m\)</span> denote the number of edges
+in the induced subgraph <span class="math inline">\(G[B]\)</span>, which
+gives us <span class="math inline">\(2m = e(B \leftrightarrow B;
+G)\)</span>. Denote <span class="math inline">\(b
+:=\left|B\right|\)</span> and Define <span class="math inline">\(p = m /
+\binom{b}{2}\)</span>. By the , we have</p>
+<p>[ | 2m - b^2 | b ] Dividing both sides with <span
+class="math inline">\(b(b-1)\)</span>, and observing that <span
+class="math inline">\(\frac{db^2}{n(b-1)b} = \frac{d}{n}\frac{b}{b-1} =
+\frac{d}{n}(1 + \frac{1}{b-1})\)</span>, we further get</p>
+<p><span class="math display">\[\begin{align}
+\left| \frac{2m}{b(b-1)} - \frac{d}{n} - \frac{d}{n(b-1)} \right|
+&amp;\le \frac{\lambda}{b-1}  \label{eq:eml-post-process}
+\end{align}\]</span></p>
+<p>From this we have <span class="math display">\[\begin{align}
+  \left| p - \frac{d}{n}\right| &amp;= \left| p - \frac{d}{n} -
+\frac{d}{n(b-1)} + \frac{d}{n(b-1)}\right|  \\
+                                &amp;\le \left| p - \frac{d}{n} -
+\frac{d}{n(b-1)} \right| + \frac{1}{(b-1)} \label{eq:triangle}\\
+                                &amp;\le \frac{\lambda}{(b-1)} +
+\frac{1}{(b-1)}  \label{eq:final} \\
+  &amp; \le \frac{2\lambda}{b}
+\end{align}\]</span></p>
+<p>Let us briefly justify each step: <span
+class="math inline">\(\eqref{eq:triangle}\)</span> comes from the
+triangle inquality and <span class="math inline">\(d/n \le 1\)</span>;
+Equation <span class="math inline">\(\eqref{eq:final}\)</span> comes
+from Equation <span
+class="math inline">\(\eqref{eq:eml-post-process}\)</span>; the last
+inequality comes from the assumption that <span class="math inline">\(b
+\in \Omega\left(n\right)\)</span>, so the inequality holds for <span
+class="math inline">\(n\)</span> large enough.\</p>
+<p>Let <span class="math inline">\(\xi\)</span> be as given by the .
+Using the bound on the difference between <span
+class="math inline">\(p\)</span> and <span
+class="math inline">\(d/n\)</span>, for every disjoint subsets <span
+class="math inline">\(S, T \subseteq B\)</span> of size <span
+class="math inline">\(|S|,|T| \ge \xi n\)</span>, for <span
+class="math inline">\(\lambda &lt; \epsilon d\)</span> where <span
+class="math inline">\(\epsilon\)</span> is sufficiently small, we
+have</p>
+<p><span class="math display">\[\begin{align*}
+  \Bigl| e(S \leftrightarrow T; G)  - p|S||T| \Bigr| &amp;\le \left| e(S
+\leftrightarrow T; G) - \frac{d}{n}|S||T| \right| + \left|
+\frac{d}{n}|S||T| - p|S||T| \right| \\
+                                    &amp;\le \lambda \sqrt{|S||T|} +
+\frac{2 \lambda}{b} |S||T| \le \xi |S||T|p
+    \end{align*}\]</span></p>
+<p>With the lower bounds on <span class="math inline">\(S,T\)</span> and
+<span class="math inline">\(B\)</span>, we can make <span
+class="math inline">\(\epsilon\)</span> sufficiently small with respect
+to <span class="math inline">\(\xi\)</span> to get the upper bound in
+the last step. As <span class="math inline">\(G[B]\)</span> has at least
+<span class="math inline">\(Cn\)</span> edges (by the ), <span
+class="math inline">\(\sigma(e) \le 2 + \log n\)</span>, and <span
+class="math inline">\(H\)</span> has at most <span
+class="math inline">\(\alpha \frac{n}{\log n}\)</span> vertices, we can
+invoke the to conclude that <span class="math inline">\(G[B]\)</span>
+contains <span class="math inline">\(H^\sigma\)</span>.</p>
+</div>
+<p>As described earlier, the second ingredient in our hardness proof is
+showing that a certain residual graph contains a perfect matching or a
+spanning <span class="math inline">\((t-1)\)</span>-regular subgraph. In
+this section we state and prove these ingredients.</p>
+<section class="level4 lemma">
+<h4><span class="callout-label">Lemma:</span> Perfect Matching
+Lemma</h4>
+<p>Suppose <span class="math inline">\(G\)</span> is an <span
+class="math inline">\((n, d, \lambda)\)</span>-graph, where <span
+class="math inline">\(\lambda &lt; d/50\)</span>. Suppose <span
+class="math inline">\(U \subseteq V(G)\)</span> is such that <span
+class="math inline">\(\delta(G[U]) \ge \tilde{c}\)</span>. Then for all
+<span class="math inline">\(S \subseteq U\)</span>, <span
+class="math inline">\(G[U \setminus S]\)</span> has at most <span
+class="math inline">\(|S|\)</span> connected components, that is, <span
+class="math inline">\(q(G[U \setminus S]) \le |S|\)</span>.</p>
+</section>
+<div class="proof">
+<p>Consider some <span class="math inline">\(U \subseteq V(G)\)</span>
+such that <span class="math inline">\(\delta(G[U]) \ge
+\tilde{c}\)</span>. We show that <span
+class="math inline">\(G[U]\)</span> satisfies the property of . Consider
+some <span class="math inline">\(S \subseteq U\)</span>. We aim to show
+that <span class="math inline">\(G[U \setminus S]\)</span> has at most
+<span class="math inline">\(|S|\)</span> connected components. If <span
+class="math inline">\(|S| \ge |U|/2\)</span> then as <span
+class="math inline">\(G[U \setminus S]\)</span> has fewer than <span
+class="math inline">\(|S|\)</span> vertices, so the the upper bound on
+connected components trivially holds. Thus, we can assume <span
+class="math inline">\(|S| &lt; |U|/2\)</span>. We claim the following:
+<span class="math display">\[\begin{equation}
+  \text{If }e(X \leftrightarrow Y; G) \ge 1 \text{ for every partition
+$X \cup Y = U \setminus S$, $|X|,|Y| \ge |S|/3$,  then }  q(G[U
+\setminus S]) \le |S|. \label{eq:mini-claim}
+\end{equation}\]</span></p>
+<p>To see why, assume towards a contradiction that there exists an edge
+between partition <span class="math inline">\(X \cup Y = U \setminus
+S\)</span>, where <span class="math inline">\(|X|, |Y| \ge
+\left|S\right|/3\)</span>, <span class="math inline">\(G[U \setminus
+S]\)</span> has more than <span class="math inline">\(|S|\)</span>
+connected components. Denote the vertex sets of these components by
+<span class="math inline">\(C_1, \ldots, C_k\)</span>, for some <span
+class="math inline">\(k &gt; |S|\)</span>. Let <span
+class="math inline">\(X^\star := C_1 \cup \ldots \cup C_{s}\)</span> and
+<span class="math inline">\(Y^\star := C_{s+1} \cup \ldots \cup
+C_{k}\)</span>, where <span class="math inline">\(s = \lfloor |S|/2
+\rfloor \ge |S|/3\)</span>. By construction, even if each component
+<span class="math inline">\(C_i\)</span> is a singleton set, we get that
+<span class="math inline">\(\left|X^\star\right|, \left|Y^\star\right|
+\ge \left|S\right|/3\)</span>. Now as all <span
+class="math inline">\(C_i\)</span>’s are disjoint connected components,
+there can be no edge between <span
+class="math inline">\(X^\star\)</span> and <span
+class="math inline">\(Y^\star\)</span>. Therefore, we have found a
+correct sized partition of <span class="math inline">\(U \setminus
+S\)</span> without an edge between them, which contradicts our
+assumption. \ Now, consider some arbitrary partition <span
+class="math inline">\(X \cup Y\)</span> of <span class="math inline">\(U
+\setminus S\)</span>, and without loss of generality assume <span
+class="math inline">\(|X| \le |Y|\)</span>. Then <span
+class="math display">\[\begin{equation}
+|X| \le (|U| - |S|)/2 \le (n - |S|)/2  \label{eq:upp-X}
+\end{equation}\]</span></p>
+<p>We will show that <span class="math display">\[\begin{equation}
+\label{eq:edge_bound}
+        e(X \leftrightarrow X; G) + e(X \leftrightarrow S; G) &lt;
+\tilde{c}|X|
+    \end{equation}\]</span> as then the minimum degree assumption on
+<span class="math inline">\(G[U]\)</span> implies there has to be at
+least one edge with one endpoint in <span
+class="math inline">\(X\)</span> and the other in <span
+class="math inline">\(U \setminus (X \cup S) = Y\)</span>. By claim
+<span class="math inline">\(\eqref{eq:mini-claim}\)</span>, the
+existence of such an edge implies that <span
+class="math inline">\(G[U\setminus S]\)</span> has at most <span
+class="math inline">\(\left|S\right|\)</span> connected components,
+which would complete the proof. Equation <span
+class="math inline">\(\eqref{eq:edge_bound}\)</span> is derived as
+follows: <span class="math display">\[\begin{align}
+  e(X \leftrightarrow X; G) + e(X \leftrightarrow S; G) &amp;\le
+\frac{d}{n}|X|^2 + \lambda |X| + \frac{d}{n}|X||S| +
+\lambda\sqrt{|X||S|}        \\
+&amp;\le \frac{d}{n} |X| \frac{(n-|S|)}{2} + \lambda |X| +
+\frac{d}{n}|X||S| + \lambda\sqrt{3} |X| \label{eq:upper-bound-X}  \\
+&amp;&lt; \frac{d|X|}{2} + \frac{d|X||S|}{2n} + 3 \lambda |X|\\
+&amp;&lt; \frac{d}{2}|X| + \frac{d}{4}|X| + 3 \lambda |X|
+\label{eq:smaller-than-one} \\
+&amp;&lt; \tilde{c}|X|  \label{eq:upper-bound-S}
+\end{align}\]</span> These steps are justified as follows: The first
+equation follows from the ; Equation <span
+class="math inline">\(\eqref{eq:upper-bound-X}\)</span> comes from
+Equation <span class="math inline">\(\eqref{eq:upp-X}\)</span> and <span
+class="math inline">\(|X| \ge |S|/3\)</span>; Equation <span
+class="math inline">\(\eqref{eq:smaller-than-one}\)</span> comes from
+<span class="math inline">\(\left|S\right| &lt; \frac{n}{2}\)</span>;
+and Equation <span
+class="math inline">\(\eqref{eq:upper-bound-S}\)</span> comes the
+assumption <span class="math inline">\(\lambda &lt; d/50\)</span>.</p>
+</div>
+As an immediate corollary of Lemma <span
+class="math inline">\(\ref{thm:perfect-matching}\)</span> we get the
+following corollary
+<p>The next lemma shows that subgraphs of <span
+class="math inline">\((n, d, \lambda)\)</span>-graphs with large minimum
+degree contain regular spanning subgraphs. In the lemma below, the
+parameter <span class="math inline">\(C\)</span> should be read as the
+subgraph <span class="math inline">\(G&#39;\)</span> obtained by
+deleting at most <span class="math inline">\(C\)</span> edges incident
+on each vertex of the <span class="math inline">\((n,d,
+\lambda)\)</span> graph <span class="math inline">\(G\)</span>.</p>
+<section class="level4 lemma">
+<h4><span class="callout-label">Lemma:</span> Regular Subgraph
+Lemma</h4>
+<p>For every <span class="math inline">\(C &gt; 1\)</span> there exists
+<span class="math inline">\(d_0 = d_0(C)\)</span> such that the
+following holds. Suppose <span class="math inline">\(G\)</span> is an
+<span class="math inline">\((n,d, \lambda)\)</span> graph with <span
+class="math inline">\(\lambda &lt; \epsilon d\)</span> and <span
+class="math inline">\(d \ge d_0\)</span>, where <span
+class="math inline">\(\epsilon &lt; 1/100C^{3/2}\)</span>. If <span
+class="math inline">\(G&#39; \subseteq G\)</span> has minimum degree
+<span class="math inline">\(\MinimalDegree{G&#39;} \ge d - C\)</span>,
+then <span class="math inline">\(G&#39;\)</span> contains a spanning
+<span class="math inline">\(f\)</span>-regular subgraph for any even
+<span class="math inline">\(2 \le f \le d/2\)</span>. % </p>
+</section>
+<div class="proof">
+<p>We prove this lemma using the . We need to show that for any pair of
+disjoint sets <span class="math inline">\(S, T \subseteq
+\mathtt{V}(G&#39;)\)</span>, we have</p>
+<p><span class="math display">\[\begin{align}
+    q\left(G&#39; \setminus (S \cup T)\right) &amp;\le \left|S\right|f -
+\sum_{w \in T} (f - \left|\Gamma_{G}(G&#39;){w} \setminus S\right|)
+\label{eq:main-goal}
+  \end{align}\]</span></p>
+<p>As <span class="math inline">\(\epsilon &lt;
+\frac{1}{100C^{3/2}}\)</span> and <span class="math inline">\(C &gt;
+1\)</span>, we have that <span class="math inline">\(\epsilon &lt;
+1/100\)</span>. This implies that <span class="math inline">\(G\)</span>
+is an <span class="math inline">\((n,d, \lambda)\)</span> graph with
+<span class="math inline">\(\lambda &lt; d/50\)</span> (with room to
+spare). We set <span class="math inline">\(d_0 := d_0(C)\)</span> large
+enough such that for all <span class="math inline">\(d \ge d_0\)</span>,
+even after deleting at most <span class="math inline">\(C\)</span> edges
+incident on each vertex of the <span
+class="math inline">\(d\)</span>-regular graph <span
+class="math inline">\(G\)</span> to get <span
+class="math inline">\(G&#39;\)</span>, we have the minimum degree of
+<span class="math inline">\(G&#39;\)</span>, <span
+class="math inline">\(\MinimalDegree{G&#39;} \ge  \MinimalDegree{G} - C
+&gt; 9d/10\)</span>. Therefore the conditions of Lemma <span
+class="math inline">\(\ref{thm:perfect-matching}\)</span> are satisfied,
+from which we can conclude that <span
+class="math display">\[q\left(G&#39; \setminus (S \cup T)\right) \le
+\left|S \cup T\right| = |S| + |T|\]</span> Thus, to prove <span
+class="math inline">\(\eqref{eq:main-goal}\)</span>, it suffices to show
+<span class="math display">\[\begin{align}
+    |S| + |T| &amp;\le |S|f - \sum_{w \in T} (f - \left|\Gamma_{G}(G){w}
+\setminus S\right|)   \\
+              &amp;=\left|S\right|f - \left|T\right|f +
+\left|T\right|(d-C) - e(S \leftrightarrow T; G&#39;)  \label{eq:to-show}
+  \end{align}\]</span></p>
+<p>: If <span class="math inline">\(\left|S\right| \leq
+\left|T\right|\)</span>, and as <span class="math inline">\(f \leq
+d/2\)</span>, we have <span class="math display">\[\begin{align}
+    \left|S\right|f + \left|T\right|(d-C-f)  &amp;\ge (\left|S\right| +
+\left|T\right|)(d/2 -C) \label{eq:to-show-1}
+  \end{align}\]</span></p>
+<p>The condition described by the inequality <span
+class="math inline">\(\eqref{eq:to-show}\)</span> is satisfied via the
+following analysis. <span class="math display">\[\begin{align}
+  |S| + |T| + e(S \leftrightarrow T; G&#39;) &amp;\le  |S| + |T| +
+|S||T|\frac{d}{n} + \epsilon d \sqrt{\left|S\right|\left|T\right|}
+\label{eq:eml}\\
+                                 &amp;\le |S| + |T| +
+\frac{d}{4}(\left|S\right| + \left|T\right|) + \epsilon d
+\frac{1}{2}(\left|S\right| + \left|T\right|) \label{eq:algebra}\\
+                                 &amp;\le (\left|S\right| +
+\left|T\right|)\left(\frac{d}{4} + 1 + \frac{
+                                   \epsilon d}{2}\right) \\
+                                 &amp;&lt;  (\left|S\right| +
+\left|T\right|)\left(d/2-C\right) \label{eq:eps-assumption}\\
+                                 &amp;\le \left|S\right|f -
+\left|T\right|(d-C-f) \label{eq:plug}
+\end{align}\]</span></p>
+<p>Equation <span class="math inline">\(\eqref{eq:eml}\)</span> comes
+from the and <span class="math inline">\(\lambda &lt; \epsilon
+d\)</span>. Equation <span
+class="math inline">\(\eqref{eq:algebra}\)</span> comes from the fact
+that <span class="math inline">\(\left|S\right|\left|T\right| \leq
+\left(\frac{\left|S\right|+\left|T\right|}{2}\right)^2 \le
+n\frac{(\left|S\right|+\left|T\right|)}{4}\)</span>. Equation <span
+class="math inline">\(\eqref{eq:eps-assumption}\)</span> comes from
+<span class="math inline">\(\epsilon &lt;
+\nicefrac{1}{100C^{3/2}}\)</span>, <span class="math inline">\(C
+&gt;1\)</span> and <span class="math inline">\(d_0\)</span> is set large
+enough (which we can assume as it is set as a function of <span
+class="math inline">\(C\)</span>, which ensures that <span
+class="math inline">\(d\)</span> is large enough). Equation <span
+class="math inline">\(\eqref{eq:plug}\)</span> follows from Equation
+<span class="math inline">\(\eqref{eq:to-show-1}\)</span> which gives us
+what we want.</p>
+<p>: If <span class="math inline">\(\left|S\right| &gt;
+\left|T\right|\)</span>, and as <span class="math inline">\(f \ge
+2\)</span>, then <span class="math display">\[\begin{align}
+    \left|S\right|f +  \left|T\right|(d-C-f)  &amp;\ge 2\left|S\right|
++\left|T\right|(d-C-2) \label{eq:to-show-2}
+  \end{align}\]</span></p>
+<p>To show Equation <span
+class="math inline">\(\eqref{eq:to-show}\)</span>, it suffices to show
+that <span class="math display">\[\begin{align}
+  e(S \leftrightarrow T; G&#39;) \leq \left|S\right| +
+\left|T\right|(d-C-3) \label{eq:to-show-3}
+\end{align}\]</span></p>
+<p>Now we distinguish between two cases.</p>
+<ul>
+<li><p>If <span class="math inline">\(\left|T\right| \le
+\nicefrac{\left|S\right|}{C+3}\)</span>, then we trivially have <span
+class="math inline">\(e(S \leftrightarrow T; G&#39;) \leq
+\left|T\right|d\)</span>, and Equation <span
+class="math inline">\(\eqref{eq:to-show-3}\)</span> follows from <span
+class="math inline">\(\left|S\right| \geq
+(C+3)\left|T\right|\)</span>.</p></li>
+<li><p>$ &lt; &lt; $. As <span class="math inline">\(\left|S\right| +
+\left|T\right| &lt; n\)</span>, this assumption implies that <span
+class="math inline">\(\left|S\right| &lt; n - \frac{\left|S\right|}{C+3}
+&lt; n\left(\frac{C+3}{C+4}\right)\)</span>. Now using the
+\nameref{lemma:expanders-mixing-lemma</p></li>
+</ul>
+<p><span class="math display">\[\begin{align}
+e(S \leftrightarrow T; G&#39;) &amp;\le
+\frac{d}{n}\left|S\right|\left|T\right| + \epsilon d
+\sqrt{\left|S\right|\left|T\right|}   \\[8pt]
+&amp;&lt; d\frac{(C+3)}{(C+4)}\left|T\right| + \epsilon d
+\left|T\right|\sqrt{(C+3)} \label{eq:thing-to-upperbound}
+\end{align}\]</span></p>
+<p>Now, as <span class="math inline">\(\left|T\right| &lt;
+\left|S\right|\)</span>, we have that <span
+class="math inline">\(\left|T\right| + \left|T\right|(d-C-3) &lt;
+\left|S\right| + \left|T\right|(d-C-3)\)</span>, so if we show that the
+RHS of inequality <span
+class="math inline">\(\eqref{eq:thing-to-upperbound}\)</span> is at most
+<span class="math inline">\(\left|T\right| +
+\left|T\right|(d-C-3)\)</span> we are done. Thus, now we want to show
+that <span class="math display">\[\begin{align}
+d\frac{(C+3)}{(C+4)}\left|T\right| + \epsilon d
+\left|T\right|\sqrt{(C+3)} &amp;&lt;   \left|T\right| +
+\left|T\right|(d-C-3) \label{eq:new-thing-to-show}
+\end{align}\]</span></p>
+<p>To show that <span
+class="math inline">\(\eqref{eq:new-thing-to-show}\)</span> holds we
+re-arrange the inequality to see that we need the following condition on
+<span class="math inline">\(d\)</span>. <span
+class="math display">\[\begin{align}
+\epsilon d \sqrt{(C+3)} &amp;&lt; d\left(1 - \frac{(C+3)}{(C+4)}\right)
+-C-2 \\[8pt]
+&amp;= d\left(\frac{1}{(C+4)}\right) -C-2 \\[8pt]
+d&amp;&gt; \frac{(C+4)(C+2)}{1 - \epsilon(C+4)\sqrt{C+3}}
+\label{eq:cond-on-d}
+\end{align}\]</span></p>
+<p>As <span class="math inline">\(\epsilon =
+\frac{1}{100C^{3/2}}\)</span> and <span class="math inline">\(100C^{3/2}
+&gt; (C+4)\sqrt{C+3}\)</span> for <span
+class="math inline">\(C&gt;1\)</span>, we have <span
+class="math inline">\(\epsilon(C+4)\sqrt{C+3} &lt; 1\)</span> To make
+<span class="math inline">\(\eqref{eq:new-thing-to-show}\)</span> hold,
+it suffices to make <span class="math inline">\(d\)</span> a large
+enough constant such that <span
+class="math inline">\(\eqref{eq:cond-on-d}\)</span> holds. }</p>
+</div></article>
+    </main>
+    <footer class="site-footer">
+      <p>&copy; 2025 On A Tangent Ltd.</p>
+      <p class="attribution">
+        Website template colors inspired by
+        <a
+          href="https://gendignoux.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Guillaume Endignoux</a
+        >
+      </p>
+    </footer>
+
+
+    <script>
+      // Theme toggle
+      const themeToggle = document.querySelector(".theme-toggle");
+      const html = document.documentElement;
+      const lightIcon = document.querySelector(".theme-toggle-light");
+      const darkIcon = document.querySelector(".theme-toggle-dark");
+      const currentTheme =
+        localStorage.getItem("theme") ||
+        (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
+
+      html.setAttribute("data-theme", currentTheme);
+      if (currentTheme === "dark") {
+        lightIcon.style.display = "none";
+        darkIcon.style.display = "block";
+      } else {
+        lightIcon.style.display = "block";
+        darkIcon.style.display = "none";
+      }
+
+      themeToggle.onclick = () => {
+        const newTheme =
+          html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+
+        if (newTheme === "dark") {
+          lightIcon.style.display = "none";
+          darkIcon.style.display = "block";
+        } else {
+          lightIcon.style.display = "block";
+          darkIcon.style.display = "none";
+        }
+      };
+
+      // Mobile menu toggle
+      document.querySelector(".menu-toggle").onclick = () =>
+        document.querySelector(".nav-group").classList.toggle("is-active");
+
+      // Auto-highlight current page
+      const currentPath = window.location.pathname;
+      const currentPage = currentPath.split("/").pop() || "index.html";
+      document.querySelectorAll(".main-nav a").forEach((link) => {
+        const href = link.getAttribute("href").replace("../", "");
+        if (
+          href === currentPage ||
+          (currentPage === "index.html" && href === "index.html")
+        ) {
+          link.classList.add("active");
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Citation tooltips
+        const refs = document.querySelector("#refs");
+        if (refs) {
+          document
+            .querySelectorAll('.citation a[href^="#ref-"]')
+            .forEach(function (cite) {
+              const refId = cite.getAttribute("href").substring(1);
+              const refItem = document.getElementById(refId);
+
+              if (refItem) {
+                const urlLink = refItem.querySelector('a[href^="http"]');
+                if (urlLink) {
+                  cite.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    window.open(urlLink.href, "_blank");
+                  });
+                  cite.style.cursor = "pointer";
+                  cite.title = "Click to open source";
+                }
+
+                const tooltip = document.createElement("div");
+                tooltip.className = "citation-tooltip";
+                const cslEntry = refItem.querySelector(".csl-entry");
+                tooltip.textContent = cslEntry
+                  ? cslEntry.textContent
+                  : refItem.textContent;
+                document.body.appendChild(tooltip);
+
+                cite.addEventListener("mouseenter", function (e) {
+                  const rect = cite.getBoundingClientRect();
+                  tooltip.style.display = "block";
+                  tooltip.style.left =
+                    Math.min(rect.left, window.innerWidth - 420) + "px";
+                  tooltip.style.top = rect.bottom + 5 + "px";
+                });
+
+                cite.addEventListener("mouseleave", function () {
+                  tooltip.style.display = "none";
+                });
+              }
+            });
+        }
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll(".highlight").forEach(function (block) {
+          const btn = document.createElement("button");
+          btn.className = "copy-btn";
+          btn.textContent = "Copy";
+          btn.setAttribute("aria-label", "Copy code to clipboard");
+          block.insertBefore(btn, block.firstChild);
+
+          const code = block.querySelector("pre");
+
+          btn.addEventListener("click", async function () {
+            const text = code.textContent;
+
+            try {
+              await navigator.clipboard.writeText(text);
+              btn.textContent = "Copied!";
+              btn.style.background = "#10b981";
+
+              setTimeout(() => {
+                btn.textContent = "Copy";
+                btn.style.background = "";
+              }, 2000);
+            } catch (err) {
+              const textarea = document.createElement("textarea");
+              textarea.value = text;
+              textarea.style.position = "fixed";
+              textarea.style.opacity = "0";
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand("copy");
+              document.body.removeChild(textarea);
+
+              btn.textContent = "Copied!";
+              setTimeout(() => {
+                btn.textContent = "Copy";
+              }, 2000);
+            }
+          });
+        });
+
+        // Add data-tag to category tags
+        document.querySelectorAll(".category-tag").forEach((tag) => {
+          const tagName = tag.textContent.trim().toLowerCase();
+          tag.setAttribute("data-tag", tagName);
+        });
+
+        // Convert author text to styled tags
+        const authorSpan = document.querySelector(".article-meta .authors");
+        if (authorSpan) {
+          const authorText = authorSpan.textContent.replace("By ", "").trim();
+          const authors = authorText.split(",").map((a) => a.trim());
+
+          authorSpan.textContent = "By ";
+
+          authors.forEach((author, index) => {
+            const tag = document.createElement("span");
+            tag.className = "category-tag";
+            tag.textContent = author;
+            tag.setAttribute("data-tag", author.toLowerCase());
+            authorSpan.appendChild(tag);
+
+            if (index < authors.length - 1) {
+              authorSpan.appendChild(document.createTextNode(", "));
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

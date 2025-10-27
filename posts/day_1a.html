@@ -3,8 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Advent Of Jolt (Day 1): The Trace And Their
-Polynomials</title>
+    <title>Advent Of Jolt (Day 1): The Dynamic Jolt Trace</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script
       async
@@ -114,15 +113,15 @@ Polynomials</title>
     </header>
     <main class="article-content">
       <header class="article-header">
-        <h1>Advent Of Jolt (Day 1): The Trace And Their Polynomials</h1>
+        <h1>Advent Of Jolt (Day 1): The Dynamic Jolt Trace</h1>
         <div class="article-meta">
           <div class="meta-left">
                          <span class="category-tag">jolt</span>
              
           </div>
           <div class="meta-right">
-            <time>2025-10-24</time>             <span class="authors"
-              >By Ivan Bliminse</span
+            <time>2025-10-25</time>             <span class="authors"
+              >By Ari</span
             >
                       </div>
         </div>
@@ -130,13 +129,15 @@ Polynomials</title>
             <nav id="TOC">
         <h2>Contents</h2>
         <ul>
-        <li><a href="#the-dumb-fibonacci-example"
-        id="toc-the-dumb-fibonacci-example">The Dumb Fibonacci
-        Example</a></li>
-        <li><a href="#the-witness" id="toc-the-witness">2. The
-        Witness</a></li>
-        <li><a href="#a-sample-walk-through"
-        id="toc-a-sample-walk-through">A Sample Walk Through</a>
+        <li><a
+        href="#a-rust-program-rightarrow-binary-rightarrow-jolt-trace"
+        id="toc-a-rust-program-rightarrow-binary-rightarrow-jolt-trace">A
+        Rust Program <span class="math inline">\(\rightarrow\)</span>
+        Binary <span class="math inline">\(\rightarrow\)</span> Jolt
+        Trace</a></li>
+        <li><a href="#sanity-check-trace-vs-assembly-instructions"
+        id="toc-sanity-check-trace-vs-assembly-instructions">Sanity
+        Check – Trace Vs Assembly Instructions</a>
         <ul>
         <li><a href="#address-conversion"
         id="toc-address-conversion">Address Conversion
@@ -145,6 +146,10 @@ Polynomials</title>
         Names</a></li>
         <li><a href="#memory-map" id="toc-memory-map">Memory
         Map</a></li>
+        </ul></li>
+        <li><a href="#boot-sequence" id="toc-boot-sequence">Boot
+        Sequence (Cycles 0-3)</a>
+        <ul>
         <li><a href="#cycle-0-stack-pointer-initialization"
         id="toc-cycle-0-stack-pointer-initialization">Cycle 0: Stack
         Pointer Initialization</a></li>
@@ -181,32 +186,65 @@ Polynomials</title>
         id="toc-cycles-8-15-load-byte-instruction-virtual-sequence">Cycles
         8-15: Load Byte Instruction (VIRTUAL SEQUENCE)</a></li>
         </ul></li>
+        <li><a href="#the-codepath" id="toc-the-codepath">The
+        Codepath:</a>
+        <ul>
+        <li><a href="#the-emulation---bytecode"
+        id="toc-the-emulation---bytecode">The Emulation -
+        Bytecode</a></li>
+        <li><a href="#the-emulation---trace"
+        id="toc-the-emulation---trace">2. The Emulation - Trace</a></li>
+        </ul></li>
+        <li><a href="#whats-next" id="toc-whats-next">What’s
+        Next</a></li>
         </ul>
       </nav>
-            <article><p>At a completely abstract level, all of this
-SNARK business solves the following problem– We have a public instance
-<span class="math inline">\(x\)</span>, and a secret witness <span
-class="math inline">\(w\)</span>, and we want to verify an NP relation
-<span class="math inline">\(R\)</span>. In an introductory complexity
-theory class <span class="math inline">\(x\)</span> can be a graph on
-<span class="math inline">\(n\)</span> vertices, and <span
-class="math inline">\(w\)</span> could be a 3 colouring of the graphs
-vertices. The relation <span class="math inline">\(R\)</span> evaluates
-to <span class="math inline">\(R(x,w)=1\)</span> if <span
-class="math inline">\(w\)</span> is a valid 3 colouring of the graph. In
-the case of Jolt, <span class="math inline">\(x\)</span> will be a
-program written as a sequence of RISC V assembly instructions. The
-witness <span class="math inline">\(w\)</span> will be an execution
-trace which is manifested by a vector of <code>Cycle</code> structs.</p>
-<p>On Day 1, we describe in great detail what <span
-class="math inline">\(x\)</span> and <span
-class="math inline">\(w\)</span> actually looks like with real data.</p>
-<section id="the-dumb-fibonacci-example" class="level2">
-<h2>The Dumb Fibonacci Example</h2>
-<p>Take this <a href="">example</a> of a program that was meant to
-compute fibonacci numbers. For pedagogical purposes, I’ve decided to not
-use the input, get rid of the loop, and just add two variables. That’s
-the entire program.</p>
+            <article><section
+id="a-rust-program-rightarrow-binary-rightarrow-jolt-trace"
+class="level2">
+<h2>A Rust Program <span class="math inline">\(\rightarrow\)</span>
+Binary <span class="math inline">\(\rightarrow\)</span> Jolt Trace</h2>
+<p>The starting point of proving is to describe the program which we
+claim to have execute correctly.</p>
+<div class="svg-container" style="max-width: 400px;">
+<p><img src="/assets/jolt-working-notes/step1.svg" /></p>
+</div>
+<p>We take this program written in rust and compile it a binary encoding
+RISC-V instructions. Then we take this binary and generate two Jolt
+specific data structures – <strong>bytecode</strong> and the
+<strong>dynamic trace</strong> The final artefacts of this blog are the
+following:</p>
+<ol type="1">
+<li><p>The file in <a
+href="/assets/jolt-tutorial/bytecode.fib.asm">disassembled RISC-V</a>
+instruction format; and a <a
+href="/assets/jolt-tutorial/annotated-trace.fib.asm">annotated
+assembly</a> which we provide to make sense of what’s going on. Note
+that the annotated file is not generated by the Jolt codebase (it is
+listed for pedagogical reasons).</p></li>
+<li><p><a href="/assets/jolt-tutorial/bytecode.fib.txt">The Jolt
+Bytecode</a>: which is just a <code>Vec&lt;Instruction&gt;</code> object
+representing the entire program’s bytecode in ascending order by memory
+address. We will talk about the type <code>Instruction</code> in greater
+detail later.</p></li>
+<li><p>The <a href="/assets/jolt-tutorial/trace.fib.txt">Dynamic
+Trace</a>: This is just the step by step execution step. At each
+timestep/cycle, it stores what instruction to run, and how the machine
+state changes due to the instruction. We will juxtapose the actual
+assembly file and this trace, and walk through them later in the
+post.</p></li>
+</ol>
+<p><strong>TODO: fix this figure</strong></p>
+<div class="svg-container" style="max-width: 400px;">
+<p><img src="/assets/jolt-working-notes/step2.svg" /> <img
+src="/assets/jolt-working-notes/step3.svg" /></p>
+</div>
+<p>For the sake of simplicity, we pick a program that essentially does
+nothing - it takes as input a 32 bit integer <code>n</code>, proceeds to
+ignore it completely and then add to variables set to 0 and 1
+respectiely. This ensures that the assembly generated is relatively
+short, which ensures that the bytecode and trace files are short –
+allowing us to hand verify each step of the process.</p>
 <div class="highlight"><pre><span></span><span class="cp">#[jolt::provable(memory_size = 10240, max_trace_length = 65536)]</span>
 <span class="k">fn</span><span class="w"> </span><span class="nf">fib</span><span class="p">(</span><span class="n">n</span><span class="p">:</span><span class="w"> </span><span class="kt">u32</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="kt">u128</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">a</span><span class="p">:</span><span class="w"> </span><span class="kt">u128</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
@@ -222,222 +260,23 @@ the entire program.</p>
 <p>To prove Jolt executed this program correctly, the documentation asks
 to run the following command into the terminal.</p>
 <p><code>cargo run --release -p jolt-core profile --name fibonacci</code></p>
-<p>After some command line parsing and instrumentation setup we arrive
-at the following line</p>
-<div class="highlight"><pre><span></span><span class="k">fn</span><span class="w"> </span><span class="nf">fibonacci</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="n">tracing</span><span class="p">::</span><span class="nf">Span</span><span class="p">,</span><span class="w"> </span><span class="nb">Box</span><span class="o">&lt;</span><span class="k">dyn</span><span class="w"> </span><span class="nb">FnOnce</span><span class="p">()</span><span class="o">&gt;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="n">prove_example</span><span class="p">(</span><span class="s">&quot;fibonacci-guest&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">postcard</span><span class="p">::</span><span class="n">to_stdvec</span><span class="p">(</span><span class="o">&amp;</span><span class="mi">400000</span><span class="k">u32</span><span class="p">).</span><span class="n">unwrap</span><span class="p">())</span>
-<span class="p">}</span>
-</pre></div>
-
 <div class="remark">
-<p>This <code>prove_example</code> <a
-href="https://github.com/abiswas3/jolt/blob/aa8de466125930710ef8fea5d5ea29ec1b501676/jolt-core/benches/e2e_profiling.rs#L46">function</a>
-will be the main object of study in our series.</p>
-<p>On Day 1 part a, we focus on the following lines code:</p>
+<p>We created a branch where we overwrote the original fibonacci program
+with the program above.</p>
 </div>
-<div class="highlight"><pre><span></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">tasks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">program</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">host</span><span class="p">::</span><span class="nf">Program</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">example_name</span><span class="p">);</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">bytecode</span><span class="p">,</span><span class="w"> </span><span class="n">init_memory_state</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">program</span><span class="p">.</span><span class="n">decode</span><span class="p">();</span>
-</pre></div>
-
-<p>All <code>Program::new</code> does is intialise a struct with a guest
-name, and some defaults.</p>
-<div class="highlight"><pre><span></span><span class="w">    </span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">guest</span><span class="p">:</span><span class="w"> </span><span class="nc">guest</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
-<span class="w">            </span><span class="n">func</span><span class="p">:</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span>
-<span class="w">            </span><span class="n">memory_size</span><span class="p">:</span><span class="w"> </span><span class="nc">DEFAULT_MEMORY_SIZE</span><span class="p">,</span>
-<span class="w">            </span><span class="n">stack_size</span><span class="p">:</span><span class="w"> </span><span class="nc">DEFAULT_STACK_SIZE</span><span class="p">,</span>
-<span class="w">            </span><span class="n">max_input_size</span><span class="p">:</span><span class="w"> </span><span class="nc">DEFAULT_MAX_INPUT_SIZE</span><span class="p">,</span>
-<span class="w">            </span><span class="n">max_untrusted_advice_size</span><span class="p">:</span><span class="w"> </span><span class="nc">DEFAULT_MAX_UNTRUSTED_ADVICE_SIZE</span><span class="p">,</span>
-<span class="w">            </span><span class="n">max_trusted_advice_size</span><span class="p">:</span><span class="w"> </span><span class="nc">DEFAULT_MAX_TRUSTED_ADVICE_SIZE</span><span class="p">,</span>
-<span class="w">            </span><span class="n">max_output_size</span><span class="p">:</span><span class="w"> </span><span class="nc">DEFAULT_MAX_OUTPUT_SIZE</span><span class="p">,</span>
-<span class="w">            </span><span class="n">std</span><span class="p">:</span><span class="w"> </span><span class="nc">false</span><span class="p">,</span>
-<span class="w">            </span><span class="n">elf</span><span class="p">:</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span>
-<span class="w">    </span><span class="p">}</span>
-</pre></div>
-
-<p>The interesting work happens in the <code>decode</code> function</p>
-<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nf">Instruction</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="kt">u64</span><span class="p">,</span><span class="w"> </span><span class="kt">u8</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="kt">u64</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="nf">DEFAULT_TARGET_DIR</span><span class="p">);</span><span class="w"> </span><span class="c1">// LINE 1</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">elf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">elf</span><span class="p">.</span><span class="n">as_ref</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">elf_file</span><span class="w"> </span><span class="o">=</span>
-<span class="w">            </span><span class="nf">File</span><span class="p">::</span><span class="n">open</span><span class="p">(</span><span class="n">elf</span><span class="p">).</span><span class="n">unwrap_or_else</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="fm">panic!</span><span class="p">(</span><span class="s">&quot;could not open elf file: {elf:?}&quot;</span><span class="p">));</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">elf_contents</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
-<span class="w">        </span><span class="n">elf_file</span><span class="p">.</span><span class="n">read_to_end</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">elf_contents</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"> </span><span class="c1">// LINE 2</span>
-<span class="w">        </span><span class="n">guest</span><span class="p">::</span><span class="n">program</span><span class="p">::</span><span class="n">decode</span><span class="p">(</span><span class="o">&amp;</span><span class="n">elf_contents</span><span class="p">)</span>
-<span class="p">}</span>
-</pre></div>
-
-<p><code>LINE 1</code>: Calls the <a
-href="https://github.com/abiswas3/jolt/blob/0017138804dc69240b0d4f4aaf4f40dbd4101f4a/jolt-core/src/guest/program.rs#L72">following
-function</a> – which essentially just calls builds and runs the guest
-program and dumps an elf file in
-<code>tmp/jolt-guest-targets/sha3-guest-/riscv64imac-unknown-none-elf/release/fibonacci-guest</code></p>
-<p><code>LINE 2</code>: Does data formatting to structure the elf file
-to make it suitable for reading, and hands the elf file contents over to
-<code>guest::program::decode</code></p>
-<p><code>LINE 3</code> decodes binary, which again is the most
-interesting function of this section</p>
-<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="n">elf</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">u8</span><span class="p">])</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nf">Instruction</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="kt">u64</span><span class="p">,</span><span class="w"> </span><span class="kt">u8</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="kt">u64</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="k">mut</span><span class="w"> </span><span class="n">instructions</span><span class="p">,</span><span class="w"> </span><span class="n">raw_bytes</span><span class="p">,</span><span class="w"> </span><span class="n">program_end</span><span class="p">,</span><span class="w"> </span><span class="n">xlen</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tracer</span><span class="p">::</span><span class="n">decode</span><span class="p">(</span><span class="n">elf</span><span class="p">);</span><span class="w"> </span><span class="c1">// &lt;- Heavy Lifiting Done here</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">program_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">program_end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nf">RAM_START_ADDRESS</span><span class="p">;</span>
-<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">allocator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">VirtualRegisterAllocator</span><span class="p">::</span><span class="n">default</span><span class="p">();</span>
-
-<span class="w">    </span><span class="c1">// Expand virtual sequences</span>
-<span class="w">    </span><span class="n">instructions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">instructions</span>
-<span class="w">        </span><span class="p">.</span><span class="n">into_iter</span><span class="p">()</span>
-<span class="w">        </span><span class="p">.</span><span class="n">flat_map</span><span class="p">(</span><span class="o">|</span><span class="n">instr</span><span class="o">|</span><span class="w"> </span><span class="n">instr</span><span class="p">.</span><span class="n">inline_sequence</span><span class="p">(</span><span class="o">&amp;</span><span class="n">allocator</span><span class="p">,</span><span class="w"> </span><span class="n">xlen</span><span class="p">))</span>
-<span class="w">        </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span>
-
-<span class="w">    </span><span class="p">(</span><span class="n">instructions</span><span class="p">,</span><span class="w"> </span><span class="n">raw_bytes</span><span class="p">,</span><span class="w"> </span><span class="n">program_size</span><span class="p">)</span>
-<span class="p">}</span>
-</pre></div>
-
-<p>Roughly here is it what it does : <strong>Input:</strong> -
-<code>elf: &amp;[u8]</code> - Raw bytes of a RISC-V ELF (Executable and
-Linkable Format) binary</p>
-<p><strong>Output:</strong> 1. <code>Vec&lt;Instruction&gt;</code> -
-Decoded program instructions. <a
-href="https://github.com/abiswas3/jolt/blob/main/tracer/src/utils/instruction_macros.rs">The
-Instruction</a> struct is built using macros. The basic template is
-linked above.</p>
-<p>In Jolt, <code>Instruction</code> is an enum</p>
-<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="nc">Instruction</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="sd">/// No-operation instruction (address)</span>
-<span class="w">            </span><span class="nf">NoOp</span><span class="p">,</span>
-<span class="w">            </span><span class="nf">UNIMPL</span><span class="p">,</span>
-<span class="w">            </span><span class="cp">$(</span>
-<span class="w">                </span><span class="cp">$instr</span><span class="p">(</span><span class="cp">$instr</span><span class="p">),</span>
-<span class="w">            </span><span class="p">)</span><span class="o">*</span>
-<span class="w">            </span><span class="sd">/// Inline instruction from external crates</span>
-<span class="w">            </span><span class="nf">INLINE</span><span class="p">(</span><span class="nf">INLINE</span><span class="p">),</span>
-<span class="w">        </span><span class="p">}</span>
-</pre></div>
-
-<p>where the macro-expansion list of instructions can be found <a
-href="">here</a>.</p>
-<div class="highlight"><pre><span></span><span class="n">instruction</span><span class="p">:</span><span class="w"> </span><span class="nc">ADDI</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">address</span><span class="p">:</span><span class="w"> </span><span class="mi">2147483652</span><span class="p">,</span>
-<span class="w">            </span><span class="n">operands</span><span class="p">:</span><span class="w"> </span><span class="nc">FormatI</span><span class="w"> </span><span class="p">{</span>
-<span class="w">                </span><span class="n">rd</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
-<span class="w">                </span><span class="n">rs1</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
-<span class="w">                </span><span class="n">imm</span><span class="p">:</span><span class="w"> </span><span class="mi">288</span><span class="p">,</span>
-<span class="w">            </span><span class="p">},</span>
-<span class="w">            </span><span class="n">virtual_sequence_remaining</span><span class="p">:</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span>
-<span class="w">            </span><span class="n">is_first_in_sequence</span><span class="p">:</span><span class="w"> </span><span class="nc">false</span><span class="p">,</span>
-<span class="w">            </span><span class="n">is_compressed</span><span class="p">:</span><span class="w"> </span><span class="nc">false</span><span class="p">,</span>
-<span class="w">        </span><span class="p">}</span>
-</pre></div>
-
-<p>The remaining things that it returns are the following :</p>
-<ol start="2" type="1">
-<li><code>Vec&lt;(u64, u8)&gt;</code> - Memory initialization data
-(address, byte pairs)</li>
-<li><code>u64</code> - Program end address (highest address used)</li>
-<li><code>Xlen</code> - Architecture width (32-bit or 64-bit)</li>
-</ol>
-<p>Additionally, some instructions like division are broken down into
-many simpler instructions. These instructions are called virtual
-instructions, and they will read/write to virtual registers. <a
-href="/posts/elf_decoder.html">Here</a> you can find a detailed
-breakdown of the decode function (though it is not a pre-req for what
-follows).</p>
-<p>So that’s it. This <code>Vec&lt;Instruction&gt;</code> is <span
-class="math inline">\(x\)</span> – and is referred to as
-<code>bytecode</code> throughout the Jolt documentation.</p>
-<div class="remark">
-<p>Bytecode is just a vector of structs of type instruction. When we
-start plotting the trace, it will immediately be apparent what these
-things look like.</p>
-</div>
+<p>Before diving into how we generated the bytecode and trace, we stare
+at the trace and actual dissambled assembly and compare the two. We have
+annotated the files with comments to make it easier to see what is going
+on.</p>
 </section>
-<section id="the-witness" class="level2">
-<h2>2. The Witness</h2>
-<p>So what does my witness look like?</p>
-<p>Now we focus on the following lines of <code>prove_example</code></p>
-<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">trace</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">program_io</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">program</span><span class="p">.</span><span class="n">trace</span><span class="p">(</span><span class="o">&amp;</span><span class="n">serialized_input</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="p">[],</span><span class="w"> </span><span class="o">&amp;</span><span class="p">[]);</span>
-</pre></div>
-
-<p>which gives us trace or what is often denoted with the variable <span
-class="math inline">\(z\)</span> in <a href="">Twist/Shout</a> or the <a
-href="">Jolt</a> paper.</p>
-<p>The trace function does the following:</p>
-<ol type="1">
-<li>Builds the binary if it does not exist.</li>
-<li>Once again reads the binary file with the right structure and
-formatting.</li>
-<li>Computes the program size, by decoding the instructions again (NOTE:
-CODE DUPLICATION here and the Decode function above).</li>
-<li>We then initialise Jolts representation of RAM via the
-<code>MemoryConfig</code> struct.</li>
-<li>Finally we invoke another auxiliary tracer function, which proceeds
-to call the actual tracer.</li>
-</ol>
-<div class="highlight"><pre><span></span><span class="w">   </span><span class="cp">#[tracing::instrument(skip_all, name = </span><span class="s">&quot;Program::trace&quot;</span><span class="cp">)]</span>
-<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span>
-<span class="w">        </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span>
-<span class="w">        </span><span class="n">inputs</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">u8</span><span class="p">],</span>
-<span class="w">        </span><span class="n">untrusted_advice</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">u8</span><span class="p">],</span>
-<span class="w">        </span><span class="n">trusted_advice</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">u8</span><span class="p">],</span>
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nf">Cycle</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nf">Memory</span><span class="p">,</span><span class="w"> </span><span class="nf">JoltDevice</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="nf">DEFAULT_TARGET_DIR</span><span class="p">);</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">elf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">elf</span><span class="p">.</span><span class="n">as_ref</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">elf_file</span><span class="w"> </span><span class="o">=</span>
-<span class="w">            </span><span class="nf">File</span><span class="p">::</span><span class="n">open</span><span class="p">(</span><span class="n">elf</span><span class="p">).</span><span class="n">unwrap_or_else</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="fm">panic!</span><span class="p">(</span><span class="s">&quot;could not open elf file: {elf:?}&quot;</span><span class="p">));</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">elf_contents</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
-<span class="w">        </span><span class="n">elf_file</span><span class="p">.</span><span class="n">read_to_end</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">elf_contents</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">program_end</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tracer</span><span class="p">::</span><span class="n">decode</span><span class="p">(</span><span class="o">&amp;</span><span class="n">elf_contents</span><span class="p">);</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">program_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">program_end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nf">RAM_START_ADDRESS</span><span class="p">;</span>
-
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">memory_config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">MemoryConfig</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="n">memory_size</span><span class="p">:</span><span class="w"> </span><span class="nc">self</span><span class="p">.</span><span class="n">memory_size</span><span class="p">,</span>
-<span class="w">            </span><span class="n">stack_size</span><span class="p">:</span><span class="w"> </span><span class="nc">self</span><span class="p">.</span><span class="n">stack_size</span><span class="p">,</span>
-<span class="w">            </span><span class="n">max_input_size</span><span class="p">:</span><span class="w"> </span><span class="nc">self</span><span class="p">.</span><span class="n">max_input_size</span><span class="p">,</span>
-<span class="w">            </span><span class="n">max_untrusted_advice_size</span><span class="p">:</span><span class="w"> </span><span class="nc">self</span><span class="p">.</span><span class="n">max_untrusted_advice_size</span><span class="p">,</span>
-<span class="w">            </span><span class="n">max_trusted_advice_size</span><span class="p">:</span><span class="w"> </span><span class="nc">self</span><span class="p">.</span><span class="n">max_trusted_advice_size</span><span class="p">,</span>
-<span class="w">            </span><span class="n">max_output_size</span><span class="p">:</span><span class="w"> </span><span class="nc">self</span><span class="p">.</span><span class="n">max_output_size</span><span class="p">,</span>
-<span class="w">            </span><span class="n">program_size</span><span class="p">:</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">program_size</span><span class="p">),</span>
-<span class="w">        </span><span class="p">};</span>
-
-<span class="w">        </span><span class="n">guest</span><span class="p">::</span><span class="n">program</span><span class="p">::</span><span class="n">trace</span><span class="p">(</span>
-<span class="w">            </span><span class="o">&amp;</span><span class="n">elf_contents</span><span class="p">,</span>
-<span class="w">            </span><span class="bp">self</span><span class="p">.</span><span class="n">elf</span><span class="p">.</span><span class="n">as_ref</span><span class="p">(),</span>
-<span class="w">            </span><span class="n">inputs</span><span class="p">,</span>
-<span class="w">            </span><span class="n">untrusted_advice</span><span class="p">,</span>
-<span class="w">            </span><span class="n">trusted_advice</span><span class="p">,</span>
-<span class="w">            </span><span class="o">&amp;</span><span class="n">memory_config</span><span class="p">,</span>
-<span class="w">        </span><span class="p">)</span>
-<span class="w">    </span><span class="p">}</span>
-</pre></div>
-
-<p>The guest tracer calls another helper which gives us our
-<code>trace</code> and final <code>memory</code> state</p>
-<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">trace</span><span class="p">,</span><span class="w"> </span><span class="n">memory</span><span class="p">,</span><span class="w"> </span><span class="n">io_device</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tracer</span><span class="p">::</span><span class="n">trace</span><span class="p">(</span>
-<span class="w">        </span><span class="n">elf_contents</span><span class="p">,</span>
-<span class="w">        </span><span class="n">elf_path</span><span class="p">,</span>
-<span class="w">        </span><span class="n">inputs</span><span class="p">,</span>
-<span class="w">        </span><span class="n">untrusted_advice</span><span class="p">,</span>
-<span class="w">        </span><span class="n">trusted_advice</span><span class="p">,</span>
-<span class="w">        </span><span class="n">memory_config</span><span class="p">,</span>
-<span class="w">    </span><span class="p">);</span>
-<span class="w">    </span><span class="p">(</span><span class="n">trace</span><span class="p">,</span><span class="w"> </span><span class="n">memory</span><span class="p">,</span><span class="w"> </span><span class="n">io_device</span><span class="p">)</span>
-</pre></div>
-
-<p>We could dig through the source code, but the best way to understand
-what this looks like is to perhaps walk through a made up example.</p>
-</section>
-<section id="a-sample-walk-through" class="level2">
-<h2>A Sample Walk Through</h2>
-<p>For completeness, <a href="">here</a> is the RISC-V assembly our
-stupid program generates, and <a href="">here</a> is a dump to stdout of
-the same instructions represented as Jolt Cycles. We focus on a handful
-of these instructions to draw equivalence between what is happening. The
-tables below have helpful meta data that makes reading the code
-easier.</p>
+<section id="sanity-check-trace-vs-assembly-instructions"
+class="level2">
+<h2>Sanity Check – Trace Vs Assembly Instructions</h2>
 <section id="address-conversion" class="level3">
 <h3>Address Conversion Reference</h3>
-<p>All addresses in the trace are <strong>DECIMAL</strong>, while
-assembly uses <strong>HEX</strong>.</p>
+<p>The following table will make it easier to translate between raw
+assembly and the jolt trace output. All addresses in the trace are
+<strong>DECIMAL</strong>, while assembly uses <strong>HEX</strong>.</p>
 <table>
 <thead>
 <tr>
@@ -524,6 +363,8 @@ Example: <code>2147483648₁₀ = 0x80000000₁₆</code></p>
 </section>
 <section id="register-names" class="level3">
 <h3>Register Names</h3>
+<p>The name of registers in the RISC-V assembly, and the jolt trace are
+also slightly different. Here is the map.</p>
 <table>
 <thead>
 <tr>
@@ -578,6 +419,7 @@ Example: <code>2147483648₁₀ = 0x80000000₁₆</code></p>
 </section>
 <section id="memory-map" class="level3">
 <h3>Memory Map</h3>
+<p>This table shows where in memory our lies.</p>
 <table>
 <thead>
 <tr>
@@ -608,10 +450,10 @@ Example: <code>2147483648₁₀ = 0x80000000₁₆</code></p>
 </tr>
 </tbody>
 </table>
-<p>Next we compare side by side what jolt outputs as the witness, and
-the contrast it with actual assembly instruction. ## Boot Sequence
-(Cycles 0-3) {#boot-sequence}</p>
 </section>
+</section>
+<section id="boot-sequence" class="level2">
+<h2>Boot Sequence (Cycles 0-3)</h2>
 <section id="cycle-0-stack-pointer-initialization" class="level3">
 <h3>Cycle 0: Stack Pointer Initialization</h3>
 <p><strong>Assembly (0x80000000):</strong></p>
@@ -1033,20 +875,207 @@ specific byte</p>
 
 <p><strong>Purpose</strong>: Sign-extend the byte to 64-bit value -
 Shift right arithmetic by 56 bits - Final result: a3 = 2</p>
-<p><strong>Virtual Sequence Complete!</strong></p>
-<p>So that’s it. The instance <span class="math inline">\(x\)</span> is
-an array of <code>Instruction</code> structs and the trace <span
-class="math inline">\(w\)</span> (often referred to as <code>z</code>)
-is just a sequence of <code>Cycles</code> which just represent a the
-machine state diff for each cycle.</p>
+</section>
+</section>
+</section>
+<section id="the-codepath" class="level2">
+<h2>The Codepath:</h2>
+<p>Here’s a rough guide to how these artefacts were generated. Our
+starting point was the command :</p>
+<p><code>cargo run --release -p jolt-core profile --name fibonacci</code></p>
+<p>After some command line parsing and instrumentation setup Line 143 in
+<code>jolt/jolt-core/src/bin/jolt_core.rs</code> calls the
+<code>bench()</code> function which eventually leads us to</p>
+<div class="highlight"><pre><span></span><span class="k">fn</span><span class="w"> </span><span class="nf">fibonacci</span><span class="p">()</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="n">tracing</span><span class="p">::</span><span class="nf">Span</span><span class="p">,</span><span class="w"> </span><span class="nb">Box</span><span class="o">&lt;</span><span class="k">dyn</span><span class="w"> </span><span class="nb">FnOnce</span><span class="p">()</span><span class="o">&gt;</span><span class="p">)</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">prove_example</span><span class="p">(</span><span class="s">&quot;fibonacci-guest&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">postcard</span><span class="p">::</span><span class="n">to_stdvec</span><span class="p">(</span><span class="o">&amp;</span><span class="mi">400000</span><span class="k">u32</span><span class="p">).</span><span class="n">unwrap</span><span class="p">())</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>This <code>prove_example</code> <a
+href="https://github.com/abiswas3/jolt/blob/aa8de466125930710ef8fea5d5ea29ec1b501676/jolt-core/benches/e2e_profiling.rs#L46">function</a>
+will be the main object of study in our lecture series. Today, we focus
+on the following code snippet.</p>
+<div class="highlight"><pre><span></span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">tasks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">program</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">host</span><span class="p">::</span><span class="nf">Program</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">example_name</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">bytecode</span><span class="p">,</span><span class="w"> </span><span class="n">init_memory_state</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">program</span><span class="p">.</span><span class="n">decode</span><span class="p">();</span>
+</pre></div>
+
+<p>All <code>Program::new</code> does is initialise a
+<code>Program</code> struct with a guest name, and some <a
+href="https://github.com/abiswas3/jolt/blob/experiments/advent-of-jolt/common/src/constants.rs">defaults</a>.</p>
+<div class="highlight"><pre><span></span><span class="w">    </span><span class="bp">Self</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">guest</span><span class="p">:</span><span class="w"> </span><span class="nc">guest</span><span class="p">.</span><span class="n">to_string</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">func</span><span class="p">:</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span>
+<span class="w">            </span><span class="n">memory_size</span><span class="p">:</span><span class="w"> </span><span class="nc">DEFAULT_MEMORY_SIZE</span><span class="p">,</span>
+<span class="w">            </span><span class="n">stack_size</span><span class="p">:</span><span class="w"> </span><span class="nc">DEFAULT_STACK_SIZE</span><span class="p">,</span>
+<span class="w">            </span><span class="n">max_input_size</span><span class="p">:</span><span class="w"> </span><span class="nc">DEFAULT_MAX_INPUT_SIZE</span><span class="p">,</span>
+<span class="w">            </span><span class="n">max_untrusted_advice_size</span><span class="p">:</span><span class="w"> </span><span class="nc">DEFAULT_MAX_UNTRUSTED_ADVICE_SIZE</span><span class="p">,</span>
+<span class="w">            </span><span class="n">max_trusted_advice_size</span><span class="p">:</span><span class="w"> </span><span class="nc">DEFAULT_MAX_TRUSTED_ADVICE_SIZE</span><span class="p">,</span>
+<span class="w">            </span><span class="n">max_output_size</span><span class="p">:</span><span class="w"> </span><span class="nc">DEFAULT_MAX_OUTPUT_SIZE</span><span class="p">,</span>
+<span class="w">            </span><span class="n">std</span><span class="p">:</span><span class="w"> </span><span class="nc">false</span><span class="p">,</span>
+<span class="w">            </span><span class="n">elf</span><span class="p">:</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span>
+<span class="w">    </span><span class="p">}</span>
+</pre></div>
+
+<p>The interesting work happens in the <code>decode</code> function</p>
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nf">Instruction</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="kt">u64</span><span class="p">,</span><span class="w"> </span><span class="kt">u8</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="kt">u64</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="nf">DEFAULT_TARGET_DIR</span><span class="p">);</span><span class="w"> </span><span class="c1">// Line 1 : THIS IS WHERE WE COMPILE THE GUEST RUST PROGRAM</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">elf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">elf</span><span class="p">.</span><span class="n">as_ref</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">elf_file</span><span class="w"> </span><span class="o">=</span>
+<span class="w">            </span><span class="nf">File</span><span class="p">::</span><span class="n">open</span><span class="p">(</span><span class="n">elf</span><span class="p">).</span><span class="n">unwrap_or_else</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="fm">panic!</span><span class="p">(</span><span class="s">&quot;could not open elf file: {elf:?}&quot;</span><span class="p">));</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">elf_contents</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
+<span class="w">        </span><span class="n">elf_file</span><span class="p">.</span><span class="n">read_to_end</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">elf_contents</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span><span class="w"> </span><span class="c1">// LINE 2</span>
+<span class="w">        </span><span class="n">guest</span><span class="p">::</span><span class="n">program</span><span class="p">::</span><span class="n">decode</span><span class="p">(</span><span class="o">&amp;</span><span class="n">elf_contents</span><span class="p">)</span><span class="w"> </span><span class="c1">// LINE 3</span>
+<span class="p">}</span>
+</pre></div>
+
+<p><code>LINE 1</code>: Calls the <a
+href="https://github.com/abiswas3/jolt/blob/0017138804dc69240b0d4f4aaf4f40dbd4101f4a/jolt-core/src/guest/program.rs#L72">following
+function</a> – which essentially just calls builds and runs the guest
+program and dumps an elf file in
+<code>tmp/jolt-guest-targets/sha3-guest-/riscv64imac-unknown-none-elf/release/fibonacci-guest</code>.
+This file is the RISC V Binary in the figure above (not yet
+disassembled).</p>
+<section id="the-emulation---bytecode" class="level3">
+<h3>The Emulation - Bytecode</h3>
+<p><code>LINE 2</code>: Does data formatting to structure the elf file
+to make it suitable for reading, and hands the elf file contents over to
+<code>guest::program::decode</code></p>
+<p><code>LINE 3</code> decodes binary, which again is the most
+interesting function of this section</p>
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">decode</span><span class="p">(</span><span class="n">elf</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">u8</span><span class="p">])</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nf">Instruction</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="p">(</span><span class="kt">u64</span><span class="p">,</span><span class="w"> </span><span class="kt">u8</span><span class="p">)</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="kt">u64</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="k">mut</span><span class="w"> </span><span class="n">instructions</span><span class="p">,</span><span class="w"> </span><span class="n">raw_bytes</span><span class="p">,</span><span class="w"> </span><span class="n">program_end</span><span class="p">,</span><span class="w"> </span><span class="n">xlen</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tracer</span><span class="p">::</span><span class="n">decode</span><span class="p">(</span><span class="n">elf</span><span class="p">);</span><span class="w"> </span><span class="c1">// &lt;- Heavy Lifiting Done here</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">program_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">program_end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nf">RAM_START_ADDRESS</span><span class="p">;</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="n">allocator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">VirtualRegisterAllocator</span><span class="p">::</span><span class="n">default</span><span class="p">();</span>
+
+<span class="w">    </span><span class="c1">// Expand virtual sequences</span>
+<span class="w">    </span><span class="n">instructions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">instructions</span>
+<span class="w">        </span><span class="p">.</span><span class="n">into_iter</span><span class="p">()</span>
+<span class="w">        </span><span class="p">.</span><span class="n">flat_map</span><span class="p">(</span><span class="o">|</span><span class="n">instr</span><span class="o">|</span><span class="w"> </span><span class="n">instr</span><span class="p">.</span><span class="n">inline_sequence</span><span class="p">(</span><span class="o">&amp;</span><span class="n">allocator</span><span class="p">,</span><span class="w"> </span><span class="n">xlen</span><span class="p">))</span>
+<span class="w">        </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span>
+
+<span class="w">    </span><span class="p">(</span><span class="n">instructions</span><span class="p">,</span><span class="w"> </span><span class="n">raw_bytes</span><span class="p">,</span><span class="w"> </span><span class="n">program_size</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Roughly here is it what it does : <strong>Input:</strong></p>
+<ul>
+<li><code>elf: &amp;[u8]</code> - Raw bytes of a RISC-V ELF (Executable
+and Linkable Format) binary</li>
+</ul>
+<p><strong>Output:</strong></p>
+<ol type="1">
+<li><code>Vec&lt;Instruction&gt;</code> - Decoded program instructions.
+<a
+href="https://github.com/abiswas3/jolt/blob/main/tracer/src/utils/instruction_macros.rs">The
+Instruction</a> struct is built using macros. The basic template is
+linked above. In Jolt, <code>Instruction</code> is an enum</li>
+</ol>
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="nc">Instruction</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="sd">/// No-operation instruction (address)</span>
+<span class="w">            </span><span class="nf">NoOp</span><span class="p">,</span>
+<span class="w">            </span><span class="nf">UNIMPL</span><span class="p">,</span>
+<span class="w">            </span><span class="cp">$(</span>
+<span class="w">                </span><span class="cp">$instr</span><span class="p">(</span><span class="cp">$instr</span><span class="p">),</span>
+<span class="w">            </span><span class="p">)</span><span class="o">*</span>
+<span class="w">            </span><span class="sd">/// Inline instruction from external crates</span>
+<span class="w">            </span><span class="nf">INLINE</span><span class="p">(</span><span class="nf">INLINE</span><span class="p">),</span>
+<span class="w">        </span><span class="p">}</span>
+</pre></div>
+
+<p>The remaining things that it returns are the following :</p>
+<ol start="2" type="1">
+<li><code>Vec&lt;(u64, u8)&gt;</code> - Memory initialization data
+(address, byte pairs)</li>
+<li><code>u64</code> - Program end address (highest address used)</li>
+<li><code>Xlen</code> - Architecture width (32-bit or 64-bit)</li>
+</ol>
+<p>Additionally, some instructions like division are broken down into
+many simpler instructions. These instructions are called virtual
+instructions, and they will read/write to virtual registers.</p>
+</section>
+<section id="the-emulation---trace" class="level3">
+<h3>2. The Emulation - Trace</h3>
+<p>Now we focus on the following lines of <code>prove_example</code></p>
+<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">trace</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">program_io</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">program</span><span class="p">.</span><span class="n">trace</span><span class="p">(</span><span class="o">&amp;</span><span class="n">serialized_input</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="p">[],</span><span class="w"> </span><span class="o">&amp;</span><span class="p">[]);</span>
+</pre></div>
+
+<p>This gives us trace or what is often denoted with the variable <span
+class="math inline">\(z\)</span> in <a
+href="https://eprint.iacr.org/2025/105">Twist/Shout</a> or the <a
+href="https://eprint.iacr.org/2023/1217">Jolt</a> paper.</p>
+<p>The trace function does the following:</p>
+<ol type="1">
+<li>Builds the binary if it does not exist.</li>
+<li>Once again reads the binary file with the right structure and
+formatting.</li>
+<li>Computes the program size, by decoding the instructions again (NOTE:
+CODE DUPLICATION here and the Decode function above).</li>
+<li>We then initialise Jolts representation of RAM via the
+<code>MemoryConfig</code> struct.</li>
+<li>Finally we invoke another auxiliary tracer function, which proceeds
+to call the actual tracer.</li>
+</ol>
+<div class="highlight"><pre><span></span><span class="w">   </span><span class="cp">#[tracing::instrument(skip_all, name = </span><span class="s">&quot;Program::trace&quot;</span><span class="cp">)]</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="k">fn</span><span class="w"> </span><span class="nf">trace</span><span class="p">(</span>
+<span class="w">        </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span>
+<span class="w">        </span><span class="n">inputs</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">u8</span><span class="p">],</span>
+<span class="w">        </span><span class="n">untrusted_advice</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">u8</span><span class="p">],</span>
+<span class="w">        </span><span class="n">trusted_advice</span><span class="p">:</span><span class="w"> </span><span class="kp">&amp;</span><span class="p">[</span><span class="kt">u8</span><span class="p">],</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="p">(</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="nf">Cycle</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="nf">Memory</span><span class="p">,</span><span class="w"> </span><span class="nf">JoltDevice</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="bp">self</span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="nf">DEFAULT_TARGET_DIR</span><span class="p">);</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">elf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">elf</span><span class="p">.</span><span class="n">as_ref</span><span class="p">().</span><span class="n">unwrap</span><span class="p">();</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">elf_file</span><span class="w"> </span><span class="o">=</span>
+<span class="w">            </span><span class="nf">File</span><span class="p">::</span><span class="n">open</span><span class="p">(</span><span class="n">elf</span><span class="p">).</span><span class="n">unwrap_or_else</span><span class="p">(</span><span class="o">|</span><span class="n">_</span><span class="o">|</span><span class="w"> </span><span class="fm">panic!</span><span class="p">(</span><span class="s">&quot;could not open elf file: {elf:?}&quot;</span><span class="p">));</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">elf_contents</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span><span class="p">::</span><span class="n">new</span><span class="p">();</span>
+<span class="w">        </span><span class="n">elf_file</span><span class="p">.</span><span class="n">read_to_end</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">elf_contents</span><span class="p">).</span><span class="n">unwrap</span><span class="p">();</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="n">program_end</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tracer</span><span class="p">::</span><span class="n">decode</span><span class="p">(</span><span class="o">&amp;</span><span class="n">elf_contents</span><span class="p">);</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">program_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">program_end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nf">RAM_START_ADDRESS</span><span class="p">;</span>
+
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">memory_config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">MemoryConfig</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">memory_size</span><span class="p">:</span><span class="w"> </span><span class="nc">self</span><span class="p">.</span><span class="n">memory_size</span><span class="p">,</span>
+<span class="w">            </span><span class="n">stack_size</span><span class="p">:</span><span class="w"> </span><span class="nc">self</span><span class="p">.</span><span class="n">stack_size</span><span class="p">,</span>
+<span class="w">            </span><span class="n">max_input_size</span><span class="p">:</span><span class="w"> </span><span class="nc">self</span><span class="p">.</span><span class="n">max_input_size</span><span class="p">,</span>
+<span class="w">            </span><span class="n">max_untrusted_advice_size</span><span class="p">:</span><span class="w"> </span><span class="nc">self</span><span class="p">.</span><span class="n">max_untrusted_advice_size</span><span class="p">,</span>
+<span class="w">            </span><span class="n">max_trusted_advice_size</span><span class="p">:</span><span class="w"> </span><span class="nc">self</span><span class="p">.</span><span class="n">max_trusted_advice_size</span><span class="p">,</span>
+<span class="w">            </span><span class="n">max_output_size</span><span class="p">:</span><span class="w"> </span><span class="nc">self</span><span class="p">.</span><span class="n">max_output_size</span><span class="p">,</span>
+<span class="w">            </span><span class="n">program_size</span><span class="p">:</span><span class="w"> </span><span class="nb">Some</span><span class="p">(</span><span class="n">program_size</span><span class="p">),</span>
+<span class="w">        </span><span class="p">};</span>
+
+<span class="w">        </span><span class="n">guest</span><span class="p">::</span><span class="n">program</span><span class="p">::</span><span class="n">trace</span><span class="p">(</span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">elf_contents</span><span class="p">,</span>
+<span class="w">            </span><span class="bp">self</span><span class="p">.</span><span class="n">elf</span><span class="p">.</span><span class="n">as_ref</span><span class="p">(),</span>
+<span class="w">            </span><span class="n">inputs</span><span class="p">,</span>
+<span class="w">            </span><span class="n">untrusted_advice</span><span class="p">,</span>
+<span class="w">            </span><span class="n">trusted_advice</span><span class="p">,</span>
+<span class="w">            </span><span class="o">&amp;</span><span class="n">memory_config</span><span class="p">,</span>
+<span class="w">        </span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+</pre></div>
+
+<p>The guest tracer calls another helper which gives us our
+<code>trace</code> and final <code>memory</code> state</p>
+<div class="highlight"><pre><span></span><span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">trace</span><span class="p">,</span><span class="w"> </span><span class="n">memory</span><span class="p">,</span><span class="w"> </span><span class="n">io_device</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tracer</span><span class="p">::</span><span class="n">trace</span><span class="p">(</span>
+<span class="w">        </span><span class="n">elf_contents</span><span class="p">,</span>
+<span class="w">        </span><span class="n">elf_path</span><span class="p">,</span>
+<span class="w">        </span><span class="n">inputs</span><span class="p">,</span>
+<span class="w">        </span><span class="n">untrusted_advice</span><span class="p">,</span>
+<span class="w">        </span><span class="n">trusted_advice</span><span class="p">,</span>
+<span class="w">        </span><span class="n">memory_config</span><span class="p">,</span>
+<span class="w">    </span><span class="p">);</span>
+<span class="w">    </span><span class="p">(</span><span class="n">trace</span><span class="p">,</span><span class="w"> </span><span class="n">memory</span><span class="p">,</span><span class="w"> </span><span class="n">io_device</span><span class="p">)</span>
+</pre></div>
+
+</section>
+</section>
+<section id="whats-next" class="level2">
+<h2>What’s Next</h2>
 <p>Great! We have the instance and the witness, but if you’ve ever read
 any of <a href="https://people.cs.georgetown.edu/jthaler/">Justin
 Thaler’s</a> papers, he bangs on about sum-checks. Sumchecks have
-polynomials. All we have so far is an array of assembly instructions. In
-<a href="/posts/day_1b.html">Part b</a> of the Day 1 series, we go from
-a vector of cycles to polynomials.</p>
-</section>
-</section>
+polynomials. All we have so far is an array of assembly instructions
+formatted in a somewhat complicated Jolt specific data structures. On <a
+href="/posts/day_1b.html">Day 2</a> we get to polynomials.</p>
 </section></article>
     </main>
     <footer class="site-footer">
