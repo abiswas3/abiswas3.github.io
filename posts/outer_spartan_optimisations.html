@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Progress Towards A Fully Functional Outer Sumcheck</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <script
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <h1 class="site-title"><a href="/index.html">Ari</a></h1>
+        <button class="menu-toggle">☰</button>
+        <div class="nav-group">
+          <nav class="main-nav">
+            <ul>
+              <li><a href="/publications.html">Research</a></li>
+              <li><a href="/blog.html">Blog</a></li>
+              <li><a href="/about.html">Random Walks</a></li>
+              <li>
+                <a
+                  href="https://github.com/abiswas3"
+                  target="_blank"
+                  rel="noopener"
+                  class="icon-link"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+                    />
+                  </svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://scholar.google.com/citations?user=yGuM3MgAAAAJ&hl=en&authuser=1"
+                  target="_blank"
+                  rel="noopener"
+                  class="icon-link"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M12 24a7 7 0 110-14 7 7 0 010 14zm0-24L0 9.5l4.838 3.94A8 8 0 0112 9a8 8 0 017.162 4.44L24 9.5z"
+                    />
+                  </svg>
+                </a>
+              </li>
+              <!-- <li> -->
+              <!--   <a -->
+              <!--     href="#" -->
+              <!--     class="email-copy" -->
+              <!--     data-email="on.a.tangent@randomwalks.xyz" -->
+              <!--   > -->
+              <!--     <span class="email-icon">&#9993;</span> -->
+              <!--   </a> -->
+              <!-- </li> -->
+            </ul>
+          </nav>
+          <button class="theme-toggle">
+            <span class="theme-toggle-light">&#9728;&#65039;</span>
+            <span class="theme-toggle-dark" style="display: none">&#127769;</span>
+          </button>
+        </div>
+      </div>
+      <style>
+        .email-icon {
+          font-size: 1em;
+          margin-right: 0.25em;
+        }
+      </style>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const emailLink = document.querySelector(".email-copy");
+          if (emailLink) {
+            emailLink.onclick = function (e) {
+              e.preventDefault();
+              const email = this.getAttribute("data-email");
+              navigator.clipboard
+                .writeText(email)
+                .then(() => {
+                  const original = this.innerHTML;
+                  this.innerHTML = '<span class="email-icon">✓</span> Copied!';
+                  setTimeout(() => {
+                    this.innerHTML = original;
+                  }, 2000);
+                })
+                .catch(() => {
+                  window.location.href = "mailto:" + email;
+                });
+            };
+          }
+        });
+      </script>
+      <script
+        data-goatcounter="https://randomwalks.goatcounter.com/count"
+        async
+        src="//gc.zgo.at/count.js"
+      ></script>
+    </header>
+    <main class="article-content">
+      <header class="article-header">
+        <h1>Progress Towards A Fully Functional Outer Sumcheck</h1>
+        <div class="article-meta">
+          <div class="meta-left">
+                         <span class="category-tag">draft</span>
+                        <span class="category-tag">jolt</span>
+             
+          </div>
+          <div class="meta-right">
+            <time>2025-11-20</time>             <span class="authors"
+              >By Ari</span
+            >
+                      </div>
+        </div>
+      </header>
+            <nav id="TOC">
+        <h2>Contents</h2>
+        <ul>
+        <li><a href="#fixing-stream_to_linear-for-round-0"
+        id="toc-fixing-stream_to_linear-for-round-0">Fixing
+        <code>stream_to_linear()</code> for round 0</a></li>
+        <li><a href="#fixing-stream_to_linear-for-any-round"
+        id="toc-fixing-stream_to_linear-for-any-round">Fixing
+        <code>stream_to_linear()</code> for any round</a></li>
+        <li><a href="#next-steps" id="toc-next-steps">Next Steps</a>
+        <ul>
+        <li><a href="#unifying-the-api"
+        id="toc-unifying-the-api">Unifying the API</a></li>
+        <li><a href="#verify-compute-message-is-optimal"
+        id="toc-verify-compute-message-is-optimal">Verify Compute
+        Message Is Optimal</a></li>
+        <li><a href="#correctly-stream-the-trace."
+        id="toc-correctly-stream-the-trace.">Correctly Stream The
+        Trace.</a></li>
+        </ul></li>
+        </ul>
+      </nav>
+            <article><p>This document loosely tracks progress on the
+streaming implementation of the spartan sumcheck. This <a
+href="https://github.com/a16z/jolt/pull/1114">pull request</a> tracks
+our latest changes.</p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />First working
+implementation: <a
+href="https://github.com/abiswas3/jolt/commit/238ca0e9f49cb06426b7b3f97eb02cff5971904a">Commit</a></label></li>
+</ul>
+<p>There should be no difference in performance between the linear
+sum-check implementation and the streaming implementation if the
+streaming schedule is <code>LinearOnlySchedule</code> defined <a
+href="https://github.com/abiswas3/jolt/blob/97422f5b06d016e38681eb7d1cd0ad64708d5e73/jolt-core/src/subprotocols/streaming_schedule.rs#L156">here</a>
+Currently we are about <code>2.5x</code> slower.</p>
+<p><img
+src="/assets/streaming_sumchecks/suboptimal_stream_to_linear.jpg" /></p>
+<p>A closer inspection shows us that the entire slowdown is coming from
+the <code>stream_to_linear_time</code> function.</p>
+<div class="remark">
+<p>Another notable difference is that in the Linear Sumcheck
+<code>OuterRemaingSumcheckProver::gen</code> is considerably slower.
+This is not an optimisation, but an artefact of moving code around. We
+were initially manifesting <code>Az</code> and <code>Bz</code>, and
+computing the first message inside of <code>gen</code>. Now we do this
+in the <code>compute_message</code> function of the first round that is
+in the linear phase of the sum-check schedule.</p>
+</div>
+<section id="fixing-stream_to_linear-for-round-0" class="level2">
+<h2>Fixing <code>stream_to_linear()</code> for round 0</h2>
+<p>If we are guaranteed that the first linear phase in the schedule is
+round zero, then the optimisation is relatively easy. We just need to
+adapt the <a
+href="https://github.com/abiswas3/jolt/blob/97422f5b06d016e38681eb7d1cd0ad64708d5e73/jolt-core/src/zkvm/spartan/outer.rs#L538"><code>compute_first_quadratic_evals_and_bound_polys</code></a>
+function. This immediately matches us with the linear sum-check (as was
+the only thing that we needed to improve.) <strong>NOTE:</strong> We
+also use the existing optimisations for small values. The code can be
+found <a
+href="https://github.com/abiswas3/jolt/blob/feat/streaming-prover-merged/jolt-core/src/zkvm/spartan/outer.rs#L991">here</a></p>
+<p>Each unit of work is described by the processing of an array of size
+<span class="math inline">\(2\sqrt{T}\)</span> and there are <span
+class="math inline">\(\sqrt{T}\)</span> such units being shared/stolen
+from inside the thread pool.</p>
+<div class="remark">
+<p>These evaluations were run while verifying the <code>sha3</code>
+program which has <span class="math inline">\(\log_2 T = 16\)</span>.
+When <span class="math inline">\(T\)</span> is much larger, we need to
+verify if this is still the right strategy or we need to chunk slightly
+differently. Either ways, <span class="math inline">\(\log_2 T\)</span>
+can be at most <span class="math inline">\(30\)</span>, and we have seen
+that processing an array of size <span
+class="math inline">\(2^{16}\)</span> serially is not that much slower.
+So this is something we should micro-optimise only if we have nothing
+better to do.</p>
+</div>
+<p><img
+src="/assets/streaming_sumchecks/matching_linear_sumchecks.png" /></p>
+</section>
+<section id="fixing-stream_to_linear-for-any-round" class="level2">
+<h2>Fixing <code>stream_to_linear()</code> for any round</h2>
+<p>We’ve fixed the issue when the first linear round is the first round
+of sum-check, but we have not yet optimised the code path for any other
+streaming schedule. That is where the sum-check actually has a streaming
+phase, and recomputing <code>Az</code> and <code>Bz</code> involves
+accounting for a prefix of bound variables.</p>
+<div class="remark">
+<p>The only code path we have optimised so far is the
+<code>stream_to_linear()</code> binding operation. In any streaming
+schedule the <code>compute_prover</code> message includes special rounds
+where we need to optimise the re-computation of the windows. Currently,
+we have not yet verified that these are optimal. The numbers below just
+describe our improvements to the <code>stream_to_linear()</code> phase
+of the algorithm</p>
+</div>
+<p>Towards this we investigate two solutions:</p>
+<ol type="1">
+<li>Optimising the existing implementation which has a rather
+complicated structure but includes small value optimisations. Observe
+that the current <code>stream_to_linear_time()</code> code only takes
+<code>7ms</code> as opposed to the <code>17ms</code> we started with. <a
+href="https://github.com/abiswas3/jolt/blob/feat/streaming-prover-merged/jolt-core/src/zkvm/spartan/outer.rs#L313">Code</a></li>
+</ol>
+<p><img src="/assets/streaming_sumchecks/half_split_theirs.png" /></p>
+<p>This is owing to us changing</p>
+<div class="highlight"><pre><span></span><span class="w"> </span><span class="c1">// Final reductions once per j.</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="mi">0</span><span class="o">..</span><span class="n">jlen</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">az_j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc_az</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">barrett_reduce</span><span class="p">();</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">bz_first_j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc_bz_first</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">barrett_reduce</span><span class="p">();</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">bz_second_j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc_bz_second</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">barrett_reduce</span><span class="p">();</span>
+<span class="w">        </span><span class="n">grid_az</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">az_j</span><span class="p">;</span>
+<span class="w">        </span><span class="n">grid_bz</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bz_first_j</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">bz_second_j</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+</pre></div>
+
+<p>to the following code. The <code>unsafe</code> block is because the
+compiler does not realise we actually write to different parts of the
+array.</p>
+<div class="highlight"><pre><span></span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="n">grid_az_ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">grid_az</span><span class="p">.</span><span class="n">as_mut_ptr</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">grid_bz_ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">grid_bz</span><span class="p">.</span><span class="n">as_mut_ptr</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="kt">usize</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">chunk_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">4096</span><span class="p">;</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="n">num_chunks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">jlen</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">chunk_size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">;</span>
+<span class="w">        </span><span class="p">(</span><span class="mi">0</span><span class="o">..</span><span class="n">num_chunks</span><span class="p">).</span><span class="n">into_par_iter</span><span class="p">().</span><span class="n">for_each</span><span class="p">(</span><span class="k">move</span><span class="w"> </span><span class="o">|</span><span class="n">chunk_idx</span><span class="o">|</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">chunk_idx</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">;</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">end</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">start</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">chunk_size</span><span class="p">).</span><span class="n">min</span><span class="p">(</span><span class="n">jlen</span><span class="p">);</span>
+
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">az_ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">grid_az_ptr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="nf">F</span><span class="p">;</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="n">bz_ptr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">grid_bz_ptr</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">*</span><span class="k">mut</span><span class="w"> </span><span class="nf">F</span><span class="p">;</span>
+
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">start</span><span class="o">..</span><span class="n">end</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="n">az_j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc_az</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">barrett_reduce</span><span class="p">();</span>
+<span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="n">bz_first_j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc_bz_first</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">barrett_reduce</span><span class="p">();</span>
+<span class="w">                </span><span class="kd">let</span><span class="w"> </span><span class="n">bz_second_j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acc_bz_second</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">barrett_reduce</span><span class="p">();</span>
+
+<span class="w">                </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                    </span><span class="o">*</span><span class="n">az_ptr</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">az_j</span><span class="p">;</span>
+<span class="w">                    </span><span class="o">*</span><span class="n">bz_ptr</span><span class="p">.</span><span class="n">add</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bz_first_j</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">bz_second_j</span><span class="p">;</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">});</span>
+</pre></div>
+
+<ol start="2" type="1">
+<li>We write a simple parallel version without small value optimisation,
+but one where we know the cache lines are well aligned. Notice that
+<code>stream_to_linear_time</code> is not as fast as our
+<code>linear_schedule</code> version, but it is still nearly twice as
+fast as the existing parallelised version. The reason it’s likely much
+faster is due to simplicity – we iterate over arrays just once. The
+reason it’s slower than the original version, is because in this version
+we need to multiply all the <span
+class="math inline">\(\text{eq}(r,x_r)\)</span> polynomials, and
+additionally the window size is 3. So the chunking is not as nice and
+uniform. Still we loose about <code>2ms</code>, which in the grand
+scheme of things is negligible. <a
+href="https://github.com/abiswas3/jolt/blob/31fbe6ea2c08e712e6e69b82e16122e44874b33f/jolt-core/src/zkvm/spartan/outer.rs#L633">Code</a></li>
+</ol>
+<p><img src="/assets/streaming_sumchecks/half_split_ours.png" /></p>
+</section>
+<section id="next-steps" class="level1">
+<h1>Next Steps</h1>
+<section id="unifying-the-api" class="level2">
+<h2>Unifying the API</h2>
+<p>This is what we the prover_message to look like, currently we have a
+much more verbose version.</p>
+<div class="highlight"><pre><span></span>
+<span class="k">fn</span><span class="w"> </span><span class="nf">compute_message</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">round</span><span class="p">:</span><span class="w"> </span><span class="kt">usize</span><span class="p">,</span><span class="w"> </span><span class="n">previous_claim</span><span class="p">:</span><span class="w"> </span><span class="nc">F</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nc">UniPoly</span><span class="o">&lt;</span><span class="nf">F</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// If this is a window start, materialize the window grid</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="p">.</span><span class="n">schedule</span><span class="p">.</span><span class="n">is_window_start</span><span class="p">(</span><span class="n">round</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="bp">self</span><span class="p">.</span><span class="n">compute_window_evals_for_new_window</span><span class="p">(</span><span class="n">round</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">        </span><span class="c1">// Use the window grid to compute this round&#39;s prover message</span>
+<span class="w">       </span><span class="bp">self</span><span class="p">.</span><span class="n">get_prover_message_from_window_evals</span><span class="p">(</span><span class="n">previous_claim</span><span class="p">)</span>
+<span class="w">    </span><span class="p">}</span>
+</pre></div>
+
+</section>
+<section id="verify-compute-message-is-optimal" class="level2">
+<h2>Verify Compute Message Is Optimal</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />: We have a working version of
+compute <code>t_grid</code>, but we have not made sure that this
+optimal.</label></li>
+</ul>
+</section>
+<section id="correctly-stream-the-trace." class="level2">
+<h2>Correctly Stream The Trace.</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" />: This the the <strong>next</strong>
+big step left. Currently, we store the entire trace in memory, and index
+into the correct poistion when building <code>Az</code> and
+<code>Bz</code>. In reality, this should be an iterator that any given
+time, can manifest only a subset of the trace. After that it must re-use
+the space and proceed to build the next trace segment from
+checkpoints.</label></li>
+</ul>
+</section>
+</section></article>
+    </main>
+    <footer class="site-footer">
+      <p>&copy; 2025 On A Tangent Ltd.</p>
+      <!-- <p class="attribution"> -->
+      <!--   Website template colors inspired by -->
+      <!--   <a -->
+      <!--     href="https://gendignoux.com/" -->
+      <!--     target="_blank" -->
+      <!--     rel="noopener noreferrer" -->
+      <!--     >Guillaume Endignoux</a -->
+      <!--   > -->
+      <!-- </p> -->
+    </footer>
+
+
+    <script>
+      // Theme toggle
+      const themeToggle = document.querySelector(".theme-toggle");
+      const html = document.documentElement;
+      const lightIcon = document.querySelector(".theme-toggle-light");
+      const darkIcon = document.querySelector(".theme-toggle-dark");
+      const currentTheme =
+        localStorage.getItem("theme") ||
+        (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
+
+      html.setAttribute("data-theme", currentTheme);
+      if (currentTheme === "dark") {
+        lightIcon.style.display = "none";
+        darkIcon.style.display = "block";
+      } else {
+        lightIcon.style.display = "block";
+        darkIcon.style.display = "none";
+      }
+
+      themeToggle.onclick = () => {
+        const newTheme =
+          html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+
+        if (newTheme === "dark") {
+          lightIcon.style.display = "none";
+          darkIcon.style.display = "block";
+        } else {
+          lightIcon.style.display = "block";
+          darkIcon.style.display = "none";
+        }
+      };
+
+      // Mobile menu toggle
+      document.querySelector(".menu-toggle").onclick = () =>
+        document.querySelector(".nav-group").classList.toggle("is-active");
+
+      // Auto-highlight current page
+      const currentPath = window.location.pathname;
+      const currentPage = currentPath.split("/").pop() || "index.html";
+      document.querySelectorAll(".main-nav a").forEach((link) => {
+        const href = link.getAttribute("href").replace("../", "");
+        if (
+          href === currentPage ||
+          (currentPage === "index.html" && href === "index.html")
+        ) {
+          link.classList.add("active");
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Citation tooltips
+        const refs = document.querySelector("#refs");
+        if (refs) {
+          document
+            .querySelectorAll('.citation a[href^="#ref-"]')
+            .forEach(function (cite) {
+              const refId = cite.getAttribute("href").substring(1);
+              const refItem = document.getElementById(refId);
+
+              if (refItem) {
+                const urlLink = refItem.querySelector('a[href^="http"]');
+                if (urlLink) {
+                  cite.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    window.open(urlLink.href, "_blank");
+                  });
+                  cite.style.cursor = "pointer";
+                  cite.title = "Click to open source";
+                }
+
+                const tooltip = document.createElement("div");
+                tooltip.className = "citation-tooltip";
+                const cslEntry = refItem.querySelector(".csl-entry");
+                tooltip.textContent = cslEntry
+                  ? cslEntry.textContent
+                  : refItem.textContent;
+                document.body.appendChild(tooltip);
+
+                cite.addEventListener("mouseenter", function (e) {
+                  const rect = cite.getBoundingClientRect();
+                  tooltip.style.display = "block";
+                  tooltip.style.left =
+                    Math.min(rect.left, window.innerWidth - 420) + "px";
+                  tooltip.style.top = rect.bottom + 5 + "px";
+                });
+
+                cite.addEventListener("mouseleave", function () {
+                  tooltip.style.display = "none";
+                });
+              }
+            });
+        }
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll(".highlight").forEach(function (block) {
+          const btn = document.createElement("button");
+          btn.className = "copy-btn";
+          btn.textContent = "Copy";
+          btn.setAttribute("aria-label", "Copy code to clipboard");
+          block.insertBefore(btn, block.firstChild);
+
+          const code = block.querySelector("pre");
+
+          btn.addEventListener("click", async function () {
+            const text = code.textContent;
+
+            try {
+              await navigator.clipboard.writeText(text);
+              btn.textContent = "Copied!";
+              btn.style.background = "#10b981";
+
+              setTimeout(() => {
+                btn.textContent = "Copy";
+                btn.style.background = "";
+              }, 2000);
+            } catch (err) {
+              const textarea = document.createElement("textarea");
+              textarea.value = text;
+              textarea.style.position = "fixed";
+              textarea.style.opacity = "0";
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand("copy");
+              document.body.removeChild(textarea);
+
+              btn.textContent = "Copied!";
+              setTimeout(() => {
+                btn.textContent = "Copy";
+              }, 2000);
+            }
+          });
+        });
+
+        // Add data-tag to category tags
+        document.querySelectorAll(".category-tag").forEach((tag) => {
+          const tagName = tag.textContent.trim().toLowerCase();
+          tag.setAttribute("data-tag", tagName);
+        });
+
+        // Convert author text to styled tags
+        const authorSpan = document.querySelector(".article-meta .authors");
+        if (authorSpan) {
+          const authorText = authorSpan.textContent.replace("By ", "").trim();
+          const authors = authorText.split(",").map((a) => a.trim());
+
+          authorSpan.textContent = "By ";
+
+          authors.forEach((author, index) => {
+            const tag = document.createElement("span");
+            tag.className = "category-tag";
+            tag.textContent = author;
+            tag.setAttribute("data-tag", author.toLowerCase());
+            authorSpan.appendChild(tag);
+
+            if (index < authors.length - 1) {
+              authorSpan.appendChild(document.createTextNode(", "));
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

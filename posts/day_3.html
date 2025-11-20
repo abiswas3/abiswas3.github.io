@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sumcheck Central</title>
+    <title>Advent of Jolt (Day 3): Prologue Before The Sumchecks</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script
       async
@@ -113,14 +113,15 @@
     </header>
     <main class="article-content">
       <header class="article-header">
-        <h1>Sumcheck Central</h1>
+        <h1>Advent of Jolt (Day 3): Prologue Before The Sumchecks</h1>
         <div class="article-meta">
           <div class="meta-left">
                          <span class="category-tag">jolt</span>
+                        <span class="category-tag">draft</span>
              
           </div>
           <div class="meta-right">
-            <time>2025-10-25</time>             <span class="authors"
+            <time>2025-10-28</time>             <span class="authors"
               >By Ari</span
             >
                       </div>
@@ -129,76 +130,255 @@
             <nav id="TOC">
         <h2>Contents</h2>
         <ul>
-        <li><a href="#stage-1-sumcheck" id="toc-stage-1-sumcheck">Stage
-        1 Sumcheck</a></li>
+        <li><a href="#a-theoretical-detour"
+        id="toc-a-theoretical-detour">A Theoretical Detour</a></li>
+        <li><a href="#constraints" id="toc-constraints">Constraints</a>
+        <ul>
+        <li><a href="#foreshadowing-the-future"
+        id="toc-foreshadowing-the-future">Foreshadowing the
+        future</a></li>
+        </ul></li>
+        <li><a href="#whats-next" id="toc-whats-next">What’s
+        next</a></li>
         </ul>
       </nav>
-            <article><p>Meet the players</p>
-<div class="highlight"><pre><span></span><span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">spartan_dag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">SpartanDag</span><span class="p">::</span><span class="o">&lt;</span><span class="nf">F</span><span class="o">&gt;</span><span class="p">::</span><span class="n">new</span><span class="p">(</span><span class="n">padded_trace_length</span><span class="p">);</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">lookups_dag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">LookupsDag</span><span class="p">::</span><span class="n">default</span><span class="p">();</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">registers_dag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">RegistersDag</span><span class="p">::</span><span class="n">default</span><span class="p">();</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">ram_dag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">RamDag</span><span class="p">::</span><span class="n">new_prover</span><span class="p">(</span><span class="o">&amp;</span><span class="n">state_manager</span><span class="p">);</span>
-<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">bytecode_dag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">BytecodeDag</span><span class="p">::</span><span class="n">default</span><span class="p">();</span><span class="w"> </span>
+            <article><section id="a-theoretical-detour" class="level2">
+<h2>A Theoretical Detour</h2>
+<p>Before we look at code and analyse intermediate outputs, we pause and
+contemplate what it means for a prover to execute a program correctly?
+How does one express correct exceution as a sequence of mathematical
+equaitions? The goal os this post is to outline the
+<code>constraints</code> that the prover must prove they satisfy?</p>
+<div class="remark">
+<p>Note to the informed reader: For the sake of simplicity, we will
+defer the discussion about virtual polynomials and sum-checks for a
+later post. When we get to enforcing each constraint with a sum-check,
+we’ll formerly introduce these polynomials.</p>
+</div>
+<p>For each cycle, we have a <code>Cycle</code> struct as <a
+href="/assets/jolt-tutorial/trace.fib.txt">discussed earlier</a>. The
+vector of these structs is what we call the dynamic trace.<br />
+From this struct we construct the following <code>R1CSCycleInput</code>
+struct. The field of this type are annoated with self explanatory
+comments. We will often denote this struct below with <code>z_t</code>
+or <span class="math inline">\(z_t\)</span> to denote the witness
+constructed for cycle <span class="math inline">\(t \in [T]\)</span>.
+There are a total of 36 fields in this struct and each field is either a
+boolean valued byte or an arithmetic type of <code>u64</code> or
+<code>i128</code> or <code>s64</code> (signed <code>u64</code>).</p>
+<div class="highlight"><pre><span></span><span class="cp">#[derive(Clone, Debug)]</span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">R1CSCycleInputs</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="sd">/// Left instruction input as a u64 bit-pattern.</span>
+<span class="w">    </span><span class="sd">/// Typically `Rs1Value` or the current `UnexpandedPC`, depending on `CircuitFlags`.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">left_input</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Right instruction input as signed-magnitude `S64`.</span>
+<span class="w">    </span><span class="sd">/// Typically `Imm` or `Rs2Value` with exact integer semantics.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">right_input</span><span class="p">:</span><span class="w"> </span><span class="nc">S64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Signed-magnitude `S128` product consistent with the `Product` witness.</span>
+<span class="w">    </span><span class="sd">/// Computed from `left_input` × `right_input` using the same truncation semantics as the witness.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">product</span><span class="p">:</span><span class="w"> </span><span class="nc">S128</span><span class="p">,</span>
+
+<span class="w">    </span><span class="sd">/// Left lookup operand (u64) for the instruction lookup query.</span>
+<span class="w">    </span><span class="sd">/// Matches `LeftLookupOperand` virtual polynomial semantics.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">left_lookup</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Right lookup operand (u128) for the instruction lookup query.</span>
+<span class="w">    </span><span class="sd">/// Full-width integer encoding used by add/sub/mul/advice cases.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">right_lookup</span><span class="p">:</span><span class="w"> </span><span class="kt">u128</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Instruction lookup output (u64) for this cycle.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">lookup_output</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+
+<span class="w">    </span><span class="sd">/// Value read from Rs1 in this cycle.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">rs1_read_value</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Value read from Rs2 in this cycle.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">rs2_read_value</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Value written to Rd in this cycle.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">rd_write_value</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+
+<span class="w">    </span><span class="sd">/// RAM address accessed this cycle.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">ram_addr</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// RAM read value for `Read`, pre-write value for `Write`, or 0 for `NoOp`.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">ram_read_value</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// RAM write value: equals read value for `Read`, post-write value for `Write`, or 0 for `NoOp`.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">ram_write_value</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+
+<span class="w">    </span><span class="sd">/// Expanded PC used by bytecode instance.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">pc</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Expanded PC for next cycle, or 0 if this is the last cycle in the domain.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">next_pc</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Unexpanded PC (normalized instruction address) for this cycle.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">unexpanded_pc</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Unexpanded PC for next cycle, or 0 if this is the last cycle in the domain.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">next_unexpanded_pc</span><span class="p">:</span><span class="w"> </span><span class="kt">u64</span><span class="p">,</span>
+
+<span class="w">    </span><span class="sd">/// Immediate operand as signed-magnitude `S64`.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">imm</span><span class="p">:</span><span class="w"> </span><span class="nc">S64</span><span class="p">,</span>
+
+<span class="w">    </span><span class="sd">/// Per-instruction circuit flags indexed by `CircuitFlags`.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">flags</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="kt">bool</span><span class="p">;</span><span class="w"> </span><span class="nf">NUM_CIRCUIT_FLAGS</span><span class="p">],</span>
+<span class="w">    </span><span class="sd">/// `IsNoop` flag for the next cycle (false for last cycle).</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">next_is_noop</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+
+<span class="w">    </span><span class="sd">/// Derived: `Jump &amp;&amp; !NextIsNoop`.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">should_jump</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Derived: `Branch &amp;&amp; (LookupOutput == 1)`.</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">should_branch</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+
+<span class="w">    </span><span class="sd">/// `IsRdNotZero` &amp;&amp; ` `WriteLookupOutputToRD`</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">write_lookup_output_to_rd_addr</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// `IsRdNotZero` &amp;&amp; `Jump`</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">write_pc_to_rd_addr</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+
+<span class="w">    </span><span class="sd">/// `VirtualInstruction` flag for the next cycle (false for last cycle).</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">next_is_virtual</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// `FirstInSequence` flag for the next cycle (false for last cycle).</span>
+<span class="w">    </span><span class="k">pub</span><span class="w"> </span><span class="n">next_is_first_in_sequence</span><span class="p">:</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span>
+<span class="p">}</span>
 </pre></div>
 
-<section id="stage-1-sumcheck" class="level2">
-<h2>Stage 1 Sumcheck</h2>
-<div class="highlight"><pre><span></span><span class="n">tracing</span><span class="p">::</span><span class="n">info</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Stage 1 proving (univariate skip first round)&quot;</span><span class="p">);</span>
-<span class="n">spartan_dag</span>
-<span class="w">    </span><span class="p">.</span><span class="n">stage1_prover_uni_skip</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">state_manager</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">context</span><span class="p">(</span><span class="s">&quot;Stage 1 univariate skip first round&quot;</span><span class="p">)</span><span class="o">?</span><span class="p">;</span>
-
-<span class="c1">// Batch the stage1 remainder instances (outer-remaining + extras)</span>
-<span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">remainder_instances</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">_</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">spartan_dag</span>
-<span class="w">    </span><span class="p">.</span><span class="n">stage1_prover_instances</span><span class="p">(</span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">state_manager</span><span class="p">)</span>
-<span class="w">    </span><span class="p">.</span><span class="n">into_iter</span><span class="p">()</span>
-<span class="w">    </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span>
-<span class="kd">let</span><span class="w"> </span><span class="n">remainder_instances_mut</span><span class="p">:</span><span class="w"> </span><span class="nb">Vec</span><span class="o">&lt;&amp;</span><span class="k">mut</span><span class="w"> </span><span class="k">dyn</span><span class="w"> </span><span class="nf">SumcheckInstance</span><span class="o">&lt;</span><span class="nf">F</span><span class="p">,</span><span class="w"> </span><span class="nf">ProofTranscript</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">=</span>
-<span class="w">    </span><span class="n">remainder_instances</span>
-<span class="w">        </span><span class="p">.</span><span class="n">iter_mut</span><span class="p">()</span>
-<span class="w">        </span><span class="p">.</span><span class="n">map</span><span class="p">(</span><span class="o">|</span><span class="n">instance</span><span class="o">|</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="o">**</span><span class="n">instance</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="k">dyn</span><span class="w"> </span><span class="nf">SumcheckInstance</span><span class="o">&lt;</span><span class="nf">F</span><span class="p">,</span><span class="w"> </span><span class="nf">ProofTranscript</span><span class="o">&gt;</span><span class="p">)</span>
-<span class="w">        </span><span class="p">.</span><span class="n">collect</span><span class="p">();</span>
-
-<span class="kd">let</span><span class="w"> </span><span class="n">transcript</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_manager</span><span class="p">.</span><span class="n">get_transcript</span><span class="p">();</span>
-<span class="kd">let</span><span class="w"> </span><span class="n">accumulator</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">state_manager</span><span class="p">.</span><span class="n">get_prover_accumulator</span><span class="p">();</span>
-<span class="n">tracing</span><span class="p">::</span><span class="n">info</span><span class="o">!</span><span class="p">(</span><span class="s">&quot;Stage 1 proving (remainder batch)&quot;</span><span class="p">);</span>
-<span class="kd">let</span><span class="w"> </span><span class="p">(</span><span class="n">stage1_remainder_proof</span><span class="p">,</span><span class="w"> </span><span class="n">_r_stage1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">BatchedSumcheck</span><span class="p">::</span><span class="n">prove</span><span class="p">(</span>
-<span class="w">    </span><span class="n">remainder_instances_mut</span><span class="p">,</span>
-<span class="w">    </span><span class="nb">Some</span><span class="p">(</span><span class="n">accumulator</span><span class="p">.</span><span class="n">clone</span><span class="p">()),</span>
-<span class="w">    </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="o">*</span><span class="n">transcript</span><span class="p">.</span><span class="n">borrow_mut</span><span class="p">(),</span>
-<span class="p">);</span>
-
-<span class="n">state_manager</span><span class="p">.</span><span class="n">proofs</span><span class="p">.</span><span class="n">borrow_mut</span><span class="p">().</span><span class="n">insert</span><span class="p">(</span>
-<span class="w">    </span><span class="nf">ProofKeys</span><span class="p">::</span><span class="nf">Stage1Sumcheck</span><span class="p">,</span>
-<span class="w">    </span><span class="nf">ProofData</span><span class="p">::</span><span class="nf">SumcheckProof</span><span class="p">(</span><span class="n">stage1_remainder_proof</span><span class="p">),</span>
-<span class="p">);</span>
+<p>where the circuit flags are given by</p>
+<div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">enum</span><span class="w"> </span><span class="nc">CircuitFlags</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="sd">/// 1 if the first lookup operand is the sum of the two instruction operands.</span>
+<span class="w">    </span><span class="nf">AddOperands</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// 1 if the first lookup operand is the difference between the two instruction operands.</span>
+<span class="w">    </span><span class="nf">SubtractOperands</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// 1 if the first lookup operand is the product of the two instruction operands.</span>
+<span class="w">    </span><span class="nf">MultiplyOperands</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// 1 if the instruction is a load (i.e. `LW`)</span>
+<span class="w">    </span><span class="nf">Load</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// 1 if the instruction is a store (i.e. `SW`)</span>
+<span class="w">    </span><span class="nf">Store</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// 1 if the instruction is a jump (i.e. `JAL`, `JALR`)</span>
+<span class="w">    </span><span class="nf">Jump</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// 1 if the lookup output is to be stored in `rd` at the end of the step.</span>
+<span class="w">    </span><span class="nf">WriteLookupOutputToRD</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// 1 if the instruction is &quot;virtual&quot;, as defined in Section 6.1 of the Jolt paper.</span>
+<span class="w">    </span><span class="nf">VirtualInstruction</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// 1 if the instruction is an assert, as defined in Section 6.1.1 of the Jolt paper.</span>
+<span class="w">    </span><span class="nf">Assert</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Used in inline sequences; the program counter should be the same for the full sequence.</span>
+<span class="w">    </span><span class="nf">DoNotUpdateUnexpandedPC</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Is (virtual) advice instruction</span>
+<span class="w">    </span><span class="nf">Advice</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Is a compressed instruction (i.e. increase UnexpandedPc by 2 only)</span>
+<span class="w">    </span><span class="nf">IsCompressed</span><span class="p">,</span>
+<span class="w">    </span><span class="sd">/// Is instruction the first in a virtual sequence</span>
+<span class="w">    </span><span class="nf">IsFirstInSequence</span><span class="p">,</span>
+<span class="p">}</span>
 </pre></div>
 
-<p>Initial Observations Looking at this code, I can see:</p>
-<p>SpartanDag Structure: Acts as a state machine managing different
-sumcheck stages</p>
-<p>Holds a cached UniformSpartanKey (derived from padded_trace_length)
-Has a uni_skip_state that gets passed between stages</p>
-<p>Three Stages Visible:</p>
-<p>Stage 1: Outer sumcheck (with univariate-skip first round) Stage 2:
-Product virtualization Stage 3: Shift, instruction input, and product
-virtual inner checks</p>
-<p>Pattern per Stage:</p>
-<p>Uni-skip first round (for stages 1 &amp; 2 only) Then remainder
-sumcheck instances</p>
+<p>The mental model for this vector is think of a 36 dimensional vector
+which each cell is filled with values of the above type. The method to
+go from a <code>Cycle</code> struct to the above witness objects is in
+the <a href=""><code>from_trace</code></a> method.</p>
+</section>
+<section id="constraints" class="level2">
+<h2>Constraints</h2>
+<p>One example of what it means to execute a program correctly is the
+following: In RISCV loads/stores look like the following:</p>
+<div class="highlight"><pre><span></span><span class="nf">lb</span><span class="w">   </span><span class="no">rd</span><span class="p">,</span><span class="w"> </span><span class="no">offset</span><span class="p">(</span><span class="no">rs1</span><span class="p">)</span><span class="w">    </span><span class="c1"># Load byte (sign-extended)</span>
+<span class="nf">lh</span><span class="w">   </span><span class="no">rd</span><span class="p">,</span><span class="w"> </span><span class="no">offset</span><span class="p">(</span><span class="no">rs1</span><span class="p">)</span><span class="w">    </span><span class="c1"># Load halfword (sign-extended)</span>
+<span class="nf">lw</span><span class="w">   </span><span class="no">rd</span><span class="p">,</span><span class="w"> </span><span class="no">offset</span><span class="p">(</span><span class="no">rs1</span><span class="p">)</span><span class="w">    </span><span class="c1"># Load word (sign-extended)</span>
+<span class="nf">ld</span><span class="w">   </span><span class="no">rd</span><span class="p">,</span><span class="w"> </span><span class="no">offset</span><span class="p">(</span><span class="no">rs1</span><span class="p">)</span><span class="w">    </span><span class="c1"># Load doubleword (RV64)</span>
+<span class="nf">lbu</span><span class="w">  </span><span class="no">rd</span><span class="p">,</span><span class="w"> </span><span class="no">offset</span><span class="p">(</span><span class="no">rs1</span><span class="p">)</span><span class="w">    </span><span class="c1"># Load byte unsigned</span>
+<span class="nf">lhu</span><span class="w">  </span><span class="no">rd</span><span class="p">,</span><span class="w"> </span><span class="no">offset</span><span class="p">(</span><span class="no">rs1</span><span class="p">)</span><span class="w">    </span><span class="c1"># Load halfword unsigned</span>
+<span class="nf">lwu</span><span class="w">  </span><span class="no">rd</span><span class="p">,</span><span class="w"> </span><span class="no">offset</span><span class="p">(</span><span class="no">rs1</span><span class="p">)</span><span class="w">    </span><span class="c1"># Load word unsigned (RV64)</span>
+
+<span class="nf">sb</span><span class="w">   </span><span class="no">rs2</span><span class="p">,</span><span class="w"> </span><span class="no">offset</span><span class="p">(</span><span class="no">rs1</span><span class="p">)</span><span class="w">   </span><span class="c1"># Store byte</span>
+<span class="nf">sh</span><span class="w">   </span><span class="no">rs2</span><span class="p">,</span><span class="w"> </span><span class="no">offset</span><span class="p">(</span><span class="no">rs1</span><span class="p">)</span><span class="w">   </span><span class="c1"># Store halfword</span>
+<span class="nf">sw</span><span class="w">   </span><span class="no">rs2</span><span class="p">,</span><span class="w"> </span><span class="no">offset</span><span class="p">(</span><span class="no">rs1</span><span class="p">)</span><span class="w">   </span><span class="c1"># Store word</span>
+<span class="nf">sd</span><span class="w">   </span><span class="no">rs2</span><span class="p">,</span><span class="w"> </span><span class="no">offset</span><span class="p">(</span><span class="no">rs1</span><span class="p">)</span><span class="w">   </span><span class="c1"># Store doubleword (RV64)</span>
+</pre></div>
+
+<p>So if a vector has the <code>Load</code> flag set to 1 or
+<code>Store</code> flag set to 1, then the address from which we
+read/write must be equal to <code>rs1+offset</code>. Using propositional
+logic we write:</p>
+<div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nf">Load</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nf">Store</span><span class="w"> </span><span class="p">}</span>
+<span class="o">=&gt;</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="nf">RamAddress</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="nf">Rs1Value</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nf">Imm</span><span class="w"> </span><span class="p">)</span>
+</pre></div>
+
+<p>The same thing expressed as algebraic constraints:</p>
+<pre><code>(Load + Store) * (RamAddress - (Rs1Value + Imm)) = 0</code></pre>
+<p>Thus, any program that is correctly executed, the witness <span
+class="math inline">\(z_t\)</span> constructed from cycle <span
+class="math inline">\(t\)</span> must satisfy the above constraint.</p>
+<section id="foreshadowing-the-future" class="level3 remark">
+<h3>Foreshadowing the future</h3>
+<p>Imagine a make believe world where that’s all we needed to check if a
+program was executed correctly. then one can already see the outline of
+a sum-check. for all <span class="math inline">\(t \in \{ 0, 1\}^{\log
+t}\)</span>,
+<code>load[t], store[t], ramaddr[t], rs1value[t], imm[t]</code> are
+vectors of size <span class="math inline">\(T\)</span> (see figure
+above), and we can now have a sumecheck, where the use the multilinear
+extensions of the above vectors below, where <span
+class="math inline">\(r_{\text{cycle}}\)</span> is the random point
+where we check equality of polynomials (and invoke Schwartz-Zippel).</p>
+<p>TODO: Format these with macros</p>
+<p><span class="math display">\[\sum_{j \in \{ 0, 1\}^{\log t}}
+\text{eq}(\text{r_cycle}, j) \Big(\text{load}[t] + \text{store}[t]) *
+(\text{ramaddress}[t] - (\text{rs1value}[t] + \text{imm}[t])\Big) =
+0\]</span></p>
+<p>Of course, successfully executing this sum-check involes being able
+to open these polynomials at random points, which in the real world
+means the prover <strong>MUST</strong> commit to these polynomials. But
+we already know what the prover has committed to and the above
+polynomials were not in the list. So how will this work? This is where
+we will get into the business of virtual polynomials. They happen to be
+polynomials the prover does not actually commit to, but can reliably
+open by committing to different polynomials, and opening them at the
+desired random location. In fact you can go and see that the above
+polynomials do indeed exist as <a href=""><em>virtual
+polynomials</em></a> inside of Jolt. More on that in the coming posts.
+For now we go back to describing what it means for a program to be
+correct.</p>
+</section>
+<p>For now we talk about all the constraints in Jolt. The links contain
+full details about each constraint.</p>
+<ol type="1">
+<li><a href="/posts/r1cs_constraints.html">R1CS Equality
+Constraints/Named Constraints</a>: These are constraints like the above
+example where we can write a constraint as a product of two linear
+equations equalling 0.</li>
+<li><a href="/posts/product_constraints.html">Product Constraints</a>:
+This is exactly the same as above, but the product equals a non-zero
+value.</li>
+<li><a href="/posts/shift_constraints.html">Shift Constraints</a>: The
+order in which we execute a program matters. These constraints that the
+order is respected.</li>
+<li><a href="">Twist/Shout Constraints</a> So far all constraints assume
+that we read/write correctly from memory. We get to these finally.</li>
+</ol>
+<p>Together – all 4 of these constraints describe the correct execution
+of a programmer. All that is left now is to define a sum-check for each
+of these constraints, and then compute the sum-checks.</p>
+</section>
+<section id="whats-next" class="level2">
+<h2>What’s next</h2>
+<p>That ends our detour. We’ve writtend down a set of constraints as
+equations. If we were to satisfy said equations, then we it is fair game
+for us to say that the program is correct.</p>
+<div class="remark">
+<p>I do not know if there is a formal proof that the above constraints
+are enough. It feels as if they are, but such things must be formally
+proved. Talk to <a href="">Quang Dao</a> for more details.</p>
+</div>
+<p>We now once more follow the code chronologically, and <a
+href="/posts/day_4.html">next</a> we arrive at the 7 sumcheck stages in
+Jolt.§</p>
 </section></article>
     </main>
     <footer class="site-footer">
       <p>&copy; 2025 On A Tangent Ltd.</p>
-      <p class="attribution">
-        Website template colors inspired by
-        <a
-          href="https://gendignoux.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Guillaume Endignoux</a
-        >
-      </p>
+      <!-- <p class="attribution"> -->
+      <!--   Website template colors inspired by -->
+      <!--   <a -->
+      <!--     href="https://gendignoux.com/" -->
+      <!--     target="_blank" -->
+      <!--     rel="noopener noreferrer" -->
+      <!--     >Guillaume Endignoux</a -->
+      <!--   > -->
+      <!-- </p> -->
     </footer>
 
 

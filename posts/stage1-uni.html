@@ -1,0 +1,1081 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skip First Round</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <script
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    ></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <h1 class="site-title"><a href="/index.html">Ari</a></h1>
+        <button class="menu-toggle">☰</button>
+        <div class="nav-group">
+          <nav class="main-nav">
+            <ul>
+              <li><a href="/publications.html">Research</a></li>
+              <li><a href="/blog.html">Blog</a></li>
+              <li><a href="/about.html">Random Walks</a></li>
+              <li>
+                <a
+                  href="https://github.com/abiswas3"
+                  target="_blank"
+                  rel="noopener"
+                  class="icon-link"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+                    />
+                  </svg>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://scholar.google.com/citations?user=yGuM3MgAAAAJ&hl=en&authuser=1"
+                  target="_blank"
+                  rel="noopener"
+                  class="icon-link"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M12 24a7 7 0 110-14 7 7 0 010 14zm0-24L0 9.5l4.838 3.94A8 8 0 0112 9a8 8 0 017.162 4.44L24 9.5z"
+                    />
+                  </svg>
+                </a>
+              </li>
+              <!-- <li> -->
+              <!--   <a -->
+              <!--     href="#" -->
+              <!--     class="email-copy" -->
+              <!--     data-email="on.a.tangent@randomwalks.xyz" -->
+              <!--   > -->
+              <!--     <span class="email-icon">&#9993;</span> -->
+              <!--   </a> -->
+              <!-- </li> -->
+            </ul>
+          </nav>
+          <button class="theme-toggle">
+            <span class="theme-toggle-light">&#9728;&#65039;</span>
+            <span class="theme-toggle-dark" style="display: none">&#127769;</span>
+          </button>
+        </div>
+      </div>
+      <style>
+        .email-icon {
+          font-size: 1em;
+          margin-right: 0.25em;
+        }
+      </style>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const emailLink = document.querySelector(".email-copy");
+          if (emailLink) {
+            emailLink.onclick = function (e) {
+              e.preventDefault();
+              const email = this.getAttribute("data-email");
+              navigator.clipboard
+                .writeText(email)
+                .then(() => {
+                  const original = this.innerHTML;
+                  this.innerHTML = '<span class="email-icon">✓</span> Copied!';
+                  setTimeout(() => {
+                    this.innerHTML = original;
+                  }, 2000);
+                })
+                .catch(() => {
+                  window.location.href = "mailto:" + email;
+                });
+            };
+          }
+        });
+      </script>
+      <script
+        data-goatcounter="https://randomwalks.goatcounter.com/count"
+        async
+        src="//gc.zgo.at/count.js"
+      ></script>
+    </header>
+    <main class="article-content">
+      <header class="article-header">
+        <h1>Skip First Round</h1>
+        <div class="article-meta">
+          <div class="meta-left">
+                         <span class="category-tag">category</span>
+             
+          </div>
+          <div class="meta-right">
+            <time>2025-10-28</time>             <span class="authors"
+              >By Ari</span
+            >
+                      </div>
+        </div>
+      </header>
+            <nav id="TOC">
+        <h2>Contents</h2>
+        <ul>
+        <li><a
+        href="#complete-walkthrough-univariate-skip-first-round-polynomial-generation"
+        id="toc-complete-walkthrough-univariate-skip-first-round-polynomial-generation">Complete
+        Walkthrough: Univariate Skip First-Round Polynomial
+        Generation</a>
+        <ul>
+        <li><a href="#table-of-contents"
+        id="toc-table-of-contents">Table of Contents</a></li>
+        <li><a href="#overview" id="toc-overview">Overview</a></li>
+        <li><a href="#the-19-r1cs-constraints"
+        id="toc-the-19-r1cs-constraints">The 19 R1CS Constraints</a>
+        <ul>
+        <li><a href="#constraint-0-ramaddreqrs1plusimmifloadstore"
+        id="toc-constraint-0-ramaddreqrs1plusimmifloadstore">Constraint
+        0: RamAddrEqRs1PlusImmIfLoadStore</a></li>
+        <li><a href="#constraint-1-ramaddreqzeroifnotloadstore"
+        id="toc-constraint-1-ramaddreqzeroifnotloadstore">Constraint 1:
+        RamAddrEqZeroIfNotLoadStore</a></li>
+        <li><a href="#constraint-2-ramreadeqramwriteifload"
+        id="toc-constraint-2-ramreadeqramwriteifload">Constraint 2:
+        RamReadEqRamWriteIfLoad</a></li>
+        <li><a href="#constraint-3-ramreadeqrdwriteifload"
+        id="toc-constraint-3-ramreadeqrdwriteifload">Constraint 3:
+        RamReadEqRdWriteIfLoad</a></li>
+        <li><a href="#constraint-4-rs2eqramwriteifstore"
+        id="toc-constraint-4-rs2eqramwriteifstore">Constraint 4:
+        Rs2EqRamWriteIfStore</a></li>
+        <li><a href="#constraint-5-leftlookupzerounlessaddsubmul"
+        id="toc-constraint-5-leftlookupzerounlessaddsubmul">Constraint
+        5: LeftLookupZeroUnlessAddSubMul</a></li>
+        <li><a href="#constraint-6-leftlookupeqleftinputotherwise"
+        id="toc-constraint-6-leftlookupeqleftinputotherwise">Constraint
+        6: LeftLookupEqLeftInputOtherwise</a></li>
+        <li><a href="#constraint-7-rightlookupadd"
+        id="toc-constraint-7-rightlookupadd">Constraint 7:
+        RightLookupAdd</a></li>
+        <li><a href="#constraint-8-rightlookupsub"
+        id="toc-constraint-8-rightlookupsub">Constraint 8:
+        RightLookupSub</a></li>
+        <li><a href="#constraint-9-rightlookupeqproductifmul"
+        id="toc-constraint-9-rightlookupeqproductifmul">Constraint 9:
+        RightLookupEqProductIfMul</a></li>
+        <li><a href="#constraint-10-rightlookupeqrightinputotherwise"
+        id="toc-constraint-10-rightlookupeqrightinputotherwise">Constraint
+        10: RightLookupEqRightInputOtherwise</a></li>
+        <li><a href="#constraint-11-assertlookupone"
+        id="toc-constraint-11-assertlookupone">Constraint 11:
+        AssertLookupOne</a></li>
+        <li><a href="#constraint-12-rdwriteeqlookupifwritelookuptord"
+        id="toc-constraint-12-rdwriteeqlookupifwritelookuptord">Constraint
+        12: RdWriteEqLookupIfWriteLookupToRd</a></li>
+        <li><a href="#constraint-13-rdwriteeqpcplusconstifwritepctord"
+        id="toc-constraint-13-rdwriteeqpcplusconstifwritepctord">Constraint
+        13: RdWriteEqPCPlusConstIfWritePCtoRD</a></li>
+        <li><a href="#constraint-14-nextunexppceqlookupifshouldjump"
+        id="toc-constraint-14-nextunexppceqlookupifshouldjump">Constraint
+        14: NextUnexpPCEqLookupIfShouldJump</a></li>
+        <li><a
+        href="#constraint-15-nextunexppceqpcplusimmifshouldbranch"
+        id="toc-constraint-15-nextunexppceqpcplusimmifshouldbranch">Constraint
+        15: NextUnexpPCEqPCPlusImmIfShouldBranch</a></li>
+        <li><a href="#constraint-16-nextunexppcupdateotherwise"
+        id="toc-constraint-16-nextunexppcupdateotherwise">Constraint 16:
+        NextUnexpPCUpdateOtherwise</a></li>
+        <li><a href="#constraint-17-nextpceqpcplusoneifinline"
+        id="toc-constraint-17-nextpceqpcplusoneifinline">Constraint 17:
+        NextPCEqPCPlusOneIfInline</a></li>
+        <li><a href="#constraint-18-muststartsequencefrombeginning"
+        id="toc-constraint-18-muststartsequencefrombeginning">Constraint
+        18: MustStartSequenceFromBeginning</a></li>
+        </ul></li>
+        <li><a href="#general-explanation"
+        id="toc-general-explanation">General Explanation</a>
+        <ul>
+        <li><a href="#the-base-polynomial-t₁y"
+        id="toc-the-base-polynomial-t₁y">The Base Polynomial
+        t₁(Y)</a></li>
+        <li><a href="#the-domain-structure"
+        id="toc-the-domain-structure">The Domain Structure</a></li>
+        <li><a href="#the-two-groups" id="toc-the-two-groups">The Two
+        Groups</a></li>
+        </ul></li>
+        <li><a href="#step-by-step-process"
+        id="toc-step-by-step-process">Step-by-Step Process</a>
+        <ul>
+        <li><a href="#phase-1-compute-extended-domain-evaluations"
+        id="toc-phase-1-compute-extended-domain-evaluations">Phase 1:
+        Compute Extended Domain Evaluations</a></li>
+        <li><a href="#phase-2-reconstruct-full-polynomial"
+        id="toc-phase-2-reconstruct-full-polynomial">Phase 2:
+        Reconstruct Full Polynomial</a></li>
+        <li><a href="#phase-3-return-first-round-polynomial"
+        id="toc-phase-3-return-first-round-polynomial">Phase 3: Return
+        First-Round Polynomial</a></li>
+        </ul></li>
+        <li><a href="#concrete-example-cycle-0"
+        id="toc-concrete-example-cycle-0">Concrete Example: Cycle 0</a>
+        <ul>
+        <li><a href="#cycle-0-trace-data"
+        id="toc-cycle-0-trace-data">Cycle 0 Trace Data</a></li>
+        <li><a href="#step-1-extract-witness-values"
+        id="toc-step-1-extract-witness-values">Step 1: Extract Witness
+        Values</a></li>
+        <li><a
+        href="#step-2-evaluate-az-and-bz-for-group-0-constraints-0-8"
+        id="toc-step-2-evaluate-az-and-bz-for-group-0-constraints-0-8">Step
+        2: Evaluate Az and Bz for Group 0 (Constraints 0-8)</a></li>
+        <li><a href="#step-3-interpolate-to-extended-point-y-5"
+        id="toc-step-3-interpolate-to-extended-point-y-5">Step 3:
+        Interpolate to Extended Point Y = 5</a></li>
+        <li><a href="#step-4-weight-by-equality-polynomials"
+        id="toc-step-4-weight-by-equality-polynomials">Step 4: Weight by
+        Equality Polynomials</a></li>
+        <li><a href="#step-5-accumulate" id="toc-step-5-accumulate">Step
+        5: Accumulate</a></li>
+        </ul></li>
+        <li><a href="#the-math-behind-lagrange-interpolation"
+        id="toc-the-math-behind-lagrange-interpolation">The Math Behind
+        Lagrange Interpolation</a>
+        <ul>
+        <li><a href="#why-does-this-work"
+        id="toc-why-does-this-work">Why Does This Work?</a></li>
+        <li><a href="#lagrange-basis-polynomials"
+        id="toc-lagrange-basis-polynomials">Lagrange Basis
+        Polynomials</a></li>
+        <li><a href="#why-doesnt-t₁y-0-everywhere"
+        id="toc-why-doesnt-t₁y-0-everywhere">Why Doesn’t t₁(Y) = 0
+        Everywhere?</a></li>
+        </ul></li>
+        <li><a href="#summary" id="toc-summary">Summary</a></li>
+        </ul></li>
+        </ul>
+      </nav>
+            <article><section
+id="complete-walkthrough-univariate-skip-first-round-polynomial-generation"
+class="level1">
+<h1>Complete Walkthrough: Univariate Skip First-Round Polynomial
+Generation</h1>
+<section id="table-of-contents" class="level2">
+<h2>Table of Contents</h2>
+<ol type="1">
+<li><a href="#overview">Overview</a></li>
+<li><a href="#the-19-r1cs-constraints">The 19 R1CS Constraints</a></li>
+<li><a href="#general-explanation">General Explanation</a></li>
+<li><a href="#step-by-step-process">Step-by-Step Process</a></li>
+<li><a href="#concrete-example-cycle-0">Concrete Example: Cycle
+0</a></li>
+<li><a href="#the-math-behind-lagrange-interpolation">The Math Behind
+Lagrange Interpolation</a></li>
+</ol>
+<hr />
+</section>
+<section id="overview" class="level2">
+<h2>Overview</h2>
+<p><strong>Goal:</strong> Generate the first-round polynomial for Stage
+1 outer sumcheck:</p>
+<p><span class="math display">\[s_1(Y) = L(\tau_{high}, Y) \cdot
+t_1(Y)\]</span></p>
+<p>Where: - <span class="math inline">\(Y\)</span> is the
+<strong>constraint index</strong> treated as a continuous variable -
+<span class="math inline">\(t_1(Y)\)</span> is the “base polynomial”
+evaluated at extended domain points - <span
+class="math inline">\(L(\tau_{high}, Y)\)</span> is a Lagrange masking
+polynomial - The result is a degree-24 polynomial with <strong>25
+coefficients</strong></p>
+<p><strong>Key insight:</strong> The R1CS property <span
+class="math inline">\(Az \cdot Bz = 0\)</span> holds at <strong>integer
+constraint indices</strong> {0, 1, …, 18}, but when we treat the
+constraint index as a <strong>continuous variable</strong> and
+interpolate, <span class="math inline">\(Az(Y) \cdot Bz(Y)\)</span>
+becomes <strong>non-zero</strong> at non-integer points.</p>
+<p><strong>The optimization:</strong> Only compute <span
+class="math inline">\(t_1(Y)\)</span> at points where it’s non-zero (8
+extended points), use Lagrange interpolation to reconstruct the full
+polynomial.</p>
+<hr />
+</section>
+<section id="the-19-r1cs-constraints" class="level2">
+<h2>The 19 R1CS Constraints</h2>
+<p>Each constraint has the form: <strong>Az · Bz = 0</strong></p>
+<section id="constraint-0-ramaddreqrs1plusimmifloadstore"
+class="level3">
+<h3>Constraint 0: RamAddrEqRs1PlusImmIfLoadStore</h3>
+<pre><code>Az = Load + Store
+Bz = RamAddress - (Rs1Value + Imm)</code></pre>
+<p><strong>Meaning:</strong> If this is a load or store, RAM address
+must equal Rs1 + Imm</p>
+</section>
+<section id="constraint-1-ramaddreqzeroifnotloadstore" class="level3">
+<h3>Constraint 1: RamAddrEqZeroIfNotLoadStore</h3>
+<pre><code>Az = 1 - Load - Store
+Bz = RamAddress</code></pre>
+<p><strong>Meaning:</strong> If NOT load/store, RAM address must be
+zero</p>
+</section>
+<section id="constraint-2-ramreadeqramwriteifload" class="level3">
+<h3>Constraint 2: RamReadEqRamWriteIfLoad</h3>
+<pre><code>Az = Load
+Bz = RamReadValue - RamWriteValue</code></pre>
+<p><strong>Meaning:</strong> On load, read value equals write value
+(memory consistency)</p>
+</section>
+<section id="constraint-3-ramreadeqrdwriteifload" class="level3">
+<h3>Constraint 3: RamReadEqRdWriteIfLoad</h3>
+<pre><code>Az = Load
+Bz = RamReadValue - RdWriteValue</code></pre>
+<p><strong>Meaning:</strong> On load, RAM read value goes to destination
+register</p>
+</section>
+<section id="constraint-4-rs2eqramwriteifstore" class="level3">
+<h3>Constraint 4: Rs2EqRamWriteIfStore</h3>
+<pre><code>Az = Store
+Bz = Rs2Value - RamWriteValue</code></pre>
+<p><strong>Meaning:</strong> On store, Rs2 value is what gets written to
+memory</p>
+</section>
+<section id="constraint-5-leftlookupzerounlessaddsubmul" class="level3">
+<h3>Constraint 5: LeftLookupZeroUnlessAddSubMul</h3>
+<pre><code>Az = AddOperands + SubtractOperands + MultiplyOperands
+Bz = LeftLookupOperand</code></pre>
+<p><strong>Meaning:</strong> For add/sub/mul, left lookup is zero (only
+right lookup used)</p>
+</section>
+<section id="constraint-6-leftlookupeqleftinputotherwise"
+class="level3">
+<h3>Constraint 6: LeftLookupEqLeftInputOtherwise</h3>
+<pre><code>Az = 1 - AddOperands - SubtractOperands - MultiplyOperands
+Bz = LeftLookupOperand - LeftInstructionInput</code></pre>
+<p><strong>Meaning:</strong> For non-add/sub/mul, left lookup equals
+left input</p>
+</section>
+<section id="constraint-7-rightlookupadd" class="level3">
+<h3>Constraint 7: RightLookupAdd</h3>
+<pre><code>Az = AddOperands
+Bz = RightLookupOperand - (LeftInstructionInput + RightInstructionInput)</code></pre>
+<p><strong>Meaning:</strong> For addition, right lookup equals sum of
+inputs</p>
+</section>
+<section id="constraint-8-rightlookupsub" class="level3">
+<h3>Constraint 8: RightLookupSub</h3>
+<pre><code>Az = SubtractOperands
+Bz = RightLookupOperand - (LeftInstructionInput - RightInstructionInput + 2^64)</code></pre>
+<p><strong>Meaning:</strong> For subtraction, right lookup equals
+difference (with 2’s complement adjustment)</p>
+</section>
+<section id="constraint-9-rightlookupeqproductifmul" class="level3">
+<h3>Constraint 9: RightLookupEqProductIfMul</h3>
+<pre><code>Az = MultiplyOperands
+Bz = RightLookupOperand - Product</code></pre>
+<p><strong>Meaning:</strong> For multiplication, right lookup equals
+product</p>
+</section>
+<section id="constraint-10-rightlookupeqrightinputotherwise"
+class="level3">
+<h3>Constraint 10: RightLookupEqRightInputOtherwise</h3>
+<pre><code>Az = 1 - AddOperands - SubtractOperands - MultiplyOperands - Advice
+Bz = RightLookupOperand - RightInstructionInput</code></pre>
+<p><strong>Meaning:</strong> Otherwise, right lookup equals right
+input</p>
+</section>
+<section id="constraint-11-assertlookupone" class="level3">
+<h3>Constraint 11: AssertLookupOne</h3>
+<pre><code>Az = Assert
+Bz = LookupOutput - 1</code></pre>
+<p><strong>Meaning:</strong> Assert instructions require lookup output
+equals 1</p>
+</section>
+<section id="constraint-12-rdwriteeqlookupifwritelookuptord"
+class="level3">
+<h3>Constraint 12: RdWriteEqLookupIfWriteLookupToRd</h3>
+<pre><code>Az = WriteLookupOutputToRD
+Bz = RdWriteValue - LookupOutput</code></pre>
+<p><strong>Meaning:</strong> When writing lookup to Rd, Rd write value
+equals lookup output</p>
+</section>
+<section id="constraint-13-rdwriteeqpcplusconstifwritepctord"
+class="level3">
+<h3>Constraint 13: RdWriteEqPCPlusConstIfWritePCtoRD</h3>
+<pre><code>Az = WritePCtoRD
+Bz = RdWriteValue - (UnexpandedPC + 4 - 2*IsCompressed)</code></pre>
+<p><strong>Meaning:</strong> When writing PC to Rd (jumps), Rd gets PC+4
+(or PC+2 if compressed)</p>
+</section>
+<section id="constraint-14-nextunexppceqlookupifshouldjump"
+class="level3">
+<h3>Constraint 14: NextUnexpPCEqLookupIfShouldJump</h3>
+<pre><code>Az = ShouldJump
+Bz = NextUnexpandedPC - LookupOutput</code></pre>
+<p><strong>Meaning:</strong> When jumping, next PC equals jump target
+from lookup</p>
+</section>
+<section id="constraint-15-nextunexppceqpcplusimmifshouldbranch"
+class="level3">
+<h3>Constraint 15: NextUnexpPCEqPCPlusImmIfShouldBranch</h3>
+<pre><code>Az = ShouldBranch
+Bz = NextUnexpandedPC - (UnexpandedPC + Imm)</code></pre>
+<p><strong>Meaning:</strong> When branching, next PC equals current PC +
+branch offset</p>
+</section>
+<section id="constraint-16-nextunexppcupdateotherwise" class="level3">
+<h3>Constraint 16: NextUnexpPCUpdateOtherwise</h3>
+<pre><code>Az = 1 - ShouldBranch - Jump
+Bz = NextUnexpandedPC - (UnexpandedPC + 4 - 4*DoNotUpdate - 2*IsCompressed)</code></pre>
+<p><strong>Meaning:</strong> When not jumping/branching, PC advances by
+4 (or 2 if compressed, or 0 if paused)</p>
+</section>
+<section id="constraint-17-nextpceqpcplusoneifinline" class="level3">
+<h3>Constraint 17: NextPCEqPCPlusOneIfInline</h3>
+<pre><code>Az = VirtualInstruction
+Bz = NextPC - (PC + 1)</code></pre>
+<p><strong>Meaning:</strong> For virtual (inlined) instructions,
+expanded PC increments by 1</p>
+</section>
+<section id="constraint-18-muststartsequencefrombeginning"
+class="level3">
+<h3>Constraint 18: MustStartSequenceFromBeginning</h3>
+<pre><code>Az = NextIsVirtual - NextIsFirstInSequence
+Bz = DoNotUpdateUnexpandedPC - 1</code></pre>
+<p><strong>Meaning:</strong> Virtual instruction sequences must start
+from beginning</p>
+<hr />
+</section>
+</section>
+<section id="general-explanation" class="level2">
+<h2>General Explanation</h2>
+<section id="the-base-polynomial-t₁y" class="level3">
+<h3>The Base Polynomial t₁(Y)</h3>
+<p>For a given cycle, we want to compute:</p>
+<p><span class="math display">\[t_1(Y) = \sum_{x_{in}} eq(\tau_{in},
+x_{in}) \cdot Az(x_{in}, Y) \cdot Bz(x_{in}, Y)\]</span></p>
+<p>Where: - <span class="math inline">\(Y\)</span> is the constraint
+index (treated as continuous) - <span
+class="math inline">\(x_{in}\)</span> indexes over inner variables - Az
+and Bz are evaluated by plugging witness values into constraint
+formulas</p>
+</section>
+<section id="the-domain-structure" class="level3">
+<h3>The Domain Structure</h3>
+<p><strong>Constraints are split into two groups:</strong> -
+<strong>Group 0 (first 10 constraints):</strong> Indices {0, 1, 2, …, 9}
+- This is the “base window” centered at 0 - At these integer points: Az
+· Bz = 0 (by R1CS property)</p>
+<ul>
+<li><strong>Group 1 (last 9 constraints):</strong> Indices {10, 11, 12,
+…, 18}</li>
+</ul>
+<p><strong>For univariate skip, we treat Group 0 as the base:</strong> -
+<strong>Base window:</strong> {-4, -3, -2, -1, 0, 1, 2, 3, 4} - These
+map to constraints {0-8} - At these points, <span
+class="math inline">\(t_1(Y) = 0\)</span> (since Az · Bz = 0)</p>
+<ul>
+<li><strong>Extended domain:</strong> {-8, -7, -6, -5, 5, 6, 7, 8} - The
+8 points outside base window
+<ul>
+<li>At these points, <span class="math inline">\(t_1(Y) \neq 0\)</span>
+(interpolation makes it non-zero)</li>
+</ul></li>
+</ul>
+<p><strong>Why is t₁(Y) zero in the base window?</strong></p>
+<p>Because at integer constraint indices, the R1CS property holds: Az(i)
+· Bz(i) = 0 for all cycles.</p>
+<p><strong>Why is t₁(Y) non-zero at extended points?</strong></p>
+<p>When we treat Y as continuous and interpolate, Az(Y) and Bz(Y) become
+polynomials. At non-integer Y values, their product is generally
+non-zero.</p>
+</section>
+<section id="the-two-groups" class="level3">
+<h3>The Two Groups</h3>
+<p>The 19 constraints are processed in <strong>two separate
+groups</strong>:</p>
+<p><strong>Group 0 (Constraints 0-8):</strong> - Maps to base window
+{-4, …, 4} - Az values are booleans (0 or 1) - Bz values fit in i128</p>
+<p><strong>Group 1 (Constraints 9-18):</strong> - Treated as part of the
+extended/remaining computation - Az values are small integers (u8) - Bz
+values require S160 (wider arithmetic)</p>
+<hr />
+</section>
+</section>
+<section id="step-by-step-process" class="level2">
+<h2>Step-by-Step Process</h2>
+<section id="phase-1-compute-extended-domain-evaluations"
+class="level3">
+<h3>Phase 1: Compute Extended Domain Evaluations</h3>
+<p><strong>For each of the 8 extended points</strong> (e.g., Y = -8, -7,
+…, -5, 5, …, 8):</p>
+<section id="step-1.1-compute-lagrange-shift-coefficients"
+class="level4">
+<h4>Step 1.1: Compute Lagrange Shift Coefficients</h4>
+<p>For target point Y (e.g., Y = 5), compute coefficients that let us
+interpolate from base window {-4, …, 4} to target Y:</p>
+<div class="highlight"><pre><span></span><span class="n">coeffs</span> <span class="o">=</span> <span class="n">lagrange_shift_coefficients</span><span class="p">(</span>
+    <span class="n">from_points</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>  <span class="c1"># base window</span>
+    <span class="n">to_point</span> <span class="o">=</span> <span class="mi">5</span>                                      <span class="c1"># extended target</span>
+<span class="p">)</span>
+<span class="c1"># Returns 9 coefficients [c₀, c₁, c₂, ..., c₈]</span>
+</pre></div>
+
+<p>These coefficients satisfy: <span class="math display">\[f(5) =
+\sum_{i=-4}^{4} coeffs[i+4] \cdot f(i)\]</span></p>
+</section>
+<section id="step-1.2-for-each-cycle" class="level4">
+<h4>Step 1.2: For Each Cycle</h4>
+<div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="mf">0.</span><span class="o">.</span><span class="n">num_cycles</span><span class="p">:</span>
+    <span class="c1"># Get witness values for this cycle</span>
+    <span class="n">row</span> <span class="o">=</span> <span class="n">trace</span><span class="p">[</span><span class="n">cycle</span><span class="p">]</span>
+    
+    <span class="c1"># Evaluate Az and Bz at discrete constraint indices</span>
+    <span class="n">az_group0</span> <span class="o">=</span> <span class="n">eval_az_first_group</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>   <span class="c1"># 9 boolean values for constraints 0-8</span>
+    <span class="n">bz_group0</span> <span class="o">=</span> <span class="n">eval_bz_first_group</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>   <span class="c1"># 9 i128 values for constraints 0-8</span>
+    
+    <span class="c1"># Interpolate Az to extended point Y using Lagrange coefficients</span>
+    <span class="n">az_at_Y</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">az_group0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="mf">0..9</span><span class="p">)</span>
+    
+    <span class="c1"># Interpolate Bz to extended point Y</span>
+    <span class="n">bz_at_Y</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">bz_group0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="mf">0..9</span><span class="p">)</span>
+    
+    <span class="c1"># Compute product</span>
+    <span class="n">product</span> <span class="o">=</span> <span class="n">az_at_Y</span> <span class="o">*</span> <span class="n">bz_at_Y</span>
+    
+    <span class="c1"># Weight by equality polynomials</span>
+    <span class="n">eq_out</span> <span class="o">=</span> <span class="n">eq</span><span class="p">(</span><span class="n">tau_out</span><span class="p">,</span> <span class="n">cycle_index</span><span class="p">)</span>
+    <span class="n">eq_in</span> <span class="o">=</span> <span class="n">eq</span><span class="p">(</span><span class="n">tau_in</span><span class="p">,</span> <span class="n">inner_vars</span><span class="p">)</span>
+    
+    <span class="c1"># Accumulate</span>
+    <span class="n">t1</span><span class="p">[</span><span class="nf">Y</span><span class="p">]</span> <span class="o">+=</span> <span class="n">eq_out</span> <span class="o">*</span> <span class="n">eq_in</span> <span class="o">*</span> <span class="n">product</span>
+</pre></div>
+
+<p><strong>Result:</strong> 8 field element values = t₁(Y) evaluated at
+the 8 extended points</p>
+</section>
+</section>
+<section id="phase-2-reconstruct-full-polynomial" class="level3">
+<h3>Phase 2: Reconstruct Full Polynomial</h3>
+<section id="step-2.1-combine-base-and-extended-evaluations"
+class="level4">
+<h4>Step 2.1: Combine Base and Extended Evaluations</h4>
+<div class="highlight"><pre><span></span><span class="n">t1_full_evals</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">;</span> <span class="mi">17</span><span class="p">]</span>  <span class="c1"># Size = 2*8 + 1 = 17 (symmetric window {-8, ..., 8})</span>
+
+<span class="c1"># Base window (all zeros)</span>
+<span class="n">t1_full_evals</span><span class="p">[</span><span class="o">-</span><span class="mf">4.</span><span class="o">.=</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># 9 zeros</span>
+
+<span class="c1"># Extended points (computed values)</span>
+<span class="n">t1_full_evals</span><span class="p">[</span><span class="o">-</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="n">t1_extended</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Point Y = -8</span>
+<span class="n">t1_full_evals</span><span class="p">[</span><span class="o">-</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">t1_extended</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Point Y = -7</span>
+<span class="n">t1_full_evals</span><span class="p">[</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">t1_extended</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># Point Y = -6</span>
+<span class="n">t1_full_evals</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">t1_extended</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># Point Y = -5</span>
+<span class="n">t1_full_evals</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>  <span class="o">=</span> <span class="n">t1_extended</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>  <span class="c1"># Point Y = 5</span>
+<span class="n">t1_full_evals</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>  <span class="o">=</span> <span class="n">t1_extended</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>  <span class="c1"># Point Y = 6</span>
+<span class="n">t1_full_evals</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>  <span class="o">=</span> <span class="n">t1_extended</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>  <span class="c1"># Point Y = 7</span>
+<span class="n">t1_full_evals</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>  <span class="o">=</span> <span class="n">t1_extended</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>  <span class="c1"># Point Y = 8</span>
+</pre></div>
+
+</section>
+<section id="step-2.2-interpolate-t₁y-to-get-coefficients"
+class="level4">
+<h4>Step 2.2: Interpolate t₁(Y) to Get Coefficients</h4>
+<div class="highlight"><pre><span></span><span class="n">t1_coeffs</span> <span class="o">=</span> <span class="n">lagrange_interpolate</span><span class="p">(</span><span class="n">t1_full_evals</span><span class="p">)</span>
+<span class="c1"># Returns 17 coefficients (degree-16 polynomial)</span>
+</pre></div>
+
+<p>Now we have <span class="math inline">\(t_1(Y)\)</span> as a
+polynomial: <span class="math inline">\(t_1(Y) = \sum_{i=0}^{16} c_i
+Y^i\)</span></p>
+</section>
+<section id="step-2.3-build-lagrange-masking-polynomial-lτ_high-y"
+class="level4">
+<h4>Step 2.3: Build Lagrange Masking Polynomial L(τ_high, Y)</h4>
+<div class="highlight"><pre><span></span><span class="c1"># Evaluate Lagrange basis polynomials at challenge tau_high</span>
+<span class="n">lagrange_values</span> <span class="o">=</span> <span class="p">[</span><span class="nf">L</span><span class="err">₀</span><span class="p">(</span><span class="n">tau_high</span><span class="p">),</span> <span class="nf">L</span><span class="err">₁</span><span class="p">(</span><span class="n">tau_high</span><span class="p">),</span> <span class="o">...</span><span class="p">,</span> <span class="nf">L</span><span class="err">₈</span><span class="p">(</span><span class="n">tau_high</span><span class="p">)]</span>  <span class="c1"># 9 values</span>
+
+<span class="c1"># Interpolate to get polynomial coefficients</span>
+<span class="n">lagrange_coeffs</span> <span class="o">=</span> <span class="n">lagrange_interpolate</span><span class="p">(</span><span class="n">lagrange_values</span><span class="p">)</span>  <span class="c1"># 9 coefficients (degree-8)</span>
+</pre></div>
+
+<p>This gives us <span class="math inline">\(L(\tau_{high}, Y)\)</span>
+that “selects” which constraint group based on <span
+class="math inline">\(\tau_{high}\)</span>.</p>
+</section>
+<section id="step-2.4-multiply-the-polynomials" class="level4">
+<h4>Step 2.4: Multiply the Polynomials</h4>
+<div class="highlight"><pre><span></span><span class="n">s1_coeffs</span> <span class="o">=</span> <span class="n">convolve</span><span class="p">(</span><span class="n">lagrange_coeffs</span><span class="p">,</span> <span class="n">t1_coeffs</span><span class="p">)</span>
+<span class="c1"># lagrange: degree 8 (9 coeffs)</span>
+<span class="c1"># t1: degree 16 (17 coeffs)</span>
+<span class="c1"># product: degree 8+16 = 24 (25 coeffs)</span>
+</pre></div>
+
+<p><strong>Convolution formula:</strong> <span
+class="math display">\[s_1(Y) = \sum_{i=0}^{24}
+\left(\sum_{j=0}^{\min(i,8)} L_j \cdot t_{i-j}\right) Y^i\]</span></p>
+</section>
+</section>
+<section id="phase-3-return-first-round-polynomial" class="level3">
+<h3>Phase 3: Return First-Round Polynomial</h3>
+<div class="highlight"><pre><span></span><span class="k">return</span> <span class="nf">UniPoly</span> <span class="p">{</span> <span class="n">coefficients</span><span class="p">:</span> <span class="n">s1_coeffs</span> <span class="p">}</span>  <span class="c1"># 25 coefficients</span>
+</pre></div>
+
+<p>This polynomial is sent to the verifier, who evaluates it at
+challenge point <span class="math inline">\(r_0\)</span> to continue the
+sumcheck.</p>
+<hr />
+</section>
+</section>
+<section id="concrete-example-cycle-0" class="level2">
+<h2>Concrete Example: Cycle 0</h2>
+<p>Let’s walk through the computation for <strong>Cycle 0</strong> at
+<strong>extended point Y = 5</strong>.</p>
+<section id="cycle-0-trace-data" class="level3">
+<h3>Cycle 0 Trace Data</h3>
+<pre><code>Instruction: AUIPC rd=2, imm=4096
+Address: 2147483648
+Result: rd[2] = PC + imm = 2147483648 + 4096 = 2147487744</code></pre>
+</section>
+<section id="step-1-extract-witness-values" class="level3">
+<h3>Step 1: Extract Witness Values</h3>
+<p>From the trace:</p>
+<div class="highlight"><pre><span></span><span class="nf">PC</span> <span class="o">=</span> <span class="mi">2147483648</span>
+<span class="nf">UnexpandedPC</span> <span class="o">=</span> <span class="mi">2147483648</span>
+<span class="nf">NextPC</span> <span class="o">=</span> <span class="mi">2147483649</span> <span class="p">(</span><span class="n">expanded</span> <span class="nf">PC</span> <span class="n">increments</span><span class="p">)</span>
+<span class="nf">NextUnexpandedPC</span> <span class="o">=</span> <span class="mi">2147483652</span> <span class="p">(</span><span class="n">instruction</span> <span class="n">address</span> <span class="n">advances</span> <span class="n">by</span> <span class="mi">4</span><span class="p">)</span>
+
+<span class="nf">Rs1Value</span> <span class="o">=</span> <span class="err">?</span> <span class="p">(</span><span class="nf">AUIPC</span> <span class="n">doesn</span><span class="s1">&#39;t read Rs1)</span>
+<span class="nf">Rs2Value</span> <span class="o">=</span> <span class="err">?</span>
+<span class="nf">RdWriteValue</span> <span class="o">=</span> <span class="mi">2147487744</span>
+
+<span class="nf">RamAddress</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">(</span><span class="n">no</span> <span class="n">memory</span> <span class="n">access</span><span class="p">)</span>
+<span class="nf">RamReadValue</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="nf">RamWriteValue</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="nf">Imm</span> <span class="o">=</span> <span class="mi">4096</span>
+
+<span class="nf">LeftInstructionInput</span> <span class="o">=</span> <span class="nf">UnexpandedPC</span> <span class="o">=</span> <span class="mi">2147483648</span> <span class="p">(</span><span class="nf">AUIPC</span> <span class="n">uses</span> <span class="nf">PC</span> <span class="k">as</span> <span class="n">left</span> <span class="nb">input</span><span class="p">)</span>
+<span class="nf">RightInstructionInput</span> <span class="o">=</span> <span class="nf">Imm</span> <span class="o">=</span> <span class="mi">4096</span>
+
+<span class="nf">LeftLookupOperand</span> <span class="o">=</span> <span class="mi">0</span> <span class="p">(</span><span class="nf">AUIPC</span> <span class="n">uses</span> <span class="nf">AddOperands</span><span class="p">,</span> <span class="n">so</span> <span class="n">left</span> <span class="n">lookup</span> <span class="ow">is</span> <span class="mi">0</span><span class="p">)</span>
+<span class="nf">RightLookupOperand</span> <span class="o">=</span> <span class="mi">2147487744</span> <span class="p">(</span><span class="nf">PC</span> <span class="o">+</span> <span class="n">imm</span><span class="p">)</span>
+<span class="nf">LookupOutput</span> <span class="o">=</span> <span class="mi">2147487744</span>
+
+<span class="nf">Flags</span><span class="p">:</span>
+  <span class="nf">Load</span> <span class="o">=</span> <span class="n">false</span>
+  <span class="nf">Store</span> <span class="o">=</span> <span class="n">false</span>
+  <span class="nf">Jump</span> <span class="o">=</span> <span class="n">false</span>
+  <span class="nf">AddOperands</span> <span class="o">=</span> <span class="n">true</span> <span class="p">(</span><span class="nf">AUIPC</span> <span class="n">internally</span> <span class="n">adds</span> <span class="nf">PC</span> <span class="o">+</span> <span class="n">imm</span><span class="p">)</span>
+  <span class="nf">SubtractOperands</span> <span class="o">=</span> <span class="n">false</span>
+  <span class="nf">MultiplyOperands</span> <span class="o">=</span> <span class="n">false</span>
+  <span class="nf">WriteLookupOutputToRD</span> <span class="o">=</span> <span class="n">true</span>
+  <span class="nf">VirtualInstruction</span> <span class="o">=</span> <span class="n">false</span>
+  <span class="nf">IsCompressed</span> <span class="o">=</span> <span class="n">false</span>
+  <span class="nf">DoNotUpdateUnexpandedPC</span> <span class="o">=</span> <span class="n">false</span>
+  <span class="nf">Assert</span> <span class="o">=</span> <span class="n">false</span>
+  <span class="nf">Advice</span> <span class="o">=</span> <span class="n">false</span>
+
+<span class="nf">Derived</span><span class="p">:</span>
+  <span class="nf">WritePCtoRD</span> <span class="o">=</span> <span class="n">false</span> <span class="p">(</span><span class="nf">Jump</span> <span class="o">&amp;&amp;</span> <span class="nf">IsRdNotZero</span> <span class="o">=</span> <span class="n">false</span> <span class="o">&amp;&amp;</span> <span class="n">true</span> <span class="o">=</span> <span class="n">false</span><span class="p">)</span>
+  <span class="nf">ShouldJump</span> <span class="o">=</span> <span class="n">false</span> <span class="p">(</span><span class="nf">Jump</span> <span class="o">&amp;&amp;</span> <span class="err">!</span><span class="nf">NextIsNoop</span> <span class="o">=</span> <span class="n">false</span><span class="p">)</span>
+  <span class="nf">ShouldBranch</span> <span class="o">=</span> <span class="n">false</span> <span class="p">(</span><span class="nf">Branch</span> <span class="o">&amp;&amp;</span> <span class="nf">LookupOutput</span><span class="o">==</span><span class="mi">1</span> <span class="o">=</span> <span class="n">false</span><span class="p">)</span>
+</pre></div>
+
+</section>
+<section id="step-2-evaluate-az-and-bz-for-group-0-constraints-0-8"
+class="level3">
+<h3>Step 2: Evaluate Az and Bz for Group 0 (Constraints 0-8)</h3>
+<section id="constraint-0-ramaddreqrs1plusimmifloadstore-1"
+class="level4">
+<h4>Constraint 0: RamAddrEqRs1PlusImmIfLoadStore</h4>
+<div class="highlight"><pre><span></span><span class="nf">Az</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nf">Load</span> <span class="o">+</span> <span class="nf">Store</span> <span class="o">=</span> <span class="n">false</span> <span class="o">+</span> <span class="n">false</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="nf">Bz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nf">RamAddress</span> <span class="o">-</span> <span class="p">(</span><span class="nf">Rs1Value</span> <span class="o">+</span> <span class="nf">Imm</span><span class="p">)</span> 
+      <span class="o">=</span> <span class="mi">0</span> <span class="o">-</span> <span class="p">(</span><span class="err">?</span> <span class="o">+</span> <span class="mi">4096</span><span class="p">)</span> 
+      <span class="o">=</span> <span class="o">-</span><span class="err">?</span> <span class="o">-</span> <span class="mi">4096</span>  <span class="c1"># Some negative value</span>
+</pre></div>
+
+</section>
+<section id="constraint-1-ramaddreqzeroifnotloadstore-1" class="level4">
+<h4>Constraint 1: RamAddrEqZeroIfNotLoadStore</h4>
+<div class="highlight"><pre><span></span><span class="nf">Az</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="nf">Load</span> <span class="o">-</span> <span class="nf">Store</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">0</span> <span class="o">-</span> <span class="mi">0</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="nf">Bz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nf">RamAddress</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+
+</section>
+<section id="constraint-2-ramreadeqramwriteifload-1" class="level4">
+<h4>Constraint 2: RamReadEqRamWriteIfLoad</h4>
+<div class="highlight"><pre><span></span><span class="nf">Az</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nf">Load</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="nf">Bz</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="nf">RamReadValue</span> <span class="o">-</span> <span class="nf">RamWriteValue</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">-</span> <span class="mi">0</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+
+</section>
+<section id="constraint-3-ramreadeqrdwriteifload-1" class="level4">
+<h4>Constraint 3: RamReadEqRdWriteIfLoad</h4>
+<div class="highlight"><pre><span></span><span class="nf">Az</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nf">Load</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="nf">Bz</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nf">RamReadValue</span> <span class="o">-</span> <span class="nf">RdWriteValue</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">-</span> <span class="mi">2147487744</span>
+</pre></div>
+
+</section>
+<section id="constraint-4-rs2eqramwriteifstore-1" class="level4">
+<h4>Constraint 4: Rs2EqRamWriteIfStore</h4>
+<div class="highlight"><pre><span></span><span class="nf">Az</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="nf">Store</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="nf">Bz</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="nf">Rs2Value</span> <span class="o">-</span> <span class="nf">RamWriteValue</span> <span class="o">=</span> <span class="err">?</span> <span class="o">-</span> <span class="mi">0</span>
+</pre></div>
+
+</section>
+<section id="constraint-5-leftlookupzerounlessaddsubmul-1"
+class="level4">
+<h4>Constraint 5: LeftLookupZeroUnlessAddSubMul</h4>
+<div class="highlight"><pre><span></span><span class="nf">Az</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="nf">AddOperands</span> <span class="o">+</span> <span class="nf">SubtractOperands</span> <span class="o">+</span> <span class="nf">MultiplyOperands</span>
+      <span class="o">=</span> <span class="n">true</span> <span class="o">+</span> <span class="n">false</span> <span class="o">+</span> <span class="n">false</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="nf">Bz</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="nf">LeftLookupOperand</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+
+</section>
+<section id="constraint-6-leftlookupeqleftinputotherwise-1"
+class="level4">
+<h4>Constraint 6: LeftLookupEqLeftInputOtherwise</h4>
+<div class="highlight"><pre><span></span><span class="nf">Az</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="nf">AddOperands</span> <span class="o">-</span> <span class="nf">SubtractOperands</span> <span class="o">-</span> <span class="nf">MultiplyOperands</span>
+      <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">0</span> <span class="o">-</span> <span class="mi">0</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="nf">Bz</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="nf">LeftLookupOperand</span> <span class="o">-</span> <span class="nf">LeftInstructionInput</span>
+      <span class="o">=</span> <span class="mi">0</span> <span class="o">-</span> <span class="mi">2147483648</span>
+</pre></div>
+
+</section>
+<section id="constraint-7-rightlookupadd-1" class="level4">
+<h4>Constraint 7: RightLookupAdd</h4>
+<div class="highlight"><pre><span></span><span class="nf">Az</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="nf">AddOperands</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="nf">Bz</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="nf">RightLookupOperand</span> <span class="o">-</span> <span class="p">(</span><span class="nf">LeftInstructionInput</span> <span class="o">+</span> <span class="nf">RightInstructionInput</span><span class="p">)</span>
+      <span class="o">=</span> <span class="mi">2147487744</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2147483648</span> <span class="o">+</span> <span class="mi">4096</span><span class="p">)</span>
+      <span class="o">=</span> <span class="mi">2147487744</span> <span class="o">-</span> <span class="mi">2147487744</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+
+</section>
+<section id="constraint-8-rightlookupsub-1" class="level4">
+<h4>Constraint 8: RightLookupSub</h4>
+<div class="highlight"><pre><span></span><span class="nf">Az</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="nf">SubtractOperands</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="nf">Bz</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="ow">not</span> <span class="n">evaluated</span><span class="p">,</span> <span class="n">constraint</span> <span class="n">inactive</span><span class="p">)</span>
+</pre></div>
+
+<p><strong>Summary for Group 0:</strong></p>
+<div class="highlight"><pre><span></span><span class="nf">Az_group0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># Boolean values</span>
+<span class="nf">Bz_group0</span> <span class="o">=</span> <span class="p">[</span><span class="err">?</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="err">?</span><span class="p">,</span> <span class="err">?</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="err">?</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="err">?</span><span class="p">]</span>  <span class="c1"># i128 values (? = some value)</span>
+</pre></div>
+
+<p><strong>Key observation:</strong> Az[i] · Bz[i] = 0 for all i! -
+Constraint 1: Az=1, Bz=0 → product = 0 - Constraint 5: Az=1, Bz=0 →
+product = 0 - Constraint 7: Az=1, Bz=0 → product = 0 - All others: Az=0
+→ product = 0</p>
+</section>
+</section>
+<section id="step-3-interpolate-to-extended-point-y-5" class="level3">
+<h3>Step 3: Interpolate to Extended Point Y = 5</h3>
+<p>Get Lagrange coefficients for interpolating from base window {-4, -3,
+-2, -1, 0, 1, 2, 3, 4} to target Y = 5:</p>
+<div class="highlight"><pre><span></span><span class="n">coeffs</span> <span class="o">=</span> <span class="n">lagrange_shift_coefficients</span><span class="p">(</span>
+    <span class="n">from_window</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+    <span class="n">to_point</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="p">)</span>
+</pre></div>
+
+<p><strong>These coefficients</strong> (computed using Lagrange
+interpolation formula) might look something like:</p>
+<div class="highlight"><pre><span></span><span class="n">coeffs</span> <span class="err">≈</span> <span class="p">[</span><span class="n">c</span><span class="err">₀</span><span class="p">,</span> <span class="n">c</span><span class="err">₁</span><span class="p">,</span> <span class="n">c</span><span class="err">₂</span><span class="p">,</span> <span class="n">c</span><span class="err">₃</span><span class="p">,</span> <span class="n">c</span><span class="err">₄</span><span class="p">,</span> <span class="n">c</span><span class="err">₅</span><span class="p">,</span> <span class="n">c</span><span class="err">₆</span><span class="p">,</span> <span class="n">c</span><span class="err">₇</span><span class="p">,</span> <span class="n">c</span><span class="err">₈</span><span class="p">]</span>
+<span class="c1"># Exact values depend on field arithmetic</span>
+</pre></div>
+
+<p><strong>Interpolate Az to Y=5:</strong></p>
+<div class="highlight"><pre><span></span><span class="nf">Az</span><span class="p">(</span><span class="nf">Y</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="nf">Az_group0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="mf">0..9</span><span class="p">)</span>
+        <span class="o">=</span> <span class="n">c</span><span class="err">₀</span><span class="o">*</span><span class="mi">0</span> <span class="o">+</span> <span class="n">c</span><span class="err">₁</span><span class="o">*</span><span class="mi">1</span> <span class="o">+</span> <span class="n">c</span><span class="err">₂</span><span class="o">*</span><span class="mi">0</span> <span class="o">+</span> <span class="n">c</span><span class="err">₃</span><span class="o">*</span><span class="mi">0</span> <span class="o">+</span> <span class="n">c</span><span class="err">₄</span><span class="o">*</span><span class="mi">0</span> <span class="o">+</span> <span class="n">c</span><span class="err">₅</span><span class="o">*</span><span class="mi">1</span> <span class="o">+</span> <span class="n">c</span><span class="err">₆</span><span class="o">*</span><span class="mi">0</span> <span class="o">+</span> <span class="n">c</span><span class="err">₇</span><span class="o">*</span><span class="mi">1</span> <span class="o">+</span> <span class="n">c</span><span class="err">₈</span><span class="o">*</span><span class="mi">0</span>
+        <span class="o">=</span> <span class="n">c</span><span class="err">₁</span> <span class="o">+</span> <span class="n">c</span><span class="err">₅</span> <span class="o">+</span> <span class="n">c</span><span class="err">₇</span>
+</pre></div>
+
+<p><strong>Interpolate Bz to Y=5:</strong></p>
+<div class="highlight"><pre><span></span><span class="nf">Bz</span><span class="p">(</span><span class="nf">Y</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">coeffs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="nf">Bz_group0</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="mf">0..9</span><span class="p">)</span>
+        <span class="o">=</span> <span class="n">c</span><span class="err">₀</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="err">₁</span><span class="o">*</span><span class="mi">0</span> <span class="o">+</span> <span class="n">c</span><span class="err">₂</span><span class="o">*</span><span class="mi">0</span> <span class="o">+</span> <span class="n">c</span><span class="err">₃</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="err">₄</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="err">₅</span><span class="o">*</span><span class="mi">0</span> <span class="o">+</span> <span class="n">c</span><span class="err">₆</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="err">₇</span><span class="o">*</span><span class="mi">0</span> <span class="o">+</span> <span class="n">c</span><span class="err">₈</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+        <span class="o">=</span> <span class="n">c</span><span class="err">₀</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="err">₃</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="err">₄</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="err">₆</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="err">₈</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+</pre></div>
+
+<p><strong>Compute product:</strong></p>
+<div class="highlight"><pre><span></span><span class="n">product</span> <span class="o">=</span> <span class="nf">Az</span><span class="p">(</span><span class="nf">Y</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="nf">Bz</span><span class="p">(</span><span class="nf">Y</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="o">=</span> <span class="p">(</span><span class="n">c</span><span class="err">₁</span> <span class="o">+</span> <span class="n">c</span><span class="err">₅</span> <span class="o">+</span> <span class="n">c</span><span class="err">₇</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">c</span><span class="err">₀</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="err">₃</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="err">₄</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="err">₆</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span><span class="err">₈</span><span class="o">*</span><span class="nf">Bz</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
+</pre></div>
+
+<p><strong>This is non-zero!</strong> Even though Az·Bz = 0 at all
+integer points, when we interpolate to Y=5, the product becomes
+non-zero.</p>
+</section>
+<section id="step-4-weight-by-equality-polynomials" class="level3">
+<h3>Step 4: Weight by Equality Polynomials</h3>
+<div class="highlight"><pre><span></span><span class="n">eq_out</span> <span class="o">=</span> <span class="n">eq</span><span class="p">(</span><span class="n">tau_out</span><span class="p">,</span> <span class="n">cycle</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="nf">R</span><span class="err">²</span> <span class="p">(</span><span class="nf">Montgomery</span> <span class="n">scaling</span><span class="p">)</span>
+<span class="n">eq_in</span> <span class="o">=</span> <span class="n">eq</span><span class="p">(</span><span class="n">tau_in</span><span class="p">,</span> <span class="n">inner_variables</span><span class="p">)</span>
+
+<span class="n">contribution</span> <span class="o">=</span> <span class="n">eq_out</span> <span class="o">*</span> <span class="n">eq_in</span> <span class="o">*</span> <span class="n">product</span>
+</pre></div>
+
+</section>
+<section id="step-5-accumulate" class="level3">
+<h3>Step 5: Accumulate</h3>
+<div class="highlight"><pre><span></span><span class="n">t1</span><span class="p">[</span><span class="nf">Y</span><span class="o">=</span><span class="mi">5</span><span class="p">]</span> <span class="o">+=</span> <span class="n">contribution</span>
+</pre></div>
+
+<p>This process repeats for: - All cycles (accumulating each cycle’s
+contribution) - All 8 extended points (Y = -8, -7, -6, -5, 5, 6, 7,
+8)</p>
+<hr />
+</section>
+</section>
+<section id="the-math-behind-lagrange-interpolation" class="level2">
+<h2>The Math Behind Lagrange Interpolation</h2>
+<section id="why-does-this-work" class="level3">
+<h3>Why Does This Work?</h3>
+<p><strong>Lagrange interpolation theorem:</strong> Given n+1 points
+(x₀, y₀), (x₁, y₁), …, (xₙ, yₙ), there exists a unique polynomial p(x)
+of degree ≤ n that passes through all these points.</p>
+<p><strong>In our case:</strong> - We know Az at 9 points: {-4, -3, -2,
+-1, 0, 1, 2, 3, 4} - We want Az at point Y=5 - We use the Lagrange basis
+to “extend” these 9 values to the target point</p>
+</section>
+<section id="lagrange-basis-polynomials" class="level3">
+<h3>Lagrange Basis Polynomials</h3>
+<p>For base points {-4, -3, -2, -1, 0, 1, 2, 3, 4}, the Lagrange basis
+polynomial for point i is:</p>
+<p><span class="math display">\[L_i(Y) = \prod_{j \neq i} \frac{Y -
+x_j}{x_i - x_j}\]</span></p>
+<p><strong>Properties:</strong> - <span class="math inline">\(L_i(x_j) =
+\delta_{ij}\)</span> (equals 1 at xᵢ, 0 at all other xⱼ) - Any
+polynomial through the points can be written as: <span
+class="math inline">\(p(Y) = \sum_i y_i L_i(Y)\)</span></p>
+<p><strong>Evaluation at target Y=5:</strong> <span
+class="math display">\[Az(5) = \sum_{i=0}^{8} Az(x_i) \cdot
+L_i(5)\]</span></p>
+<p>The <strong>Lagrange shift coefficients</strong> are just:
+<code>coeffs[i] = Lᵢ(5)</code></p>
+</section>
+<section id="why-doesnt-t₁y-0-everywhere" class="level3">
+<h3>Why Doesn’t t₁(Y) = 0 Everywhere?</h3>
+<p><strong>At integer points:</strong> Az(i) · Bz(i) = 0 for all i (R1CS
+property)</p>
+<p><strong>At non-integer point Y=5:</strong> - Az(5) = interpolated
+value ≠ necessarily 0 - Bz(5) = interpolated value ≠ necessarily 0 -
+<strong>Product Az(5) · Bz(5) is generally non-zero</strong></p>
+<p><strong>Intuition:</strong> The polynomial Az(Y) · Bz(Y) has zeros at
+integer points {0, 1, …, 8}, but that doesn’t mean it’s zero everywhere.
+Between and beyond these points, it can (and does) take non-zero
+values.</p>
+<p><strong>Example with simple polynomials:</strong> - Let Az(Y) = Y and
+Bz(Y) = 1 - Y - At Y=0: Az·Bz = 0·1 = 0 ✓ - At Y=1: Az·Bz = 1·0 = 0 ✓ -
+At Y=0.5: Az·Bz = 0.5·0.5 = 0.25 ≠ 0 ✗</p>
+<p>The R1CS constraints ensure Az·Bz = 0 at discrete points, but
+interpolation creates a polynomial that’s non-zero elsewhere.</p>
+<hr />
+</section>
+</section>
+<section id="summary" class="level2">
+<h2>Summary</h2>
+<p><strong>The univariate skip optimization:</strong></p>
+<ol type="1">
+<li><strong>Exploits sparsity:</strong> t₁(Y) = 0 in base window {-4, …,
+4} due to R1CS property</li>
+<li><strong>Computes at extended points:</strong> Only 8 evaluations
+needed where t₁(Y) ≠ 0</li>
+<li><strong>Uses Lagrange interpolation:</strong> To “extend” discrete
+Az/Bz values to continuous points</li>
+<li><strong>Reconstructs full polynomial:</strong> Combine zeros +
+computed values, then interpolate</li>
+<li><strong>Multiplies by Lagrange mask:</strong> L(τ_high, Y) to get
+final s₁(Y)</li>
+<li><strong>Result:</strong> Degree-24 polynomial (25 coefficients) for
+first sumcheck round</li>
+</ol>
+<p><strong>Cost savings:</strong> - Without optimization: O(num_cycles ×
+2^(constraint_vars)) - With optimization: O(num_cycles × 8 extended
+points) = Linear!</p>
+<p>This is what makes Jolt’s Stage 1 sumcheck practical at scale.</p>
+</section>
+</section></article>
+    </main>
+    <footer class="site-footer">
+      <p>&copy; 2025 On A Tangent Ltd.</p>
+      <!-- <p class="attribution"> -->
+      <!--   Website template colors inspired by -->
+      <!--   <a -->
+      <!--     href="https://gendignoux.com/" -->
+      <!--     target="_blank" -->
+      <!--     rel="noopener noreferrer" -->
+      <!--     >Guillaume Endignoux</a -->
+      <!--   > -->
+      <!-- </p> -->
+    </footer>
+
+
+    <script>
+      // Theme toggle
+      const themeToggle = document.querySelector(".theme-toggle");
+      const html = document.documentElement;
+      const lightIcon = document.querySelector(".theme-toggle-light");
+      const darkIcon = document.querySelector(".theme-toggle-dark");
+      const currentTheme =
+        localStorage.getItem("theme") ||
+        (matchMedia("(prefers-color-scheme:dark)").matches ? "dark" : "light");
+
+      html.setAttribute("data-theme", currentTheme);
+      if (currentTheme === "dark") {
+        lightIcon.style.display = "none";
+        darkIcon.style.display = "block";
+      } else {
+        lightIcon.style.display = "block";
+        darkIcon.style.display = "none";
+      }
+
+      themeToggle.onclick = () => {
+        const newTheme =
+          html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+
+        if (newTheme === "dark") {
+          lightIcon.style.display = "none";
+          darkIcon.style.display = "block";
+        } else {
+          lightIcon.style.display = "block";
+          darkIcon.style.display = "none";
+        }
+      };
+
+      // Mobile menu toggle
+      document.querySelector(".menu-toggle").onclick = () =>
+        document.querySelector(".nav-group").classList.toggle("is-active");
+
+      // Auto-highlight current page
+      const currentPath = window.location.pathname;
+      const currentPage = currentPath.split("/").pop() || "index.html";
+      document.querySelectorAll(".main-nav a").forEach((link) => {
+        const href = link.getAttribute("href").replace("../", "");
+        if (
+          href === currentPage ||
+          (currentPage === "index.html" && href === "index.html")
+        ) {
+          link.classList.add("active");
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // Citation tooltips
+        const refs = document.querySelector("#refs");
+        if (refs) {
+          document
+            .querySelectorAll('.citation a[href^="#ref-"]')
+            .forEach(function (cite) {
+              const refId = cite.getAttribute("href").substring(1);
+              const refItem = document.getElementById(refId);
+
+              if (refItem) {
+                const urlLink = refItem.querySelector('a[href^="http"]');
+                if (urlLink) {
+                  cite.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    window.open(urlLink.href, "_blank");
+                  });
+                  cite.style.cursor = "pointer";
+                  cite.title = "Click to open source";
+                }
+
+                const tooltip = document.createElement("div");
+                tooltip.className = "citation-tooltip";
+                const cslEntry = refItem.querySelector(".csl-entry");
+                tooltip.textContent = cslEntry
+                  ? cslEntry.textContent
+                  : refItem.textContent;
+                document.body.appendChild(tooltip);
+
+                cite.addEventListener("mouseenter", function (e) {
+                  const rect = cite.getBoundingClientRect();
+                  tooltip.style.display = "block";
+                  tooltip.style.left =
+                    Math.min(rect.left, window.innerWidth - 420) + "px";
+                  tooltip.style.top = rect.bottom + 5 + "px";
+                });
+
+                cite.addEventListener("mouseleave", function () {
+                  tooltip.style.display = "none";
+                });
+              }
+            });
+        }
+
+        // Add copy buttons to code blocks
+        document.querySelectorAll(".highlight").forEach(function (block) {
+          const btn = document.createElement("button");
+          btn.className = "copy-btn";
+          btn.textContent = "Copy";
+          btn.setAttribute("aria-label", "Copy code to clipboard");
+          block.insertBefore(btn, block.firstChild);
+
+          const code = block.querySelector("pre");
+
+          btn.addEventListener("click", async function () {
+            const text = code.textContent;
+
+            try {
+              await navigator.clipboard.writeText(text);
+              btn.textContent = "Copied!";
+              btn.style.background = "#10b981";
+
+              setTimeout(() => {
+                btn.textContent = "Copy";
+                btn.style.background = "";
+              }, 2000);
+            } catch (err) {
+              const textarea = document.createElement("textarea");
+              textarea.value = text;
+              textarea.style.position = "fixed";
+              textarea.style.opacity = "0";
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand("copy");
+              document.body.removeChild(textarea);
+
+              btn.textContent = "Copied!";
+              setTimeout(() => {
+                btn.textContent = "Copy";
+              }, 2000);
+            }
+          });
+        });
+
+        // Add data-tag to category tags
+        document.querySelectorAll(".category-tag").forEach((tag) => {
+          const tagName = tag.textContent.trim().toLowerCase();
+          tag.setAttribute("data-tag", tagName);
+        });
+
+        // Convert author text to styled tags
+        const authorSpan = document.querySelector(".article-meta .authors");
+        if (authorSpan) {
+          const authorText = authorSpan.textContent.replace("By ", "").trim();
+          const authors = authorText.split(",").map((a) => a.trim());
+
+          authorSpan.textContent = "By ";
+
+          authors.forEach((author, index) => {
+            const tag = document.createElement("span");
+            tag.className = "category-tag";
+            tag.textContent = author;
+            tag.setAttribute("data-tag", author.toLowerCase());
+            authorSpan.appendChild(tag);
+
+            if (index < authors.length - 1) {
+              authorSpan.appendChild(document.createTextNode(", "));
+            }
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

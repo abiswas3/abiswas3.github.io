@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Advent Of Jolt</title>
+    <title>Product Constraints</title>
     <link rel="stylesheet" href="../css/style.css" />
     <script
       async
@@ -113,38 +113,45 @@
     </header>
     <main class="article-content">
       <header class="article-header">
-        <h1>Advent Of Jolt</h1>
+        <h1>Product Constraints</h1>
         <div class="article-meta">
           <div class="meta-left">
-                         <span class="category-tag">jolt</span>
+                         <span class="category-tag">category</span>
              
           </div>
           <div class="meta-right">
-            <time>2025-10-24</time>             <span class="authors"
+            <time>2025-10-30</time>             <span class="authors"
               >By Ari</span
             >
                       </div>
         </div>
       </header>
-            <article><p>The objective of this post is to take following
-figure from the <a href="https://jolt.a16zcrypto.com">Jolt</a>
-documentation, and walk the reader through an actual real example of the
-proving in action.</p>
-<div class="svg-container" style="max-width: 400px;">
-<p><img src="/assets/jolt-working-notes/jolt-prover-overview.svg" /></p>
-</div>
-<p>For each component, we will explicitly describe the input and output
-components, and detail exactly how we compute them. We start with the
-setup before we get to actually proving claims.</p>
-<ol type="1">
-<li><a href="/posts/day_1a.html">Day 1: The Bytecode and The
-Trace</a></li>
-<li><a href="/posts/day_1b.html">Day 2: The Committed
-Polynomials</a></li>
-<li><a href="/posts/day_3.html">Day 3: Why Do We Need Sumchecks?
-Constraints in Jolt</a></li>
-<li><a href="/posts/day_4.html">Day 4: Sumcheck Stages 1-3</a></li>
-</ol></article>
+            <nav id="TOC">
+        <h2>Contents</h2>
+        <ul>
+        <li><a href="#stage-2-product-constraints"
+        id="toc-stage-2-product-constraints">Stage 2 Product
+        Constraints</a></li>
+        </ul>
+      </nav>
+            <article><section id="stage-2-product-constraints"
+class="level2">
+<h2>Stage 2 Product Constraints</h2>
+<p>For all time steps <span class="math inline">\(t \in \{ 0, 1\}^{\log
+T}\)</span> we want the following:</p>
+<p><span class="math display">\[\begin{align}
+\text{LeftInstructionInput}(t) \cdot \text{RightInstructionInput}(t)
+&amp;= \text{Product}(t) \\[10pt]
+\text{IsRdNotZero}(t) \cdot \text{WriteLookupOutputToRDFlag}(t) &amp;=
+\text{WriteLookupOutputToRD}(t) \\[10pt]
+\text{IsRdNotZero}(t) \cdot \text{JumpFlag}(t) &amp;=
+\text{WritePCtoRD}(t) \\[10pt]
+\text{LookupOutput}(t) \cdot \text{BranchFlag}(t) &amp;=
+\text{ShouldBranch}(t) \\[10pt]
+\text{JumpFlag}(t) \cdot (1 - \text{NextIsNoop}(t)) &amp;=
+\text{ShouldJump}(t)
+\end{align}\]</span></p>
+</section></article>
     </main>
     <footer class="site-footer">
       <p>&copy; 2025 On A Tangent Ltd.</p>
