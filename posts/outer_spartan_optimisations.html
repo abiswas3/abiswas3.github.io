@@ -315,14 +315,18 @@ optimal.</label></li>
 <section id="correctly-stream-the-trace." class="level2">
 <h2>Correctly Stream The Trace.</h2>
 <ul class="task-list">
-<li><label><input type="checkbox" />: This the the <strong>next</strong>
-big step left. Currently, we store the entire trace in memory, and index
-into the correct poistion when building <code>Az</code> and
-<code>Bz</code>. In reality, this should be an iterator that any given
-time, can manifest only a subset of the trace. After that it must re-use
-the space and proceed to build the next trace segment from
-checkpoints.</label></li>
+<li><label><input type="checkbox" checked="" />: This the the
+<strong>next</strong> big step left. Currently, we store the entire
+trace in memory, and index into the correct poistion when building
+<code>Az</code> and <code>Bz</code>. In reality, this should be an
+iterator that any given time, can manifest only a subset of the trace.
+After that it must re-use the space and proceed to build the next trace
+segment from checkpoints.</label></li>
 </ul>
+<p>The latest PR resolves this issue – from a functional standpoint. The
+real test will be in the numbers: which should allow streaming and
+linear to blend in – and then allocative should be used correctly for
+the checkpoint stuff.</p>
 </section>
 </section></article>
     </main>
