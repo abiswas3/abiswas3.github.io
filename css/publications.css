@@ -3,25 +3,25 @@
   :root {
     --abstract-colour: var(--text-primary);
     --artefacts-color: #2a7d7d;
-    --primary-author-text: olive;
+    --primary-author-text: #1e66f5;
     --primary-author-bg: #ffd700;
     --pub-title-color: var(--text-primary);
     --venue-color: #2a7d7d;
-    --author-text: #209fb5;
+    --author-text: #5c5f77;
   }
 }
 [data-theme="dark"] {
   --abstract-colour: var(--text-primary);
   --artefacts-color: #6cb;
-  --primary-author-text: #e58500;
+  --primary-author-text: #f9e2af;
   --primary-author-bg: lightgray;
   --pub-title-color: var(--text-primary);
   --venue-color: #6cb;
-  --author-text: #cba6f7;
+  --author-text: #b4befe;
 }
 
 .pub-list {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
   display: flex;
@@ -85,8 +85,8 @@
 }
 
 .authors {
-  font-size: 0.8rem;
-  line-height: 1.3;
+  font-size: 0.75rem;
+  line-height: 1;
   grid-column: 1 / 2;
   grid-row: 2;
 }
@@ -101,6 +101,9 @@
 
 .authors a:hover {
   text-decoration: underline;
+}
+.primary {
+  color: var(--primary-author-text);
 }
 .authors .primary {
   color: var(--primary-author-text);
