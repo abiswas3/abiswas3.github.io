@@ -1,0 +1,103 @@
+.site-header {
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  position: sticky;
+  backdrop-filter: blur(10px);
+}
+.site-header-inner {
+  max-width: var(--max-width-wide);
+  margin: 0 auto;
+  padding: var(--space-md) var(--space-xl); /* reduced from lg to md */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.site-title {
+  font-size: var(--font-xl);
+  font-weight: var(--weight-bold);
+  margin: 0;
+}
+.site-title a {
+  color: var(--text-primary);
+}
+.site-title a:hover {
+  color: var(--accent);
+}
+
+.nav-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+}
+.main-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--space-lg);
+}
+.main-nav li {
+  margin: 0;
+}
+.main-nav a {
+  color: var(--text-secondary);
+  font-weight: var(--weight-semibold); /* bumped from medium */
+  text-transform: uppercase; /* makes them stand out */
+  letter-spacing: 0.05em; /* breathing room */
+  font-size: var(--font-sm); /* slightly smaller, punchier */
+  transition: var(--transition);
+}
+.main-nav a:hover {
+  color: var(--text-primary);
+  transform: translateY(-1px); /* subtle lift */
+}
+.main-nav a.active {
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent); /* underline active */
+  padding-bottom: 2px;
+}
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+}
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-sm);
+  color: var(--text-primary) !important; /* Force it */
+  font-size: var(--font-2xl);
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+  .nav-group {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    padding: var(--space-lg);
+  }
+  .nav-group.is-active {
+    display: flex;
+  }
+  .main-nav ul {
+    flex-direction: column;
+    width: 100%;
+  }
+}
