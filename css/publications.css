@@ -7,6 +7,7 @@
     --primary-author-bg: #ffd700;
     --pub-title-color: var(--text-primary);
     --venue-color: #2a7d7d;
+    --author-text: #209fb5;
   }
 }
 [data-theme="dark"] {
@@ -16,6 +17,7 @@
   --primary-author-bg: lightgray;
   --pub-title-color: var(--text-primary);
   --venue-color: #6cb;
+  --author-text: #cba6f7;
 }
 
 .pub-list {
@@ -83,7 +85,6 @@
 }
 
 .authors {
-  /* color: var(--author-text); */
   font-size: 0.8rem;
   line-height: 1.3;
   grid-column: 1 / 2;
@@ -95,24 +96,21 @@
 }
 
 .authors a {
-  text-decoration: underline;
+  color: var(--author-text);
 }
 
 .authors a:hover {
   text-decoration: underline;
 }
-
-.primary {
-  /* background-color: var(--primary-author-bg); */
+.authors .primary {
   color: var(--primary-author-text);
   padding: 1px 4px;
   border-radius: 2px;
   font-weight: 600;
 }
-.primary > a {
+.authours .primary > a {
   color: var(--primary-author-text);
 }
-
 .abstract-toggle {
   display: none;
   grid-column: 2 / 3;
@@ -179,7 +177,7 @@
 }
 
 .artefacts {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   grid-column: 1 / 2;
   grid-row: 4;
 }
@@ -189,9 +187,8 @@
 }
 
 .artefacts a {
-  color: var(--artefacts-color);
   margin-right: 0.75rem;
-  border: 1px solid var(--text-secondary);
+  /* border: 1px solid var(--text-secondary); */
   padding: 5px;
   border-radius: 4px;
 }
@@ -210,4 +207,272 @@
 
 .note-container p {
   margin: 0;
+}
+
+
+/* Dark theme - Catppuccin Mocha colors */
+[data-theme="dark"] .artefacts a[href*="a"],
+[data-theme="dark"] .artefacts a[data-tag^="a"] {
+  color: #f38ba8; /* Red */
+}
+
+[data-theme="dark"] .artefacts a[href*="b"],
+[data-theme="dark"] .artefacts a[data-tag^="b"] {
+  color: #eba0ac; /* Maroon */
+}
+
+[data-theme="dark"] .artefacts a[href*="c"],
+[data-theme="dark"] .artefacts a[data-tag^="c"] {
+  color: #fab387; /* Peach */
+}
+
+[data-theme="dark"] .artefacts a[href*="d"],
+[data-theme="dark"] .artefacts a[data-tag^="d"] {
+  color: #f9e2af; /* Yellow */
+}
+
+[data-theme="dark"] .artefacts a[href*="e"],
+[data-theme="dark"] .artefacts a[data-tag^="e"] {
+  color: #a6e3a1; /* Green */
+}
+
+[data-theme="dark"] .artefacts a[href*="f"],
+[data-theme="dark"] .artefacts a[data-tag^="f"] {
+  color: #94e2d5; /* Teal */
+}
+
+[data-theme="dark"] .artefacts a[href*="g"],
+[data-theme="dark"] .artefacts a[data-tag^="g"] {
+  color: #89dceb; /* Sky */
+}
+
+[data-theme="dark"] .artefacts a[href*="h"],
+[data-theme="dark"] .artefacts a[data-tag^="h"] {
+  color: #74c7ec; /* Sapphire */
+}
+
+[data-theme="dark"] .artefacts a[href*="i"],
+[data-theme="dark"] .artefacts a[data-tag^="i"] {
+  color: #89b4fa; /* Blue */
+}
+
+[data-theme="dark"] .artefacts a[href*="j"],
+[data-theme="dark"] .artefacts a[data-tag^="j"] {
+  color: #b4befe; /* Lavender */
+}
+
+[data-theme="dark"] .artefacts a[href*="k"],
+[data-theme="dark"] .artefacts a[data-tag^="k"] {
+  color: #cba6f7; /* Mauve */
+}
+
+[data-theme="dark"] .artefacts a[href*="l"],
+[data-theme="dark"] .artefacts a[data-tag^="l"] {
+  color: #f5c2e7; /* Pink */
+}
+
+[data-theme="dark"] .artefacts a[href*="m"],
+[data-theme="dark"] .artefacts a[data-tag^="m"] {
+  color: #f38ba8; /* Red */
+}
+
+[data-theme="dark"] .artefacts a[href*="n"],
+[data-theme="dark"] .artefacts a[data-tag^="n"] {
+  color: #fab387; /* Peach */
+}
+
+[data-theme="dark"] .artefacts a[href*="o"],
+[data-theme="dark"] .artefacts a[data-tag^="o"] {
+  color: #f9e2af; /* Yellow */
+}
+
+[data-theme="dark"] .artefacts a[href*="p"],
+[data-theme="dark"] .artefacts a[data-tag^="p"] {
+  color: #a6e3a1; /* Green */
+}
+
+[data-theme="dark"] .artefacts a[href*="q"],
+[data-theme="dark"] .artefacts a[data-tag^="q"] {
+  color: #94e2d5; /* Teal */
+}
+
+[data-theme="dark"] .artefacts a[href*="r"],
+[data-theme="dark"] .artefacts a[data-tag^="r"] {
+  color: #89b4fa; /* Blue */
+}
+
+[data-theme="dark"] .artefacts a[href*="s"],
+[data-theme="dark"] .artefacts a[data-tag^="s"] {
+  color: #cba6f7; /* Mauve */
+}
+
+[data-theme="dark"] .artefacts a[href*="t"],
+[data-theme="dark"] .artefacts a[data-tag^="t"] {
+  color: #f5c2e7; /* Pink */
+}
+
+[data-theme="dark"] .artefacts a[href*="u"],
+[data-theme="dark"] .artefacts a[data-tag^="u"] {
+  color: #eba0ac; /* Maroon */
+}
+
+[data-theme="dark"] .artefacts a[href*="v"],
+[data-theme="dark"] .artefacts a[data-tag^="v"] {
+  color: #fab387; /* Peach */
+}
+
+[data-theme="dark"] .artefacts a[href*="w"],
+[data-theme="dark"] .artefacts a[data-tag^="w"] {
+  color: #f9e2af; /* Yellow */
+}
+
+[data-theme="dark"] .artefacts a[href*="x"],
+[data-theme="dark"] .artefacts a[data-tag^="x"] {
+  color: #a6e3a1; /* Green */
+}
+
+[data-theme="dark"] .artefacts a[href*="y"],
+[data-theme="dark"] .artefacts a[data-tag^="y"] {
+  color: #94e2d5; /* Teal */
+}
+
+[data-theme="dark"] .artefacts a[href*="z"],
+[data-theme="dark"] .artefacts a[data-tag^="z"] {
+  color: #89dceb; /* Sky */
+}
+
+/* Light theme - Catppuccin Latte colors */
+[data-theme="light"] .artefacts a[href*="a"],
+[data-theme="light"] .artefacts a[data-tag^="a"] {
+  color: #d20f39; /* Red */
+}
+
+[data-theme="light"] .artefacts a[href*="b"],
+[data-theme="light"] .artefacts a[data-tag^="b"] {
+  color: #e64553; /* Maroon */
+}
+
+[data-theme="light"] .artefacts a[href*="c"],
+[data-theme="light"] .artefacts a[data-tag^="c"] {
+  color: #fe640b; /* Peach */
+}
+
+[data-theme="light"] .artefacts a[href*="d"],
+[data-theme="light"] .artefacts a[data-tag^="d"] {
+  color: #df8e1d; /* Yellow */
+}
+
+[data-theme="light"] .artefacts a[href*="e"],
+[data-theme="light"] .artefacts a[data-tag^="e"] {
+  color: #40a02b; /* Green */
+}
+
+[data-theme="light"] .artefacts a[href*="f"],
+[data-theme="light"] .artefacts a[data-tag^="f"] {
+  color: #179299; /* Teal */
+}
+
+[data-theme="light"] .artefacts a[href*="g"],
+[data-theme="light"] .artefacts a[data-tag^="g"] {
+  color: #04a5e5; /* Sky */
+}
+
+[data-theme="light"] .artefacts a[href*="h"],
+[data-theme="light"] .artefacts a[data-tag^="h"] {
+  color: #209fb5; /* Sapphire */
+}
+
+[data-theme="light"] .artefacts a[href*="i"],
+[data-theme="light"] .artefacts a[data-tag^="i"] {
+  color: #1e66f5; /* Blue */
+}
+
+[data-theme="light"] .artefacts a[href*="j"],
+[data-theme="light"] .artefacts a[data-tag^="j"] {
+  color: #7287fd; /* Lavender */
+}
+
+[data-theme="light"] .artefacts a[href*="k"],
+[data-theme="light"] .artefacts a[data-tag^="k"] {
+  color: #8839ef; /* Mauve */
+}
+
+[data-theme="light"] .artefacts a[href*="l"],
+[data-theme="light"] .artefacts a[data-tag^="l"] {
+  color: #ea76cb; /* Pink */
+}
+
+[data-theme="light"] .artefacts a[href*="m"],
+[data-theme="light"] .artefacts a[data-tag^="m"] {
+  color: #d20f39; /* Red */
+}
+
+[data-theme="light"] .artefacts a[href*="n"],
+[data-theme="light"] .artefacts a[data-tag^="n"] {
+  color: #fe640b; /* Peach */
+}
+
+[data-theme="light"] .artefacts a[href*="o"],
+[data-theme="light"] .artefacts a[data-tag^="o"] {
+  color: #df8e1d; /* Yellow */
+}
+
+[data-theme="light"] .artefacts a[href*="p"],
+[data-theme="light"] .artefacts a[data-tag^="p"] {
+  color: #40a02b; /* Green */
+}
+
+[data-theme="light"] .artefacts a[href*="q"],
+[data-theme="light"] .artefacts a[data-tag^="q"] {
+  color: #179299; /* Teal */
+}
+
+[data-theme="light"] .artefacts a[href*="r"],
+[data-theme="light"] .artefacts a[data-tag^="r"] {
+  color: #1e66f5; /* Blue */
+}
+
+[data-theme="light"] .artefacts a[href*="s"],
+[data-theme="light"] .artefacts a[data-tag^="s"] {
+  color: #8839ef; /* Mauve */
+}
+
+[data-theme="light"] .artefacts a[href*="t"],
+[data-theme="light"] .artefacts a[data-tag^="t"] {
+  color: #ea76cb; /* Pink */
+}
+
+[data-theme="light"] .artefacts a[href*="u"],
+[data-theme="light"] .artefacts a[data-tag^="u"] {
+  color: #e64553; /* Maroon */
+}
+
+[data-theme="light"] .artefacts a[href*="v"],
+[data-theme="light"] .artefacts a[data-tag^="v"] {
+  color: #fe640b; /* Peach */
+}
+
+[data-theme="light"] .artefacts a[href*="w"],
+[data-theme="light"] .artefacts a[data-tag^="w"] {
+  color: #df8e1d; /* Yellow */
+}
+
+[data-theme="light"] .artefacts a[href*="x"],
+[data-theme="light"] .artefacts a[data-tag^="x"] {
+  color: #40a02b; /* Green */
+}
+
+[data-theme="light"] .artefacts a[href*="y"],
+[data-theme="light"] .artefacts a[data-tag^="y"] {
+  color: #179299; /* Teal */
+}
+
+[data-theme="light"] .artefacts a[href*="z"],
+[data-theme="light"] .artefacts a[data-tag^="z"] {
+  color: #04a5e5; /* Sky */
+}
+
+/* Optional: Add hover effects */
+.artefacts a:hover {
+  background-color: rgba(128, 128, 128, 0.1);
 }

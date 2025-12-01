@@ -126,10 +126,19 @@
                       </div>
         </div>
       </header>
+            <nav id="TOC">
+        <h2>Contents</h2>
+        <ul>
+        <li><a href="#accepted-typographicgrammatical-changes"
+        id="toc-accepted-typographicgrammatical-changes">Accepted
+        Typographic/Grammatical Changes</a></li>
+        </ul>
+      </nav>
             <article><p>Thank you for your detailed feedback. We have
-addressed the typographic issues in the paper as recommended. For the
-technical questions, we’ve addressed them in the main paper, and also
-left short comments describing our changes below:</p>
+addressed the typographic issues in the paper as recommended.</p>
+<p>For the more technical questions, we’ve addressed them in the new
+version of paper (see attached), and also left short comments describing
+our changes below:</p>
 <ul class="task-list">
 <li><label><input type="checkbox" checked="" />why are you not claiming
 lower bounds for the bounded depth Frege system? –</label></li>
@@ -138,16 +147,16 @@ lower bounds for the bounded depth Frege system? –</label></li>
 system, but as we did not do anything specific to the Frege proof
 system, we decided to focus on just the semi-algebraic proof systems for
 brevity. We thought this made the preliminary section shorter and
-cleaner. We have revised the manuscript, and added a footnote to mention
-that the lower bounds would extend to the extended Frege system as
-well.</strong></p>
+cleaner. We have revised the manuscript, and added a short footnote to
+mention that the lower bounds would extend to the extended Frege system
+as well.</strong></p>
 <ul class="task-list">
 <li><label><input type="checkbox" checked="" />for some equations you
 have periods at the end and for others (where they would be needed, eg,
 (23)-(25)) they are missing. Either remove all or (what I would prefer)
 add them where appropriate.</label></li>
 </ul>
-<p><strong>We have removed all of them</strong></p>
+<p><strong>We have removed all periods.</strong></p>
 <ul class="task-list">
 <li><label><input type="checkbox" checked="" />1:-13: coNP=NP -&gt;
 P=NP? Are you sure this holds? Usually one only claims that the poly
@@ -155,7 +164,97 @@ hierarchy collapses to the level where an equality has been
 shown?</label></li>
 </ul>
 <p><strong>You are correct, we apologise for the misstatement – this
-should have been PH = NP. </strong></p>
+should have been poly nomial hierarchy collapses to NP i.e PH =
+NP.</strong></p>
+<ul class="task-list">
+<li><p><label><input type="checkbox" checked="" />1:-2: Two common
+measures… Note that the measure of a degree only makes sense in
+semi-algebraic proof systems and not even everywhere there. So more
+precise would be: Two common measures of the complexity of
+semi-algebraic proofs are…</label></p></li>
+<li><p><label><input type="checkbox" checked="" />2:2: you should
+mention that size lower bounds only follow for degree lower bounds much
+larger than sqrt(n). Consider stating the size lower bounds below the
+theorem statements. <strong>We have explicitly stated the relationship
+between size and degreee</strong></label></p></li>
+<li><p><label><input type="checkbox" checked="" />3:-16: “underlying
+graph being random” theorem 3.3 of [5] does not rely on any randomness –
+only on pseudorandom properties.</label></p></li>
+</ul>
+<p><strong>You are right the embedding theorem by itself does not
+require randomness. Austrin and Risse rely on the the contiguity
+property of random regular graphs to show G’ (the remaining graph)
+contains <span class="math inline">\((t-1)\)</span>-regular spanning
+subgraph. We have changed the writeup to reflect this.</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />3:-15: since theorem 3.3
+of [5] does not require spectral expansion but vertex expansion plus two
+other properties it is non-obvious to me that such graphs are also
+spectral expanders? Are you sure that you subsume it in all cases? I
+mean morally I understand that the other statement should not be used
+but rather yours. But formally this is non-obvious to me. If you want to
+keep this statement as-is I expect at the least a proof
+sketch.</label></li>
+</ul>
+<p><strong>We have removed the original statement. The more accurate
+description is that they rely on randomness for using the contiguity
+property, which then is neededed to prove hardness for Card(G, t). We do
+not require randomness. Thus, they can use our technique along with
+their embedding result.</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />11:4: for C=(1/100)^{2/3}
+your claim eps &lt; 1/50 is certainly false. Do you want
+C&gt;1?</label></li>
+</ul>
+<p><strong>We have been a little sloppy with assigning numeric values
+where constants for which “large enough” is good. In this case yes,
+<span class="math inline">\(C &gt; 1\)</span> is needed. Downstream,
+when this lemma is invoked, C=5 so this change is not
+destructive</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />11:-6: ..comes from eps
+&lt; 1/100C^{3/2}. Are you sure this is enough? We want that <span
+class="math inline">\(d/4 + 1 + \epsilon d/2 &lt; d/2 - C4\)</span> or
+with eps substituted that 0 &lt; d(50 C^{3/2} - 1) - 200(C^{5/2} +
+C^{3/2}). For this to hold you probably also want that (1) C &gt; 1, and
+(2) that d &gt;= d_0 is large enough.</label></li>
+</ul>
+<p><strong>We were a little sloppy here, and the conditions stated above
+were assumed. C should be thought of as the number of incidental edges
+we delete per node of G to get G’. First we are given C, then we choose
+<span class="math inline">\(d_0\)</span> large enough such that deleting
+C edges still keeps 90 percent of the edges. We have cleaned the proofs
+to reflect that this step is a result of 3 things 1. The upper bound on
+eps, 2. C &gt; 1 and 3. d_0 is large enough.</strong></p>
+<ul class="task-list">
+<li><p><label><input type="checkbox" checked="" />11:5: why are you
+stating that d-C 9d/10? By assumption we have that 9d/10. <strong>We’ve
+cleaned up the writeup to be less confusing. As C is maximum the number
+of indicental edges we delete per vertex of G, the minimum degree of G
+is at least d - C, and this is greater than 9d/10 (which we ensure by
+making d_0 large enough.)</strong></label></p></li>
+<li><p><label><input type="checkbox" checked="" />nd/20 = Cn fixes C =
+d/20. Since C is also equal to 6 we get that d = 120? Seems a bit weird.
+<strong>We apologise for the confusion. The two C’s were unrelated, and
+we’ve removed this to remove confusion.</strong></label></p></li>
+<li><p><label><input type="checkbox" checked="" />11:-7: Maybe state
+that in case 2 you are using that f &gt;= 2 similarly to how you stated
+the upper bound in case 1? <strong>fixed</strong></label></p></li>
+<li><p><label><input type="checkbox" checked="" />12:3: what is D, what
+is c? The initial inequality may be chosen to be strict since lambda
+&lt; eps d. I do not follow the rest of the computation. Please
+elaborate and make the steps explicit.</label></p></li>
+</ul>
+<p><strong>We have cleaned this up and written the proof in
+detail</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" />12: the end of proof
+symbol is two lines lower than the final sentence. Is there some text
+which we cannot see? Or just an oversight? <strong>The enumerate
+environment causes weird spacing. There’s no text</strong></label></li>
+</ul>
+<section id="accepted-typographicgrammatical-changes" class="level2">
+<h2>Accepted Typographic/Grammatical Changes</h2>
 <ul class="task-list">
 <li><p><label><input type="checkbox" checked="" />1:-6: “In PC, the
 coefficients” maybe replace coefficients with equations since the
@@ -164,15 +263,6 @@ coefficients?</label></p></li>
 <li><p><label><input type="checkbox" checked="" />1:-5: “arbitrary
 field” maybe arbitrary but fixed field; the choice should not depend on
 the equation/coefficient.</label></p></li>
-<li><p><label><input type="checkbox" checked="" />1:-2: Two common
-measures… Note that the measure of a degree only makes sense in
-semi-algebraic proof systems and not even everywhere there. So more
-precise would be: Two common measures of the complexity of
-semi-algebraic proofs are…</label></p></li>
-<li><p><label><input type="checkbox" checked="" />TODO: 2:2: you should
-mention that size lower bounds only follow for degree lower bounds much
-larger than sqrt(n). Consider stating the size lower bounds below the
-theorem statements.</label></p></li>
 <li><p><label><input type="checkbox" checked="" />2:20: Tseitin formulae
 <em>are</em></label></p></li>
 <li><p><label><input type="checkbox" checked="" />2:24: graphs with
@@ -183,28 +273,6 @@ me.</label></p></li>
 <li><p><label><input type="checkbox" checked="" />3:-17: Austrin and
 Risse is also similar… this makes no sense. maybe also -&gt;
 a?</label></p></li>
-<li><p><label><input type="checkbox" checked="" />TODO: 3:-16:
-“underlying graph being random” theorem 3.3 of [5] does not rely on any
-randomness – only on pseudorandom properties.</label></p></li>
-</ul>
-<p><strong>You are right the embedding theorem by itself does not
-require randomness. Austrin and Risse rely on the the contiguity
-property of random regular graphs to show G’ (the remaining graph) <span
-class="math inline">\((t-1)\)</span>-regular spanning subgraph. We have
-changed the writeup to reflect this.</strong></p>
-<p>TODO: - [x] 3:-15: since theorem 3.3 of [5] does not require spectral
-expansion but vertex expansion plus two other properties it is
-non-obvious to me that such graphs are also spectral expanders? Are you
-sure that you subsume it in all cases? I mean morally I understand that
-the other statement should not be used but rather yours. But formally
-this is non-obvious to me. If you want to keep this statement as-is I
-expect at the least a proof sketch.</p>
-<p><strong>We have removed the original statement. The accurate
-description is they rely on randomness for using the contiguity
-property, which is needed to prove hardness for Card(G, t). We do not
-require randomness. They can use our technique to extend their result on
-vertex expanders instead.</strong></p>
-<ul class="task-list">
 <li><p><label><input type="checkbox" checked="" />3:-7: the rest of the
 document as is.. drop the as. Also the following sentence needs some
 attention.</label></p></li>
@@ -245,64 +313,13 @@ expander mixing lemma</label></p></li>
 embedding theorem</label></p></li>
 <li><p><label><input type="checkbox" checked="" />10: final line of the
 proof: comes <em>from</em> the assumption</label></p></li>
-<li><p><label><input type="checkbox" checked="" />11:4: for
-C=(1/100)^{2/3} your claim eps &lt; 1/50 is certainly false. Do you want
-C&gt;1?</label></p></li>
-</ul>
-<p><strong>We have been a little sloppy with assigning numeric values
-where constants for which “large enough” is good. In this case yes,
-<span class="math inline">\(C &gt; 1\)</span> is needed. Downstream,
-when this lemma is invoked, C=5 so this change is not
-destructive</strong></p>
-<ul class="task-list">
-<li><label><input type="checkbox" checked="" />11:-6: ..comes from eps
-&lt; 1/100C^{3/2}. Are you sure this is enough? We want that <span
-class="math inline">\(d/4 + 1 + \epsilon d/2 &lt; d/2 - C4\)</span> or
-with eps substituted that 0 &lt; d(50 C^{3/2} - 1) - 200(C^{5/2} +
-C^{3/2}). For this to hold you probably also want that (1) C &gt; 1, and
-(2) that d &gt;= d_0 is large enough.</label></li>
-</ul>
-<p><strong>We were a little sloppy here, and the conditions stated above
-were assumed. C should be thought of as the number of edges we delete
-from G to get G’. First we are given C, then we choose <span
-class="math inline">\(d_0\)</span> large enough such that deleting C
-edges still keeps 90 percent of the edges. If <span
-class="math inline">\(d_0\)</span> iis large enough, then d is large
-enough. We have updated the document to reflect that this step is a
-result of 3 things 1. The upper bound on eps, 2. C &gt; 1 and 3. d_0 is
-large enough.</strong></p>
-<ul class="task-list">
-<li><p><label><input type="checkbox" checked="" />11:5: why are you
-stating that <em>{G’} d-C 9d/10? By assumption we have that </em>{G’}
-9d/10. <strong>We’ve cleaned up the writeup to be less confusing. As C
-is maximum the number of edges we delete, the minimum degree of G is at
-least d - C, and therefore greater than 9d/10 (which we ensure by making
-d_0 large enough.)</strong></label></p></li>
-<li><p><label><input type="checkbox" checked="" />11:-7: Maybe state
-that in case 2 you are using that f &gt;= 2 similarly to how you stated
-the upper bound in case 1? <strong>fixed</strong></label></p></li>
 <li><p><label><input type="checkbox" checked="" />11:-6: the math
 display starts with f|S| but equation 18,17 read |S|f. Maybe swap f and
 |S|?</label></p></li>
-<li><p><label><input type="checkbox" checked="" />11:-4: e_{G} -&gt;
-e_{G’}<br />
-</label></p></li>
-<li><p><label><input type="checkbox" checked="" />TODO: 12:3: what is D,
-what is c? The initial inequality may be chosen to be strict since
-lambda &lt; eps d. I do not follow the rest of the computation. Please
-elaborate and make the steps explicit.</label></p></li>
-<li><p><label><input type="checkbox" checked="" />12: the end of proof
-symbol is two lines lower than the final sentence. Is there some text
-which we cannot see? Or just an oversight? <strong>The enumerate
-environment causes weird spacing. There’s no
-text</strong></label></p></li>
+<li><p><label><input type="checkbox" checked="" />11:-4: e<em>{G} -&gt;
+e</em>{G’}</label></p></li>
 <li><p><label><input type="checkbox" checked="" />12:15: B=G-&gt;
 B=V(G)</label></p></li>
-<li><p><label><input type="checkbox" checked="" />nd/20 = Cn fixes C =
-d/20. Since C is also equal to 6 we get that d = 120? Seems a bit
-weird.<br />
-<strong>We apologise for the confusion. The two C’s were unrelated, and
-we’ve removed this to remove confusion.</strong></label></p></li>
 <li><p><label><input type="checkbox" checked="" />12:footnote: hardness
 <em>of</em> refuting PM(G).</label></p></li>
 <li><p><label><input type="checkbox" checked="" />13:3: <em>the</em>
@@ -312,7 +329,8 @@ reference has a question mark; is missing.</label></p></li>
 <li><p><label><input type="checkbox" checked="" />13:-10: “makes the
 graphs are sparse” something is wrong with this
 sentence.</label></p></li>
-</ul></article>
+</ul>
+</section></article>
     </main>
     <footer class="site-footer">
       <p>&copy; 2025 On A Tangent Ltd.</p>

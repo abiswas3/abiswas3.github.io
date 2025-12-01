@@ -253,7 +253,8 @@ step.</p>
 <h3>Product Virtual Sumcheck</h3>
 <p>For all time steps <span class="math inline">\(t \in \{ 0, 1\}^{\log
 T}\)</span> we want the following:</p>
-<p><span class="math display">\[\begin{align}
+<p><span class="math display">\[
+\begin{align}
 \text{LeftInstructionInput}(t) \cdot \text{RightInstructionInput}(t)
 &amp;= \text{Product}(t) \\[10pt]
 \text{IsRdNotZero}(t) \cdot \text{WriteLookupOutputToRDFlag}(t) &amp;=
@@ -264,7 +265,8 @@ T}\)</span> we want the following:</p>
 \text{ShouldBranch}(t) \\[10pt]
 \text{JumpFlag}(t) \cdot (1 - \text{NextIsNoop}(t)) &amp;=
 \text{ShouldJump}(t)
-\end{align}\]</span></p>
+\end{align}
+\]</span></p>
 <p>Sampling a random <span
 class="math inline">\(r_{\text{cycle}}\xleftarrow[]{\$}\mathsf{C}^{\log
 T} \subset \mathbb{F}^{\log T}\)</span> from the challenge set, we get
@@ -278,7 +280,8 @@ class="math inline">\(r_{\text{cycle}}\)</span> below is the
 <strong>exact</strong> same verifier random samples used in the <a
 href="/posts/stage1-spartan.html">Stage 1</a> sumchecks.</p>
 </div>
-<p><span class="math display">\[\begin{align}
+<p><span class="math display">\[
+\begin{align}
 \sum_{t \in \{ 0, 1\}^{\log T}}
 \widetilde{\mathsf{eq}}\left(r_{\text{cycle}}, t \right) \cdot
 \text{LeftInstructionInput}(t) \cdot \text{RightInstructionInput}(t)
@@ -299,12 +302,14 @@ href="/posts/stage1-spartan.html">Stage 1</a> sumchecks.</p>
 \widetilde{\mathsf{eq}}\left(r_{\text{cycle}}, t \right) \cdot
 \text{JumpFlag}(t) \cdot (1 - \text{NextIsNoop}(t)) &amp;=
 \text{ShouldJump}(r_{\text{cycle}})
-\end{align}\]</span></p>
+\end{align}
+\]</span></p>
 <p>The RHS of these equations were stored from virtual openings.</p>
 <p>Instead of 5 separate sumchecks, create polynomials <span
 class="math inline">\(l(t, z)\)</span> and <span
 class="math inline">\(r(t, z)\)</span> such that:</p>
-<p><span class="math display">\[\begin{align}
+<p><span class="math display">\[
+\begin{align}
 \text{At } z = -2: \quad &amp; l(t, -2) =
 \text{LeftInstructionInput}(t), \quad r(t, -2) =
 \text{RightInstructionInput}(t), \quad p(t, -2) = \text{Product}(t)
@@ -320,7 +325,8 @@ r(t, 1) = \text{BranchFlag}(t), \quad p(t, 1) = \text{ShouldBranch}(t)
 \\[10pt]
 \text{At } z = 2: \quad &amp; l(t, 2) = \text{JumpFlag}(t), \quad r(t,
 2) = (1 - \text{NextIsNoop}(t)), \quad p(t, 2) = \text{ShouldJump}(t)
-\end{align}\]</span></p>
+\end{align}
+\]</span></p>
 <p>Define <span class="math inline">\(S = \{-2, -1, 0, 1,
 2\}\)</span>.</p>
 <p>Now if we wanted to check all 5 constraints are satisfied, we simply
@@ -351,17 +357,17 @@ sumcheck essentially guarantees that <code>SpartanAz</code> is correctly
 constructed (assuming <code>z</code> was correctly constructed). We will
 get to <code>z</code>’s correctness later (for now assume it is so).</p>
 <p><span class="math display">\[\begin{align}
-\sum_{z \in \{ 0, 1\}^{\log C}} \Big(
-  \widetilde{M_A}[r_{b}, r_{y}, z]\cdot \widetilde{z}[r_{\text{cycle}},
-z]
-  + \gamma\cdot \widetilde{M_B}[r_{b}, r_{y}, z]\cdot
+\sum\_{z \in \{ 0, 1\}^{\log C}} \Big(
+\widetilde{M_A}[r_{b}, r_{y}, z]\cdot \widetilde{z}[r_{\text{cycle}}, z]
+
+- \gamma\cdot \widetilde{M_B}[r_{b}, r_{y}, z]\cdot
 \widetilde{z}[r_{\text{cycle}}, z]
-\Big)
-= {} &amp;
-\\
-\widetilde{A}[r_{\text{cycle}}, r_{b}, r_{y}]
-+ \gamma\,\widetilde{B}[r_{\text{cycle}}, r_{b}, r_{y}].
-\end{align}\]</span></p>
+  \Big)
+  = {} &amp;
+  \\
+  \widetilde{A}[r_{\text{cycle}}, r_{b}, r_{y}]
+- \gamma\,\widetilde{B}[r_{\text{cycle}}, r_{b}, r_{y}].
+  \end{align}\]</span></p>
 <p>where <span class="math inline">\(\gamma
 \xleftarrow[]{\$}\mathsf{C}\)</span>, and the mental model for <span
 class="math inline">\(M_A\)</span> (and <span
