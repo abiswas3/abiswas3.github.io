@@ -434,16 +434,16 @@ href="https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599f
 here</a> does.</p>
 <p>Here <code>t0</code> and <code>t_inf</code> refer to evaluations of
 the following quadratic polynomial.</p>
-<p><span class="math display">\[t(\textcolor{pink}{X_B}) :=\sum_{x_t \in
+<p><span class="math display">\[t(\textcolor{pink}{X_b}) :=\sum_{x_t \in
 \{0,1\}^{\log T}}\sum_{y \in \{-4, \dots,
 5\}}  \widetilde{\mathsf{eq}}\left(\tau_t, x_t \right) \cdot
 \mathcal{L}_{r_y}\left(y \right) \cdot \widetilde{A}(x_t
-,\textcolor{pink}{X_B}, y) \, \widetilde{B}(x_t, \textcolor{pink}{X_B},
+,\textcolor{pink}{X_b}, y) \, \widetilde{B}(x_t, \textcolor{pink}{X_b},
 y) \]</span></p>
 <p>The final polynomial that the prover must send is the following:</p>
-<p><span class="math inline">\(s(X_B) :=\mathcal{L}_{\tau_y}\left(r_0
-\right) \cdot t(\textcolor{pink}{X_B})
-\cdot  \widetilde{\mathsf{eq}}\left(\tau_b, \textcolor{pink}{X_B}
+<p><span class="math inline">\(s(X_b) :=\mathcal{L}_{\tau_y}\left(r_0
+\right) \cdot t(\textcolor{pink}{X_b})
+\cdot  \widetilde{\mathsf{eq}}\left(\tau_b, \textcolor{pink}{X_b}
 \right)\)</span></p>
 <p>which is exactly what the following snippet of code on Line 1430 of
 <code>jolt-core/src/zkvm/spartan/outer.rs</code></p>
