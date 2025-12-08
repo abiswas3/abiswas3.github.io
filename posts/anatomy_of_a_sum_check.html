@@ -121,7 +121,7 @@
              
           </div>
           <div class="meta-right">
-                         <span class="authors"
+            <time>2025-12-01</time>             <span class="authors"
               >By Ari</span
             >
                       </div>
@@ -171,20 +171,26 @@
             <article><p>This <a
 href="https://github.com/a16z/jolt/pull/1114">PR</a> introduces a
 generalised sum-check API, adapted to accommodate a streaming version of
-Jolt. This post works through a concrete example along with a
-walkthrough of the existing code</p>
+Jolt, when materialising the full polynomial in the first round is not
+an option. Here we discuss the new methods introduced by the API by
+working through an concrete example.</p>
 <section id="the-trace" class="level2">
 <h2>The Trace</h2>
-<p>The sum-check algorithm enables a prover to convince a verifier that
-it computed the sums of polynomial evaluations correctly. In Jolt, the
-prover convinces the verifier that it ran some RISC-V binary correctly
-via many stages of sum-checks. Therefore, the polynomials involved in
-any Jolt sumcheck must be related to the execution of a program. As such
-honest proving begins with emulation of the given RISC-V program. <a
-href="./day_0.html">See</a> for a fully worked out description of the
-emulation from an actual program written in Rust. Briefly, the trace is
-a snap-shot of the machine state (registers, memory etc.) for every
-instruction cycle. For example, consider the following program.</p>
+<p>Given some polynomial <span class="math inline">\(g\)</span> and a
+set <span class="math inline">\(S\)</span>, the sum-check algorithm
+enables a prover to convince a verifier that it computed <span
+class="math inline">\(\sum_{x \in S} g(x)\)</span> honestly. The Jolt
+prover is meant to convince an honest verifier that it ran some
+program<a href="#fn1" class="footnote-ref" id="fnref1"
+role="doc-noteref"><sup>1</sup></a> correctly via many stages of
+sum-checks. Therefore, the polynomials involved in any Jolt sumcheck
+must be related to the execution of said program. As such honest proving
+begins with emulation of the given RISC-V program – which we refer to as
+the trace. <a href="./day_0.html">See</a> for a fully worked out
+description of the emulation from an actual program written in Rust.
+Briefly, the trace is a snap-shot of the machine state (registers,
+memory etc.) for every instruction cycle. For example, consider the
+following program.</p>
 <div class="highlight"><pre><span></span><span class="err">00001117</span><span class="w">    </span><span class="nf">auipc</span><span class="w">  </span><span class="no">sp</span><span class="p">,</span><span class="mi">0x1</span><span class="w"> </span><span class="c1"># sp = PC + (0x1 &lt;&lt; 12) = 0x80000000 + 0x1000 = 0x80001000</span>
 <span class="err">12010113</span><span class="w">    </span><span class="nf">addi</span><span class="w">   </span><span class="no">sp</span><span class="p">,</span><span class="no">sp</span><span class="p">,</span><span class="mi">288</span><span class="w"> </span><span class="c1"># sp = 0x80001000 + 288 = 0x80001120</span>
 </pre></div>
@@ -228,17 +234,20 @@ memory, the emulation looks like the following:</p>
 <span class="p">)</span>
 </pre></div>
 
-<p>Thus concretely, in Jolt the <code>trace</code> is a giant vector,
-and location <span class="math inline">\(t\)</span> stores the machine
-state before and after instruction number <span
-class="math inline">\(t\)</span>.</p>
+<p>For the purposes of this post, this is the mental model we will have
+when referring to the trace. It is a giant vector of length <span
+class="math inline">\(T\)</span>, and location <span
+class="math inline">\(t \in [T]\)</span> stores the machine state before
+and after the <span class="math inline">\(t\)</span>’th instruction.</p>
 <section id="a-lie-in-service-of-the-truth" class="level3 remark">
 <h3>A Lie In Service Of The Truth</h3>
 <p>Throughout this post we will assume that we can store the entire
 trace in memory, and iterating through the trace is free. This is
-clearly not true, and we will fix this later. But for the purposes of
-this post, this assumption allows us to abstract away important
-implementation details that currently remain unimplemented.</p>
+clearly not true, and we will fix this on later date. But for the
+purposes of this post, this assumption allows us to abstract away
+important implementation details that currently remain unimplemented –
+and implement sum-check algorithms that rely on a fixed amount of
+memory, regardless of how many cycles are used.</p>
 </section>
 </section>
 <section id="correctness-as-constraint-satisfaction" class="level2">
@@ -277,10 +286,11 @@ class="math inline">\(t \in \{ 0, 1\}^{\log T}\)</span>, the above
 constraint must be satisfied. Of course for a program to be correct, it
 is not sufficient to just satisfy the above constraint. There are many
 more constraints. In the <code>OuterSpartan</code> sumcheck we write
-down 20 such <a href="./r1cs_constraints.html">constraints</a>.</p>
-<p>The <code>OuterSpartan</code> sumchecks does precisely this. It
-iterates through the trace and constructs 40 evaluations per trace. See
-below for details.</p>
+down 20 such <a href="./r1cs_constraints.html">constraints</a>, express
+these constraints as the evaluations of two polynomials <span
+class="math inline">\(\widetilde{A}\)</span> and <span
+class="math inline">\(\widetilde{B}\)</span>, and represent constraint
+satisfaction as a sumcheck. More details follow.</p>
 </section>
 <section id="the-outer-spartan-polynomials" class="level2">
 <h2>The Outer Spartan Polynomials</h2>
@@ -292,8 +302,8 @@ will be of form</p>
 class="math inline">\(A\)</span> and <code>Term 2</code> will be
 represented by <span class="math inline">\(B\)</span>.</p>
 <p><strong>Indexing</strong>: We divide the 20 constraints into 2
-groups. We refer to the each constraint using two digits<a href="#fn1"
-class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>
+groups. We refer to the each constraint using two digits<a href="#fn2"
+class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>
 <span class="math inline">\((b,y)\)</span> where <span
 class="math inline">\(b \in \{ 0, 1\}\)</span> is the selector index,
 and <span class="math inline">\(y\in \{-4, \ldots, 5\}\)</span> refers
@@ -313,34 +323,35 @@ constraint and so on.</p></li>
 <p>Let <span class="math inline">\(z_t[\text{LOAD}], z_t[\text{STORE}]
 \in \{ 0, 1\}\)</span> denote boolean flags that denote whether the
 <span class="math inline">\(t\)</span>’th instruction contains a LOAD or
-a STORE instruction. Thus for a given timestep <span
-class="math inline">\(t \in \{ 0, 1\}^{\log T}\)</span>, using
-infromation from the trace, we write a table of evaluations with the
-following indexing logic:</p>
+a STORE instruction. For a given time step <span class="math inline">\(t
+\in \{ 0, 1\}^{\log T}\)</span>, using information from the trace, we
+write a table of evaluations with the following indexing logic:</p>
 <ul>
 <li><p><span class="math inline">\(A(t, 0 , -4) = z_t[\text{LOAD}] +
 z_t[\text{STORE}]\)</span></p></li>
 <li><p><span class="math inline">\(B(t, 0, -4) = (\text{RamAddress} -
 (\text{Rs1Value} + \text{Imm}))\)</span></p></li>
 </ul>
-<p>The remaining 19 constraints give us evaluations <span
-class="math inline">\(A(\vec{x}, X_b, y)\)</span> and <span
-class="math inline">\(B(\vec{x}, X_b, y)\)</span> for <span
-class="math inline">\(y \in \{-4, \ldots, 5\}, X_b \in \{ 0, 1\},
-\vec{x} \in \{ 0, 1\}^{\log T}\)</span>.</p>
-<p>The picture you have in mind is the following <img
+<p>That is satisfying constraint 1 for time step <span
+class="math inline">\(t\)</span> is equivalent to checking if <span
+class="math inline">\(A(t, 0, -4) \times B(t, 0, -4) = 0\)</span>. The
+remaining 19 constraints give us evaluations <span
+class="math inline">\(A(X_t, X_b, Y)\)</span> and <span
+class="math inline">\(B(X_t, X_b, Y)\)</span> for <span
+class="math inline">\(Y \in \{-4, \ldots, 5\}, X_b \in \{ 0, 1\}, X_t
+\in \{ 0, 1\}^{\log T}\)</span>. The picture you have in mind is the
+following <img
 src="../assets/streaming_sumchecks/trave_to_poly.svg" /></p>
-<p>Now satisfying all constraints is just saying the following:</p>
+<p>Satisfying all constraints is just saying the following:</p>
 <p><span class="math display">\[\widetilde{A}(x_t, x_b, y) \times
 \widetilde{B}(x_t, x_b,  y) = \vec{0} \quad \forall x_t \in
 \{0,1\}^{\log T}, \forall x_b \in \{0,1\}, \forall y \in \{-4, ...,
 5\}\]</span></p>
 <p>where <span class="math inline">\(\widetilde{U}\)</span> denoes the
 multi-linear extension of a vector <span
-class="math inline">\(U\)</span>.</p>
-<p>Now we do the thing we have done since the beginning of time. We want
-to make sure the LHS of the above system of equations to equal the RHS
-as polynomials. So we sample <span
+class="math inline">\(U\)</span>. Now we do the thing we have done since
+the beginning of time. We want to make sure the LHS of the above system
+of equations to equal the RHS as polynomials. So we sample <span
 class="math inline">\((\tau_{\text{cycle}}|| \tau_b|| \tau_y)
 \xleftarrow[]{\$}\mathsf{C}^{\log T+2}\)</span> and check if the
 following sumcheck holds:</p>
@@ -362,19 +373,19 @@ class="math inline">\(\widetilde{A}\)</span> and <span
 class="math inline">\(\widetilde{B}\)</span> we need to process the
 entire trace. As soon as we process the trace once, we can store <span
 class="math inline">\(\widetilde{A}\)</span> and <span
-class="math inline">\(\widetilde{B}\)</span> in memory. This will <span
-class="math inline">\(T \times 2 \times 20\)</span> field elements worth
-of memory. If we could afford this, then all is well – we can bin the
-trace, and we have every bit of information needed to do a sumcheck.
-This is roughly what the old linear sumcheck did. Here’s what the
-current implementation of the above sum-check looks like. There are
-three phases</p>
+class="math inline">\(\widetilde{B}\)</span> in memory. This requires
+<span class="math inline">\(T \times 2 \times 20\)</span> field elements
+worth of memory. If we could afford this, then all is well – we can bin
+the trace, and we have every bit of information needed to do a sumcheck.
+Here’s what the current implementation of the linear
+<code>OuterSpartan</code> sumcheck looks like. There are three
+phases</p>
 <ol type="1">
 <li>A special handling of round involving variable <span
 class="math inline">\(Y\)</span> involving 10 constraints per time step
 and group index.</li>
 </ol>
-<p>We iterate through the trace. <strong>BUT</strong> we do
+<p>We iterate through the entire trace, <strong>but</strong> we do
 <strong>NOT</strong> compute and store <span
 class="math inline">\(\widetilde{A}\)</span> and <span
 class="math inline">\(\widetilde{B}\)</span> in memory. Instead we store
@@ -385,9 +396,11 @@ in memory, the following univariate polynomial:</p>
 \widetilde{\mathsf{eq}}\left(\tau_b, x_b \right) \cdot
 \mathcal{L}_{\tau_y}\left(\textcolor{pink}{Y} \right) \cdot A(x_t, x_b,
 \textcolor{pink}{Y}) \, B(x_t, x_b , \textcolor{pink}{Y})\]</span></p>
-<p>This only takes 21 field elements worth of storage, as we need to
-store evaluations of the above polynomial. We refer to these evaluations
-as the <code>skip_window</code> in the code.</p>
+<p>This only takes 20 odd field elements worth of storage , as we need
+to store evaluations of the above polynomial. <a
+href="https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L117">See</a>
+for the evaluation points that represent the above polynomial. We refer
+to these evaluations as the <code>skip_window</code> in the code.</p>
 <div class="remark">
 <p><strong>NOTE:</strong>: This phase will remains exactly as is in the
 current “streaming” implementation. Remember we assumed streaming the
@@ -462,22 +475,30 @@ rounds are standard. The mental picture is the following:</p>
 <p><img src="/assets/streaming_sumchecks/Linear_sumcheck.svg" /></p>
 <p>The <a
 href="https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L387">code</a>
-is described here. In conclusion, the linear sum-check with a special
-first round required that we stream the trace twice. The second time of
-doing so – we materialised the polynomials with only <span
+is described here.</p>
+<p>At each bind the length of the representation of <span
+class="math inline">\(\widetilde{A}\)</span> and <span
+class="math inline">\(\widetilde{B}\)</span> shrinks by half. And the
+next prover message can be computed from the bounded and materialised
+polynomials.</p>
+<p>In conclusion, the linear sum-check with a special first round
+required that we stream the trace twice. The second time of doing so –
+we materialised the polynomials with only <span
 class="math inline">\(r_0\)</span> bound to <span
 class="math inline">\(Y\)</span>. Once we materialise, we never have to
 look at the trace ever again – for at least this sum-check. But this
 came at the cost of storing <span class="math inline">\(2T\)</span>
-field elements in memory. If <span class="math inline">\(T\)</span> is
-large, on the order of billions, then this is too expensive.</p>
+field elements in memory per polynomial. If <span
+class="math inline">\(T\)</span> is large, on the order of billions,
+then this is too expensive.</p>
 </section>
 <section id="the-streaming-generalisation" class="level2">
 <h2>The Streaming Generalisation</h2>
 <p>To describe the streaming sum-check we need to first describe what we
 mean by a sum-check schedule. A schedule classifies every round of the
-sum-check as being a <code>window_start</code> round or not. See for
-example the sum-check involving 16 rounds of interaction below:</p>
+sum-check as being a <code>window_start</code> round or not. For example
+the sum-check involving 16 rounds of interaction below can be scheduled
+as shown below:</p>
 <p><img src="/assets/streaming_sumchecks/stream_schedule.svg" /></p>
 <ul>
 <li><p>For every round, the number of unbound variables or window width
@@ -493,19 +514,21 @@ from the trace and store it in memory.</p></li>
 <p>Note the later we materialise, the more variables would be bound,
 hence the memory representation of the materialised polynomial will be
 smaller. However, the later we materialise, it means we would have to
-stream the entire trace to compute prover messages.The rough idea is as
-follows:</p>
+stream the entire trace to compute prover messages many more times. The
+rough sketch of the algorithm is as follows:</p>
 <ol type="1">
 <li><p>If a round <span class="math inline">\(i \in \{0, ..
 n-1\}\)</span> is the start of a window with width <span
 class="math inline">\(w\)</span> – we need to stream over the entire
 trace to generate and store a multi-variate polynomial <span
 class="math inline">\(t\)</span> with <span
-class="math inline">\(w\)</span>. This requires space <span
-class="math inline">\(W:=(d+1)^w\)</span> field elements worth of
-memory, which we can afford, where <span
+class="math inline">\(w\)</span> variables. This requires storing <span
+class="math inline">\(W:=(d+1)^w\)</span> evaluations of <span
+class="math inline">\(t\)</span> in memory, where <span
 class="math inline">\(d\)</span> is the degree of <span
-class="math inline">\(t\)</span>.</p></li>
+class="math inline">\(t\)</span>. Typically <span
+class="math inline">\(d\)</span> and <span
+class="math inline">\(w\)</span> will be small constants.</p></li>
 <li><p>Once we manifest <span class="math inline">\(t\)</span> i.e
 compute enough evaluations to uniquely represent the above polynomial,
 we can compute all prover messages needed for the next <span
@@ -523,10 +546,9 @@ class="math inline">\(t\)</span> should reduce to 1.</p></li>
 <li><p>The next round is either the start of a new window or its the
 switchover point. If it’s the former, we repeat the process described
 above. That is, we stream the trace again, and compute <span
-class="math inline">\(t\)</span> with</p></li>
-<li><p>If the current round <span class="math inline">\(i\)</span> is
-the start of a linear round, we stream over the trace and store a
-multi-linear polynomials <span
+class="math inline">\(t\)</span> from the trace.</p></li>
+<li><p>If the round is the switch-over point, we stream over the trace
+and store a multi-linear polynomials <span
 class="math inline">\(\widetilde{A}\)</span> and <span
 class="math inline">\(\widetilde{B}\)</span>.</p></li>
 <li><p>Once again we compute <span class="math inline">\(t\)</span> to
@@ -535,7 +557,7 @@ above. We no longer need to stream the strace.</p></li>
 </ol>
 <p>If the above description is all too abstract, lets’ work through an
 actual example, and then finally look at the code snippets. In the
-example above the maximum window width is <span
+example above the window width is <span
 class="math inline">\(w=3\)</span> for round 0. The prover computes the
 multi-variate polynomial<br />
 <span class="math display">\[\begin{align}
@@ -546,18 +568,17 @@ t&#39;(\textcolor{pink}{X_2, X_1, X_b}) = \sum_{y \in \{-4, \dots,
 \mathcal{L}_{y}\left(r_y \right) \\[10pt]
 &amp;\cdot\text{eq}(\tau_{15}..\tau_3; x_{15}...x_3)
 \end{align}\]</span> Which is a degree <span
-class="math inline">\(d=2\)</span> multi-variate polynomial. Thus, we
-need <span class="math inline">\((d+1)^w = 3^w\)</span> evaluations to
+class="math inline">\(d=2\)</span> tri-variate polynomial. Thus, we need
+<span class="math inline">\((d+1)^w = 3^3 = 27\)</span> evaluations to
 represent <span class="math inline">\(t\)</span>. In Jolt we evaluate
 <span class="math inline">\(t\)</span> at <span
 class="math inline">\(\{0,1, \infty\}^{w}\)</span> and the data
 structure that stores is this evaluations is called <code>t_grid</code>
-which is what describe as the streaming data structure.</p>
-<p>This is exactly what the method</p>
-<p><code>fn compute_evaluation_grid_from_trace(&amp;mut self, window_size: usize)</code></p>
-<p>computes. Note that we have not yet materialised any polynonials, so
-we must compute <code>t_grid</code> by streaming the trace. The next
-stage is to compute <span class="math inline">\(t(0)\)</span> and <span
+which is what describe as the streaming data structure. This is exactly
+what the method</p>
+<p><code>fn compute_evaluation_grid_from_trace(&amp;mut self, window_size: usize)</code>
+computes. The next stage is to compute <span
+class="math inline">\(t(0)\)</span> and <span
 class="math inline">\(t(\infty)\)</span> where <span
 class="math display">\[
 t(\textcolor{pink}{X_b}) = \sum_{x_2, x_1 \in \{0,1\}^2 } t&#39;(x_2,
@@ -595,11 +616,11 @@ linear i.e <span class="math inline">\(p(X) = aX + b\)</span>, we have
 we are sorted for the next <span class="math inline">\(w\)</span>
 rounds, till we bind all <span class="math inline">\(w\)</span> of its
 variables. In the example above, we can answer 3 rounds of prover
-messages using <code>t_grid</code> Binding is exactly the same as the
-linear version but we do it for the multi-quadratic polynomial and is
-done by the</p>
-<p><code>t_prime_poly.bind(r_j, BindingOrder::LowToHigh)</code></p>
-<p>method in <code>MultiquadraticPolynomial</code> struct.</p>
+messages using <code>t_grid</code> only. Binding is exactly the same as
+the linear version but we do it for the multi-quadratic polynomial and
+is done by the
+<code>t_prime_poly.bind(r_j, BindingOrder::LowToHigh)</code> <a
+href="https://github.com/abiswas3/jolt/blob/feat/streaming-prover-merged/jolt-core/src/poly/multiquadratic_poly.rs">method</a>.</p>
 <p>After binding in round 0 we go from <span
 class="math inline">\(t&#39;(X_2, X_1, X_b)\)</span> to <span
 class="math inline">\(t&#39;(X_2, X_1,
@@ -608,12 +629,13 @@ with <span class="math inline">\(t&#39;(X_2, \textcolor{orange}{r_1,
 r_b})\)</span> and after round 2 i.e 3 rounds of sum-check we are left
 with <span class="math inline">\(t&#39;( \textcolor{orange}{r_2, r_1,
 r_b})\)</span>. Hereafter, we must stream the trace again – and we will
-as round 3 is a window start. Additionally, we also build a data
+as round 3 is a window start.</p>
+<p>Additionally as the challenges come in, we also build a data
 structure called <code>r_grid</code> which looks like the following</p>
 <pre><code>[
     [1]
-    [(1-rb), rb] // after round 1
-    [(1-rb)(1-r1), rb(1-r1), (1-rb)r1, rbr1] // after round 2
+    [(1-rb), rb] // eq(r_b, x_b)
+    [(1-rb)(1-r1), rb(1-r1), (1-rb)r1, rbr1] // eq(r_1, r_b, x_1, x_b)
     ...
 ]</code></pre>
 <div class="remark">
@@ -646,6 +668,15 @@ X_3}, x_2, x_1, x_b, y) \\[10pt]
 &amp;\cdot\text{eq}(\tau_{15}\dots\tau_6;\, x_{15}\dots x_6) \,
 \text{eq}(\textcolor{orange}{r_2, r_1, r_b}, x_{2}, x_{1}, x_{b})
 \end{align}\]</span></p>
+<p>So how the <code>r_grid</code> becomes useful now in the last line.
+This process continues till we hit the switch over point.</p>
+<p>At this point we have only used <span
+class="math inline">\(\max\{(d+1)^\hat{w}, 2^{\hat{t}}\}\)</span> field
+elements worth of memory, where <span
+class="math inline">\(\hat{t}\)</span> is the switch-over point and
+<span class="math inline">\(\hat{w}\)</span> is the maximum window width
+for a round. <span class="math inline">\(d=2\)</span> is for this
+sumcheck.</p>
 </section>
 <section id="switch-over-point" class="level3">
 <h3>Switch Over Point</h3>
@@ -742,11 +773,13 @@ the logic describe above, based on the round classification.</p>
 role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1"><p>We choose those indices for <span
+<li id="fn1"><p>A program is just a sequence of RISC-V instructions.<a
+href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>We choose those indices for <span
 class="math inline">\(y\)</span> instead of bit string or the set <span
 class="math inline">\(\{0, \ldots, 9\}\)</span> for computational
 reasons, the details of which we dot discuss here (maybe for a separate
-post).<a href="#fnref1" class="footnote-back"
+post).<a href="#fnref2" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></article>
