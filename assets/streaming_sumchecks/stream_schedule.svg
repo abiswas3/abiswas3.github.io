@@ -1,129 +1,139 @@
-<svg width="900" height="300" xmlns="http://www.w3.org/2000/svg">
+<svg width="900" height="350" xmlns="http://www.w3.org/2000/svg">
   <!-- Background -->
-  <rect width="900" height="300" fill="#1e1e2e"/>
+  <rect width="900" height="350" fill="#1e1e2e"/>
   
   <!-- Title -->
   <text x="450" y="30" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#cdd6f4">
-    Round Division: Streaming and Linear Phases (m = 16)
+    Sum-Check Schedule (m = 16 rounds)
+  </text>
+  <text x="450" y="55" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#a6adc8">
+    Rounds marked as window_start • Round 9 is the switchover point
   </text>
   
   <!-- Main container for rounds -->
-  <g transform="translate(50, 80)">
-    
-    <!-- Streaming Phase Background -->
-    <rect x="0" y="0" width="450" height="80" fill="#313244" stroke="#585b70" stroke-width="2" rx="5"/>
-    
-    <!-- Linear Phase Background -->
-    <rect x="450" y="0" width="350" height="80" fill="#45475a" stroke="#585b70" stroke-width="2" rx="5"/>
-    
-    <!-- Streaming Windows -->
-    <!-- Window 1: rounds 0-2 -->
-    <rect x="10" y="10" width="140" height="60" fill="#89b4fa" fill-opacity="0.3" stroke="#89b4fa" stroke-width="2" rx="3"/>
-    
-    <!-- Window 2: rounds 3-5 -->
-    <rect x="160" y="10" width="140" height="60" fill="#94e2d5" fill-opacity="0.3" stroke="#94e2d5" stroke-width="2" rx="3"/>
-    
-    <!-- Window 3: rounds 6-8 -->
-    <rect x="310" y="10" width="130" height="60" fill="#a6e3a1" fill-opacity="0.3" stroke="#a6e3a1" stroke-width="2" rx="3"/>
+  <g transform="translate(50, 90)">
     
     <!-- Individual round boxes -->
-    <!-- Streaming rounds 0-8 -->
-    <g fill="#f9e2af">
-      <rect x="20" y="25" width="35" height="30" rx="2"/>
-      <rect x="65" y="25" width="35" height="30" rx="2"/>
-      <rect x="110" y="25" width="35" height="30" rx="2"/>
+    <g>
+      <!-- Rounds 0-8: only some are window_start -->
+      <rect x="0" y="25" width="45" height="40" fill="#f9e2af" stroke="#585b70" stroke-width="2" rx="2"/>
+      <rect x="50" y="25" width="45" height="40" fill="#313244" stroke="#585b70" stroke-width="2" rx="2"/>
+      <rect x="100" y="25" width="45" height="40" fill="#313244" stroke="#585b70" stroke-width="2" rx="2"/>
       
-      <rect x="170" y="25" width="35" height="30" rx="2"/>
-      <rect x="215" y="25" width="35" height="30" rx="2"/>
-      <rect x="260" y="25" width="35" height="30" rx="2"/>
+      <rect x="150" y="25" width="45" height="40" fill="#f9e2af" stroke="#585b70" stroke-width="2" rx="2"/>
+      <rect x="200" y="25" width="45" height="40" fill="#313244" stroke="#585b70" stroke-width="2" rx="2"/>
+      <rect x="250" y="25" width="45" height="40" fill="#313244" stroke="#585b70" stroke-width="2" rx="2"/>
       
-      <rect x="320" y="25" width="35" height="30" rx="2"/>
-      <rect x="365" y="25" width="35" height="30" rx="2"/>
-      <rect x="410" y="25" width="35" height="30" rx="2"/>
-    </g>
-    
-    <!-- Linear rounds 9-15 -->
-    <g fill="#cba6f7">
-      <rect x="460" y="25" width="35" height="30" rx="2"/>
-      <rect x="505" y="25" width="35" height="30" rx="2"/>
-      <rect x="550" y="25" width="35" height="30" rx="2"/>
-      <rect x="595" y="25" width="35" height="30" rx="2"/>
-      <rect x="640" y="25" width="35" height="30" rx="2"/>
-      <rect x="685" y="25" width="35" height="30" rx="2"/>
-      <rect x="730" y="25" width="35" height="30" rx="2"/>
+      <rect x="300" y="25" width="45" height="40" fill="#f9e2af" stroke="#585b70" stroke-width="2" rx="2"/>
+      <rect x="350" y="25" width="45" height="40" fill="#313244" stroke="#585b70" stroke-width="2" rx="2"/>
+      <rect x="400" y="25" width="45" height="40" fill="#313244" stroke="#585b70" stroke-width="2" rx="2"/>
+      
+      <!-- Round 9: switchover point (special) -->
+      <rect x="460" y="25" width="45" height="40" fill="#f38ba8" stroke="#f38ba8" stroke-width="3" rx="2"/>
+      
+      <!-- Rounds 10-15: all are window_start (after switchover) -->
+      <rect x="510" y="25" width="45" height="40" fill="#f9e2af" stroke="#585b70" stroke-width="2" rx="2"/>
+      <rect x="560" y="25" width="45" height="40" fill="#f9e2af" stroke="#585b70" stroke-width="2" rx="2"/>
+      <rect x="610" y="25" width="45" height="40" fill="#f9e2af" stroke="#585b70" stroke-width="2" rx="2"/>
+      <rect x="660" y="25" width="45" height="40" fill="#f9e2af" stroke="#585b70" stroke-width="2" rx="2"/>
+      <rect x="710" y="25" width="45" height="40" fill="#f9e2af" stroke="#585b70" stroke-width="2" rx="2"/>
+      <rect x="760" y="25" width="45" height="40" fill="#f9e2af" stroke="#585b70" stroke-width="2" rx="2"/>
     </g>
     
     <!-- Round numbers -->
-    <g font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1e1e2e" text-anchor="middle">
-      <!-- Streaming rounds -->
-      <text x="37" y="45">0</text>
-      <text x="82" y="45">1</text>
-      <text x="127" y="45">2</text>
+    <g font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#cdd6f4" text-anchor="middle">
+      <text x="22" y="50">0</text>
+      <text x="72" y="50">1</text>
+      <text x="122" y="50">2</text>
       
-      <text x="187" y="45">3</text>
-      <text x="232" y="45">4</text>
-      <text x="277" y="45">5</text>
+      <text x="172" y="50">3</text>
+      <text x="222" y="50">4</text>
+      <text x="272" y="50">5</text>
       
-      <text x="337" y="45">6</text>
-      <text x="382" y="45">7</text>
-      <text x="427" y="45">8</text>
+      <text x="322" y="50">6</text>
+      <text x="372" y="50">7</text>
+      <text x="422" y="50">8</text>
       
-      <!-- Linear rounds -->
-      <text x="477" y="45">9</text>
-      <text x="522" y="45">10</text>
-      <text x="567" y="45">11</text>
-      <text x="612" y="45">12</text>
-      <text x="657" y="45">13</text>
-      <text x="702" y="45">14</text>
-      <text x="747" y="45">15</text>
+      <text x="482" y="50">9</text>
+      <text x="532" y="50">10</text>
+      <text x="582" y="50">11</text>
+      <text x="632" y="50">12</text>
+      <text x="682" y="50">13</text>
+      <text x="732" y="50">14</text>
+      <text x="782" y="50">15</text>
     </g>
     
-    <!-- Phase labels -->
-    <text x="225" y="105" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#89b4fa">
-      Streaming Phase
-    </text>
-    <text x="225" y="125" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#a6adc8">
-      (Rounds 0-8)
+    <!-- Window start markers (stars above the boxes) -->
+    <g font-family="Arial, sans-serif" font-size="18" fill="#89b4fa" text-anchor="middle">
+      <text x="22" y="18">★</text>
+      <text x="172" y="18">★</text>
+      <text x="322" y="18">★</text>
+    </g>
+    
+    <!-- Switchover point marker (special star) -->
+    <text x="482" y="18" font-family="Arial, sans-serif" font-size="18" fill="#f38ba8" text-anchor="middle">★</text>
+    
+    <!-- Window start markers for rounds 10-15 -->
+    <g font-family="Arial, sans-serif" font-size="18" fill="#89b4fa" text-anchor="middle">
+      <text x="532" y="18">★</text>
+      <text x="582" y="18">★</text>
+      <text x="632" y="18">★</text>
+      <text x="682" y="18">★</text>
+      <text x="732" y="18">★</text>
+      <text x="782" y="18">★</text>
+    </g>
+    
+    <!-- Labels -->
+    <text x="225" y="95" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#a6adc8">
+      Before switchover: sparse window_start rounds
     </text>
     
-    <text x="612" y="105" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#cba6f7">
-      Linear Phase
-    </text>
-    <text x="612" y="125" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#a6adc8">
-      (Rounds 9-15)
+    <text x="620" y="95" font-family="Arial, sans-serif" font-size="14" text-anchor="middle" fill="#a6adc8">
+      After switchover: every round is window_start
     </text>
     
-    <!-- Window labels -->
-    <text x="80" y="-5" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#89b4fa">
-      Window 1
-    </text>
-    <text x="230" y="-5" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#94e2d5">
-      Window 2
-    </text>
-    <text x="375" y="-5" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#a6e3a1">
-      Window 3
+    <!-- Switchover annotation -->
+    <line x1="482" y1="75" x2="482" y2="105" stroke="#f38ba8" stroke-width="2" stroke-dasharray="4,4"/>
+    <text x="482" y="120" font-family="Arial, sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="#f38ba8">
+      Switchover Point
     </text>
   </g>
   
   <!-- Legend -->
-  <g transform="translate(50, 230)">
+  <g transform="translate(50, 240)">
     <text x="0" y="0" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#cdd6f4">
       Legend:
     </text>
     
-    <rect x="80" y="-12" width="20" height="15" fill="#f9e2af" rx="2"/>
-    <text x="110" y="0" font-family="Arial, sans-serif" font-size="12" fill="#a6adc8">
-      Streaming rounds (windowed processing)
+    <rect x="80" y="-12" width="25" height="20" fill="#f9e2af" stroke="#585b70" stroke-width="2" rx="2"/>
+    <text x="115" y="3" font-family="Arial, sans-serif" font-size="12" fill="#a6adc8">
+      window_start round
     </text>
     
-    <rect x="350" y="-12" width="20" height="15" fill="#cba6f7" rx="2"/>
-    <text x="380" y="0" font-family="Arial, sans-serif" font-size="12" fill="#a6adc8">
-      Linear rounds (sequential processing)
+    <rect x="280" y="-12" width="25" height="20" fill="#313244" stroke="#585b70" stroke-width="2" rx="2"/>
+    <text x="315" y="3" font-family="Arial, sans-serif" font-size="12" fill="#a6adc8">
+      regular round
     </text>
     
-    <rect x="80" y="13" width="20" height="15" fill="none" stroke="#89b4fa" stroke-width="2" rx="2"/>
-    <text x="110" y="25" font-family="Arial, sans-serif" font-size="12" fill="#a6adc8">
-      Streaming windows (size = 3 rounds)
+    <rect x="470" y="-12" width="25" height="20" fill="#f38ba8" stroke="#f38ba8" stroke-width="3" rx="2"/>
+    <text x="505" y="3" font-family="Arial, sans-serif" font-size="12" fill="#a6adc8">
+      switchover point (special window_start)
+    </text>
+    
+    <text x="95" y="28" font-family="Arial, sans-serif" font-size="16" fill="#89b4fa" text-anchor="middle">★</text>
+    <text x="115" y="28" font-family="Arial, sans-serif" font-size="12" fill="#a6adc8">
+      marks window_start rounds
+    </text>
+  </g>
+  
+  <!-- Key insight box -->
+  <g transform="translate(50, 285)">
+    <rect x="0" y="0" width="800" height="45" fill="#313244" stroke="#89b4fa" stroke-width="2" rx="5"/>
+    <text x="400" y="20" font-family="Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle" fill="#89b4fa">
+      Key Property:
+    </text>
+    <text x="400" y="37" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" fill="#cdd6f4">
+      Rounds 0, 3, 6 are window_start • Round 9 is the switchover point • Rounds 9-15 are all window_start
     </text>
   </g>
 </svg>
