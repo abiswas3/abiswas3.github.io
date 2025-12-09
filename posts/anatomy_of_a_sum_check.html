@@ -179,24 +179,26 @@ role="doc-noteref"><sup>1</sup></a>.</p>
 <p>Before we describe the API, it will be useful to briefly re-cap how
 Jolt works. At the heart of the jolt prover is the sumcheck algorithm.
 Given some polynomial <span class="math inline">\(g\)</span> and a set
-<span class="math inline">\(S\)</span> with sufficient structure, the
-sum-check algorithm enables a prover to convince a verifier that it
-computed <span class="math inline">\(\sum_{x \in S} g(x)\)</span>
-honestly. The end goal of the Jolt prover is to convince an honest
-verifier that it ran some guest program<a href="#fn2"
-class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>
-correctly. It does so via many sum-check algorithms. Therefore for the
-whole setup to work, the polynomials involved in these sumchecks must be
-in someway related to the execution of said program. As such honest
-proving begins with emulation of the given RISC-V program – which we
-refer to as the trace. This is a fancy way of saying that the prover
-runs the program, and stores succinctly as a list the machine state
-before and after each instruction. This list is what we refer to the
-trace. And it is this trace from which we will construct the sum-check
-polynomials in Jolt. <a href="./day_0.html">See this post</a> for a
-fully worked out description of the emulation from an actual albeit
-useless program written in Rust. For example, consider the following
-program with just two instructions.</p>
+<span class="math inline">\(S\)</span> with sufficient structure<a
+href="#fn2" class="footnote-ref" id="fnref2"
+role="doc-noteref"><sup>2</sup></a>, the sum-check algorithm enables a
+prover to convince a verifier that it computed <span
+class="math inline">\(\sum_{x \in S} g(x)\)</span> honestly. The end
+goal of the Jolt prover is to convince an honest verifier that it ran
+some guest program<a href="#fn3" class="footnote-ref" id="fnref3"
+role="doc-noteref"><sup>3</sup></a> correctly. It does so via many
+sum-check algorithms. Therefore for the whole setup to work, the
+polynomials involved in these sumchecks must be in someway related to
+the execution of said program. As such honest proving begins with
+emulation of the given RISC-V program – which we refer to as the trace.
+This is a fancy way of saying that the prover runs the program, and
+stores succinctly as a list the machine state before and after each
+instruction. This list is what we refer to the trace. And it is this
+trace from which we will construct the sum-check polynomials in Jolt. <a
+href="./day_0.html">See this post</a> for a fully worked out description
+of the emulation from an actual albeit useless program written in Rust.
+For example, consider the following program with just two
+instructions.</p>
 <div class="highlight"><pre><span></span><span class="err">00001117</span><span class="w">    </span><span class="nf">auipc</span><span class="w">  </span><span class="no">sp</span><span class="p">,</span><span class="mi">0x1</span><span class="w"> </span><span class="c1"># sp = PC + (0x1 &lt;&lt; 12) = 0x80000000 + 0x1000 = 0x80001000</span>
 <span class="err">12010113</span><span class="w">    </span><span class="nf">addi</span><span class="w">   </span><span class="no">sp</span><span class="p">,</span><span class="no">sp</span><span class="p">,</span><span class="mi">288</span><span class="w"> </span><span class="c1"># sp = 0x80001000 + 288 = 0x80001120</span>
 </pre></div>
@@ -308,8 +310,8 @@ will be of form</p>
 class="math inline">\(A\)</span> and <code>Term 2</code> will be
 represented by <span class="math inline">\(B\)</span>.</p>
 <p><strong>Indexing</strong>: We divide the 20 constraints into 2
-groups. We refer to the each constraint using two digits<a href="#fn3"
-class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>
+groups. We refer to the each constraint using two digits<a href="#fn4"
+class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>
 <span class="math inline">\((b,y)\)</span> where <span
 class="math inline">\(b \in \{ 0, 1\}\)</span> is the selector index,
 and <span class="math inline">\(y\in \{-4, \ldots, 5\}\)</span> refers
@@ -839,21 +841,25 @@ role="doc-endnotes">
 <hr />
 <ol>
 <li id="fn1"><p>This statement is strictly not true. In the current
-implementation the process by which we construct the polynomials means
-that we still need <span class="math inline">\(O(T)\)</span> memory,
-where <span class="math inline">\(T\)</span> is the number of
-instructions in the guest program (both virtual and real). Still we
-assume that iterating a trace is free, as mentioned in the remark later,
-then we can actually use <span class="math inline">\(O(1)\)</span>
-memory.<a href="#fnref1" class="footnote-back"
+implementation, as a consequence of the process by which we construct
+the polynomials, we still need <span class="math inline">\(O(T)\)</span>
+memory, where <span class="math inline">\(T\)</span> is the number of
+instructions in the guest program (both virtual and real). But in this
+post we make a few simplifying assumptions, by which the statement does
+ring true.<a href="#fnref1" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>A program is just a sequence of RISC-V instructions.<a
-href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn3"><p>We choose those indices for <span
+<li id="fn2"><p>It is not so imporant to be formal about what we mean by
+sufficient structure here. If <span class="math inline">\(g \in
+\mathbb{F}[x_1, \dots, x_n]\)</span>, then we can just pretend <span
+class="math inline">\(H = \{ 0, 1\}^n\)</span>.<a href="#fnref2"
+class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>A program is just a sequence of RISC-V instructions.<a
+href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>We choose those indices for <span
 class="math inline">\(y\)</span> instead of bit string or the set <span
 class="math inline">\(\{0, \ldots, 9\}\)</span> for computational
 reasons, the details of which we dot discuss here (maybe for a separate
-post).<a href="#fnref3" class="footnote-back"
+post).<a href="#fnref4" class="footnote-back"
 role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></article>
