@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   
-  <title>404</title>
+  <title></title>
   <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
@@ -153,10 +153,52 @@
 
   <link rel="stylesheet" href="/main.css">
   
+
+<link id="hl" rel="stylesheet" type="text/css" href="/hl-light.css" />
+
+    <title>Secret Santa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+             max-width: 600px;
+        margin: 2rem auto;
+        line-height: 1.6;
+      }
+      
+      button {
+        font-size: 1rem;
+        padding: 0.5rem 0.7rem;
+        margin: 0.25rem;
+        cursor: pointer;
+      }
+      input {
+        font-size: 1rem;
+        padding: 0.4rem 0.6rem;
+        margin-top: 0.5rem;
+      }
+      .names {
+        margin-bottom: 1rem;
+      }
+      .result {
+        margin-top: 1rem;
+        font-weight: bold;
+      }
+      .hint {
+        margin-top: 0.5rem;
+        font-weight: normal;
+      }
+      .error {
+        margin-top: 1rem;
+        color: #b00020;
+        font-weight: bold;
+      }
+    </style>
+
+
   
 </head>
 
-<body class="not-found">
+<body class="prose-page">
   
   <script>
     const theme = sessionStorage.getItem('theme');
@@ -169,12 +211,120 @@
   </script>
   
   
-<div class="wrapper">
-  <p class="error">
-    404 Not Found
-  </p>
-  <a class="instant" href="">« back to home »</a>
-</div>
+  <body>
+    <h1>Christmas Poems</h1>
+
+  
+<p>
+  The head of the household, Nicky Fouhy, wants you to write a poem for Christmas.
+  Click your name and enter your secret password to discover your randomly assigned recipient.
+</p>
+    <div class="names" id="names"></div>
+
+    <div id="auth" style="display: none">
+      <p>Enter your secret code for <strong id="selectedName"></strong>:</p>
+      <input id="codeInput" type="password" placeholder="Secret code" />
+      <br />
+      <button onclick="reveal()">Reveal my match</button>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+      const names = [
+        "Ari",
+        "Vicky",
+        "Nicky",
+        "Dan",
+        "Becky",
+        "Dean",
+        "Tom",
+        "Elly",
+      ];
+
+      // Fixed permutation (giver -> recipient)
+      const permutation = {
+        Ari: "Becky",
+        Vicky: "Nicky",
+        Nicky: "Dean",
+        Dan: "Tom",
+        Becky: "Vicky",
+        Dean: "Dan",
+        Tom: "Elly",
+        Elly: "Ari",
+      };
+
+      // Secret codes (light protection only)
+      const codes = {
+        Ari: "apple",
+        Vicky: "the ai bubble bursts",
+        Nicky: "late stage capitalism",
+        Dan: "dishonesty is the best policy",
+        Becky: "my jesus speaketh but i not listeneth",
+        Dean: "money for nothing bills for free",
+        Tom: "to baz or to ball",
+        Elly: "born in the usa",
+      };
+
+      // Custom prompts per giver
+      const prompts = {
+        Ari: "Vicky loves hiking and good coffee — something cozy or outdoorsy?",
+        Vicky: "Nicky is into photography; maybe an accessory or book.",
+        Nicky: "Dan enjoys cooking — spices or a fun utensil?",
+        Dan: "Becky likes plants and home decor.",
+        Becky: "Dean runs a lot — running socks or recovery gear?",
+        Dean: "Tom enjoys board games and puzzles.",
+        Tom: "Elly likes art supplies and stationery.",
+        Elly: "Ari enjoys films — a cinema-themed gift?",
+      };
+
+      let currentName = null;
+
+      const namesDiv = document.getElementById("names");
+      const authDiv = document.getElementById("auth");
+      const selectedNameSpan = document.getElementById("selectedName");
+      const output = document.getElementById("output");
+      const codeInput = document.getElementById("codeInput");
+
+      // Render name buttons
+      names.forEach((name) => {
+        const btn = document.createElement("button");
+        btn.textContent = name;
+        btn.onclick = () => selectName(name);
+        namesDiv.appendChild(btn);
+      });
+
+      function selectName(name) {
+        currentName = name;
+        selectedNameSpan.textContent = name;
+        authDiv.style.display = "block";
+        output.innerHTML = "";
+        codeInput.value = "";
+      }
+
+      function reveal() {
+        if (!currentName) return;
+
+        const code = codeInput.value;
+
+        if (codes[currentName] !== code) {
+          output.innerHTML = '<div class="error">Incorrect secret code.</div>';
+          return;
+        }
+
+        const recipient = permutation[currentName];
+        // const prompt = prompts[currentName] || "";
+        const prompt = "";
+
+        output.innerHTML =
+          '<div class="result">You are giving a gift to: ' +
+          recipient +
+          "</div>" +
+          (prompt ? '<div class="hint">Hint: ' + prompt + "</div>" : "");
+      }
+    </script>
+  </body>
+
 
   
   <script src="/js/main.js"></script>

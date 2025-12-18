@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  
+<meta
+  name="description"
+  content="true"
+/>
+
+  <title>Interactive Proofs For Differentially Private Counting</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
+  
+  <style>
+  /* ------------------ Light Mode ------------------ */
+  body {
+    --primary-color: #4f6cb8; /* main accent */
+    --primary-pale-color: #4f6cb822; /* subtle accent */
+    --primary-decoration-color: #4f6cb811; /* very subtle */
+    --bg-color: #ffffff;
+    --text-color: #1f1f1f;
+    --text-pale-color: #6b6b6b;
+    --text-decoration-color: #b0b0b0;
+    --highlight-mark-color: #a1b0db20;
+
+    --callout-note-color: #4f6cb8; /* blue */
+    --callout-tip-color: #2e8555; /* green */
+    --callout-important-color: #8c4fc9; /* purple */
+    --callout-warning-color: #c27b3f; /* orange */
+    --callout-caution-color: #c64e4e; /* red */
+  }
+
+  /* ------------------ Dark Mode ------------------ */
+  body.dark {
+    --primary-color: #7a92db;
+    --primary-pale-color: #7a92db44;
+    --primary-decoration-color: #7a92db11;
+    --bg-color: #1c1c1c;
+    --text-color: #e0e0e0;
+    --text-pale-color: #8a8a8a;
+    --text-decoration-color: #5f5f5f;
+    --highlight-mark-color: #7a92db33;
+
+    --callout-note-color: #7a92db; /* lighter blue */
+    --callout-tip-color: #52a077; /* lighter green */
+    --callout-important-color: #a378db; /* lighter purple */
+    --callout-warning-color: #d89d68; /* softer orange */
+    --callout-caution-color: #e37474; /* lighter red */
+  }
+
+  /* ------------------ Fonts & Layout ------------------ */
+  body {
+    /* --main-font: "Lora", "Courier", monospace; */
+    --main-font:
+      Work Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
+      Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+    --code-font:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    --homepage-max-width: 768px;
+    --main-max-width: 768px;
+    --avatar-size: 60px;
+    --font-size: 16px;
+    --line-height: 2;
+    --img-border-radius: 0px;
+    --detail-border-radius: 0px;
+    --dark-mode-img-brightness: 0.75;
+    --dark-mode-chart-brightness: 0.75;
+    --inline-code-border-radius: 2px;
+    --inline-code-bg-color: var(--primary-decoration-color);
+    --block-code-border-radius: 0px;
+    --block-code-border-color: var(--primary-color);
+    --detail-border-color: var(--primary-color);
+  }
+
+  /* ------------------ Theorem / Lemma / Definition Blocks ------------------ */
+  blockquote.theorem {
+    border-left: 4px solid var(--callout-note-color);
+    background: #f2f7ff;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+  }
+
+  blockquote.theorem.lemma {
+    border-color: var(--callout-tip-color);
+    background: #edf9f2;
+  }
+
+  blockquote.theorem.definition {
+    border-color: var(--callout-warning-color);
+    background: #fff8eb;
+  }
+
+  blockquote.theorem.important {
+    border-color: var(--callout-important-color);
+    background: #f6f0ff;
+  }
+
+  blockquote.theorem.caution {
+    border-color: var(--callout-caution-color);
+    background: #ffecec;
+  }
+
+  blockquote.theorem .title {
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--text-color);
+  }
+
+  blockquote.theorem .content {
+    margin: 0;
+    color: var(--text-color);
+  }
+
+  /* Dark mode overrides for theorem blocks */
+  body.dark blockquote.theorem {
+    background: #22293b;
+    border-left-color: var(--callout-note-color);
+  }
+
+  body.dark blockquote.theorem.lemma {
+    background: #1d2d22;
+    border-left-color: var(--callout-tip-color);
+  }
+
+  body.dark blockquote.theorem.definition {
+    background: #2f1e0f;
+    border-left-color: var(--callout-warning-color);
+  }
+
+  body.dark blockquote.theorem.important {
+    background: #2a1f33;
+    border-left-color: var(--callout-important-color);
+  }
+
+  body.dark blockquote.theorem.caution {
+    background: #3c1f1f;
+    border-left-color: var(--callout-caution-color);
+  }
+  body {
+    font-weight: 450;
+  }
+
+  #theme-toggle {
+    all: unset; /* removes all inherited and default styles */
+    display: inline; /* or block, if you want */
+    /* background-color: var(--bg-color); */
+  }
+</style>
+
+  <link rel="stylesheet" href="/main.css">
+   
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+  integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+"
+  crossorigin="anonymous"
+/>
+<script
+  defer
+  src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+  integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg"
+  crossorigin="anonymous"
+></script>
+<script
+  defer
+  src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+  integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk"
+  crossorigin="anonymous"
+></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    renderMathInElement(document.querySelector(".publication-single"), {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      throwOnError: false,
+    });
+  });
+</script>
+ 
+  
+</head>
+
+<body class="post">
+  
+  <script>
+    const theme = sessionStorage.getItem('theme');
+    const match = window.matchMedia("(prefers-color-scheme: dark)").matches
+    if ((theme && theme == 'dark') || (!theme && match)) {
+      document.body.classList.add('dark');
+      const hl = document.querySelector('link#hl');
+      if (hl) hl.href = '/hl-dark.css';
+    }
+  </script>
+  
+  
+<div id="wrapper">
+  <main class="layout-single-publication">
+    
+<header>
+  <nav>
+    <a id="back-link" href="&#x2F;publications">← Back</a>
+    <a id="back-link" href="/">Home</a>
+    
+    
+
+    <button id="theme-toggle" aria-label="theme switch">
+    <span class="moon-icon">🌙</span>
+     <span class="sun-icon">🌞</span>
+    </button>
+
+  </nav>
+</header>
+
+    <article class="prose publication-single">
+      <!-- Title -->
+      <h1>Interactive Proofs For Differentially Private Counting</h1>
+
+      <!-- Venue -->
+      
+      <div class="pub-venue-ind">
+        
+        <h3 style="display:inline; margin:0;">Venue: </h3>
+        <a href="https:&#x2F;&#x2F;www.sigsac.org&#x2F;ccs&#x2F;CCS2023&#x2F;">CCS 2023</a>
+               
+      </div>
+      
+
+      
+
+      <!-- Authors -->
+      
+      <h3 style="display:inline; margin:0;">Authors: </h3>
+      <ul class="pub-authors-ind">
+        
+        <li>
+          
+          <span class="primary"><a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a></span>
+          
+        </li>
+        
+        <li>
+          
+          <a href="https:&#x2F;&#x2F;warwick.ac.uk&#x2F;fac&#x2F;sci&#x2F;dcs&#x2F;people&#x2F;graham_cormode&#x2F;">Graham Cormode</a>
+          
+        </li>
+        
+      </ul>
+      
+            <!-- Body content -->
+       
+
+<blockquote class="theorem comment">
+   
+  <p class="title">
+    <strong>Comment</strong>
+  </p>
+   
+  <div class="content"><p>These artefacts are <strong>terribly outdated</strong>.
+A newer version exists locally -- that needs to be uploaded. I'll get to this when I write my thesis in the coming months.</p>
+</div>
+</blockquote>
+<h2 id="abstract">Abstract</h2>
+<p>Differential Privacy (DP) is often presented as a strong privacy-enhancing technology with broad applicability and advocated as a de facto standard for releasing aggregate statistics on sensitive data. However, in many embodiments, DP introduces a new attack surface: a malicious entity entrusted with releasing statistics could manipulate the results and use the randomness of DP as a convenient smokescreen to mask its nefariousness. Since revealing the random noise would obviate the purpose of introducing it, the miscreant may have a perfect alibi. To close this loophole, we introduce the idea of Interactive Proofs For Differential Privacy, which requires the publishing entity to output a zero knowledge proof that convinces an efficient verifier that the output is both DP and reliable. Such a definition might seem unachievable, as a verifier must validate that DP randomness was generated faithfully without learning anything about the randomness itself. We resolve this paradox by carefully mixing private and public randomness to compute verifiable DP counting queries with theoretical guarantees and show that it is also practical for real-world deployment. We also demonstrate that computational assumptions are necessary by showing a separation between information-theoretic DP and computational DP under our definition of verifiability.</p>
+<pre data-lang="tex" class="language-tex z-code"><code class="language-tex" data-lang="tex"><span class="z-text z-tex z-latex">@inproceedings<span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>10.1145/3576915.3616681,
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> author = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>Biswas, Ari and Cormode, Graham<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>, 
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> title = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>Interactive Proofs For Differentially Private Counting<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>, 
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> year = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>2023<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>, 
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> isbn = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>9798400700507<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>, 
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> publisher = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>Association for Computing Machinery<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>,
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> address = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>New York, NY, USA<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>, 
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> url = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>https://doi.org/10.1145/3576915.3616681<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>, 
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> doi = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>10.1145/3576915.3616681<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>,
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> booktitle = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>Proceedings of the 2023 ACM SIGSAC Conference on Computer and Communications Security<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>, 
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> pages = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>1919–1933<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>, 
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> numpages = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>15<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>, 
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> keywords = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>differential privacy, secure multiparty computation, verifiable computation, zero knowledge<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>, 
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> location = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>Copenhagen, Denmark<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>, 
+</span></span><span class="z-text z-tex z-latex"><span class="z-meta z-group z-brace z-latex"> series = <span class="z-meta z-group z-brace z-latex"><span class="z-punctuation z-definition z-group z-brace z-begin z-latex">{</span>CCS &#39;23<span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span><span class="z-punctuation z-definition z-group z-brace z-end z-latex">}</span></span>
+</span></code></pre>
+
+
+      
+      <!-- Artefacts -->
+      
+      <h2> Artefacts </h2>
+      <div class="pub-artefacts">
+        
+        <a href="https:&#x2F;&#x2F;dl.acm.org&#x2F;doi&#x2F;10.1145&#x2F;3576915.3616681">Conference paper</a>
+        
+        <a href="https:&#x2F;&#x2F;youtu.be&#x2F;hRiGMDKYZoU">Talk</a>
+        
+        <a href="https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;Verifiable-Differential-Privacy">Code</a>
+        
+      </div>
+      
+
+
+    </article>
+
+    
+
+
+<footer>
+  <div class="left">
+    <div class="copyright">
+      © 2025 Ari
+      
+    </div>
+  </div>
+
+  <div class="right">
+    
+
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <!-- <button id="theme-toggle" aria-label="theme switch"> -->
+    <!--   <span class="moon-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3945 15.9187 17.7035 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29648 8.08133 5.60547 8.2379 4.938C5.71611 6.28423 4 8.9417 4 12Z" fill="currentColor"></path></svg>
+</span> -->
+    <!--   <span class="sun-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 20.4853L3.51472 19.0711L5.63604 16.9497ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z" fill="currentColor"></path></svg>
+</span> -->
+    <!-- </button> -->
+    <!--  -->
+  </div>
+</footer>
+
+
+
+  </main>
+</div>
+
+  
+  <script src="/js/main.js"></script>
+</body>
+
+</html>
