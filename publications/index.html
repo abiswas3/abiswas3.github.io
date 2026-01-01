@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+   
+<meta name="description" content="true" />
+
+  <title>Publications</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
+  
+  <style>
+  /* ------------------ Light Mode ------------------ */
+  body {
+    --primary-color: #4f6cb8; /* main accent */
+    --primary-pale-color: #4f6cb822; /* subtle accent */
+    --primary-decoration-color: #4f6cb811; /* very subtle */
+    --bg-color: #ffffff;
+    --text-color: #1f1f1f;
+    --text-pale-color: #6b6b6b;
+    --text-decoration-color: #b0b0b0;
+    --highlight-mark-color: #a1b0db20;
+
+    --callout-note-color: #4f6cb8; /* blue */
+    --callout-tip-color: #2e8555; /* green */
+    --callout-important-color: #8c4fc9; /* purple */
+    --callout-warning-color: #c27b3f; /* orange */
+    --callout-caution-color: #c64e4e; /* red */
+  }
+
+  /* ------------------ Dark Mode ------------------ */
+  body.dark {
+    --primary-color: #7a92db;
+    --primary-pale-color: #7a92db44;
+    --primary-decoration-color: #7a92db11;
+    --bg-color: #1c1c1c;
+    --text-color: #e0e0e0;
+    --text-pale-color: #8a8a8a;
+    --text-decoration-color: #5f5f5f;
+    --highlight-mark-color: #7a92db33;
+
+    --callout-note-color: #7a92db; /* lighter blue */
+    --callout-tip-color: #52a077; /* lighter green */
+    --callout-important-color: #a378db; /* lighter purple */
+    --callout-warning-color: #d89d68; /* softer orange */
+    --callout-caution-color: #e37474; /* lighter red */
+  }
+
+  /* ------------------ Fonts & Layout ------------------ */
+  body {
+    /* --main-font: "Lora", "Courier", monospace; */
+    --main-font: sans-serif;
+    /* --main-font: Georgia, "Palatino Linotype", Palatino, "Book Antiqua", serif; */
+    /* --font-weight: 450; */
+    --code-font:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    --homepage-max-width: 768px;
+    --main-max-width: 768px;
+    --avatar-size: 60px;
+    --font-size: 17px;
+    --line-height: 2;
+    --img-border-radius: 0px;
+    --detail-border-radius: 0px;
+    --dark-mode-img-brightness: 0.75;
+    --dark-mode-chart-brightness: 0.75;
+    --inline-code-border-radius: 2px;
+    --inline-code-bg-color: var(--primary-decoration-color);
+    --block-code-border-radius: 5px;
+    --block-code-border-color: var(--primary-color);
+    --detail-border-color: var(--primary-color);
+  }
+
+  /* ------------------ Theorem / Lemma / Definition Blocks ------------------ */
+  blockquote.theorem {
+    border-left: 4px solid var(--callout-note-color);
+    background: #f2f7ff;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+  }
+
+  blockquote.theorem.lemma {
+    border-color: var(--callout-tip-color);
+    background: #edf9f2;
+  }
+
+  blockquote.theorem.definition {
+    border-color: var(--callout-warning-color);
+    background: #fff8eb;
+  }
+
+  blockquote.theorem.important {
+    border-color: var(--callout-important-color);
+    background: #f6f0ff;
+  }
+
+  blockquote.theorem.caution {
+    border-color: var(--callout-caution-color);
+    background: #ffecec;
+  }
+
+  blockquote.theorem .title {
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--text-color);
+  }
+
+  blockquote.theorem .content {
+    margin: 0;
+    color: var(--text-color);
+  }
+
+  /* Dark mode overrides for theorem blocks */
+  body.dark blockquote.theorem {
+    background: #22293b;
+    border-left-color: var(--callout-note-color);
+  }
+
+  body.dark blockquote.theorem.lemma {
+    background: #1d2d22;
+    border-left-color: var(--callout-tip-color);
+  }
+
+  body.dark blockquote.theorem.definition {
+    background: #2f1e0f;
+    border-left-color: var(--callout-warning-color);
+  }
+
+  body.dark blockquote.theorem.important {
+    background: #2a1f33;
+    border-left-color: var(--callout-important-color);
+  }
+
+  body.dark blockquote.theorem.caution {
+    background: #3c1f1f;
+    border-left-color: var(--callout-caution-color);
+  }
+  #theme-toggle {
+    all: unset; /* removes all inherited and default styles */
+    display: inline; /* or block, if you want */
+    /* background-color: var(--bg-color); */
+  }
+</style>
+
+  <link rel="stylesheet" href="/main.css">
+  
+  
+</head>
+
+<body class="blog">
+  
+  <script>
+    const theme = sessionStorage.getItem('theme');
+    const match = window.matchMedia("(prefers-color-scheme: dark)").matches
+    if ((theme && theme == 'dark') || (!theme && match)) {
+      document.body.classList.add('dark');
+      const hl = document.querySelector('link#hl');
+      if (hl) hl.href = '/hl-dark.css';
+    }
+  </script>
+  
+  
+<div id="wrapper">
+  
+<header>
+  <nav>
+    <a id="back-link" href="">← Back</a>
+    <a id="back-link" href="/">Home</a>
+    
+    
+
+    <button id="theme-toggle" aria-label="theme switch">
+    <span class="moon-icon">🌙</span>
+     <span class="sun-icon">🌞</span>
+    </button>
+
+  </nav>
+</header>
+
+  <p style="text-align: center">
+    Authors listed in alphabetic order of last name. Safe to assume <underline>equal</underline> contribution unless the primary
+    author[s] is[are] <span class="primary">highlighted</span> explicitly.
+  </p>
+
+  
+
+  <main class="layout-list publication-list">
+    
+    
+    
+    
+    
+    
+    
+    <article class="publication-summary">
+      <!-- Header row: title + venue -->
+      <div class="pub-header">
+        <h4>
+          1. <a href="&#x2F;publications&#x2F;ipdt&#x2F;">Interactive Proofs For Distribution Testing With Conditional Oracles</a>
+        </h4>
+
+        
+        
+        <div class="pub-venue">
+          
+          <a href="http:&#x2F;&#x2F;itcs-conf.org&#x2F;"
+            >ITCS 2026</a
+          >
+          
+        </div>
+        
+      </div>
+
+      <!-- Authors -->
+      
+      <div class="pub-authors">
+         
+        <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a>
+        ,   
+        <a href="https:&#x2F;&#x2F;cs-people.bu.edu&#x2F;mbun&#x2F;">Mark Bun</a>
+        ,   
+        <a href="https:&#x2F;&#x2F;ccanonne.github.io&#x2F;">Clément Cannone</a>
+        ,   
+        <a href="https:&#x2F;&#x2F;sites.google.com&#x2F;view&#x2F;satchit&#x2F;home">Satchit Sivakumar</a>
+         
+      </div>
+      
+
+      <!-- Link to full details -->
+      <a class="details-link" href="&#x2F;publications&#x2F;ipdt&#x2F;">View details →</a>
+    </article>
+    
+    
+    
+    <article class="publication-summary">
+      <!-- Header row: title + venue -->
+      <div class="pub-header">
+        <h4>
+          2. <a href="&#x2F;publications&#x2F;pm-matchings&#x2F;">Refutations of Perfect Matchings In Expanders Is Hard</a>
+        </h4>
+
+        
+        
+        <div class="pub-venue">
+          
+          <a href="https:&#x2F;&#x2F;www.siam.org&#x2F;publications&#x2F;siam-journals&#x2F;siam-journal-on-discrete-mathematics&#x2F;"
+            >Under Review: SIAM Discrete Maths Journal</a
+          >
+          
+        </div>
+        
+      </div>
+
+      <!-- Authors -->
+      
+      <div class="pub-authors">
+         
+        <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a>
+        ,   
+        <a href="https:&#x2F;&#x2F;sites.google.com&#x2F;view&#x2F;rajkon">Rajko Nenadov</a>
+         
+      </div>
+      
+
+      <!-- Link to full details -->
+      <a class="details-link" href="&#x2F;publications&#x2F;pm-matchings&#x2F;">View details →</a>
+    </article>
+    
+    
+    
+    <article class="publication-summary">
+      <!-- Header row: title + venue -->
+      <div class="pub-header">
+        <h4>
+          3. <a href="&#x2F;publications&#x2F;dp-hhh&#x2F;">Differentially Private Hierarchical Heavy Hitters</a>
+        </h4>
+
+        
+        
+        <div class="pub-venue">
+          
+          <a href="https:&#x2F;&#x2F;2025.sigmod.org&#x2F;"
+            >PODS 2025</a
+          >
+          
+        </div>
+        
+      </div>
+
+      <!-- Authors -->
+      
+      <div class="pub-authors">
+         
+        <span class="primary"><a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a></span>
+        ,   
+        <a href="https:&#x2F;&#x2F;warwick.ac.uk&#x2F;fac&#x2F;sci&#x2F;dcs&#x2F;people&#x2F;graham_cormode&#x2F;">Graham Cormode</a>
+        ,   
+        <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;yaron-kanza-27897642&#x2F;">Yaron Kanza</a>
+        ,   
+        <a href="https:&#x2F;&#x2F;divesh.net&#x2F;">Divesh Srivastava</a>
+        ,   
+        <a href="https:&#x2F;&#x2F;dblp.org&#x2F;pid&#x2F;166&#x2F;5104.html">Zhengyi Zhou</a>
+         
+      </div>
+      
+
+      <!-- Link to full details -->
+      <a class="details-link" href="&#x2F;publications&#x2F;dp-hhh&#x2F;">View details →</a>
+    </article>
+    
+    
+    
+    <article class="publication-summary">
+      <!-- Header row: title + venue -->
+      <div class="pub-header">
+        <h4>
+          4. <a href="&#x2F;publications&#x2F;ipdp&#x2F;">Interactive Proofs For Differentially Private Counting</a>
+        </h4>
+
+        
+        
+        <div class="pub-venue">
+          
+          <a href="https:&#x2F;&#x2F;www.sigsac.org&#x2F;ccs&#x2F;CCS2023&#x2F;"
+            >CCS 2023</a
+          >
+          
+        </div>
+        
+      </div>
+
+      <!-- Authors -->
+      
+      <div class="pub-authors">
+         
+        <span class="primary"><a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a></span>
+        ,   
+        <a href="https:&#x2F;&#x2F;warwick.ac.uk&#x2F;fac&#x2F;sci&#x2F;dcs&#x2F;people&#x2F;graham_cormode&#x2F;">Graham Cormode</a>
+         
+      </div>
+      
+
+      <!-- Link to full details -->
+      <a class="details-link" href="&#x2F;publications&#x2F;ipdp&#x2F;">View details →</a>
+    </article>
+    
+    
+    
+    <article class="publication-summary">
+      <!-- Header row: title + venue -->
+      <div class="pub-header">
+        <h4>
+          5. <a href="&#x2F;publications&#x2F;seeker&#x2F;">Seeker: Real-Time Interactive Search</a>
+        </h4>
+
+        
+        
+        <div class="pub-venue">
+          
+          <a href="https:&#x2F;&#x2F;www.kdd.org&#x2F;kdd2019&#x2F;"
+            >KDD 2019</a
+          >
+          
+        </div>
+        
+      </div>
+
+      <!-- Authors -->
+      
+      <div class="pub-authors">
+         
+        <span class="primary"><a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a></span>
+        ,   
+        <a href="https:&#x2F;&#x2F;pages.cs.wisc.edu&#x2F;~hous21&#x2F;">Houssam Nassif</a>
+        ,   
+        <a href="https:&#x2F;&#x2F;scholar.google.com&#x2F;citations?user=tJzykd0AAAAJ&amp;hl=en">Thai Pham</a>
+        ,   
+        <span class="primary"><a href="https:&#x2F;&#x2F;www.google.com&#x2F;url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;ben-snyder-3b777b10&amp;ved=2ahUKEwjR-unUl8WRAxWnQEEAHS3zCbMQFnoECBkQAQ&amp;usg=AOvVaw02N1uPxPyS0WZ92VwRbTbq">Benjamin Snyder</a></span>
+        ,   
+        <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;michael-vogelsong-524b2080&#x2F;">Michael Vogelsong</a>
+         
+      </div>
+      
+
+      <!-- Link to full details -->
+      <a class="details-link" href="&#x2F;publications&#x2F;seeker&#x2F;">View details →</a>
+    </article>
+    
+    
+    
+    <article class="publication-summary">
+      <!-- Header row: title + venue -->
+      <div class="pub-header">
+        <h4>
+          6. <a href="&#x2F;publications&#x2F;adversarial-pca&#x2F;">Adversarial Principal Component Analysis</a>
+        </h4>
+
+        
+        
+        <div class="pub-venue">
+          
+          <a href="https:&#x2F;&#x2F;isit2017.org&#x2F;"
+            >ISIT 2017</a
+          >
+          
+        </div>
+        
+      </div>
+
+      <!-- Authors -->
+      
+      <div class="pub-authors">
+         
+        <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a>
+        ,   
+        <span class="primary"><a href="https:&#x2F;&#x2F;danielpimentel.github.io">Daniel Pimentel-Alarcón</a></span>
+        ,   
+        <a href="https:&#x2F;&#x2F;solislemuslab.github.io&#x2F;">Claudia Solís-Lemus</a>
+         
+      </div>
+      
+
+      <!-- Link to full details -->
+      <a class="details-link" href="&#x2F;publications&#x2F;adversarial-pca&#x2F;">View details →</a>
+    </article>
+    
+    
+    
+    <article class="publication-summary">
+      <!-- Header row: title + venue -->
+      <div class="pub-header">
+        <h4>
+          7. <a href="&#x2F;publications&#x2F;education&#x2F;">Hands-on Introduction To Computer Science At The Freshman Level</a>
+        </h4>
+
+        
+        
+        <div class="pub-venue">
+          
+          <a href="https:&#x2F;&#x2F;dl.acm.org&#x2F;doi&#x2F;proceedings&#x2F;10.1145&#x2F;2538862"
+            >SIGCSE 2014</a
+          >
+          
+        </div>
+        
+      </div>
+
+      <!-- Authors -->
+      
+      <div class="pub-authors">
+         
+        <a href="https:&#x2F;&#x2F;scholar.google.com&#x2F;citations?user=7PCO-DEAAAAJ&amp;hl=en">Raghuraman Balasubramanian</a>
+        ,   
+        <a href="https&#x2F;&#x2F;randomwalks.xyz">Ari Biswas</a>
+        ,   
+        <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;tgirgin">Timur Girgin</a>
+        ,   
+        <a href="https:&#x2F;&#x2F;karu.sites.cs.wisc.edu&#x2F;wiki&#x2F;">Karu Sankaralingam</a>
+        ,   
+        <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;zach-york-9511a359">Zach York</a>
+         
+      </div>
+      
+
+      <!-- Link to full details -->
+      <a class="details-link" href="&#x2F;publications&#x2F;education&#x2F;">View details →</a>
+    </article>
+    
+    
+  </main>
+  
+
+
+<footer>
+  <div class="left">
+    <div class="copyright">
+      © 2025 Ari
+      
+    </div>
+  </div>
+
+  <div class="right">
+    
+
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <!-- <button id="theme-toggle" aria-label="theme switch"> -->
+    <!--   <span class="moon-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3945 15.9187 17.7035 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29648 8.08133 5.60547 8.2379 4.938C5.71611 6.28423 4 8.9417 4 12Z" fill="currentColor"></path></svg>
+</span> -->
+    <!--   <span class="sun-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 20.4853L3.51472 19.0711L5.63604 16.9497ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z" fill="currentColor"></path></svg>
+</span> -->
+    <!-- </button> -->
+    <!--  -->
+  </div>
+</footer>
+
+
+
+</div>
+
+  
+  <script src="/js/main.js"></script>
+</body>
+
+</html>
