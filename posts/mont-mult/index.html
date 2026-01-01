@@ -368,7 +368,7 @@
 
         <h2 id="background">Background<a class="zola-anchor" href="#background" aria-label="Anchor link for: background" style="visibility: hidden;"></a>
 </h2>
-<p>In an earlier <a href="/posts/mont-mult/mont_mult.html">post</a>, we analysed why <a rel="nofollow noreferrer" href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">this implementation</a> of the improved <a rel="nofollow noreferrer" href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication">Montgomery multiplication</a> algorithm by <a rel="nofollow noreferrer" href="https://hackmd.io/@Ingonyama/Barret-Montgomery">Yuval Domb</a> was not empirically faster out of the box.
+<p>In an earlier <a href="/posts/dyn-instrument/">post</a>, we analysed why <a rel="nofollow noreferrer" href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">this implementation</a> of the improved <a rel="nofollow noreferrer" href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication">Montgomery multiplication</a> algorithm by <a rel="nofollow noreferrer" href="https://hackmd.io/@Ingonyama/Barret-Montgomery">Yuval Domb</a> was not empirically faster out of the box.
 After disassembling the code using the Intel Pin tool, we identified large memory reads and writes as the primary source of slower run times.
 Although the analysis was specific to x86 architectures, the empirical findings were consistent across MacBook M2 Laptops and Intel x86 Digital Ocean servers.
 This loss of performance, however, is an artefact of the implementation, not the algorithm itself<sup class="footnote-reference"><a href="#a">1</a></sup>.
@@ -484,8 +484,9 @@ Also as we are working modulo $r$, it suffices to use $m = \mu_{0}c_0$ discardin
     <strong>Remark</strong>
   </p>
    
-  <div class="content">We overload $m$ a little in notation. This $m$ is NOT the same $m$ as the one defined in the pseudocode description on top.
-This $m$ is just to make $c_0 + mp$ divisible by $r$.</div>
+  <div class="content"><p>We overload $m$ a little in notation. This $m$ is NOT the same $m$ as the one defined in the pseudocode description on top.
+This $m$ is just to make $c_0 + mp$ divisible by $r$.</p>
+</div>
 </blockquote>
 <p>Once we compute $mp$, and add this to $c$ to get $c^{(1)}$, this should clear the least significant digit based on how we picked $m$. See below</p>
  
@@ -544,9 +545,10 @@ We <strong>NEVER</strong> need more than one subtraction!</p>
 
 <blockquote class="theorem box">
   
-  <div class="content">Per round of the Montgomery reduction, we previously computed $c_i\text{ }r^{-1} \mod p$ using $n+1$ digit multiplications. An alternative method to achieve this, using only
+  <div class="content"><p>Per round of the Montgomery reduction, we previously computed $c_i\text{ }r^{-1} \mod p$ using $n+1$ digit multiplications. An alternative method to achieve this, using only
 $n$ digit multiplications, is by computing $\rho_1 = r^{-1}\mod p$.
-One way to understand this algorithm is that, in each round, the current sum is divided by $𝑟$, and the resulting fraction is converted into an $n+1$-digit number $c_i\text{ }\rho_1$, which is then added to the integer part of the division.</div>
+One way to understand this algorithm is that, in each round, the current sum is divided by $𝑟$, and the resulting fraction is converted into an $n+1$-digit number $c_i\text{ }\rho_1$, which is then added to the integer part of the division.</p>
+</div>
 </blockquote>
 <p>In simple words, in CIOS we were adding and then dividing<sup class="footnote-reference"><a href="#2">4</a></sup>, now we first divide and then add things.
 See below:</p>
@@ -581,7 +583,8 @@ This is the akin to playing the CIOS game for 1 round.</p>
     <strong>Theorem: Upper Bound</strong>
   </p>
    
-  <div class="content">We claim that $s < n\cdot(rp)$.</div>
+  <div class="content"><p>We claim that $s &lt; n\cdot(rp)$.</p>
+</div>
 </blockquote>
 <blockquote>
 <p><strong>Proof</strong></p>
@@ -635,9 +638,10 @@ $$</p>
     <strong>Remark</strong>
   </p>
    
-  <div class="content">Note that the total effect is the same as in `h-mul` where we also divide by $r^{-3}$ before adding things.
-The key difference between `h-mul` and `s-mul` is that in `s-mul` we call do all 3 divisions in parallel, whereas here we first divide by $r^{-2}$, and only then can we divide by $r^{-1}$.
-So we lose some parallelism in `h-mul`, but as we will soon see, we minimise the amount of overflow.</div>
+  <div class="content"><p>Note that the total effect is the same as in <code>h-mul</code> where we also divide by $r^{-3}$ before adding things.
+The key difference between <code>h-mul</code> and <code>s-mul</code> is that in <code>s-mul</code> we call do all 3 divisions in parallel, whereas here we first divide by $r^{-2}$, and only then can we divide by $r^{-1}$.
+So we lose some parallelism in <code>h-mul</code>, but as we will soon see, we minimise the amount of overflow.</p>
+</div>
 </blockquote>
 <p>From here on with just do CIOS.</p>
 <p>For each division operation, we blow up the current sum by at most $rp$.
@@ -678,9 +682,10 @@ Using the above analysis, one can easily show the following:</p>
 </strong>
   </p>
    
-  <div class="content">Let $u$ be the number of multiplication operations the CIOS algorithm with inputs $a$ and $b$ that each at most $p$, and $v$ be the number of addition operations (including the reduction phase).
- Then, for any $0 \le k \le n-1$, if we divide $ab$ by $r^k$ before adding, we have $k$ fewer multiplication operations compared to CIOS.
- If we have $m$ rounds of division, then we have $m$ more addition operations than CIOS (due to the reduction step of making the answer less than $p$).</div>
+  <div class="content"><p>Let $u$ be the number of multiplication operations the CIOS algorithm with inputs $a$ and $b$ that each at most $p$, and $v$ be the number of addition operations (including the reduction phase).
+Then, for any $0 \le k \le n-1$, if we divide $ab$ by $r^k$ before adding, we have $k$ fewer multiplication operations compared to CIOS.
+If we have $m$ rounds of division, then we have $m$ more addition operations than CIOS (due to the reduction step of making the answer less than $p$).</p>
+</div>
 </blockquote>
 <h2 id="missing-factor-of-1p">Missing Factor Of $1p$<a class="zola-anchor" href="#missing-factor-of-1p" aria-label="Anchor link for: missing-factor-of-1p" style="visibility: hidden;"></a>
 </h2>
@@ -700,10 +705,14 @@ If we tighten our analysis, $\rho_1$ and $\rho_2$ are fixed. The largest value f
 Plugging in exact numbers</p>
 <p>$$cr^{-4} &lt; \frac{p^2}{r^4} + (\rho_1 + \rho_2) + p &lt; 2.25p$$</p>
 <p>It turns out to be less than $3.25p$ for <code>s-mul</code></p>
-<p>::: {.remark}
-It's the <code>bn-254</code> prime modulus $p$ that allows us to do one subtraction less for <code>h-mul</code> and <code>s-mul</code> than what theory would suggest for any general prime $p$.
-If $p$ were only a little smaller than $r^n$, then we'd have to put in one extra reduction for each of these algorithms.
-:::</p>
+ 
+
+<blockquote class="theorem box">
+  
+  <div class="content"><p>It's the <code>bn-254</code> prime modulus $p$ that allows us to do one subtraction less for <code>h-mul</code> and <code>s-mul</code> than what theory would suggest for any general prime $p$.
+If $p$ were only a little smaller than $r^n$, then we'd have to put in one extra reduction for each of these algorithms.</p>
+</div>
+</blockquote>
 <h2 id="the-need-for-speed">The Need For Speed<a class="zola-anchor" href="#the-need-for-speed" aria-label="Anchor link for: the-need-for-speed" style="visibility: hidden;"></a>
 </h2>
 <p>Remember, we began with the goal of speeding up Montgomery multiplication. So far, we have only understood correctness to make Jolt unit tests pass.
@@ -792,11 +801,15 @@ Of course, we still lose a bit as <code>h-mul</code> needs 2 subtractions and 2 
 <p>In conclusion, something as innocuous as random inputs can lead to completely different conclusions about the real-world performance of code.</p>
 <h2 id="so-where-do-we-go-now">So Where Do We Go Now?<a class="zola-anchor" href="#so-where-do-we-go-now" aria-label="Anchor link for: so-where-do-we-go-now" style="visibility: hidden;"></a>
 </h2>
-<p>::: {.remark}</p>
-<p>At this point, where do we stand? We have a family of algorithms for Montgomery multiplication. If we are not bothered about reducing $\mod p$, then <code>s-mul</code> should be the fastest algorithm, owing to its maximal parallelism (allows maximal for out-of-order execution on the CPU).
+ 
+
+<blockquote class="theorem box">
+  
+  <div class="content"><p>At this point, where do we stand? We have a family of algorithms for Montgomery multiplication. If we are not bothered about reducing $\mod p$, then <code>s-mul</code> should be the fastest algorithm, owing to its maximal parallelism (allows maximal for out-of-order execution on the CPU).
 But we <em>need</em> the final answer to be less than $p$ for the rest of the Jolt setup to work.
-Does this mean that for Jolt, CIOS remains the best algorithm to use?
-:::</p>
+Does this mean that for Jolt, CIOS remains the best algorithm to use?</p>
+</div>
+</blockquote>
 <p>We try a middle ground. We use our theory framework so far to come up with an alternate strategy:
 -- We will save 2 multiplications (instead of 3) but also need to reduce one fewer time compared to <code>h-mul</code>
 By our analysis and the actual value of $p$ in <code>bn-254</code>, we will need at most one subtraction now as opposed to the two from <code>h-mul</code> (just like CIOS).
