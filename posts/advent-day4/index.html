@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 
-<html lang="
-
-en">
+<html lang="en">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   
-  <meta name="description" content="Tags">
+  
+    
+  
+  <meta name="description" content="My blog site.">
 
-  <title>Tags</title>
+  <title>Advent Of Jolt: Day 4</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
@@ -152,10 +153,53 @@ en">
 
   <link rel="stylesheet" href="/main.css">
   
+
+<link id="hl" rel="stylesheet" type="text/css" href="/hl-light.css" />
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" integrity="sha384-HORx6nWi8j5/mYA+y57/9/CZc5z8HnEw4WUZWy5yOn9ToKBv1l58vJaufFAn9Zzi" crossorigin="anonymous"></script>
+  
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+          macros: {
+            "\\field": "\\mathbb{#1}",
+            "\\hei": "\\mathbb{F}(#1)",
+            "\\Field": "\\mathbb{F}",
+            "\\Mont": "\\widetilde{#1}",
+            "\\samples": "\\xleftarrow{\\$}",
+            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
+            "\\TauConstraints": "\\tau_y",
+            "\\TauTime": "\\tau_{\\text{cycle}}",
+            "\\TauGroup": "\\tau_b",
+            "\\MLE": "\\widetilde{#1}",
+            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
+            "\\Def": ":=",
+            "\\ChallengeSet": "\\mathsf{C}"
+
+          },
+            throwOnError: false,
+          trust: true
+
+        });
+    });
+</script>
+
+
+
   
 </head>
 
-<body class="tag-list">
+<body class="post">
   
   <script>
     const theme = sessionStorage.getItem('theme');
@@ -169,10 +213,23 @@ en">
   
   
 <div id="wrapper">
-  
+  <div id="blank"></div>
+  <aside>
+    
+    
+    
+    <button id="back-to-top" aria-label="back to top">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-up"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+
+    </button>
+    
+  </aside>
+  <main>
+    
 <header>
   <nav>
-    <a id="back-link" href="">← Back</a>
+    <a id="back-link" href="&#x2F;posts">← Back</a>
     <a id="back-link" href="/">Home</a>
     
     
@@ -185,23 +242,53 @@ en">
   </nav>
 </header>
 
-  <main>
-    <h1 class="title">Tags</h1>
-    <div class="tags">
-      <a class="instant" href="&#x2F;tags&#x2F;incomplete&#x2F;"># incomplete</a>
-      <a class="instant" href="&#x2F;tags&#x2F;instrumentation&#x2F;"># instrumentation</a>
-      <a class="instant" href="&#x2F;tags&#x2F;jolt&#x2F;"># jolt</a>
-      <a class="instant" href="&#x2F;tags&#x2F;lists&#x2F;"># lists</a>
-      <a class="instant" href="&#x2F;tags&#x2F;montgomery-mults&#x2F;"># montgomery-mults</a>
-      <a class="instant" href="&#x2F;tags&#x2F;music&#x2F;"># music</a>
-      <a class="instant" href="&#x2F;tags&#x2F;one&#x2F;"># one</a>
-      <a class="instant" href="&#x2F;tags&#x2F;sumcheck&#x2F;"># sumcheck</a>
-      <a class="instant" href="&#x2F;tags&#x2F;three&#x2F;"># three</a>
-      <a class="instant" href="&#x2F;tags&#x2F;two&#x2F;"># two</a>
+    <div>
+      
+      
+      
+      
+      <div id="copy-cfg" style="display: none;" data-copy-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" data-check-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+"></div>
+      
+      <article class="prose">
+        <h1>Advent Of Jolt: Day 4</h1>
+        <div id="post-info">
+          <div id="date">
+            <span id="publish">Jan 8, 2026</span>
+            </div>
+
+          
+          <div id="tags">
+            <a class="instant" href="//tags/one"><span>#</span>one</a><a class="instant" href="//tags/two"><span>#</span>two</a>
+          </div>
+          
+        </div>
+
+        
+        
+
+        <blockquote id="outdate_alert" class="callout caution hidden" data-days="50"
+          data-alert-text-before="This article was last updated "
+          data-alert-text-after=" days ago and may be out of date.">
+          <div class="content"></div>
+        </blockquote>
+        
+
+        
+      </article>
+
+      
+      
+
+      
+      
+      <div class="giscus"></div>
+      
       
     </div>
-  </main>
-  
+
+    
 
 
 <footer>
@@ -254,9 +341,13 @@ en">
 
 
 
+  </main>
 </div>
 
   
+<script src="/js/lightense.min.js"></script>
+
+
   <script src="/js/main.js"></script>
 </body>
 

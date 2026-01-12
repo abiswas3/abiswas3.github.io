@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  
+  
+    
+  
+  <meta name="description" content="My blog site.">
+
+  <title>Advent Of Jolt: Day 2</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
+  
+  <style>
+  /* ------------------ Light Mode ------------------ */
+  body {
+    --primary-color: #4f6cb8; /* main accent */
+    --primary-pale-color: #4f6cb822; /* subtle accent */
+    --primary-decoration-color: #4f6cb811; /* very subtle */
+    --bg-color: #ffffff;
+    --text-color: #1f1f1f;
+    --text-pale-color: #6b6b6b;
+    --text-decoration-color: #b0b0b0;
+    --highlight-mark-color: #a1b0db20;
+
+    --callout-note-color: #4f6cb8; /* blue */
+    --callout-tip-color: #2e8555; /* green */
+    --callout-important-color: #8c4fc9; /* purple */
+    --callout-warning-color: #c27b3f; /* orange */
+    --callout-caution-color: #c64e4e; /* red */
+  }
+
+  /* ------------------ Dark Mode ------------------ */
+  body.dark {
+    --primary-color: #7a92db;
+    --primary-pale-color: #7a92db44;
+    --primary-decoration-color: #7a92db11;
+    --bg-color: #1c1c1c;
+    --text-color: #e0e0e0;
+    --text-pale-color: #8a8a8a;
+    --text-decoration-color: #5f5f5f;
+    --highlight-mark-color: #7a92db33;
+
+    --callout-note-color: #7a92db; /* lighter blue */
+    --callout-tip-color: #52a077; /* lighter green */
+    --callout-important-color: #a378db; /* lighter purple */
+    --callout-warning-color: #d89d68; /* softer orange */
+    --callout-caution-color: #e37474; /* lighter red */
+  }
+
+  /* ------------------ Fonts & Layout ------------------ */
+  body {
+    /* --main-font: "Lora", "Courier", monospace; */
+    --main-font: sans-serif;
+    /* --main-font: Georgia, "Palatino Linotype", Palatino, "Book Antiqua", serif; */
+    /* --font-weight: 450; */
+    --code-font:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    --homepage-max-width: 768px;
+    --main-max-width: 768px;
+    --avatar-size: 60px;
+    --font-size: 17px;
+    --line-height: 2;
+    --img-border-radius: 0px;
+    --detail-border-radius: 0px;
+    --dark-mode-img-brightness: 0.75;
+    --dark-mode-chart-brightness: 0.75;
+    --inline-code-border-radius: 2px;
+    --inline-code-bg-color: var(--primary-decoration-color);
+    --block-code-border-radius: 5px;
+    --block-code-border-color: var(--primary-color);
+    --detail-border-color: var(--primary-color);
+  }
+
+  /* ------------------ Theorem / Lemma / Definition Blocks ------------------ */
+  blockquote.theorem {
+    border-left: 4px solid var(--callout-note-color);
+    background: #f2f7ff;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+  }
+
+  blockquote.theorem.lemma {
+    border-color: var(--callout-tip-color);
+    background: #edf9f2;
+  }
+
+  blockquote.theorem.definition {
+    border-color: var(--callout-warning-color);
+    background: #fff8eb;
+  }
+
+  blockquote.theorem.important {
+    border-color: var(--callout-important-color);
+    background: #f6f0ff;
+  }
+
+  blockquote.theorem.caution {
+    border-color: var(--callout-caution-color);
+    background: #ffecec;
+  }
+
+  blockquote.theorem .title {
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--text-color);
+  }
+
+  blockquote.theorem .content {
+    margin: 0;
+    color: var(--text-color);
+  }
+
+  /* Dark mode overrides for theorem blocks */
+  body.dark blockquote.theorem {
+    background: #22293b;
+    border-left-color: var(--callout-note-color);
+  }
+
+  body.dark blockquote.theorem.lemma {
+    background: #1d2d22;
+    border-left-color: var(--callout-tip-color);
+  }
+
+  body.dark blockquote.theorem.definition {
+    background: #2f1e0f;
+    border-left-color: var(--callout-warning-color);
+  }
+
+  body.dark blockquote.theorem.important {
+    background: #2a1f33;
+    border-left-color: var(--callout-important-color);
+  }
+
+  body.dark blockquote.theorem.caution {
+    background: #3c1f1f;
+    border-left-color: var(--callout-caution-color);
+  }
+  #theme-toggle {
+    all: unset; /* removes all inherited and default styles */
+    display: inline; /* or block, if you want */
+    /* background-color: var(--bg-color); */
+  }
+</style>
+
+  <link rel="stylesheet" href="/main.css">
+  
+
+<link id="hl" rel="stylesheet" type="text/css" href="/hl-light.css" />
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" integrity="sha384-HORx6nWi8j5/mYA+y57/9/CZc5z8HnEw4WUZWy5yOn9ToKBv1l58vJaufFAn9Zzi" crossorigin="anonymous"></script>
+  
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+          macros: {
+            "\\field": "\\mathbb{#1}",
+            "\\hei": "\\mathbb{F}(#1)",
+            "\\Field": "\\mathbb{F}",
+            "\\Mont": "\\widetilde{#1}",
+            "\\samples": "\\xleftarrow{\\$}",
+            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
+            "\\TauConstraints": "\\tau_y",
+            "\\TauTime": "\\tau_{\\text{cycle}}",
+            "\\TauGroup": "\\tau_b",
+            "\\MLE": "\\widetilde{#1}",
+            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
+            "\\Def": ":=",
+            "\\ChallengeSet": "\\mathsf{C}"
+
+          },
+            throwOnError: false,
+          trust: true
+
+        });
+    });
+</script>
+
+
+
+  
+</head>
+
+<body class="post">
+  
+  <script>
+    const theme = sessionStorage.getItem('theme');
+    const match = window.matchMedia("(prefers-color-scheme: dark)").matches
+    if ((theme && theme == 'dark') || (!theme && match)) {
+      document.body.classList.add('dark');
+      const hl = document.querySelector('link#hl');
+      if (hl) hl.href = '/hl-dark.css';
+    }
+  </script>
+  
+  
+<div id="wrapper">
+  <div id="blank"></div>
+  <aside>
+    
+    
+    <nav>
+      <ul>
+        
+        <li>
+          <a class="h2" href="#from-trace-to-polynomials">From Trace To Polynomials</a>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#pre-processing">Pre-Processing</a>
+          
+          <ul>
+            
+            <li>
+              <a class="h3" href="#byte-code-preprocessing">Byte Code Preprocessing</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#worked-out-examples">Worked Out Examples</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#ram-pre-processing">RAM Pre-processing</a>
+            </li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#we-are-done-with-pre-processing-now-polynomials">We are done with pre-processing; Now Polynomials</a>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#details-about-how-we-compute-each-polynomial">Details about how we compute each polynomial</a>
+          
+          <ul>
+            
+            <li>
+              <a class="h3" href="#the-rdinc-polynomial">The RdInc Polynomial</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#the-raminc-polynomial">The RamInc Polynomial</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#one-hot-encoded-polynomials">One Hot Encoded Polynomials</a>
+            </li>
+            
+          </ul>
+          
+        </li>
+        
+      </ul>
+    </nav>
+    
+    
+    <button id="back-to-top" aria-label="back to top">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-up"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+
+    </button>
+    
+  </aside>
+  <main>
+    
+<header>
+  <nav>
+    <a id="back-link" href="&#x2F;posts">← Back</a>
+    <a id="back-link" href="/">Home</a>
+    
+    
+
+    <button id="theme-toggle" aria-label="theme switch">
+    <span class="moon-icon">🌙</span>
+     <span class="sun-icon">🌞</span>
+    </button>
+
+  </nav>
+</header>
+
+    <div>
+      
+      
+      
+      
+      <div id="copy-cfg" style="display: none;" data-copy-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" data-check-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+"></div>
+      
+      <article class="prose">
+        <h1>Advent Of Jolt: Day 2</h1>
+        <div id="post-info">
+          <div id="date">
+            <span id="publish">Jan 8, 2026</span>
+            </div>
+
+          
+          <div id="tags">
+            <a class="instant" href="//tags/one"><span>#</span>one</a><a class="instant" href="//tags/two"><span>#</span>two</a>
+          </div>
+          
+        </div>
+
+        
+        
+
+        <blockquote id="outdate_alert" class="callout caution hidden" data-days="50"
+          data-alert-text-before="This article was last updated "
+          data-alert-text-after=" days ago and may be out of date.">
+          <div class="content"></div>
+        </blockquote>
+        
+
+        <p><strong>Quick Recap</strong></p>
+<p>In the <a href="/posts/day_1a.md">last post</a> we took a rust program, and transformed it into a RISC-V Binary.
+Using this binary file as input, we generate two intermediate representations : 1. The Bytecode object 2. The Jolt Execution trace.
+The byte code is just a vetor of <code>Instruction</code> <a rel="nofollow noreferrer" href="https://github.com/abiswas3/jolt/blob/c5c1e7bc62cfa50fcd17350e5b014e9cc943a6e5/tracer/src/instruction/mod.rs#L379">structs</a>, where <code>Instruction</code> is a data structure we defined to represent one assembly instruction<sup class="footnote-reference"><a href="#a">1</a></sup>.
+The exectution trace is a vector of <code>Cycle</code> <a rel="nofollow noreferrer" href="https://github.com/abiswas3/jolt/blob/c5c1e7bc62cfa50fcd17350e5b014e9cc943a6e5/tracer/src/instruction/mod.rs#L393">structs</a> where <code>Cycle</code> is a jolt specific data structure which contains an assembly instruction, and a description of the machine state before and after the execution of the instruction.</p>
+<div class="footnote-definition" id="a"><sup class="footnote-definition-label">1</sup>
+<p>To be precise, we should say 1 virtual assembly instruction. In jolt some RISC-V instructions such as division are represented by a sequence of virtual instructions. See memory instruction in previous example for a physical example.</p>
+</div>
+<p>In this post, we go from a jolt-trace (and some pre-processing) to polynomials, and commitments.</p>
+ 
+
+<blockquote class="theorem box">
+  
+  <div class="content"><p>For brevity, and mostly my sanity, I will skip all the commitment specific details of Jolt. Perhaps, later I can convice <a rel="nofollow noreferrer" href="https://github.com/markosg04">Markos</a> to write a guest post, outlining his Dory Tales.
+For now, we will gingerly step around commitment code -- and just assume any Rust vector of finite field elements can be committed to.</p>
+</div>
+</blockquote>
+<h2 id="from-trace-to-polynomials">From Trace To Polynomials<a class="zola-anchor" href="#from-trace-to-polynomials" aria-label="Anchor link for: from-trace-to-polynomials" style="visibility: hidden;"></a>
+</h2>
+<p>In this post we describe how we go from Jolt data structures which describe assembly instructions and machine state, to polynomials over 256 bit fields that describe the same.
+That is we focus on this phase of the architecture.</p>
+<p>** TODO: fix this **
+<img src="/posts/advent-day2/step4.svg" alt="" /></p>
+<p>Our object of study is still this program that practically nothing.</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-annotation z-rust"><span class="z-punctuation z-definition z-annotation z-rust">#</span><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-variable z-annotation z-rust">jolt</span>::<span class="z-variable z-annotation z-rust">provable</span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust">memory_size <span class="z-keyword z-operator z-rust">=</span> 10240<span class="z-punctuation z-separator z-rust">,</span> max_trace_length <span class="z-keyword z-operator z-rust">=</span> 65536</span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>
+</span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">fib</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-variable z-parameter z-rust">n</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u32</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> <span class="z-storage z-type z-rust">u128</span></span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> a<span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u128</span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> b<span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u128</span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">1</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-support z-function z-rust">start_cycle_tracking</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-string z-quoted z-double z-rust"><span class="z-punctuation z-definition z-string z-begin z-rust">&quot;</span>fib_loop<span class="z-punctuation z-definition z-string z-end z-rust">&quot;</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Use `start_cycle_tracking(&quot;{name}&quot;)` to start a cycle span
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    b <span class="z-keyword z-operator z-assignment z-rust">=</span> a <span class="z-keyword z-operator z-arithmetic z-rust">+</span> b<span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-support z-function z-rust">end_cycle_tracking</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-string z-quoted z-double z-rust"><span class="z-punctuation z-definition z-string z-begin z-rust">&quot;</span>fib_loop<span class="z-punctuation z-definition z-string z-end z-rust">&quot;</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Use `end_cycle_tracking(&quot;{name}&quot;)` to end a cycle span
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    b
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>Our inputs will be</p>
+<ol>
+<li><a href="/posts/advent-day2/todo">Dynamic Trace</a></li>
+<li>Program input <code>n</code> which we do not use (so you can ignore this for most of this post).</li>
+<li>Some pre-processing, which we detail below.</li>
+</ol>
+ 
+
+<blockquote class="theorem box">
+  
+  <div class="content"><p>Throughout this series, and most Jolt papers, when I say polynomials, what I really mean is vectors.
+The polynomial in question will be the multi-linear extension of said vector, which representst the evaluation of said polynomial over the boolean hypercube.</p>
+</div>
+</blockquote>
+<h2 id="pre-processing">Pre-Processing<a class="zola-anchor" href="#pre-processing" aria-label="Anchor link for: pre-processing" style="visibility: hidden;"></a>
+</h2>
+<p>As mentioned earlier, I will dance around commitment specific details here, and only focus on items I need to later explain the sum-check proving for later in the series.
+In my opinion, the commitment bit (although an essential non-trivial component of the proof system) is only interesting if one wants to understand algorithmic decisions like "why did we introduce the parameter $d$" and "what should $d$ be?".
+Here, we are just trying to understand how the jolt prover works, and the commitment scheme is a little bit of a distraction.
+Note: you do not have to know what $d$ means. For now it's just some small integer like 2 or 16.</p>
+<p>Our first object of study begins here on Line 261 of <code>jolt/jolt-core/benches/e2e_profiling.rs</code></p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> preprocessing <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-path z-rust">JoltRV64IMAC<span class="z-punctuation z-accessor z-rust">::</span></span>prover_preprocess<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">        bytecode<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">clone</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> We have already described this 
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">        program_io<span class="z-punctuation z-accessor z-dot z-rust">.</span>memory_layout<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">clone</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> See below
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">        init_memory_state<span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span>`vec&lt;(u64, u8)&gt;` of address value pairs.
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">        trace<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">len</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">next_power_of_two</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> This will be 64 for us given we had 63 virtual instructions. 
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    </span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>Memory layout looks like the following with most of the keys being self explanatory</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-struct z-rust">struct</span> </span><span class="z-meta z-struct z-rust"><span class="z-entity z-name z-struct z-rust">MemoryLayout</span> </span><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> The total size of the elf&#39;s sections, including the .text, .data, .rodata, and .bss sections.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">program_size</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">max_trusted_advice_size</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">trusted_advice_start</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">trusted_advice_end</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">max_untrusted_advice_size</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">untrusted_advice_start</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">untrusted_advice_end</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">max_input_size</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">max_output_size</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">input_start</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">input_end</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">output_start</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">output_end</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">stack_size</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Stack starts from (RAM_START_ADDRESS + `program_size` + `stack_size`) and grows in descending addresses by `stack_size` bytes.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">stack_end</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">memory_size</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Heap starts just after the start of the stack and is `memory_size` bytes.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">memory_end</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">panic</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">termination</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> End of the memory region containing inputs, outputs, the panic bit,
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> and the termination bit
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">io_end</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>and the initial memory state is given by <code>vec&lt;(u64, u8)&gt;</code> of address value pairs.
+Diving deeper into pre-processing gets us to :</p>
+<p>Line 240 <code>jolt/jolt-core/src/zkvm/mod.rs</code></p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust">    <span class="z-meta z-annotation z-rust"><span class="z-punctuation z-definition z-annotation z-rust">#</span><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-variable z-annotation z-rust">tracing</span>::<span class="z-variable z-annotation z-rust">instrument</span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust">skip_all<span class="z-punctuation z-separator z-rust">,</span> name <span class="z-keyword z-operator z-rust">=</span> <span class="z-string z-quoted z-double z-rust"><span class="z-punctuation z-definition z-string z-begin z-rust">&quot;</span>Jolt::prover_preprocess<span class="z-punctuation z-definition z-string z-end z-rust">&quot;</span></span></span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>
+</span><span class="z-source z-rust">    <span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">prover_preprocess</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust">        <span class="z-variable z-parameter z-rust">bytecode</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Vec</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span>Instruction<span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust">        <span class="z-variable z-parameter z-rust">memory_layout</span><span class="z-punctuation z-separator z-rust">:</span> MemoryLayout,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust">        <span class="z-variable z-parameter z-rust">memory_init</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Vec</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-storage z-type z-rust">u64</span>, <span class="z-storage z-type z-rust">u8</span><span class="z-punctuation z-section z-group z-end z-rust">)</span><span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust">        <span class="z-variable z-parameter z-rust">max_trace_length</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">usize</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust">    </span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> <span class="z-meta z-generic z-rust">JoltProverPreprocessing<span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span>F, PCS<span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span></span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> shared <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-storage z-type z-rust">Self</span><span class="z-meta z-path z-rust"><span class="z-punctuation z-accessor z-rust">::</span></span>shared_preprocess<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>bytecode<span class="z-punctuation z-separator z-rust">,</span> memory_layout<span class="z-punctuation z-separator z-rust">,</span> memory_init</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> &lt;- we care about this only
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> max_T<span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">usize</span> <span class="z-keyword z-operator z-assignment z-rust">=</span> max_trace_length<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">next_power_of_two</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Ignored for this post
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> generators <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-other z-rust">PCS</span><span class="z-meta z-path z-rust"><span class="z-punctuation z-accessor z-rust">::</span></span>setup_prover<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-other z-rust">DTH_ROOT_OF_K</span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">log_2</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-arithmetic z-rust">+</span> max_T<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">log_2</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        JoltProverPreprocessing <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> generators<span class="z-punctuation z-separator z-rust">,</span> shared </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>We only focus on the shared portion of the pre-processing, so</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">shared_preprocess</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust">        <span class="z-variable z-parameter z-rust">bytecode</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Vec</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span>Instruction<span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust">        <span class="z-variable z-parameter z-rust">memory_layout</span><span class="z-punctuation z-separator z-rust">:</span> MemoryLayout,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust">        <span class="z-variable z-parameter z-rust">memory_init</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Vec</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-storage z-type z-rust">u64</span>, <span class="z-storage z-type z-rust">u8</span><span class="z-punctuation z-section z-group z-end z-rust">)</span><span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust">    </span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> JoltSharedPreprocessing</span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> bytecode_preprocessing <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-path z-rust">BytecodePreprocessing<span class="z-punctuation z-accessor z-rust">::</span></span>preprocess<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>bytecode</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> LINE 1 
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> ram_preprocessing <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-path z-rust">RAMPreprocessing<span class="z-punctuation z-accessor z-rust">::</span></span>preprocess<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>memory_init</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> LINE 2
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        JoltSharedPreprocessing <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            memory_layout<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            bytecode<span class="z-punctuation z-separator z-rust">:</span> bytecode_preprocessing<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            ram<span class="z-punctuation z-separator z-rust">:</span> ram_preprocessing<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>We already know what <code>MemoryLayout</code> is so we focus on the remaining two outputs.</p>
+<h3 id="byte-code-preprocessing">Byte Code Preprocessing<a class="zola-anchor" href="#byte-code-preprocessing" aria-label="Anchor link for: byte-code-preprocessing" style="visibility: hidden;"></a>
+</h3>
+<p>This pre-processings stage outputs a struct of the following type</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-struct z-rust">struct</span> </span><span class="z-meta z-struct z-rust"><span class="z-entity z-name z-struct z-rust">BytecodePreprocessing</span> </span><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">code_size</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">usize</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">bytecode</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Vec</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span>Instruction<span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Maps the memory address of each instruction in the bytecode to its &quot;virtual&quot; address.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> See Section 6.1 of the Jolt paper, &quot;Reflecting the program counter&quot;. The virtual address
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> is the one used to keep track of the next (potentially virtual) instruction to execute.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">pc_map</span><span class="z-punctuation z-separator z-type z-rust">:</span> BytecodePCMapper,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">d</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">usize</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>Roughly it does the following:</p>
+<ol>
+<li>Computes <code>Bytecode_ra_d</code> parameter used for chunking one hot encodings (we will get to this). For our program, as it is so small it is we have $d=1$.</li>
+<li>Constructs the <code>pc_map</code> object which is of <code>BytecodePcMapper</code> which looks like <a href="/posts/advent-day2/byte-code-map.txt">this</a> for our program.</li>
+<li>Computes how much memory byte code needs.</li>
+</ol>
+<p>The interesting object in this pre-processing phase is the following object.</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-struct z-rust">struct</span> </span><span class="z-meta z-struct z-rust"><span class="z-entity z-name z-struct z-rust">BytecodePCMapper</span> </span><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Stores the mapping of the PC at the beginning of each inline sequence
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> and the maximum number of the inline sequence
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Indexed by the address of instruction unmapped divided by 2
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-variable z-other z-member z-rust">indices</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Vec</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span><span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Option</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-storage z-type z-rust">usize</span>, <span class="z-storage z-type z-rust">u16</span><span class="z-punctuation z-section z-group z-end z-rust">)</span><span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span><span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+ 
+
+<blockquote class="theorem box">
+  
+  <div class="content"><h4 id="how-to-interpret-each-position-of-indices">How to Interpret Each Position of indices</h4>
+<p>Each index position <code>i</code> represents a specific memory address in your program:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust">address <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>i <span class="z-keyword z-operator z-arithmetic z-rust">-</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">1</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-arithmetic z-rust">*</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">2</span> <span class="z-keyword z-operator z-arithmetic z-rust">+</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-rust">0x80000000</span>
+</span></code></pre>
+<p>This is the reverse of <code>get_index()</code> which we will explain shortly.</p>
+<p>Examples:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust">rustindices<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-constant z-numeric z-integer z-decimal z-rust">0</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>  → Reserved <span class="z-keyword z-control z-rust">for</span> <span class="z-constant z-other z-rust">NOOP</span>
+</span><span class="z-source z-rust">indices<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-constant z-numeric z-integer z-decimal z-rust">1</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>  → address <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">1</span><span class="z-keyword z-operator z-arithmetic z-rust">-</span><span class="z-constant z-numeric z-integer z-decimal z-rust">1</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-keyword z-operator z-arithmetic z-rust">*</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2</span> <span class="z-keyword z-operator z-arithmetic z-rust">+</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-rust">0x80000000</span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-rust">0x80000000</span>
+</span><span class="z-source z-rust">indices<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>  → address <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2</span><span class="z-keyword z-operator z-arithmetic z-rust">-</span><span class="z-constant z-numeric z-integer z-decimal z-rust">1</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-keyword z-operator z-arithmetic z-rust">*</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2</span> <span class="z-keyword z-operator z-arithmetic z-rust">+</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-rust">0x80000000</span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-rust">0x80000002</span>
+</span><span class="z-source z-rust">indices<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-constant z-numeric z-integer z-decimal z-rust">3</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>  → address <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">3</span><span class="z-keyword z-operator z-arithmetic z-rust">-</span><span class="z-constant z-numeric z-integer z-decimal z-rust">1</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-keyword z-operator z-arithmetic z-rust">*</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2</span> <span class="z-keyword z-operator z-arithmetic z-rust">+</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-rust">0x80000000</span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-rust">0x80000004</span>
+</span><span class="z-source z-rust">indices<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-constant z-numeric z-integer z-decimal z-rust">34</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span> → address <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">34</span><span class="z-keyword z-operator z-arithmetic z-rust">-</span><span class="z-constant z-numeric z-integer z-decimal z-rust">1</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-keyword z-operator z-arithmetic z-rust">*</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2</span> <span class="z-keyword z-operator z-arithmetic z-rust">+</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-rust">0x80000000</span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-rust">0x80000042</span>
+</span><span class="z-source z-rust">indices<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-constant z-numeric z-integer z-decimal z-rust">76</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span> → address <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">76</span><span class="z-keyword z-operator z-arithmetic z-rust">-</span><span class="z-constant z-numeric z-integer z-decimal z-rust">1</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-keyword z-operator z-arithmetic z-rust">*</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2</span> <span class="z-keyword z-operator z-arithmetic z-rust">+</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-rust">0x80000000</span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-rust">0x80000096</span>
+</span></code></pre>
+<p>What the value means:</p>
+<p><code>indices[3] = Some((2, 0))</code> → "At address 0x80000004, bytecode position 2, no virtual sequence"
+<code>indices[34] = Some((36, 7))</code> → "At address 0x80000042, bytecode position 36, 8-step virtual sequence"
+<code>indices[2] = None →</code> "No instruction at address 0x80000002"</p>
+<p>So the array is a direct map: Index → Address → Bytecode Position</p>
+</div>
+</blockquote>
+<p>In more detail, the input to the creating of this map is the <a href="/posts/advent-day2/bytecode.fib.txt">bytecode</a> which is just a <code>Vec&lt;Instruction&gt;</code> object representing the entire program's bytecode in ascending order by memory address:</p>
+<pre class="z-code"><code><span class="z-text z-plain">// Line 1
+</span><span class="z-text z-plain">AUIPC { address: 2147483648, virtual_sequence_remaining: None, ... }
+</span><span class="z-text z-plain">// Line 2  
+</span><span class="z-text z-plain">ADDI { address: 2147483652, virtual_sequence_remaining: None, ... }
+</span><span class="z-text z-plain">// Line 3
+</span><span class="z-text z-plain">AUIPC { address: 2147483656, virtual_sequence_remaining: None, ... }
+</span><span class="z-text z-plain">// ...
+</span><span class="z-text z-plain">// Lines 36-43: Virtual sequence at same address
+</span><span class="z-text z-plain">ADDI { address: 2147483714, virtual_sequence_remaining: Some(7), ... }
+</span><span class="z-text z-plain">ANDI { address: 2147483714, virtual_sequence_remaining: Some(6), ... }
+</span><span class="z-text z-plain">LD { address: 2147483714, virtual_sequence_remaining: Some(5), ... }
+</span><span class="z-text z-plain">// ... (5 more at same address)
+</span></code></pre>
+<p>The output is a BytecodePCMapper containing a sparse array that maps instruction addresses to bytecode positions:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust">BytecodePCMapper <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    indices<span class="z-punctuation z-separator z-rust">:</span> <span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Vec</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span><span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Option</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-storage z-type z-rust">usize</span>, <span class="z-storage z-type z-rust">u16</span><span class="z-punctuation z-section z-group z-end z-rust">)</span><span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span><span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span>        ^^^^^^^^^^^^^^^^^^^^^^^^
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span>        (bytecode_position, virtual_sequence_remaining)
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></code></pre>
+<p>where  <strong>The Address-to-Index Formula</strong> is given by</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-rust">const</span> <span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">get_index</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-variable z-parameter z-rust">address</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">usize</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> <span class="z-storage z-type z-rust">usize</span></span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>address <span class="z-keyword z-operator z-arithmetic z-rust">-</span> <span class="z-constant z-other z-rust">RAM_START_ADDRESS</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-arithmetic z-rust">/</span> <span class="z-constant z-other z-rust">ALIGNMENT_FACTOR_BYTECODE</span> <span class="z-keyword z-operator z-arithmetic z-rust">+</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">1</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span><span class="z-source z-rust"><span class="z-keyword z-other z-rust">where</span> 
+</span><span class="z-source z-rust"><span class="z-constant z-other z-rust">RAM_START_ADDRESS</span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-rust">0x80000000</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2147483648</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span><span class="z-source z-rust"><span class="z-constant z-other z-rust">ALIGNMENT_FACTOR_BYTECODE</span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">2</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2</span><span class="z-keyword z-operator z-arithmetic z-rust">-</span>byte alignment</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></code></pre>
+<p><strong>The formula in more detail:</strong> Subtract <code>RAM_START_ADDRESS</code> to get offset from program start
+Divide by 2 because instructions are on even addresses
+Add 1 because index 0 is reserved for <code>NOOP</code></p>
+<p>The length of this array is given by taking the last instruction in the bytecode array, and pulling its physucal address and computing the index, which gives us the size the array (as bytecode stores instructions in ascending order of memory).</p>
+<h3 id="worked-out-examples">Worked Out Examples<a class="zola-anchor" href="#worked-out-examples" aria-label="Anchor link for: worked-out-examples" style="visibility: hidden;"></a>
+</h3>
+<h4 id="example-1-simple-instruction">Example 1: Simple Instruction<a class="zola-anchor" href="#example-1-simple-instruction" aria-label="Anchor link for: example-1-simple-instruction" style="visibility: hidden;"></a>
+</h4>
+<p>The second <code>Instruction</code> in Bytecode</p>
+<pre class="z-code"><code><span class="z-text z-plain">rustADDI { 
+</span><span class="z-text z-plain">    address: 2147483652,  // 0x80000004
+</span><span class="z-text z-plain">    virtual_sequence_remaining: None,
+</span><span class="z-text z-plain">    ...
+</span><span class="z-text z-plain">}
+</span></code></pre>
+<p>Calculation:</p>
+<pre class="z-code"><code><span class="z-text z-plain">address = 2147483652
+</span><span class="z-text z-plain">offset = 2147483652 - 2147483648 = 4
+</span><span class="z-text z-plain">index = 4 / 2 + 1 = 3
+</span></code></pre>
+<p>Result:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust">indices<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-constant z-numeric z-integer z-decimal z-rust">3</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2</span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span>               |   |
+</span></span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span>               |   └─ No virtual sequence (0)
+</span></span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span>               └───── Bytecode position 2
+</span></span></code></pre>
+<p><strong>Interpretation:</strong> The instruction at address 0x80000004 is located at bytecode position 2, with no virtual expansion.</p>
+<h4 id="example-2-none-entry-address-gap">Example 2: None Entry (Address Gap)<a class="zola-anchor" href="#example-2-none-entry-address-gap" aria-label="Anchor link for: example-2-none-entry-address-gap" style="visibility: hidden;"></a>
+</h4>
+<p>Address <code>0x80000002</code> (2147483650):
+Calculation:</p>
+<pre class="z-code"><code><span class="z-text z-plain">address = 2147483650
+</span><span class="z-text z-plain">offset = 2147483650 - 2147483648 = 2
+</span><span class="z-text z-plain">index = 2 / 2 + 1 = 2
+</span></code></pre>
+<p>Result:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust">indices<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-type z-rust">None</span>
+</span></code></pre>
+<p>Why <code>None</code>? The array is initialised with <code>None</code> values.
+Then as we iterate through the bytecode, for each instruction address we update the corresponding index of the mapper.
+Some indices of the mapper never have instructions.
+Instructions appear at 0x80000000, then 0x80000004—the even addresses.
+The addresses between them (like 0x80000002) have no code, so their indices remain None.
+This creates a sparse array where gaps represent unused memory addresses.</p>
+<h4 id="example-3-virtual-instruction-sequence">Example 3: Virtual Instruction Sequence<a class="zola-anchor" href="#example-3-virtual-instruction-sequence" aria-label="Anchor link for: example-3-virtual-instruction-sequence" style="visibility: hidden;"></a>
+</h4>
+<p>Bytecode Lines 36-43:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Line 36
+</span></span><span class="z-source z-rust"><span class="z-constant z-other z-rust">ADDI</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> address<span class="z-punctuation z-separator z-rust">:</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">2147483714</span><span class="z-punctuation z-separator z-rust">,</span> virtual_sequence_remaining<span class="z-punctuation z-separator z-rust">:</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">7</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-range z-rust">...</span> </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Line 37
+</span></span><span class="z-source z-rust"><span class="z-constant z-other z-rust">ANDI</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> address<span class="z-punctuation z-separator z-rust">:</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">2147483714</span><span class="z-punctuation z-separator z-rust">,</span> virtual_sequence_remaining<span class="z-punctuation z-separator z-rust">:</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">6</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-range z-rust">...</span> </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Line 38
+</span></span><span class="z-source z-rust"><span class="z-constant z-other z-rust">LD</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> address<span class="z-punctuation z-separator z-rust">:</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">2147483714</span><span class="z-punctuation z-separator z-rust">,</span> virtual_sequence_remaining<span class="z-punctuation z-separator z-rust">:</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">5</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-range z-rust">...</span> </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Line 39
+</span></span><span class="z-source z-rust"><span class="z-constant z-other z-rust">XORI</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> address<span class="z-punctuation z-separator z-rust">:</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">2147483714</span><span class="z-punctuation z-separator z-rust">,</span> virtual_sequence_remaining<span class="z-punctuation z-separator z-rust">:</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">4</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-range z-rust">...</span> </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Line 40
+</span></span><span class="z-source z-rust">VirtualMULI <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> address<span class="z-punctuation z-separator z-rust">:</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">2147483714</span><span class="z-punctuation z-separator z-rust">,</span> virtual_sequence_remaining<span class="z-punctuation z-separator z-rust">:</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">3</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-range z-rust">...</span> </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Line 41
+</span></span><span class="z-source z-rust">VirtualPow2 <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> address<span class="z-punctuation z-separator z-rust">:</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">2147483714</span><span class="z-punctuation z-separator z-rust">,</span> virtual_sequence_remaining<span class="z-punctuation z-separator z-rust">:</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-range z-rust">...</span> </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Line 42
+</span></span><span class="z-source z-rust"><span class="z-constant z-other z-rust">MUL</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> address<span class="z-punctuation z-separator z-rust">:</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">2147483714</span><span class="z-punctuation z-separator z-rust">,</span> virtual_sequence_remaining<span class="z-punctuation z-separator z-rust">:</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">1</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-range z-rust">...</span> </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Line 43
+</span></span><span class="z-source z-rust">VirtualSRAI <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> address<span class="z-punctuation z-separator z-rust">:</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">2147483714</span><span class="z-punctuation z-separator z-rust">,</span> virtual_sequence_remaining<span class="z-punctuation z-separator z-rust">:</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">0</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-range z-rust">...</span> </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></code></pre>
+<p>All 8 instructions share address <code>0x80000042</code> (2147483714).
+Calculation:</p>
+<pre class="z-code"><code><span class="z-text z-plain">address = 2147483714
+</span><span class="z-text z-plain">offset = 2147483714 - 2147483648 = 66
+</span><span class="z-text z-plain">index = 66 / 2 + 1 = 34
+</span></code></pre>
+<p>Result:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust">indices<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-constant z-numeric z-integer z-decimal z-rust">34</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">36</span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">7</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span>                 |   |
+</span></span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span>                 |   └─ 7 more virtual steps follow this one (8 total)
+</span></span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span>                 └───── Bytecode position 36 (first instruction)
+</span></span></code></pre>
+<p><strong>Interpretation:</strong></p>
+<p>Address <code>0x80000042</code> maps to bytecode position 36
+This starts an 8-step virtual sequence
+To execute this instruction, read bytecode positions 36-43 consecutively
+The mapper stores only the first position, not all 8</p>
+<p>And that's all the bytecode pre-processing we do.
+Next we get to RAM -pre processing</p>
+<h3 id="ram-pre-processing">RAM Pre-processing<a class="zola-anchor" href="#ram-pre-processing" aria-label="Anchor link for: ram-pre-processing" style="visibility: hidden;"></a>
+</h3>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"> <span class="z-storage z-type z-rust">let</span> ram_preprocessing <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-path z-rust">RAMPreprocessing<span class="z-punctuation z-accessor z-rust">::</span></span>preprocess<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>memory_init</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>This simply returns a struct of type</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-struct z-rust">struct</span> </span><span class="z-meta z-struct z-rust"><span class="z-entity z-name z-struct z-rust">RAMPreprocessing</span> </span><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">min_bytecode_address</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">bytecode_words</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Vec</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span><span class="z-storage z-type z-rust">u64</span><span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p><strong>Input</strong>: <code>memory_init: Vec&lt;(u64, u8)&gt;</code> - List of <code>(address, byte)</code> pairs representing initial RAM state
+Output: <code>RAMPreprocessing</code> with:</p>
+<p><code>min_bytecode_address</code>: Starting address of memory region
+<code>bytecode_words</code>: Dense array of 64-bit words</p>
+<p>which is illustrated with the following picture (note the final lower addresses go at the end)</p>
+<div class="svg-container">
+![](ram-preprocess.svg)
+</div>
+<p>It takes the memory which a sequence of bytes and chunks it into a sequence of words (64 bits).</p>
+<h2 id="we-are-done-with-pre-processing-now-polynomials">We are done with pre-processing; Now Polynomials<a class="zola-anchor" href="#we-are-done-with-pre-processing-now-polynomials" aria-label="Anchor link for: we-are-done-with-pre-processing-now-polynomials" style="visibility: hidden;"></a>
+</h2>
+<p>Now we know exactly what the inputs are and we are ready to generate polynomials.
+The right entry point for this seeing how polynomials are generated starts here.</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>jolt_proof<span class="z-punctuation z-separator z-rust">,</span> program_io<span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-rust">_</span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-rust">_</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-path z-rust">JoltRV64IMAC<span class="z-punctuation z-accessor z-rust">::</span></span>prove<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">            <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span>preprocessing<span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> what we discussed above + crypto commitment mallarkey
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">            elf_contents<span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> the binary file in bytes
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">            <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span>serialized_input<span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> This is the postcard thing we called fib with see part a of day 1 post i.e n 
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">            <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> no trusted or untrusted advice for now
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">            <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">            <span class="z-support z-type z-rust">None</span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">        </span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>Digging in further: the code is divided into the following logical sections:</p>
+<ol>
+<li>Bookkeeping (not very interesting): It does things like count number of actual Risc-V cycles in the trace, and how many virtual cycles. Pads the trace appropriately to make things nice powers of 2. Truncate zeros on program on device outputs. We don't detail this any further.</li>
+<li>Commitment setup (<strong>won't bother with this</strong>)</li>
+<li>Generation of polynomials. <strong>Our focus</strong></li>
+<li>Committing of the polynomials (<strong>we won't go here</strong>)</li>
+<li>Rest of proving (which we will get to later in the series)</li>
+</ol>
+<p>We intialise the prover state with all the data they'd ever need:</p>
+<ul>
+<li>The pre-processing needed to commit to things, which we treat like a magic black box for now.</li>
+<li>The trace which we explained in <a href="/posts/day_1a.html">detail</a></li>
+<li>the <code>program_io</code> (which we will explain shortly)</li>
+<li>we had no trusted_advice so safe to ignore this</li>
+<li>finally the final memory state after the program has done running.</li>
+</ul>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> state_manager <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-path z-rust">StateManager<span class="z-punctuation z-accessor z-rust">::</span></span>new_prover<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">                preprocessing<span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> what we discussed above
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">                trace<span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> the dynamic trace discussed in detail in part 1
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">                program_io<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">clone</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> see above
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">                trusted_advice_commitment<span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> There was no trusted advice in our example
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">                final_memory_state<span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> The final Vec&lt;(u64)&gt; state of memory
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">            </span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust">            <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> We will spend ALOT of time here
+</span></span><span class="z-source z-rust">            <span class="z-storage z-type z-rust">let</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>proof<span class="z-punctuation z-separator z-rust">,</span> debug_info</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-path z-rust">JoltDAG<span class="z-punctuation z-accessor z-rust">::</span></span>prove<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>state_manager</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">ok</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">unwrap</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust">            ```
+</span><span class="z-source z-rust">
+</span><span class="z-source z-rust"><span class="z-keyword z-other z-rust">where</span> the `program_io` is given by the following <span class="z-meta z-struct z-rust"><span class="z-storage z-type z-struct z-rust">struct</span> 
+</span></span><span class="z-source z-rust">```<span class="z-meta z-struct z-rust"><span class="z-entity z-name z-struct z-rust">rust</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust">pub struct JoltDevice </span><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">inputs</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Vec</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span><span class="z-storage z-type z-rust">u8</span><span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span>, <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> the post card bit of our input n
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">trusted_advice</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Vec</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span><span class="z-storage z-type z-rust">u8</span><span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span>, <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> These were []
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">untrusted_advice</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Vec</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span><span class="z-storage z-type z-rust">u8</span><span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span>, <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> These were []
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">outputs</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-meta z-generic z-rust"><span class="z-support z-type z-rust">Vec</span><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span><span class="z-storage z-type z-rust">u8</span><span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span>, <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> the final answer b
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">panic</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">bool</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">memory_layout</span><span class="z-punctuation z-separator z-type z-rust">:</span> MemoryLayout,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>It's ok if a lot of this makes no sense of the bat. We'll clear things slowly.
+The main body which we focus on is the following:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust">    <span class="z-storage z-type z-rust">let</span> _guard <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">AllCommittedPolynomials<span class="z-punctuation z-accessor z-rust">::</span></span>initialize<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-support z-function z-rust">compute_d_parameter</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>ram_K</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> bytecode_d</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> &lt;--- Focus here
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust"></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust">
+</span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> opening_proof_hints <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-storage z-type z-rust">Self</span><span class="z-meta z-path z-rust"><span class="z-punctuation z-accessor z-rust">::</span></span>generate_and_commit_polynomials<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-keyword z-operator z-bitwise z-rust">&amp;</span><span class="z-storage z-modifier z-rust">mut</span> state_manager</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-keyword z-operator z-rust">?</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>Before we can fill in our polynomials with the right values that match the trace, we need to allocate space in memory for them.
+This is exactly what <code>initialize</code> does.
+The work is done in</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> opening_proof_hints <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-storage z-type z-rust">Self</span><span class="z-meta z-path z-rust"><span class="z-punctuation z-accessor z-rust">::</span></span>generate_and_commit_polynomials<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-keyword z-operator z-bitwise z-rust">&amp;</span><span class="z-storage z-modifier z-rust">mut</span> state_manager</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-keyword z-operator z-rust">?</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>which generates the following vectors (from which we can get polynomials).</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> polynomials <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-macro z-rust">vec!</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>RdInc<span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>RamInc<span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">0</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">1</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">2</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">3</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">4</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">5</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">6</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">7</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">8</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">9</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">10</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">11</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">12</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">13</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">14</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">    <span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>InstructionRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">15</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust"><span class="z-keyword z-control z-rust">for</span> i <span class="z-keyword z-operator z-rust">in</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span><span class="z-keyword z-operator z-range z-rust">..</span>ram_d <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    polynomials<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">push</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>RamRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>i</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span><span class="z-source z-rust"><span class="z-keyword z-control z-rust">for</span> i <span class="z-keyword z-operator z-rust">in</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span><span class="z-keyword z-operator z-range z-rust">..</span>bytecode_d <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    polynomials<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">push</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-path z-rust">CommittedPolynomial<span class="z-punctuation z-accessor z-rust">::</span></span>BytecodeRa<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>i</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></code></pre>
+<p>So this is the image you should have for what is committed to:</p>
+<ol>
+<li>
+<p><code>RdInc</code> and <code>RamInc</code> are <code>Vec&lt;i128&gt;</code> of size $T$ where $T$ is the number of cycles in our dynamic trace rounded to the next power of 2 (so 64 for our case).</p>
+</li>
+<li>
+<p><code>bytecode_ra</code>, <code>instruction_ra</code> and <code>ram_ra</code> are have the same structure: they consists of $d_1, 16, d_2$ matrices. Each matrix has $T$ rows and $255$ columns. For every row exactly 1 column is to set 1 based on the logic discussed below. $d_1$ and $d_2$ are dynamically calculated based on the trace.</p>
+</li>
+</ol>
+<h2 id="details-about-how-we-compute-each-polynomial">Details about how we compute each polynomial<a class="zola-anchor" href="#details-about-how-we-compute-each-polynomial" aria-label="Anchor link for: details-about-how-we-compute-each-polynomial" style="visibility: hidden;"></a>
+</h2>
+<h4 id="the-rdinc-polynomial">The RdInc Polynomial<a class="zola-anchor" href="#the-rdinc-polynomial" aria-label="Anchor link for: the-rdinc-polynomial" style="visibility: hidden;"></a>
+</h4>
+<p>For each cycle $i \in [T]$ if register was written to store the difference between the value before and after write. Simple enough!</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust">batch_ref<span class="z-punctuation z-accessor z-dot z-rust">.</span>rd_inc<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>i<span class="z-punctuation z-section z-group z-end z-rust">]</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> post_rd <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">i128</span> <span class="z-keyword z-operator z-arithmetic z-rust">-</span> pre_rd <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">i128</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<h4 id="the-raminc-polynomial">The RamInc Polynomial<a class="zola-anchor" href="#the-raminc-polynomial" aria-label="Anchor link for: the-raminc-polynomial" style="visibility: hidden;"></a>
+</h4>
+<p>Quite simple, for each cycle, if the trace does not touch ram store 0, otherwise, if it writes to RAM at some address, then store the difference in value before and after write.</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> ram_inc <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-keyword z-control z-rust">match</span> cycle<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">ram_access</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">            <span class="z-meta z-path z-rust">tracer<span class="z-punctuation z-accessor z-rust">::</span></span><span class="z-meta z-path z-rust">instruction<span class="z-punctuation z-accessor z-rust">::</span></span><span class="z-meta z-path z-rust">RAMAccess<span class="z-punctuation z-accessor z-rust">::</span></span>Write<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>write</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-rust">=&gt;</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">                write<span class="z-punctuation z-accessor z-dot z-rust">.</span>post_value <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">i128</span> <span class="z-keyword z-operator z-arithmetic z-rust">-</span> write<span class="z-punctuation z-accessor z-dot z-rust">.</span>pre_value <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">i128</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">            <span class="z-keyword z-operator z-rust">_</span> <span class="z-keyword z-operator z-rust">=&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">        </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust">
+</span><span class="z-source z-rust">batch_ref<span class="z-punctuation z-accessor z-dot z-rust">.</span>ram_inc<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>i<span class="z-punctuation z-section z-group z-end z-rust">]</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> ram_inc<span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>Finally we get to all the one hot encoded polynomials</p>
+<h4 id="one-hot-encoded-polynomials">One Hot Encoded Polynomials<a class="zola-anchor" href="#one-hot-encoded-polynomials" aria-label="Anchor link for: one-hot-encoded-polynomials" style="visibility: hidden;"></a>
+</h4>
+<p>Click on the links below to see detailed worked out examples of how we get to the polynomials using the trace and the pc-mapper.</p>
+<ol>
+<li><a href="/posts/bytecode-ra/">BytecodeRa</a></li>
+</ol>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> BytecodeRa indices
+</span></span><span class="z-source z-rust"><span class="z-keyword z-control z-rust">if</span> <span class="z-storage z-type z-rust">let</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>d<span class="z-punctuation z-separator z-rust">,</span> log_K_chunk<span class="z-punctuation z-separator z-rust">,</span> K_chunk</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> bytecode_constants <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> pc <span class="z-keyword z-operator z-assignment z-rust">=</span> preprocessing<span class="z-punctuation z-accessor z-dot z-rust">.</span>shared<span class="z-punctuation z-accessor z-dot z-rust">.</span>bytecode<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">get_pc</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>cycle</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-control z-rust">for</span> j <span class="z-keyword z-operator z-rust">in</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span><span class="z-keyword z-operator z-range z-rust">..</span>bytecode_d <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> index <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pc <span class="z-keyword z-operator z-comparison z-rust">&gt;</span><span class="z-keyword z-operator z-comparison z-rust">&gt;</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>log_K_chunk <span class="z-keyword z-operator z-arithmetic z-rust">*</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>d <span class="z-keyword z-operator z-arithmetic z-rust">-</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">1</span> <span class="z-keyword z-operator z-arithmetic z-rust">-</span> j</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-arithmetic z-rust">%</span> K_chunk<span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        batch_ref<span class="z-punctuation z-accessor z-dot z-rust">.</span>bytecode_ra<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>j<span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>i<span class="z-punctuation z-section z-group z-end z-rust">]</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>index <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">u8</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></code></pre>
+<ol start="2">
+<li><a href="/posts/instruction-ra/">InstructionRa</a></li>
+</ol>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> InstructionRa indices
+</span></span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> lookup_index <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-path z-rust">LookupQuery<span class="z-punctuation z-accessor z-rust">::</span></span><span class="z-meta z-generic z-rust"><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span>XLEN<span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span><span class="z-meta z-path z-rust"><span class="z-punctuation z-accessor z-rust">::</span></span>to_lookup_index<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>cycle</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust"><span class="z-keyword z-control z-rust">for</span> j <span class="z-keyword z-operator z-rust">in</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span><span class="z-keyword z-operator z-range z-rust">..</span><span class="z-meta z-path z-rust">instruction_lookups<span class="z-punctuation z-accessor z-rust">::</span></span>D <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> k <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>lookup_index <span class="z-keyword z-operator z-comparison z-rust">&gt;</span><span class="z-keyword z-operator z-comparison z-rust">&gt;</span> instruction_ra_shifts<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>j<span class="z-punctuation z-section z-group z-end z-rust">]</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">        <span class="z-keyword z-operator z-arithmetic z-rust">%</span> <span class="z-meta z-path z-rust">instruction_lookups<span class="z-punctuation z-accessor z-rust">::</span></span><span class="z-constant z-other z-rust">K_CHUNK</span> <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">u128</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    batch_ref<span class="z-punctuation z-accessor z-dot z-rust">.</span>instruction_ra<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>j<span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>i<span class="z-punctuation z-section z-group z-end z-rust">]</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>k <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">u8</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></code></pre>
+<ol start="3">
+<li><a href="/posts/ram-ra/">RamRa</a></li>
+</ol>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> RamRa indices
+</span></span><span class="z-source z-rust"><span class="z-keyword z-control z-rust">if</span> <span class="z-storage z-type z-rust">let</span> <span class="z-support z-type z-rust">Some</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>dth_log</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> dth_root_log <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> address_opt <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-function z-rust">remap_address</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">        cycle<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">ram_access</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">address</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">u64</span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">        <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span>preprocessing<span class="z-punctuation z-accessor z-dot z-rust">.</span>shared<span class="z-punctuation z-accessor z-dot z-rust">.</span>memory_layout<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">    </span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-control z-rust">for</span> j <span class="z-keyword z-operator z-rust">in</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span><span class="z-keyword z-operator z-range z-rust">..</span>ram_d <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> index <span class="z-keyword z-operator z-assignment z-rust">=</span> address_opt<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">map</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-function z-closure z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">|</span></span></span><span class="z-meta z-function z-closure z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-variable z-parameter z-rust">address</span><span class="z-punctuation z-section z-parameters z-end z-rust">|</span></span> </span><span class="z-meta z-function z-closure z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust"><span class="z-meta z-function z-closure z-rust"><span class="z-meta z-block z-rust">            <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>address <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">usize</span> <span class="z-keyword z-operator z-comparison z-rust">&gt;</span><span class="z-keyword z-operator z-comparison z-rust">&gt;</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>dth_log <span class="z-keyword z-operator z-arithmetic z-rust">*</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>ram_d <span class="z-keyword z-operator z-arithmetic z-rust">-</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">1</span> <span class="z-keyword z-operator z-arithmetic z-rust">-</span> j</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-arithmetic z-rust">%</span> <span class="z-constant z-other z-rust">DTH_ROOT_OF_K</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust"><span class="z-meta z-function z-closure z-rust"><span class="z-meta z-block z-rust">                <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">u8</span>
+</span></span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust"><span class="z-meta z-function z-closure z-rust"><span class="z-meta z-block z-rust">        </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        batch_ref<span class="z-punctuation z-accessor z-dot z-rust">.</span>ram_ra<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>j<span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>i<span class="z-punctuation z-section z-group z-end z-rust">]</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> index<span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></code></pre>
+
+      </article>
+
+      
+      
+
+      
+      
+      <div class="giscus"></div>
+      
+      
+    </div>
+
+    
+
+
+<footer>
+  <div class="left">
+    <div class="copyright">
+      © 2025 Ari
+      
+    </div>
+  </div>
+
+  <div class="right">
+    
+    
+      
+    
+    
+    <a id="rss-btn" href="/posts/feed.xml">RSS</a>
+    
+    
+
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <!-- <button id="theme-toggle" aria-label="theme switch"> -->
+    <!--   <span class="moon-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3945 15.9187 17.7035 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29648 8.08133 5.60547 8.2379 4.938C5.71611 6.28423 4 8.9417 4 12Z" fill="currentColor"></path></svg>
+</span> -->
+    <!--   <span class="sun-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 20.4853L3.51472 19.0711L5.63604 16.9497ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z" fill="currentColor"></path></svg>
+</span> -->
+    <!-- </button> -->
+    <!--  -->
+  </div>
+</footer>
+
+
+
+
+<dialog id="rss-mask">
+  <div>
+    <a href="&#x2F;posts&#x2F;feed.xml">&#x2F;posts&#x2F;feed.xml</a>
+    
+    
+    <button autofocus aria-label="copy" data-link="&#x2F;posts&#x2F;feed.xml" data-copy-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" data-check-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z" fill="currentColor"></path></svg>
+
+    </button>
+  </div>
+</dialog>
+
+
+
+  </main>
+</div>
+
+  
+<script src="/js/lightense.min.js"></script>
+
+
+  <script src="/js/main.js"></script>
+</body>
+
+</html>

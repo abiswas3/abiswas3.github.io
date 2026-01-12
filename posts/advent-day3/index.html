@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  
+  
+    
+  
+  <meta name="description" content="My blog site.">
+
+  <title>Advent Of Jolt: Day 3</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
+  
+  <style>
+  /* ------------------ Light Mode ------------------ */
+  body {
+    --primary-color: #4f6cb8; /* main accent */
+    --primary-pale-color: #4f6cb822; /* subtle accent */
+    --primary-decoration-color: #4f6cb811; /* very subtle */
+    --bg-color: #ffffff;
+    --text-color: #1f1f1f;
+    --text-pale-color: #6b6b6b;
+    --text-decoration-color: #b0b0b0;
+    --highlight-mark-color: #a1b0db20;
+
+    --callout-note-color: #4f6cb8; /* blue */
+    --callout-tip-color: #2e8555; /* green */
+    --callout-important-color: #8c4fc9; /* purple */
+    --callout-warning-color: #c27b3f; /* orange */
+    --callout-caution-color: #c64e4e; /* red */
+  }
+
+  /* ------------------ Dark Mode ------------------ */
+  body.dark {
+    --primary-color: #7a92db;
+    --primary-pale-color: #7a92db44;
+    --primary-decoration-color: #7a92db11;
+    --bg-color: #1c1c1c;
+    --text-color: #e0e0e0;
+    --text-pale-color: #8a8a8a;
+    --text-decoration-color: #5f5f5f;
+    --highlight-mark-color: #7a92db33;
+
+    --callout-note-color: #7a92db; /* lighter blue */
+    --callout-tip-color: #52a077; /* lighter green */
+    --callout-important-color: #a378db; /* lighter purple */
+    --callout-warning-color: #d89d68; /* softer orange */
+    --callout-caution-color: #e37474; /* lighter red */
+  }
+
+  /* ------------------ Fonts & Layout ------------------ */
+  body {
+    /* --main-font: "Lora", "Courier", monospace; */
+    --main-font: sans-serif;
+    /* --main-font: Georgia, "Palatino Linotype", Palatino, "Book Antiqua", serif; */
+    /* --font-weight: 450; */
+    --code-font:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    --homepage-max-width: 768px;
+    --main-max-width: 768px;
+    --avatar-size: 60px;
+    --font-size: 17px;
+    --line-height: 2;
+    --img-border-radius: 0px;
+    --detail-border-radius: 0px;
+    --dark-mode-img-brightness: 0.75;
+    --dark-mode-chart-brightness: 0.75;
+    --inline-code-border-radius: 2px;
+    --inline-code-bg-color: var(--primary-decoration-color);
+    --block-code-border-radius: 5px;
+    --block-code-border-color: var(--primary-color);
+    --detail-border-color: var(--primary-color);
+  }
+
+  /* ------------------ Theorem / Lemma / Definition Blocks ------------------ */
+  blockquote.theorem {
+    border-left: 4px solid var(--callout-note-color);
+    background: #f2f7ff;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+  }
+
+  blockquote.theorem.lemma {
+    border-color: var(--callout-tip-color);
+    background: #edf9f2;
+  }
+
+  blockquote.theorem.definition {
+    border-color: var(--callout-warning-color);
+    background: #fff8eb;
+  }
+
+  blockquote.theorem.important {
+    border-color: var(--callout-important-color);
+    background: #f6f0ff;
+  }
+
+  blockquote.theorem.caution {
+    border-color: var(--callout-caution-color);
+    background: #ffecec;
+  }
+
+  blockquote.theorem .title {
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--text-color);
+  }
+
+  blockquote.theorem .content {
+    margin: 0;
+    color: var(--text-color);
+  }
+
+  /* Dark mode overrides for theorem blocks */
+  body.dark blockquote.theorem {
+    background: #22293b;
+    border-left-color: var(--callout-note-color);
+  }
+
+  body.dark blockquote.theorem.lemma {
+    background: #1d2d22;
+    border-left-color: var(--callout-tip-color);
+  }
+
+  body.dark blockquote.theorem.definition {
+    background: #2f1e0f;
+    border-left-color: var(--callout-warning-color);
+  }
+
+  body.dark blockquote.theorem.important {
+    background: #2a1f33;
+    border-left-color: var(--callout-important-color);
+  }
+
+  body.dark blockquote.theorem.caution {
+    background: #3c1f1f;
+    border-left-color: var(--callout-caution-color);
+  }
+  #theme-toggle {
+    all: unset; /* removes all inherited and default styles */
+    display: inline; /* or block, if you want */
+    /* background-color: var(--bg-color); */
+  }
+</style>
+
+  <link rel="stylesheet" href="/main.css">
+  
+
+<link id="hl" rel="stylesheet" type="text/css" href="/hl-light.css" />
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" integrity="sha384-HORx6nWi8j5/mYA+y57/9/CZc5z8HnEw4WUZWy5yOn9ToKBv1l58vJaufFAn9Zzi" crossorigin="anonymous"></script>
+  
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+          macros: {
+            "\\field": "\\mathbb{#1}",
+            "\\hei": "\\mathbb{F}(#1)",
+            "\\Field": "\\mathbb{F}",
+            "\\Mont": "\\widetilde{#1}",
+            "\\samples": "\\xleftarrow{\\$}",
+            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
+            "\\TauConstraints": "\\tau_y",
+            "\\TauTime": "\\tau_{\\text{cycle}}",
+            "\\TauGroup": "\\tau_b",
+            "\\MLE": "\\widetilde{#1}",
+            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
+            "\\Def": ":=",
+            "\\ChallengeSet": "\\mathsf{C}"
+
+          },
+            throwOnError: false,
+          trust: true
+
+        });
+    });
+</script>
+
+
+
+  
+</head>
+
+<body class="post">
+  
+  <script>
+    const theme = sessionStorage.getItem('theme');
+    const match = window.matchMedia("(prefers-color-scheme: dark)").matches
+    if ((theme && theme == 'dark') || (!theme && match)) {
+      document.body.classList.add('dark');
+      const hl = document.querySelector('link#hl');
+      if (hl) hl.href = '/hl-dark.css';
+    }
+  </script>
+  
+  
+<div id="wrapper">
+  <div id="blank"></div>
+  <aside>
+    
+    
+    <nav>
+      <ul>
+        
+        <li>
+          <a class="h2" href="#a-theoretical-detour">A Theoretical Detour</a>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#constraints">Constraints</a>
+          
+          <ul>
+            
+            <li>
+              <a class="h3" href="#foreshadowing-the-future">Foreshadowing the future</a>
+            </li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#what-s-next">What&#x27;s next</a>
+          
+        </li>
+        
+      </ul>
+    </nav>
+    
+    
+    <button id="back-to-top" aria-label="back to top">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-up"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+
+    </button>
+    
+  </aside>
+  <main>
+    
+<header>
+  <nav>
+    <a id="back-link" href="&#x2F;posts">← Back</a>
+    <a id="back-link" href="/">Home</a>
+    
+    
+
+    <button id="theme-toggle" aria-label="theme switch">
+    <span class="moon-icon">🌙</span>
+     <span class="sun-icon">🌞</span>
+    </button>
+
+  </nav>
+</header>
+
+    <div>
+      
+      
+      
+      
+      <div id="copy-cfg" style="display: none;" data-copy-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" data-check-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+"></div>
+      
+      <article class="prose">
+        <h1>Advent Of Jolt: Day 3</h1>
+        <div id="post-info">
+          <div id="date">
+            <span id="publish">Jan 8, 2026</span>
+            </div>
+
+          
+          <div id="tags">
+            <a class="instant" href="//tags/one"><span>#</span>one</a><a class="instant" href="//tags/two"><span>#</span>two</a>
+          </div>
+          
+        </div>
+
+        
+        
+
+        <blockquote id="outdate_alert" class="callout caution hidden" data-days="50"
+          data-alert-text-before="This article was last updated "
+          data-alert-text-after=" days ago and may be out of date.">
+          <div class="content"></div>
+        </blockquote>
+        
+
+        <h2 id="a-theoretical-detour">A Theoretical Detour<a class="zola-anchor" href="#a-theoretical-detour" aria-label="Anchor link for: a-theoretical-detour" style="visibility: hidden;"></a>
+</h2>
+<p>Before we look at code and analyse intermediate outputs, we pause and contemplate what it means for a prover to execute a program correctly?
+How does one express correct exceution as a sequence of mathematical equaitions?
+The goal os this post is to outline the <code>constraints</code> that the prover must prove they satisfy?</p>
+<p>:::{.remark}
+Note to the informed reader: For the sake of simplicity, we will defer the discussion about virtual polynomials and sum-checks for a later post.
+When we get to enforcing each constraint with a sum-check, we'll formerly introduce these polynomials.
+:::</p>
+<p>For each cycle, we have a <code>Cycle</code> struct as <a href="/assets/jolt-tutorial/trace.fib.txt">discussed earlier</a>.
+The vector of these structs is what we call the dynamic trace.<br />
+From this struct we construct the following <code>R1CSCycleInput</code> struct.
+The field of this type are annoated with self explanatory comments.
+We will often denote this struct below with <code>z_t</code> or $z_t$ to denote the witness constructed for cycle $t \in [T]$.
+There are a total of 36 fields in this struct and each field is either a boolean valued byte or an arithmetic type of <code>u64</code> or <code>i128</code> or <code>s64</code> (signed <code>u64</code>).</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-annotation z-rust"><span class="z-punctuation z-definition z-annotation z-rust">#</span><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-variable z-annotation z-rust">derive</span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust">Clone<span class="z-punctuation z-separator z-rust">,</span> Debug</span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>
+</span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-struct z-rust">struct</span> </span><span class="z-meta z-struct z-rust"><span class="z-entity z-name z-struct z-rust">R1CSCycleInputs</span> </span><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Left instruction input as a u64 bit-pattern.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Typically `Rs1Value` or the current `UnexpandedPC`, depending on `CircuitFlags`.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">left_input</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Right instruction input as signed-magnitude `S64`.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Typically `Imm` or `Rs2Value` with exact integer semantics.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">right_input</span><span class="z-punctuation z-separator z-type z-rust">:</span> S64,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Signed-magnitude `S128` product consistent with the `Product` witness.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Computed from `left_input` × `right_input` using the same truncation semantics as the witness.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">product</span><span class="z-punctuation z-separator z-type z-rust">:</span> S128,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Left lookup operand (u64) for the instruction lookup query.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Matches `LeftLookupOperand` virtual polynomial semantics.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">left_lookup</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Right lookup operand (u128) for the instruction lookup query.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Full-width integer encoding used by add/sub/mul/advice cases.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">right_lookup</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u128</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Instruction lookup output (u64) for this cycle.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">lookup_output</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Value read from Rs1 in this cycle.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">rs1_read_value</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Value read from Rs2 in this cycle.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">rs2_read_value</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Value written to Rd in this cycle.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">rd_write_value</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> RAM address accessed this cycle.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">ram_addr</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> RAM read value for `Read`, pre-write value for `Write`, or 0 for `NoOp`.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">ram_read_value</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> RAM write value: equals read value for `Read`, post-write value for `Write`, or 0 for `NoOp`.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">ram_write_value</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Expanded PC used by bytecode instance.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">pc</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Expanded PC for next cycle, or 0 if this is the last cycle in the domain.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">next_pc</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Unexpanded PC (normalized instruction address) for this cycle.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">unexpanded_pc</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Unexpanded PC for next cycle, or 0 if this is the last cycle in the domain.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">next_unexpanded_pc</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Immediate operand as signed-magnitude `S64`.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">imm</span><span class="z-punctuation z-separator z-type z-rust">:</span> S64,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Per-instruction circuit flags indexed by `CircuitFlags`.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">flags</span><span class="z-punctuation z-separator z-type z-rust">:</span> [<span class="z-storage z-type z-rust">bool</span>; NUM_CIRCUIT_FLAGS],
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> `IsNoop` flag for the next cycle (false for last cycle).
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">next_is_noop</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">bool</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Derived: `Jump &amp;&amp; !NextIsNoop`.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">should_jump</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">bool</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Derived: `Branch &amp;&amp; (LookupOutput == 1)`.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">should_branch</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">bool</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> `IsRdNotZero` &amp;&amp; ` `WriteLookupOutputToRD`
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">write_lookup_output_to_rd_addr</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">bool</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> `IsRdNotZero` &amp;&amp; `Jump`
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">write_pc_to_rd_addr</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">bool</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> `VirtualInstruction` flag for the next cycle (false for last cycle).
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">next_is_virtual</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">bool</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> `FirstInSequence` flag for the next cycle (false for last cycle).
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">pub</span> <span class="z-variable z-other z-member z-rust">next_is_first_in_sequence</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">bool</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>where the circuit flags are given by</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-enum z-rust">enum</span> <span class="z-entity z-name z-enum z-rust">CircuitFlags</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> 1 if the first lookup operand is the sum of the two instruction operands.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    AddOperands<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> 1 if the first lookup operand is the difference between the two instruction operands.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    SubtractOperands<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> 1 if the first lookup operand is the product of the two instruction operands.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    MultiplyOperands<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> 1 if the instruction is a load (i.e. `LW`)
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    Load<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> 1 if the instruction is a store (i.e. `SW`)
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    Store<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> 1 if the instruction is a jump (i.e. `JAL`, `JALR`)
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    Jump<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> 1 if the lookup output is to be stored in `rd` at the end of the step.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    WriteLookupOutputToRD<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> 1 if the instruction is &quot;virtual&quot;, as defined in Section 6.1 of the Jolt paper.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    VirtualInstruction<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> 1 if the instruction is an assert, as defined in Section 6.1.1 of the Jolt paper.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    Assert<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Used in inline sequences; the program counter should be the same for the full sequence.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    DoNotUpdateUnexpandedPC<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Is (virtual) advice instruction
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    Advice<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Is a compressed instruction (i.e. increase UnexpandedPc by 2 only)
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    IsCompressed<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Is instruction the first in a virtual sequence
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust">    IsFirstInSequence<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-enum z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>The mental model for this vector is think of a 36 dimensional vector which each cell is filled with values of the above type.
+The method to go from a <code>Cycle</code> struct to the above witness objects is in the <a href="TODO:"><code>from_trace</code></a> method.</p>
+<h2 id="constraints">Constraints<a class="zola-anchor" href="#constraints" aria-label="Anchor link for: constraints" style="visibility: hidden;"></a>
+</h2>
+<p>One example of what it means to execute a program correctly is the following:
+In RISCV loads/stores look like the following:</p>
+<pre data-lang="asm" class="language-asm z-code"><code class="language-asm" data-lang="asm"><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly">l</span><span class="z-entity z-name z-function z-assembly">b</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">)</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">#</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">L</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">a</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">byte</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">i</span><span class="z-entity z-name z-function z-assembly">g</span><span class="z-entity z-name z-function z-assembly">n</span><span class="z-source z-assembly">-</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">x</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">n</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly">)</span>
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly">l</span><span class="z-entity z-name z-function z-assembly">h</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">)</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">#</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">L</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">a</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">h</span><span class="z-entity z-name z-function z-assembly">a</span><span class="z-entity z-name z-function z-assembly">l</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">w</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">i</span><span class="z-entity z-name z-function z-assembly">g</span><span class="z-entity z-name z-function z-assembly">n</span><span class="z-source z-assembly">-</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">x</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">n</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly">)</span>
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly">l</span><span class="z-entity z-name z-function z-assembly">w</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">)</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">#</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">L</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">a</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">word</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">i</span><span class="z-entity z-name z-function z-assembly">g</span><span class="z-entity z-name z-function z-assembly">n</span><span class="z-source z-assembly">-</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">x</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">n</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly">)</span>
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly">l</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">)</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">#</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">L</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">a</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly">b</span><span class="z-entity z-name z-function z-assembly">l</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">w</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">R</span><span class="z-entity z-name z-function z-assembly">V</span><span class="z-entity z-name z-function z-assembly">6</span><span class="z-entity z-name z-function z-assembly">4</span><span class="z-entity z-name z-function z-assembly">)</span>
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly">l</span><span class="z-entity z-name z-function z-assembly">b</span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">)</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">#</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">L</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">a</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">byte</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly">n</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">i</span><span class="z-entity z-name z-function z-assembly">g</span><span class="z-entity z-name z-function z-assembly">n</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">d</span>
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly">l</span><span class="z-entity z-name z-function z-assembly">h</span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">)</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">#</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">L</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">a</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">h</span><span class="z-entity z-name z-function z-assembly">a</span><span class="z-entity z-name z-function z-assembly">l</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">w</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly">n</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">i</span><span class="z-entity z-name z-function z-assembly">g</span><span class="z-entity z-name z-function z-assembly">n</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">d</span>
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly">l</span><span class="z-entity z-name z-function z-assembly">w</span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">)</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">#</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">L</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">a</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">word</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly">n</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">i</span><span class="z-entity z-name z-function z-assembly">g</span><span class="z-entity z-name z-function z-assembly">n</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">R</span><span class="z-entity z-name z-function z-assembly">V</span><span class="z-entity z-name z-function z-assembly">6</span><span class="z-entity z-name z-function z-assembly">4</span><span class="z-entity z-name z-function z-assembly">)</span>
+</span><span class="z-source z-assembly">
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">b</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">2</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">)</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">#</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">S</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">byte</span>
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">h</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">2</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">)</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">#</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">S</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">h</span><span class="z-entity z-name z-function z-assembly">a</span><span class="z-entity z-name z-function z-assembly">l</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">w</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span>
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">w</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">2</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">)</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">#</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">S</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">word</span>
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">2</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">f</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">s</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">)</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">#</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">S</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly">b</span><span class="z-entity z-name z-function z-assembly">l</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">w</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">(</span><span class="z-entity z-name z-function z-assembly">R</span><span class="z-entity z-name z-function z-assembly">V</span><span class="z-entity z-name z-function z-assembly">6</span><span class="z-entity z-name z-function z-assembly">4</span><span class="z-entity z-name z-function z-assembly">)</span>
+</span></code></pre>
+<p>So if a vector has the <code>Load</code> flag set to 1 or <code>Store</code> flag set to 1, then the address from which we read/write must be equal to <code>rs1+offset</code>.
+Using propositional logic we write:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-keyword z-control z-rust">if</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> Load <span class="z-keyword z-operator z-arithmetic z-rust">+</span> Store </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span><span class="z-source z-rust"><span class="z-keyword z-operator z-rust">=&gt;</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span> RamAddress </span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-comparison z-rust">==</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span> Rs1Value <span class="z-keyword z-operator z-arithmetic z-rust">+</span> Imm </span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></code></pre>
+<p>The same thing expressed as algebraic constraints:</p>
+<pre class="z-code"><code><span class="z-text z-plain">(Load + Store) * (RamAddress - (Rs1Value + Imm)) = 0
+</span></code></pre>
+<p>Thus, any program that is correctly executed, the witness $z_t$ constructed from cycle $t$ must satisfy the above constraint.</p>
+<p>:::{.remark}</p>
+<h3 id="foreshadowing-the-future">Foreshadowing the future<a class="zola-anchor" href="#foreshadowing-the-future" aria-label="Anchor link for: foreshadowing-the-future" style="visibility: hidden;"></a>
+</h3>
+<p>Imagine a make believe world where that's all we needed to check if a program was executed correctly.
+then one can already see the outline of a sum-check.
+for all $t \in \bit^{\log t}$, <code>load[t], store[t], ramaddr[t], rs1value[t], imm[t]</code> are vectors of size $T$ (see figure above), and we can now have a sumecheck, where the use the multilinear extensions of the above vectors below, where $r_{\text{cycle}}$ is the random point where we check equality of polynomials (and invoke Schwartz-Zippel).</p>
+<p>TODO: Format these with macros</p>
+<p>$$\sum_{j \in \bit^{\log t}} \text{eq}(\text{r_cycle}, j) \Big(\text{load}[t] + \text{store}[t]) * (\text{ramaddress}[t] - (\text{rs1value}[t] + \text{imm}[t])\Big) = 0$$</p>
+<p>Of course, successfully executing this sum-check involes being able to open these polynomials at random points, which in the real world means the prover <strong>MUST</strong> commit to these polynomials.
+But we already know what the prover has committed to and the above polynomials were not in the list.
+So how will this work?
+This is where we will get into the business of virtual polynomials.
+They happen to be polynomials the prover does not actually commit to, but can reliably open by committing to different polynomials, and opening them at the desired random location.
+In fact you can go and see that the above polynomials do indeed exist as <a href="TODO:"><em>virtual polynomials</em></a> inside of Jolt.
+More on that in the coming posts.
+For now we go back to describing what it means for a program to be correct.
+:::</p>
+<p>For now we talk about all the constraints in Jolt. The links contain full details about each constraint.</p>
+<ol>
+<li><a href="/posts/r1cs_constraints.html">R1CS Equality Constraints/Named Constraints</a>: These are constraints like the above example where we can write a constraint as a product of two linear equations equalling 0.</li>
+<li><a href="/posts/product_constraints.html">Product Constraints</a>: This is exactly the same as above, but the product equals a non-zero value.</li>
+<li><a href="/posts/shift_constraints.html">Shift Constraints</a>: The order in which we execute a program matters. These constraints that the order is respected.</li>
+<li><a href="TODO:">Twist/Shout Constraints</a> So far all constraints assume that we read/write correctly from memory. We get to these finally.</li>
+</ol>
+<p>Together -- all 4 of these constraints describe the correct execution of a programmer.
+All that is left now is to define a sum-check for each of these constraints, and then compute the sum-checks.</p>
+<h2 id="what-s-next">What's next<a class="zola-anchor" href="#what-s-next" aria-label="Anchor link for: what-s-next" style="visibility: hidden;"></a>
+</h2>
+<p>That ends our detour.
+We've writtend down a set of constraints as equations.
+If we were to satisfy said equations, then we it is fair game for us to say that the program is correct.</p>
+<p>:::{.remark}
+I do not know if there is a formal proof that the above constraints are enough.
+It feels as if they are, but such things must be formally proved.
+Talk to <a href="TODO:">Quang Dao</a> for more details.
+:::</p>
+<p>We now once more follow the code chronologically, and
+<a href="/posts/day_4.html">next</a> we arrive at the 7 sumcheck stages in Jolt.§</p>
+
+      </article>
+
+      
+      
+
+      
+      
+      <div class="giscus"></div>
+      
+      
+    </div>
+
+    
+
+
+<footer>
+  <div class="left">
+    <div class="copyright">
+      © 2025 Ari
+      
+    </div>
+  </div>
+
+  <div class="right">
+    
+    
+      
+    
+    
+    <a id="rss-btn" href="/posts/feed.xml">RSS</a>
+    
+    
+
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <!-- <button id="theme-toggle" aria-label="theme switch"> -->
+    <!--   <span class="moon-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3945 15.9187 17.7035 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29648 8.08133 5.60547 8.2379 4.938C5.71611 6.28423 4 8.9417 4 12Z" fill="currentColor"></path></svg>
+</span> -->
+    <!--   <span class="sun-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 20.4853L3.51472 19.0711L5.63604 16.9497ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z" fill="currentColor"></path></svg>
+</span> -->
+    <!-- </button> -->
+    <!--  -->
+  </div>
+</footer>
+
+
+
+
+<dialog id="rss-mask">
+  <div>
+    <a href="&#x2F;posts&#x2F;feed.xml">&#x2F;posts&#x2F;feed.xml</a>
+    
+    
+    <button autofocus aria-label="copy" data-link="&#x2F;posts&#x2F;feed.xml" data-copy-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" data-check-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z" fill="currentColor"></path></svg>
+
+    </button>
+  </div>
+</dialog>
+
+
+
+  </main>
+</div>
+
+  
+<script src="/js/lightense.min.js"></script>
+
+
+  <script src="/js/main.js"></script>
+</body>
+
+</html>

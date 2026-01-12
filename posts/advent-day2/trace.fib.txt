@@ -1,0 +1,1514 @@
+cycle 0: auipc(
+    riscvcycle {
+        instruction: auipc {
+            address: 2147483648,
+            operands: formatu {
+                rd: 2,
+                imm: 4096,
+            },
+            virtual_sequence_remaining: none,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: registerstateformatu {
+            rd: (
+                0,
+                2147487744,
+            ),
+        },
+        ram_access: (),
+    },
+)
+cycle 1: addi(
+    riscvcycle {
+        instruction: addi {
+            address: 2147483652,
+            operands: formati {
+                rd: 2,
+                rs1: 2,
+                imm: 288,
+            },
+            virtual_sequence_remaining: none,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: registerstateformati {
+            rd: (
+                2147487744,
+                2147488032,
+            ),
+            rs1: 2147487744,
+        },
+        ram_access: (),
+    },
+)
+cycle 2: auipc(
+    riscvcycle {
+        instruction: auipc {
+            address: 2147483656,
+            operands: formatu {
+                rd: 1,
+                imm: 0,
+            },
+            virtual_sequence_remaining: none,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: registerstateformatu {
+            rd: (
+                0,
+                2147483656,
+            ),
+        },
+        ram_access: (),
+    },
+)
+cycle 3: jalr(
+    riscvcycle {
+        instruction: jalr {
+            address: 2147483660,
+            operands: formati {
+                rd: 1,
+                rs1: 1,
+                imm: 46,
+            },
+            virtual_sequence_remaining: none,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: registerstateformati {
+            rd: (
+                2147483656,
+                2147483664,
+            ),
+            rs1: 2147483656,
+        },
+        ram_access: (),
+    },
+)
+cycle 4: lui(
+    riscvcycle {
+        instruction: lui {
+            address: 2147483702,
+            operands: formatu {
+                rd: 11,
+                imm: 2147459072,
+            },
+            virtual_sequence_remaining: none,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: registerstateformatu {
+            rd: (
+                0,
+                2147459072,
+            ),
+        },
+        ram_access: (),
+    },
+)
+Cycle 5: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483706,
+            operands: FormatI {
+                rd: 10,
+                rs1: 0,
+                imm: 18446744073709551615,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: true,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                0,
+                18446744073709551615,
+            ),
+            rs1: 0,
+        },
+        ram_access: (),
+    },
+)
+Cycle 6: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483708,
+            operands: FormatI {
+                rd: 12,
+                rs1: 0,
+                imm: 4,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: true,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                0,
+                4,
+            ),
+            rs1: 0,
+        },
+        ram_access: (),
+    },
+)
+Cycle 7: BEQ(
+    RISCVCycle {
+        instruction: BEQ {
+            address: 2147483710,
+            operands: FormatB {
+                rs1: 10,
+                rs2: 12,
+                imm: 84,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatB {
+            rs1: 18446744073709551615,
+            rs2: 4,
+        },
+        ram_access: (),
+    },
+)
+Cycle 8: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483714,
+            operands: FormatI {
+                rd: 32,
+                rs1: 11,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                7,
+            ),
+            is_first_in_sequence: true,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                0,
+                2147459072,
+            ),
+            rs1: 2147459072,
+        },
+        ram_access: (),
+    },
+)
+Cycle 9: ANDI(
+    RISCVCycle {
+        instruction: ANDI {
+            address: 2147483714,
+            operands: FormatI {
+                rd: 33,
+                rs1: 32,
+                imm: 18446744073709551608,
+            },
+            virtual_sequence_remaining: Some(
+                6,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                0,
+                2147459072,
+            ),
+            rs1: 2147459072,
+        },
+        ram_access: (),
+    },
+)
+Cycle 10: LD(
+    RISCVCycle {
+        instruction: LD {
+            address: 2147483714,
+            operands: FormatLoad {
+                rd: 34,
+                rs1: 33,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                5,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatLoad {
+            rd: (
+                0,
+                2,
+            ),
+            rs1: 2147459072,
+        },
+        ram_access: RAMRead {
+            address: 2147459072,
+            value: 2,
+        },
+    },
+)
+Cycle 11: XORI(
+    RISCVCycle {
+        instruction: XORI {
+            address: 2147483714,
+            operands: FormatI {
+                rd: 35,
+                rs1: 32,
+                imm: 7,
+            },
+            virtual_sequence_remaining: Some(
+                4,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                0,
+                2147459079,
+            ),
+            rs1: 2147459072,
+        },
+        ram_access: (),
+    },
+)
+Cycle 12: VirtualMULI(
+    RISCVCycle {
+        instruction: VirtualMULI {
+            address: 2147483714,
+            operands: FormatI {
+                rd: 35,
+                rs1: 35,
+                imm: 8,
+            },
+            virtual_sequence_remaining: Some(
+                3,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                2147459079,
+                17179672632,
+            ),
+            rs1: 2147459079,
+        },
+        ram_access: (),
+    },
+)
+Cycle 13: VirtualPow2(
+    RISCVCycle {
+        instruction: VirtualPow2 {
+            address: 2147483714,
+            operands: FormatI {
+                rd: 36,
+                rs1: 35,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                2,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                0,
+                72057594037927936,
+            ),
+            rs1: 17179672632,
+        },
+        ram_access: (),
+    },
+)
+Cycle 14: MUL(
+    RISCVCycle {
+        instruction: MUL {
+            address: 2147483714,
+            operands: FormatR {
+                rd: 13,
+                rs1: 34,
+                rs2: 36,
+            },
+            virtual_sequence_remaining: Some(
+                1,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatR {
+            rd: (
+                0,
+                144115188075855872,
+            ),
+            rs1: 2,
+            rs2: 72057594037927936,
+        },
+        ram_access: (),
+    },
+)
+Cycle 15: VirtualSRAI(
+    RISCVCycle {
+        instruction: VirtualSRAI {
+            address: 2147483714,
+            operands: FormatVirtualRightShiftI {
+                rd: 13,
+                rs1: 13,
+                imm: 18374686479671623680,
+            },
+            virtual_sequence_remaining: Some(
+                0,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatVirtualI {
+            rd: (
+                144115188075855872,
+                2,
+            ),
+            rs1: 144115188075855872,
+        },
+        ram_access: (),
+    },
+)
+Cycle 16: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483718,
+            operands: FormatI {
+                rd: 11,
+                rs1: 11,
+                imm: 1,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: true,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                2147459072,
+                2147459073,
+            ),
+            rs1: 2147459072,
+        },
+        ram_access: (),
+    },
+)
+Cycle 17: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483720,
+            operands: FormatI {
+                rd: 10,
+                rs1: 10,
+                imm: 1,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: true,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                18446744073709551615,
+                0,
+            ),
+            rs1: 18446744073709551615,
+        },
+        ram_access: (),
+    },
+)
+Cycle 18: BLT(
+    RISCVCycle {
+        instruction: BLT {
+            address: 2147483722,
+            operands: FormatB {
+                rs1: 13,
+                rs2: 0,
+                imm: -12,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatB {
+            rs1: 2,
+            rs2: 0,
+        },
+        ram_access: (),
+    },
+)
+Cycle 19: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483726,
+            operands: FormatI {
+                rd: 11,
+                rs1: 0,
+                imm: 4,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: true,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                2147459073,
+                4,
+            ),
+            rs1: 0,
+        },
+        ram_access: (),
+    },
+)
+Cycle 20: BNE(
+    RISCVCycle {
+        instruction: BNE {
+            address: 2147483728,
+            operands: FormatB {
+                rs1: 10,
+                rs2: 11,
+                imm: 14,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatB {
+            rs1: 0,
+            rs2: 4,
+        },
+        ram_access: (),
+    },
+)
+Cycle 21: AUIPC(
+    RISCVCycle {
+        instruction: AUIPC {
+            address: 2147483742,
+            operands: FormatU {
+                rd: 10,
+                imm: 0,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatU {
+            rd: (
+                0,
+                2147483742,
+            ),
+        },
+        ram_access: (),
+    },
+)
+Cycle 22: LUI(
+    RISCVCycle {
+        instruction: LUI {
+            address: 2147483746,
+            operands: FormatU {
+                rd: 13,
+                imm: 819200,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatU {
+            rd: (
+                2,
+                819200,
+            ),
+        },
+        ram_access: (),
+    },
+)
+Cycle 23: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483750,
+            operands: FormatI {
+                rd: 14,
+                rs1: 0,
+                imm: 1,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: true,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                0,
+                1,
+            ),
+            rs1: 0,
+        },
+        ram_access: (),
+    },
+)
+Cycle 24: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483752,
+            operands: FormatI {
+                rd: 12,
+                rs1: 0,
+                imm: 8,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: true,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                4,
+                8,
+            ),
+            rs1: 0,
+        },
+        ram_access: (),
+    },
+)
+Cycle 25: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483754,
+            operands: FormatI {
+                rd: 11,
+                rs1: 10,
+                imm: 66,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                4,
+                2147483808,
+            ),
+            rs1: 2147483742,
+        },
+        ram_access: (),
+    },
+)
+Cycle 26: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483758,
+            operands: FormatI {
+                rd: 10,
+                rs1: 13,
+                imm: 18446744073709550622,
+            },
+            virtual_sequence_remaining: Some(
+                1,
+            ),
+            is_first_in_sequence: true,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                2147483742,
+                818206,
+            ),
+            rs1: 819200,
+        },
+        ram_access: (),
+    },
+)
+Cycle 27: VirtualSignExtendWord(
+    RISCVCycle {
+        instruction: VirtualSignExtendWord {
+            address: 2147483758,
+            operands: FormatI {
+                rd: 10,
+                rs1: 10,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                0,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                818206,
+                818206,
+            ),
+            rs1: 818206,
+        },
+        ram_access: (),
+    },
+)
+Cycle 28: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483762,
+            operands: FormatI {
+                rd: 13,
+                rs1: 0,
+                imm: 1,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: true,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                819200,
+                1,
+            ),
+            rs1: 0,
+        },
+        ram_access: (),
+    },
+)
+Cycle 29: ECALL(
+    RISCVCycle {
+        instruction: ECALL {
+            address: 2147483764,
+            operands: FormatI {
+                rd: 0,
+                rs1: 0,
+                imm: 0,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                0,
+                0,
+            ),
+            rs1: 0,
+        },
+        ram_access: (),
+    },
+)
+Cycle 30: LUI(
+    RISCVCycle {
+        instruction: LUI {
+            address: 2147483768,
+            operands: FormatU {
+                rd: 16,
+                imm: 2147463168,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatU {
+            rd: (
+                0,
+                2147463168,
+            ),
+        },
+        ram_access: (),
+    },
+)
+Cycle 31: LUI(
+    RISCVCycle {
+        instruction: LUI {
+            address: 2147483772,
+            operands: FormatU {
+                rd: 15,
+                imm: 2147467264,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatU {
+            rd: (
+                0,
+                2147467264,
+            ),
+        },
+        ram_access: (),
+    },
+)
+Cycle 32: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483776,
+            operands: FormatI {
+                rd: 12,
+                rs1: 0,
+                imm: 8,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: true,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                8,
+                8,
+            ),
+            rs1: 0,
+        },
+        ram_access: (),
+    },
+)
+Cycle 33: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483778,
+            operands: FormatI {
+                rd: 13,
+                rs1: 0,
+                imm: 2,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: true,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                1,
+                2,
+            ),
+            rs1: 0,
+        },
+        ram_access: (),
+    },
+)
+Cycle 34: ECALL(
+    RISCVCycle {
+        instruction: ECALL {
+            address: 2147483780,
+            operands: FormatI {
+                rd: 0,
+                rs1: 0,
+                imm: 0,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                0,
+                0,
+            ),
+            rs1: 0,
+        },
+        ram_access: (),
+    },
+)
+Cycle 35: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483784,
+            operands: FormatI {
+                rd: 32,
+                rs1: 16,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                12,
+            ),
+            is_first_in_sequence: true,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                2147459072,
+                2147463168,
+            ),
+            rs1: 2147463168,
+        },
+        ram_access: (),
+    },
+)
+Cycle 36: ANDI(
+    RISCVCycle {
+        instruction: ANDI {
+            address: 2147483784,
+            operands: FormatI {
+                rd: 33,
+                rs1: 32,
+                imm: 18446744073709551608,
+            },
+            virtual_sequence_remaining: Some(
+                11,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                2147459072,
+                2147463168,
+            ),
+            rs1: 2147463168,
+        },
+        ram_access: (),
+    },
+)
+Cycle 37: LD(
+    RISCVCycle {
+        instruction: LD {
+            address: 2147483784,
+            operands: FormatLoad {
+                rd: 34,
+                rs1: 33,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                10,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatLoad {
+            rd: (
+                2,
+                0,
+            ),
+            rs1: 2147463168,
+        },
+        ram_access: RAMRead {
+            address: 2147463168,
+            value: 0,
+        },
+    },
+)
+Cycle 38: VirtualMULI(
+    RISCVCycle {
+        instruction: VirtualMULI {
+            address: 2147483784,
+            operands: FormatI {
+                rd: 35,
+                rs1: 32,
+                imm: 8,
+            },
+            virtual_sequence_remaining: Some(
+                9,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                17179672632,
+                17179705344,
+            ),
+            rs1: 2147463168,
+        },
+        ram_access: (),
+    },
+)
+Cycle 39: LUI(
+    RISCVCycle {
+        instruction: LUI {
+            address: 2147483784,
+            operands: FormatU {
+                rd: 36,
+                imm: 255,
+            },
+            virtual_sequence_remaining: Some(
+                8,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatU {
+            rd: (
+                72057594037927936,
+                255,
+            ),
+        },
+        ram_access: (),
+    },
+)
+Cycle 40: VirtualPow2(
+    RISCVCycle {
+        instruction: VirtualPow2 {
+            address: 2147483784,
+            operands: FormatI {
+                rd: 38,
+                rs1: 35,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                7,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                0,
+                1,
+            ),
+            rs1: 17179705344,
+        },
+        ram_access: (),
+    },
+)
+Cycle 41: MUL(
+    RISCVCycle {
+        instruction: MUL {
+            address: 2147483784,
+            operands: FormatR {
+                rd: 36,
+                rs1: 36,
+                rs2: 38,
+            },
+            virtual_sequence_remaining: Some(
+                6,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatR {
+            rd: (
+                255,
+                255,
+            ),
+            rs1: 255,
+            rs2: 1,
+        },
+        ram_access: (),
+    },
+)
+Cycle 42: VirtualPow2(
+    RISCVCycle {
+        instruction: VirtualPow2 {
+            address: 2147483784,
+            operands: FormatI {
+                rd: 38,
+                rs1: 35,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                5,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                1,
+                1,
+            ),
+            rs1: 17179705344,
+        },
+        ram_access: (),
+    },
+)
+Cycle 43: MUL(
+    RISCVCycle {
+        instruction: MUL {
+            address: 2147483784,
+            operands: FormatR {
+                rd: 37,
+                rs1: 14,
+                rs2: 38,
+            },
+            virtual_sequence_remaining: Some(
+                4,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatR {
+            rd: (
+                0,
+                1,
+            ),
+            rs1: 1,
+            rs2: 1,
+        },
+        ram_access: (),
+    },
+)
+Cycle 44: XOR(
+    RISCVCycle {
+        instruction: XOR {
+            address: 2147483784,
+            operands: FormatR {
+                rd: 37,
+                rs1: 34,
+                rs2: 37,
+            },
+            virtual_sequence_remaining: Some(
+                3,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatR {
+            rd: (
+                1,
+                1,
+            ),
+            rs1: 0,
+            rs2: 1,
+        },
+        ram_access: (),
+    },
+)
+Cycle 45: AND(
+    RISCVCycle {
+        instruction: AND {
+            address: 2147483784,
+            operands: FormatR {
+                rd: 37,
+                rs1: 37,
+                rs2: 36,
+            },
+            virtual_sequence_remaining: Some(
+                2,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatR {
+            rd: (
+                1,
+                1,
+            ),
+            rs1: 1,
+            rs2: 255,
+        },
+        ram_access: (),
+    },
+)
+Cycle 46: XOR(
+    RISCVCycle {
+        instruction: XOR {
+            address: 2147483784,
+            operands: FormatR {
+                rd: 34,
+                rs1: 34,
+                rs2: 37,
+            },
+            virtual_sequence_remaining: Some(
+                1,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatR {
+            rd: (
+                0,
+                1,
+            ),
+            rs1: 0,
+            rs2: 1,
+        },
+        ram_access: (),
+    },
+)
+Cycle 47: SD(
+    RISCVCycle {
+        instruction: SD {
+            address: 2147483784,
+            operands: FormatS {
+                rs1: 33,
+                rs2: 34,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                0,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatS {
+            rs1: 2147463168,
+            rs2: 1,
+        },
+        ram_access: RAMWrite {
+            address: 2147463168,
+            pre_value: 0,
+            post_value: 1,
+        },
+    },
+)
+Cycle 48: ADDI(
+    RISCVCycle {
+        instruction: ADDI {
+            address: 2147483788,
+            operands: FormatI {
+                rd: 32,
+                rs1: 15,
+                imm: 8,
+            },
+            virtual_sequence_remaining: Some(
+                12,
+            ),
+            is_first_in_sequence: true,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                2147463168,
+                2147467272,
+            ),
+            rs1: 2147467264,
+        },
+        ram_access: (),
+    },
+)
+Cycle 49: ANDI(
+    RISCVCycle {
+        instruction: ANDI {
+            address: 2147483788,
+            operands: FormatI {
+                rd: 33,
+                rs1: 32,
+                imm: 18446744073709551608,
+            },
+            virtual_sequence_remaining: Some(
+                11,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                2147463168,
+                2147467272,
+            ),
+            rs1: 2147467272,
+        },
+        ram_access: (),
+    },
+)
+Cycle 50: LD(
+    RISCVCycle {
+        instruction: LD {
+            address: 2147483788,
+            operands: FormatLoad {
+                rd: 34,
+                rs1: 33,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                10,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatLoad {
+            rd: (
+                1,
+                0,
+            ),
+            rs1: 2147467272,
+        },
+        ram_access: RAMRead {
+            address: 2147467272,
+            value: 0,
+        },
+    },
+)
+Cycle 51: VirtualMULI(
+    RISCVCycle {
+        instruction: VirtualMULI {
+            address: 2147483788,
+            operands: FormatI {
+                rd: 35,
+                rs1: 32,
+                imm: 8,
+            },
+            virtual_sequence_remaining: Some(
+                9,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                17179705344,
+                17179738176,
+            ),
+            rs1: 2147467272,
+        },
+        ram_access: (),
+    },
+)
+Cycle 52: LUI(
+    RISCVCycle {
+        instruction: LUI {
+            address: 2147483788,
+            operands: FormatU {
+                rd: 36,
+                imm: 255,
+            },
+            virtual_sequence_remaining: Some(
+                8,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatU {
+            rd: (
+                255,
+                255,
+            ),
+        },
+        ram_access: (),
+    },
+)
+Cycle 53: VirtualPow2(
+    RISCVCycle {
+        instruction: VirtualPow2 {
+            address: 2147483788,
+            operands: FormatI {
+                rd: 38,
+                rs1: 35,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                7,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                1,
+                1,
+            ),
+            rs1: 17179738176,
+        },
+        ram_access: (),
+    },
+)
+Cycle 54: MUL(
+    RISCVCycle {
+        instruction: MUL {
+            address: 2147483788,
+            operands: FormatR {
+                rd: 36,
+                rs1: 36,
+                rs2: 38,
+            },
+            virtual_sequence_remaining: Some(
+                6,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatR {
+            rd: (
+                255,
+                255,
+            ),
+            rs1: 255,
+            rs2: 1,
+        },
+        ram_access: (),
+    },
+)
+Cycle 55: VirtualPow2(
+    RISCVCycle {
+        instruction: VirtualPow2 {
+            address: 2147483788,
+            operands: FormatI {
+                rd: 38,
+                rs1: 35,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                5,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                1,
+                1,
+            ),
+            rs1: 17179738176,
+        },
+        ram_access: (),
+    },
+)
+Cycle 56: MUL(
+    RISCVCycle {
+        instruction: MUL {
+            address: 2147483788,
+            operands: FormatR {
+                rd: 37,
+                rs1: 14,
+                rs2: 38,
+            },
+            virtual_sequence_remaining: Some(
+                4,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatR {
+            rd: (
+                1,
+                1,
+            ),
+            rs1: 1,
+            rs2: 1,
+        },
+        ram_access: (),
+    },
+)
+Cycle 57: XOR(
+    RISCVCycle {
+        instruction: XOR {
+            address: 2147483788,
+            operands: FormatR {
+                rd: 37,
+                rs1: 34,
+                rs2: 37,
+            },
+            virtual_sequence_remaining: Some(
+                3,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatR {
+            rd: (
+                1,
+                1,
+            ),
+            rs1: 0,
+            rs2: 1,
+        },
+        ram_access: (),
+    },
+)
+Cycle 58: AND(
+    RISCVCycle {
+        instruction: AND {
+            address: 2147483788,
+            operands: FormatR {
+                rd: 37,
+                rs1: 37,
+                rs2: 36,
+            },
+            virtual_sequence_remaining: Some(
+                2,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatR {
+            rd: (
+                1,
+                1,
+            ),
+            rs1: 1,
+            rs2: 255,
+        },
+        ram_access: (),
+    },
+)
+Cycle 59: XOR(
+    RISCVCycle {
+        instruction: XOR {
+            address: 2147483788,
+            operands: FormatR {
+                rd: 34,
+                rs1: 34,
+                rs2: 37,
+            },
+            virtual_sequence_remaining: Some(
+                1,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatR {
+            rd: (
+                0,
+                1,
+            ),
+            rs1: 0,
+            rs2: 1,
+        },
+        ram_access: (),
+    },
+)
+Cycle 60: SD(
+    RISCVCycle {
+        instruction: SD {
+            address: 2147483788,
+            operands: FormatS {
+                rs1: 33,
+                rs2: 34,
+                imm: 0,
+            },
+            virtual_sequence_remaining: Some(
+                0,
+            ),
+            is_first_in_sequence: false,
+            is_compressed: false,
+        },
+        register_state: RegisterStateFormatS {
+            rs1: 2147467272,
+            rs2: 1,
+        },
+        ram_access: RAMWrite {
+            address: 2147467272,
+            pre_value: 0,
+            post_value: 1,
+        },
+    },
+)
+Cycle 61: JALR(
+    RISCVCycle {
+        instruction: JALR {
+            address: 2147483792,
+            operands: FormatI {
+                rd: 0,
+                rs1: 1,
+                imm: 0,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: true,
+        },
+        register_state: RegisterStateFormatI {
+            rd: (
+                0,
+                0,
+            ),
+            rs1: 2147483664,
+        },
+        ram_access: (),
+    },
+)
+Cycle 62: JAL(
+    RISCVCycle {
+        instruction: JAL {
+            address: 2147483664,
+            operands: FormatJ {
+                rd: 0,
+                imm: 0,
+            },
+            virtual_sequence_remaining: None,
+            is_first_in_sequence: false,
+            is_compressed: true,
+        },
+        register_state: RegisterStateFormatJ {
+            rd: (
+                0,
+                0,
+            ),
+        },
+        ram_access: (),
+    },
+)

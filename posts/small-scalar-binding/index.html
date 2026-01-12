@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  
+  
+    
+  
+  <meta name="description" content="My blog site.">
+
+  <title>Small Scalar Binding</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
+  
+  <style>
+  /* ------------------ Light Mode ------------------ */
+  body {
+    --primary-color: #4f6cb8; /* main accent */
+    --primary-pale-color: #4f6cb822; /* subtle accent */
+    --primary-decoration-color: #4f6cb811; /* very subtle */
+    --bg-color: #ffffff;
+    --text-color: #1f1f1f;
+    --text-pale-color: #6b6b6b;
+    --text-decoration-color: #b0b0b0;
+    --highlight-mark-color: #a1b0db20;
+
+    --callout-note-color: #4f6cb8; /* blue */
+    --callout-tip-color: #2e8555; /* green */
+    --callout-important-color: #8c4fc9; /* purple */
+    --callout-warning-color: #c27b3f; /* orange */
+    --callout-caution-color: #c64e4e; /* red */
+  }
+
+  /* ------------------ Dark Mode ------------------ */
+  body.dark {
+    --primary-color: #7a92db;
+    --primary-pale-color: #7a92db44;
+    --primary-decoration-color: #7a92db11;
+    --bg-color: #1c1c1c;
+    --text-color: #e0e0e0;
+    --text-pale-color: #8a8a8a;
+    --text-decoration-color: #5f5f5f;
+    --highlight-mark-color: #7a92db33;
+
+    --callout-note-color: #7a92db; /* lighter blue */
+    --callout-tip-color: #52a077; /* lighter green */
+    --callout-important-color: #a378db; /* lighter purple */
+    --callout-warning-color: #d89d68; /* softer orange */
+    --callout-caution-color: #e37474; /* lighter red */
+  }
+
+  /* ------------------ Fonts & Layout ------------------ */
+  body {
+    /* --main-font: "Lora", "Courier", monospace; */
+    --main-font: sans-serif;
+    /* --main-font: Georgia, "Palatino Linotype", Palatino, "Book Antiqua", serif; */
+    /* --font-weight: 450; */
+    --code-font:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    --homepage-max-width: 768px;
+    --main-max-width: 768px;
+    --avatar-size: 60px;
+    --font-size: 17px;
+    --line-height: 2;
+    --img-border-radius: 0px;
+    --detail-border-radius: 0px;
+    --dark-mode-img-brightness: 0.75;
+    --dark-mode-chart-brightness: 0.75;
+    --inline-code-border-radius: 2px;
+    --inline-code-bg-color: var(--primary-decoration-color);
+    --block-code-border-radius: 5px;
+    --block-code-border-color: var(--primary-color);
+    --detail-border-color: var(--primary-color);
+  }
+
+  /* ------------------ Theorem / Lemma / Definition Blocks ------------------ */
+  blockquote.theorem {
+    border-left: 4px solid var(--callout-note-color);
+    background: #f2f7ff;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+  }
+
+  blockquote.theorem.lemma {
+    border-color: var(--callout-tip-color);
+    background: #edf9f2;
+  }
+
+  blockquote.theorem.definition {
+    border-color: var(--callout-warning-color);
+    background: #fff8eb;
+  }
+
+  blockquote.theorem.important {
+    border-color: var(--callout-important-color);
+    background: #f6f0ff;
+  }
+
+  blockquote.theorem.caution {
+    border-color: var(--callout-caution-color);
+    background: #ffecec;
+  }
+
+  blockquote.theorem .title {
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    color: var(--text-color);
+  }
+
+  blockquote.theorem .content {
+    margin: 0;
+    color: var(--text-color);
+  }
+
+  /* Dark mode overrides for theorem blocks */
+  body.dark blockquote.theorem {
+    background: #22293b;
+    border-left-color: var(--callout-note-color);
+  }
+
+  body.dark blockquote.theorem.lemma {
+    background: #1d2d22;
+    border-left-color: var(--callout-tip-color);
+  }
+
+  body.dark blockquote.theorem.definition {
+    background: #2f1e0f;
+    border-left-color: var(--callout-warning-color);
+  }
+
+  body.dark blockquote.theorem.important {
+    background: #2a1f33;
+    border-left-color: var(--callout-important-color);
+  }
+
+  body.dark blockquote.theorem.caution {
+    background: #3c1f1f;
+    border-left-color: var(--callout-caution-color);
+  }
+  #theme-toggle {
+    all: unset; /* removes all inherited and default styles */
+    display: inline; /* or block, if you want */
+    /* background-color: var(--bg-color); */
+  }
+</style>
+
+  <link rel="stylesheet" href="/main.css">
+  
+
+<link id="hl" rel="stylesheet" type="text/css" href="/hl-light.css" />
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" integrity="sha384-HORx6nWi8j5/mYA+y57/9/CZc5z8HnEw4WUZWy5yOn9ToKBv1l58vJaufFAn9Zzi" crossorigin="anonymous"></script>
+  
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+          macros: {
+            "\\field": "\\mathbb{#1}",
+            "\\hei": "\\mathbb{F}(#1)",
+            "\\Field": "\\mathbb{F}",
+            "\\Mont": "\\widetilde{#1}",
+            "\\samples": "\\xleftarrow{\\$}",
+            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
+            "\\TauConstraints": "\\tau_y",
+            "\\TauTime": "\\tau_{\\text{cycle}}",
+            "\\TauGroup": "\\tau_b",
+            "\\MLE": "\\widetilde{#1}",
+            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
+            "\\Def": ":=",
+            "\\ChallengeSet": "\\mathsf{C}"
+
+          },
+            throwOnError: false,
+          trust: true
+
+        });
+    });
+</script>
+
+
+
+  
+</head>
+
+<body class="post">
+  
+  <script>
+    const theme = sessionStorage.getItem('theme');
+    const match = window.matchMedia("(prefers-color-scheme: dark)").matches
+    if ((theme && theme == 'dark') || (!theme && match)) {
+      document.body.classList.add('dark');
+      const hl = document.querySelector('link#hl');
+      if (hl) hl.href = '/hl-dark.css';
+    }
+  </script>
+  
+  
+<div id="wrapper">
+  <div id="blank"></div>
+  <aside>
+    
+    
+    <nav>
+      <ul>
+        
+        <li>
+          <a class="h2" href="#tl-dr-just-tell-us-what-you-did">TL;DR - Just Tell Us What You Did</a>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#sum-check-recap">Sum-Check Recap</a>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#the-challenge-set-s">The Challenge Set $S$</a>
+          
+          <ul>
+            
+            <li>
+              <a class="h3" href="#worked-out-example">Worked Out Example:</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#cios-review">CIOS Review</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#important-sub-routine">Important Sub-Routine</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#repeat-the-subroutine-n-times">Repeat The Subroutine $n$ times</a>
+            </li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#some-implementation-details">Some Implementation Details</a>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#footnotes-and-references">Footnotes and References</a>
+          
+        </li>
+        
+      </ul>
+    </nav>
+    
+    
+    <button id="back-to-top" aria-label="back to top">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-up"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+
+    </button>
+    
+  </aside>
+  <main>
+    
+<header>
+  <nav>
+    <a id="back-link" href="&#x2F;posts">← Back</a>
+    <a id="back-link" href="/">Home</a>
+    
+    
+
+    <button id="theme-toggle" aria-label="theme switch">
+    <span class="moon-icon">🌙</span>
+     <span class="sun-icon">🌞</span>
+    </button>
+
+  </nav>
+</header>
+
+    <div>
+      
+      
+      
+      
+      <div id="copy-cfg" style="display: none;" data-copy-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" data-check-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+"></div>
+      
+      <article class="prose">
+        <h1>Small Scalar Binding</h1>
+        <div id="post-info">
+          <div id="date">
+            <span id="publish">Oct 4, 2025</span>
+            <span>Updated on <span id="updated">Jan 8, 2026</span></span>
+            </div>
+
+          
+          <div id="tags">
+            <a class="instant" href="//tags/sumcheck"><span>#</span>sumcheck</a><a class="instant" href="//tags/montgomery-mults"><span>#</span>montgomery-mults</a>
+          </div>
+          
+        </div>
+
+        
+        
+
+        <blockquote id="outdate_alert" class="callout caution hidden" data-days="50"
+          data-alert-text-before="This article was last updated "
+          data-alert-text-after=" days ago and may be out of date.">
+          <div class="content"></div>
+        </blockquote>
+        
+
+        <h2 id="tl-dr-just-tell-us-what-you-did">TL;DR - Just Tell Us What You Did<a class="zola-anchor" href="#tl-dr-just-tell-us-what-you-did" aria-label="Anchor link for: tl-dr-just-tell-us-what-you-did" style="visibility: hidden;"></a>
+</h2>
+ 
+
+<blockquote class="theorem box">
+  
+  <div class="content"><h3 id="faster-sumcheck-in-jolt">Faster Sumcheck In Jolt</h3>
+<p>By sampling the verifiers random challenges from a set $S \subset \mathbb{F}$ of size roughly $\sqrt{|\mathbb{F}|}$, we speed up sum-check binding by <strong>1.6x</strong> from baseline (where challenges are sampled over the whole field $\mathbb{F}$ -- the field over which polynomials are defined. )
+<strong>NOTE:</strong> This now reduces the soundness error from $1/2^{254}$ to $1/2^{125}$, but this is not a concern as currently Jolt usess the <code>bn256</code> curve to commit to polynomials, which offers 110 bits of security anyway.</p>
+</div>
+</blockquote>
+<h2 id="sum-check-recap">Sum-Check Recap<a class="zola-anchor" href="#sum-check-recap" aria-label="Anchor link for: sum-check-recap" style="visibility: hidden;"></a>
+</h2>
+<p>We briefly recap the sum-check protocol<sup class="footnote-reference"><a href="#a">1</a></sup>.</p>
+<p>Let $g \in \Field[X_1, \ldots, X_m]$ be a polynomial over $\Field$ with the following structure.
+$$ g(X_1, \ldots, X_m) = \prod_{j=1}^d q_j(X_1, \ldots, X_m)$$
+where all $q_j(X)$'s are multi-linear polynomials over $\Field$.
+We expand more below:</p>
+<ol>
+<li><strong>Polynomial evaluation</strong> The prover computes the following univariate polynomial, using the following steps $$p_i(X_i) = \sum_{b_{i+1} \in {0,1}}\ldots\sum_{b_{m} \in {0,1}^{}}g(r_1, \ldots, r_{i-1}, X_i, b_{i+1}, b_m)$$
+a. If $g$ has degree $d$, this requires computing $p_i(0), \ldots, p_i(d)$, then via standard lagrange interpolation, we're able to fully define $p_i(X)$.
+$$p_i(Z) = \prod_{j=1}^d \Bigg( \sum_{b_{i+1} \in {0,1}}\ldots\sum_{b_{m}} q_j\Big(r_1, \ldots, r_{i-1}, Z, b_{i+1}, \ldots, b_m\Big)\Bigg)$$
+so to get $p_i(Z)$ we compute for all $j \in [d]$, $q_j(r_1, \ldots, r_{i-1}, Z, \vec{b})$ for $Z \in {0, \ldots, d}$ for all $\vec{b} \in {0, 1}^{m-i}$.
+As $q_j$ is multi-linear -- this can be computed by linear-interpolation.</li>
+</ol>
+<div id="hello" style="overflow-x: auto; max-width: 100%;">
+ 
+
+<div class="content">$$
+	\begin{aligned}
+		q_j(r_1, \ldots, r_{i-1}, Z, \vec{b}) = & (1-Z) \,q_j(r_1, \ldots, r_{i-1}, 0, b_{i+1}, \ldots, b_m) \\[10pt]
+		                                        & + Z\, q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m)
+	\end{aligned}
+$$</div>
+</div>
+<p>As $d$ is a small constant number, computing the above value requires <strong>no multiplication operations</strong>. We can compute it via a running sum.
+See pseudocode below</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Compute q_j(Z) = (1-Z) * q_j(0) + Z * q_j(1)
+</span></span><span class="z-source z-rust"><span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> using only additions
+</span></span><span class="z-source z-rust"><span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> when Z is a small integer.
+</span></span><span class="z-source z-rust">    <span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">compute_q_j_running_sum</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-variable z-parameter z-rust">z</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">usize</span>, <span class="z-variable z-parameter z-rust">q_at_0</span><span class="z-punctuation z-separator z-rust">:</span> JoltField, <span class="z-variable z-parameter z-rust">q_at_1</span><span class="z-punctuation z-separator z-rust">:</span> JoltField</span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> JoltField</span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> diff <span class="z-keyword z-operator z-assignment z-rust">=</span> q_at_1 <span class="z-keyword z-operator z-arithmetic z-rust">-</span> q_at_0<span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Compute Z * diff using repeated addition (running sum)
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> z_times_diff <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-path z-rust">JoltField<span class="z-punctuation z-accessor z-rust">::</span></span>zero<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        <span class="z-keyword z-control z-rust">for</span> <span class="z-keyword z-operator z-rust">_</span> <span class="z-keyword z-operator z-rust">in</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span><span class="z-keyword z-operator z-range z-rust">..</span>z <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            z_times_diff <span class="z-keyword z-operator z-assignment z-rust">+=</span> diff<span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">        q_at_0 <span class="z-keyword z-operator z-arithmetic z-rust">+</span> z_times_diff
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span><span class="z-source z-rust">
+</span></code></pre>
+<ol start="2">
+<li><strong>Binding Phase</strong> Thee prover needs to binds the multi-linear polynomial $g$ to $r_i$, that is to say it computes a new multi-linear polynomial in $m-i$ variables $$g_i(X_{i+1}, \ldots, X_{m}) = g(r_1, \ldots, r_{i-1}, X_{i+1}, \ldots, X_{m})$$.
+This involves storing all evaluations of $g_i$ over the hyper cube ${0, 1}^{m-i}$, but unlike the above step $r_i$ is <strong>NOT</strong> guaranteed to be a small number.
+Therefore the running sum described in the pseudocode above is no good to use.
+We need to use actual multiplication here.</li>
+</ol>
+ 
+
+<div class="content">$$
+	\begin{align}
+		q_j(r_1, \ldots, r_{i-1}, \textcolor{orange}{r_i}, \vec{b}) = & (1-\textcolor{orange}{r_i}) \,q_j(r_1, \ldots, r_{i-1}, 0, b_{i+1}, \ldots, b_m) \\[10pt]
+		                                                              & + \textcolor{orange}{r_i}\, q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m)
+	\end{align}
+$$</div>
+<p>Now $q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m) \in \Field$, and traditionally the set $S$ from which we sample $r_i$ is also equal to $\Field$.
+Therefore this step requires $2^{m-i}$ $\Field \times \Field$ multiplications in round $i$ -- a total of $2^m$ multiplications over $m$ rounds.
+It is well known that multiplication for $\Field$ elements is 1000x costlier than addition.
+So our hope is that we can choose $S$ cleverly such that this operation can be done faster.
+Note we cannot make $S$ too small, as this the soundness probability of any sumcheck protocol is given by $\frac{d}{|S|}$.</p>
+ 
+
+<blockquote class="theorem box">
+  
+  <div class="content"><h4 id="what-we-show">What we show</h4>
+<p>We show that there exists a set $S$ of size rouhgly $|\Field|^{1/2}$, which we call <code>MontU128Challenge</code>, in which $\Field \times r$ is 1.6x
+faster than $\Field \times \Field$.
+This in returns speeds up the <strong>binding</strong> phase of the sum-check protocol, which results in a 1.3x speedup per round of sum-check.</p>
+</div>
+</blockquote>
+<h2 id="the-challenge-set-s">The Challenge Set $S$<a class="zola-anchor" href="#the-challenge-set-s" aria-label="Anchor link for: the-challenge-set-s" style="visibility: hidden;"></a>
+</h2>
+<p>Define the set</p>
+<p>$$
+S \subset \Field  \text{where} S = { x \in \Field : \text{the least 2 significant digits of $x$ in Montgomery form are 0} }
+$$</p>
+<h4 id="worked-out-example">Worked Out Example:<a class="zola-anchor" href="#worked-out-example" aria-label="Anchor link for: worked-out-example" style="visibility: hidden;"></a>
+</h4>
+<p>Prime Field $\Field = \mathbb{Z}_{13}$ with Montgomery Form.
+Montgomery parameter: $R = 16 = 2⁴$.
+Montgomery form of $x$ is given by $xR \mod 13$</p>
+<table><thead><tr><th>x</th><th>Montgomery Form (decimal)</th><th>Binary</th><th>Last 2 bits</th></tr></thead><tbody>
+<tr><td>0</td><td>0</td><td>0000</td><td>00 ✓</td></tr>
+<tr><td>1</td><td>3</td><td>0011</td><td>11</td></tr>
+<tr><td>2</td><td>6</td><td>0110</td><td>10</td></tr>
+<tr><td>3</td><td>9</td><td>1001</td><td>01</td></tr>
+<tr><td>4</td><td>12</td><td>1100</td><td>00 ✓</td></tr>
+<tr><td>5</td><td>2</td><td>0010</td><td>10</td></tr>
+<tr><td>6</td><td>5</td><td>0101</td><td>01</td></tr>
+<tr><td>7</td><td>8</td><td>1000</td><td>00 ✓</td></tr>
+<tr><td>8</td><td>11</td><td>1011</td><td>11</td></tr>
+<tr><td>9</td><td>1</td><td>0001</td><td>01</td></tr>
+<tr><td>10</td><td>4</td><td>0100</td><td>00 ✓</td></tr>
+<tr><td>11</td><td>7</td><td>0111</td><td>11</td></tr>
+<tr><td>12</td><td>10</td><td>1010</td><td>10</td></tr>
+</tbody></table>
+<p>$$S = {0, 4, 7, 10}$$</p>
+<p><strong>Note:</strong> $|S| = 4 \approx \sqrt{p}$, which makes sense since we're filtering by the last 2 bits.</p>
+<p>The short answer to why we this set $S$ is nice, is that it saves us 10 multiplication instructions per field multiplication.
+We first briefly review the <a href="/posts/mont-mult/">CIOS</a> algorithm, which is currently used to multiply field elements.</p>
+<h3 id="cios-review">CIOS Review<a class="zola-anchor" href="#cios-review" aria-label="Anchor link for: cios-review" style="visibility: hidden;"></a>
+</h3>
+<p>Let $n$ be the number of limbs used to represent field elements. Currently in Jolt, $n=4$.
+The width $w$ of each limb is 64 bits.
+Given $a \in \Field$ and $b\in S$ , let $\Mont{a} = aR \mod p, \Mont{b} = bR \mod p$ be the respective Montgomery representations.</p>
+<p>Let $c = \Mont{a}\Mont{b}$ computed using textbook limb by limb multiplication.
+Now to get $\Mont{c}$ we <strong>need</strong> to compute $cR^{-1} = cr^{-n} = (ab)R \mod p$.</p>
+<p>$c$ can be written as the following sum and we compute $cR^{-1}$ limb by limb by multiplying $r^{-1}$ $n$ times</p>
+ 
+
+<div class="content">$$
+	\begin{align}
+		c       & \equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p                \\[10pt]
+		cr^{-1} & \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p \\[10pt]
+	\end{align}
+$$</div>
+<h3 id="important-sub-routine">Important Sub-Routine<a class="zola-anchor" href="#important-sub-routine" aria-label="Anchor link for: important-sub-routine" style="visibility: hidden;"></a>
+</h3>
+<p>Observe that $c_0r^{-1} \equiv (c_0 + mp)r^{-1} \mod p$, where $m$ such that $c_0 + mp \equiv 0 \mod r$.
+Solving for $m = -p^{-1}c_0 \equiv \mu c_0 \mod r$.
+Also as we are working modulo $r$, it suffices to use $m = \mu_{0}c_0$ discarding any carries, where $\mu_{0}$ is the least significant word of $\mu$.</p>
+<p>Once we compute $mp$, and add this to $c$ to get $c^{(1)}$, this should clear the least significant digit based on how we picked $m$. See below</p>
+ 
+
+<div class="content">$$
+	\begin{align}
+		c       & \equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p                     \\[10pt]
+		cr^{-1} & \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p      \\[10pt]
+		        & \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + (c_0+ mp)r^{-1}   \mod p \\[10pt]
+		        & \equiv (c + mp)r^{-1} \mod p                                                                    \\[10pt]
+		        & \equiv ( c^{(1)}_{2n-1}r^{2n-1} + \ldots c^{(1)}_1r + 0)r^{-1} \mod p                           \\[10pt]
+		        & \equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1) \mod p                                      \\[10pt]
+	\end{align}
+$$</div>
+<h3 id="repeat-the-subroutine-n-times">Repeat The Subroutine $n$ times<a class="zola-anchor" href="#repeat-the-subroutine-n-times" aria-label="Anchor link for: repeat-the-subroutine-n-times" style="visibility: hidden;"></a>
+</h3>
+<p>Now we can play the subroutine again with $c^{(1)}_1$ replacing the role of $c_0$, and the updated value of $m = \mu_0c_1^{(1)}$ (<strong>NOTE</strong> the same $\mu_0$ is always used)</p>
+ 
+
+<div class="content">$$
+	\begin{align}
+		cr^{-1} & \equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1 ) \mod p                    \\
+		cr^{-2} & \equiv ( c^{(1)}_{2n-1}r^{2n-3} + \ldots + c_1^{(1)}+ c_1^{(1)}r^{-1}   \mod p \\
+		        & \equiv ( c^{(2)}_{2n-1}r^{2n-3} + \ldots + c_1^{(2)} ) \mod p
+	\end{align}
+$$</div>
+<p>In fact we play this game $n$ times</p>
+<p> 
+
+<div class="content">$$cR^{-1} \equiv cr^{-n} \equiv c^{(n)}_{2n-1}r^{n-1} + c^{(n)}_{n+1}r +c^{(n)}_{n} \mod p$$</div>
+
+To get the final answer<sup class="footnote-reference"><a href="#c">2</a></sup></p>
+<blockquote>
+<h4 id="total-multiplications">Total Multiplications<a class="zola-anchor" href="#total-multiplications" aria-label="Anchor link for: total-multiplications" style="visibility: hidden;"></a>
+</h4>
+<p>The total number of multiplications is $2n^2 + n$ which for $n=4$ is 36.</p>
+<ul>
+<li>$n^2$ multiplications to compute $c$.</li>
+<li>$n$ multiplications to compute to $m=\mu_i c_i^{(i)}$ in each round.</li>
+<li>$n$ multiplications to compute $mp$ per round which totals $n^2$ multiplications.</li>
+</ul>
+</blockquote>
+<p>Next we illustrate how sampling $\Mont{b} \samples S$ saves us multiplications.</p>
+<p>Firstly when 2 digits are 0 we we only need $n \times (n-2)$ multiplications, which allows us to save 8 multiplications when $n=4$.</p>
+<p><img src="/posts/small-scalar-binding/diag.svg" alt="" /></p>
+<p>Remember the reduction phase is all about 0'ing out the least significant digit.
+If it's already 0 we do not need to compute $m_0 p$ and $m_1p$ anymore.</p>
+<p><img src="/posts/small-scalar-binding/diag2.svg" alt="" /></p>
+<blockquote>
+<p>This saves us $8 + 2 + 8= 20$ multiplications, which leaves with only $16$ multiplications</p>
+</blockquote>
+<p>If multiplications were the only thing that cost us CPU cycles we should see roughly <strong>2x</strong> speedup.
+However, additions and bit shifts -- although significantly cheaper, are not <em>free</em>.
+Thus, a reasonable expectation would be to see <strong>1.6-1.8x</strong> speedup.</p>
+<p>So we compute $(a-b)\times c$, where $a,b\in\Field$ and $c\in S$, 100 times and measure how long it takes.</p>
+<ul>
+<li>$S = \Field$</li>
+<li>$S$ is 2 least significant digits 0'd out.</li>
+</ul>
+<pre data-lang="zsh" class="language-zsh z-code"><code class="language-zsh" data-lang="zsh"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">cargo</span></span><span class="z-meta z-function-call z-arguments z-shell"> bench<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>p</span> jolt-core<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> --</span>bench</span> challenge_mult_performance</span>
+</span></code></pre>
+<p><img src="/posts/small-scalar-binding/mul-bench.png" alt="" /></p>
+<p>Next we show that this improved multiplication does indeed speed up polynomial binding</p>
+<pre data-lang="zsh" class="language-zsh z-code"><code class="language-zsh" data-lang="zsh"><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">cargo</span></span><span class="z-meta z-function-call z-arguments z-shell"> bench<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>p</span> jolt-core<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> --</span>bench</span> binding</span>
+</span><span class="z-source z-shell z-bash"><span class="z-meta z-function-call z-shell"><span class="z-variable z-function z-shell">cargo</span></span><span class="z-meta z-function-call z-arguments z-shell"> bench<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> -</span>p</span> jolt-core<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> --</span>bench</span> binding<span class="z-variable z-parameter z-option z-shell"><span class="z-punctuation z-definition z-parameter z-shell"> --</span>features</span> challenge-254-bit</span>
+</span></code></pre>
+<p><img src="/posts/small-scalar-binding/binding-fast.png" alt="" />
+Comparing it against the baseline</p>
+<p><img src="/posts/small-scalar-binding/binding-slow.png" alt="" /></p>
+<p>Shown below is the diff from bench with the red pdf representing our fast multiplication.</p>
+<p><img src="/posts/small-scalar-binding/binding-diff.svg" alt="" /></p>
+<h2 id="some-implementation-details">Some Implementation Details<a class="zola-anchor" href="#some-implementation-details" aria-label="Anchor link for: some-implementation-details" style="visibility: hidden;"></a>
+</h2>
+<p>we use $256$ bits to represent big integers and our challenge and the modulus for <code>ark-bn256</code> uses $254$ bits. Thus, if sampled a 2 limbed $128$ bit integer $x$ and used that as the challenge as is <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that $x &lt; p$ which the CIOS algorithm assumes.
+we use $256$ bits to represent big integers and our challenge and the modulus for <code>ark-bn254</code> uses $254$ bits. Thus, if sampled a 2 limbed $128$ bit integer $x$ and used that as the challenge as is <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that $x &lt; p$ which the CIOS algorithm assumes.
+So we clear the first 3 bits of $x$ to ensure that $x$ is <strong>ALWAYS</strong> less than $p$.</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-storage z-type z-impl z-rust">impl</span></span><span class="z-meta z-impl z-rust"><span class="z-meta z-generic z-rust"><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span>F<span class="z-punctuation z-separator z-rust">:</span> JoltField<span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span></span><span class="z-meta z-impl z-rust"> <span class="z-entity z-name z-impl z-rust">MontU128Challenge</span><span class="z-meta z-generic z-rust"><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span>F<span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span> </span><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">new</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-variable z-parameter z-rust">value</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u128</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> <span class="z-storage z-type z-rust">Self</span></span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> MontU128 can always be represented by 125 bits.
+</span></span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> This guarantees that the big integer is never greater than the
+</span></span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> bn254 modulus
+</span></span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> val_masked <span class="z-keyword z-operator z-assignment z-rust">=</span> value <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-storage z-type z-rust">u128</span><span class="z-meta z-path z-rust"><span class="z-punctuation z-accessor z-rust">::</span></span><span class="z-constant z-other z-rust">MAX</span> <span class="z-keyword z-operator z-comparison z-rust">&gt;</span><span class="z-keyword z-operator z-comparison z-rust">&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">3</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> low <span class="z-keyword z-operator z-assignment z-rust">=</span> val_masked <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">u64</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> high <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>val_masked <span class="z-keyword z-operator z-comparison z-rust">&gt;</span><span class="z-keyword z-operator z-comparison z-rust">&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">64</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">u64</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">Self</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        value<span class="z-punctuation z-separator z-rust">:</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-constant z-numeric z-integer z-decimal z-rust">0</span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span><span class="z-punctuation z-separator z-rust">,</span> low<span class="z-punctuation z-separator z-rust">,</span> high<span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        _marker<span class="z-punctuation z-separator z-rust">:</span> PhantomData<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">value</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-keyword z-operator z-rust">&amp;</span><span class="z-variable z-parameter z-rust">self</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> </span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-storage z-type z-rust">u64</span><span class="z-punctuation z-separator z-rust">;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">4</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>value
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">random</span></span><span class="z-meta z-generic z-rust"><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span>R<span class="z-punctuation z-separator z-rust">:</span> Rng <span class="z-keyword z-operator z-rust">+</span> <span class="z-invalid z-illegal z-rust">?</span></span><span class="z-support z-type z-rust">Sized</span><span class="z-keyword z-operator z-comparison z-rust">&gt;</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>rng<span class="z-punctuation z-separator z-rust">:</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span><span class="z-storage z-modifier z-rust">mut</span> R</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> <span class="z-storage z-type z-rust">Self</span></span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">		<span class="z-storage z-type z-rust">Self</span><span class="z-meta z-path z-rust"><span class="z-punctuation z-accessor z-rust">::</span></span>from<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>rng<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-meta z-path z-rust">gen<span class="z-punctuation z-accessor z-rust">::</span></span><span class="z-meta z-generic z-rust"><span class="z-punctuation z-definition z-generic z-begin z-rust">&lt;</span><span class="z-storage z-type z-rust">u128</span><span class="z-punctuation z-definition z-generic z-end z-rust">&gt;</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">	</span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-impl z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span><span class="z-source z-rust">
+</span><span class="z-source z-rust">
+</span></code></pre>
+<h2 id="footnotes-and-references">Footnotes and References<a class="zola-anchor" href="#footnotes-and-references" aria-label="Anchor link for: footnotes-and-references" style="visibility: hidden;"></a>
+</h2>
+<div class="footnote-definition" id="b"><sup class="footnote-definition-label">3</sup>
+<p>In practice, these protocols are implemented non-interactively using the Fiat-Shamir transform. The verifiers work is restricted to sampling random values.</p>
+</div>
+<div class="footnote-definition" id="c"><sup class="footnote-definition-label">2</sup>
+<p>We have to conditionally subtract from $p$ to get the actual right answer, but this operation is common to both the baseline and our optimisation, so we do not focus on this.</p>
+</div>
+<div class="footnote-definition" id="a"><sup class="footnote-definition-label">1</sup>
+<p>There are optimisations by [?] that improve on this, but the optimisations discussed in this note still apply, so for the sake of simplicity, we describe the Sum-check protocol in its simplest form.</p>
+</div>
+
+      </article>
+
+      
+      
+
+      
+      
+      <div class="giscus"></div>
+      
+      
+    </div>
+
+    
+
+
+<footer>
+  <div class="left">
+    <div class="copyright">
+      © 2025 Ari
+      
+    </div>
+  </div>
+
+  <div class="right">
+    
+    
+      
+    
+    
+    <a id="rss-btn" href="/posts/feed.xml">RSS</a>
+    
+    
+
+    <!--  -->
+    <!--  -->
+    <!--  -->
+    <!-- <button id="theme-toggle" aria-label="theme switch"> -->
+    <!--   <span class="moon-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3945 15.9187 17.7035 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29648 8.08133 5.60547 8.2379 4.938C5.71611 6.28423 4 8.9417 4 12Z" fill="currentColor"></path></svg>
+</span> -->
+    <!--   <span class="sun-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 20.4853L3.51472 19.0711L5.63604 16.9497ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z" fill="currentColor"></path></svg>
+</span> -->
+    <!-- </button> -->
+    <!--  -->
+  </div>
+</footer>
+
+
+
+
+<dialog id="rss-mask">
+  <div>
+    <a href="&#x2F;posts&#x2F;feed.xml">&#x2F;posts&#x2F;feed.xml</a>
+    
+    
+    <button autofocus aria-label="copy" data-link="&#x2F;posts&#x2F;feed.xml" data-copy-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" data-check-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z" fill="currentColor"></path></svg>
+
+    </button>
+  </div>
+</dialog>
+
+
+
+  </main>
+</div>
+
+  
+<script src="/js/lightense.min.js"></script>
+
+
+  <script src="/js/main.js"></script>
+</body>
+
+</html>
