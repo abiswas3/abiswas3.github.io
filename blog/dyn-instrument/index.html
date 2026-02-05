@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Montgomery Multiplication: Theory Vs Practice | Random Walks</title>
-  <link rel="stylesheet" href="http://onATangent.xyz/style.css">
+  <link rel="stylesheet" href="/style.css">
   <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css" media="(prefers-color-scheme: dark)">
   <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css" media="(prefers-color-scheme: light)">
   
@@ -19,20 +19,20 @@
   <nav class="nav">
     <div class="nav-inner">
       <div class="nav-left">
-        <a href="http://onATangent.xyz">Home</a>
+        <a href="">Home</a>
       </div>
 
       <div class="nav-right">
-        <a href="http://onATangent.xyz/blog/">Notes</a>
-        <a href="http://onATangent.xyz/blog/atom.xml" class="feed-link" title="RSS Feed">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
-        </a>
-        <a href="http://onATangent.xyz/publications/">Research</a>
-        <a href="http://onATangent.xyz/misc/">Random</a>
+        <a href="/blog/">Notes</a>
+        <a href="/publications/">Research</a>
+        <a href="/misc/">Random</a>
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
           <span class="icon-sun">&#9788;</span>
           <span class="icon-moon">&#9790;</span>
         </button>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
 
       </div>
     </div>
@@ -54,7 +54,7 @@
     </div>
     
     <div class="post-tags">
-      <a href="http://onATangent.xyz/tags/instrumentation/" class="tag">instrumentation</a><a href="http://onATangent.xyz/tags/jolt/" class="tag">jolt</a>
+      <a href="/tags/instrumentation/" class="tag">instrumentation</a><a href="/tags/jolt/" class="tag">jolt</a>
     </div>
     
   </header>
@@ -90,7 +90,7 @@ This post is a deep dive into why this could be, and potentially what can be don
 <p>The terms word, digit, limbs are all interchangeable. For everything we discuss here, the word size is 64-bits. So a 2-limb integer is just an integer that takes 2$\times$ 64 bits to describe.</p>
 </div>
 <div class="footnote-definition" id="z2"><sup class="footnote-definition-label">2</sup>
-<p>A description of this algorithm can be found in <a href="http://onATangent.xyz/blog/dyn-instrument/papers/Acard.pdf">Chapter 1 of Acar's Phd thesis</a>.</p>
+<p>A description of this algorithm can be found in <a href="/blog/dyn-instrument/papers/Acard.pdf">Chapter 1 of Acar's Phd thesis</a>.</p>
 </div>
 <h2 id="montgomery-multiplication-a-brief-review">Montgomery Multiplication - A Brief Review</h2>
 <p>Given $n$ limb modulus $p$, and integers $a$ and $b$, the modular multiplication problem is to compute the remainder of the product</p>
@@ -183,7 +183,7 @@ to Montgomery form is not included in benchmarking run times.</p>
 <span class="giallo-l"><span class="z-entity z-name">cargo</span><span class="z-string"> bench</span></span></code></pre>
 <blockquote>
 <p><strong>UPDATE: 2025-06-01</strong>: The barebones_profiling has been merged into main, and running <code>cargo bench</code> should give you time stamps for 4 algorithms: the arkworks, and implementation discussed above, plus additionally two different implementations, one of CIOS and one of the new algorithm -- written to optimise use of registers.
-See <a href="http://onATangent.xyz/blog/mont-mult/">more details</a></p>
+See <a href="/blog/mont-mult/">more details</a></p>
 </blockquote>
 <h3 id="computer-information">Computer Information</h3>
 <p>All computations were run on Intel CPUs on Digital Ocean servers.

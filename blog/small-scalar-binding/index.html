@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Small Scalar Binding | Random Walks</title>
-  <link rel="stylesheet" href="http://onATangent.xyz/style.css">
+  <link rel="stylesheet" href="/style.css">
   <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css" media="(prefers-color-scheme: dark)">
   <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css" media="(prefers-color-scheme: light)">
   
@@ -19,20 +19,20 @@
   <nav class="nav">
     <div class="nav-inner">
       <div class="nav-left">
-        <a href="http://onATangent.xyz">Home</a>
+        <a href="">Home</a>
       </div>
 
       <div class="nav-right">
-        <a href="http://onATangent.xyz/blog/">Notes</a>
-        <a href="http://onATangent.xyz/blog/atom.xml" class="feed-link" title="RSS Feed">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
-        </a>
-        <a href="http://onATangent.xyz/publications/">Research</a>
-        <a href="http://onATangent.xyz/misc/">Random</a>
+        <a href="/blog/">Notes</a>
+        <a href="/publications/">Research</a>
+        <a href="/misc/">Random</a>
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
           <span class="icon-sun">&#9788;</span>
           <span class="icon-moon">&#9790;</span>
         </button>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
 
       </div>
     </div>
@@ -54,7 +54,7 @@
     </div>
     
     <div class="post-tags">
-      <a href="http://onATangent.xyz/tags/sumcheck/" class="tag">sumcheck</a><a href="http://onATangent.xyz/tags/montgomery-mults/" class="tag">montgomery-mults</a>
+      <a href="/tags/sumcheck/" class="tag">sumcheck</a><a href="/tags/montgomery-mults/" class="tag">montgomery-mults</a>
     </div>
     
   </header>
@@ -175,7 +175,7 @@ Montgomery form of $x$ is given by $xR \mod 13$</p>
 <p>$$S = {0, 4, 7, 10}$$</p>
 <p><strong>Note:</strong> $|S| = 4 \approx \sqrt{p}$, which makes sense since we're filtering by the last 2 bits.</p>
 <p>The short answer to why we this set $S$ is nice, is that it saves us 10 multiplication instructions per field multiplication.
-We first briefly review the <a href="http://onATangent.xyz/blog/mont-mult/">CIOS</a> algorithm, which is currently used to multiply field elements.</p>
+We first briefly review the <a href="/blog/mont-mult/">CIOS</a> algorithm, which is currently used to multiply field elements.</p>
 <h3 id="cios-review">CIOS Review</h3>
 <p>Let $n$ be the number of limbs used to represent field elements. Currently in Jolt, $n=4$.
 The width $w$ of each limb is 64 bits.
@@ -236,10 +236,10 @@ To get the final answer<sup class="footnote-reference"><a href="#c">2</a></sup><
 </blockquote>
 <p>Next we illustrate how sampling $\Mont{b} \samples S$ saves us multiplications.</p>
 <p>Firstly when 2 digits are 0 we we only need $n \times (n-2)$ multiplications, which allows us to save 8 multiplications when $n=4$.</p>
-<p><img src="http://onATangent.xyz/blog/small-scalar-binding/diag.svg" alt="" /></p>
+<p><img src="/blog/small-scalar-binding/diag.svg" alt="" /></p>
 <p>Remember the reduction phase is all about 0'ing out the least significant digit.
 If it's already 0 we do not need to compute $m_0 p$ and $m_1p$ anymore.</p>
-<p><img src="http://onATangent.xyz/blog/small-scalar-binding/diag2.svg" alt="" /></p>
+<p><img src="/blog/small-scalar-binding/diag2.svg" alt="" /></p>
 <blockquote>
 <p>This saves us $8 + 2 + 8= 20$ multiplications, which leaves with only $16$ multiplications</p>
 </blockquote>
@@ -252,15 +252,15 @@ Thus, a reasonable expectation would be to see <strong>1.6-1.8x</strong> speedup
 <li>$S$ is 2 least significant digits 0'd out.</li>
 </ul>
 <pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cargo</span><span class="z-string"> bench</span><span class="z-constant"> -</span><span class="z-constant">p</span><span class="z-string"> jolt-core</span><span class="z-constant"> -</span><span class="z-constant">-bench</span><span class="z-string"> challenge_mult_performance</span></span></code></pre>
-<p><img src="http://onATangent.xyz/blog/small-scalar-binding/mul-bench.png" alt="" /></p>
+<p><img src="/blog/small-scalar-binding/mul-bench.png" alt="" /></p>
 <p>Next we show that this improved multiplication does indeed speed up polynomial binding</p>
 <pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cargo</span><span class="z-string"> bench</span><span class="z-constant"> -</span><span class="z-constant">p</span><span class="z-string"> jolt-core</span><span class="z-constant"> -</span><span class="z-constant">-bench</span><span class="z-string"> binding</span></span>
 <span class="giallo-l"><span class="z-entity z-name">cargo</span><span class="z-string"> bench</span><span class="z-constant"> -</span><span class="z-constant">p</span><span class="z-string"> jolt-core</span><span class="z-constant"> -</span><span class="z-constant">-bench</span><span class="z-string"> binding</span><span class="z-constant"> -</span><span class="z-constant">-features</span><span class="z-string"> challenge-254-bit</span></span></code></pre>
-<p><img src="http://onATangent.xyz/blog/small-scalar-binding/binding-fast.png" alt="" />
+<p><img src="/blog/small-scalar-binding/binding-fast.png" alt="" />
 Comparing it against the baseline</p>
-<p><img src="http://onATangent.xyz/blog/small-scalar-binding/binding-slow.png" alt="" /></p>
+<p><img src="/blog/small-scalar-binding/binding-slow.png" alt="" /></p>
 <p>Shown below is the diff from bench with the red pdf representing our fast multiplication.</p>
-<p><img src="http://onATangent.xyz/blog/small-scalar-binding/binding-diff.svg" alt="" /></p>
+<p><img src="/blog/small-scalar-binding/binding-diff.svg" alt="" /></p>
 <h2 id="some-implementation-details">Some Implementation Details</h2>
 <p>we use $256$ bits to represent big integers and our challenge and the modulus for <code>ark-bn256</code> uses $254$ bits. Thus, if sampled a 2 limbed $128$ bit integer $x$ and used that as the challenge as is <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that $x &lt; p$ which the CIOS algorithm assumes.
 we use $256$ bits to represent big integers and our challenge and the modulus for <code>ark-bn254</code> uses $254$ bits. Thus, if sampled a 2 limbed $128$ bit integer $x$ and used that as the challenge as is <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that $x &lt; p$ which the CIOS algorithm assumes.

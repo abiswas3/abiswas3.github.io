@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Algorithms For Montgomery Multiplication | Random Walks</title>
-  <link rel="stylesheet" href="http://onATangent.xyz/style.css">
+  <link rel="stylesheet" href="/style.css">
   <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css" media="(prefers-color-scheme: dark)">
   <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css" media="(prefers-color-scheme: light)">
   
@@ -19,20 +19,20 @@
   <nav class="nav">
     <div class="nav-inner">
       <div class="nav-left">
-        <a href="http://onATangent.xyz">Home</a>
+        <a href="">Home</a>
       </div>
 
       <div class="nav-right">
-        <a href="http://onATangent.xyz/blog/">Notes</a>
-        <a href="http://onATangent.xyz/blog/atom.xml" class="feed-link" title="RSS Feed">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
-        </a>
-        <a href="http://onATangent.xyz/publications/">Research</a>
-        <a href="http://onATangent.xyz/misc/">Random</a>
+        <a href="/blog/">Notes</a>
+        <a href="/publications/">Research</a>
+        <a href="/misc/">Random</a>
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
           <span class="icon-sun">&#9788;</span>
           <span class="icon-moon">&#9790;</span>
         </button>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
 
       </div>
     </div>
@@ -54,7 +54,7 @@
     </div>
     
     <div class="post-tags">
-      <a href="http://onATangent.xyz/tags/one/" class="tag">one</a><a href="http://onATangent.xyz/tags/two/" class="tag">two</a><a href="http://onATangent.xyz/tags/three/" class="tag">three</a>
+      <a href="/tags/one/" class="tag">one</a><a href="/tags/two/" class="tag">two</a><a href="/tags/three/" class="tag">three</a>
     </div>
     
   </header>
@@ -77,7 +77,7 @@
 
   <div class="post-content">
     <h2 id="background">Background</h2>
-<p>In an earlier <a href="http://onATangent.xyz/blog/dyn-instrument/">post</a>, we analysed why <a rel="external" href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">this implementation</a> of the improved <a rel="external" href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication">Montgomery multiplication</a> algorithm by <a rel="external" href="https://hackmd.io/@Ingonyama/Barret-Montgomery">Yuval Domb</a> was not empirically faster out of the box.
+<p>In an earlier <a href="/blog/dyn-instrument/">post</a>, we analysed why <a rel="external" href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">this implementation</a> of the improved <a rel="external" href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication">Montgomery multiplication</a> algorithm by <a rel="external" href="https://hackmd.io/@Ingonyama/Barret-Montgomery">Yuval Domb</a> was not empirically faster out of the box.
 After disassembling the code using the Intel Pin tool, we identified large memory reads and writes as the primary source of slower run times.
 Although the analysis was specific to x86 architectures, the empirical findings were consistent across MacBook M2 Laptops and Intel x86 Digital Ocean servers.
 This loss of performance, however, is an artefact of the implementation, not the algorithm itself<sup class="footnote-reference"><a href="#a">1</a></sup>.
@@ -148,7 +148,7 @@ In the process, we establish that there is not just 1 new algorithm for Montgome
 This gives all the background needed to figure out what is going on.</p>
 <p>Below, we actually describe the Separated Operand Scanning Algorithm (SOS), but deceptively refer to it as the Coarse Integrated Operand Scanning (CIOS) algorithm.
 This is done for ease of exposition only; the claims would hold regardless.
-See <a href="http://onATangent.xyz/blog/mont-mult/papers/Acard.pdf">Acar's thesis Chapter 2</a> for more details.
+See <a href="/blog/mont-mult/papers/Acard.pdf">Acar's thesis Chapter 2</a> for more details.
 We also do not discuss the optimisations made by the <a rel="external" href="https://hackmd.io/@gnark/modular_multiplication">Gnark</a> team as they are not relevant in this context.</p>
 <div class="footnote-definition" id="f"><sup class="footnote-definition-label">3</sup>
 <p>Limbs here just mean digits. A 4 limb number is a 4-digit number where each digit is $w$ bits large, i.e each digit is between 0 and $2^w -1$.</p>

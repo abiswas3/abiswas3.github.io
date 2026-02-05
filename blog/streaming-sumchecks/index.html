@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Anatomy Of A Jolt Sumcheck | Random Walks</title>
-  <link rel="stylesheet" href="http://onATangent.xyz/style.css">
+  <link rel="stylesheet" href="/style.css">
   <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css" media="(prefers-color-scheme: dark)">
   <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css" media="(prefers-color-scheme: light)">
   
@@ -19,20 +19,20 @@
   <nav class="nav">
     <div class="nav-inner">
       <div class="nav-left">
-        <a href="http://onATangent.xyz">Home</a>
+        <a href="">Home</a>
       </div>
 
       <div class="nav-right">
-        <a href="http://onATangent.xyz/blog/">Notes</a>
-        <a href="http://onATangent.xyz/blog/atom.xml" class="feed-link" title="RSS Feed">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
-        </a>
-        <a href="http://onATangent.xyz/publications/">Research</a>
-        <a href="http://onATangent.xyz/misc/">Random</a>
+        <a href="/blog/">Notes</a>
+        <a href="/publications/">Research</a>
+        <a href="/misc/">Random</a>
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
           <span class="icon-sun">&#9788;</span>
           <span class="icon-moon">&#9790;</span>
         </button>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
 
       </div>
     </div>
@@ -54,7 +54,7 @@
     </div>
     
     <div class="post-tags">
-      <a href="http://onATangent.xyz/tags/sumcheck/" class="tag">sumcheck</a><a href="http://onATangent.xyz/tags/montgomery-mults/" class="tag">montgomery-mults</a>
+      <a href="/tags/sumcheck/" class="tag">sumcheck</a><a href="/tags/montgomery-mults/" class="tag">montgomery-mults</a>
     </div>
     
   </header>
@@ -84,7 +84,7 @@ As such honest proving begins with emulation of the given RISC-V program -- whic
 This is a fancy way of saying that the prover runs the program, and stores succinctly as a list the machine state before and after each instruction.
 This list is what we refer to the trace.
 And it is this trace from which we will construct the sum-check polynomials in Jolt.
-<a href="http://onATangent.xyz/blog/streaming-sumchecks/./day_0.html">See this post</a> for a fully worked out description of the emulation from an actual albeit useless program written in Rust.
+<a href="/blog/streaming-sumchecks/./day_0.html">See this post</a> for a fully worked out description of the emulation from an actual albeit useless program written in Rust.
 For example, consider the following program with just two instructions.</p>
 <pre class="giallo z-code"><code data-lang="asm"><span class="giallo-l"><span class="z-constant z-numeric z-constant">00001117</span><span>    auipc  </span><span class="z-constant z-language z-constant">sp</span><span>,</span><span class="z-constant z-numeric z-constant">0x1</span><span class="z-comment"> # sp = PC + (0x1 &lt;&lt; 12) = 0x80000000 + 0x1000 = 0x80001000</span></span>
 <span class="giallo-l"><span class="z-constant z-numeric z-constant">12010113</span><span>    addi   </span><span class="z-constant z-language z-constant">sp</span><span>,</span><span class="z-constant z-language z-constant">sp</span><span>,</span><span class="z-constant z-numeric z-constant">288</span><span class="z-comment"> # sp = 0x80001000 + 288 = 0x80001120</span></span></code></pre>
@@ -159,7 +159,7 @@ Using propositional logic we write:</p>
 <p>For a program to be correctly executed, for every time step $t \in { 0,1 }^{\log T}$, the above constraint must be satisfied.
 Of course for a program to be correct, it is not sufficient to just satisfy the above constraint.
 There are many more constraints.
-In the <code>OuterSpartan</code> sumcheck we write down 20 such <a href="http://onATangent.xyz/blog/streaming-sumchecks/./r1cs_constraints.html">constraints</a>, express these constraints as the evaluations of two polynomials $\widetilde{A}$ and $\widetilde{B}$, and represent constraint satisfaction as a sumcheck.
+In the <code>OuterSpartan</code> sumcheck we write down 20 such <a href="/blog/streaming-sumchecks/./r1cs_constraints.html">constraints</a>, express these constraints as the evaluations of two polynomials $\widetilde{A}$ and $\widetilde{B}$, and represent constraint satisfaction as a sumcheck.
 More details follow.</p>
 <h2 id="the-outer-spartan-polynomials">The Outer Spartan Polynomials</h2>
 <p>There are 20 constraints for each time step $t \in {0,1}^{\log T}$.
@@ -200,7 +200,7 @@ For a given time step $t \in {0,1}^{\log T}$, using information from the trace, 
 <p>That is satisfying constraint 1 for time step $t$ is equivalent to checking if $A(t, 0, -4) \times B(t, 0, -4) = 0$.
 The remaining 19 constraints give us evaluations $A(X_t, X_b, Y)$ and $B(X_t, X_b, Y)$ for $Y \in {-4, \ldots, 5}, X_b \in {0,1}, X_t \in {0,1}^{\log T}$.
 The picture you have in mind is the following
-<img src="http://onATangent.xyz/blog/streaming-sumchecks/trave_to_poly.svg" alt="" /></p>
+<img src="/blog/streaming-sumchecks/trave_to_poly.svg" alt="" /></p>
 <p>Satisfying all constraints is just saying the following:</p>
 <p>$$
 \begin{align<em>ed</em>}
@@ -265,7 +265,7 @@ This is exactly what the method</p>
 <span class="giallo-l"><span class="z-variable z-language z-variable"> self</span><span class="z-keyword z-keyword z-operator">.</span><span>split_eq_poly</span></span>
 <span class="giallo-l"><span class="z-keyword z-keyword z-operator">    .</span><span class="z-entity z-name z-entity z-name z-function">gruen_poly_deg_3</span><span class="z-punctuation">(</span><span class="z-variable z-other">t0</span><span class="z-punctuation">,</span><span class="z-variable z-other"> t_inf</span><span class="z-punctuation">,</span><span class="z-variable z-other"> previous_claim</span><span class="z-punctuation">)</span></span></code></pre><h2 id="the-remaining-rounds">The Remaining Rounds</h2>
 <p>With $\widetilde{A}$ and $\widetilde{B}$ materialised. The remaining rounds are standard. The mental picture is the following:</p>
-<p><img src="http://onATangent.xyz/blog/streaming-sumchecks/Linear_sumcheck.svg" alt="" /></p>
+<p><img src="/blog/streaming-sumchecks/Linear_sumcheck.svg" alt="" /></p>
 <p>At each bind the length of the representation of $\widetilde{A}$ and $\widetilde{B}$ shrinks by half.
 And the next prover message can be computed from the bounded and materialised polynomials.
 The <a rel="external" href="https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L387">code</a> is described here.</p>
@@ -289,7 +289,7 @@ In what follows, we make a compromise, of sometimes streaming instead of always 
 For example the sum-check involving 16 rounds of interaction below can be scheduled as shown below.
 Rounds 0, 3, 6, 9, 10, ..., 15 are all window starts.</li>
 </ul>
-<p><img src="http://onATangent.xyz/blog/streaming-sumchecks/stream_schedule.svg" alt="" /></p>
+<p><img src="/blog/streaming-sumchecks/stream_schedule.svg" alt="" /></p>
 <ul>
 <li>
 <p>For every round, we have a notion of width or the number of unbound variables. This is given by the distance of current round from the next window start (or the end if there is no more window starts).
