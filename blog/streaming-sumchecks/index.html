@@ -72,6 +72,11 @@
   </header>
 
   
+  <nav class="toc toc-side">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#the-trace">The Trace</a></li><li><a href="#correctness-as-constraint-satisfaction">Correctness As Constraint Satisfaction</a></li><li><a href="#the-outer-spartan-polynomials">The Outer Spartan Polynomials</a><ol><li><a href="#example-constraint-1">Example : Constraint 1</a></li></ol></li><li><a href="#review-of-the-linear-sumcheck-implementation">Review Of The Linear Sumcheck Implementation</a><ol><li><a href="#setup-phase">Setup Phase</a></li></ol></li><li><a href="#the-remaining-rounds">The Remaining Rounds</a></li><li><a href="#the-streaming-generalisation">The Streaming Generalisation</a><ol><li><a href="#prover-messages-are-always-computed-from-t-grid">Prover Messages Are Always Computed From t_grid</a></li><li><a href="#a-note-about-evaluating-at-infinity">A Note About Evaluating At Infinity</a><ol><li><a href="#binding-in-the-streaming-phase">Binding in the streaming phase</a></li></ol></li><li><a href="#next-window-start">Next Window Start</a></li><li><a href="#switch-over-point">Switch Over Point</a></li><li><a href="#actual-code">Actual Code</a></li></ol></li></ol>
+  </nav>
+  
 
   
 
@@ -215,9 +220,9 @@ The picture you have in mind is the following
 <img src="/blog/streaming-sumchecks/trave_to_poly.svg" alt="" /></p>
 <p>Satisfying all constraints is just saying the following:</p>
 <p>$$
-\begin{align<em>ed</em>}
+\begin{aligned}
 \widetilde{A}(x_t, x_b, y) \times \widetilde{B}(x_t, x_b,  y) = \vec{0} \quad \forall x_t \in {0,1}^{\log T}, \forall x_b \in {0,1}, \forall y \in {-4, ..., 5}
-\end{align<em>ed</em>}
+\end{aligned}
 $$</p>
 <p>where $\widetilde{U}$ denoes the multi-linear extension of a vector $U$.
 Now we do the thing we have done since the beginning of time.

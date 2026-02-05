@@ -12,7 +12,7 @@
   </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>On Errors and Resilience | Random Walks</title>
+  <title>Bug Report: Jolt Bytecode Expansion | Random Walks</title>
   <link rel="stylesheet" href="/style.css">
   <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
   <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
@@ -51,11 +51,6 @@
   </nav>
   
 
-<div class="backdrop">
-  <img src="backdrop.svg" alt="">
-  <div class="backdrop-fade"></div>
-</div>
-
 
   <main class="content">
     
@@ -64,14 +59,14 @@
 
 <article class="post">
   <header class="post-header">
-    <h1>On Errors and Resilience</h1>
+    <h1>Bug Report: Jolt Bytecode Expansion</h1>
     <div class="post-meta">
-      <span class="post-author">Francis, Ada</span>
+      <span class="post-author">Ari</span>
       <time>2026-02-02</time>
     </div>
     
     <div class="post-tags">
-      <a href="/tags/systems/" class="tag">systems</a><a href="/tags/research/" class="tag">research</a>
+      <a href="/tags/jolt/" class="tag">jolt</a><a href="/tags/front-end/" class="tag">front-end</a>
     </div>
     
   </header>
@@ -81,7 +76,7 @@
   
   <nav class="toc toc-inline">
     <div class="toc-title">Contents</div>
-    <ol><li><a href="#the-anatomy-of-a-failure">The Anatomy of a Failure</a></li><li><a href="#retry-strategies">Retry Strategies</a></li><li><a href="#circuit-breakers">Circuit Breakers</a></li><li><a href="#budgeting-for-failure">Budgeting for Failure</a></li><li><a href="#takeaway">Takeaway</a></li></ol>
+    <ol><li><a href="#instruction-and-its-expansion">Instruction and Its Expansion</a></li><li><a href="#counter-example">Counter Example</a></li><li><a href="#correction">Correction</a></li></ol>
   </nav>
   
 
@@ -94,20 +89,10 @@
   
 
   <div class="post-content">
-    <p>Every system fails. The question is how gracefully.</p>
-<h2 id="the-anatomy-of-a-failure">The Anatomy of a Failure</h2>
-<p>Below is a simplified view of how errors propagate through a typical service:</p>
+    <h2 id="instruction-and-its-expansion">Instruction and Its Expansion</h2>
+<h2 id="counter-example">Counter Example</h2>
+<h2 id="correction">Correction</h2>
 <p><img src="/blog/error/Jolt-overview.svg" alt="Error propagation" /></p>
-<h2 id="retry-strategies">Retry Strategies</h2>
-<p>The naive approach — retry immediately — often makes things worse. Exponential backoff with jitter is the standard:</p>
-<p>$$t_n = \min\left(t_{\text{max}},; t_0 \cdot 2^n + \text{rand}(0, t_0)\right)$$</p>
-<p>where $n$ is the attempt number and $t_0$ is the base delay.</p>
-<h2 id="circuit-breakers">Circuit Breakers</h2>
-<p>After $k$ consecutive failures, stop trying. This protects downstream services from cascading load. The state machine is simple: <strong>closed</strong> (normal), <strong>open</strong> (rejecting), <strong>half-open</strong> (probing).</p>
-<h2 id="budgeting-for-failure">Budgeting for Failure</h2>
-<p>Google's SRE handbook introduced error budgets: if your SLO is 99.9%, you have 43.8 minutes of downtime per month to spend. Use them on deploys.</p>
-<h2 id="takeaway">Takeaway</h2>
-<p>Resilience isn't about preventing failure. It's about making failure boring.</p>
 
   </div>
 
