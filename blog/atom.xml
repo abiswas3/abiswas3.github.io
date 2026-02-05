@@ -4,8 +4,41 @@
     <link rel="self" type="application/atom+xml" href="/blog/atom.xml"/>
     <link rel="alternate" type="text/html" href="/blog/"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2026-01-08T00:00:00+00:00</updated>
+    <updated>2026-02-02T00:00:00+00:00</updated>
     <id>/blog/atom.xml</id>
+    <entry xml:lang="en">
+        <title>On Errors and Resilience</title>
+        <published>2026-02-02T00:00:00+00:00</published>
+        <updated>2026-02-02T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="/blog/error/"/>
+        <id>/blog/error/</id>
+        
+        <content type="html" xml:base="/blog/error/">&lt;p&gt;Every system fails. The question is how gracefully.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-anatomy-of-a-failure&quot;&gt;The Anatomy of a Failure&lt;&#x2F;h2&gt;
+&lt;p&gt;Below is a simplified view of how errors propagate through a typical service:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;blog&#x2F;error&#x2F;Jolt-overview.svg&quot; alt=&quot;Error propagation&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;retry-strategies&quot;&gt;Retry Strategies&lt;&#x2F;h2&gt;
+&lt;p&gt;The naive approach — retry immediately — often makes things worse. Exponential backoff with jitter is the standard:&lt;&#x2F;p&gt;
+&lt;p&gt;$$t_n = \min\left(t_{\text{max}},; t_0 \cdot 2^n + \text{rand}(0, t_0)\right)$$&lt;&#x2F;p&gt;
+&lt;p&gt;where $n$ is the attempt number and $t_0$ is the base delay.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;circuit-breakers&quot;&gt;Circuit Breakers&lt;&#x2F;h2&gt;
+&lt;p&gt;After $k$ consecutive failures, stop trying. This protects downstream services from cascading load. The state machine is simple: &lt;strong&gt;closed&lt;&#x2F;strong&gt; (normal), &lt;strong&gt;open&lt;&#x2F;strong&gt; (rejecting), &lt;strong&gt;half-open&lt;&#x2F;strong&gt; (probing).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;budgeting-for-failure&quot;&gt;Budgeting for Failure&lt;&#x2F;h2&gt;
+&lt;p&gt;Google&#x27;s SRE handbook introduced error budgets: if your SLO is 99.9%, you have 43.8 minutes of downtime per month to spend. Use them on deploys.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;takeaway&quot;&gt;Takeaway&lt;&#x2F;h2&gt;
+&lt;p&gt;Resilience isn&#x27;t about preventing failure. It&#x27;s about making failure boring.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
     <entry xml:lang="en">
         <title>ByteCode RA</title>
         <published>2026-01-08T00:00:00+00:00</published>
