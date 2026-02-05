@@ -1,12 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>#sumcheck | onATangent</title>
   <link rel="stylesheet" href="/style.css">
-  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css" media="(prefers-color-scheme: dark)">
-  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css" media="(prefers-color-scheme: light)">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
   
   <link rel="stylesheet" href="/katex.css">
   <script defer src="/katex.min.js"></script>
@@ -26,10 +35,13 @@
         <a href="/blog/">Notes</a>
         <a href="/publications/">Research</a>
         <a href="/misc/">Random</a>
-        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
-          <span class="icon-sun">&#9788;</span>
-          <span class="icon-moon">&#9790;</span>
-        </button>
+        <select class="theme-select" id="theme-select" aria-label="Select theme">
+          <option value="gruvbox-dark">Gruvbox Dark</option>
+          <option value="tokyo-night">Tokyo Night</option>
+          <option value="vitesse-dark">Vitesse Dark</option>
+          <option value="rose-pine-dawn">Rosé Pine Dawn</option>
+          <option value="bw-light">Light</option>
+        </select>
         <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
         </a>
@@ -198,36 +210,35 @@
   </script>
   <script>
     (function() {
-      const toggle = document.getElementById('theme-toggle');
+      const select = document.getElementById('theme-select');
       const html = document.documentElement;
       const darkLink = document.getElementById('giallo-dark');
       const lightLink = document.getElementById('giallo-light');
 
+      const lightThemes = ['rose-pine-dawn', 'bw-light'];
+
       function setTheme(theme) {
         html.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
-        if (theme === 'dark') {
-          darkLink.media = 'all';
-          lightLink.media = 'not all';
-        } else {
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
           lightLink.media = 'all';
           darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
         }
       }
 
-      const saved = localStorage.getItem('theme');
-      if (saved) {
-        setTheme(saved);
-      } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-        setTheme('light');
-      } else {
-        setTheme('dark');
-      }
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
 
-      toggle.addEventListener('click', function() {
-        const current = html.getAttribute('data-theme');
-        setTheme(current === 'dark' ? 'light' : 'dark');
-      });
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
     })();
   </script>
     
