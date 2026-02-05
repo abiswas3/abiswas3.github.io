@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ByteCode RA | Random Walks</title>
+  <link rel="stylesheet" href="http://onATangent.xyz/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css" media="(prefers-color-scheme: dark)">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css" media="(prefers-color-scheme: light)">
+  
+  <link rel="stylesheet" href="/katex.css">
+  <script defer src="/katex.min.js"></script>
+  <script defer src="/auto-render.min.js"></script>
+  <script defer src="/katex-init.js"></script>
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="http://onATangent.xyz">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="http://onATangent.xyz/blog/">Notes</a>
+        <a href="http://onATangent.xyz/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+        <a href="http://onATangent.xyz/publications/">Research</a>
+        <a href="http://onATangent.xyz/misc/">Random</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <span class="icon-sun">&#9788;</span>
+          <span class="icon-moon">&#9790;</span>
+        </button>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+<article class="post">
+  <header class="post-header">
+    <h1>ByteCode RA</h1>
+    <div class="post-meta">
+      
+      <time>2026-01-08</time>
+    </div>
+    
+    <div class="post-tags">
+      <a href="http://onATangent.xyz/tags/one/" class="tag">one</a><a href="http://onATangent.xyz/tags/two/" class="tag">two</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <h2 id="summary">Summary</h2>
+<p>For our specific example we have</p>
+<p><strong>Input:</strong></p>
+<ul>
+<li>Bytecode array (94 instructions at positions 0..93)</li>
+<li>Trace (63 cycles)</li>
+<li><code>BytecodePCMapper</code> (address → bytecode position) discussed in detail <a href="/posts/day_1b.md">here</a></li>
+</ul>
+<p><strong>Process:</strong>
+For each cycle i:</p>
+<ol>
+<li>Get instruction address from <code>cycle.address</code></li>
+<li>Map address → bytecode position using <code>get_pc()</code> which uses <code>BytecodePCMapper</code>. This gives us the index/position in the bytecode array (0..93)</li>
+<li>Handle virtual sequences by calculating offset from <code>virtual_sequence_remaining</code></li>
+<li>Store in <code>BytecodeRa[0][i] = Some(pc as u8)</code></li>
+</ol>
+<p><strong>Output:</strong>
+One polynomial with 63 entries, getting ready for the Shout stages.</p>
+<h2 id="our-simple-case-d-1">Our Simple Case: d = 1</h2>
+<p>Why? Because we have 94 instructions which is strictly less than 256, all bytecode positions fit in a single 8-bit value.</p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-entity z-name z-type">BytecodeRa</span><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">]</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> Vec</span><span class="z-punctuation">&lt;</span><span class="z-entity z-name z-type">Option</span><span class="z-punctuation">&lt;</span><span class="z-entity z-name z-type">u8</span><span class="z-punctuation">&gt;</span><span class="z-punctuation">&gt;</span><span class="z-punctuation z-punctuation z-definition z-comment">  //</span><span class="z-comment"> One polynomial, length = 63 (trace length)</span></span></code></pre>
+<p>Each entry <code>BytecodeRa[0][i]</code> directly stores which bytecode instruction executed at cycle <code>i</code>.</p>
+<h2 id="what-is-bytecodera">What is BytecodeRa?</h2>
+<p><code>BytecodeRa</code> tracks which bytecode instruction is executing at each cycle. For a small program like yours:</p>
+<p><strong>Structure:</strong></p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-entity z-name z-type">BytecodeRa</span><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">]</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation"> [</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">    Some</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">1</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">   //</span><span class="z-comment"> Cycle 0 executes bytecode[1]</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">    Some</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">2</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">   //</span><span class="z-comment"> Cycle 1 executes bytecode[2]</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">    Some</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">3</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">   //</span><span class="z-comment"> Cycle 2 executes bytecode[3]</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">    Some</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">   //</span><span class="z-comment"> Cycle 3 executes bytecode[4]</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">    ...</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">    Some</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">5</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">   //</span><span class="z-comment"> Cycle 62 executes bytecode[5]</span></span>
+<span class="giallo-l"><span class="z-punctuation">]</span><span class="z-punctuation z-punctuation z-definition z-comment">  //</span><span class="z-comment"> Length = 63 cycles</span></span></code></pre>
+<p>This is a <strong>witness polynomial</strong> that tells the verifier: "At cycle i, we executed the instruction at bytecode position <code>BytecodeRa[0][i]</code>."
+You can verify this by looking at the actual <a href="/assets/jolt-tutorial/bytecode-ra">BytecodeRa</a> generated by Jolt for our program.</p>
+<h2 id="the-construction-process">The Construction Process</h2>
+<h3 id="input-data">Input Data</h3>
+<p><strong>1. Bytecode Array</strong> (94 instructions):</p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">]</span><span class="z-constant">  NOOP</span><span class="z-punctuation">  {</span><span class="z-variable z-other"> address</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 0x00000000</span><span class="z-punctuation">,</span><span class="z-keyword z-keyword z-operator"> ...</span><span class="z-punctuation"> }</span><span class="z-punctuation z-punctuation z-definition z-comment">  //</span><span class="z-comment"> Reserved</span></span>
+<span class="giallo-l"><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">1</span><span class="z-punctuation">]</span><span class="z-constant">  AUIPC</span><span class="z-punctuation"> {</span><span class="z-variable z-other"> address</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 0x80000000</span><span class="z-punctuation">,</span><span class="z-keyword z-keyword z-operator"> ...</span><span class="z-punctuation"> }</span></span>
+<span class="giallo-l"><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">2</span><span class="z-punctuation">]</span><span class="z-constant">  ADDI</span><span class="z-punctuation">  {</span><span class="z-variable z-other"> address</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 0x80000004</span><span class="z-punctuation">,</span><span class="z-keyword z-keyword z-operator"> ...</span><span class="z-punctuation"> }</span></span>
+<span class="giallo-l"><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">3</span><span class="z-punctuation">]</span><span class="z-constant">  AUIPC</span><span class="z-punctuation"> {</span><span class="z-variable z-other"> address</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 0x80000008</span><span class="z-punctuation">,</span><span class="z-keyword z-keyword z-operator"> ...</span><span class="z-punctuation"> }</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">...</span></span>
+<span class="giallo-l"><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">36</span><span class="z-punctuation">]</span><span class="z-constant"> ADDI</span><span class="z-punctuation">  {</span><span class="z-variable z-other"> address</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 0x80000042</span><span class="z-punctuation">,</span><span class="z-variable z-other"> virtual_sequence_remaining</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> Some</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">7</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-keyword z-keyword z-operator"> ...</span><span class="z-punctuation"> }</span></span>
+<span class="giallo-l"><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">37</span><span class="z-punctuation">]</span><span class="z-constant"> ANDI</span><span class="z-punctuation">  {</span><span class="z-variable z-other"> address</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 0x80000042</span><span class="z-punctuation">,</span><span class="z-variable z-other"> virtual_sequence_remaining</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> Some</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">6</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-keyword z-keyword z-operator"> ...</span><span class="z-punctuation"> }</span></span>
+<span class="giallo-l"><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">38</span><span class="z-punctuation">]</span><span class="z-constant"> LD</span><span class="z-punctuation">    {</span><span class="z-variable z-other"> address</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 0x80000042</span><span class="z-punctuation">,</span><span class="z-variable z-other"> virtual_sequence_remaining</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> Some</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">5</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-keyword z-keyword z-operator"> ...</span><span class="z-punctuation"> }</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">...</span></span>
+<span class="giallo-l"><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">93</span><span class="z-punctuation">]</span><span class="z-constant"> JALR</span><span class="z-punctuation">  {</span><span class="z-variable z-other"> address</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 0x80000316</span><span class="z-punctuation">,</span><span class="z-keyword z-keyword z-operator"> ...</span><span class="z-punctuation"> }</span></span></code></pre>
+<p><strong>2. BytecodePCMapper</strong> - Converts instruction addresses → bytecode positions:</p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-entity z-name z-type">BytecodePCMapper</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-variable z-other">    indices</span><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">34</span><span class="z-punctuation">]</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-type"> Some</span><span class="z-punctuation">(</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">36</span><span class="z-punctuation">,</span><span class="z-constant z-numeric z-constant"> 7</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">  //</span><span class="z-comment"> Address 0x80000042 → position 36, 8-step sequence</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">    ...</span></span>
+<span class="giallo-l"><span class="z-punctuation">}</span></span></code></pre>
+<p><strong>3. Execution Trace</strong> (63 cycles):</p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-entity z-name z-type">Cycle</span><span class="z-constant z-numeric z-constant"> 0</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant">  AUIPC</span><span class="z-variable z-other"> at</span><span class="z-variable z-other"> address</span><span class="z-constant z-numeric z-constant"> 0x80000000</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Cycle</span><span class="z-constant z-numeric z-constant"> 1</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant">  ADDI</span><span class="z-variable z-other">  at</span><span class="z-variable z-other"> address</span><span class="z-constant z-numeric z-constant"> 0x80000004</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">...</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Cycle</span><span class="z-constant z-numeric z-constant"> 8</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant">  ADDI</span><span class="z-variable z-other">  at</span><span class="z-variable z-other"> address</span><span class="z-constant z-numeric z-constant"> 0x80000042</span><span class="z-punctuation">  (</span><span class="z-keyword">virtual</span><span class="z-variable z-other"> seq</span><span class="z-constant z-numeric z-constant"> 7</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Cycle</span><span class="z-constant z-numeric z-constant"> 9</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant">  ANDI</span><span class="z-variable z-other">  at</span><span class="z-variable z-other"> address</span><span class="z-constant z-numeric z-constant"> 0x80000042</span><span class="z-punctuation">  (</span><span class="z-keyword">virtual</span><span class="z-variable z-other"> seq</span><span class="z-constant z-numeric z-constant"> 6</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Cycle</span><span class="z-constant z-numeric z-constant"> 10</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant"> LD</span><span class="z-variable z-other">    at</span><span class="z-variable z-other"> address</span><span class="z-constant z-numeric z-constant"> 0x80000042</span><span class="z-punctuation">  (</span><span class="z-keyword">virtual</span><span class="z-variable z-other"> seq</span><span class="z-constant z-numeric z-constant"> 5</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">...</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Cycle</span><span class="z-constant z-numeric z-constant"> 62</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant"> JAL</span><span class="z-variable z-other">   at</span><span class="z-variable z-other"> address</span><span class="z-constant z-numeric z-constant"> 0x80000010</span></span></code></pre><h3 id="step-by-step-construction">Step-by-Step Construction</h3>
+<p><strong>For each cycle i in the trace:</strong></p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-storage z-type">let</span><span class="z-variable z-other"> pc</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-variable z-other"> preprocessing</span><span class="z-keyword z-keyword z-operator">.</span><span>shared</span><span class="z-keyword z-keyword z-operator">.</span><span>bytecode</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">get_pc</span><span class="z-punctuation">(</span><span class="z-variable z-other">cycle</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">BytecodeRa</span><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">]</span><span class="z-punctuation">[</span><span class="z-variable z-other">i</span><span class="z-punctuation">]</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-type"> Some</span><span class="z-punctuation">(</span><span class="z-variable z-other">pc</span><span class="z-keyword"> as</span><span class="z-entity z-name z-type"> u8</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span></code></pre>
+<p>That's it! Since <code>d = 1</code>, we directly store the bytecode position without any chunking.</p>
+<h3 id="how-get-pc-works">How <code>get_pc()</code> Works</h3>
+<p>The <code>get_pc()</code> function uses the BytecodePCMapper to convert the cycle's instruction address to its bytecode position, accounting for virtual instruction sequences.</p>
+<h4 id="example-1-simple-instruction-cycle-0">Example 1: Simple Instruction (Cycle 0)</h4>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">//</span><span class="z-comment"> Cycle 0: AUIPC at address 0x80000000</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Step</span><span class="z-constant z-numeric z-constant"> 1</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> Get</span><span class="z-variable z-other"> mapper</span><span class="z-variable z-other"> index</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-entity z-name z-function">    get_index</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">0x80000000</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-constant z-numeric z-constant"> 1</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Step</span><span class="z-constant z-numeric z-constant"> 2</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> Look</span><span class="z-variable z-other"> up</span><span class="z-keyword"> in</span><span class="z-variable z-other"> mapper</span></span>
+<span class="giallo-l"><span class="z-variable z-other">    mapper</span><span class="z-keyword z-keyword z-operator">.</span><span>indices</span><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">1</span><span class="z-punctuation">]</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-type"> Some</span><span class="z-punctuation">(</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">1</span><span class="z-punctuation">,</span><span class="z-constant z-numeric z-constant"> 0</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator z-logical">                              |</span><span class="z-keyword z-keyword z-operator z-logical">  |</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator z-logical">                              |</span><span>  └─ </span><span class="z-entity z-name z-type">No</span><span class="z-keyword"> virtual</span><span class="z-variable z-other"> sequence</span></span>
+<span class="giallo-l"><span>                              └──── </span><span class="z-entity z-name z-type">Bytecode</span><span class="z-variable z-other"> position</span><span class="z-constant z-numeric z-constant"> 1</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Step</span><span class="z-constant z-numeric z-constant"> 3</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> Store</span><span class="z-variable z-other"> result</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">    BytecodeRa</span><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">]</span><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">]</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-type"> Some</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">1</span><span class="z-punctuation">)</span></span></code></pre>
+<p><strong>Result:</strong> Cycle 0 executed bytecode instruction 1.</p>
+<h4 id="example-2-virtual-instruction-sequence-cycle-8">Example 2: Virtual Instruction Sequence (Cycle 8)</h4>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">//</span><span class="z-comment"> Cycle 8: ADDI at address 0x80000042, virtual_sequence_remaining = Some(7)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Step</span><span class="z-constant z-numeric z-constant"> 1</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> Get</span><span class="z-variable z-other"> mapper</span><span class="z-variable z-other"> index</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-entity z-name z-function">    get_index</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">0x80000042</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-constant z-numeric z-constant"> 34</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Step</span><span class="z-constant z-numeric z-constant"> 2</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> Look</span><span class="z-variable z-other"> up</span><span class="z-keyword"> in</span><span class="z-variable z-other"> mapper</span></span>
+<span class="giallo-l"><span class="z-variable z-other">    mapper</span><span class="z-keyword z-keyword z-operator">.</span><span>indices</span><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">34</span><span class="z-punctuation">]</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-type"> Some</span><span class="z-punctuation">(</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">36</span><span class="z-punctuation">,</span><span class="z-constant z-numeric z-constant"> 7</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator z-logical">                               |</span><span class="z-keyword z-keyword z-operator z-logical">  |</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator z-logical">                               |</span><span>  └─ </span><span class="z-entity z-name z-type">First</span><span class="z-variable z-other"> instruction</span><span class="z-variable z-other"> has</span><span class="z-constant z-numeric z-constant"> 7</span><span class="z-variable z-other"> more</span><span class="z-variable z-other"> following</span></span>
+<span class="giallo-l"><span>                               └──── </span><span class="z-entity z-name z-type">Sequence</span><span class="z-variable z-other"> starts</span><span class="z-variable z-other"> at</span><span class="z-variable z-other"> bytecode</span><span class="z-variable z-other"> position</span><span class="z-constant z-numeric z-constant"> 36</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Step</span><span class="z-constant z-numeric z-constant"> 3</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> Calculate</span><span class="z-variable z-other"> position</span><span class="z-keyword"> in</span><span class="z-variable z-other"> sequence</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    //</span><span class="z-comment"> This is the FIRST instruction (virtual_sequence_remaining = 7)</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    //</span><span class="z-comment"> So offset = 0</span></span>
+<span class="giallo-l"><span class="z-variable z-other">    pc</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-constant z-numeric z-constant"> 36</span><span class="z-keyword z-keyword z-operator"> +</span><span class="z-constant z-numeric z-constant"> 0</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-constant z-numeric z-constant"> 36</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Step</span><span class="z-constant z-numeric z-constant"> 4</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> Store</span><span class="z-variable z-other"> result</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">    BytecodeRa</span><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">]</span><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">8</span><span class="z-punctuation">]</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-type"> Some</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">36</span><span class="z-punctuation">)</span></span></code></pre>
+<p><strong>Result:</strong> Cycle 8 executed bytecode instruction 36 (the first ADDI in the virtual sequence).</p>
+<h2 id="what-if-d-1-larger-programs">What If d &gt; 1? (Larger Programs)</h2>
+<p>For larger programs with more than 256 bytecode instructions, we'd need multiple chunks:</p>
+<p><strong>Example with 500 instructions (d = 2):</strong></p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-entity z-name z-type">BytecodeRa</span><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">]</span><span class="z-punctuation">[</span><span class="z-variable z-other">i</span><span class="z-punctuation">]</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation"> (</span><span class="z-variable z-other">pc</span><span class="z-keyword z-keyword z-operator z-logical"> &gt;&gt;</span><span class="z-constant z-numeric z-constant"> 8</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> %</span><span class="z-constant z-numeric z-constant"> 256</span><span class="z-punctuation z-punctuation z-definition z-comment">   //</span><span class="z-comment"> High byte</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">BytecodeRa</span><span class="z-punctuation">[</span><span class="z-constant z-numeric z-constant">1</span><span class="z-punctuation">]</span><span class="z-punctuation">[</span><span class="z-variable z-other">i</span><span class="z-punctuation">]</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation"> (</span><span class="z-variable z-other">pc</span><span class="z-keyword z-keyword z-operator z-logical"> &gt;&gt;</span><span class="z-constant z-numeric z-constant"> 0</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> %</span><span class="z-constant z-numeric z-constant"> 256</span><span class="z-punctuation z-punctuation z-definition z-comment">   //</span><span class="z-comment"> Low byte</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">//</span><span class="z-comment"> To reconstruct: pc = BytecodeRa[0][i] * 256 + BytecodeRa[1][i]</span></span></code></pre>
+<p>But for our 94-instruction program, <code>d = 1</code> is all we need!</p>
+
+  </div>
+
+  
+
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const toggle = document.getElementById('theme-toggle');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (theme === 'dark') {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        } else {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        }
+      }
+
+      const saved = localStorage.getItem('theme');
+      if (saved) {
+        setTheme(saved);
+      } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+
+      toggle.addEventListener('click', function() {
+        const current = html.getAttribute('data-theme');
+        setTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+  </script>
+    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+          macros: {
+            "\\field": "\\mathbb{#1}",
+            "\\hei": "\\mathbb{F}(#1)",
+            "\\Field": "\\mathbb{F}",
+            "\\Mont": "\\widetilde{#1}",
+            "\\samples": "\\xleftarrow{\\$}",
+            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
+            "\\TauConstraints": "\\tau_y",
+            "\\TauTime": "\\tau_{\\text{cycle}}",
+            "\\TauGroup": "\\tau_b",
+            "\\MLE": "\\widetilde{#1}",
+            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
+            "\\Def": ":=",
+            "\\ChallengeSet": "\\mathsf{C}"
+
+          },
+            throwOnError: false,
+          trust: true
+
+        });
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Instruction RA | Random Walks</title>
+  <link rel="stylesheet" href="http://onATangent.xyz/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css" media="(prefers-color-scheme: dark)">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css" media="(prefers-color-scheme: light)">
+  
+  <link rel="stylesheet" href="/katex.css">
+  <script defer src="/katex.min.js"></script>
+  <script defer src="/auto-render.min.js"></script>
+  <script defer src="/katex-init.js"></script>
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="http://onATangent.xyz">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="http://onATangent.xyz/blog/">Notes</a>
+        <a href="http://onATangent.xyz/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+        <a href="http://onATangent.xyz/publications/">Research</a>
+        <a href="http://onATangent.xyz/misc/">Random</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <span class="icon-sun">&#9788;</span>
+          <span class="icon-moon">&#9790;</span>
+        </button>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+<article class="post">
+  <header class="post-header">
+    <h1>Instruction RA</h1>
+    <div class="post-meta">
+      
+      <time>2026-01-08</time>
+    </div>
+    
+    <div class="post-tags">
+      <a href="http://onATangent.xyz/tags/one/" class="tag">one</a><a href="http://onATangent.xyz/tags/two/" class="tag">two</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <h2 id="concrete-examples-with-real-data">Concrete Examples with Real Data</h2>
+<h3 id="example-1-addi-type-1-arithmetic">Example 1: ADDI (Type 1 - Arithmetic)</h3>
+<p><strong>From the trace:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Cycle 1: ADDI {</span></span>
+<span class="giallo-l"><span>    operands: { rd: 2, rs1: 2, imm: 288 }</span></span>
+<span class="giallo-l"><span>    register_state: {</span></span>
+<span class="giallo-l"><span>        rd: (2147487744, 2147488032),  // before → after</span></span>
+<span class="giallo-l"><span>        rs1: 2147487744</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p><strong>What happens:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Step 1: Get inputs</span></span>
+<span class="giallo-l"><span>   rs1 = 2147487744</span></span>
+<span class="giallo-l"><span>   imm = 288</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Step 2: Compute in field (addition is cheap!)</span></span>
+<span class="giallo-l"><span>   result = 2147487744 + 288 = 2147488032</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Step 3: Form lookup address</span></span>
+<span class="giallo-l"><span>   address = result = 2147488032</span></span>
+<span class="giallo-l"><span>           = 0x80001120</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Step 4: Chunk into 16 bytes</span></span>
+<span class="giallo-l"><span>   0x00 00 00 00 00 00 00 00 00 00 00 00 80 00 11 20</span></span>
+<span class="giallo-l"><span>   └─┬─┘                           └─┬─┘ └─┬─┘ └─┬─┘</span></span>
+<span class="giallo-l"><span>    b0                              b12   b14   b15</span></span></code></pre>
+<p><strong>InstructionRa values for cycle 1:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>InstructionRa[0][1]  = 0    (0x00)</span></span>
+<span class="giallo-l"><span>InstructionRa[1][1]  = 0    (0x00)</span></span>
+<span class="giallo-l"><span>...</span></span>
+<span class="giallo-l"><span>InstructionRa[11][1] = 0    (0x00)</span></span>
+<span class="giallo-l"><span>InstructionRa[12][1] = 128  (0x80)</span></span>
+<span class="giallo-l"><span>InstructionRa[13][1] = 0    (0x00)</span></span>
+<span class="giallo-l"><span>InstructionRa[14][1] = 17   (0x11)</span></span>
+<span class="giallo-l"><span>InstructionRa[15][1] = 32   (0x20)</span></span></code></pre>
+<p><strong>Reconstructed address:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>0×256¹⁵ + 0×256¹⁴ + ... + 128×256³ + 0×256² + 17×256¹ + 32×256⁰</span></span>
+<span class="giallo-l"><span>= 2147488032 ✓</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>This equals the RESULT!</span></span></code></pre><h3 id="example-2-mul-type-1-arithmetic">Example 2: MUL (Type 1 - Arithmetic)</h3>
+<p><strong>From the trace:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Cycle 14: MUL {</span></span>
+<span class="giallo-l"><span>    operands: { rd: 13, rs1: 34, rs2: 36 }</span></span>
+<span class="giallo-l"><span>    register_state: {</span></span>
+<span class="giallo-l"><span>        rd: (0, 144115188075855872),    // before → after</span></span>
+<span class="giallo-l"><span>        rs1: 2,</span></span>
+<span class="giallo-l"><span>        rs2: 72057594037927936</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p><strong>What happens:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Step 1: Get inputs</span></span>
+<span class="giallo-l"><span>   rs1 = 2</span></span>
+<span class="giallo-l"><span>   rs2 = 72057594037927936 = 0x0100000000000000 (2⁵⁶)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Step 2: Compute (multiplication is done in field)</span></span>
+<span class="giallo-l"><span>   result = 2 × 72057594037927936 = 144115188075855872</span></span>
+<span class="giallo-l"><span>          = 0x0200000000000000 (2⁵⁷)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Step 3: Form lookup address</span></span>
+<span class="giallo-l"><span>   address = result = 144115188075855872</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Step 4: Chunk into bytes</span></span>
+<span class="giallo-l"><span>   0x00 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00</span></span>
+<span class="giallo-l"><span>                           └─┬─┘</span></span>
+<span class="giallo-l"><span>                             b8</span></span></code></pre>
+<p><strong>InstructionRa values for cycle 14:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>InstructionRa[0][14]  = 0</span></span>
+<span class="giallo-l"><span>InstructionRa[1][14]  = 0</span></span>
+<span class="giallo-l"><span>...</span></span>
+<span class="giallo-l"><span>InstructionRa[7][14]  = 0</span></span>
+<span class="giallo-l"><span>InstructionRa[8][14]  = 2    (0x02) ← The product is here!</span></span>
+<span class="giallo-l"><span>InstructionRa[9][14]  = 0</span></span>
+<span class="giallo-l"><span>...</span></span>
+<span class="giallo-l"><span>InstructionRa[15][14] = 0</span></span></code></pre>
+<p><strong>Reconstructed address:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>2 × 256⁷ = 2 × 72057594037927936 = 144115188075855872 ✓</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>This equals the RESULT of 2 × 72057594037927936!</span></span></code></pre><h3 id="example-3-andi-type-2-bitwise">Example 3: ANDI (Type 2 - Bitwise)</h3>
+<p><strong>From the trace:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Cycle 9: ANDI {</span></span>
+<span class="giallo-l"><span>    operands: { rd: 33, rs1: 32, imm: 0xFFFFFFFFFFFFFFF8 }</span></span>
+<span class="giallo-l"><span>    register_state: {</span></span>
+<span class="giallo-l"><span>        rd: (0, 2147459072),</span></span>
+<span class="giallo-l"><span>        rs1: 2147459072</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p><strong>What happens:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Step 1: Get inputs</span></span>
+<span class="giallo-l"><span>   rs1 = 2147459072  = 0x000000007FFFA000</span></span>
+<span class="giallo-l"><span>   imm = -8 (as u64) = 0xFFFFFFFFFFFFFFF8</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Step 2: CAN&#39;T compute AND efficiently in field!</span></span>
+<span class="giallo-l"><span>   Need to look up: (rs1, imm) → result</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Step 3: Form lookup address by INTERLEAVING inputs</span></span>
+<span class="giallo-l"><span>   Interleave bits of (imm, rs1)  [note: order is (y, x)]</span></span>
+<span class="giallo-l"><span>   </span></span>
+<span class="giallo-l"><span>   rs1 = 0x000000007FFFA000</span></span>
+<span class="giallo-l"><span>       = 0000...0111111111111111101000000000000</span></span>
+<span class="giallo-l"><span>   </span></span>
+<span class="giallo-l"><span>   imm = 0xFFFFFFFFFFFFFFF8</span></span>
+<span class="giallo-l"><span>       = 1111...1111111111111111111111111000</span></span>
+<span class="giallo-l"><span>   </span></span>
+<span class="giallo-l"><span>   Interleaved (alternating bits: imm₀ rs1₀ imm₁ rs1₁ ...):</span></span>
+<span class="giallo-l"><span>       = 0x55555555555555557FFFFFFFDD555540</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Step 4: Chunk this interleaved value</span></span></code></pre>
+<p><strong>InstructionRa values for cycle 9:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Address: 0x55555555555555557FFFFFFFDD555540</span></span>
+<span class="giallo-l"><span>         └────────────────────┬──────────────┘</span></span>
+<span class="giallo-l"><span>         These are the interleaved input bits!</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>NOT the result (which would be 0x7FFFA000)</span></span></code></pre><h3 id="example-4-beq-type-2-comparison">Example 4: BEQ (Type 2 - Comparison)</h3>
+<p><strong>From the trace:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Cycle 7: BEQ {</span></span>
+<span class="giallo-l"><span>    operands: { rs1: 10, rs2: 12, imm: 84 }</span></span>
+<span class="giallo-l"><span>    register_state: {</span></span>
+<span class="giallo-l"><span>        rs1: 18446744073709551615,  // -1 as unsigned (all 1s)</span></span>
+<span class="giallo-l"><span>        rs2: 4</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p><strong>What happens:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Step 1: Get inputs</span></span>
+<span class="giallo-l"><span>   rs1 = 18446744073709551615 = 0xFFFFFFFFFFFFFFFF (all 1s)</span></span>
+<span class="giallo-l"><span>   rs2 = 4                    = 0x0000000000000004</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Step 2: CAN&#39;T compute equality efficiently</span></span>
+<span class="giallo-l"><span>   Need to check: does rs1 == rs2?</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Step 3: Form lookup address by INTERLEAVING</span></span>
+<span class="giallo-l"><span>   rs1 = 1111111111111111111111111111111111111111111111111111111111111111</span></span>
+<span class="giallo-l"><span>   rs2 = 0000000000000000000000000000000000000000000000000000000000000100</span></span>
+<span class="giallo-l"><span>   </span></span>
+<span class="giallo-l"><span>   Interleave (rs2, rs1):</span></span>
+<span class="giallo-l"><span>   = 1010101010101010101010101010101010101010101010101010101010111010</span></span>
+<span class="giallo-l"><span>   = 0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Step 4: Chunk this interleaved value</span></span></code></pre>
+<p><strong>InstructionRa values for cycle 7:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>InstructionRa[0][7]  = 170  (0xAA = 10101010)</span></span>
+<span class="giallo-l"><span>InstructionRa[1][7]  = 170  (0xAA)</span></span>
+<span class="giallo-l"><span>InstructionRa[2][7]  = 170  (0xAA)</span></span>
+<span class="giallo-l"><span>...</span></span>
+<span class="giallo-l"><span>InstructionRa[14][7] = 170  (0xAA)</span></span>
+<span class="giallo-l"><span>InstructionRa[15][7] = 186  (0xBA = 10111010)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Pattern: 0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA</span></span>
+<span class="giallo-l"><span>         └──────────────┬──────────────────┘</span></span>
+<span class="giallo-l"><span>         Interleaved input bits!</span></span></code></pre>
+<p><strong>The lookup:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Address: 0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABA</span></span>
+<span class="giallo-l"><span>         = interleave(4, 0xFFFFFFFFFFFFFFFF)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>### Example 5: AND (Type 2 - Bitwise R-format)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>**From the trace:**</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Cycle 58: AND {</span></span>
+<span class="giallo-l"><span>    operands: { rd: 37, rs1: 37, rs2: 36 }</span></span>
+<span class="giallo-l"><span>    register_state: {</span></span>
+<span class="giallo-l"><span>        rd: (1, 1),</span></span>
+<span class="giallo-l"><span>        rs1: 1,</span></span>
+<span class="giallo-l"><span>        rs2: 255</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p><strong>What happens:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Inputs: rs1 = 1, rs2 = 255</span></span>
+<span class="giallo-l"><span>Result: 1 &amp; 255 = 1</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>InstructionRa stores:</span></span>
+<span class="giallo-l"><span>   interleave(rs2, rs1) = interleave(255, 1)</span></span>
+<span class="giallo-l"><span>   = 0x0000000000000000000000000000000000000000000000000000000000005557</span></span></code></pre><h2 id="visual-the-chunking-process">Visual: The Chunking Process</h2>
+<p>Regardless of type, the 128-bit address gets chunked into 16 bytes:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>128-bit Lookup Address</span></span>
+<span class="giallo-l"><span>┌──────────────────────────────────────────────────────────────┐</span></span>
+<span class="giallo-l"><span>│ Either: RESULT (Type 1) or INTERLEAVED_INPUTS (Type 2)      │</span></span>
+<span class="giallo-l"><span>└──────────────────────────────────────────────────────────────┘</span></span>
+<span class="giallo-l"><span>                           │</span></span>
+<span class="giallo-l"><span>                           │ Split into 16 chunks</span></span>
+<span class="giallo-l"><span>                           ▼</span></span>
+<span class="giallo-l"><span>    ┌────┬────┬────┬────┬────┬─  ─┬────┬────┐</span></span>
+<span class="giallo-l"><span>    │ b0 │ b1 │ b2 │ b3 │ b4 │ ... │b14 │b15 │</span></span>
+<span class="giallo-l"><span>    └────┴────┴────┴────┴────┴─  ─┴────┴────┘</span></span>
+<span class="giallo-l"><span>     8bit 8bit 8bit 8bit 8bit      8bit 8bit</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Each byte goes into one polynomial:</span></span>
+<span class="giallo-l"><span>InstructionRa[0][cycle] = b0  (high byte)</span></span>
+<span class="giallo-l"><span>InstructionRa[1][cycle] = b1</span></span>
+<span class="giallo-l"><span>...</span></span>
+<span class="giallo-l"><span>InstructionRa[15][cycle] = b15 (low byte)</span></span></code></pre>
+  </div>
+
+  
+
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const toggle = document.getElementById('theme-toggle');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (theme === 'dark') {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        } else {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        }
+      }
+
+      const saved = localStorage.getItem('theme');
+      if (saved) {
+        setTheme(saved);
+      } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+
+      toggle.addEventListener('click', function() {
+        const current = html.getAttribute('data-theme');
+        setTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+  </script>
+    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+          macros: {
+            "\\field": "\\mathbb{#1}",
+            "\\hei": "\\mathbb{F}(#1)",
+            "\\Field": "\\mathbb{F}",
+            "\\Mont": "\\widetilde{#1}",
+            "\\samples": "\\xleftarrow{\\$}",
+            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
+            "\\TauConstraints": "\\tau_y",
+            "\\TauTime": "\\tau_{\\text{cycle}}",
+            "\\TauGroup": "\\tau_b",
+            "\\MLE": "\\widetilde{#1}",
+            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
+            "\\Def": ":=",
+            "\\ChallengeSet": "\\mathsf{C}"
+
+          },
+            throwOnError: false,
+          trust: true
+
+        });
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Small Scalar Binding | Random Walks</title>
+  <link rel="stylesheet" href="http://onATangent.xyz/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css" media="(prefers-color-scheme: dark)">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css" media="(prefers-color-scheme: light)">
+  
+  <link rel="stylesheet" href="/katex.css">
+  <script defer src="/katex.min.js"></script>
+  <script defer src="/auto-render.min.js"></script>
+  <script defer src="/katex-init.js"></script>
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="http://onATangent.xyz">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="http://onATangent.xyz/blog/">Notes</a>
+        <a href="http://onATangent.xyz/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+        <a href="http://onATangent.xyz/publications/">Research</a>
+        <a href="http://onATangent.xyz/misc/">Random</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <span class="icon-sun">&#9788;</span>
+          <span class="icon-moon">&#9790;</span>
+        </button>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+<article class="post">
+  <header class="post-header">
+    <h1>Small Scalar Binding</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2025-10-04</time>
+    </div>
+    
+    <div class="post-tags">
+      <a href="http://onATangent.xyz/tags/sumcheck/" class="tag">sumcheck</a><a href="http://onATangent.xyz/tags/montgomery-mults/" class="tag">montgomery-mults</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <h2 id="tl-dr-just-tell-us-what-you-did">TL;DR - Just Tell Us What You Did</h2>
+<div class="callout callout-box">
+  
+  <h3 id="faster-sumcheck-in-jolt">Faster Sumcheck In Jolt</h3>
+<p>By sampling the verifiers random challenges from a set $S \subset \mathbb{F}$ of size roughly $\sqrt{|\mathbb{F}|}$, we speed up sum-check binding by <strong>1.6x</strong> from baseline (where challenges are sampled over the whole field $\mathbb{F}$ -- the field over which polynomials are defined. )
+<strong>NOTE:</strong> This now reduces the soundness error from $1/2^{254}$ to $1/2^{125}$, but this is not a concern as currently Jolt usess the <code>bn256</code> curve to commit to polynomials, which offers 110 bits of security anyway.</p>
+
+</div>
+<h2 id="sum-check-recap">Sum-Check Recap</h2>
+<p>We briefly recap the sum-check protocol<sup class="footnote-reference"><a href="#a">1</a></sup>.</p>
+<p>Let $g \in \Field[X_1, \ldots, X_m]$ be a polynomial over $\Field$ with the following structure.
+$$ g(X_1, \ldots, X_m) = \prod_{j=1}^d q_j(X_1, \ldots, X_m)$$
+where all $q_j(X)$'s are multi-linear polynomials over $\Field$.
+We expand more below:</p>
+<ol>
+<li><strong>Polynomial evaluation</strong> The prover computes the following univariate polynomial, using the following steps $$p_i(X_i) = \sum_{b_{i+1} \in {0,1}}\ldots\sum_{b_{m} \in {0,1}^{}}g(r_1, \ldots, r_{i-1}, X_i, b_{i+1}, b_m)$$
+a. If $g$ has degree $d$, this requires computing $p_i(0), \ldots, p_i(d)$, then via standard lagrange interpolation, we're able to fully define $p_i(X)$.
+$$p_i(Z) = \prod_{j=1}^d \Bigg( \sum_{b_{i+1} \in {0,1}}\ldots\sum_{b_{m}} q_j\Big(r_1, \ldots, r_{i-1}, Z, b_{i+1}, \ldots, b_m\Big)\Bigg)$$
+so to get $p_i(Z)$ we compute for all $j \in [d]$, $q_j(r_1, \ldots, r_{i-1}, Z, \vec{b})$ for $Z \in {0, \ldots, d}$ for all $\vec{b} \in {0, 1}^{m-i}$.
+As $q_j$ is multi-linear -- this can be computed by linear-interpolation.</li>
+</ol>
+<div id="hello" style="overflow-x: auto; max-width: 100%;">
+<div class="math-display">
+$$
+	\begin{aligned}
+		q_j(r_1, \ldots, r_{i-1}, Z, \vec{b}) = & (1-Z) \,q_j(r_1, \ldots, r_{i-1}, 0, b_{i+1}, \ldots, b_m) \\[10pt]
+		                                        & + Z\, q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m)
+	\end{aligned}
+$$
+</div>
+</div>
+<p>As $d$ is a small constant number, computing the above value requires <strong>no multiplication operations</strong>. We can compute it via a running sum.
+See pseudocode below</p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">///</span><span class="z-comment"> Compute q_j(Z) = (1-Z) * q_j(0) + Z * q_j(1)</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">///</span><span class="z-comment"> using only additions</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">///</span><span class="z-comment"> when Z is a small integer.</span></span>
+<span class="giallo-l"><span class="z-keyword">    fn</span><span class="z-entity z-name z-entity z-name z-function"> compute_q_j_running_sum</span><span class="z-punctuation">(</span><span class="z-variable z-other">z</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> usize</span><span class="z-punctuation">,</span><span class="z-variable z-other"> q_at_0</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> JoltField</span><span class="z-punctuation">,</span><span class="z-variable z-other"> q_at_1</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> JoltField</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> -&gt;</span><span class="z-entity z-name z-type"> JoltField</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-storage z-type">        let</span><span class="z-variable z-other"> diff</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-variable z-other"> q_at_1</span><span class="z-keyword z-keyword z-operator"> -</span><span class="z-variable z-other"> q_at_0</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">        //</span><span class="z-comment"> Compute Z * diff using repeated addition (running sum)</span></span>
+<span class="giallo-l"><span class="z-storage z-type">        let</span><span class="z-storage z-modifier"> mut</span><span class="z-variable z-other"> z_times_diff</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-type"> JoltField</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-entity z-name z-function">zero</span><span class="z-punctuation">(</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        for</span><span class="z-variable z-other"> _</span><span class="z-keyword"> in</span><span class="z-constant z-numeric z-constant"> 0</span><span class="z-keyword z-keyword z-operator">..</span><span class="z-variable z-other">z</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-variable z-other">            z_times_diff</span><span class="z-keyword z-keyword z-operator"> +=</span><span class="z-variable z-other"> diff</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-punctuation">        }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-variable z-other">        q_at_0</span><span class="z-keyword z-keyword z-operator"> +</span><span class="z-variable z-other"> z_times_diff</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation">    }</span></span>
+<span class="giallo-l"></span></code></pre>
+<ol start="2">
+<li><strong>Binding Phase</strong> Thee prover needs to binds the multi-linear polynomial $g$ to $r_i$, that is to say it computes a new multi-linear polynomial in $m-i$ variables $$g_i(X_{i+1}, \ldots, X_{m}) = g(r_1, \ldots, r_{i-1}, X_{i+1}, \ldots, X_{m})$$.
+This involves storing all evaluations of $g_i$ over the hyper cube ${0, 1}^{m-i}$, but unlike the above step $r_i$ is <strong>NOT</strong> guaranteed to be a small number.
+Therefore the running sum described in the pseudocode above is no good to use.
+We need to use actual multiplication here.</li>
+</ol>
+<div class="math-display">
+$$
+	\begin{align}
+		q_j(r_1, \ldots, r_{i-1}, \textcolor{orange}{r_i}, \vec{b}) = & (1-\textcolor{orange}{r_i}) \,q_j(r_1, \ldots, r_{i-1}, 0, b_{i+1}, \ldots, b_m) \\[10pt]
+		                                                              & + \textcolor{orange}{r_i}\, q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m)
+	\end{align}
+$$
+</div>
+<p>Now $q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m) \in \Field$, and traditionally the set $S$ from which we sample $r_i$ is also equal to $\Field$.
+Therefore this step requires $2^{m-i}$ $\Field \times \Field$ multiplications in round $i$ -- a total of $2^m$ multiplications over $m$ rounds.
+It is well known that multiplication for $\Field$ elements is 1000x costlier than addition.
+So our hope is that we can choose $S$ cleverly such that this operation can be done faster.
+Note we cannot make $S$ too small, as this the soundness probability of any sumcheck protocol is given by $\frac{d}{|S|}$.</p>
+<div class="callout callout-box">
+  
+  <h4 id="what-we-show">What we show</h4>
+<p>We show that there exists a set $S$ of size rouhgly $|\Field|^{1/2}$, which we call <code>MontU128Challenge</code>, in which $\Field \times r$ is 1.6x
+faster than $\Field \times \Field$.
+This in returns speeds up the <strong>binding</strong> phase of the sum-check protocol, which results in a 1.3x speedup per round of sum-check.</p>
+
+</div>
+<h2 id="the-challenge-set-s">The Challenge Set $S$</h2>
+<p>Define the set</p>
+<p>$$
+S \subset \Field  \text{where} S = { x \in \Field : \text{the least 2 significant digits of $x$ in Montgomery form are 0} }
+$$</p>
+<h4 id="worked-out-example">Worked Out Example:</h4>
+<p>Prime Field $\Field = \mathbb{Z}_{13}$ with Montgomery Form.
+Montgomery parameter: $R = 16 = 2⁴$.
+Montgomery form of $x$ is given by $xR \mod 13$</p>
+<table><thead><tr><th>x</th><th>Montgomery Form (decimal)</th><th>Binary</th><th>Last 2 bits</th></tr></thead><tbody>
+<tr><td>0</td><td>0</td><td>0000</td><td>00 ✓</td></tr>
+<tr><td>1</td><td>3</td><td>0011</td><td>11</td></tr>
+<tr><td>2</td><td>6</td><td>0110</td><td>10</td></tr>
+<tr><td>3</td><td>9</td><td>1001</td><td>01</td></tr>
+<tr><td>4</td><td>12</td><td>1100</td><td>00 ✓</td></tr>
+<tr><td>5</td><td>2</td><td>0010</td><td>10</td></tr>
+<tr><td>6</td><td>5</td><td>0101</td><td>01</td></tr>
+<tr><td>7</td><td>8</td><td>1000</td><td>00 ✓</td></tr>
+<tr><td>8</td><td>11</td><td>1011</td><td>11</td></tr>
+<tr><td>9</td><td>1</td><td>0001</td><td>01</td></tr>
+<tr><td>10</td><td>4</td><td>0100</td><td>00 ✓</td></tr>
+<tr><td>11</td><td>7</td><td>0111</td><td>11</td></tr>
+<tr><td>12</td><td>10</td><td>1010</td><td>10</td></tr>
+</tbody></table>
+<p>$$S = {0, 4, 7, 10}$$</p>
+<p><strong>Note:</strong> $|S| = 4 \approx \sqrt{p}$, which makes sense since we're filtering by the last 2 bits.</p>
+<p>The short answer to why we this set $S$ is nice, is that it saves us 10 multiplication instructions per field multiplication.
+We first briefly review the <a href="http://onATangent.xyz/blog/mont-mult/">CIOS</a> algorithm, which is currently used to multiply field elements.</p>
+<h3 id="cios-review">CIOS Review</h3>
+<p>Let $n$ be the number of limbs used to represent field elements. Currently in Jolt, $n=4$.
+The width $w$ of each limb is 64 bits.
+Given $a \in \Field$ and $b\in S$ , let $\Mont{a} = aR \mod p, \Mont{b} = bR \mod p$ be the respective Montgomery representations.</p>
+<p>Let $c = \Mont{a}\Mont{b}$ computed using textbook limb by limb multiplication.
+Now to get $\Mont{c}$ we <strong>need</strong> to compute $cR^{-1} = cr^{-n} = (ab)R \mod p$.</p>
+<p>$c$ can be written as the following sum and we compute $cR^{-1}$ limb by limb by multiplying $r^{-1}$ $n$ times</p>
+<div class="math-display">
+$$
+	\begin{align}
+		c       & \equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p                \\[10pt]
+		cr^{-1} & \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p \\[10pt]
+	\end{align}
+$$
+</div>
+<h3 id="important-sub-routine">Important Sub-Routine</h3>
+<p>Observe that $c_0r^{-1} \equiv (c_0 + mp)r^{-1} \mod p$, where $m$ such that $c_0 + mp \equiv 0 \mod r$.
+Solving for $m = -p^{-1}c_0 \equiv \mu c_0 \mod r$.
+Also as we are working modulo $r$, it suffices to use $m = \mu_{0}c_0$ discarding any carries, where $\mu_{0}$ is the least significant word of $\mu$.</p>
+<p>Once we compute $mp$, and add this to $c$ to get $c^{(1)}$, this should clear the least significant digit based on how we picked $m$. See below</p>
+<div class="math-display">
+$$
+	\begin{align}
+		c       & \equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p                     \\[10pt]
+		cr^{-1} & \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p      \\[10pt]
+		        & \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + (c_0+ mp)r^{-1}   \mod p \\[10pt]
+		        & \equiv (c + mp)r^{-1} \mod p                                                                    \\[10pt]
+		        & \equiv ( c^{(1)}_{2n-1}r^{2n-1} + \ldots c^{(1)}_1r + 0)r^{-1} \mod p                           \\[10pt]
+		        & \equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1) \mod p                                      \\[10pt]
+	\end{align}
+$$
+</div>
+<h3 id="repeat-the-subroutine-n-times">Repeat The Subroutine $n$ times</h3>
+<p>Now we can play the subroutine again with $c^{(1)}_1$ replacing the role of $c_0$, and the updated value of $m = \mu_0c_1^{(1)}$ (<strong>NOTE</strong> the same $\mu_0$ is always used)</p>
+<div class="math-display">
+$$
+	\begin{align}
+		cr^{-1} & \equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1 ) \mod p                    \\
+		cr^{-2} & \equiv ( c^{(1)}_{2n-1}r^{2n-3} + \ldots + c_1^{(1)}+ c_1^{(1)}r^{-1}   \mod p \\
+		        & \equiv ( c^{(2)}_{2n-1}r^{2n-3} + \ldots + c_1^{(2)} ) \mod p
+	\end{align}
+$$
+</div>
+<p>In fact we play this game $n$ times</p>
+<p><div class="math-display">
+$$cR^{-1} \equiv cr^{-n} \equiv c^{(n)}_{2n-1}r^{n-1} + c^{(n)}_{n+1}r +c^{(n)}_{n} \mod p$$
+</div>
+
+To get the final answer<sup class="footnote-reference"><a href="#c">2</a></sup></p>
+<blockquote>
+<h4 id="total-multiplications">Total Multiplications</h4>
+<p>The total number of multiplications is $2n^2 + n$ which for $n=4$ is 36.</p>
+<ul>
+<li>$n^2$ multiplications to compute $c$.</li>
+<li>$n$ multiplications to compute to $m=\mu_i c_i^{(i)}$ in each round.</li>
+<li>$n$ multiplications to compute $mp$ per round which totals $n^2$ multiplications.</li>
+</ul>
+</blockquote>
+<p>Next we illustrate how sampling $\Mont{b} \samples S$ saves us multiplications.</p>
+<p>Firstly when 2 digits are 0 we we only need $n \times (n-2)$ multiplications, which allows us to save 8 multiplications when $n=4$.</p>
+<p><img src="http://onATangent.xyz/blog/small-scalar-binding/diag.svg" alt="" /></p>
+<p>Remember the reduction phase is all about 0'ing out the least significant digit.
+If it's already 0 we do not need to compute $m_0 p$ and $m_1p$ anymore.</p>
+<p><img src="http://onATangent.xyz/blog/small-scalar-binding/diag2.svg" alt="" /></p>
+<blockquote>
+<p>This saves us $8 + 2 + 8= 20$ multiplications, which leaves with only $16$ multiplications</p>
+</blockquote>
+<p>If multiplications were the only thing that cost us CPU cycles we should see roughly <strong>2x</strong> speedup.
+However, additions and bit shifts -- although significantly cheaper, are not <em>free</em>.
+Thus, a reasonable expectation would be to see <strong>1.6-1.8x</strong> speedup.</p>
+<p>So we compute $(a-b)\times c$, where $a,b\in\Field$ and $c\in S$, 100 times and measure how long it takes.</p>
+<ul>
+<li>$S = \Field$</li>
+<li>$S$ is 2 least significant digits 0'd out.</li>
+</ul>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cargo</span><span class="z-string"> bench</span><span class="z-constant"> -</span><span class="z-constant">p</span><span class="z-string"> jolt-core</span><span class="z-constant"> -</span><span class="z-constant">-bench</span><span class="z-string"> challenge_mult_performance</span></span></code></pre>
+<p><img src="http://onATangent.xyz/blog/small-scalar-binding/mul-bench.png" alt="" /></p>
+<p>Next we show that this improved multiplication does indeed speed up polynomial binding</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cargo</span><span class="z-string"> bench</span><span class="z-constant"> -</span><span class="z-constant">p</span><span class="z-string"> jolt-core</span><span class="z-constant"> -</span><span class="z-constant">-bench</span><span class="z-string"> binding</span></span>
+<span class="giallo-l"><span class="z-entity z-name">cargo</span><span class="z-string"> bench</span><span class="z-constant"> -</span><span class="z-constant">p</span><span class="z-string"> jolt-core</span><span class="z-constant"> -</span><span class="z-constant">-bench</span><span class="z-string"> binding</span><span class="z-constant"> -</span><span class="z-constant">-features</span><span class="z-string"> challenge-254-bit</span></span></code></pre>
+<p><img src="http://onATangent.xyz/blog/small-scalar-binding/binding-fast.png" alt="" />
+Comparing it against the baseline</p>
+<p><img src="http://onATangent.xyz/blog/small-scalar-binding/binding-slow.png" alt="" /></p>
+<p>Shown below is the diff from bench with the red pdf representing our fast multiplication.</p>
+<p><img src="http://onATangent.xyz/blog/small-scalar-binding/binding-diff.svg" alt="" /></p>
+<h2 id="some-implementation-details">Some Implementation Details</h2>
+<p>we use $256$ bits to represent big integers and our challenge and the modulus for <code>ark-bn256</code> uses $254$ bits. Thus, if sampled a 2 limbed $128$ bit integer $x$ and used that as the challenge as is <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that $x &lt; p$ which the CIOS algorithm assumes.
+we use $256$ bits to represent big integers and our challenge and the modulus for <code>ark-bn254</code> uses $254$ bits. Thus, if sampled a 2 limbed $128$ bit integer $x$ and used that as the challenge as is <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that $x &lt; p$ which the CIOS algorithm assumes.
+So we clear the first 3 bits of $x$ to ensure that $x$ is <strong>ALWAYS</strong> less than $p$.</p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-keyword">impl</span><span class="z-punctuation">&lt;</span><span class="z-entity z-name z-type">F</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> JoltField</span><span class="z-punctuation">&gt;</span><span class="z-entity z-name z-type"> MontU128Challenge</span><span class="z-punctuation">&lt;</span><span class="z-entity z-name z-type">F</span><span class="z-punctuation">&gt;</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-keyword">pub</span><span class="z-keyword"> fn</span><span class="z-entity z-name z-entity z-name z-function"> new</span><span class="z-punctuation">(</span><span class="z-variable z-other">value</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> u128</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> -&gt;</span><span class="z-variable z-language z-variable"> Self</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    //</span><span class="z-comment"> MontU128 can always be represented by 125 bits.</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    //</span><span class="z-comment"> This guarantees that the big integer is never greater than the</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    //</span><span class="z-comment"> bn254 modulus</span></span>
+<span class="giallo-l"><span class="z-storage z-type">    let</span><span class="z-variable z-other"> val_masked</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-variable z-other"> value</span><span class="z-keyword z-keyword z-operator"> &amp;</span><span class="z-punctuation"> (</span><span class="z-entity z-name z-type">u128</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-constant">MAX</span><span class="z-keyword z-keyword z-operator z-logical"> &gt;&gt;</span><span class="z-constant z-numeric z-constant"> 3</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-storage z-type">    let</span><span class="z-variable z-other"> low</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-variable z-other"> val_masked</span><span class="z-keyword"> as</span><span class="z-entity z-name z-type"> u64</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-storage z-type">    let</span><span class="z-variable z-other"> high</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation"> (</span><span class="z-variable z-other">val_masked</span><span class="z-keyword z-keyword z-operator z-logical"> &gt;&gt;</span><span class="z-constant z-numeric z-constant"> 64</span><span class="z-punctuation">)</span><span class="z-keyword"> as</span><span class="z-entity z-name z-type"> u64</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-variable z-language z-variable">    Self</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-variable z-other">        value</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-punctuation"> [</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">,</span><span class="z-constant z-numeric z-constant"> 0</span><span class="z-punctuation">,</span><span class="z-variable z-other"> low</span><span class="z-punctuation">,</span><span class="z-variable z-other"> high</span><span class="z-punctuation">]</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-other">        _marker</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> PhantomData</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">    }</span></span>
+<span class="giallo-l"><span class="z-punctuation">}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">pub</span><span class="z-keyword"> fn</span><span class="z-entity z-name z-entity z-name z-function"> value</span><span class="z-punctuation">(</span><span class="z-keyword z-keyword z-operator">&amp;</span><span class="z-variable z-language z-variable">self</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> -&gt;</span><span class="z-punctuation"> [</span><span class="z-entity z-name z-type">u64</span><span class="z-punctuation">;</span><span class="z-constant z-numeric z-constant"> 4</span><span class="z-punctuation">]</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-variable z-language z-variable">    self</span><span class="z-keyword z-keyword z-operator">.</span><span>value</span></span>
+<span class="giallo-l"><span class="z-punctuation">}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">pub</span><span class="z-keyword"> fn</span><span class="z-entity z-name z-entity z-name z-function"> random</span><span class="z-punctuation">&lt;</span><span class="z-entity z-name z-type">R</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> Rng</span><span class="z-keyword z-keyword z-operator"> +</span><span class="z-keyword z-keyword z-operator"> ?</span><span class="z-entity z-name z-type">Sized</span><span class="z-punctuation">&gt;</span><span class="z-punctuation">(</span><span class="z-variable z-other">rng</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-keyword z-keyword z-operator"> &amp;</span><span class="z-storage z-modifier">mut</span><span class="z-entity z-name z-type"> R</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> -&gt;</span><span class="z-variable z-language z-variable"> Self</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-variable z-language z-variable">		Self</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-entity z-name z-function">from</span><span class="z-punctuation">(</span><span class="z-variable z-other">rng</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-keyword">gen</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-punctuation">&lt;</span><span class="z-entity z-name z-type">u128</span><span class="z-punctuation">&gt;</span><span class="z-punctuation">(</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-punctuation">	}</span></span>
+<span class="giallo-l"><span class="z-punctuation">}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span></code></pre><h2 id="footnotes-and-references">Footnotes and References</h2>
+<div class="footnote-definition" id="b"><sup class="footnote-definition-label">3</sup>
+<p>In practice, these protocols are implemented non-interactively using the Fiat-Shamir transform. The verifiers work is restricted to sampling random values.</p>
+</div>
+<div class="footnote-definition" id="c"><sup class="footnote-definition-label">2</sup>
+<p>We have to conditionally subtract from $p$ to get the actual right answer, but this operation is common to both the baseline and our optimisation, so we do not focus on this.</p>
+</div>
+<div class="footnote-definition" id="a"><sup class="footnote-definition-label">1</sup>
+<p>There are optimisations by [?] that improve on this, but the optimisations discussed in this note still apply, so for the sake of simplicity, we describe the Sum-check protocol in its simplest form.</p>
+</div>
+
+  </div>
+
+  
+
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const toggle = document.getElementById('theme-toggle');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (theme === 'dark') {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        } else {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        }
+      }
+
+      const saved = localStorage.getItem('theme');
+      if (saved) {
+        setTheme(saved);
+      } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+
+      toggle.addEventListener('click', function() {
+        const current = html.getAttribute('data-theme');
+        setTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+  </script>
+    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+          macros: {
+            "\\field": "\\mathbb{#1}",
+            "\\hei": "\\mathbb{F}(#1)",
+            "\\Field": "\\mathbb{F}",
+            "\\Mont": "\\widetilde{#1}",
+            "\\samples": "\\xleftarrow{\\$}",
+            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
+            "\\TauConstraints": "\\tau_y",
+            "\\TauTime": "\\tau_{\\text{cycle}}",
+            "\\TauGroup": "\\tau_b",
+            "\\MLE": "\\widetilde{#1}",
+            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
+            "\\Def": ":=",
+            "\\ChallengeSet": "\\mathsf{C}"
+
+          },
+            throwOnError: false,
+          trust: true
+
+        });
+    });
+</script>
+
+
+</body>
+</html>

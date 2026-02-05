@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anatomy Of A Jolt Sumcheck | Random Walks</title>
+  <link rel="stylesheet" href="http://onATangent.xyz/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css" media="(prefers-color-scheme: dark)">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css" media="(prefers-color-scheme: light)">
+  
+  <link rel="stylesheet" href="/katex.css">
+  <script defer src="/katex.min.js"></script>
+  <script defer src="/auto-render.min.js"></script>
+  <script defer src="/katex-init.js"></script>
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="http://onATangent.xyz">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="http://onATangent.xyz/blog/">Notes</a>
+        <a href="http://onATangent.xyz/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+        <a href="http://onATangent.xyz/publications/">Research</a>
+        <a href="http://onATangent.xyz/misc/">Random</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <span class="icon-sun">&#9788;</span>
+          <span class="icon-moon">&#9790;</span>
+        </button>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+<article class="post">
+  <header class="post-header">
+    <h1>Anatomy Of A Jolt Sumcheck</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2025-12-01</time>
+    </div>
+    
+    <div class="post-tags">
+      <a href="http://onATangent.xyz/tags/sumcheck/" class="tag">sumcheck</a><a href="http://onATangent.xyz/tags/montgomery-mults/" class="tag">montgomery-mults</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <p>This <a rel="external" href="https://github.com/a16z/jolt/pull/1114">PR</a> introduces a generalised sum-check API, adapted to accommodate an implementation of Jolt that uses $O(1)$ memory<sup class="footnote-reference"><a href="#d">1</a></sup>.</p>
+<h2 id="the-trace">The Trace</h2>
+<p>Before we describe the API, it will be useful to briefly re-cap how Jolt works.
+At the heart of the jolt prover is the sumcheck algorithm.
+Given some polynomial $g$ and a set $S$ with sufficient structure<sup class="footnote-reference"><a href="#e">2</a></sup>, the sum-check algorithm enables a prover to convince a verifier that it computed $\sum_{x \in S} g(x)$ honestly.
+The end goal of the Jolt prover is to convince an honest verifier that it ran some guest program<sup class="footnote-reference"><a href="#c">3</a></sup> correctly.
+It does so via many sum-check algorithms.
+Therefore for the whole setup to work, the polynomials involved in these sumchecks must be in someway related to the execution of said program.
+As such honest proving begins with emulation of the given RISC-V program -- which we refer to as the trace.
+This is a fancy way of saying that the prover runs the program, and stores succinctly as a list the machine state before and after each instruction.
+This list is what we refer to the trace.
+And it is this trace from which we will construct the sum-check polynomials in Jolt.
+<a href="http://onATangent.xyz/blog/streaming-sumchecks/./day_0.html">See this post</a> for a fully worked out description of the emulation from an actual albeit useless program written in Rust.
+For example, consider the following program with just two instructions.</p>
+<pre class="giallo z-code"><code data-lang="asm"><span class="giallo-l"><span class="z-constant z-numeric z-constant">00001117</span><span>    auipc  </span><span class="z-constant z-language z-constant">sp</span><span>,</span><span class="z-constant z-numeric z-constant">0x1</span><span class="z-comment"> # sp = PC + (0x1 &lt;&lt; 12) = 0x80000000 + 0x1000 = 0x80001000</span></span>
+<span class="giallo-l"><span class="z-constant z-numeric z-constant">12010113</span><span>    addi   </span><span class="z-constant z-language z-constant">sp</span><span>,</span><span class="z-constant z-language z-constant">sp</span><span>,</span><span class="z-constant z-numeric z-constant">288</span><span class="z-comment"> # sp = 0x80001000 + 288 = 0x80001120</span></span></code></pre>
+<p>After doing some initial setup of all the values of registers and memory, the emulation looks like the following:</p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-entity z-name z-type">Cycle</span><span class="z-constant z-numeric z-constant"> 0</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant"> AUIPC</span><span class="z-punctuation">(</span></span>
+<span class="giallo-l"><span class="z-variable z-other">    address</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 2147483648</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">  //</span><span class="z-comment"> = 0x80000000 ✓</span></span>
+<span class="giallo-l"><span class="z-variable z-other">    operands</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> FormatU</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-variable z-other">        rd</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 2</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">            //</span><span class="z-comment"> x2 = sp (stack pointer)</span></span>
+<span class="giallo-l"><span class="z-variable z-other">        imm</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 4096</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">        //</span><span class="z-comment"> = 0x1000 ✓</span></span>
+<span class="giallo-l"><span class="z-punctuation">    }</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-other">    register_state</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-variable z-other">        rd</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-punctuation"> (</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">,</span><span class="z-constant z-numeric z-constant"> 2147487744</span><span class="z-punctuation">)</span><span class="z-punctuation z-punctuation z-definition z-comment">  //</span><span class="z-comment"> sp: 0 → 0x80001000 ✓</span></span>
+<span class="giallo-l"><span class="z-punctuation">    }</span></span>
+<span class="giallo-l"><span class="z-punctuation">)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">Cycle</span><span class="z-constant z-numeric z-constant"> 1</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant"> ADDI</span><span class="z-punctuation">(</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-type">    RISCVCycle</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-variable z-other">        instruction</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant"> ADDI</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-variable z-other">            address</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 2147483652</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">  //</span><span class="z-comment"> = 0x80000004 ✓ (Program counter)</span></span>
+<span class="giallo-l"><span class="z-variable z-other">            operands</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> FormatI</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-variable z-other">                rd</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 2</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">            //</span><span class="z-comment"> sp (based on mapping above)</span></span>
+<span class="giallo-l"><span class="z-variable z-other">                rs1</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 2</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">           //</span><span class="z-comment"> sp</span></span>
+<span class="giallo-l"><span class="z-variable z-other">                imm</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 288</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">         //</span><span class="z-comment"> = 0x120 ✓</span></span>
+<span class="giallo-l"><span class="z-punctuation">            }</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-other">            virtual_sequence_remaining</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> None</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-other">            is_first_in_sequence</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-language z-constant"> false</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-other">            is_compressed</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-language z-constant"> false</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">        }</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-other">        register_state</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> RegisterStateFormatI</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-variable z-other">            rd</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-punctuation"> (</span></span>
+<span class="giallo-l"><span class="z-constant z-numeric z-constant">                2147487744</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment"> //</span><span class="z-comment"> new value in rd </span></span>
+<span class="giallo-l"><span class="z-constant z-numeric z-constant">                2147488032</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment"> //</span><span class="z-comment"> old value in rd</span></span>
+<span class="giallo-l"><span class="z-punctuation">            )</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-other">            rs1</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-constant z-numeric z-constant"> 2147487744</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment"> //</span><span class="z-comment"> value in rs1</span></span>
+<span class="giallo-l"><span class="z-punctuation">        }</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-other">        ram_access</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-punctuation"> (</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment"> //</span><span class="z-comment"> no ram access</span></span>
+<span class="giallo-l"><span class="z-punctuation">    }</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">)</span></span>
+<span class="giallo-l"></span></code></pre>
+<p>For the purposes of this post, this is the mental model we will have when referring to the trace.
+It is a giant vector of length $T$, and location $t \in [T]$ stores the machine state before and after the $t$'th instruction.</p>
+<div class="callout callout-box">
+  
+  <h3 id="a-lie-in-service-of-the-truth">A Lie In Service Of The Truth</h3>
+<p>Throughout this post we will assume that we can store the entire trace in memory, and iterating through the trace is free. This is clearly not true, and we will fix this at a later date.
+But for the purposes of this post, this assumption allows us to abstract away important implementation details that currently remain unimplemented -- and prove that we can indeed implement any jolt sumcheck with $O(1)$ memory.</p>
+
+</div>
+<h2 id="correctness-as-constraint-satisfaction">Correctness As Constraint Satisfaction</h2>
+<p>Now with the trace/emulation in hand, we ask - what does it mean for a program to be executed correctly?
+One way to define correctness would be to say at every cycle, the machine state is consistent with the program specification.
+As a concrete example, consider loading and storing to memory.
+In RISC-V assembly loads/store instructions look like the following:</p>
+<pre class="giallo z-code"><code data-lang="asm"><span class="giallo-l"><span>lb   rd, offset(rs1)   </span><span class="z-comment"> # Load byte (sign-extended)</span></span>
+<span class="giallo-l"><span>lh   rd, offset(rs1)   </span><span class="z-comment"> # Load halfword (sign-extended)</span></span>
+<span class="giallo-l"><span>lw   rd, offset(rs1)   </span><span class="z-comment"> # Load word (sign-extended)</span></span>
+<span class="giallo-l"><span>ld   rd, offset(rs1)   </span><span class="z-comment"> # Load doubleword (RV64)</span></span>
+<span class="giallo-l"><span>lbu  rd, offset(rs1)   </span><span class="z-comment"> # Load byte unsigned</span></span>
+<span class="giallo-l"><span>lhu  rd, offset(rs1)   </span><span class="z-comment"> # Load halfword unsigned</span></span>
+<span class="giallo-l"><span>lwu  rd, offset(rs1)   </span><span class="z-comment"> # Load word unsigned (RV64)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>sb   rs2, offset(rs1)  </span><span class="z-comment"> # Store byte</span></span>
+<span class="giallo-l"><span>sh   rs2, offset(rs1)  </span><span class="z-comment"> # Store halfword</span></span>
+<span class="giallo-l"><span>sw   rs2, offset(rs1)  </span><span class="z-comment"> # Store word</span></span>
+<span class="giallo-l"><span>sd   rs2, offset(rs1)  </span><span class="z-comment"> # Store doubleword (RV64)</span></span></code></pre>
+<p>So if the instruction has the <code>Load</code> flag set to 1 or <code>Store</code> flag set to 1, then the address from which we read/write must be equal to value in <code>rs1 + offset</code>.
+Using propositional logic we write:</p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-keyword z-keyword z-control">if</span><span class="z-punctuation"> {</span><span class="z-entity z-name z-type"> Instruct</span><span class="z-variable z-other"> has</span><span class="z-entity z-name z-type"> Load</span><span class="z-constant"> OR</span><span class="z-entity z-name z-type"> Store</span><span class="z-punctuation"> }</span><span class="z-variable z-other"> then</span><span class="z-punctuation"> (</span><span class="z-entity z-name z-type"> RamAddress</span><span class="z-punctuation"> )</span><span class="z-keyword z-keyword z-operator"> ==</span><span class="z-punctuation"> (</span><span class="z-entity z-name z-type"> Rs1Value</span><span class="z-keyword z-keyword z-operator"> +</span><span class="z-entity z-name z-type"> Imm</span><span class="z-punctuation"> )</span></span></code></pre>
+<p>The same thing expressed as algebraic constraints:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>(Load + Store) * (RamAddress - (Rs1Value + Imm)) = 0</span></span></code></pre>
+<p>For a program to be correctly executed, for every time step $t \in { 0,1 }^{\log T}$, the above constraint must be satisfied.
+Of course for a program to be correct, it is not sufficient to just satisfy the above constraint.
+There are many more constraints.
+In the <code>OuterSpartan</code> sumcheck we write down 20 such <a href="http://onATangent.xyz/blog/streaming-sumchecks/./r1cs_constraints.html">constraints</a>, express these constraints as the evaluations of two polynomials $\widetilde{A}$ and $\widetilde{B}$, and represent constraint satisfaction as a sumcheck.
+More details follow.</p>
+<h2 id="the-outer-spartan-polynomials">The Outer Spartan Polynomials</h2>
+<p>There are 20 constraints for each time step $t \in {0,1}^{\log T}$.
+Each constraint will be of form</p>
+<p><code>Term 1 * Term 2 = 0</code>.</p>
+<p>Here <code>Term 1</code> will be represented by $A$ and <code>Term 2</code> will be represented by $B$.</p>
+<p><strong>Indexing</strong>: We divide the 20 constraints into 2 groups.
+We refer to the each constraint using two digits<sup class="footnote-reference"><a href="#a">4</a></sup> $(b,y)$ where $b \in {0,1}$ is the selector index, and $y\in {-4, \ldots, 5}$ refers to one of the 10 constraints in group $b$.
+For example,</p>
+<ul>
+<li>
+<p>$(0,-4)$ refers to constraint 1,</p>
+</li>
+<li>
+<p>$(0, -3)$ refers to constraint 2,</p>
+</li>
+<li>
+<p>...</p>
+</li>
+<li>
+<p>$(1, 5)$ refers to the 20th constraint and so on.</p>
+</li>
+</ul>
+<div class="footnote-definition" id="a"><sup class="footnote-definition-label">4</sup>
+<p>We choose those indices for $y$ instead of bit string or the set ${0, \ldots, 9}$ for computational reasons, the details of which we dot discuss here (maybe for a separate post).</p>
+</div>
+<h3 id="example-constraint-1">Example : Constraint 1</h3>
+<p>Let $z_t[\text{LOAD}], z_t[\text{STORE}] \in {0,1}$ denote boolean flags that denote whether the $t$'th instruction contains a LOAD or a STORE instruction.
+For a given time step $t \in {0,1}^{\log T}$, using information from the trace, we write a table of evaluations with the following indexing logic:</p>
+<ul>
+<li>
+<p>$A(t, 0 , -4) = z_t[\text{LOAD}] + z_t[\text{STORE}]$</p>
+</li>
+<li>
+<p>$B(t, 0, -4) = (\text{RamAddress} - (\text{Rs1Value} + \text{Imm}))$</p>
+</li>
+</ul>
+<p>That is satisfying constraint 1 for time step $t$ is equivalent to checking if $A(t, 0, -4) \times B(t, 0, -4) = 0$.
+The remaining 19 constraints give us evaluations $A(X_t, X_b, Y)$ and $B(X_t, X_b, Y)$ for $Y \in {-4, \ldots, 5}, X_b \in {0,1}, X_t \in {0,1}^{\log T}$.
+The picture you have in mind is the following
+<img src="http://onATangent.xyz/blog/streaming-sumchecks/trave_to_poly.svg" alt="" /></p>
+<p>Satisfying all constraints is just saying the following:</p>
+<p>$$
+\begin{align<em>ed</em>}
+\widetilde{A}(x_t, x_b, y) \times \widetilde{B}(x_t, x_b,  y) = \vec{0} \quad \forall x_t \in {0,1}^{\log T}, \forall x_b \in {0,1}, \forall y \in {-4, ..., 5}
+\end{align<em>ed</em>}
+$$</p>
+<p>where $\widetilde{U}$ denoes the multi-linear extension of a vector $U$.
+Now we do the thing we have done since the beginning of time.
+We want to make sure the LHS of the above system of equations to equal the RHS as polynomials.
+So we sample $(\TauTime || \tau_{b} || \TauConstraints) \samples \ChallengeSet^{\log T+2}$ and check if the following sumcheck holds:</p>
+<p>$$\sum_{x_t \in {0,1}^{\log T}} \sum_{x_b \in {0,1}} \sum_{y \in {-4,...,5}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{y}{\TauConstraints} \cdot \widetilde{A}(x_t, x_b, y) , \widetilde{B}(x_t, x_b, y) = 0 $$</p>
+<p>By Schwartz-Zippel, with high probability if the above tests passes, then the verifier can be happy that the prover was honest.</p>
+<h2 id="review-of-the-linear-sumcheck-implementation">Review Of The Linear Sumcheck Implementation</h2>
+<p>As described above in the picture, that in-order to get $\widetilde{A}(x_t, x_b, y)$ and $\widetilde{B}(x_t, x_b, y)$ we need to process the $t$'th location of the trace.
+As soon as we process every location of the trace once, we can store $\widetilde{A}$ and $\widetilde{B}$ in memory.
+This requires $T \times 2 \times 20$ field elements worth of memory.
+If we could afford this, -- we can bin the trace once and for all.
+We have every bit of information needed to complete the sum-check algorithm.
+This is almost how the current implementation of the linear <code>OuterSpartan</code> sumcheck looks like.
+Except there's a special first round, which we describe below.</p>
+<ol>
+<li>A special handling of round involving variable $Y$ involving 10 constraints per time step and group index.</li>
+</ol>
+<p>Remember in each round of the sum-check the prover sends to the verifier a univariate polynomial, and the verifier responds with a challenge $r \samples \ChallengeSet$ sampled from the challenge set.
+We iterate through the entire trace, <strong>but</strong> we do <strong>NOT</strong> compute and store $\widetilde{A}$ and $\widetilde{B}$ in memory.
+Instead we store in memory, the following univariate polynomial, which is the provers first round message.</p>
+<p>$$s(\textcolor{pink}{Y}) \Def \sum_{x_t \in {0,1}^{\log T}} \sum_{x_b \in {0,1}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{\TauConstraints}{\textcolor{pink}{Y}} \cdot A(x_t, x_b, \textcolor{pink}{Y}) , B(x_t, x_b , \textcolor{pink}{Y})$$</p>
+<p>This takes $O(1)$ field elements worth of storage as there are only $10$ constraints per group.
+<a rel="external" href="https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L117">See</a> for the evaluation points that represent the above polynomial.
+We refer to these evaluations as the <code>skip_window</code> in the code.</p>
+<div class="callout callout-box">
+  
+  <p><strong>NOTE:</strong> This phase will remain exactly the same in the current "streaming" implementation as well.
+Remember we assumed streaming the trace was free, and storing $O(1)$ field elements for a univariate polynomial does not break anyone's memory bank.
+We include this round in this post for completeness.</p>
+
+</div>
+<p>After this round, the prover has received challenge $r_y$ to bind to variable $Y$.
+What we describe next, refers to the <code>OuterRemainingSumcheck</code> in Jolt.
+The sumcheck is divided into 2 phases:</p>
+<ol start="2">
+<li>A setup phase which materialises the polynomials -- this is the <code>gen</code> constructor.</li>
+<li>The remaining communication rounds (which are standard).</li>
+</ol>
+<h3 id="setup-phase">Setup Phase</h3>
+<p>We iterate over the entire trace one more time, and now materialise polynomials $\widetilde{A}, \widetilde{B}$ with $r_y$ bound to variable $Y$.
+This takes $2T$ field elements worth of space.</p>
+<p>More specifically for every $(x_{\log T}, \dots, x_{1}, x_b) \in {0,1}^{\log T + 1}$, we store</p>
+<p>$$\widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, r_y) = \sum_{y \in {-4. \dots, 5}} \Lagrange{\tau_y}{y}, \widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, y)$$ and
+$$\widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, r_y)= \sum_{y \in {-4. \dots, 5}} \Lagrange{\tau_y}{y}, \widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, y)$$</p>
+<p>This storing of partially bound sumcheck polynomials in memory is what we refer to as materialising.</p>
+<p>While we're materialising $\widetilde{A}$ and $\widetilde{B}$, we might as well prepare ourselves to also compute the provers messages for first round of the sum-check algorithm.
+This process where we materialise the polynomials of the sum-check <strong>and</strong> also compute the messages for the next round is referred to as <code>fused</code> materialisation in the code.
+This is exactly what the method</p>
+<p><code>fn compute_first_quadratic_evals_and_bound_polys</code> <a rel="external" href="https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L297">described here</a> does.</p>
+<p>Here <code>t0</code> and <code>t_inf</code> refer to evaluations of the following quadratic polynomial.</p>
+<p>$$t(\textcolor{pink}{X_b}) \Def \sum_{x_t \in {0,1}^{\log T}}\sum_{y \in {-4, \dots, 5}}  \eq{\tau_t}{x_t} \cdot \Lagrange{r_y}{y} \cdot \widetilde{A}(x_t ,\textcolor{pink}{X_b}, y) , \widetilde{B}(x_t, \textcolor{pink}{X_b}, y) $$</p>
+<p>The final polynomial that the prover must send is the following:</p>
+<p>$s(X_b) \Def \Lagrange{\tau_y}{r_0} \cdot t(\textcolor{pink}{X_b}) \cdot  \eq{\tau_{b}}{\textcolor{pink}{X_b}}$</p>
+<p>which is exactly what the following snippet of code on Line 1430 of <code>jolt-core/src/zkvm/spartan/outer.rs</code></p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-variable z-language z-variable"> self</span><span class="z-keyword z-keyword z-operator">.</span><span>split_eq_poly</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">    .</span><span class="z-entity z-name z-entity z-name z-function">gruen_poly_deg_3</span><span class="z-punctuation">(</span><span class="z-variable z-other">t0</span><span class="z-punctuation">,</span><span class="z-variable z-other"> t_inf</span><span class="z-punctuation">,</span><span class="z-variable z-other"> previous_claim</span><span class="z-punctuation">)</span></span></code></pre><h2 id="the-remaining-rounds">The Remaining Rounds</h2>
+<p>With $\widetilde{A}$ and $\widetilde{B}$ materialised. The remaining rounds are standard. The mental picture is the following:</p>
+<p><img src="http://onATangent.xyz/blog/streaming-sumchecks/Linear_sumcheck.svg" alt="" /></p>
+<p>At each bind the length of the representation of $\widetilde{A}$ and $\widetilde{B}$ shrinks by half.
+And the next prover message can be computed from the bounded and materialised polynomials.
+The <a rel="external" href="https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L387">code</a> is described here.</p>
+<p>In conclusion, the linear sum-check with a special first round required that we stream the trace twice.
+The second time of doing so -- we materialised the polynomials with only $r_0$ bound to $Y$.
+Once we materialise, we never have to look at the trace ever again -- for at least this sum-check.
+But this came at the cost of storing $2T$ field elements in memory per polynomial.
+If $T$ is large, on the order of billions, then this is too expensive.</p>
+<p>:::{.remark}
+In this world where iterating through the trace is free, we could <strong>never</strong> materialise any polynomial and always just stream the trace every round (like we did in the first round).
+That would take close to no memory at all.
+While this is true, streaming the trace is actually not free, and we want to avoid it as many times as possible.
+We only assume its free to make the memory accounting work for this post.
+Eventually, we will have to implement a memory efficient way to stream the trace -- but that is not terribly hard, and will soon be implemented.
+In what follows, we make a compromise, of sometimes streaming instead of always streaming, but this will allow us to store fewer things.
+:::</p>
+<h2 id="the-streaming-generalisation">The Streaming Generalisation</h2>
+<p>To describe the streaming sum-check we need to first describe what we mean by a sum-check schedule.</p>
+<ul>
+<li>A schedule classifies every round of the sum-check as being a <code>window_start</code> round or not.
+For example the sum-check involving 16 rounds of interaction below can be scheduled as shown below.
+Rounds 0, 3, 6, 9, 10, ..., 15 are all window starts.</li>
+</ul>
+<p><img src="http://onATangent.xyz/blog/streaming-sumchecks/stream_schedule.svg" alt="" /></p>
+<ul>
+<li>
+<p>For every round, we have a notion of width or the number of unbound variables. This is given by the distance of current round from the next window start (or the end if there is no more window starts).
+So in the above example, round 0 has window width 3, round 1 has width 2, round 2 has width 1, and round 3 has width 3 again, round 4 has width 2 and so on.</p>
+</li>
+<li>
+<p>Out of all the rounds that are marked as <code>window_start</code> rounds, exactly <strong>one</strong> round is marked as special, and we call it the switchover point. This switchover point will mark the round at which we <strong>materialise</strong> the polynomials from the trace and store it in memory. In the example above, the switch over round is the 10th round given by round index 9. The width of this round is one in the above example (but it doesn't have to be such).</p>
+</li>
+</ul>
+<p>At this point it should be somewhat clear that the later we materialise, the more variables would be bound by verifier challenges, hence the memory representation of the materialised polynomial will be smaller.
+However, the later we materialise, it means we would have to stream the entire trace to compute prover messages more times.
+There is an inherent tradeoff here that cannot be avoided.
+The rough sketch of the algorithm proceeds is as follows:</p>
+<ol>
+<li>
+<p>If a round $i \in {0, .. n-1}$ is the start of a window with width $w$ -- we need to stream over the entire trace to generate and store a multi-variate polynomial $t$ with $w$ variables. This requires storing $W:=(d+1)^w$ evaluations of $t$ in memory, where $d$ is the degree of $t$.  This degree $d$, $w$-variate polynomial is what is referred to as <code>t_grid</code> or the streaming data structure. As $d$ and $w$ will be small constants, storing <code>t_grid</code> in memory is essentially free.</p>
+</li>
+<li>
+<p>Once store $t$ in memory, we can compute all prover messages needed for the next $w$ rounds of sum-check, without streaming the trace again. If this is not immediately clear, we work out an example below.</p>
+</li>
+<li>
+<p>On receiving a verifier challenge $r$ for the current round, we shrink the size of $t$ by a factor of $d+1$ (just as in the case of the linear-sum-check) where $d$ is the degree of $t$. The factor is 2 if $t$ is multi-linear.</p>
+</li>
+<li>
+<p>In the last round of the given window the size of $t$ should reduce to 1.</p>
+</li>
+<li>
+<p>The next round is either the start of a new window or its the switchover point. If it's the former, we repeat the process described above. That is, we stream the trace again, and compute $t$ from the trace.</p>
+</li>
+<li>
+<p>If the round $\hat{t} \in [n]$ is the switch-over point, we stream over the trace and store a multi-linear polynomials $\widetilde{A}(\textcolor{orange}{r_y, r_b, r_1, \ldots, r_{\hat{t}-1}}, X_{\hat{t}}, \ldots, X_{\log T})$ and $\widetilde{B}(\textcolor{orange}{r_y, r_b, r_1, \ldots, r_{\hat{t}-1}}, X_{\hat{t}}, \ldots, X_{\log T})$. Note that as we are materialising later, the size of these polynomials is much smaller than if we materialised in the first or second round.</p>
+</li>
+<li>
+<p>Once again we compute $t$ to answer the provers messages. But crucially, this time we do it from materialised polynomials above. We no longer need to stream the strace.</p>
+</li>
+</ol>
+<p>If the above description is all too abstract, lets' work through an actual example, and then finally look at the code snippets.
+For this sum-check the degree of $t$ will be $d=2$ always.
+In the example schedule above, the window width is $w=3$ for round 0.
+The streaming data structure for to compute is the following:</p>
+<div class="math-display">
+$$\begin{align*} 
+t'(\textcolor{pink}{X_2, X_1, X_b}) = \sum_{y \in \{-4, \dots, 5\}}\sum_{x_{15}..x_{3} \in \{0,1\}^{13}} &A(x_{15}...x_3 , \textcolor{pink}{X_2, X_1, X_b},\, y) \\ 
+&\cdot B(x_{15}...x_3,\textcolor{pink}{X_2, X_1, X_b},\, y)\, \Lagrange{y}{r_y} \\[10pt] &\cdot\text{eq}(\tau_{15}..\tau_3; x_{15}...x_3) 
+\end{align*}
+$$
+</div>
+<p>Thus, we need $(d+1)^w = 3^3 = 27$ evaluations to represent $t$.
+In Jolt we evaluate $t$ at ${0,1, \infty}^{w}$ and the data structure that stores is this evaluations is called <code>t_grid</code> which is what describe as the streaming data structure.
+This is exactly what the method</p>
+<p><code>fn compute_evaluation_grid_from_trace(&amp;mut self, window_size: usize)</code> computes.
+The next stage is to compute $t(0)$ and $t(\infty)$ where</p>
+<div class="math-display">
+$$
+t(\textcolor{pink}{X_b}) = \sum_{x_2, x_1 \in \{0,1\}^2 } t'(x_2, x_1, \textcolor{pink}{X_b})\,\,\text{eq}(\tau_2, \tau_1; x_2, x_1)
+$$
+</div>
+<p>This is what <code>fn compute_t_evals(&amp;self, window_size: usize) -&gt; (F, F)</code> computes.</p>
+<div class="callout callout-box">
+  
+  <p>Throughout this post when we write $\eq{\tau}{x}$, we assume its implemented using the Dao-Thaler split-eq optimisation. Thus the memory representation of the $\eq{}{}$ polynomials is never an issue.</p>
+
+</div>
+<p>Finally the provers message is given by
+$$
+s(\textcolor{pink}{X_b}) = t(\textcolor{pink}{X_b}),\text{eq}(\tau_b, \textcolor{pink}{X_b})
+$$</p>
+<blockquote>
+<h3 id="prover-messages-are-always-computed-from-t-grid">Prover Messages Are Always Computed From <code>t_grid</code></h3>
+<p>It is important to note that in every round of the sum-check the provers messages will be computed using the streaming data structure <code>t_grid</code>.
+We will shortly see that once the current <code>t_grid</code> gets exhaused we will re-compute it.</p>
+</blockquote>
+<blockquote>
+<h3 id="a-note-about-evaluating-at-infinity">A Note About Evaluating At Infinity</h3>
+<p>For a univariate polynomial $p$, $p(\infty)$ is equal to the coefficient associated with the highest degree variable of the polynomial.
+For example, if $p$ is linear i.e $p(X) = aX + b$, we have $p(\infty) = a$.</p>
+</blockquote>
+<p>This completes the first round message the prover sends.</p>
+<h4 id="binding-in-the-streaming-phase">Binding in the streaming phase</h4>
+<p>Note as $t'$ is multi-variate, we are sorted for the next $w$ rounds, till we bind all $w$ of its variables.
+In the example above, we can answer 3 rounds of prover messages using <code>t_grid</code> only.
+Binding is exactly the same as the linear version but we do it for the multi-quadratic polynomial and is done by the</p>
+<p><code>t_prime_poly.bind(r_j, BindingOrder::LowToHigh)</code></p>
+<p><a rel="external" href="https://github.com/abiswas3/jolt/blob/feat/streaming-prover-merged/jolt-core/src/poly/multiquadratic_poly.rs">method</a>.</p>
+<p>After binding in round 0 we go from  $t'(X_2, X_1, X_b)$ to $t'(X_2, X_1, \textcolor{orange}{r_b})$.
+Then at then of round 1 we are left with $t'(X_2, \textcolor{orange}{r_1, r_b})$ and after round 2 i.e 3 rounds of sum-check we are left with $t'( \textcolor{orange}{r_2, r_1, r_b})$.
+Hereafter, we must stream the trace again -- and we will as round 3 is a window start.</p>
+<p>Additionally as the challenges come in, we also build a data structure called <code>r_grid</code> which looks like the following</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>[</span></span>
+<span class="giallo-l"><span>	[1]</span></span>
+<span class="giallo-l"><span>	[(1-rb), rb] // eq(r_b, x_b)</span></span>
+<span class="giallo-l"><span>	[(1-rb)(1-r1), rb(1-r1), (1-rb)r1, rbr1] // eq(r_1, r_b, x_1, x_b)</span></span>
+<span class="giallo-l"><span>	...</span></span>
+<span class="giallo-l"><span>]</span></span></code></pre>
+<p>:::{.remark}
+We will see shortly, we only need to store <code>r_grid</code> only upto the switch-over point.
+The total amount of storage needed is $2^{\hat{t}}$ where $\hat{t} \in [n]$ is the switchover point of the sum-check and $n$ is the number of rounds of the sum-check.
+If $\hat{t}$ is large, we can always use the split-eq technique for <code>r_grid</code> (this is not currently needed).
+:::</p>
+<p>The last line of <code>r_grid</code> helps us compute $\text{eq}(\textcolor{orange}{r_{w-1},..., r_b}, x_{w-1},..., x_{b})$ which is useful when we recompute <code>t_grid</code> in the first round of the next window.</p>
+<h3 id="next-window-start">Next Window Start</h3>
+<p>Now we still have not hit a switchover point, so nothing is materialised yet, so we once again compute the grid from the trace.
+Additionally, as we are not in the first round anymore, we have to deal with the verifier challenges -- so the equations for computing the grid are the following.</p>
+<div class="math-display">
+$$\begin{align*} 
+&=t(\textcolor{pink}{X_5, X_4, X_3}) \\[10pt] 
+&= \sum_{x_{15}..x_{6}, x_{2}, x_{1}, x_{b} \in \{0,1\}^{13}}\sum_{y \in \{-4, \dots, 5\}}  \widetilde{A}(x_{15}...x_6,  \textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \\
+&\qquad \cdot \widetilde{B}(x_{15}\dots x_6 ,\textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \\[10pt]
+&\qquad \cdot\text{eq}(\tau_{15}\dots\tau_6;\, x_{15}\dots x_6) \, \\[10pt]
+&\qquad \cdot \text{eq}(\textcolor{orange}{r_2, r_1, r_b}, x_{2}, x_{1}, x_{b})
+\end{align*}
+$$
+</div>
+<p>So how the <code>r_grid</code> becomes useful now in the last line.
+This process continues till we hit the switch over point.
+Also observer that the RHS of the above equations actually visits every cell of the trace exactly once.
+Hence we keep banging on about streaming the trace.</p>
+<p>At this point we have only used $\max\{(d+1)^{\hat{w}}, 2^{\hat{t}}\}$ field elements worth of memory, where $\hat{t}$ is the switch-over point and $\hat{w}$ is the maximum window width for a round.
+$d=2$ is for this sumcheck.</p>
+<h3 id="switch-over-point">Switch Over Point</h3>
+<p>Finally we get to the switchover point.
+<code>t_grid</code> is exhausted once again.
+We stream through the trace one last time to manifest the bounded polynomials.</p>
+<p>We now store for each $X_{15}...X_9 \in {0,1}^{7}$</p>
+<div class="math-display">
+$$\begin{align*} 
+& \widetilde{A}(\textcolor{pink}{X_{15}...X_9}, \textcolor{orange}{r_8, ..., r_b, r_y}) \\[10pt]
+&= \sum_{x_8...x_b \in \{0,1\}^9}\sum_{y \in \{-4, \dots, 5\}} \widetilde{A}(\textcolor{pink}{X_{15}, ..., X_9}, x_8...x_b, y)\,\text{eq}(\textcolor{orange}{r_8..r_b}, x_8...x_b)\, \Lagrange{r_y}{y}
+\end{align*}
+$$
+
+$$\begin{align*} 
+& \widetilde{B}(\textcolor{pink}{X_{15}...X_9}, \textcolor{orange}{r_8, ..., r_b, r_y}) \\[10pt]
+&= \sum_{x_8...x_b \in \{0,1\}^9}\sum_{y \in \{-4, \dots, 5\}} \widetilde{B}(\textcolor{pink}{X_{15}, ..., X_9}, x_8...x_b, y)\,\text{eq}(\textcolor{orange}{r_8..r_b}, x_8...x_b)\, \Lagrange{r_y}{y}
+\end{align*}
+$$
+</div>
+<p><strong>NOTE</strong>: This just stores $2^7$ field elements worth of storage (much fewer than the linear sumcheck setup).
+The method</p>
+<p><code>fused_materialise_polynomials_general_with_multiquadratic</code></p>
+<p>computes the above polynomials and stores them in memory.
+Note that as we have the polynomials at hand already, we also compute the grid now.
+In the schedule given above, the grid size is just 1, thus we only need to store</p>
+<div class="math-display">
+$$
+\begin{align*}
+t(\textcolor{pink}{X_9}) =  \sum_{x_{15},\dots,x_{10} \in \{0,1\}^{6}} & \widetilde{A}(x_{15}, \dots, x_{10}, \textcolor{pink}{X_9}, \textcolor{orange}{r_8, \dots, r_1, r_b, r_y})\\[10pt]
+&\cdot \widetilde{B}(x_{15}, \dots, x_{10}, \textcolor{pink}{X_9}, \textcolor{orange}{r_8, \dots, r_1, r_b, r_y}) \\[10pt]
+&  \cdot \eq{\tau_{15}, \dots, \tau_{10}}{ x_{15}, \dots, x_{10}} \\[10pt]
+\end{align*}
+$$
+</div>
+<p>Finally the prover message is</p>
+<div class="math-display">
+$$s(\textcolor{pink}{X_9}) = t(\textcolor{pink}{X_9})\,\, \eq{\tau_9}{\textcolor{pink}{X_9}}\,\,\eq{\tau_8, \dots, \tau_b}{\textcolor{orange}{r_{8}, \dots, r_{b}}}\,\,\Lagrange{\tau_y}{\textcolor{orange}{r_y}}
+$$
+</div>
+<p>From here onwards, whenever we need to compute the grid, we never look at the trace.
+We can directly do it from the materialised polynomials $\widetilde{A}$ and $\widetilde{B}$.
+This is what the method</p>
+<p><code>compute_evaluation_grid_from_polynomials_parallel</code> computes.</p>
+<p>From here on after the switchover point we <strong>NEVER</strong> touch the trace again.</p>
+<h3 id="actual-code">Actual Code</h3>
+<p>Below we describe what the <code>compute_message</code> method of the generalised sumcheck looks like.
+The following snippet of code executes the logic describe above, based on the round classification.</p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-keyword">fn</span><span class="z-entity z-name z-entity z-name z-function"> compute_message</span><span class="z-punctuation">(</span><span class="z-keyword z-keyword z-operator">&amp;</span><span class="z-storage z-modifier">mut</span><span class="z-variable z-language z-variable"> self</span><span class="z-punctuation">,</span><span class="z-variable z-other"> round</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> usize</span><span class="z-punctuation">,</span><span class="z-variable z-other"> previous_claim</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> F</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> -&gt;</span><span class="z-entity z-name z-type"> UniPoly</span><span class="z-punctuation">&lt;</span><span class="z-entity z-name z-type">F</span><span class="z-punctuation">&gt;</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-storage z-type">    let</span><span class="z-variable z-other"> num_unbound_vars</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-variable z-language z-variable"> self</span><span class="z-keyword z-keyword z-operator">.</span><span>schedule</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">num_unbound_vars</span><span class="z-punctuation">(</span><span class="z-variable z-other">round</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span><span class="z-punctuation z-punctuation z-definition z-comment"> //</span><span class="z-comment"> The size of the streaming data structure</span></span>
+<span class="giallo-l"><span>    </span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">    if</span><span class="z-variable z-language z-variable"> self</span><span class="z-keyword z-keyword z-operator">.</span><span>schedule</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">is_switch_over_point</span><span class="z-punctuation">(</span><span class="z-variable z-other">round</span><span class="z-punctuation">)</span><span class="z-punctuation"> {</span><span class="z-punctuation z-punctuation z-definition z-comment"> //</span><span class="z-comment"> Check if it&#39;s time materialise the sum-check polynomials</span></span>
+<span class="giallo-l"><span class="z-variable z-language z-variable">        self</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">materialise_polynomials_from_trace</span><span class="z-punctuation">(</span><span class="z-variable z-other">num_unbound_vars</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span><span class="z-punctuation z-punctuation z-definition z-comment"> //</span><span class="z-comment"> Materialise bound polynomials A and B </span></span>
+<span class="giallo-l"><span class="z-punctuation">    }</span><span> </span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">    else</span><span class="z-keyword z-keyword z-control"> if</span><span class="z-variable z-language z-variable"> self</span><span class="z-keyword z-keyword z-operator">.</span><span>schedule</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">is_window_start</span><span class="z-punctuation">(</span><span class="z-variable z-other">round</span><span class="z-punctuation">)</span><span class="z-punctuation"> {</span><span class="z-punctuation z-punctuation z-definition z-comment"> //</span><span class="z-comment"> Window start</span></span>
+<span class="giallo-l"><span>    </span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        if</span><span class="z-variable z-language z-variable"> self</span><span class="z-keyword z-keyword z-operator">.</span><span>schedule</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">before_switch_over_point</span><span class="z-punctuation">(</span><span class="z-variable z-other">round</span><span class="z-punctuation">)</span><span class="z-punctuation"> {</span><span class="z-punctuation z-punctuation z-definition z-comment"> //</span><span class="z-comment"> Need to compute streaming data structure from trace</span></span>
+<span class="giallo-l"><span class="z-variable z-language z-variable">            self</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">compute_evaluation_grid_from_trace</span><span class="z-punctuation">(</span><span class="z-variable z-other">num_unbound_vars</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-punctuation">        }</span><span class="z-keyword z-keyword z-control"> else</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">            //</span><span class="z-comment"> Have materialised polynomials, no need to stream the trace anymore</span></span>
+<span class="giallo-l"><span class="z-variable z-language z-variable">            self</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">compute_evaluation_grid_from_polynomials_parallel</span><span class="z-punctuation">(</span><span class="z-variable z-other">num_unbound_vars</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-punctuation">        }</span></span>
+<span class="giallo-l"><span class="z-punctuation">    }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    //</span><span class="z-comment"> This part remains unchanged -- from the linear sum-check</span></span>
+<span class="giallo-l"><span class="z-storage z-type">    let</span><span class="z-punctuation"> (</span><span class="z-variable z-other">t_prime_0</span><span class="z-punctuation">,</span><span class="z-variable z-other"> t_prime_inf</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-variable z-language z-variable"> self</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">compute_t_evals</span><span class="z-punctuation">(</span><span class="z-variable z-other">num_unbound_vars</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-variable z-language z-variable">    self</span><span class="z-keyword z-keyword z-operator">.</span><span>split_eq_poly</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">        .</span><span class="z-entity z-name z-entity z-name z-function">gruen_poly_deg_3</span><span class="z-punctuation">(</span><span class="z-variable z-other">t_prime_0</span><span class="z-punctuation">,</span><span class="z-variable z-other"> t_prime_inf</span><span class="z-punctuation">,</span><span class="z-variable z-other"> previous_claim</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-punctuation">}</span></span></code></pre>
+<div class="footnote-definition" id="d"><sup class="footnote-definition-label">1</sup>
+<p>This statement is strictly not true. In the current implementation, as a consequence of the process by which we construct the polynomials, we still need $O(T)$ memory, where $T$ is the number of instructions in the guest program (both virtual and real). But in this post we make a few simplifying assumptions, by which the statement does ring true.</p>
+</div>
+<div class="footnote-definition" id="e"><sup class="footnote-definition-label">2</sup>
+<p>It is not so imporant to be formal about what we mean by sufficient structure here. If $g \in \Field[x_1, \dots, x_n]$, then we can just pretend $H = {0,1}^n$.</p>
+</div>
+<div class="footnote-definition" id="c"><sup class="footnote-definition-label">3</sup>
+<p>A program is just a sequence of RISC-V instructions.</p>
+</div>
+
+  </div>
+
+  
+
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const toggle = document.getElementById('theme-toggle');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (theme === 'dark') {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        } else {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        }
+      }
+
+      const saved = localStorage.getItem('theme');
+      if (saved) {
+        setTheme(saved);
+      } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+
+      toggle.addEventListener('click', function() {
+        const current = html.getAttribute('data-theme');
+        setTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+  </script>
+    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+          macros: {
+            "\\field": "\\mathbb{#1}",
+            "\\hei": "\\mathbb{F}(#1)",
+            "\\Field": "\\mathbb{F}",
+            "\\Mont": "\\widetilde{#1}",
+            "\\samples": "\\xleftarrow{\\$}",
+            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
+            "\\TauConstraints": "\\tau_y",
+            "\\TauTime": "\\tau_{\\text{cycle}}",
+            "\\TauGroup": "\\tau_b",
+            "\\MLE": "\\widetilde{#1}",
+            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
+            "\\Def": ":=",
+            "\\ChallengeSet": "\\mathsf{C}"
+
+          },
+            throwOnError: false,
+          trust: true
+
+        });
+    });
+</script>
+
+
+</body>
+</html>

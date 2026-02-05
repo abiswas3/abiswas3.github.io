@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tracked Types | Random Walks</title>
+  <link rel="stylesheet" href="http://onATangent.xyz/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css" media="(prefers-color-scheme: dark)">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css" media="(prefers-color-scheme: light)">
+  
+  <link rel="stylesheet" href="/katex.css">
+  <script defer src="/katex.min.js"></script>
+  <script defer src="/auto-render.min.js"></script>
+  <script defer src="/katex-init.js"></script>
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="http://onATangent.xyz">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="http://onATangent.xyz/blog/">Notes</a>
+        <a href="http://onATangent.xyz/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+        <a href="http://onATangent.xyz/publications/">Research</a>
+        <a href="http://onATangent.xyz/misc/">Random</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <span class="icon-sun">&#9788;</span>
+          <span class="icon-moon">&#9790;</span>
+        </button>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+<article class="post">
+  <header class="post-header">
+    <h1>Tracked Types</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2025-10-04</time>
+    </div>
+    
+    <div class="post-tags">
+      <a href="http://onATangent.xyz/tags/sumcheck/" class="tag">sumcheck</a><a href="http://onATangent.xyz/tags/montgomery-mults/" class="tag">montgomery-mults</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+    <div class="callout callout-warning stale-disclaimer">
+      This post has not been updated since it was published and the website has since been moved. Some links may be broken.
+    </div>
+    
+  
+
+  <div class="post-content">
+    <h2 id="tracked-data-types">Tracked Data Types</h2>
+<div class="footnote-definition" id="new-world"><sup class="footnote-definition-label">1</sup>
+<p>it's remarkable how far libraries have come that prevent us from writing semaphores and mutexes from scratch</p>
+</div>
+<p>Before, describing optimisations to polynomial evaluation, we discuss an additional tool to debug numerical algebra libraries.
+In <a rel="external" href="https://jolt.a16zcrypto.com/how/appendix/pcs.html">Jolt</a> sum-check algorithms, almost invariably the bottleneck in computation is number of field multiplications by large scalars.
+So it might be helpful to be able to count the number of multiplications your algorithm does, and check if we're under the theoretical limit.</p>
+<p>Towards this we introduce <code>TrackedFr</code> data type which is exactly the same as <code>ark_bn254::Fr</code> except for 1 critical difference.
+<a rel="external" href="https://github.com/abiswas3/jolt/blob/main/jolt-core/src/field/tracked_ark.rs">Implementation here</a></p>
+<p>Before performing a multiplication operation, we increment a global counter atomically (in a thread safe way).
+Rust makes this relatively easy to do<sup class="footnote-reference"><a href="#new-world">1</a></sup>.
+See <a rel="external" href="https://doc.rust-lang.org/std/sync/atomic/struct.AtomicUsize.html">official docs here</a></p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-keyword">use</span><span class="z-entity z-name z-namespace z-entity z-name"> std</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-namespace z-entity z-name">sync</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-namespace z-entity z-name">atomic</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-punctuation">{</span><span class="z-entity z-name z-type">AtomicUsize</span><span class="z-punctuation">,</span><span class="z-entity z-name z-type"> Ordering</span><span class="z-punctuation">}</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">//</span><span class="z-comment"> A global counter that tracks how many times we&#39;ve use a*b where a, b are ark_bn254::Fr types</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">//</span><span class="z-comment"> see jolt-core::field::tracked_fr::TrackedFr for more details</span></span>
+<span class="giallo-l"><span class="z-keyword">pub</span><span class="z-storage z-modifier"> static</span><span class="z-constant"> MULT_COUNT</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> AtomicUsize</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-type"> AtomicUsize</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-entity z-name z-function">new</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span></code></pre>
+<p>We have the ability to reset this counter at any time as well.
+So now all we need to do if we wanted to see how many multiplications transpired, is to wrap the function being examined with <code>reset_mult_count()</code> and <code>get_mult_count()</code>.
+See an example of how to use <a rel="external" href="https://github.com/abiswas3/jolt/blob/main/jolt-core/benches/polynomial_evaluation.rs">here</a>.</p>
+<p>That's it! Right now it just tracks multiplications, but you may extend it to <strong>any</strong> operation <code>ark_bn254::Fr</code> does by simply wrapping the operation as follows:</p>
+<p>For all types of multiplication we do w</p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">//</span><span class="z-comment"> crate is jolt-core</span></span>
+<span class="giallo-l"><span class="z-keyword">use</span><span class="z-keyword"> crate</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-namespace z-entity z-name">utils</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-namespace z-entity z-name">counters</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-type">MULT_COUNT</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">//</span><span class="z-comment"> Owned * owned</span></span>
+<span class="giallo-l"><span class="z-keyword">impl</span><span class="z-entity z-name z-type"> Mul</span><span class="z-punctuation">&lt;</span><span class="z-entity z-name z-type">TrackedFr</span><span class="z-punctuation">&gt;</span><span class="z-keyword z-keyword z-control"> for</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-storage z-type">    type</span><span class="z-entity z-name z-type"> Output</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-keyword">    fn</span><span class="z-entity z-name z-entity z-name z-function"> mul</span><span class="z-punctuation">(</span><span class="z-variable z-language z-variable">self</span><span class="z-punctuation">,</span><span class="z-variable z-other"> rhs</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> -&gt;</span><span class="z-variable z-language z-variable"> Self</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-type">Output</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-constant">        MULT_COUNT</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">fetch_add</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">1</span><span class="z-punctuation">,</span><span class="z-entity z-name z-namespace z-entity z-name"> Ordering</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-type">Relaxed</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-entity z-name z-function">        TrackedFr</span><span class="z-punctuation">(</span><span class="z-variable z-language z-variable">self</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-constant z-numeric z-constant">0</span><span class="z-keyword z-keyword z-operator"> *</span><span class="z-variable z-other"> rhs</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-punctuation">    }</span></span>
+<span class="giallo-l"><span class="z-punctuation">}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">//</span><span class="z-comment"> Owned * borrowed</span></span>
+<span class="giallo-l"><span class="z-keyword">impl</span><span class="z-punctuation">&lt;</span><span class="z-punctuation">&#39;</span><span class="z-entity z-name z-type">a</span><span class="z-punctuation">&gt;</span><span class="z-entity z-name z-type"> Mul</span><span class="z-punctuation">&lt;</span><span class="z-keyword z-keyword z-operator">&amp;</span><span class="z-punctuation">&#39;</span><span class="z-entity z-name z-type">a</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation">&gt;</span><span class="z-keyword z-keyword z-control"> for</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-storage z-type">    type</span><span class="z-entity z-name z-type"> Output</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-keyword">    fn</span><span class="z-entity z-name z-entity z-name z-function"> mul</span><span class="z-punctuation">(</span><span class="z-variable z-language z-variable">self</span><span class="z-punctuation">,</span><span class="z-variable z-other"> rhs</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-keyword z-keyword z-operator"> &amp;</span><span class="z-punctuation">&#39;</span><span class="z-entity z-name z-type">a</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> -&gt;</span><span class="z-variable z-language z-variable"> Self</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-type">Output</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-constant">        MULT_COUNT</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">fetch_add</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">1</span><span class="z-punctuation">,</span><span class="z-entity z-name z-namespace z-entity z-name"> Ordering</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-type">Relaxed</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-entity z-name z-function">        TrackedFr</span><span class="z-punctuation">(</span><span class="z-variable z-language z-variable">self</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-constant z-numeric z-constant">0</span><span class="z-keyword z-keyword z-operator"> *</span><span class="z-variable z-other"> rhs</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-punctuation">    }</span></span>
+<span class="giallo-l"><span class="z-punctuation">}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">//</span><span class="z-comment"> Borrowed * owned</span></span>
+<span class="giallo-l"><span class="z-keyword">impl</span><span class="z-entity z-name z-type"> Mul</span><span class="z-punctuation">&lt;</span><span class="z-entity z-name z-type">TrackedFr</span><span class="z-punctuation">&gt;</span><span class="z-keyword z-keyword z-control"> for</span><span class="z-keyword z-keyword z-operator"> &amp;</span><span class="z-entity z-name z-type">TrackedFr</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-storage z-type">    type</span><span class="z-entity z-name z-type"> Output</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">    fn</span><span class="z-entity z-name z-entity z-name z-function"> mul</span><span class="z-punctuation">(</span><span class="z-variable z-language z-variable">self</span><span class="z-punctuation">,</span><span class="z-variable z-other"> rhs</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> -&gt;</span><span class="z-variable z-language z-variable"> Self</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-type">Output</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-constant">        MULT_COUNT</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">fetch_add</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">1</span><span class="z-punctuation">,</span><span class="z-entity z-name z-namespace z-entity z-name"> Ordering</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-type">Relaxed</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-entity z-name z-function">        TrackedFr</span><span class="z-punctuation">(</span><span class="z-variable z-language z-variable">self</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-constant z-numeric z-constant">0</span><span class="z-keyword z-keyword z-operator"> *</span><span class="z-variable z-other"> rhs</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-punctuation">    }</span></span>
+<span class="giallo-l"><span class="z-punctuation">}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation">#</span><span class="z-punctuation">[</span><span>allow</span><span class="z-punctuation">(</span><span>clippy</span><span class="z-keyword z-keyword z-operator">::</span><span>needless_lifetimes</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span></span>
+<span class="giallo-l"><span class="z-keyword">impl</span><span class="z-punctuation">&lt;</span><span class="z-punctuation">&#39;</span><span class="z-entity z-name z-type">a</span><span class="z-punctuation">,</span><span class="z-punctuation"> &#39;</span><span class="z-entity z-name z-type">b</span><span class="z-punctuation">&gt;</span><span class="z-entity z-name z-type"> Mul</span><span class="z-punctuation">&lt;</span><span class="z-keyword z-keyword z-operator">&amp;</span><span class="z-punctuation">&#39;</span><span class="z-entity z-name z-type">b</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation">&gt;</span><span class="z-keyword z-keyword z-control"> for</span><span class="z-keyword z-keyword z-operator"> &amp;</span><span class="z-punctuation">&#39;</span><span class="z-entity z-name z-type">a</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-storage z-type">    type</span><span class="z-entity z-name z-type"> Output</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-keyword">    fn</span><span class="z-entity z-name z-entity z-name z-function"> mul</span><span class="z-punctuation">(</span><span class="z-variable z-language z-variable">self</span><span class="z-punctuation">,</span><span class="z-variable z-other"> rhs</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-keyword z-keyword z-operator"> &amp;</span><span class="z-punctuation">&#39;</span><span class="z-entity z-name z-type">b</span><span class="z-entity z-name z-type"> TrackedFr</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> -&gt;</span><span class="z-variable z-language z-variable"> Self</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-type">Output</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-constant">        MULT_COUNT</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-entity z-name z-entity z-name z-function">fetch_add</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">1</span><span class="z-punctuation">,</span><span class="z-entity z-name z-namespace z-entity z-name"> Ordering</span><span class="z-keyword z-keyword z-operator">::</span><span class="z-entity z-name z-type">Relaxed</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span class="z-entity z-name z-entity z-name z-function">        TrackedFr</span><span class="z-punctuation">(</span><span class="z-variable z-language z-variable">self</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-constant z-numeric z-constant">0</span><span class="z-keyword z-keyword z-operator"> *</span><span class="z-variable z-other"> rhs</span><span class="z-keyword z-keyword z-operator">.</span><span class="z-constant z-numeric z-constant">0</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-punctuation">    }</span></span>
+<span class="giallo-l"><span class="z-punctuation">}</span></span>
+<span class="giallo-l"></span></code></pre>
+  </div>
+
+  
+
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const toggle = document.getElementById('theme-toggle');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (theme === 'dark') {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        } else {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        }
+      }
+
+      const saved = localStorage.getItem('theme');
+      if (saved) {
+        setTheme(saved);
+      } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+
+      toggle.addEventListener('click', function() {
+        const current = html.getAttribute('data-theme');
+        setTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+  </script>
+    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+          macros: {
+            "\\field": "\\mathbb{#1}",
+            "\\hei": "\\mathbb{F}(#1)",
+            "\\Field": "\\mathbb{F}",
+            "\\Mont": "\\widetilde{#1}",
+            "\\samples": "\\xleftarrow{\\$}",
+            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
+            "\\TauConstraints": "\\tau_y",
+            "\\TauTime": "\\tau_{\\text{cycle}}",
+            "\\TauGroup": "\\tau_b",
+            "\\MLE": "\\widetilde{#1}",
+            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
+            "\\Def": ":=",
+            "\\ChallengeSet": "\\mathsf{C}"
+
+          },
+            throwOnError: false,
+          trust: true
+
+        });
+    });
+</script>
+
+
+</body>
+</html>

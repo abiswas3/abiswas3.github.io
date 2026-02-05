@@ -1,313 +1,289 @@
 <!DOCTYPE html>
-
-<html lang="en">
-
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light dark">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seeker: Real-Time Interactive Search | onATangent</title>
+  <link rel="stylesheet" href="http://onATangent.xyz/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css" media="(prefers-color-scheme: dark)">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css" media="(prefers-color-scheme: light)">
   
-<meta
-  name="description"
-  content="true"
-/>
-
-  <title>Seeker: Real-Time Interactive Search</title>
-  <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon-16x16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="/katex.css">
+  <script defer src="/katex.min.js"></script>
+  <script defer src="/auto-render.min.js"></script>
+  <script defer src="/katex-init.js"></script>
   
-  <style>
-  /* ------------------ Light Mode ------------------ */
-  body {
-    --primary-color: #4f6cb8; /* main accent */
-    --primary-pale-color: #4f6cb822; /* subtle accent */
-    --primary-decoration-color: #4f6cb811; /* very subtle */
-    --bg-color: #ffffff;
-    --text-color: #1f1f1f;
-    --text-pale-color: #6b6b6b;
-    --text-decoration-color: #b0b0b0;
-    --highlight-mark-color: #a1b0db20;
-
-    --callout-note-color: #4f6cb8; /* blue */
-    --callout-tip-color: #2e8555; /* green */
-    --callout-important-color: #8c4fc9; /* purple */
-    --callout-warning-color: #c27b3f; /* orange */
-    --callout-caution-color: #c64e4e; /* red */
-  }
-
-  /* ------------------ Dark Mode ------------------ */
-  body.dark {
-    --primary-color: #7a92db;
-    --primary-pale-color: #7a92db44;
-    --primary-decoration-color: #7a92db11;
-    --bg-color: #1c1c1c;
-    --text-color: #e0e0e0;
-    --text-pale-color: #8a8a8a;
-    --text-decoration-color: #5f5f5f;
-    --highlight-mark-color: #7a92db33;
-
-    --callout-note-color: #7a92db; /* lighter blue */
-    --callout-tip-color: #52a077; /* lighter green */
-    --callout-important-color: #a378db; /* lighter purple */
-    --callout-warning-color: #d89d68; /* softer orange */
-    --callout-caution-color: #e37474; /* lighter red */
-  }
-
-  /* ------------------ Fonts & Layout ------------------ */
-  body {
-    /* --main-font: "Lora", "Courier", monospace; */
-    --main-font: sans-serif;
-    /* --main-font: Georgia, "Palatino Linotype", Palatino, "Book Antiqua", serif; */
-    /* --font-weight: 450; */
-    --code-font:
-      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-      "Courier New", monospace;
-    --homepage-max-width: 768px;
-    --main-max-width: 768px;
-    --avatar-size: 60px;
-    --font-size: 17px;
-    --line-height: 2;
-    --img-border-radius: 0px;
-    --detail-border-radius: 0px;
-    --dark-mode-img-brightness: 0.75;
-    --dark-mode-chart-brightness: 0.75;
-    --inline-code-border-radius: 2px;
-    --inline-code-bg-color: var(--primary-decoration-color);
-    --block-code-border-radius: 5px;
-    --block-code-border-color: var(--primary-color);
-    --detail-border-color: var(--primary-color);
-  }
-
-  /* ------------------ Theorem / Lemma / Definition Blocks ------------------ */
-  blockquote.theorem {
-    border-left: 4px solid var(--callout-note-color);
-    background: #f2f7ff;
-    padding: 0.75rem 1rem;
-    margin: 1rem 0;
-    border-radius: 0.5rem;
-  }
-
-  blockquote.theorem.lemma {
-    border-color: var(--callout-tip-color);
-    background: #edf9f2;
-  }
-
-  blockquote.theorem.definition {
-    border-color: var(--callout-warning-color);
-    background: #fff8eb;
-  }
-
-  blockquote.theorem.important {
-    border-color: var(--callout-important-color);
-    background: #f6f0ff;
-  }
-
-  blockquote.theorem.caution {
-    border-color: var(--callout-caution-color);
-    background: #ffecec;
-  }
-
-  blockquote.theorem .title {
-    font-weight: 600;
-    margin-bottom: 0.35rem;
-    color: var(--text-color);
-  }
-
-  blockquote.theorem .content {
-    margin: 0;
-    color: var(--text-color);
-  }
-
-  /* Dark mode overrides for theorem blocks */
-  body.dark blockquote.theorem {
-    background: #22293b;
-    border-left-color: var(--callout-note-color);
-  }
-
-  body.dark blockquote.theorem.lemma {
-    background: #1d2d22;
-    border-left-color: var(--callout-tip-color);
-  }
-
-  body.dark blockquote.theorem.definition {
-    background: #2f1e0f;
-    border-left-color: var(--callout-warning-color);
-  }
-
-  body.dark blockquote.theorem.important {
-    background: #2a1f33;
-    border-left-color: var(--callout-important-color);
-  }
-
-  body.dark blockquote.theorem.caution {
-    background: #3c1f1f;
-    border-left-color: var(--callout-caution-color);
-  }
-  #theme-toggle {
-    all: unset; /* removes all inherited and default styles */
-    display: inline; /* or block, if you want */
-    /* background-color: var(--bg-color); */
-  }
-</style>
-
-  <link rel="stylesheet" href="/main.css">
-    
   
 </head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="http://onATangent.xyz">Home</a>
+      </div>
 
-<body class="post">
-  
-  <script>
-    const theme = sessionStorage.getItem('theme');
-    const match = window.matchMedia("(prefers-color-scheme: dark)").matches
-    if ((theme && theme == 'dark') || (!theme && match)) {
-      document.body.classList.add('dark');
-      const hl = document.querySelector('link#hl');
-      if (hl) hl.href = '/hl-dark.css';
-    }
-  </script>
-  
-  
-<div id="wrapper">
-  <main class="layout-single-publication">
-    
-<header>
-  <nav>
-    <a id="back-link" href="&#x2F;publications">← Back</a>
-    <a id="back-link" href="/">Home</a>
-    
-    
+      <div class="nav-right">
+        <a href="http://onATangent.xyz/blog/">Notes</a>
+        <a href="http://onATangent.xyz/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+        <a href="http://onATangent.xyz/publications/">Research</a>
+        <a href="http://onATangent.xyz/misc/">Random</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <span class="icon-sun">&#9788;</span>
+          <span class="icon-moon">&#9790;</span>
+        </button>
 
-    <button id="theme-toggle" aria-label="theme switch">
-    <span class="moon-icon">🌙</span>
-     <span class="sun-icon">🌞</span>
-    </button>
-
+      </div>
+    </div>
   </nav>
-</header>
-
-    <article class="prose publication-single">
-      <!-- Title -->
-      <h1>Seeker: Real-Time Interactive Search</h1>
-
-      <!-- Venue -->
-      
-      <div class="pub-venue-ind">
-        
-        <h3 style="display:inline; margin:0;">Venue: </h3>
-        <a href="https:&#x2F;&#x2F;www.kdd.org&#x2F;kdd2019&#x2F;">KDD 2019</a>
-               
-      </div>
-      
-
-      
-
-      <!-- Authors -->
-      
-      <h3 style="display:inline; margin:0;">Authors: </h3>
-      <ul class="pub-authors-ind">
-        
-        <li>
-          
-          <span class="primary"><a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a></span>
-          
-        </li>
-        
-        <li>
-          
-          <a href="https:&#x2F;&#x2F;pages.cs.wisc.edu&#x2F;~hous21&#x2F;">Houssam Nassif</a>
-          
-        </li>
-        
-        <li>
-          
-          <a href="https:&#x2F;&#x2F;scholar.google.com&#x2F;citations?user=tJzykd0AAAAJ&amp;hl=en">Thai Pham</a>
-          
-        </li>
-        
-        <li>
-          
-          <span class="primary"><a href="https:&#x2F;&#x2F;www.google.com&#x2F;url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;ben-snyder-3b777b10&amp;ved=2ahUKEwjR-unUl8WRAxWnQEEAHS3zCbMQFnoECBkQAQ&amp;usg=AOvVaw02N1uPxPyS0WZ92VwRbTbq">Benjamin Snyder</a></span>
-          
-        </li>
-        
-        <li>
-          
-          <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;michael-vogelsong-524b2080&#x2F;">Michael Vogelsong</a>
-          
-        </li>
-        
-      </ul>
-      
-
-      <!-- Artefacts -->
-      
-      <div class="pub-artefacts">
-
-      <h3 style="display:inline; margin:0;">Artefacts: </h3>
-        
-        <a href="https:&#x2F;&#x2F;dl.acm.org&#x2F;doi&#x2F;10.1145&#x2F;3292500.3330733">Conference Paper</a>
-        
-      </div>
-      
-
-
-            <!-- Body content -->
-       
-
-<blockquote class="theorem box">
   
-  <div class="content"><p>Long back when machine learning or AI was not as pervasive in our lives, Ben Snyder came up with the idea of real-time adaptive UX's.
+  <main class="content">
+    
+<article class="post pub-page">
+  <header class="post-header">
+    <h1>Seeker: Real-Time Interactive Search</h1>
+    <div class="post-meta">
+      
+      <a href="https:&#x2F;&#x2F;www.kdd.org&#x2F;kdd2019&#x2F;" class="pub-venue-link">KDD 2019</a>
+      
+      <time>2019-08-01</time>
+    </div>
+    
+    <div class="pub-authors pub-authors-page">
+      <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;"
+         class="author-primary">
+        Ari Biswas
+      </a>, <a href="https:&#x2F;&#x2F;pages.cs.wisc.edu&#x2F;~hous21&#x2F;"
+         >
+        Houssam Nassif
+      </a>, <a href="https:&#x2F;&#x2F;scholar.google.com&#x2F;citations?user=tJzykd0AAAAJ&amp;hl=en"
+         >
+        Thai Pham
+      </a>, <a href="https:&#x2F;&#x2F;www.google.com&#x2F;url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;ben-snyder-3b777b10&amp;ved=2ahUKEwjR-unUl8WRAxWnQEEAHS3zCbMQFnoECBkQAQ&amp;usg=AOvVaw02N1uPxPyS0WZ92VwRbTbq"
+         class="author-primary">
+        Benjamin Snyder
+      </a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;michael-vogelsong-524b2080&#x2F;"
+         >
+        Michael Vogelsong
+      </a>
+    </div>
+    
+    
+    <div class="pub-artefacts">
+      
+      <a href="https:&#x2F;&#x2F;dl.acm.org&#x2F;doi&#x2F;10.1145&#x2F;3292500.3330733" class="pub-artefact">Conference Paper</a>
+      
+    </div>
+    
+    
+  </header>
+
+  <div class="post-content">
+    <div class="callout callout-box">
+  
+  <p>Long back when machine learning or AI was not as pervasive in our lives, Ben Snyder came up with the idea of real-time adaptive UX's.
 The premise was simple -- people are often not able to describe in words what they are looking for, but if they were to be shown something that looked similar or dissimilar to their item of choice; then that decision was cognitively much simpler.
 In the summer of 2017, while interning at Amazon, we worked on this simple idea of implementing real time thompson sampling for large datasets.
-The algorithm subsequently made itself into production, under the name <a rel="nofollow noreferrer" href="https://www.amazon.com/discover">Shop By Look</a>.
-Here's some media <a rel="nofollow noreferrer" href="https://www.bizjournals.com/boston/news/2018/09/19/wayfair-stock-drops-after-amazon-unveils-furniture.html">coverage</a>.
+The algorithm subsequently made itself into production, under the name <a rel="external" href="https://www.amazon.com/discover">Shop By Look</a>.
+Here's some media <a rel="external" href="https://www.bizjournals.com/boston/news/2018/09/19/wayfair-stock-drops-after-amazon-unveils-furniture.html">coverage</a>.
 I greatly benefited from the success of this algorithm personally, but I am forever indebted to Ben for identifying, and formulating this problem.</p>
+
 </div>
-</blockquote>
 <h2 id="abstract">Abstract</h2>
 <p>This paper introduces Seeker, a system that allows users to interactively refine search rankings in real time, through feedback in the form of likes and dislikes. When searching online, users may not know how to accurately describe their product of choice in words. An alternative approach is to search an embedding space, allowing the user to query using a representation of the item (like a tune for a song, or a picture for an object). However, this approach requires the user to possess an example representation of their desired item. Additionally, most current search systems do not allow the user to dynamically adapt the results with further feedback. On the other hand, users often have a mental picture of the desired item and are able to answer ordinal questions of the form: Is this item similar to what you have in mind? With this assumption, our algorithm allows for users to provide sequential feedback on search results to adapt the search feed. We show that our proposed approach works well both qualitatively and quantitatively. Unlike most previous representation-based search systems, we can quantify the quality of our algorithm by evaluating humans-in-the-loop experiments.</p>
 
-
-      
-
-    </article>
-
-    
-
-
-<footer>
-  <div class="left">
-    <div class="copyright">
-      © 2025 Ari
-      
-    </div>
   </div>
-
-  <div class="right">
-    
-
-    <!--  -->
-    <!--  -->
-    <!--  -->
-    <!-- <button id="theme-toggle" aria-label="theme switch"> -->
-    <!--   <span class="moon-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3945 15.9187 17.7035 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29648 8.08133 5.60547 8.2379 4.938C5.71611 6.28423 4 8.9417 4 12Z" fill="currentColor"></path></svg>
-</span> -->
-    <!--   <span class="sun-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 20.4853L3.51472 19.0711L5.63604 16.9497ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z" fill="currentColor"></path></svg>
-</span> -->
-    <!-- </button> -->
-    <!--  -->
-  </div>
-</footer>
-
-
-
-  </main>
-</div>
 
   
-  <script src="/js/main.js"></script>
-</body>
+</article>
 
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const toggle = document.getElementById('theme-toggle');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (theme === 'dark') {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        } else {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        }
+      }
+
+      const saved = localStorage.getItem('theme');
+      if (saved) {
+        setTheme(saved);
+      } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+
+      toggle.addEventListener('click', function() {
+        const current = html.getAttribute('data-theme');
+        setTheme(current === 'dark' ? 'light' : 'dark');
+      });
+    })();
+  </script>
+    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+          macros: {
+            "\\field": "\\mathbb{#1}",
+            "\\hei": "\\mathbb{F}(#1)",
+            "\\Field": "\\mathbb{F}",
+            "\\Mont": "\\widetilde{#1}",
+            "\\samples": "\\xleftarrow{\\$}",
+            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
+            "\\TauConstraints": "\\tau_y",
+            "\\TauTime": "\\tau_{\\text{cycle}}",
+            "\\TauGroup": "\\tau_b",
+            "\\MLE": "\\widetilde{#1}",
+            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
+            "\\Def": ":=",
+            "\\ChallengeSet": "\\mathsf{C}"
+
+          },
+            throwOnError: false,
+          trust: true
+
+        });
+    });
+</script>
+
+
+</body>
 </html>
