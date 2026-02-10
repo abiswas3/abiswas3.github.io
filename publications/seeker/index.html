@@ -5,7 +5,7 @@
     (function() {
       var theme = localStorage.getItem('theme');
       if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+        theme = 'bw-light';
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -32,15 +32,15 @@
       </div>
 
       <div class="nav-right">
-        <a href="/blog/">Notes</a>
         <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
         <a href="/misc/">Random</a>
-        <select class="theme-select" id="theme-select" aria-label="Select theme">
-          <option value="gruvbox-dark">Gruvbox Dark</option>
-          <option value="tokyo-night">Tokyo Night</option>
-          <option value="vitesse-dark">Vitesse Dark</option>
-          <option value="rose-pine-dawn">Rosé Pine Dawn</option>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
           <option value="bw-light">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
         </select>
         <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
@@ -92,7 +92,7 @@
   </header>
 
   <div class="post-content">
-    <div class="callout callout-box">
+    <div class="callout callout-box thm-box">
   
   <p>Long back when machine learning or AI was not as pervasive in our lives, Ben Snyder came up with the idea of real-time adaptive UX's.
 The premise was simple -- people are often not able to describe in words what they are looking for, but if they were to be shown something that looked similar or dissimilar to their item of choice; then that decision was cognitively much simpler.

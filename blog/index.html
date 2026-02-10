@@ -5,7 +5,7 @@
     (function() {
       var theme = localStorage.getItem('theme');
       if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+        theme = 'bw-light';
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -32,15 +32,15 @@
       </div>
 
       <div class="nav-right">
-        <a href="/blog/">Notes</a>
         <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
         <a href="/misc/">Random</a>
-        <select class="theme-select" id="theme-select" aria-label="Select theme">
-          <option value="gruvbox-dark">Gruvbox Dark</option>
-          <option value="tokyo-night">Tokyo Night</option>
-          <option value="vitesse-dark">Vitesse Dark</option>
-          <option value="rose-pine-dawn">Rosé Pine Dawn</option>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
           <option value="bw-light">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
         </select>
         <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
@@ -120,15 +120,17 @@
   
 
 
-<section class="section" data-default-layout="minimal">
+<section class="section" data-default-layout="minimal" data-layout-key="notes">
   <div class="section-header">
     
     <h1>Notes</h1>
     
     <select class="layout-select" id="layout-select" aria-label="Select layout">
-      <option value="masonry">Masonry</option>
-      <option value="list">List</option>
-      <option value="minimal">Minimal</option>
+      
+        <option value="masonry">Masonry</option>
+        <option value="list">List</option>
+        <option value="minimal">Minimal</option>
+      
     </select>
   </div>
   
@@ -136,7 +138,12 @@
   
 
   
+
+  
   <p class="stale-legend"><span class="stale-mark"></span> Not recently updated. Links may have broken since the website was moved.</p>
+  
+
+  
   
 
   
@@ -150,16 +157,16 @@
       
       
     
-    <a href="&#x2F;blog&#x2F;error&#x2F;" class="card">
-      <h2 class="card-title">Bug Report: Jolt Bytecode Expansion</h2>
+    <a href="&#x2F;blog&#x2F;stage-1-sumchec&#x2F;" class="card">
+      <h2 class="card-title">Stage 1 Sumcheck</h2>
       
       <div class="card-meta">
-        <span>Ari</span>
-        <time>2026-02-02</time>
+        
+        <time>2026-02-06</time>
       </div>
       
       <div class="card-tags">
-        <span class="tag">jolt</span><span class="tag">front-end</span>
+        <span class="tag">one</span><span class="tag">two</span>
       </div>
       
     </a>
@@ -330,17 +337,17 @@
     
     <li>
       <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;error&#x2F;">Bug Report: Jolt Bytecode Expansion</a>
+        <a href="&#x2F;blog&#x2F;stage-1-sumchec&#x2F;">Stage 1 Sumcheck</a>
         
         
         <div class="post-list-tags">
-          <span class="tag">jolt</span><span class="tag">front-end</span>
+          <span class="tag">one</span><span class="tag">two</span>
         </div>
         
       </div>
       <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-02-02</time>
+        
+        <time>2026-02-06</time>
       </div>
     </li>
     
@@ -521,8 +528,8 @@
       
     
     <li>
-      <a href="&#x2F;blog&#x2F;error&#x2F;">Bug Report: Jolt Bytecode Expansion</a>
-      <time>2026-02-02</time>
+      <a href="&#x2F;blog&#x2F;stage-1-sumchec&#x2F;">Stage 1 Sumcheck</a>
+      <time>2026-02-06</time>
     </li>
     
     
@@ -634,15 +641,17 @@
   var views = section.querySelectorAll('.layout-view');
   var defaultLayout = section.getAttribute('data-default-layout');
 
+  var layoutKey = 'layout-' + (section.getAttribute('data-layout-key') || 'section');
+
   function setLayout(layout) {
     views.forEach(function(v) {
       v.style.display = v.getAttribute('data-layout') === layout ? '' : 'none';
     });
-    localStorage.setItem('blog-layout', layout);
+    localStorage.setItem(layoutKey, layout);
     select.value = layout;
   }
 
-  var saved = localStorage.getItem('blog-layout');
+  var saved = localStorage.getItem(layoutKey);
   setLayout(saved || defaultLayout);
 
   select.addEventListener('change', function() {

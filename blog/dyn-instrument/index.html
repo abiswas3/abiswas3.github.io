@@ -5,7 +5,7 @@
     (function() {
       var theme = localStorage.getItem('theme');
       if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+        theme = 'bw-light';
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -32,15 +32,15 @@
       </div>
 
       <div class="nav-right">
-        <a href="/blog/">Notes</a>
         <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
         <a href="/misc/">Random</a>
-        <select class="theme-select" id="theme-select" aria-label="Select theme">
-          <option value="gruvbox-dark">Gruvbox Dark</option>
-          <option value="tokyo-night">Tokyo Night</option>
-          <option value="vitesse-dark">Vitesse Dark</option>
-          <option value="rose-pine-dawn">Rosé Pine Dawn</option>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
           <option value="bw-light">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
         </select>
         <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
@@ -88,7 +88,7 @@
   
 
   <div class="post-content">
-    <div class="callout callout-box">
+    <div class="callout callout-box thm-box">
   
   <p><strong>UPDATE (2025-06-01)</strong> This post is still relevant as a tutorial for how to use dynamic binary instrumentation to analyse why code is slow -- and is still reproducible using the methods described here.
 More information about the exact details of Montgomery multiplication has been uncovered, and the discussion can be found <a href="why-jolt-breaks.html">here</a>, where we discuss in detail why we often draw different conclusions from benchmarking the same source of code.</p>
@@ -130,7 +130,7 @@ For the interested reader, <a rel="external" href="https://eprint.iacr.org/2017/
 <p>These are the operations that the algorithms need. When running code on an actual CPU, there are other instructional overheads -- OS code, memory freeing etc.</p>
 </div>
 <p>More complex operations just use the above instructions as building blocks.</p>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <p>A critical factor for understanding performance is that these operations are not equal.
 For example, on Skylake (mid-level x86 processor)</p>
@@ -149,7 +149,7 @@ For example, on Skylake (mid-level x86 processor)</p>
 
 </div>
 <p>Now given the above constraints, one would imagine that minimising the number of multiplication operations would be the answer to implementing faster algorithms.</p>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <p>Surprisingly, this was not what we see in actual experiments.
 The remainder of this document tries to understand why?</p>
@@ -179,7 +179,7 @@ Similarly, the stripped down code needed to compute the Montgomery product with 
 <p>The only change we made was we <a rel="external" href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/4420b0c9702ca237cb93fc21338575ae855be34b/src/world_coin_single.rs#L20">unrolled</a> for <code>addv</code> helper method for $n=4$.
 This only sped things up.</p>
 </div>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <p>This entire write-up focuses on $n=4$.
 It is entirely possible that for larger values of $n$, the miscellaneous overheads we are about to discuss below will be outdone by the gains from fewer multiplications.</p>
@@ -307,7 +307,7 @@ We make 74 64-bit read/write operations and 6 128-bit/read write operations.</p>
 <pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks#</span><span class="z-string"> cat</span><span class="z-string"> yuval</span><span class="z-keyword z-keyword z-operator">|</span><span class="z-entity z-name">grep</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-punctuation z-definition z-string z-punctuation"> &#39;</span><span class="z-string">[a-z0-9]\+ ptr</span><span class="z-punctuation z-definition z-string z-punctuation">&#39;</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> sort</span><span class="z-keyword z-keyword z-operator">|</span><span class="z-entity z-name">uniq</span><span class="z-constant"> -</span><span class="z-constant">c</span></span>
 <span class="giallo-l"><span class="z-entity z-name">      2</span><span class="z-string"> byte</span><span class="z-string"> ptr</span></span>
 <span class="giallo-l"><span class="z-entity z-name">     74</span><span class="z-string"> qword</span><span class="z-string"> ptr</span></span>
-<span class="giallo-l"><span class="z-entity z-name">      6</span><span class="z-string"> xmmword</span><span class="z-string"> ptr</span></span></code></pre><div class="callout callout-box">
+<span class="giallo-l"><span class="z-entity z-name">      6</span><span class="z-string"> xmmword</span><span class="z-string"> ptr</span></span></code></pre><div class="callout callout-box thm-box">
   
   <p>So it seems that the gains from having fewer multiplications is being drowned out by the heavier read/write operations, and the greater number of assembly instructions.
 Note that this does not imply that the new algorithm could not be faster for even $n=4$.
@@ -318,7 +318,7 @@ It just means that the way the Rust compiler is building the current binary is n
 One potential way to see the promised speedup is to write optimised assembly code directly.
 We defer investigating whether this is possible to future work.</p>
 <h2 id="how-to-replicate-the-process">How To Replicate The Process</h2>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <p><strong>Update: 2025-05-27</strong>: Since this blog was published we've cleaned up the benchmarking code. The names of functions are no longer called <code>scalar_mul</code>, but the analysis below will still work with if we replace <code>scalar_mul*</code> with the correct function names.</p>
 
@@ -328,13 +328,13 @@ To extract assembly we use techniques inspired by the field of <a rel="external"
 At a high level, when we run <code>cargo run</code>, just before an instruction in our code is physically executed on the CPU, the <a rel="external" href="https://software.intel.com/sites/landingpage/pintool/downloads/pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz">pin tool</a> provided by Intel interjects, and allows us to run pre and post instrumentation code.
 We modified <a href="/blog_assets/mont_mult/code/itrace.cpp">the instrumentation</a> code to simply log the assembly instructions to a file called <code>itrace.out</code> just before they are executed.
 Thus, the files above not only describe assembly instructions associated with each algorithm, but they are are listed in time order of execution.</p>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <p>This is often strictly more powerful than <code>cargo-asm</code> which just dumps the assembly associated with a function label. If this function has conditional branches, we do not know without feeding real inputs and running the code, how often these branches will be taken.
 Your CPU tries to predict branch outcomes as an optimisation. So in a way this linear trace of everything that happened can offer more insight than just dumping the assembly associated with a method header using <code>cargo asm</code></p>
 
 </div>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <p>Given that we use the above tool, our techniques only apply when executing programs on Intel CPU's.
 This dynamic technique for extracting assembly instructions by running the binary would not apply to a M series Mac on apple silicon.
@@ -405,7 +405,7 @@ Likewise, the opt::scalar_mul routine is contained at <code>0x5e4052170000</code
 <p>So if we want to dump a copy of a run of the yuval scalar_mul, we simply print from <code>0x5e4052170000</code>+<code>0x4b7d0</code>=<code>0x5e40521bb7d0</code> to the corresponding ret instruction:</p>
 <pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cat</span><span class="z-string"> itrace.out</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> sed</span><span class="z-constant"> -</span><span class="z-constant">n</span><span class="z-punctuation z-definition z-string z-punctuation"> &#39;</span><span class="z-string">/^0x5e40521bb7d0/,/ret/{p;/ret/q}</span><span class="z-punctuation z-definition z-string z-punctuation">&#39;</span><span class="z-keyword z-keyword z-operator"> &gt;</span><span class="z-string"> yuval.disas</span></span></code></pre>
 <p>and similarly</p>
-<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cat</span><span class="z-string"> itrace.out</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> sed</span><span class="z-constant"> -</span><span class="z-constant">n</span><span class="z-punctuation z-definition z-string z-punctuation"> &#39;</span><span class="z-string">/^0x5e40521bb3a0/,/ret/{p;/ret/q}</span><span class="z-punctuation z-definition z-string z-punctuation">&#39;</span><span class="z-keyword z-keyword z-operator"> &gt;</span><span class="z-string"> opt.disas</span></span></code></pre><div class="callout callout-box">
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cat</span><span class="z-string"> itrace.out</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> sed</span><span class="z-constant"> -</span><span class="z-constant">n</span><span class="z-punctuation z-definition z-string z-punctuation"> &#39;</span><span class="z-string">/^0x5e40521bb3a0/,/ret/{p;/ret/q}</span><span class="z-punctuation z-definition z-string z-punctuation">&#39;</span><span class="z-keyword z-keyword z-operator"> &gt;</span><span class="z-string"> opt.disas</span></span></code></pre><div class="callout callout-box thm-box">
   
   <p>The above sed script is a little bit facile, and works here because the functions of interest do not call anything established, as we asked the Rust compiler to inline the helpers.
 A more robust way to extract the assembly is to do the following:</p>

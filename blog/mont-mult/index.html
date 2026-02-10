@@ -5,7 +5,7 @@
     (function() {
       var theme = localStorage.getItem('theme');
       if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+        theme = 'bw-light';
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -32,15 +32,15 @@
       </div>
 
       <div class="nav-right">
-        <a href="/blog/">Notes</a>
         <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
         <a href="/misc/">Random</a>
-        <select class="theme-select" id="theme-select" aria-label="Select theme">
-          <option value="gruvbox-dark">Gruvbox Dark</option>
-          <option value="tokyo-night">Tokyo Night</option>
-          <option value="vitesse-dark">Vitesse Dark</option>
-          <option value="rose-pine-dawn">Rosé Pine Dawn</option>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
           <option value="bw-light">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
         </select>
         <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
@@ -245,7 +245,7 @@ This is exactly why, if the answer is greater than $p$, <strong>one</strong> sub
 We <strong>NEVER</strong> need more than one subtraction!</p>
 <h2 id="yuval-s-new-multiplication-algorithm">Yuval's New Multiplication Algorithm</h2>
 <p>The new algorithm is based on a subtle observation. Quoting the original <a rel="external" href="https://hackmd.io/@Ingonyama/Barret-Montgomery">blog</a>:</p>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <p>Per round of the Montgomery reduction, we previously computed $c_i\text{ }r^{-1} \mod p$ using $n+1$ digit multiplications. An alternative method to achieve this, using only
 $n$ digit multiplications, is by computing $\rho_1 = r^{-1}\mod p$.
@@ -392,7 +392,7 @@ If we tighten our analysis, $\rho_1$ and $\rho_2$ are fixed. The largest value f
 Plugging in exact numbers</p>
 <p>$$cr^{-4} &lt; \frac{p^2}{r^4} + (\rho_1 + \rho_2) + p &lt; 2.25p$$</p>
 <p>It turns out to be less than $3.25p$ for <code>s-mul</code></p>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <p>It's the <code>bn-254</code> prime modulus $p$ that allows us to do one subtraction less for <code>h-mul</code> and <code>s-mul</code> than what theory would suggest for any general prime $p$.
 If $p$ were only a little smaller than $r^n$, then we'd have to put in one extra reduction for each of these algorithms.</p>
@@ -475,7 +475,7 @@ Now the CPU cannot predict the branch, and this is much closer to the no-subtrac
 Of course, we still lose a bit as <code>h-mul</code> needs 2 subtractions and 2 checks as opposed to 1 -- hence we don't see the 11% speedup, but still see some speedup.</p>
 <p>In conclusion, something as innocuous as random inputs can lead to completely different conclusions about the real-world performance of code.</p>
 <h2 id="so-where-do-we-go-now">So Where Do We Go Now?</h2>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <p>At this point, where do we stand? We have a family of algorithms for Montgomery multiplication. If we are not bothered about reducing $\mod p$, then <code>s-mul</code> should be the fastest algorithm, owing to its maximal parallelism (allows maximal for out-of-order execution on the CPU).
 But we <em>need</em> the final answer to be less than $p$ for the rest of the Jolt setup to work.

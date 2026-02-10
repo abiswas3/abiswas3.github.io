@@ -5,7 +5,7 @@
     (function() {
       var theme = localStorage.getItem('theme');
       if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+        theme = 'bw-light';
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -32,15 +32,15 @@
       </div>
 
       <div class="nav-right">
-        <a href="/blog/">Notes</a>
         <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
         <a href="/misc/">Random</a>
-        <select class="theme-select" id="theme-select" aria-label="Select theme">
-          <option value="gruvbox-dark">Gruvbox Dark</option>
-          <option value="tokyo-night">Tokyo Night</option>
-          <option value="vitesse-dark">Vitesse Dark</option>
-          <option value="rose-pine-dawn">Rosé Pine Dawn</option>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
           <option value="bw-light">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
         </select>
         <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
@@ -58,13 +58,15 @@
     
     <a href="&#x2F;categories&#x2F;jolt&#x2F;" class="tag">jolt <span class="tag-count">3</span></a>
     
+    <a href="&#x2F;categories&#x2F;lean&#x2F;" class="tag">Lean <span class="tag-count">5</span></a>
+    
     <a href="&#x2F;categories&#x2F;life&#x2F;" class="tag">life <span class="tag-count">1</span></a>
     
     <a href="&#x2F;categories&#x2F;one&#x2F;" class="tag">one <span class="tag-count">1</span></a>
     
-    <a href="&#x2F;categories&#x2F;param&#x2F;" class="tag">param <span class="tag-count">3</span></a>
+    <a href="&#x2F;categories&#x2F;param&#x2F;" class="tag">param <span class="tag-count">4</span></a>
     
-    <a href="&#x2F;categories&#x2F;software&#x2F;" class="tag">software <span class="tag-count">1</span></a>
+    <a href="&#x2F;categories&#x2F;software&#x2F;" class="tag">Software <span class="tag-count">3</span></a>
     
   </div>
 </section>

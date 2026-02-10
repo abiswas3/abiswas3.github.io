@@ -5,7 +5,7 @@
     (function() {
       var theme = localStorage.getItem('theme');
       if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+        theme = 'bw-light';
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -32,15 +32,15 @@
       </div>
 
       <div class="nav-right">
-        <a href="/blog/">Notes</a>
         <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
         <a href="/misc/">Random</a>
-        <select class="theme-select" id="theme-select" aria-label="Select theme">
-          <option value="gruvbox-dark">Gruvbox Dark</option>
-          <option value="tokyo-night">Tokyo Night</option>
-          <option value="vitesse-dark">Vitesse Dark</option>
-          <option value="rose-pine-dawn">Rosé Pine Dawn</option>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
           <option value="bw-light">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
         </select>
         <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
@@ -144,7 +144,7 @@ For example, consider the following program with just two instructions.</p>
 <span class="giallo-l"></span></code></pre>
 <p>For the purposes of this post, this is the mental model we will have when referring to the trace.
 It is a giant vector of length $T$, and location $t \in [T]$ stores the machine state before and after the $t$'th instruction.</p>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <h3 id="a-lie-in-service-of-the-truth">A Lie In Service Of The Truth</h3>
 <p>Throughout this post we will assume that we can store the entire trace in memory, and iterating through the trace is free. This is clearly not true, and we will fix this at a later date.
@@ -248,7 +248,7 @@ Instead we store in memory, the following univariate polynomial, which is the pr
 <p>This takes $O(1)$ field elements worth of storage as there are only $10$ constraints per group.
 <a rel="external" href="https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L117">See</a> for the evaluation points that represent the above polynomial.
 We refer to these evaluations as the <code>skip_window</code> in the code.</p>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <p><strong>NOTE:</strong> This phase will remain exactly the same in the current "streaming" implementation as well.
 Remember we assumed streaming the trace was free, and storing $O(1)$ field elements for a univariate polynomial does not break anyone's memory bank.
@@ -365,7 +365,7 @@ t(\textcolor{pink}{X_b}) = \sum_{x_2, x_1 \in \{0,1\}^2 } t'(x_2, x_1, \textcolo
 $$
 </div>
 <p>This is what <code>fn compute_t_evals(&amp;self, window_size: usize) -&gt; (F, F)</code> computes.</p>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <p>Throughout this post when we write $\eq{\tau}{x}$, we assume its implemented using the Dao-Thaler split-eq optimisation. Thus the memory representation of the $\eq{}{}$ polynomials is never an issue.</p>
 

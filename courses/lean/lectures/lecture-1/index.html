@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = 'bw-light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lecture 1 | Random Walks</title>
+  <link rel="stylesheet" href="/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  
+  <link rel="stylesheet" href="/katex.css">
+  <script defer src="/katex.min.js"></script>
+  <script defer src="/auto-render.min.js"></script>
+  <script defer src="/katex-init.js"></script>
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="/">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
+        <a href="/misc/">Random</a>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
+          <option value="bw-light">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
+        </select>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+<article class="post">
+  <header class="post-header">
+    <h1>Lecture 1</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-02-07</time>
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/lean-notes/" class="tag">lean-notes</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <p>We start off with some Lean-specific definitions.</p>
+<div class="callout callout-definition thm-numbered">
+  
+  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> (Proposition)</span></div>
+  
+  <p>A <strong>proposition</strong> (<code>Prop</code>) is a statement that is either true or false.</p>
+
+</div>
+<div class="callout callout-definition thm-numbered">
+  
+  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> (Predicate)</span></div>
+  
+  <p>A <strong>predicate</strong> is a function that takes arguments and returns a <code>Prop</code>.</p>
+
+</div>
+<p><strong>Example</strong>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-comment">/--</span><span class="z-comment"> The sequence `u` of real numbers converges to `l`. </span><span class="z-comment">-/</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> SequenceHasLimit</span><span> (u : ℕ → ℝ) (l : ℝ) : </span><span class="z-storage z-type">Prop</span><span> :=</span></span>
+<span class="giallo-l"><span>  ∀ ε &gt; </span><span class="z-constant z-numeric z-constant">0</span><span>, ∃ N : ℕ, ∀ n ≥ N, |u n - l| &lt; ε</span></span></code></pre>
+<p>For example, <code>SequenceHasLimit</code> is a predicate of type <code>(ℕ → ℝ) → ℝ → Prop</code>.</p>
+<p>Partially applying it, <code>SequenceHasLimit u</code> is of type <code>ℝ → Prop</code> —
+it takes a real number <code>l</code> and returns the proposition that <code>u</code> converges to <code>l</code>.</p>
+<p>Only when all arguments are supplied do we get a <code>Prop</code>.
+That is, <code>SequenceHasLimit u x₀</code> is a <code>Prop</code> — it is the statement
+that the sequence <code>u</code> converges to <code>x₀</code>, defined as:</p>
+<p>$$\forall \varepsilon &gt; 0, \exists N \in \mathbb{N}, \forall n \geq N, |u_n - x_0| &lt; \varepsilon$$</p>
+<p>This statement may or may not have a proof, but it is a well-formed proposition.</p>
+<h3 id="a-note-curried-functions">A Note: Curried Functions</h3>
+<p>In Lean (and in type theory generally), multi-argument functions are curried by default, not tupled.
+So:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">#check</span><span> (add_complex_i : ℂ → ℂ)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> less_than_pi</span><span> (x : ℝ) : </span><span class="z-storage z-type">Prop</span><span> := x &lt; π</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">#check</span><span> less_than_pi</span></span>
+<span class="giallo-l"><span>-- ⊢ ℝ → </span><span class="z-storage z-type">Prop</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> less_than</span><span> (x y : ℝ) : </span><span class="z-storage z-type">Prop</span><span> :=</span></span>
+<span class="giallo-l"><span>  x &lt; y</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- ℝ → (ℝ → </span><span class="z-storage z-type">Prop</span><span>)</span></span>
+<span class="giallo-l"><span class="z-keyword">#check</span><span> (less_than)</span></span></code></pre>
+<p>The difference between these two signatures is:</p>
+<ul>
+<li><code>ℝ → ℝ → Prop</code> (curried) — takes one ℝ, returns a function <code>ℝ → Prop</code>. This is what Lean uses.</li>
+</ul>
+<h2 id="first-proof">First Proof</h2>
+<p>Now let us look at a slightly non-trivial first proof in Lean.
+We start off by defining what it means for a sequence to have a limit, and for a function to be continuous.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-comment">/--</span><span class="z-comment"> The sequence `u` of real numbers converges to `l`. </span><span class="z-comment">-/</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> SequenceHasLimit</span><span> (u : ℕ → ℝ) (l : ℝ) : </span><span class="z-storage z-type">Prop</span><span> :=</span></span>
+<span class="giallo-l"><span>  ∀ ε &gt; </span><span class="z-constant z-numeric z-constant">0</span><span>, ∃ N : ℕ, ∀ n ≥ N, |u n - l| &lt; ε</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-comment">/--</span><span class="z-comment"> The function `f : ℝ → ℝ` is continuous at `x₀`. </span><span class="z-comment">-/</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> ContinuousAtPoint</span><span> (f : ℝ → ℝ) (x₀ : ℝ) : </span><span class="z-storage z-type">Prop</span><span> :=</span></span>
+<span class="giallo-l"><span>  ∀ ε &gt; </span><span class="z-constant z-numeric z-constant">0</span><span>, ∃ δ &gt; </span><span class="z-constant z-numeric z-constant">0</span><span>, ∀ x, |x - x₀| &lt; δ →</span></span>
+<span class="giallo-l"><span>  |f (x) - f (x₀)| &lt; ε</span></span></code></pre>
+<p>Then we state our first lemma:</p>
+<div class="callout callout-lemma thm-numbered">
+  
+  <div class="thm-header"><span class="thm-label"></span></div>
+  
+  <p>If a sequence $u: \mathbb{N} \rightarrow \mathbb{R}$ converges to $x_0$, and a function $f: \mathbb{R} \rightarrow \mathbb{R}$ is continuous at $x_0$, <em>then</em> the sequence $f(u(n))$ converges to $f(x_0)$.</p>
+
+</div>
+<p>We first prove this theorem on "paper" like we are used to, but in a way that is directly (or almost directly) translatable to Lean.
+This will give us a mental model of how to think of proofs in Lean.
+The <code>unfold</code> commands just expand out the goals for better viewing.</p>
+<div class="callout callout-proof">
+  <div class="proof-header"><em>Proof.</em></div>
+  <p>For the sequence to converge we need
+$$\forall \varepsilon &gt; 0, \exists N \in \mathbb{N}, \forall n \geq N, |f(u(n)) - f(x_0)| &lt; \varepsilon$$</p>
+<p>This is our GOAL.
+The steps of the proof are as follows.</p>
+<ol>
+<li>Let $\varepsilon &gt; 0$ be arbitrary.  [Line 7]</li>
+<li>As $f$ is continuous at $x_0$, we get a $\delta &gt; 0$ such that $\forall x, |x - x_0| &lt; \delta \implies |f(x) - f(x_0)| &lt; \varepsilon$. [Line 12] uses $\varepsilon$ above for the definition of continuity (works as it's greater than 0), and stores as <code>f_prop</code> the proposition $\forall x \in \mathbb{R}, |x - x_0| &lt; \delta \implies |f(x) - f(x_0)| &lt; \varepsilon$.</li>
+<li>As $u$ converges to $x_0$, we obtain $N$ by passing $\delta &gt; 0$ as the value for $\varepsilon$ in the definition. We denote with <code>u_prop</code> the proposition that for all $n \geq N$, we have $|u(n) - x_0| &lt; \delta$. [Line 17]</li>
+<li>We pick this $N$ to be the $N$ in our goal. [Line 19]</li>
+<li>Let $m \ge N$ be arbitrary [Line 21]. Now <code>hn</code> stores the proposition that $|u(m) - x_0| &lt; \delta$ (after specialising to use the $m$ we introduced) [Line 22].</li>
+<li>Specialise <code>f_prop</code> with <code>u_prop</code> i.e. $x = u(m)$. As $|u(m) - x_0| &lt; \delta$, we get $|f(u(m)) - f(x_0)| &lt; \varepsilon$.</li>
+</ol>
+
+  <div class="qed">&#9634;</div>
+</div>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 1</span><span class="z-keyword">lemma</span><span class="z-entity z-name z-entity z-name z-function"> first_proof</span><span> (f : ℝ → ℝ) (u : ℕ → ℝ) (x₀ : ℝ)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 2</span><span>    (u_lim : SequenceHasLimit u x₀)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 3</span><span>    (f_cont : ContinuousAtPoint f x₀) :</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 4</span><span>    SequenceHasLimit (f ∘ u) (f x₀) := </span><span class="z-keyword">by</span><span> {</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 5</span><span>  unfold SequenceHasLimit</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 6</span><span>  -- Let ε &gt; </span><span class="z-constant z-numeric z-constant">0</span><span> be arbitrary</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 7</span><span>  intro (ε : ℝ) (hε : ε &gt; </span><span class="z-constant z-numeric z-constant">0</span><span>)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 8</span><span>  -- Since `f` is continuous, we can pick a `δ &gt; </span><span class="z-constant z-numeric z-constant">0</span><span>` such that</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 9</span><span>  -- </span><span class="z-keyword">for</span><span> all `x`, `|x - x₀| &lt; δ → |f(x) - f(x₀)| &lt; ε`.</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">10</span><span>  unfold ContinuousAtPoint at f_cont</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">11</span><span>  -- We want to invoke f_cont </span><span class="z-keyword">with</span><span> eps and </span><span class="z-keyword">by</span><span> assumption</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">12</span><span>  obtain ⟨δ, hδ, f_prop⟩ := f_cont ε (</span><span class="z-keyword">by</span><span> exact hε )</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">13</span><span>  -- obtain ⟨δ, hδ, f_prop⟩ := f_cont ε (</span><span class="z-keyword">by</span><span> assumption) -- also works </span><span class="z-keyword">if</span><span> we don&#39;t want to remember hε </span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">14</span><span>  -- Since `u` converges to `x₀`, we can pick a `N` such that</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">15</span><span>  -- </span><span class="z-keyword">for</span><span> all `n ≥ N`, `|u_n - x₀| &lt; δ`.</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">16</span><span>  unfold SequenceHasLimit at u_lim </span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">17</span><span>  obtain ⟨N, u_prop⟩ := u_lim δ hδ</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">18</span><span>  -- We pick this `N` to </span><span class="z-keyword">show</span><span> that `f ∘ u` has limit `f(x₀)`.</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">19</span><span>  use N</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">20</span><span>  -- If `n ≥ N` we </span><span class="z-keyword">have</span><span> `|u_n - x₀| &lt; δ`,</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">21</span><span>  intro m hn</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">22</span><span>  specialize u_prop m hn</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">23</span><span>  -- hence `|f(u_m) - f(x₀)| &lt; ε`.</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">24</span><span>  specialize f_prop (u m) u_prop</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">25</span><span>  -- This finishes the proof.</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">26</span><span>  exact f_prop  </span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">27</span><span>  }</span></span></code></pre><div class="callout callout-box thm-box">
+  
+  <p>Some comments:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>obtain ⟨δ, hδ, f_prop⟩ := f_cont ε hε</span></span></code></pre>
+<p>or if you wanted to be maximally explicit with by:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">have</span><span> hε&#39; : ε &gt; </span><span class="z-constant z-numeric z-constant">0</span><span> := </span><span class="z-keyword">by</span><span> exact hε</span></span>
+<span class="giallo-l"><span>obtain ⟨δ, hδ, f_prop⟩ := f_cont ε hε&#39;</span></span></code></pre>
+<p>The (by assumption) on Line 13 is just finding <code>hε : ε &gt; 0</code> from the context automatically.
+Since you already have <code>hε</code> in scope, you can pass it directly as a term — no tactic needed at all.
+The <code>by assumption</code> version is a convenience for when you don't want to remember/type the exact hypothesis name.</p>
+
+</div>
+<h2 id="the-re-write-tactic">The Re Write Tactic</h2>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">example</span><span> (a b c d : ℝ) (h : a + b = c - d) : </span><span class="z-constant z-numeric z-constant">2</span><span> * (a + b) = </span><span class="z-constant z-numeric z-constant">2</span><span> * c - </span><span class="z-constant z-numeric z-constant">2</span><span> * d := </span><span class="z-keyword">by</span><span> {</span></span>
+<span class="giallo-l"><span>  rw [h, mul_sub]</span></span>
+<span class="giallo-l"><span>  }</span></span></code></pre>
+<p>The <code>rw</code> tactic takes a list of rewrite rules and applies them left to right, in sequence.
+So <code>rw [h, mul_sub]</code> does two rewrites:</p>
+<p><code>h</code> — rewrites <code>a + b</code> to <code>c - d</code>, transforming the goal from <code>2 * (a + b) = 2 * c - 2 * d</code> to <code>2 * (c - d) = 2 * c - 2 * d</code>
+<code>mul_sub</code> — this is a Mathlib lemma stating <code>a * (b - c)</code> = <code>a * b - a * c</code>.
+It rewrites <code>2 * (c - d)</code> to <code>2 * c - 2 * d</code>, making the goal <code>2 * c - 2 * d = 2 * c - 2 * d</code>, which closes automatically by reflexivity.
+Alternatively,</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">example</span><span> (a b c d : ℝ) (h : a + b = c - d) : </span><span class="z-constant z-numeric z-constant">2</span><span> * (a + b) = </span><span class="z-constant z-numeric z-constant">2</span><span> * c - </span><span class="z-constant z-numeric z-constant">2</span><span> * d := </span><span class="z-keyword">by</span><span> {</span></span>
+<span class="giallo-l"><span>  rw [h]</span></span>
+<span class="giallo-l"><span>  rw [mul_sub]</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>also works.</p>
+<h2 id="the-ring-tactic">The Ring Tactic</h2>
+<p>Basic properties of addition, subtraction and multiplication that are supported by rings are handled by the ring tactic.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">example</span><span> (a b c d : ℝ) (h : a + b = c - d) : </span><span class="z-constant z-numeric z-constant">2</span><span> * (a + b) = </span><span class="z-constant z-numeric z-constant">2</span><span> * c - </span><span class="z-constant z-numeric z-constant">2</span><span> * d := </span><span class="z-keyword">by</span><span> {</span></span>
+<span class="giallo-l"><span>  rw [h]</span></span>
+<span class="giallo-l"><span>  ring </span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>This also works instead of re-writing <code>mul_sub</code>.</p>
+<h2 id="the-congr-calc-tactic">The Congr + Calc Tactic</h2>
+<p>The <code>congr</code> tactic is an attempt to prove LHS = RHS, and if this fails, it changes the goal to a sub-goal of proving the bit that does.
+The way it works is best illustrated with an example:
+Say the goal is</p>
+<p><code>⊢ f (g (x + y)) = f (g (y + x))</code></p>
+<p>Writing <code>congr</code>, Lean sees that the LHS and RHS both have <code>f( ) = f( )</code>, so it first reduces the goal to proving <code>g(x+y) = g(y+x)</code>.
+Then it trying to prove equality again, and finds that both sides have <code>g( ) = g( )</code>, so the new goal is <code>x+y = y+x</code>.
+Then it tries to prove equality again, and sees that if we proved <code>x=y</code> and <code>y=x</code> we would be done.
+The command <code>congr x</code> applies the tactic <code>x</code> times.
+So when the goal is</p>
+<p><code>⊢ f (g (x + y)) = f (g (y + x))</code></p>
+<ol>
+<li><code>congr 1</code>: would make the goal <code>g(x+y) = g(y+x)</code></li>
+<li><code>congr 2</code>: would make the goal <code>(x + y) = (y+x)</code></li>
+<li><code>congr 3</code> or highher would result in two cases <code>x=y</code> and <code>y=x</code>.</li>
+</ol>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">example</span><span> (a b : ℝ) (f g : ℝ → ℝ) : f (g (a + b) ) = f (g (b + a)) := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span>  congr </span><span class="z-constant z-numeric z-constant">2</span><span> -- </span><span class="z-keyword">try</span><span> increasing it to see the issue.</span></span>
+<span class="giallo-l"><span>  ring</span></span></code></pre>
+<p>The <code>calc</code> tactic allows us to string together many <code>congr</code> and <code>ring</code> tactics.
+As shown below:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">example</span><span> (a b c d : ℝ) (h : c = b*a - d) (h&#39; : d = a*b) : c = </span><span class="z-constant z-numeric z-constant">0</span><span> := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span class="z-keyword">  calc</span></span>
+<span class="giallo-l"><span>    c = b*a - d   := </span><span class="z-keyword">by</span><span> congr</span></span>
+<span class="giallo-l"><span>    _ = b*a - a*b := </span><span class="z-keyword">by</span><span> congr</span></span>
+<span class="giallo-l"><span>    _ = </span><span class="z-constant z-numeric z-constant">0</span><span>         := </span><span class="z-keyword">by</span><span> ring</span></span></code></pre>
+<p><code>congr</code> is cleve about using the hypotheses to figure out the expansions for <code>c</code> and <code>d</code>.
+Alternatively we can also use the hypotheses directly:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- Alternate view</span></span>
+<span class="giallo-l"><span class="z-keyword">example</span><span> (a b c d : ℝ) (h : c = b*a - d) (h&#39; : d = a*b) : c = </span><span class="z-constant z-numeric z-constant">0</span><span> := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span class="z-keyword">  calc</span></span>
+<span class="giallo-l"><span>    c = b*a - d   := </span><span class="z-keyword">by</span><span> exact h</span></span>
+<span class="giallo-l"><span>    _ = b*a - a*b := </span><span class="z-keyword">by</span><span> rw [h&#39;]</span></span>
+<span class="giallo-l"><span>    _ = </span><span class="z-constant z-numeric z-constant">0</span><span>         := </span><span class="z-keyword">by</span><span> ring</span></span></code></pre>
+<p><code>exact</code> tells Lean to expand <code>c</code> using the <code>h</code> rule exactly.
+<code>rw [h]</code> replaces the LHS of <code>h</code> with the RHS.
+NOTE: <code>rw [&lt;- h']</code> will replace the RHS with LHS.</p>
+<p>The <code>gcongr</code> tactic generalises <code>congr</code> tactic to inequalities</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">example</span><span> (a b : ℝ) (h : b ≤ a) : a + b ≤ </span><span class="z-constant z-numeric z-constant">2</span><span>*a := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span class="z-keyword">  calc</span></span>
+<span class="giallo-l"><span>    a + b ≤ a + a := </span><span class="z-keyword">by</span><span> gcongr</span></span>
+<span class="giallo-l"><span>    _  = </span><span class="z-constant z-numeric z-constant">2</span><span>*a := </span><span class="z-keyword">by</span><span> ring</span></span></code></pre><h2 id="simp">Simp</h2>
+<p>Next tactic we have in computation is the simplifier <code>simp</code>. It will
+repeatedly apply a number of lemmas that are marked as simplification lemmas.
+For instance the proof below simplifies <code>x - x</code> to <code>0</code> and then <code>|0|</code> to <code>0</code>.</p>
+<h2 id="intro-apply">Intro + Apply</h2>
+<p>The <code>apply</code> tactic can be used to specialize universally quantified statements.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">example</span><span> (f : ℝ → ℝ) (hf : even_fun f) : f (-</span><span class="z-constant z-numeric z-constant">3</span><span>) = f </span><span class="z-constant z-numeric z-constant">3</span><span> := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span>  apply hf </span><span class="z-constant z-numeric z-constant">3</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-comment">/-</span></span>
+<span class="giallo-l"><span class="z-comment">Fortunately, Lean is willing to work for us, so we can leave out the `3` and</span></span>
+<span class="giallo-l"><span class="z-comment">let the `apply` tactic compare the goal with the assumption</span></span>
+<span class="giallo-l"><span class="z-comment">and decide to specialize it to `x = 3`.</span></span>
+<span class="giallo-l"><span class="z-comment">-/</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">example</span><span> (f : ℝ → ℝ) (hf : even_fun f) : f (-</span><span class="z-constant z-numeric z-constant">3</span><span>) = f </span><span class="z-constant z-numeric z-constant">3</span><span> := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span>  apply hf</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-comment">/-</span></span>
+<span class="giallo-l"><span class="z-comment">In the following exercise, you get to choose whether you want help from Lean</span></span>
+<span class="giallo-l"><span class="z-comment">or do all the work.</span></span>
+<span class="giallo-l"><span class="z-comment">-/</span></span>
+<span class="giallo-l"><span class="z-keyword">example</span><span> (f : ℝ → ℝ) (hf : even_fun f) : f (-</span><span class="z-constant z-numeric z-constant">5</span><span>) = f </span><span class="z-constant z-numeric z-constant">5</span><span> := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span>  apply hf (</span><span class="z-constant z-numeric z-constant">5</span><span>)</span></span></code></pre>
+<p>When i want to prove something like for all $x \in X$, $f(x)$ is true, i use the <code>intro</code> tactic.
+The <code>intro</code> tactic is akin to when we write in a real proof, let $x$ be an arbitrary element of set $X$, and then we prove that $f(x)$ is true.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">example</span><span> (f g : ℝ → ℝ) (hf : even_fun f) : even_fun (g ∘ f) := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span>  unfold even_fun</span></span>
+<span class="giallo-l"><span>  intro x</span></span>
+<span class="giallo-l"><span>  specialize hf x</span></span>
+<span class="giallo-l"><span class="z-keyword">  calc</span></span>
+<span class="giallo-l"><span>    (g ∘ f) (-x) = g (f (-x)) := </span><span class="z-keyword">by</span><span> simp</span></span>
+<span class="giallo-l"><span>    _            = g (f x) := </span><span class="z-keyword">by</span><span> rw [hf]</span></span>
+<span class="giallo-l"><span>    _            = (g ∘ f) (x) := </span><span class="z-keyword">by</span><span> simp</span></span></code></pre>
+<p>In the above example we introduce $x$ and then specialise the <code>hf</code> function at  <code>x</code>.</p>
+<p>Alternate proof using apply</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">example</span><span> (f g : ℝ → ℝ) (hf : even_fun f) : even_fun (g ∘ f) := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span>  intro x</span></span>
+<span class="giallo-l"><span class="z-keyword">  calc</span></span>
+<span class="giallo-l"><span>    (g ∘ f) (-x) = g (f (-x))   := </span><span class="z-keyword">by</span><span> simp</span></span>
+<span class="giallo-l"><span>    _            = g (f x)      := </span><span class="z-keyword">by</span><span> congr </span><span class="z-constant z-numeric z-constant">1</span><span>; apply hf</span></span></code></pre>
+<p>A note about how <code>apply</code> works</p>
+<div class="callout callout-box thm-box">
+  
+  <p><code>apply H</code> : <code>H</code> must be a hypothesis or theorem with type <code>P1 -&gt; P2 -&gt; ... -&gt; PN -&gt; Q</code>, where the goal has type <code>Q</code>.
+This tactic will replace the goal with <code>N</code> separate goals, <code>P1</code>, through <code>PN</code>, as it corresponds to deciding to prove the premises of <code>H</code> and then using it to prove the goal.
+In the simply case where you just have <code>P -&gt; Q</code> this will replace <code>Q</code> with <code>P</code>.</p>
+
+</div>
+<p>In the above example, after <code>congr 1</code>, we had to prove <code>f (-x) = f x</code>, so why did <code>apply hf</code> work when <code>hf: even_fun f</code>?
+The reason for this is for any predicate <code>P</code></p>
+<p><code>∀ x, P x</code> is definitionally <code>(x : ℝ) → P x</code> in Lean's type theory.
+So apply on a universally quantified hypothesis works exactly like the P → Q pattern — the "premise" is just the implicit argument that Lean resolves automatically.</p>
+<p><code>even_fun f</code> unfolds to <code>∀ x, f (-x) = f x</code>, which in Lean's type theory is:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>hf : (x : ℝ) → f (-x) = f x</span></span></code></pre>
+<p>So when I did <code>apply hf</code>, Lean then asked for an <code>intro x</code> which we had.</p>
+<ul>
+<li><code>P (premise): (x : ℝ)</code> — you need to provide a real number</li>
+<li><code>Q (conclusion): f (-x) = f x</code> — you get a proof of equality for that number.
+And as I did intro <code>x</code> I had a proof for that number.</li>
+</ul>
+<blockquote>
+<p>This is how we say the apply tactic allows us to specialise.
+Alternatively, I could have specialised h earlier, and not needed to use <code>hf</code>.</p>
+</blockquote>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> non_decreasing</span><span> (f : ℝ → ℝ) := ∀ x₁ x₂, x₁ ≤ x₂ → f x₁ ≤ f x₂</span></span>
+<span class="giallo-l"><span class="z-keyword">example</span><span> (f : ℝ → ℝ) (hf : non_decreasing f) (x₁ x₂ : ℝ) (hx : x₁ ≤ x₂) : f x₁ ≤ f x₂ := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span>  apply hf x₁ x₂ hx</span></span></code></pre>
+<p>Here as <code>hf</code> is telling us  that <code>f</code> is <code>non_decreasing</code>, so when we apply <code>hf</code> with the argumeents <code>x1, x2</code> and the hypothesis that <code>x1 &lt;= x2</code>, we reduce to getting what we need.</p>
+<h2 id="r-cases">R cases</h2>
+<p>In order to use <code>h : ∃ x, P x</code>, we use the <code>rcases</code> tactic to fix
+one <code>x₀</code> that works.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">example</span><span> (a b c : ℤ) (h₁ : a ∣ b) (h₂ : b ∣ c) : a ∣ c := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span>  rcases h₁ </span><span class="z-keyword">with</span><span> ⟨k, hk⟩ -- we fix some `k` such that `b = a * k` i.e. hk: b = a * k</span></span>
+<span class="giallo-l"><span>  rcases h₂ </span><span class="z-keyword">with</span><span> ⟨l, hl⟩ -- we fix some `l` such that `c = b * l` i.e. hl: c = b * l</span></span>
+<span class="giallo-l"><span>  -- Since `a ∣ c` means `∃ k, c = a*k`, we need the `use` tactic.</span></span>
+<span class="giallo-l"><span>  use k*l</span></span>
+<span class="giallo-l"><span class="z-keyword">  calc</span></span>
+<span class="giallo-l"><span>    c = b*l     := </span><span class="z-keyword">by</span><span> congr</span></span>
+<span class="giallo-l"><span>    _ = (a*k)*l := </span><span class="z-keyword">by</span><span> congr</span></span>
+<span class="giallo-l"><span>    _ = a*(k*l) := </span><span class="z-keyword">by</span><span> ring</span></span></code></pre><h2 id="complex-applies-with-specialise">Complex Applies with specialise</h2>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>-- You don&#39;t need to specialise but this is more exolicit</span></span>
+<span class="giallo-l"><span>example (f g : ℝ → ℝ) (hf : non_decreasing f) (hg : non_increasing g) :</span></span>
+<span class="giallo-l"><span>    non_increasing (g ∘ f) := by</span></span>
+<span class="giallo-l"><span>  unfold non_increasing at *</span></span>
+<span class="giallo-l"><span>  unfold non_decreasing at *</span></span>
+<span class="giallo-l"><span>  intro x1 x2 hx</span></span>
+<span class="giallo-l"><span>  specialize hf x1 x2</span></span>
+<span class="giallo-l"><span>  specialize hg (f (x1)) (f (x2))</span></span>
+<span class="giallo-l"><span>  apply hg</span></span>
+<span class="giallo-l"><span>  apply hf</span></span>
+<span class="giallo-l"><span>  exact hx</span></span></code></pre>
+  </div>
+
+  
+
+  
+  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
+  <nav class="toc toc-panel" id="toc-panel">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#a-note-curried-functions">A Note: Curried Functions</a></li><li><a href="#first-proof">First Proof</a></li><li><a href="#the-re-write-tactic">The Re Write Tactic</a></li><li><a href="#the-ring-tactic">The Ring Tactic</a></li><li><a href="#the-congr-calc-tactic">The Congr + Calc Tactic</a></li><li><a href="#simp">Simp</a></li><li><a href="#intro-apply">Intro + Apply</a></li><li><a href="#r-cases">R cases</a></li><li><a href="#complex-applies-with-specialise">Complex Applies with specialise</a></li></ol>
+  </nav>
+  <script>
+    (function() {
+      var btn = document.getElementById('toc-toggle');
+      var panel = document.getElementById('toc-panel');
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target)) {
+          panel.classList.remove('open');
+        }
+      });
+      panel.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          panel.classList.remove('open');
+        });
+      });
+    })();
+  </script>
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const select = document.getElementById('theme-select');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      const lightThemes = ['rose-pine-dawn', 'bw-light'];
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        }
+      }
+
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
+
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
+    })();
+  </script>
+    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+          macros: {
+            "\\field": "\\mathbb{#1}",
+            "\\hei": "\\mathbb{F}(#1)",
+            "\\Field": "\\mathbb{F}",
+            "\\Mont": "\\widetilde{#1}",
+            "\\samples": "\\xleftarrow{\\$}",
+            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
+            "\\TauConstraints": "\\tau_y",
+            "\\TauTime": "\\tau_{\\text{cycle}}",
+            "\\TauGroup": "\\tau_b",
+            "\\MLE": "\\widetilde{#1}",
+            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
+            "\\Def": ":=",
+            "\\ChallengeSet": "\\mathsf{C}"
+
+          },
+            throwOnError: false,
+          trust: true
+
+        });
+    });
+</script>
+
+
+</body>
+</html>

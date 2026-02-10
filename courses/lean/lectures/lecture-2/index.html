@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = 'bw-light';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lecture 2 | Random Walks</title>
+  <link rel="stylesheet" href="/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  
+  <link rel="stylesheet" href="/katex.css">
+  <script defer src="/katex.min.js"></script>
+  <script defer src="/auto-render.min.js"></script>
+  <script defer src="/katex-init.js"></script>
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="/">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
+        <a href="/misc/">Random</a>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
+          <option value="bw-light">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
+        </select>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+<article class="post">
+  <header class="post-header">
+    <h1>Lecture 2</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-02-07</time>
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/lean-notes/" class="tag">lean-notes</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <p><code>fun x : ℝ ↦ x ^ 2</code>
+Read it as: "the function that takes <code>x</code> (a real number) and maps it to <code>x²</code>"</p>
+<p><code>fun</code> — introduces an anonymous function (like λ)
+<code>x : ℝ</code> — the parameter x of type real
+<code>↦</code> — "maps to" (the Lean 4 symbol for =&gt; in lambda expressions)
+<code>x ^ 2</code> — the body/output</p>
+<h2 id="forward-reasoning-have">Forward Reasoning : Have</h2>
+<p>One uses the <code>have</code> tactic, which introduces a new hypothesis.
+We read have new hypothesis <code>h</code> by <code>apply hq hp</code>.</p>
+<div class="callout callout-box thm-box">
+  
+  <p><code>apply H</code> : <code>H</code> must be a hypothesis or theorem with type <code>P1 -&gt; P2 -&gt; ... -&gt; PN -&gt; Q</code>, where the goal has type <code>Q</code>.
+This tactic will replace the goal with <code>N</code> separate goals, <code>P1</code>, through <code>PN</code>, as it corresponds to deciding to prove the premises of <code>H</code> and then using it to prove the goal.
+In the simply case where you just have <code>P -&gt; Q</code> this will replace <code>Q</code> with <code>P</code>.</p>
+
+</div>
+<p>Since <code>hq : p → q</code>, the goal of is a function expecting a proof of <code>p</code>, and <code>hp : p</code> is exactly that, applying <code>hq</code> to <code>hp</code> produces a proof of <code>q</code> which is my new hypothesis <code>h</code>.
+In other words, <code>apply</code> reduces the task of finding a proof of <code>q</code> to finding a proof for <code>p</code>, as I have a proof for <code>p</code>, I immediately "have" a proof <code>h</code> for <code>q</code>.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>We will start </span><span class="z-keyword">with</span><span> reasoning </span><span class="z-keyword">with</span><span> implications </span><span class="z-keyword">in</span><span> Lean.</span></span>
+<span class="giallo-l"><span>-/</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-comment">/-</span></span>
+<span class="giallo-l"><span class="z-comment">**Forwards Reasoning** is reasoning forwards from the hypotheses that other facts must hold.</span></span>
+<span class="giallo-l"><span class="z-comment">We can do this with the `have` tactic.</span></span>
+<span class="giallo-l"><span class="z-comment">`intro` is used to introduce assumptions.</span></span>
+<span class="giallo-l"><span class="z-comment">`exact` or `assumption` can be used to finish the proof.</span></span>
+<span class="giallo-l"><span class="z-comment">-/</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">example</span><span> (p q r : </span><span class="z-storage z-type">Prop</span><span>) (hq : p → q) (hr : p → q → r) : p → r := </span><span class="z-keyword">by</span><span> {</span></span>
+<span class="giallo-l"><span>  intro (hp: p) -- Assume I </span><span class="z-keyword">have</span><span> p </span></span>
+<span class="giallo-l"><span class="z-keyword">  have</span><span> h := </span><span class="z-keyword">by</span><span> apply hq hp -- (h:q)</span></span>
+<span class="giallo-l"><span class="z-keyword">  have</span><span> h&#39; := </span><span class="z-keyword">by</span><span> apply hr hp h  -- (h&#39;: q-&gt;r) at first and </span><span class="z-keyword">then</span><span> (h&#39;: r) </span></span>
+<span class="giallo-l"><span>  exact h&#39;</span></span>
+<span class="giallo-l"><span>  }</span></span></code></pre>
+<p><strong>Forward reasoning</strong> starts from what you already know (your hypotheses) and builds towards the goal.</p>
+<p>Instead of naming new hypotheses, I can just specialise the existing ones.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-comment">/-</span><span class="z-comment"> We can also use `specialize` to apply a hypothesis to arguments. </span><span class="z-comment">-/</span></span>
+<span class="giallo-l"><span class="z-keyword">example</span><span> (p q r : </span><span class="z-storage z-type">Prop</span><span>) (hq : p → q) (hr : p → q → r) : p → r := </span><span class="z-keyword">by</span><span> {</span></span>
+<span class="giallo-l"><span>  intro (hp: p) -- Assume I </span><span class="z-keyword">have</span><span> p </span></span>
+<span class="giallo-l"><span>  specialize hq hp -- I specialise (hq: p-&gt;q) to (hq: q) because i give it p </span></span>
+<span class="giallo-l"><span>  specialize hr hp  -- I specialise (hr: p -&gt; q-&gt; r) to (hr: q-&gt; r) because i get it p</span></span>
+<span class="giallo-l"><span>  specialize hr hq  -- I specialise (hr: r) to r because i give it q</span></span>
+<span class="giallo-l"><span>  exact hr </span></span>
+<span class="giallo-l"><span>}</span></span></code></pre><h2 id="backwards-reasoning">Backwards Reasoning</h2>
+<p>Backward reasoning starts from what you need to prove (the goal) and works back towards your hypotheses. You say: "I need <code>s</code>. It suffices to prove <code>r</code> (because <code>hrs : r → s</code>). It suffices to prove <code>q</code> (because <code>hqr : q → r</code>). It suffices to prove <code>p</code> — which I already have."
+I reduce my goal to <code>p</code> whereas previously, I started with <code>p</code> and found a way to get to the goal.</p>
+<pre class="giallo z-code"><code data-lang="rust"><span class="giallo-l"><span class="z-keyword z-keyword z-operator">-</span><span class="z-keyword z-keyword z-operator">-</span><span class="z-entity z-name z-type"> Here</span><span class="z-variable z-other"> we</span><span class="z-variable z-other"> work</span><span class="z-variable z-other"> backwards</span></span>
+<span class="giallo-l"><span class="z-variable z-other">example</span><span class="z-punctuation"> (</span><span class="z-variable z-other">p</span><span class="z-variable z-other"> q</span><span class="z-variable z-other"> r</span><span class="z-variable z-other"> s</span><span class="z-keyword z-keyword z-operator"> :</span><span class="z-entity z-name z-type"> Prop</span><span class="z-punctuation">)</span><span class="z-punctuation"> (</span><span class="z-variable z-other">hpq</span><span class="z-keyword z-keyword z-operator"> :</span><span class="z-variable z-other"> p</span><span> → </span><span class="z-variable z-other">q</span><span class="z-punctuation">)</span><span class="z-punctuation"> (</span><span class="z-variable z-other">hqr</span><span class="z-keyword z-keyword z-operator"> :</span><span class="z-variable z-other"> q</span><span> → </span><span class="z-variable z-other">r</span><span class="z-punctuation">)</span><span class="z-punctuation"> (</span><span class="z-variable z-other">hrs</span><span class="z-keyword z-keyword z-operator"> :</span><span class="z-variable z-other"> r</span><span> → </span><span class="z-variable z-other">s</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> :</span><span class="z-variable z-other"> p</span><span> → </span><span class="z-variable z-other">s</span><span class="z-keyword z-keyword z-operator"> :</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-variable z-other"> by</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span class="z-variable z-other">  intro</span><span class="z-variable z-other"> hp</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">  -</span><span class="z-keyword z-keyword z-operator">-</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">To prove s, it suffices to prove r</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation"> (</span><span class="z-variable z-other">refine</span><span class="z-variable z-other"> hrs</span><span class="z-keyword z-keyword z-operator"> ?</span><span class="z-variable z-other">_</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-variable z-other">  refine</span><span class="z-variable z-other"> hrs</span><span class="z-keyword z-keyword z-operator"> ?</span><span class="z-variable z-other">_</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">  -</span><span class="z-keyword z-keyword z-operator">-</span><span class="z-variable z-other"> goal</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-variable z-other"> r</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">  -</span><span class="z-keyword z-keyword z-operator">-</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">To prove r, it suffices to prove q</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation"> (</span><span class="z-variable z-other">refine</span><span class="z-variable z-other"> hqr</span><span class="z-keyword z-keyword z-operator"> ?</span><span class="z-variable z-other">_</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-variable z-other">  refine</span><span class="z-variable z-other"> hqr</span><span class="z-keyword z-keyword z-operator"> ?</span><span class="z-variable z-other">_</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">  -</span><span class="z-keyword z-keyword z-operator">-</span><span class="z-variable z-other"> goal</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-variable z-other"> q</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">  -</span><span class="z-keyword z-keyword z-operator">-</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">To prove q, it suffices to prove p</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation"> (</span><span class="z-variable z-other">refine</span><span class="z-variable z-other"> hpq</span><span class="z-keyword z-keyword z-operator"> ?</span><span class="z-variable z-other">_</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-variable z-other">  refine</span><span class="z-variable z-other"> hpq</span><span class="z-keyword z-keyword z-operator"> ?</span><span class="z-variable z-other">_</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator">  -</span><span class="z-keyword z-keyword z-operator">-</span><span class="z-variable z-other"> goal</span><span class="z-keyword z-keyword z-operator">:</span><span class="z-variable z-other"> p</span></span>
+<span class="giallo-l"><span class="z-variable z-other">  exact</span><span class="z-variable z-other"> hp</span></span>
+<span class="giallo-l"><span class="z-punctuation">}</span></span></code></pre>
+<p>Using Lemmas</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- At each line I asked apply?</span></span>
+<span class="giallo-l"><span class="z-keyword">example</span><span> : Continuous (</span><span class="z-keyword">fun</span><span> x ↦ </span><span class="z-constant z-numeric z-constant">2</span><span> + x * Real.sin x) := </span><span class="z-keyword">by</span><span> {</span></span>
+<span class="giallo-l"><span>  -- Get two cases Continous f and </span></span>
+<span class="giallo-l"><span>  -- Contnous g</span></span>
+<span class="giallo-l"><span>  apply Continuous.add  </span></span>
+<span class="giallo-l"><span>  . exact continuous_const</span></span>
+<span class="giallo-l"><span>  . refine Continuous.mul ?hg.hf ?hg.hg --</span></span>
+<span class="giallo-l"><span>    . exact continuous_id </span></span>
+<span class="giallo-l"><span>    . exact continuous_sin</span></span>
+<span class="giallo-l"><span>  }</span></span></code></pre>
+<p><strong>Linarith</strong></p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">example</span><span> (h₀ : a = b) (h₁ : b &lt; c) (h₂ : c ≤ d) (h₃ : d &lt; e) : a &lt; e := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span class="z-keyword">  calc</span><span> a</span></span>
+<span class="giallo-l"><span>      = b := h₀</span></span>
+<span class="giallo-l"><span>    _ &lt; c := h₁</span></span>
+<span class="giallo-l"><span>    _ ≤ d := h₂</span></span>
+<span class="giallo-l"><span>    _ &lt; e := h₃</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-comment">/-</span><span class="z-comment"> `linarith` can prove inequalities (and equalities)</span></span>
+<span class="giallo-l"><span class="z-comment">  that follow from linear combinations of assumptions. </span><span class="z-comment">-/</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">example</span><span> (h₀ : a = b) (h₁ : b &lt; c) (h₂ : c ≤ d) (h₃ : d &lt; e) : a &lt; e := </span><span class="z-keyword">by</span><span> {</span></span>
+<span class="giallo-l"><span>  linarith</span></span>
+<span class="giallo-l"><span>  }</span></span>
+<span class="giallo-l"></span></code></pre><h2 id="universal-quantifies">Universal Quantifies</h2>
+<p>The tactics for universal quantification and implication are the same.</p>
+<ul>
+<li>We can use <code>intro</code> to prove an universal quantification (or implication).</li>
+<li>We can use <code>apply</code> or <code>specialize</code> to use a hypothesis
+that is a universal quantification (or implication).</li>
+</ul>
+<p>See example below</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"></span>
+<span class="giallo-l"><span>-- No collisions </span><span class="z-keyword">in</span><span> the image</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> Injective</span><span> (f : ℝ → ℝ) : </span><span class="z-storage z-type">Prop</span><span> := ∀ x y : ℝ, f x = f y → x = y</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">example</span><span> (f g : ℝ → ℝ) (hg : Injective g) (hf : Injective f) :</span></span>
+<span class="giallo-l"><span>    Injective (g ∘ f) := </span><span class="z-keyword">by</span><span> {</span></span>
+<span class="giallo-l"><span>    unfold Injective at * </span></span>
+<span class="giallo-l"><span>    intro x y h -- The goal is to </span><span class="z-keyword">show</span><span> P-&gt; Q </span><span class="z-keyword">where</span><span> P =: f x = f y and Q =: x = y</span></span>
+<span class="giallo-l"><span>    -- </span><span class="z-keyword">by</span><span> intro h we say assume we </span><span class="z-keyword">have</span><span> P, </span><span class="z-keyword">then</span><span> we need to </span><span class="z-keyword">show</span><span> Q</span></span>
+<span class="giallo-l"><span>    specialize hf x y </span></span>
+<span class="giallo-l"><span>    specialize hg (f x) (f y) </span></span>
+<span class="giallo-l"><span>    apply hf -- this asks me to now sow that f x = f y  </span></span>
+<span class="giallo-l"><span>    apply hg  -- this asks me to </span><span class="z-keyword">show</span><span> g (f x) = g (f y)</span></span>
+<span class="giallo-l"><span>    exact h  -- this is my P</span></span>
+<span class="giallo-l"><span>  }</span></span></code></pre>
+  </div>
+
+  
+
+  
+  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
+  <nav class="toc toc-panel" id="toc-panel">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#forward-reasoning-have">Forward Reasoning : Have</a></li><li><a href="#backwards-reasoning">Backwards Reasoning</a></li><li><a href="#universal-quantifies">Universal Quantifies</a></li></ol>
+  </nav>
+  <script>
+    (function() {
+      var btn = document.getElementById('toc-toggle');
+      var panel = document.getElementById('toc-panel');
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target)) {
+          panel.classList.remove('open');
+        }
+      });
+      panel.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          panel.classList.remove('open');
+        });
+      });
+    })();
+  </script>
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const select = document.getElementById('theme-select');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      const lightThemes = ['rose-pine-dawn', 'bw-light'];
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        }
+      }
+
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
+
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
+    })();
+  </script>
+    
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+          macros: {
+            "\\field": "\\mathbb{#1}",
+            "\\hei": "\\mathbb{F}(#1)",
+            "\\Field": "\\mathbb{F}",
+            "\\Mont": "\\widetilde{#1}",
+            "\\samples": "\\xleftarrow{\\$}",
+            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
+            "\\TauConstraints": "\\tau_y",
+            "\\TauTime": "\\tau_{\\text{cycle}}",
+            "\\TauGroup": "\\tau_b",
+            "\\MLE": "\\widetilde{#1}",
+            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
+            "\\Def": ":=",
+            "\\ChallengeSet": "\\mathsf{C}"
+
+          },
+            throwOnError: false,
+          trust: true
+
+        });
+    });
+</script>
+
+
+</body>
+</html>

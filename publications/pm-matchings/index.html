@@ -5,7 +5,7 @@
     (function() {
       var theme = localStorage.getItem('theme');
       if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+        theme = 'bw-light';
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -32,15 +32,15 @@
       </div>
 
       <div class="nav-right">
-        <a href="/blog/">Notes</a>
         <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
         <a href="/misc/">Random</a>
-        <select class="theme-select" id="theme-select" aria-label="Select theme">
-          <option value="gruvbox-dark">Gruvbox Dark</option>
-          <option value="tokyo-night">Tokyo Night</option>
-          <option value="vitesse-dark">Vitesse Dark</option>
-          <option value="rose-pine-dawn">Rosé Pine Dawn</option>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
           <option value="bw-light">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
         </select>
         <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
@@ -87,7 +87,7 @@
   <div class="post-content">
     <h2 id="abstract">Abstract</h2>
 <p>This work studies the complexity of refuting the existence of a perfect matching in spectral expanders with an odd number of vertices, in the Polynomial Calculus (PC) and Sum of Squares (SoS) proof system. Austrin and Risse [SODA, 2021] showed that refuting perfect matchings in sparse $d$-regular <em>random</em> graphs in the above proof systems requires proofs with degree $\Omega(n/\log n)$ on average.  We extend their result by showing the same lower bound holds for <strong>all</strong> $d$-regular graphs with a mild spectral gap.Additionally, as Austrin and Risse do for random graphs, we show that the hardness of refuting a more general class of formulae, which includes both perfect matchings and <em>even-colouring</em> formulas, also reduces to the hardness of refuting perfect matchings in spectral expanders, thereby settling an open problem of Buss and Nordstrom.</p>
-<div class="callout callout-box">
+<div class="callout callout-box thm-box">
   
   <p><strong>Comment</strong>: In March 2024, when I was first introduced to this problem, I was largely unaware of the field of proof complexity, or even the combinatorial techniques used to prove the hardness result in this paper.
 I owe a huge debt of gratitude to Rajko for being patient with me, and re-drafting numerous poorly written proofs in the early stages of this project.
