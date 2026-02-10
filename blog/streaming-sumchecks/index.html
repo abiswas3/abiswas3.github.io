@@ -72,12 +72,12 @@
   </header>
 
   
-  <nav class="toc toc-side">
-    <div class="toc-title">Contents</div>
-    <ol><li><a href="#the-trace">The Trace</a></li><li><a href="#correctness-as-constraint-satisfaction">Correctness As Constraint Satisfaction</a></li><li><a href="#the-outer-spartan-polynomials">The Outer Spartan Polynomials</a><ol><li><a href="#example-constraint-1">Example : Constraint 1</a></li></ol></li><li><a href="#review-of-the-linear-sumcheck-implementation">Review Of The Linear Sumcheck Implementation</a><ol><li><a href="#setup-phase">Setup Phase</a></li></ol></li><li><a href="#the-remaining-rounds">The Remaining Rounds</a></li><li><a href="#the-streaming-generalisation">The Streaming Generalisation</a><ol><li><a href="#prover-messages-are-always-computed-from-t-grid">Prover Messages Are Always Computed From t_grid</a></li><li><a href="#a-note-about-evaluating-at-infinity">A Note About Evaluating At Infinity</a><ol><li><a href="#binding-in-the-streaming-phase">Binding in the streaming phase</a></li></ol></li><li><a href="#next-window-start">Next Window Start</a></li><li><a href="#switch-over-point">Switch Over Point</a></li><li><a href="#actual-code">Actual Code</a></li></ol></li></ol>
-  </nav>
-  
 
+  
+  <nav class="toc toc-inline">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#the-trace">The Trace</a></li><li><a href="#correctness-as-constraint-satisfaction">Correctness As Constraint Satisfaction</a></li><li><a href="#the-outer-spartan-polynomials">The Outer Spartan Polynomials</a><ol><li><a href="#example-constraint-1">Example : Constraint 1</a></li></ol></li><li><a href="#review-of-the-linear-sumcheck-implementation">Review Of The Linear Sumcheck Implementation</a><ol><li><a href="#setup-phase">Setup Phase</a></li></ol></li><li><a href="#the-remaining-rounds">The Remaining Rounds</a></li><li><a href="#the-streaming-generalisation">The Streaming Generalisation</a><ol><li><a href="#a-note-about-evaluating-at-infinity">A Note About Evaluating At Infinity</a><ol><li><a href="#binding-in-the-streaming-phase">Binding in the streaming phase</a></li></ol></li><li><a href="#next-window-start">Next Window Start</a></li><li><a href="#switch-over-point">Switch Over Point</a></li><li><a href="#actual-code">Actual Code</a></li></ol></li></ol>
+  </nav>
   
 
   
@@ -146,8 +146,9 @@ For example, consider the following program with just two instructions.</p>
 It is a giant vector of length $T$, and location $t \in [T]$ stores the machine state before and after the $t$'th instruction.</p>
 <div class="callout callout-box thm-box">
   
-  <h3 id="a-lie-in-service-of-the-truth">A Lie In Service Of The Truth</h3>
-<p>Throughout this post we will assume that we can store the entire trace in memory, and iterating through the trace is free. This is clearly not true, and we will fix this at a later date.
+  <div class="callout-title">A Lie In Service Of The Truth</div>
+  
+  <p>Throughout this post we will assume that we can store the entire trace in memory, and iterating through the trace is free. This is clearly not true, and we will fix this at a later date.
 But for the purposes of this post, this assumption allows us to abstract away important implementation details that currently remain unimplemented -- and prove that we can indeed implement any jolt sumcheck with $O(1)$ memory.</p>
 
 </div>
@@ -374,11 +375,13 @@ $$
 $$
 s(\textcolor{pink}{X_b}) = t(\textcolor{pink}{X_b}),\text{eq}(\tau_b, \textcolor{pink}{X_b})
 $$</p>
-<blockquote>
-<h3 id="prover-messages-are-always-computed-from-t-grid">Prover Messages Are Always Computed From <code>t_grid</code></h3>
+<div class="callout callout-box thm-box">
+  
+  <h3 id="prover-messages-are-always-computed-from-t-grid">Prover Messages Are Always Computed From <code>t_grid</code></h3>
 <p>It is important to note that in every round of the sum-check the provers messages will be computed using the streaming data structure <code>t_grid</code>.
 We will shortly see that once the current <code>t_grid</code> gets exhaused we will re-compute it.</p>
-</blockquote>
+
+</div>
 <blockquote>
 <h3 id="a-note-about-evaluating-at-infinity">A Note About Evaluating At Infinity</h3>
 <p>For a univariate polynomial $p$, $p(\infty)$ is equal to the coefficient associated with the highest degree variable of the polynomial.
