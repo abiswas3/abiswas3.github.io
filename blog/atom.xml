@@ -458,8 +458,9 @@ The following snippet of code executes the logic describe above, based on the ro
     <content type="html" xml:base="/blog/small-scalar-binding/">&lt;h2 id=&quot;tl-dr-just-tell-us-what-you-did&quot;&gt;TL;DR - Just Tell Us What You Did&lt;&#x2F;h2&gt;
 &lt;div class=&quot;callout callout-box thm-box&quot;&gt;
   
-  &lt;h3 id=&quot;faster-sumcheck-in-jolt&quot;&gt;Faster Sumcheck In Jolt&lt;&#x2F;h3&gt;
-&lt;p&gt;By sampling the verifiers random challenges from a set $S \subset \mathbb{F}$ of size roughly $\sqrt{|\mathbb{F}|}$, we speed up sum-check binding by &lt;strong&gt;1.6x&lt;&#x2F;strong&gt; from baseline (where challenges are sampled over the whole field $\mathbb{F}$ -- the field over which polynomials are defined. )
+  &lt;div class=&quot;callout-title&quot;&gt;Faster Sumcheck In Jolt&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;By sampling the verifiers random challenges from a set $S \subset \mathbb{F}$ of size roughly $\sqrt{|\mathbb{F}|}$, we speed up sum-check binding by &lt;strong&gt;1.6x&lt;&#x2F;strong&gt; from baseline (where challenges are sampled over the whole field $\mathbb{F}$ -- the field over which polynomials are defined. )
 &lt;strong&gt;NOTE:&lt;&#x2F;strong&gt; This now reduces the soundness error from $1&#x2F;2^{254}$ to $1&#x2F;2^{125}$, but this is not a concern as currently Jolt usess the &lt;code&gt;bn256&lt;&#x2F;code&gt; curve to commit to polynomials, which offers 110 bits of security anyway.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;div&gt;

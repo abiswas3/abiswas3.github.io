@@ -87,8 +87,9 @@
     <h2 id="tl-dr-just-tell-us-what-you-did">TL;DR - Just Tell Us What You Did</h2>
 <div class="callout callout-box thm-box">
   
-  <h3 id="faster-sumcheck-in-jolt">Faster Sumcheck In Jolt</h3>
-<p>By sampling the verifiers random challenges from a set $S \subset \mathbb{F}$ of size roughly $\sqrt{|\mathbb{F}|}$, we speed up sum-check binding by <strong>1.6x</strong> from baseline (where challenges are sampled over the whole field $\mathbb{F}$ -- the field over which polynomials are defined. )
+  <div class="callout-title">Faster Sumcheck In Jolt</div>
+  
+  <p>By sampling the verifiers random challenges from a set $S \subset \mathbb{F}$ of size roughly $\sqrt{|\mathbb{F}|}$, we speed up sum-check binding by <strong>1.6x</strong> from baseline (where challenges are sampled over the whole field $\mathbb{F}$ -- the field over which polynomials are defined. )
 <strong>NOTE:</strong> This now reduces the soundness error from $1/2^{254}$ to $1/2^{125}$, but this is not a concern as currently Jolt usess the <code>bn256</code> curve to commit to polynomials, which offers 110 bits of security anyway.</p>
 
 </div>
