@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Razbarovs Pseudowidth | Random Walks</title>
+  <link rel="stylesheet" href="/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  
+  
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      tags: 'ams',
+      macros: {
+        field: ['{\\mathbb{#1}}', 1],
+        hei: ['{\\mathbb{F}(#1)}', 1],
+        Field: '{\\mathbb{F}}',
+        Mont: ['{\\widetilde{#1}}', 1],
+        samples: '{\\xleftarrow{\\$}}',
+        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+        TauConstraints: '{\\tau_y}',
+        TauTime: '{\\tau_{\\text{cycle}}}',
+        TauGroup: '{\\tau_b}',
+        MLE: ['{\\widetilde{#1}}', 1],
+        tf: ['{\\widetilde{#1}}', 1],
+        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+        Def: '{:=}',
+        ChallengeSet: '{\\mathsf{C}}',
+        Complement: ['{\\overline{#1}}', 1],
+        Size: ['{\\left|#1\\right|}', 1],
+        Exp: ['{2^{#1}}', 1],
+        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+        BigO: ['{O\\ \\left(#1\\right)}', 1],
+        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
+        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
+        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+        poly: '{\\operatorname{poly}}',
+        criticalAlpha: ['{\\alpha_{#1}}', 1],
+        bit: '{\\{0,1\\}}',
+        CStar: '{C^{\\star}}',
+        GraphNbrs: ['{N_G(#1)}', 1],
+        ClauseNbrs: ['{N_C(#1)}', 1],
+        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        SmallO: ['{o\\!(#1)}', 1],
+        Naturals: '{\\mathbb{N}}',
+        Closure: ['{\\operatorname{Cl}(#1)}', 1],
+        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+        Dim: ['{\\dim(#1)}', 1],
+        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+        domain: ['{\\operatorname{dom}(#1)}', 1],
+        False: '{\\bot}'
+      }
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="/">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
+        <a href="/misc/">Random</a>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
+          <option value="bw-light">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
+        </select>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+<article class="post">
+  <header class="post-header">
+    
+    
+    <a href="&#x2F;blog&#x2F;proof-complexity&#x2F;" class="back-link">&larr; Proof Complexity Notes</a>
+    
+    <h1>Razbarovs Pseudowidth</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2025-05-01</time>
+      
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/proof-complexity/" class="tag">proof-complexity</a><a href="/tags/combinatorics/" class="tag">combinatorics</a>
+    </div>
+    
+  </header>
+
+  
+  <nav class="toc toc-side">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#razbarov-s-pseudowidth">Razbarov&#x27;s PseudoWidth</a><ol><li><a href="#some-notation">Some Notation</a></li><li><a href="#what-is-pseudo-width">What Is Pseudo Width</a><ol><li><a href="#heavy-pigeons">Heavy Pigeons</a></li><li><a href="#super-heavy-pigeons">Super Heavy Pigeons</a></li><li><a href="#w-0-vec-d-axiom">$(w_0, \vec{d})$-axiom</a></li></ol></li><li><a href="#first-key-technical-tool-the-pigeon-filtering-lemma">First Key Technical Tool - The Pigeon Filtering Lemma</a></li><li><a href="#how-do-we-use-the-pigeon-filtering-lemma">How Do We Use The Pigeon Filtering Lemma</a></li><li><a href="#refutations-must-have-a-clause-with-high-pseudowidth">Refutations Must Have A Clause With High Pseudowidth</a></li><li><a href="#main-theorem">Main Theorem</a></li></ol></li></ol>
+  </nav>
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+    <div class="callout callout-warning stale-disclaimer">
+      This post has not been updated since it was published and the website has since been moved. Some links may be broken.
+    </div>
+    
+  
+
+  <div class="post-content">
+    <h1 id="razbarov-s-pseudowidth">Razbarov's PseudoWidth</h1>
+<p><a href="/blog/proof-complexity/basic-lower-bound/">Last time</a>, we saw an example of how short proofs imply that all clauses are narrow, but then we also showed that any valid resolution refutation needs a wide clause, so the proofs must be long.
+We showed this for the basic $\PHP{n}{n-1}$, though the same argument applies to $\FPHP{n}{n-1}$.</p>
+<p>Now we'll do this again, but we will not use width directly, but a proxy for width - pseudowidth introduced by <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle">Razborov (2003)</a>.
+Then we will use this again, when working with sparse graphs, along with a new idea called graph closure.</p>
+<h2 id="some-notation">Some Notation</h2>
+<p>$\GraphNbrs{i}$ — the holes that pigeon $i$ is permitted to fly into.</p>
+<p>$\ClauseNbrs{i}$ — holes that can receive pigeon $i$ and also satisfy clause $C$.</p>
+<p>$V_{\text{exp}}(G) := V_P$ when $G$ is a bipartite graph $V_P \cup V_H$, and otherwise $V_{\text{exp}}(G) = G$.</p>
+<h2 id="what-is-pseudo-width">What Is Pseudo Width</h2>
+<h3 id="heavy-pigeons">Heavy Pigeons</h3>
+<p>Given an unsatisfiable formula $F = \FPHP{m}{n}$, and integer vectors of length $m$,  $\vec{d} = (d_1, \dots, d_m), \vec{\delta} = (\delta_1, \dots, \delta_m)$, such that, $\delta_i &lt; d_i$ for all $i \in [m]$, the pseudowidth of a clause $C$, denoted $\Pseudowidth{C}$</p>
+<p>$$\Pseudowidth{C} = \Size{\HeavyPigeons{C}} := \Size{\{ i \in [m]: \ClauseNbrs{i} \geq d_i - \delta_i \}}$$</p>
+<p>The pigeons in $\HeavyPigeons{C}$ are called <strong>heavy</strong> pigeons in clause $C$.</p>
+<div class="callout callout-note">
+  <p><strong>How I think of Pseudowidth</strong>: If you think of the role of a resolution proof system as starting with all the axioms, and ensuring pigeons cannot be assigned a hole, then the pseudowidth of a clause really measures how many "important" pigeons are there in the clause.
+These pigeons are important because there are many ways to satisfy these pigeons, and therefore getting rid of them will make a lot of progress.</p>
+
+</div>
+<h3 id="super-heavy-pigeons">Super Heavy Pigeons</h3>
+<p>We denote the <strong>super-heavy</strong> pigeons in clause $C$ with</p>
+<p>$$P_{\vec{d}}(C) : = \{ i \in [m]: \ClauseNbrs{i} \geq d_i \}$$</p>
+<h3 id="w-0-vec-d-axiom">$(w_0, \vec{d})$-axiom</h3>
+<p>Finally, any clause that contains exactly $w_0$ super-heavy pigeons where super-heaviness is parameterised by $\vec{d}$ is called a $(w_0, \vec{d})$-axiom.</p>
+<h2 id="first-key-technical-tool-the-pigeon-filtering-lemma">First Key Technical Tool - The Pigeon Filtering Lemma</h2>
+<p>The above lemma is a generalisation of filtering lemma that was originally introduced in <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle">Razborov (2003)</a>.
+In the lemma below, $m$ and $n$ in our context will refer to the number of pigeons and holes, and $L$ will be the size of the resolution refutation, but this is a general combinatorial lemma that has nothing to do with the PHP or expander graphs per se.</p>
+<div class="callout callout-lemma thm-numbered">
+  
+  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> (Pigeon Filtering Lemma)</span></div>
+  
+  <p>Fix $m, n, L \in \Naturals$. Let $\alpha \in [m]$ and $w_0$ be an arbitrary parameter such that $w_0 \ge \alpha^2 \ge 4$ and $w_0 \ge \log L$.
+Given any arbitrary set of integer vectors of length $m$, $\vec{r}(1), \ldots, \vec{r}(L)$, there <strong>exists</strong> a vector $\vec{r} = (r_1, \ldots, r_m)$ with $r_k \le t=\lfloor \frac{\log m}{\log \alpha}\rfloor -1$, such that for <strong>every</strong> $C \in [L]$ one of the following holds:</p>
+<ol>
+<li>
+<p>$\Size{\{ i\in [m]: r_i(C) \le r_i \}} \geq w_0$</p>
+</li>
+<li>
+<p>$\Size{\{ i\in [m]: r_i(C) \le r_i + 1 \}}\le \BigO{\alpha w_0}$</p>
+</li>
+</ol>
+
+</div>
+<div class="callout callout-proof">
+  <div class="proof-header"><em>Proof.</em></div>
+  <p>The proof follows from the probabilistic method and the Chernoff bounds. See <a href="../pigeonFilter.pdf">handwritten notes</a> for every step of the proof.</p>
+
+  <div class="qed">&#9634;</div>
+</div>
+<h2 id="how-do-we-use-the-pigeon-filtering-lemma">How Do We Use The Pigeon Filtering Lemma</h2>
+<p>The way <a href="#ref-rezende2020Exp" class="citation citation-t" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs">de Rezende et al. (2020)</a> and <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle">Razborov (2003)</a> use this lemma is to show that short proofs imply short pseudo-width for all clauses in the proof.</p>
+<p>Then independently, they will show that valid refutations <strong>MUST</strong> contain a clause with large pseudowidth, therefore resolution refutations <strong>CANNOT</strong> be short.
+The proof is remarkably similar to the proof for showing lower bounds for PHP in the dense graph model.</p>
+<div class="callout callout-note">
+  <p><strong>How I think of the following parameters</strong></p>
+<ul>
+<li>$m$ and $n$ mean the usual.</li>
+<li>$w_0$ is an upper bound on the proof size in $\log$ scale. We need this as we will later show that when proof sizes are smaller than $\Exp{w_0}$ we get a contradiction.</li>
+<li>$\alpha = 2$ in the original result by <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle">Razborov (2003)</a>, but here we will set it to $\SmallO{r/\log m}$ — and this will in some ways force us to have a very very strong expander.</li>
+</ul>
+
+</div>
+<div class="callout callout-lemma thm-numbered">
+  
+  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> (Short Proofs Have Small Pseudowidth (Lemma 4.2))</span></div>
+  
+  <p>Let $\pi$ be a resolution refutation for an unsatisfiable CNF formula $F = \FPHP{m}{n}(G)$.
+Let $w_0$ be an arbitrary parameter and $\alpha \in [m]$ such that $w_0 \ge \alpha^2 \ge 4$ and $w_0 \ge \log \Size{\pi}$, and for each $i \in [m]$, define $\delta_i = \GraphNbrs{i}\lfloor\frac{\log \alpha}{\log m} \rfloor$.
+There exists a vector $\vec{d} = (d_1, \dots, d_m)$, and $\delta_i &lt; d_i \le \GraphNbrs{i}$, a set $\mathcal{A} \le \Size{\pi}$ of $(w_0, \vec{d})$ axioms, and a proof $\pi'$ which refutes $\FPHP{m}{n}(G) \cup \mathcal{A}$ such that $w_{\vec{d}, \vec{\delta}}(\pi') = \BigO{\alpha w_0}$.</p>
+
+</div>
+<div class="callout callout-proof">
+  <div class="proof-header"><em>Proof.</em></div>
+  <p>For any $C \in \pi$, for $i \in [m]$, set</p>
+<div class="math-display">
+$$r_i(C) = \lfloor \frac{\GraphNbrs{i} - \ClauseNbrs{i}}{\delta_i}\rfloor$$
+</div>
+<p>All the parameters are specified to call pigeon filter lemma which says there exists vector $\vec{r} = (r_1, \dots, r_m)$ where $r_i \le \lfloor \frac{\log m}{\log \alpha}\rfloor  - 1$.
+Set</p>
+<div class="math-display">
+$$d_i = \GraphNbrs{i} - \lceil r_i \delta_i\rceil + \delta_i$$
+</div>
+<p>Using the above definition, it's not too hard to see that $d_i = \text{arg}\min_{x \in \Naturals} \lfloor \frac{\GraphNbrs{i} - x}{\delta_i}\rfloor \le r_i$.</p>
+<p>This implies that for a given clause $C$, for any $i \in [m]$</p>
+<p>$$r_i(C) \le r_i \implies \ClauseNbrs{i} \ge d_i$$
+$$r_i(C) \le r_i + 1 \implies \ClauseNbrs{i} \ge d_i - \delta_i$$</p>
+<p>The pigeon filter lemma also gives us that for any $C \in \pi$, we either have</p>
+<ol>
+<li>$\Size{\{ i\in [m]: r_i(C) \le r_i \}}\geq w_0 \implies \Size{\{  i\in [m]: \ClauseNbrs{i} \ge d_i\}} \geq w_0$</li>
+</ol>
+<p>If this is the case, kill super heavy pigeons in $C$ till there are exactly $w_0$ super pigeons in the strengthened clause $C'$, which ensures that $w_{\vec{d},\vec{\delta}}(C) = w_0$. Add $C'$ to set $\mathcal{A}$.
+By definition $\Size{\mathcal{A}} \le \Size{\pi}$.</p>
+<ol start="2">
+<li>$\Size{\{ i\in [m]: r_i(C) \le r_i + 1 \}}\le \BigO{\alpha w_0} \implies \Size{\{  i\in [m]: \ClauseNbrs{i} \ge d_i - \delta_i\}} \le \BigO{\alpha w_0}$</li>
+</ol>
+<p>This automatically gives us $w_{\vec{d},\vec{\delta}}(C) = \BigO{\alpha w_0}$.</p>
+
+  <div class="qed">&#9634;</div>
+</div>
+<p>Note in the above proof system we are assuming $\Size{\pi} &lt; 2^{w_0}$ for some parameter $w_0$.
+Later we will set $w_0$ such that $2^{w_0} &lt; \Exp{\BigOmega{n}}$, and this will give us a contradiction.
+<strong>REVISIT THIS</strong></p>
+<h2 id="refutations-must-have-a-clause-with-high-pseudowidth">Refutations Must Have A Clause With High Pseudowidth</h2>
+<p>This is the main technical contribution, where we do counting via linear algebra.
+Before we formally state the lemma, let's do some setup work.</p>
+<p><strong>Notation</strong> of matchings as vectors</p>
+<div class="callout callout-lemma thm-numbered">
+  
+  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> (Valid Resolution Refutations MUST have a clause with high pseudowidth (Lemma 4.3))</span></div>
+  
+  <p><strong>Setup (What Is Given To Me)</strong>: I get</p>
+<ul>
+<li>A parameter $\xi \le 1/4$</li>
+<li>A bipartite $(r, \Delta, c)$ boundary expander $G=(V_P \cup V_H, E)$ where $c=(1-2\xi)\Delta$, $V_P = [m]$ and $V_H = [n]$.</li>
+<li>A slack vector $\vec{\delta} = (\delta_1, \ldots, \delta_m)$ where $\delta_i = 4\GraphNbrs{i}\xi$.</li>
+<li>A vector $\vec{d} = (d_1, \ldots, d_m)$ such that $\delta_i &lt; d_i \le \GraphNbrs{i}$ for all $i \in [m]$.</li>
+<li>An arbitrary parameter $w_0$</li>
+<li>A small set[^a] of arbitrary $(w_0, \vec{d})$-axioms, $\mathcal{A}$ such that $\Size{\mathcal{A}} \le (1 + \xi)^{w_0}$.</li>
+</ul>
+<p><strong>What Do I show</strong>:</p>
+<p>Every valid proof $\pi$ that refutes $\FPHP{m}{n}(G) \cup \mathcal{A}$ must have at least one clause $C \in \pi$, such that $\Pseudowidth{C} \ge \frac{r\xi}{4}$</p>
+
+</div>
+<div class="footnote-definition" id="a"><sup class="footnote-definition-label">1</sup>
+<p>This smallness just ensures sticking these axioms along with the refutation does not make the short proof any bigger.</p>
+</div>
+<div class="callout callout-proof">
+  <div class="proof-header"><em>Proof.</em></div>
+  <p>Before we can fully prove this result, we need some setup to introduce linear algebra notation.</p>
+<p>Define the closure of a clause</p>
+<p>$$\Closure{C} := \ClosureParam{\HeavyPigeons{C}}$$</p>
+<p>Note that closure is only defined if $\Size{\HeavyPigeons{C}} \le r$.
+If for any $C \in \pi$, we have $\Size{\HeavyPigeons{C}} &gt; r$, then $\Size{\ClosureParam{\HeavyPigeons{C}}} &gt; \frac{r\xi}{4}$.</p>
+<p>To see why:  $\xi \le 1/4$ implies $r &gt; \frac{r\xi}{4}$ and, $\HeavyPigeons{C} \subseteq \ClosureParam{\HeavyPigeons{C}}$. This gives us our wide clause.</p>
+<p>So we can safely assume that for every clause $C \in \pi$, we have $\Size{\HeavyPigeons{C}} \le r$.</p>
+<p>Fix a field $\Field$ of characteristic 0 and for each pigeon $i \in V_P$,  let $\Lambda_i$ be a vector space over $\Field$ of dimension $\GraphNbrs{i} - d_i + \delta_i/4$.
+Define</p>
+<p>$$ \Lambda := \underset{i \in V_P}{\otimes} \Lambda_i$$</p>
+<p>where $\otimes$ denotes the tensor product.
+Now for each $i$, define $\lambda_i: V_H \rightarrow \Lambda_i$, such that for any $J \subseteq V_H$ such that</p>
+<ul>
+<li>If $\Size{J} \ge \Dim{\Lambda_i}$, then $\Span{\lambda(j): j \in J}$ spans all of $\Lambda_i$.</li>
+<li>If $\Size{J} &lt; \Dim{\Lambda_i}$, then $\Span{\lambda(j): j \in J}$ spans a subspace of $\Lambda_i$ and has dimension $\Size{J}$.</li>
+</ul>
+<p>Now for any partial matching $\psi: V_P \rightarrow V_H$, we can visualise $\psi$ with a vector of length $m$, where $\psi_i = j \in V_H$ represents the hole pigeon $i$ is sent to hole $j$, and $\psi_i = \bot$, means that $i \notin \domain{\psi}$.
+For any partial matching $\psi$, we define</p>
+<div class="math-display">
+$$\lambda(\psi) := \underset{i \in \domain{\psi}}{\otimes}\lambda_i(\psi_i) \bigotimes \underset{i \notin \domain{\psi}}{\otimes} \Lambda_i$$
+</div>
+<p>where by $\domain{\psi}{\otimes} \Lambda_i$, we mean the vector space formed by taking the tensor product of every basis vector in  $\Lambda_i$.</p>
+<blockquote>
+<p>Note that when $\domain{\psi} = V_P$, $\lambda(\psi) \in \Field^{\Dim{\Lambda}}$ is a vector of length $\Dim{\Lambda}$ or a 1 dimensional vector space.
+Whenever, $\domain{\psi} \subset V_P$, we get a set of basis vectors that span a proper subspace of $\Lambda$.
+Finally, if $\domain{\psi} = \emptyset$ then $\lambda(\psi) = \Lambda$.</p>
+<p>So think of $\lambda$ this way: feeding $\psi$ into $\lambda$ should spit out a set of vectors in $\Field^{\Dim{\Lambda}}$.
+Based on the size of the domain of $\psi$, these vectors could span a 1-dimensional subspace or the full space.</p>
+</blockquote>
+<p>Finally, let $\mathcal{M}$ denote the set of all partial matchings $\psi: V_P \rightarrow V_H$.
+For any clause $C$, define</p>
+<p>$$Z(C) := \{ \psi \in \mathcal{M} : \domain{\psi} = \Closure{C} \land C(\psi) = \False\}$$</p>
+<p>Finally, we define</p>
+<p>$$\lambda(C) := \Span{\underset{\psi \in Z(C)}{\cup}\lambda(\psi) }$$</p>
+<p>It is clear to see that for $C=\bot$, we have $\HeavyPigeons{C} = \{\}$, and therefore, $Z(C) = \{ \psi_0 \}$ where $\domain{\psi_0} = \emptyset$.
+Therefore $\lambda(\bot) = \Span{\lambda{\psi_0}} = \Lambda$.</p>
+<div class="callout callout-important">
+  <p><strong>KEY IDEA</strong></p>
+<p>Now here's the trick. We will show that the PHP axioms and the $(w_0, \vec{d})$ axioms, span a much smaller subspace than $\Lambda$ under $\lambda$. <strong>This is Lemma 4.9</strong> below.</p>
+<p>Thus, to go from these axioms to the refutation, we must encounter a resolvent that spans a bigger subspace than its parents.
+But if the pseudowidth of all clauses is small i.e smaller than $\frac{r}{2}$, then every resolvent spans a space entirely contained by the space spanned by its parents, thus we can actually never get to $\bot$, giving us our contradiction.
+This is formally shown in <strong>Lemma 4.10</strong>.</p>
+</div>
+<p>More formally, Lemma 4.9 says that there exists $$\frac{C_0 \vee x \quad \Complement{x} \vee C_1}{C}$$ such that $\Span{\lambda(C)} \not\subseteq \Span{\lambda(C_0), \lambda(C_1)}$ (otherwise, how do we get to $\bot$). (Remember, in <a href="#ref-beame1996simplified" class="citation citation-t" title="Simplified and Improved Resolution Lower Bounds">Beame &amp; Pitassi (1996)</a>, <a href="/blog/proof-complexity/basic-lower-bound/">we did the same thing</a> with critical pigeons, now we're playing the same game with subspaces, which is a generalisation.)</p>
+<p>But Lemma 4.10 prevents this from happening if $\max\{\Closure{C_0}, \Closure{C_1}, \Closure{C}\} \le \frac{r}{4}$.
+Thus, for the resolvent to span more space, we need some $C' \in \{C, C_0, C_1\}$ such that $\Closure{C'} &gt; \frac{r}{4} = \frac{k\Delta}{c - \nu} = \frac{r}{4\xi}$.
+Solving for $k = \frac{r\xi}{4}$.</p>
+<blockquote>
+<p>This is the second time we use expansion in the proof. The only other use is in the proof for Lemma 4.10 where we show that the set $\mathcal{M}_D$ is large enough — to do that we need to lower bound how many holes a light pigeon in $C$ can go to in $G$ without satisfying clause $C$.
+Strong expansion implies many holes. Many holes means many vectors in $\mathcal{M}_D$ which then allows us to span all of $\Lambda_D$. See proof for more details.</p>
+</blockquote>
+<p>Now as $G$ is a $(r,\Delta, c)$ boundary expander, by <strong>Lemma 3.3</strong>  (contrapositive), we have that if $\Closure{C'} = \ClosureParam{\HeavyPigeons{C'}} &gt; \frac{k\Delta}{c - \nu}$ then $\Size{\HeavyPigeons{C'}} &gt; k = \frac{r\xi}{4}$.</p>
+<p>This completes the proof.</p>
+
+  <div class="qed">&#9634;</div>
+</div>
+<p>Now we prove the main lemmas the above proof relies on. Numbering is from <a href="#ref-rezende2020Exp" class="citation citation-t" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs">de Rezende et al. (2020)</a>.</p>
+<div class="callout callout-lemma thm-numbered">
+  
+  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> (Lemma 3.3)</span></div>
+  
+  <p>Suppose that $G$ is an $(r,\Delta,c)$-boundary expander and that $T \subseteq V_{\text{exp}}(G)$ has size $|T|\le k \le r$. Then $\Size{\ClosureParam{T}} \le \frac{k\Delta}{c-\nu}$.</p>
+<p><strong>Contrapositive</strong>: If $\Size{\ClosureParam{T}} &gt; \frac{k\Delta}{c-\nu}$, then $\Size{T} &gt; k$</p>
+
+</div>
+<div class="callout callout-proof">
+  <div class="proof-header"><em>Proof.</em></div>
+  <p>See <a href="../Lemma3.3.pdf">full proof</a></p>
+
+  <div class="qed">&#9634;</div>
+</div>
+<div class="callout callout-lemma thm-numbered">
+  
+  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> (Lemma 4.9)</span></div>
+  
+  <p>Let $\xi \le 1/4$. Let $G$ be any graph with $m &gt; n$ and $\delta_i = 4\GraphNbrs{i}\xi$ for all $i\in [m]$.
+Given a set of $(w_0, \vec{d})$ axioms $\mathcal{A}$ of size $\Size{\mathcal{A}} \le (1 + \xi)^{w_0}$ for arbitrary $w_0$ and any vector $\vec{d}$ with $d_i \le \GraphNbrs{i}$ for all $i\in [m]$, we have</p>
+<p>$$\Span{\lambda(C) : C \in \FPHP{m}{n}(G) \cup \mathcal{A}} \not\subseteq \Lambda$$</p>
+
+</div>
+<div class="callout callout-proof">
+  <div class="proof-header"><em>Proof.</em></div>
+  <p>See <a href="../Lemma4.9.pdf">full proof</a></p>
+
+  <div class="qed">&#9634;</div>
+</div>
+<div class="callout callout-note">
+  <p><strong>Attention Rajko</strong>: This lemma will make use of this idea called closure, which looks remarkably similar to the non-blocking graph game.
+But I do not think the strong expansion issue is coming from here. I'm curious to see what you think?</p>
+
+</div>
+<div class="callout callout-lemma thm-numbered">
+  
+  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> (Lemma 4.10)</span></div>
+  
+  <p>Let $C$ be the resolvent from $C_0$ and $C_1$.
+$$ \max\Big\{\Closure{C_0}, \Closure{C_1}, \Closure{C}\Big\} \le \frac{r}{4} \implies \Span{\lambda(C)} \subseteq \Span{\lambda(C_0), \lambda(C_1)}$$</p>
+
+</div>
+<div class="callout callout-proof">
+  <div class="proof-header"><em>Proof.</em></div>
+  <!-- Let $S = \Closure{C}$ and $S_0 = \Closure{C_0}$ and $S_1 = \Closure{C_1}$.  -->
+<!-- Let $S_{01} = S_0 \cup S_1$. -->
+<!-- Let $M$ denote the set of all partial matchings that assign pigeons holes. -->
+<!-- We want to show that $\lambda(C) \subseteq \Span{\lambda(C_0), \lambda(C_1)}$. -->
+<!-- Note that $\lambda(C)= \Span{\lambda(\phi) : \phi \in Z(C)}$ where $Z(C) = \{ \phi \in M: \domain{\phi} = \Closure{C} \land C(\phi) = \False\}$ -->
+<!-- Pick arbitrary $\phi \in Z(C)$. -->
+<!-- Let $\phi'$ be a restriction of $\phi$ to $S \cap S_{01}$ i.e we only consider partial matchings where $\domain{\phi'c} = S \cap S_{01}$. -->
+<!-- As $\phi'$ is a restriction we get $\lambda(\phi) \subseteq \lambda(\phi')$. -->
+<!-- Thus, showing $\lambda(\phi') \subseteq \Span{\lambda(C_0), \lambda(C_1)}$ completes the proof. -->
+<!-- Define $D = S_{01} \setminus S$. -->
+<!-- Now here's what we do, we start with an arbitrary $\phi \in Z(C)$, and construct a set of partial matchings $M_D$ as follows: -->
+<!-- $$ \phi \xrightarrow{\text{restrict domain to $S \cap S_{01}$}} \phi' $$ -->
+<!-- Let $M_D = \{\widetilde{\phi} : \text{extend $\domain{\phi'}$ to $D$ such that $C(\widetilde{\phi})=\False$}  \}$ be the set of all such extensions. -->
+<!-- Now for any $\widetilde{\phi} \in M_D$. as $C(\widetilde{\phi}) = \False$, by the soundness of the resolution system, it must be that either $C_0(\widetilde{\phi}) = \False$ or $C_1(\widetilde{\phi}) = \False$. -->
+<!-- Assume without loss of generality that  $C_0(\widetilde{\phi}) = \False$ and let $\widetilde{\phi'}$ be a restriction $\widetilde{\phi}$ to $S_0 = \Closure{C_0}$. -->
+<!-- As restricting a matching cannot turn it true, we can conculude -->
+<!-- $$ \widetilde{\phi'} \in Z(C_0) \text{ which implies } \widetilde{\phi'} \in \Span{\lambda(C_0)}$$. -->
+<!-- There for any $\widetilde{\phi} \in M_D$ we have:  -->
+<!-- $$ \lambda(\widetilde{\phi}) \subseteq \lambda(\widetilde{\phi'}) \subseteq \Span{\lambda(C_0)} \subseteq \Span{\lambda(C_0), \lambda(C_1) }$$ -->
+<!-- Now i wanted to show this for any $\phi \in Z(C)$, but we have so far only done this for any  $\widetilde{\phi} \in M_D$.  -->
+<!-- Next we will show that  -->
+<!-- $$\lambda(M_D) = \Span{\lambda(\widetilde{\phi}) : \widetilde{\phi} \in M_D} \superseteq \lambda(\phi')$$ -->
+<p>See <a href="../Lemma4.10.pdf">full proof</a></p>
+
+  <div class="qed">&#9634;</div>
+</div>
+<h2 id="main-theorem">Main Theorem</h2>
+
+
+<div class="bibliography">
+<h2>References</h2>
+<ol>
+
+  
+  
+  
+  <li id="ref-razborov2003resolution">
+    Razborov, A..
+    <span class="bib-title">Resolution Lower Bounds for the Weak Pigeonhole Principle</span>.
+    <em>ECCC</em>, 2003.
+  </li>
+  
+
+  
+  
+  
+  <li id="ref-rezende2020Exp">
+    de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D..
+    <span class="bib-title">Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs</span>.
+    <em>CCC</em>, 2020.
+  </li>
+  
+
+  
+  
+  
+  <li id="ref-beame1996simplified">
+    Beame, P. and Pitassi, T..
+    <span class="bib-title">Simplified and Improved Resolution Lower Bounds</span>.
+    <em>FOCS</em>, 1996.
+  </li>
+  
+
+</ol>
+</div>
+
+  </div>
+
+  
+
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const select = document.getElementById('theme-select');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      const lightThemes = ['rose-pine-dawn', 'bw-light'];
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        }
+      }
+
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
+
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
+    })();
+  </script>
+  <script>
+    // Smooth scroll + highlight for eqref and citation links.
+    // Citations get a ↩ back-link to return to reading position.
+    document.addEventListener('click', function(e) {
+      // Handle back-arrow clicks
+      var back = e.target.closest('.bib-back');
+      if (back) {
+        e.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Clean up previous highlights and back-links
+      document.querySelectorAll('.eq-highlight').forEach(function(el) {
+        el.classList.remove('eq-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function(el) {
+        el.remove();
+      });
+
+      var href = link.getAttribute('href');
+      var id = decodeURIComponent(href.slice(1));
+      var target = document.getElementById(id);
+      if (!target) return;
+
+      var highlight = target.closest('mjx-container[display="true"]') || target;
+      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlight.classList.add('eq-highlight');
+
+      // For citations, add a back-arrow to return to reading position
+      if (link.classList.contains('citation')) {
+        if (!link.id) link.id = 'cite-src-' + id;
+        var arrow = document.createElement('a');
+        arrow.className = 'bib-back';
+        arrow.setAttribute('data-source', link.id);
+        arrow.textContent = ' \u21A9';
+        arrow.title = 'Back to text';
+        highlight.appendChild(arrow);
+      }
+    });
+  </script>
+
+</body>
+</html>

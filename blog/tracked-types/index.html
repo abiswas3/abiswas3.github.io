@@ -5,7 +5,7 @@
     (function() {
       var theme = localStorage.getItem('theme');
       if (!theme) {
-        theme = 'vitesse-dark';
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -17,10 +17,62 @@
   <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
   <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
   
-  <link rel="stylesheet" href="/katex.css">
-  <script defer src="/katex.min.js"></script>
-  <script defer src="/auto-render.min.js"></script>
-  <script defer src="/katex-init.js"></script>
+  
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      tags: 'ams',
+      macros: {
+        field: ['{\\mathbb{#1}}', 1],
+        hei: ['{\\mathbb{F}(#1)}', 1],
+        Field: '{\\mathbb{F}}',
+        Mont: ['{\\widetilde{#1}}', 1],
+        samples: '{\\xleftarrow{\\$}}',
+        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+        TauConstraints: '{\\tau_y}',
+        TauTime: '{\\tau_{\\text{cycle}}}',
+        TauGroup: '{\\tau_b}',
+        MLE: ['{\\widetilde{#1}}', 1],
+        tf: ['{\\widetilde{#1}}', 1],
+        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+        Def: '{:=}',
+        ChallengeSet: '{\\mathsf{C}}',
+        Complement: ['{\\overline{#1}}', 1],
+        Size: ['{\\left|#1\\right|}', 1],
+        Exp: ['{2^{#1}}', 1],
+        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+        BigO: ['{O\\ \\left(#1\\right)}', 1],
+        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
+        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
+        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+        poly: '{\\operatorname{poly}}',
+        criticalAlpha: ['{\\alpha_{#1}}', 1],
+        bit: '{\\{0,1\\}}',
+        CStar: '{C^{\\star}}',
+        GraphNbrs: ['{N_G(#1)}', 1],
+        ClauseNbrs: ['{N_C(#1)}', 1],
+        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        SmallO: ['{o\\!(#1)}', 1],
+        Naturals: '{\\mathbb{N}}',
+        Closure: ['{\\operatorname{Cl}(#1)}', 1],
+        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+        Dim: ['{\\dim(#1)}', 1],
+        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+        domain: ['{\\operatorname{dom}(#1)}', 1],
+        False: '{\\bot}'
+      }
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
   
   
 </head>
@@ -59,10 +111,15 @@
 
 <article class="post">
   <header class="post-header">
+    
+    
+    <a href="&#x2F;blog&#x2F;" class="back-link">&larr; Notes</a>
+    
     <h1>Tracked Types</h1>
     <div class="post-meta">
       <span class="post-author">Ari</span>
       <time>2025-10-04</time>
+      
     </div>
     
     <div class="post-tags">
@@ -311,39 +368,54 @@ See an example of how to use <a rel="external" href="https://github.com/abiswas3
       }
     })();
   </script>
-    
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        renderMathInElement(document.body, {
-            delimiters: [
-                { left: '$$', right: '$$', display: true },
-                { left: '$', right: '$', display: false },
-                { left: '\\(', right: '\\)', display: false },
-                { left: '\\[', right: '\\]', display: true }
-            ],
-          macros: {
-            "\\field": "\\mathbb{#1}",
-            "\\hei": "\\mathbb{F}(#1)",
-            "\\Field": "\\mathbb{F}",
-            "\\Mont": "\\widetilde{#1}",
-            "\\samples": "\\xleftarrow{\\$}",
-            "\\Lagrange": "\\mathcal{L}_{#1}\\left(#2 \\right)",
-            "\\TauConstraints": "\\tau_y",
-            "\\TauTime": "\\tau_{\\text{cycle}}",
-            "\\TauGroup": "\\tau_b",
-            "\\MLE": "\\widetilde{#1}",
-            "\\eq": "\\MLE{\\mathsf{eq}}\\left(#1, #2 \\right)",
-            "\\Def": ":=",
-            "\\ChallengeSet": "\\mathsf{C}"
+  <script>
+    // Smooth scroll + highlight for eqref and citation links.
+    // Citations get a ↩ back-link to return to reading position.
+    document.addEventListener('click', function(e) {
+      // Handle back-arrow clicks
+      var back = e.target.closest('.bib-back');
+      if (back) {
+        e.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
 
-          },
-            throwOnError: false,
-          trust: true
+      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      if (!link) return;
 
-        });
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Clean up previous highlights and back-links
+      document.querySelectorAll('.eq-highlight').forEach(function(el) {
+        el.classList.remove('eq-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function(el) {
+        el.remove();
+      });
+
+      var href = link.getAttribute('href');
+      var id = decodeURIComponent(href.slice(1));
+      var target = document.getElementById(id);
+      if (!target) return;
+
+      var highlight = target.closest('mjx-container[display="true"]') || target;
+      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlight.classList.add('eq-highlight');
+
+      // For citations, add a back-arrow to return to reading position
+      if (link.classList.contains('citation')) {
+        if (!link.id) link.id = 'cite-src-' + id;
+        var arrow = document.createElement('a');
+        arrow.className = 'bib-back';
+        arrow.setAttribute('data-source', link.id);
+        arrow.textContent = ' \u21A9';
+        arrow.title = 'Back to text';
+        highlight.appendChild(arrow);
+      }
     });
-</script>
-
+  </script>
 
 </body>
 </html>

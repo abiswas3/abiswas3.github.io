@@ -7,16 +7,10 @@
   <id>/blog/atom.xml</id>
   
   
-  
-  
-  
-  
-  
-  
   <entry xml:lang="en">
     <title>Anatomy Of A Jolt Sumcheck</title>
     <published>2025-12-01T00:00:00+00:00</published>
-    <updated>2025-12-01T00:00:00+00:00</updated>
+    <updated>2026-02-17T00:00:00+00:00</updated>
     <author>
       <name></name>
     </author>
@@ -26,28 +20,28 @@
     <content type="html" xml:base="/blog/streaming-sumchecks/">&lt;p&gt;This &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;a16z&#x2F;jolt&#x2F;pull&#x2F;1114&quot;&gt;PR&lt;&#x2F;a&gt; introduces a generalised sum-check API, adapted to accommodate an implementation of Jolt that uses $O(1)$ memory&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#d&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;the-trace&quot;&gt;The Trace&lt;&#x2F;h2&gt;
 &lt;p&gt;Before we describe the API, it will be useful to briefly re-cap how Jolt works.
-At the heart of the jolt prover is the sumcheck algorithm.
+At the heart of the Jolt prover is the sumcheck algorithm.
 Given some polynomial $g$ and a set $S$ with sufficient structure&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#e&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;, the sum-check algorithm enables a prover to convince a verifier that it computed $\sum_{x \in S} g(x)$ honestly.
 The end goal of the Jolt prover is to convince an honest verifier that it ran some guest program&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#c&quot;&gt;3&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; correctly.
 It does so via many sum-check algorithms.
-Therefore for the whole setup to work, the polynomials involved in these sumchecks must be in someway related to the execution of said program.
+Therefore for the whole setup to work, the polynomials involved in these sumchecks must be in some way related to the execution of said program.
 As such honest proving begins with emulation of the given RISC-V program -- which we refer to as the trace.
 This is a fancy way of saying that the prover runs the program, and stores succinctly as a list the machine state before and after each instruction.
-This list is what we refer to the trace.
+This list is what we refer to as the trace.
 And it is this trace from which we will construct the sum-check polynomials in Jolt.
-&lt;a href=&quot;&#x2F;blog&#x2F;streaming-sumchecks&#x2F;.&#x2F;day_0.html&quot;&gt;See this post&lt;&#x2F;a&gt; for a fully worked out description of the emulation from an actual albeit useless program written in Rust.
+See the emulation post for a fully worked out description of the emulation from an actual albeit useless program written in Rust.
 For example, consider the following program with just two instructions.&lt;&#x2F;p&gt;
 &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;asm&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;00001117&lt;&#x2F;span&gt;&lt;span&gt;    auipc  &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-language z-constant&quot;&gt;sp&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0x1&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; # sp = PC + (0x1 &amp;lt;&amp;lt; 12) = 0x80000000 + 0x1000 = 0x80001000&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;12010113&lt;&#x2F;span&gt;&lt;span&gt;    addi   &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-language z-constant&quot;&gt;sp&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-language z-constant&quot;&gt;sp&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;288&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; # sp = 0x80001000 + 288 = 0x80001120&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;After doing some initial setup of all the values of registers and memory, the emulation looks like the following:&lt;&#x2F;p&gt;
 &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt;Cycle&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; AUIPC&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;    address&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2147483648&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;  &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; = 0x80000000 ✓&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;    address&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2147483648&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;  &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; = 0x80000000&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;    operands&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; FormatU&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;        rd&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;            &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; x2 = sp (stack pointer)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;        imm&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 4096&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;        &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; = 0x1000 ✓&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;        imm&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 4096&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;        &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; = 0x1000&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation&quot;&gt;    }&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;    register_state&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;        rd&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; (&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2147487744&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;  &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; sp: 0 → 0x80001000 ✓&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;        rd&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; (&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2147487744&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;  &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; sp: 0 → 0x80001000&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation&quot;&gt;    }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
@@ -55,11 +49,11 @@ For example, consider the following program with just two instructions.&lt;&#x2F
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt;Cycle&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 1&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; ADDI&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt;    RISCVCycle&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;        instruction&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; ADDI&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;            address&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2147483652&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;  &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; = 0x80000004 ✓ (Program counter)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;            address&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2147483652&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;  &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; = 0x80000004 (Program counter)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;            operands&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; FormatI&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;                rd&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;            &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; sp (based on mapping above)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;                rs1&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;           &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; sp&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;                imm&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 288&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;         &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; = 0x120 ✓&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;                imm&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 288&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;         &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; = 0x120&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation&quot;&gt;            }&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;            virtual_sequence_remaining&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; None&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;            is_first_in_sequence&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-language z-constant&quot;&gt; false&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -67,7 +61,7 @@ For example, consider the following program with just two instructions.&lt;&#x2F
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation&quot;&gt;        }&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;        register_state&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; RegisterStateFormatI&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;            rd&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; (&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;                2147487744&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt; &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; new value in rd &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;                2147487744&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt; &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; new value in rd&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;                2147488032&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt; &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; old value in rd&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation&quot;&gt;            )&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;            rs1&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2147487744&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt; &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; value in rs1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -83,7 +77,7 @@ It is a giant vector of length $T$, and location $t \in [T]$ stores the machine 
   &lt;div class=&quot;callout-title&quot;&gt;A Lie In Service Of The Truth&lt;&#x2F;div&gt;
   
   &lt;p&gt;Throughout this post we will assume that we can store the entire trace in memory, and iterating through the trace is free. This is clearly not true, and we will fix this at a later date.
-But for the purposes of this post, this assumption allows us to abstract away important implementation details that currently remain unimplemented -- and prove that we can indeed implement any jolt sumcheck with $O(1)$ memory.&lt;&#x2F;p&gt;
+But for the purposes of this post, this assumption allows us to abstract away important implementation details that currently remain unimplemented, and prove that we can indeed implement any Jolt sumcheck with $O(1)$ memory.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;div&gt;
 &lt;h2 id=&quot;correctness-as-constraint-satisfaction&quot;&gt;Correctness As Constraint Satisfaction&lt;&#x2F;h2&gt;
@@ -105,21 +99,21 @@ In RISC-V assembly loads&#x2F;store instructions look like the following:&lt;&#x
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;sd   rs2, offset(rs1)  &lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; # Store doubleword (RV64)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;So if the instruction has the &lt;code&gt;Load&lt;&#x2F;code&gt; flag set to 1 or &lt;code&gt;Store&lt;&#x2F;code&gt; flag set to 1, then the address from which we read&#x2F;write must be equal to value in &lt;code&gt;rs1 + offset&lt;&#x2F;code&gt;.
 Using propositional logic we write:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword z-keyword z-control&quot;&gt;if&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; {&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; Instruct&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt; has&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; Load&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; OR&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; Store&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; }&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt; then&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; (&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; RamAddress&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; )&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt; ==&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; (&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; Rs1Value&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt; +&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; Imm&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;if { Instruct has Load OR Store } then ( RamAddress ) == ( Rs1Value + Imm )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;The same thing expressed as algebraic constraints:&lt;&#x2F;p&gt;
 &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;(Load + Store) * (RamAddress - (Rs1Value + Imm)) = 0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;For a program to be correctly executed, for every time step $t \in { 0,1 }^{\log T}$, the above constraint must be satisfied.
+&lt;p&gt;For a program to be correctly executed, for every time step $t \in \lbrace 0,1 \rbrace^{\log T}$, the above constraint must be satisfied.
 Of course for a program to be correct, it is not sufficient to just satisfy the above constraint.
 There are many more constraints.
-In the &lt;code&gt;OuterSpartan&lt;&#x2F;code&gt; sumcheck we write down 20 such &lt;a href=&quot;&#x2F;blog&#x2F;streaming-sumchecks&#x2F;.&#x2F;r1cs_constraints.html&quot;&gt;constraints&lt;&#x2F;a&gt;, express these constraints as the evaluations of two polynomials $\widetilde{A}$ and $\widetilde{B}$, and represent constraint satisfaction as a sumcheck.
+In the &lt;code&gt;OuterSpartan&lt;&#x2F;code&gt; sumcheck we write down 20 such constraints, express these constraints as the evaluations of two polynomials $\widetilde{A}$ and $\widetilde{B}$, and represent constraint satisfaction as a sumcheck.
 More details follow.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;the-outer-spartan-polynomials&quot;&gt;The Outer Spartan Polynomials&lt;&#x2F;h2&gt;
-&lt;p&gt;There are 20 constraints for each time step $t \in {0,1}^{\log T}$.
+&lt;p&gt;There are 20 constraints for each time step $t \in \lbrace 0,1\rbrace^{\log T}$.
 Each constraint will be of form&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;code&gt;Term 1 * Term 2 = 0&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
 &lt;p&gt;Here &lt;code&gt;Term 1&lt;&#x2F;code&gt; will be represented by $A$ and &lt;code&gt;Term 2&lt;&#x2F;code&gt; will be represented by $B$.&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;strong&gt;Indexing&lt;&#x2F;strong&gt;: We divide the 20 constraints into 2 groups.
-We refer to the each constraint using two digits&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#a&quot;&gt;4&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; $(b,y)$ where $b \in {0,1}$ is the selector index, and $y\in {-4, \ldots, 5}$ refers to one of the 10 constraints in group $b$.
+We refer to each constraint using two digits&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#a&quot;&gt;4&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; $(b,y)$ where $b \in \lbrace 0,1\rbrace$ is the selector index, and $y\in \lbrace -4, \ldots, 5\rbrace$ refers to one of the 10 constraints in group $b$.
 For example,&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;
@@ -136,11 +130,11 @@ For example,&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;div class=&quot;footnote-definition&quot; id=&quot;a&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;4&lt;&#x2F;sup&gt;
-&lt;p&gt;We choose those indices for $y$ instead of bit string or the set ${0, \ldots, 9}$ for computational reasons, the details of which we dot discuss here (maybe for a separate post).&lt;&#x2F;p&gt;
+&lt;p&gt;We choose those indices for $y$ instead of bit string or the set $\lbrace 0, \ldots, 9\rbrace$ for computational reasons, the details of which we don&#x27;t discuss here (maybe for a separate post).&lt;&#x2F;p&gt;
 &lt;&#x2F;div&gt;
 &lt;h3 id=&quot;example-constraint-1&quot;&gt;Example : Constraint 1&lt;&#x2F;h3&gt;
-&lt;p&gt;Let $z_t[\text{LOAD}], z_t[\text{STORE}] \in {0,1}$ denote boolean flags that denote whether the $t$&#x27;th instruction contains a LOAD or a STORE instruction.
-For a given time step $t \in {0,1}^{\log T}$, using information from the trace, we write a table of evaluations with the following indexing logic:&lt;&#x2F;p&gt;
+&lt;p&gt;Let $z_t[\text{LOAD}], z_t[\text{STORE}] \in \lbrace 0,1\rbrace$ denote boolean flags that denote whether the $t$&#x27;th instruction contains a LOAD or a STORE instruction.
+For a given time step $t \in \lbrace 0,1\rbrace^{\log T}$, using information from the trace, we write a table of evaluations with the following indexing logic:&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;$A(t, 0 , -4) = z_t[\text{LOAD}] + z_t[\text{STORE}]$&lt;&#x2F;p&gt;
@@ -150,36 +144,51 @@ For a given time step $t \in {0,1}^{\log T}$, using information from the trace, 
 &lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;p&gt;That is satisfying constraint 1 for time step $t$ is equivalent to checking if $A(t, 0, -4) \times B(t, 0, -4) = 0$.
-The remaining 19 constraints give us evaluations $A(X_t, X_b, Y)$ and $B(X_t, X_b, Y)$ for $Y \in {-4, \ldots, 5}, X_b \in {0,1}, X_t \in {0,1}^{\log T}$.
+The remaining 19 constraints give us evaluations $A(X_t, X_b, Y)$ and $B(X_t, X_b, Y)$ for $Y \in \lbrace -4, \ldots, 5\rbrace, X_b \in \lbrace 0,1\rbrace, X_t \in \lbrace 0,1\rbrace^{\log T}$.
 The picture you have in mind is the following
 &lt;img src=&quot;&#x2F;blog&#x2F;streaming-sumchecks&#x2F;trave_to_poly.svg&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;Satisfying all constraints is just saying the following:&lt;&#x2F;p&gt;
-&lt;p&gt;$$
-\begin{aligned}
-\widetilde{A}(x_t, x_b, y) \times \widetilde{B}(x_t, x_b,  y) = \vec{0} \quad \forall x_t \in {0,1}^{\log T}, \forall x_b \in {0,1}, \forall y \in {-4, ..., 5}
-\end{aligned}
-$$&lt;&#x2F;p&gt;
-&lt;p&gt;where $\widetilde{U}$ denoes the multi-linear extension of a vector $U$.
-Now we do the thing we have done since the beginning of time.
-We want to make sure the LHS of the above system of equations to equal the RHS as polynomials.
-So we sample $(\TauTime || \tau_{b} || \TauConstraints) \samples \ChallengeSet^{\log T+2}$ and check if the following sumcheck holds:&lt;&#x2F;p&gt;
-&lt;p&gt;$$\sum_{x_t \in {0,1}^{\log T}} \sum_{x_b \in {0,1}} \sum_{y \in {-4,...,5}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{y}{\TauConstraints} \cdot \widetilde{A}(x_t, x_b, y) , \widetilde{B}(x_t, x_b, y) = 0 $$&lt;&#x2F;p&gt;
-&lt;p&gt;By Schwartz-Zippel, with high probability if the above tests passes, then the verifier can be happy that the prover was honest.&lt;&#x2F;p&gt;
+&lt;div class=&quot;math-display&quot;&gt;
+$$
+\widetilde{A}(x_t, x_b, y) \times \widetilde{B}(x_t, x_b,  y) = \vec{0} \quad \forall x_t \in \{0,1\}^{\log T}, \forall x_b \in \{0,1\}, \forall y \in \{-4, ..., 5\}
+$$
+&lt;&#x2F;div&gt;
+&lt;p&gt;where $\widetilde{U}$ denotes the multilinear extension of a vector $U$.&lt;&#x2F;p&gt;
+&lt;div class=&quot;callout callout-definition thm-numbered&quot;&gt;
+  
+  &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;thm-title&quot;&gt; (Notation)&lt;&#x2F;span&gt;&lt;&#x2F;div&gt;
+  
+  &lt;ul&gt;
+&lt;li&gt;$\widetilde{U}$ denotes the &lt;strong&gt;multilinear extension&lt;&#x2F;strong&gt; (MLE) of $U$: the unique multilinear polynomial agreeing with $U$ on all Boolean inputs.&lt;&#x2F;li&gt;
+&lt;li&gt;$\eq{\tau}{x}$ is the &lt;strong&gt;equality polynomial&lt;&#x2F;strong&gt;, evaluating to 1 when $\tau = x$ on the Boolean hypercube and 0 otherwise.&lt;&#x2F;li&gt;
+&lt;li&gt;$\mathcal{L}_a(X)$ is the &lt;strong&gt;Lagrange basis polynomial&lt;&#x2F;strong&gt; for point $a$ in a domain $D$: the unique polynomial of degree $|D|-1$ satisfying $\mathcal{L}_a(a) = 1$ and $\mathcal{L}_a(d) = 0$ for all other $d \in D$.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+
+&lt;&#x2F;div&gt;
+&lt;p&gt;Now we do the thing we have done since the beginning of time.
+We want to make sure the LHS of the above system of equations equals the RHS as polynomials.
+So we sample $(\TauTime | \tau_{b} | \TauConstraints) \samples \ChallengeSet^{\log T+2}$ and check if the following sumcheck holds:&lt;&#x2F;p&gt;
+&lt;div class=&quot;math-display&quot;&gt;
+$$\sum_{x_t \in \{0,1\}^{\log T}} \sum_{x_b \in \{0,1\}} \sum_{y \in \{-4,...,5\}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{y}{\TauConstraints} \cdot \widetilde{A}(x_t, x_b, y) \, \widetilde{B}(x_t, x_b, y) = 0 $$
+&lt;&#x2F;div&gt;
+&lt;p&gt;By Schwartz-Zippel, with high probability if the above test passes, then the verifier can be happy that the prover was honest.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;review-of-the-linear-sumcheck-implementation&quot;&gt;Review Of The Linear Sumcheck Implementation&lt;&#x2F;h2&gt;
-&lt;p&gt;As described above in the picture, that in-order to get $\widetilde{A}(x_t, x_b, y)$ and $\widetilde{B}(x_t, x_b, y)$ we need to process the $t$&#x27;th location of the trace.
+&lt;p&gt;As described above in the picture, in order to get $\widetilde{A}(x_t, x_b, y)$ and $\widetilde{B}(x_t, x_b, y)$ we need to process the $t$&#x27;th location of the trace.
 As soon as we process every location of the trace once, we can store $\widetilde{A}$ and $\widetilde{B}$ in memory.
 This requires $T \times 2 \times 20$ field elements worth of memory.
-If we could afford this, -- we can bin the trace once and for all.
+If we could afford this, we can bin the trace once and for all.
 We have every bit of information needed to complete the sum-check algorithm.
-This is almost how the current implementation of the linear &lt;code&gt;OuterSpartan&lt;&#x2F;code&gt; sumcheck looks like.
+This is almost how the current implementation of the linear &lt;code&gt;OuterSpartan&lt;&#x2F;code&gt; sumcheck looks.
 Except there&#x27;s a special first round, which we describe below.&lt;&#x2F;p&gt;
 &lt;ol&gt;
 &lt;li&gt;A special handling of round involving variable $Y$ involving 10 constraints per time step and group index.&lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
 &lt;p&gt;Remember in each round of the sum-check the prover sends to the verifier a univariate polynomial, and the verifier responds with a challenge $r \samples \ChallengeSet$ sampled from the challenge set.
 We iterate through the entire trace, &lt;strong&gt;but&lt;&#x2F;strong&gt; we do &lt;strong&gt;NOT&lt;&#x2F;strong&gt; compute and store $\widetilde{A}$ and $\widetilde{B}$ in memory.
-Instead we store in memory, the following univariate polynomial, which is the provers first round message.&lt;&#x2F;p&gt;
-&lt;p&gt;$$s(\textcolor{pink}{Y}) \Def \sum_{x_t \in {0,1}^{\log T}} \sum_{x_b \in {0,1}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{\TauConstraints}{\textcolor{pink}{Y}} \cdot A(x_t, x_b, \textcolor{pink}{Y}) , B(x_t, x_b , \textcolor{pink}{Y})$$&lt;&#x2F;p&gt;
+Instead we store in memory the following univariate polynomial, which is the prover&#x27;s first round message.&lt;&#x2F;p&gt;
+&lt;div class=&quot;math-display&quot;&gt;
+$$s(\textcolor{pink}{Y}) \Def \sum_{x_t \in \{0,1\}^{\log T}} \sum_{x_b \in \{0,1\}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{\TauConstraints}{\textcolor{pink}{Y}} \cdot A(x_t, x_b, \textcolor{pink}{Y}) \, B(x_t, x_b , \textcolor{pink}{Y})$$
+&lt;&#x2F;div&gt;
 &lt;p&gt;This takes $O(1)$ field elements worth of storage as there are only $10$ constraints per group.
 &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;c20fe3c0234ea3a328dbbd3d7f717f64599ff579&#x2F;jolt-core&#x2F;src&#x2F;zkvm&#x2F;spartan&#x2F;outer.rs#L117&quot;&gt;See&lt;&#x2F;a&gt; for the evaluation points that represent the above polynomial.
 We refer to these evaluations as the &lt;code&gt;skip_window&lt;&#x2F;code&gt; in the code.&lt;&#x2F;p&gt;
@@ -191,7 +200,7 @@ We include this round in this post for completeness.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;div&gt;
 &lt;p&gt;After this round, the prover has received challenge $r_y$ to bind to variable $Y$.
-What we describe next, refers to the &lt;code&gt;OuterRemainingSumcheck&lt;&#x2F;code&gt; in Jolt.
+What we describe next refers to the &lt;code&gt;OuterRemainingSumcheck&lt;&#x2F;code&gt; in Jolt.
 The sumcheck is divided into 2 phases:&lt;&#x2F;p&gt;
 &lt;ol start=&quot;2&quot;&gt;
 &lt;li&gt;A setup phase which materialises the polynomials -- this is the &lt;code&gt;gen&lt;&#x2F;code&gt; constructor.&lt;&#x2F;li&gt;
@@ -200,40 +209,47 @@ The sumcheck is divided into 2 phases:&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;setup-phase&quot;&gt;Setup Phase&lt;&#x2F;h3&gt;
 &lt;p&gt;We iterate over the entire trace one more time, and now materialise polynomials $\widetilde{A}, \widetilde{B}$ with $r_y$ bound to variable $Y$.
 This takes $2T$ field elements worth of space.&lt;&#x2F;p&gt;
-&lt;p&gt;More specifically for every $(x_{\log T}, \dots, x_{1}, x_b) \in {0,1}^{\log T + 1}$, we store&lt;&#x2F;p&gt;
-&lt;p&gt;$$\widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, r_y) = \sum_{y \in {-4. \dots, 5}} \Lagrange{\tau_y}{y}, \widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, y)$$ and
-$$\widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, r_y)= \sum_{y \in {-4. \dots, 5}} \Lagrange{\tau_y}{y}, \widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, y)$$&lt;&#x2F;p&gt;
+&lt;p&gt;More specifically for every $(x_{\log T}, \dots, x_{1}, x_b) \in \lbrace 0,1\rbrace^{\log T + 1}$, we store&lt;&#x2F;p&gt;
+&lt;div class=&quot;math-display&quot;&gt;
+$$\widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, r_y) = \sum_{y \in \{-4, \dots, 5\}} \Lagrange{\tau_y}{y}\, \widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, y)$$
+&lt;&#x2F;div&gt;
+&lt;p&gt;and&lt;&#x2F;p&gt;
+&lt;div class=&quot;math-display&quot;&gt;
+$$\widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, r_y)= \sum_{y \in \{-4, \dots, 5\}} \Lagrange{\tau_y}{y}\, \widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, y)$$
+&lt;&#x2F;div&gt;
 &lt;p&gt;This storing of partially bound sumcheck polynomials in memory is what we refer to as materialising.&lt;&#x2F;p&gt;
-&lt;p&gt;While we&#x27;re materialising $\widetilde{A}$ and $\widetilde{B}$, we might as well prepare ourselves to also compute the provers messages for first round of the sum-check algorithm.
+&lt;p&gt;While we&#x27;re materialising $\widetilde{A}$ and $\widetilde{B}$, we might as well prepare ourselves to also compute the prover&#x27;s messages for the first round of the sum-check algorithm.
 This process where we materialise the polynomials of the sum-check &lt;strong&gt;and&lt;&#x2F;strong&gt; also compute the messages for the next round is referred to as &lt;code&gt;fused&lt;&#x2F;code&gt; materialisation in the code.
-This is exactly what the method&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;code&gt;fn compute_first_quadratic_evals_and_bound_polys&lt;&#x2F;code&gt; &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;c20fe3c0234ea3a328dbbd3d7f717f64599ff579&#x2F;jolt-core&#x2F;src&#x2F;zkvm&#x2F;spartan&#x2F;outer.rs#L297&quot;&gt;described here&lt;&#x2F;a&gt; does.&lt;&#x2F;p&gt;
+This is exactly what &lt;code&gt;compute_first_quadratic_evals_and_bound_polys&lt;&#x2F;code&gt; (&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;c20fe3c0234ea3a328dbbd3d7f717f64599ff579&#x2F;jolt-core&#x2F;src&#x2F;zkvm&#x2F;spartan&#x2F;outer.rs#L297&quot;&gt;described here&lt;&#x2F;a&gt;) does.&lt;&#x2F;p&gt;
 &lt;p&gt;Here &lt;code&gt;t0&lt;&#x2F;code&gt; and &lt;code&gt;t_inf&lt;&#x2F;code&gt; refer to evaluations of the following quadratic polynomial.&lt;&#x2F;p&gt;
-&lt;p&gt;$$t(\textcolor{pink}{X_b}) \Def \sum_{x_t \in {0,1}^{\log T}}\sum_{y \in {-4, \dots, 5}}  \eq{\tau_t}{x_t} \cdot \Lagrange{r_y}{y} \cdot \widetilde{A}(x_t ,\textcolor{pink}{X_b}, y) , \widetilde{B}(x_t, \textcolor{pink}{X_b}, y) $$&lt;&#x2F;p&gt;
+&lt;div class=&quot;math-display&quot;&gt;
+$$t(\textcolor{pink}{X_b}) \Def \sum_{x_t \in \{0,1\}^{\log T}}\sum_{y \in \{-4, \dots, 5\}}  \eq{\tau_t}{x_t} \cdot \Lagrange{r_y}{y} \cdot \widetilde{A}(x_t ,\textcolor{pink}{X_b}, y) \, \widetilde{B}(x_t, \textcolor{pink}{X_b}, y) $$
+&lt;&#x2F;div&gt;
 &lt;p&gt;The final polynomial that the prover must send is the following:&lt;&#x2F;p&gt;
 &lt;p&gt;$s(X_b) \Def \Lagrange{\tau_y}{r_0} \cdot t(\textcolor{pink}{X_b}) \cdot  \eq{\tau_{b}}{\textcolor{pink}{X_b}}$&lt;&#x2F;p&gt;
-&lt;p&gt;which is exactly what the following snippet of code on Line 1430 of &lt;code&gt;jolt-core&#x2F;src&#x2F;zkvm&#x2F;spartan&#x2F;outer.rs&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-language z-variable&quot;&gt; self&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;split_eq_poly&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;p&gt;which is exactly what the following snippet of code on Line 1430 of &lt;code&gt;jolt-core&#x2F;src&#x2F;zkvm&#x2F;spartan&#x2F;outer.rs&lt;&#x2F;code&gt; computes.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-language z-variable&quot;&gt;self&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;split_eq_poly&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;    .&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt;gruen_poly_deg_3&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;t0&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt; t_inf&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt; previous_claim&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;the-remaining-rounds&quot;&gt;The Remaining Rounds&lt;&#x2F;h2&gt;
-&lt;p&gt;With $\widetilde{A}$ and $\widetilde{B}$ materialised. The remaining rounds are standard. The mental picture is the following:&lt;&#x2F;p&gt;
+&lt;p&gt;With $\widetilde{A}$ and $\widetilde{B}$ materialised, the remaining rounds are standard. The mental picture is the following:&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;img src=&quot;&#x2F;blog&#x2F;streaming-sumchecks&#x2F;Linear_sumcheck.svg&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;At each bind the length of the representation of $\widetilde{A}$ and $\widetilde{B}$ shrinks by half.
-And the next prover message can be computed from the bounded and materialised polynomials.
+And the next prover message can be computed from the bound and materialised polynomials.
 The &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;c20fe3c0234ea3a328dbbd3d7f717f64599ff579&#x2F;jolt-core&#x2F;src&#x2F;zkvm&#x2F;spartan&#x2F;outer.rs#L387&quot;&gt;code&lt;&#x2F;a&gt; is described here.&lt;&#x2F;p&gt;
 &lt;p&gt;In conclusion, the linear sum-check with a special first round required that we stream the trace twice.
 The second time of doing so -- we materialised the polynomials with only $r_0$ bound to $Y$.
 Once we materialise, we never have to look at the trace ever again -- for at least this sum-check.
 But this came at the cost of storing $2T$ field elements in memory per polynomial.
 If $T$ is large, on the order of billions, then this is too expensive.&lt;&#x2F;p&gt;
-&lt;p&gt;:::{.remark}
-In this world where iterating through the trace is free, we could &lt;strong&gt;never&lt;&#x2F;strong&gt; materialise any polynomial and always just stream the trace every round (like we did in the first round).
+&lt;div class=&quot;callout callout-box thm-box&quot;&gt;
+  
+  &lt;p&gt;In this world where iterating through the trace is free, we could &lt;strong&gt;never&lt;&#x2F;strong&gt; materialise any polynomial and always just stream the trace every round (like we did in the first round).
 That would take close to no memory at all.
 While this is true, streaming the trace is actually not free, and we want to avoid it as many times as possible.
-We only assume its free to make the memory accounting work for this post.
+We only assume it&#x27;s free to make the memory accounting work for this post.
 Eventually, we will have to implement a memory efficient way to stream the trace -- but that is not terribly hard, and will soon be implemented.
-In what follows, we make a compromise, of sometimes streaming instead of always streaming, but this will allow us to store fewer things.
-:::&lt;&#x2F;p&gt;
+In what follows, we make a compromise of sometimes streaming instead of always streaming, but this will allow us to store fewer things.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
 &lt;h2 id=&quot;the-streaming-generalisation&quot;&gt;The Streaming Generalisation&lt;&#x2F;h2&gt;
 &lt;p&gt;To describe the streaming sum-check we need to first describe what we mean by a sum-check schedule.&lt;&#x2F;p&gt;
 &lt;ul&gt;
@@ -254,82 +270,84 @@ So in the above example, round 0 has window width 3, round 1 has width 2, round 
 &lt;p&gt;At this point it should be somewhat clear that the later we materialise, the more variables would be bound by verifier challenges, hence the memory representation of the materialised polynomial will be smaller.
 However, the later we materialise, it means we would have to stream the entire trace to compute prover messages more times.
 There is an inherent tradeoff here that cannot be avoided.
-The rough sketch of the algorithm proceeds is as follows:&lt;&#x2F;p&gt;
+The rough sketch of the algorithm is as follows:&lt;&#x2F;p&gt;
 &lt;ol&gt;
 &lt;li&gt;
-&lt;p&gt;If a round $i \in {0, .. n-1}$ is the start of a window with width $w$ -- we need to stream over the entire trace to generate and store a multi-variate polynomial $t$ with $w$ variables. This requires storing $W:=(d+1)^w$ evaluations of $t$ in memory, where $d$ is the degree of $t$.  This degree $d$, $w$-variate polynomial is what is referred to as &lt;code&gt;t_grid&lt;&#x2F;code&gt; or the streaming data structure. As $d$ and $w$ will be small constants, storing &lt;code&gt;t_grid&lt;&#x2F;code&gt; in memory is essentially free.&lt;&#x2F;p&gt;
+&lt;p&gt;If a round $i \in \lbrace 0, \ldots, n-1\rbrace$ is the start of a window with width $w$ -- we need to stream over the entire trace to generate and store a multivariate polynomial $t$ with $w$ variables. This requires storing $W:=(d+1)^w$ evaluations of $t$ in memory, where $d$ is the degree of $t$.  This degree $d$, $w$-variate polynomial is what is referred to as &lt;code&gt;t_grid&lt;&#x2F;code&gt; or the streaming data structure. As $d$ and $w$ will be small constants, storing &lt;code&gt;t_grid&lt;&#x2F;code&gt; in memory is essentially free.&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;li&gt;
-&lt;p&gt;Once store $t$ in memory, we can compute all prover messages needed for the next $w$ rounds of sum-check, without streaming the trace again. If this is not immediately clear, we work out an example below.&lt;&#x2F;p&gt;
+&lt;p&gt;Once we store $t$ in memory, we can compute all prover messages needed for the next $w$ rounds of sum-check, without streaming the trace again. If this is not immediately clear, we work out an example below.&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;li&gt;
-&lt;p&gt;On receiving a verifier challenge $r$ for the current round, we shrink the size of $t$ by a factor of $d+1$ (just as in the case of the linear-sum-check) where $d$ is the degree of $t$. The factor is 2 if $t$ is multi-linear.&lt;&#x2F;p&gt;
+&lt;p&gt;On receiving a verifier challenge $r$ for the current round, we shrink the size of $t$ by a factor of $d+1$ (just as in the case of the linear-sum-check) where $d$ is the degree of $t$. The factor is 2 if $t$ is multilinear.&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;li&gt;
 &lt;p&gt;In the last round of the given window the size of $t$ should reduce to 1.&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;li&gt;
-&lt;p&gt;The next round is either the start of a new window or its the switchover point. If it&#x27;s the former, we repeat the process described above. That is, we stream the trace again, and compute $t$ from the trace.&lt;&#x2F;p&gt;
+&lt;p&gt;The next round is either the start of a new window or it&#x27;s the switchover point. If it&#x27;s the former, we repeat the process described above. That is, we stream the trace again, and compute $t$ from the trace.&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;li&gt;
-&lt;p&gt;If the round $\hat{t} \in [n]$ is the switch-over point, we stream over the trace and store a multi-linear polynomials $\widetilde{A}(\textcolor{orange}{r_y, r_b, r_1, \ldots, r_{\hat{t}-1}}, X_{\hat{t}}, \ldots, X_{\log T})$ and $\widetilde{B}(\textcolor{orange}{r_y, r_b, r_1, \ldots, r_{\hat{t}-1}}, X_{\hat{t}}, \ldots, X_{\log T})$. Note that as we are materialising later, the size of these polynomials is much smaller than if we materialised in the first or second round.&lt;&#x2F;p&gt;
+&lt;p&gt;If the round $\hat{t} \in [n]$ is the switch-over point, we stream over the trace and store multilinear polynomials $\widetilde{A}(\textcolor{orange}{r_y, r_b, r_1, \ldots, r_{\hat{t}-1}}, X_{\hat{t}}, \ldots, X_{\log T})$ and $\widetilde{B}(\textcolor{orange}{r_y, r_b, r_1, \ldots, r_{\hat{t}-1}}, X_{\hat{t}}, \ldots, X_{\log T})$. Note that as we are materialising later, the size of these polynomials is much smaller than if we materialised in the first or second round.&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;li&gt;
-&lt;p&gt;Once again we compute $t$ to answer the provers messages. But crucially, this time we do it from materialised polynomials above. We no longer need to stream the strace.&lt;&#x2F;p&gt;
+&lt;p&gt;Once again we compute $t$ to answer the prover&#x27;s messages. But crucially, this time we do it from the materialised polynomials above. We no longer need to stream the trace.&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
-&lt;p&gt;If the above description is all too abstract, lets&#x27; work through an actual example, and then finally look at the code snippets.
+&lt;p&gt;If the above description is all too abstract, let&#x27;s work through an actual example, and then finally look at the code snippets.
 For this sum-check the degree of $t$ will be $d=2$ always.
 In the example schedule above, the window width is $w=3$ for round 0.
-The streaming data structure for to compute is the following:&lt;&#x2F;p&gt;
+The streaming data structure to compute is the following:&lt;&#x2F;p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$\begin{align*} 
-t&#x27;(\textcolor{pink}{X_2, X_1, X_b}) = \sum_{y \in \{-4, \dots, 5\}}\sum_{x_{15}..x_{3} \in \{0,1\}^{13}} &amp;A(x_{15}...x_3 , \textcolor{pink}{X_2, X_1, X_b},\, y) \\ 
-&amp;\cdot B(x_{15}...x_3,\textcolor{pink}{X_2, X_1, X_b},\, y)\, \Lagrange{y}{r_y} \\[10pt] &amp;\cdot\text{eq}(\tau_{15}..\tau_3; x_{15}...x_3) 
+$$\begin{align*}
+t&#x27;(\textcolor{pink}{X_2, X_1, X_b}) = \sum_{y \in \{-4, \dots, 5\}}\sum_{x_{15}..x_{3} \in \{0,1\}^{13}} &amp;A(x_{15}...x_3 , \textcolor{pink}{X_2, X_1, X_b},\, y) \\
+&amp;\cdot B(x_{15}...x_3,\textcolor{pink}{X_2, X_1, X_b},\, y)\, \Lagrange{y}{r_y} \\[10pt] &amp;\cdot\text{eq}(\tau_{15}..\tau_3; x_{15}...x_3)
 \end{align*}
 $$
 &lt;&#x2F;div&gt;
 &lt;p&gt;Thus, we need $(d+1)^w = 3^3 = 27$ evaluations to represent $t$.
-In Jolt we evaluate $t$ at ${0,1, \infty}^{w}$ and the data structure that stores is this evaluations is called &lt;code&gt;t_grid&lt;&#x2F;code&gt; which is what describe as the streaming data structure.
-This is exactly what the method&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;code&gt;fn compute_evaluation_grid_from_trace(&amp;amp;mut self, window_size: usize)&lt;&#x2F;code&gt; computes.
+In Jolt we evaluate $t$ at $\lbrace 0,1, \infty\rbrace^{w}$ and the data structure that stores these evaluations is called &lt;code&gt;t_grid&lt;&#x2F;code&gt;, which is what we describe as the streaming data structure.
+This is exactly what &lt;code&gt;compute_evaluation_grid_from_trace&lt;&#x2F;code&gt; computes.
 The next stage is to compute $t(0)$ and $t(\infty)$ where&lt;&#x2F;p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
 $$
 t(\textcolor{pink}{X_b}) = \sum_{x_2, x_1 \in \{0,1\}^2 } t&#x27;(x_2, x_1, \textcolor{pink}{X_b})\,\,\text{eq}(\tau_2, \tau_1; x_2, x_1)
 $$
 &lt;&#x2F;div&gt;
-&lt;p&gt;This is what &lt;code&gt;fn compute_t_evals(&amp;amp;self, window_size: usize) -&amp;gt; (F, F)&lt;&#x2F;code&gt; computes.&lt;&#x2F;p&gt;
+&lt;p&gt;This is what &lt;code&gt;compute_t_evals&lt;&#x2F;code&gt; computes.&lt;&#x2F;p&gt;
 &lt;div class=&quot;callout callout-box thm-box&quot;&gt;
   
-  &lt;p&gt;Throughout this post when we write $\eq{\tau}{x}$, we assume its implemented using the Dao-Thaler split-eq optimisation. Thus the memory representation of the $\eq{}{}$ polynomials is never an issue.&lt;&#x2F;p&gt;
+  &lt;p&gt;Throughout this post when we write $\eq{\tau}{x}$, we assume it&#x27;s implemented using the Dao-Thaler split-eq optimisation. Thus the memory representation of the $\eq{}{}$ polynomials is never an issue.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;div&gt;
-&lt;p&gt;Finally the provers message is given by
+&lt;p&gt;Finally the prover&#x27;s message is given by
 $$
 s(\textcolor{pink}{X_b}) = t(\textcolor{pink}{X_b}),\text{eq}(\tau_b, \textcolor{pink}{X_b})
 $$&lt;&#x2F;p&gt;
 &lt;div class=&quot;callout callout-box thm-box&quot;&gt;
   
-  &lt;h3 id=&quot;prover-messages-are-always-computed-from-t-grid&quot;&gt;Prover Messages Are Always Computed From &lt;code&gt;t_grid&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
-&lt;p&gt;It is important to note that in every round of the sum-check the provers messages will be computed using the streaming data structure &lt;code&gt;t_grid&lt;&#x2F;code&gt;.
-We will shortly see that once the current &lt;code&gt;t_grid&lt;&#x2F;code&gt; gets exhaused we will re-compute it.&lt;&#x2F;p&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;Prover Messages Are Always Computed From `t_grid`&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;It is important to note that in every round of the sum-check the prover&#x27;s messages will be computed using the streaming data structure &lt;code&gt;t_grid&lt;&#x2F;code&gt;.
+We will shortly see that once the current &lt;code&gt;t_grid&lt;&#x2F;code&gt; gets exhausted we will re-compute it.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;div&gt;
-&lt;blockquote&gt;
-&lt;h3 id=&quot;a-note-about-evaluating-at-infinity&quot;&gt;A Note About Evaluating At Infinity&lt;&#x2F;h3&gt;
-&lt;p&gt;For a univariate polynomial $p$, $p(\infty)$ is equal to the coefficient associated with the highest degree variable of the polynomial.
+&lt;div class=&quot;callout callout-box thm-box&quot;&gt;
+  
+  &lt;div class=&quot;callout-title&quot;&gt;A Note About Evaluating At Infinity&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;For a univariate polynomial $p$, $p(\infty)$ is equal to the coefficient associated with the highest degree term of the polynomial.
 For example, if $p$ is linear i.e $p(X) = aX + b$, we have $p(\infty) = a$.&lt;&#x2F;p&gt;
-&lt;&#x2F;blockquote&gt;
+
+&lt;&#x2F;div&gt;
 &lt;p&gt;This completes the first round message the prover sends.&lt;&#x2F;p&gt;
 &lt;h4 id=&quot;binding-in-the-streaming-phase&quot;&gt;Binding in the streaming phase&lt;&#x2F;h4&gt;
-&lt;p&gt;Note as $t&#x27;$ is multi-variate, we are sorted for the next $w$ rounds, till we bind all $w$ of its variables.
+&lt;p&gt;Note as $t&#x27;$ is multivariate, we are sorted for the next $w$ rounds, till we bind all $w$ of its variables.
 In the example above, we can answer 3 rounds of prover messages using &lt;code&gt;t_grid&lt;&#x2F;code&gt; only.
-Binding is exactly the same as the linear version but we do it for the multi-quadratic polynomial and is done by the&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;code&gt;t_prime_poly.bind(r_j, BindingOrder::LowToHigh)&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;feat&#x2F;streaming-prover-merged&#x2F;jolt-core&#x2F;src&#x2F;poly&#x2F;multiquadratic_poly.rs&quot;&gt;method&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+Binding is exactly the same as the linear version but we do it for the multi-quadratic polynomial and is done by &lt;code&gt;t_prime_poly.bind(r_j, BindingOrder::LowToHigh)&lt;&#x2F;code&gt;
+(&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;feat&#x2F;streaming-prover-merged&#x2F;jolt-core&#x2F;src&#x2F;poly&#x2F;multiquadratic_poly.rs&quot;&gt;method&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
 &lt;p&gt;After binding in round 0 we go from  $t&#x27;(X_2, X_1, X_b)$ to $t&#x27;(X_2, X_1, \textcolor{orange}{r_b})$.
-Then at then of round 1 we are left with $t&#x27;(X_2, \textcolor{orange}{r_1, r_b})$ and after round 2 i.e 3 rounds of sum-check we are left with $t&#x27;( \textcolor{orange}{r_2, r_1, r_b})$.
+Then at the end of round 1 we are left with $t&#x27;(X_2, \textcolor{orange}{r_1, r_b})$ and after round 2 i.e 3 rounds of sum-check we are left with $t&#x27;( \textcolor{orange}{r_2, r_1, r_b})$.
 Hereafter, we must stream the trace again -- and we will as round 3 is a window start.&lt;&#x2F;p&gt;
 &lt;p&gt;Additionally as the challenges come in, we also build a data structure called &lt;code&gt;r_grid&lt;&#x2F;code&gt; which looks like the following&lt;&#x2F;p&gt;
 &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -337,54 +355,52 @@ Hereafter, we must stream the trace again -- and we will as round 3 is a window 
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	[(1-rb), rb] &#x2F;&#x2F; eq(r_b, x_b)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	[(1-rb)(1-r1), rb(1-r1), (1-rb)r1, rbr1] &#x2F;&#x2F; eq(r_1, r_b, x_1, x_b)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;:::{.remark}
-We will see shortly, we only need to store &lt;code&gt;r_grid&lt;&#x2F;code&gt; only upto the switch-over point.
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;div class=&quot;callout callout-box thm-box&quot;&gt;
+  
+  &lt;p&gt;We will see shortly that we only need to store &lt;code&gt;r_grid&lt;&#x2F;code&gt; up to the switch-over point.
 The total amount of storage needed is $2^{\hat{t}}$ where $\hat{t} \in [n]$ is the switchover point of the sum-check and $n$ is the number of rounds of the sum-check.
-If $\hat{t}$ is large, we can always use the split-eq technique for &lt;code&gt;r_grid&lt;&#x2F;code&gt; (this is not currently needed).
-:::&lt;&#x2F;p&gt;
+If $\hat{t}$ is large, we can always use the split-eq technique for &lt;code&gt;r_grid&lt;&#x2F;code&gt; (this is not currently needed).&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
 &lt;p&gt;The last line of &lt;code&gt;r_grid&lt;&#x2F;code&gt; helps us compute $\text{eq}(\textcolor{orange}{r_{w-1},..., r_b}, x_{w-1},..., x_{b})$ which is useful when we recompute &lt;code&gt;t_grid&lt;&#x2F;code&gt; in the first round of the next window.&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;next-window-start&quot;&gt;Next Window Start&lt;&#x2F;h3&gt;
 &lt;p&gt;Now we still have not hit a switchover point, so nothing is materialised yet, so we once again compute the grid from the trace.
 Additionally, as we are not in the first round anymore, we have to deal with the verifier challenges -- so the equations for computing the grid are the following.&lt;&#x2F;p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$\begin{align*} 
-&amp;=t(\textcolor{pink}{X_5, X_4, X_3}) \\[10pt] 
-&amp;= \sum_{x_{15}..x_{6}, x_{2}, x_{1}, x_{b} \in \{0,1\}^{13}}\sum_{y \in \{-4, \dots, 5\}}  \widetilde{A}(x_{15}...x_6,  \textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \\
+$$\begin{align*}
+t(\textcolor{pink}{X_5, X_4, X_3}) &amp;= \sum_{x_{15}..x_{6}, x_{2}, x_{1}, x_{b} \in \{0,1\}^{13}}\sum_{y \in \{-4, \dots, 5\}}  \widetilde{A}(x_{15}...x_6,  \textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \\
 &amp;\qquad \cdot \widetilde{B}(x_{15}\dots x_6 ,\textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \\[10pt]
 &amp;\qquad \cdot\text{eq}(\tau_{15}\dots\tau_6;\, x_{15}\dots x_6) \, \\[10pt]
 &amp;\qquad \cdot \text{eq}(\textcolor{orange}{r_2, r_1, r_b}, x_{2}, x_{1}, x_{b})
 \end{align*}
 $$
 &lt;&#x2F;div&gt;
-&lt;p&gt;So how the &lt;code&gt;r_grid&lt;&#x2F;code&gt; becomes useful now in the last line.
+&lt;p&gt;Notice how &lt;code&gt;r_grid&lt;&#x2F;code&gt; becomes useful in the last line.
 This process continues till we hit the switch over point.
-Also observer that the RHS of the above equations actually visits every cell of the trace exactly once.
+Also observe that the RHS of the above equations actually visits every cell of the trace exactly once.
 Hence we keep banging on about streaming the trace.&lt;&#x2F;p&gt;
-&lt;p&gt;At this point we have only used $\max\{(d+1)^{\hat{w}}, 2^{\hat{t}}\}$ field elements worth of memory, where $\hat{t}$ is the switch-over point and $\hat{w}$ is the maximum window width for a round.
-$d=2$ is for this sumcheck.&lt;&#x2F;p&gt;
+&lt;p&gt;At this point we have only used $\max\lbrace(d+1)^{\hat{w}}, 2^{\hat{t}}\rbrace$ field elements worth of memory, where $\hat{t}$ is the switch-over point and $\hat{w}$ is the maximum window width for a round.
+$d=2$ for this sumcheck.&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;switch-over-point&quot;&gt;Switch Over Point&lt;&#x2F;h3&gt;
 &lt;p&gt;Finally we get to the switchover point.
 &lt;code&gt;t_grid&lt;&#x2F;code&gt; is exhausted once again.
-We stream through the trace one last time to manifest the bounded polynomials.&lt;&#x2F;p&gt;
-&lt;p&gt;We now store for each $X_{15}...X_9 \in {0,1}^{7}$&lt;&#x2F;p&gt;
+We stream through the trace one last time to materialise the bound polynomials.&lt;&#x2F;p&gt;
+&lt;p&gt;We now store for each $X_{15}...X_9 \in \lbrace 0,1\rbrace^{7}$&lt;&#x2F;p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$\begin{align*} 
+$$\begin{align*}
 &amp; \widetilde{A}(\textcolor{pink}{X_{15}...X_9}, \textcolor{orange}{r_8, ..., r_b, r_y}) \\[10pt]
 &amp;= \sum_{x_8...x_b \in \{0,1\}^9}\sum_{y \in \{-4, \dots, 5\}} \widetilde{A}(\textcolor{pink}{X_{15}, ..., X_9}, x_8...x_b, y)\,\text{eq}(\textcolor{orange}{r_8..r_b}, x_8...x_b)\, \Lagrange{r_y}{y}
 \end{align*}
 $$
 
-$$\begin{align*} 
+$$\begin{align*}
 &amp; \widetilde{B}(\textcolor{pink}{X_{15}...X_9}, \textcolor{orange}{r_8, ..., r_b, r_y}) \\[10pt]
 &amp;= \sum_{x_8...x_b \in \{0,1\}^9}\sum_{y \in \{-4, \dots, 5\}} \widetilde{B}(\textcolor{pink}{X_{15}, ..., X_9}, x_8...x_b, y)\,\text{eq}(\textcolor{orange}{r_8..r_b}, x_8...x_b)\, \Lagrange{r_y}{y}
 \end{align*}
 $$
 &lt;&#x2F;div&gt;
-&lt;p&gt;&lt;strong&gt;NOTE&lt;&#x2F;strong&gt;: This just stores $2^7$ field elements worth of storage (much fewer than the linear sumcheck setup).
-The method&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;code&gt;fused_materialise_polynomials_general_with_multiquadratic&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
-&lt;p&gt;computes the above polynomials and stores them in memory.
+&lt;p&gt;&lt;strong&gt;NOTE&lt;&#x2F;strong&gt;: This stores only $2^7$ field elements worth of storage (much fewer than the linear sumcheck setup).
+The method &lt;code&gt;fused_materialise_polynomials_general_with_multiquadratic&lt;&#x2F;code&gt; computes the above polynomials and stores them in memory.
 Note that as we have the polynomials at hand already, we also compute the grid now.
 In the schedule given above, the grid size is just 1, thus we only need to store&lt;&#x2F;p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
@@ -403,21 +419,20 @@ $$
 &lt;&#x2F;div&gt;
 &lt;p&gt;From here onwards, whenever we need to compute the grid, we never look at the trace.
 We can directly do it from the materialised polynomials $\widetilde{A}$ and $\widetilde{B}$.
-This is what the method&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;code&gt;compute_evaluation_grid_from_polynomials_parallel&lt;&#x2F;code&gt; computes.&lt;&#x2F;p&gt;
+This is what &lt;code&gt;compute_evaluation_grid_from_polynomials_parallel&lt;&#x2F;code&gt; computes.&lt;&#x2F;p&gt;
 &lt;p&gt;From here on after the switchover point we &lt;strong&gt;NEVER&lt;&#x2F;strong&gt; touch the trace again.&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;actual-code&quot;&gt;Actual Code&lt;&#x2F;h3&gt;
 &lt;p&gt;Below we describe what the &lt;code&gt;compute_message&lt;&#x2F;code&gt; method of the generalised sumcheck looks like.
-The following snippet of code executes the logic describe above, based on the round classification.&lt;&#x2F;p&gt;
+The following snippet of code executes the logic described above, based on the round classification.&lt;&#x2F;p&gt;
 &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;fn&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; compute_message&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span class=&quot;z-storage z-modifier&quot;&gt;mut&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-language z-variable&quot;&gt; self&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt; round&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; usize&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;,&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt; previous_claim&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;:&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; F&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt; -&amp;gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt; UniPoly&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-type&quot;&gt;F&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-storage z-type&quot;&gt;    let&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt; num_unbound_vars&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt; =&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-language z-variable&quot;&gt; self&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;schedule&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt;num_unbound_vars&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;round&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;;&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt; &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; The size of the streaming data structure&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword z-keyword z-control&quot;&gt;    if&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-language z-variable&quot;&gt; self&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;schedule&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt;is_switch_over_point&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;round&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; {&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt; &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; Check if it&amp;#39;s time materialise the sum-check polynomials&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-language z-variable&quot;&gt;        self&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt;materialise_polynomials_from_trace&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;num_unbound_vars&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;;&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt; &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; Materialise bound polynomials A and B &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation&quot;&gt;    }&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-language z-variable&quot;&gt;        self&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt;materialise_polynomials_from_trace&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;num_unbound_vars&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;;&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt; &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; Materialise bound polynomials A and B&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation&quot;&gt;    }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword z-keyword z-control&quot;&gt;    else&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-control&quot;&gt; if&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-language z-variable&quot;&gt; self&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;schedule&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt;is_window_start&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;round&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; {&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt; &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; Window start&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword z-keyword z-control&quot;&gt;        if&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-language z-variable&quot;&gt; self&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;schedule&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt;before_switch_over_point&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;round&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; {&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt; &#x2F;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; Need to compute streaming data structure from trace&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-language z-variable&quot;&gt;            self&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;.&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt;compute_evaluation_grid_from_trace&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;num_unbound_vars&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation&quot;&gt;        }&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-control&quot;&gt; else&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -435,7 +450,7 @@ The following snippet of code executes the logic describe above, based on the ro
 &lt;p&gt;This statement is strictly not true. In the current implementation, as a consequence of the process by which we construct the polynomials, we still need $O(T)$ memory, where $T$ is the number of instructions in the guest program (both virtual and real). But in this post we make a few simplifying assumptions, by which the statement does ring true.&lt;&#x2F;p&gt;
 &lt;&#x2F;div&gt;
 &lt;div class=&quot;footnote-definition&quot; id=&quot;e&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
-&lt;p&gt;It is not so imporant to be formal about what we mean by sufficient structure here. If $g \in \Field[x_1, \dots, x_n]$, then we can just pretend $H = {0,1}^n$.&lt;&#x2F;p&gt;
+&lt;p&gt;It is not so important to be formal about what we mean by sufficient structure here. If $g \in \Field[x_1, \dots, x_n]$, then we can just pretend $H = \lbrace 0,1\rbrace^n$.&lt;&#x2F;p&gt;
 &lt;&#x2F;div&gt;
 &lt;div class=&quot;footnote-definition&quot; id=&quot;c&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;3&lt;&#x2F;sup&gt;
 &lt;p&gt;A program is just a sequence of RISC-V instructions.&lt;&#x2F;p&gt;
@@ -876,7 +891,7 @@ $$&lt;&#x2F;p&gt;
 &lt;p&gt;Observe that $c_0r^{-1} \equiv (c_0 + mp)r^{-1} \mod p$, where $m$ such that $c_0 + mp \equiv 0 \mod r$.
 Solving for $m = -p^{-1}c_0 \equiv \mu c_0 \mod r$.
 Also as we are working modulo $r$, it suffices to use $m = \mu_{0}c_0$ discarding any carries, where $\mu_{0}$ is the least significant word of $\mu$.&lt;&#x2F;p&gt;
-&lt;div class=&quot;callout callout-remark&quot;&gt;
+&lt;div class=&quot;callout callout-box thm-box&quot;&gt;
   
   &lt;p&gt;We overload $m$ a little in notation. This $m$ is NOT the same $m$ as the one defined in the pseudocode description on top.
 This $m$ is just to make $c_0 + mp$ divisible by $r$.&lt;&#x2F;p&gt;
@@ -1015,7 +1030,7 @@ cr^{-3} &amp;amp;\equiv \Big(c_{7}r^{4} + \ldots +c_{3} \Big)  + \rho_1(c_2 + \r
 &amp;amp;\equiv Q + \text{Remainder}
 \end{align}
 $$&lt;&#x2F;p&gt;
-&lt;div class=&quot;callout callout-remark&quot;&gt;
+&lt;div class=&quot;callout callout-box thm-box&quot;&gt;
   
   &lt;p&gt;Note that the total effect is the same as in &lt;code&gt;h-mul&lt;&#x2F;code&gt; where we also divide by $r^{-3}$ before adding things.
 The key difference between &lt;code&gt;h-mul&lt;&#x2F;code&gt; and &lt;code&gt;s-mul&lt;&#x2F;code&gt; is that in &lt;code&gt;s-mul&lt;&#x2F;code&gt; we call do all 3 divisions in parallel, whereas here we first divide by $r^{-2}$, and only then can we divide by $r^{-1}$.
