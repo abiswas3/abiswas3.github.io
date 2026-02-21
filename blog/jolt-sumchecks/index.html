@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sumchecks Bloody Sumchecks | Random Walks</title>
+  <link rel="stylesheet" href="/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  
+  
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      tags: 'ams',
+      macros: {
+        field: ['{\\mathbb{#1}}', 1],
+        hei: ['{\\mathbb{F}(#1)}', 1],
+        Field: '{\\mathbb{F}}',
+        Mont: ['{\\widetilde{#1}}', 1],
+        samples: '{\\xleftarrow{\\$}}',
+        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+        TauConstraints: '{\\tau_y}',
+        TauTime: '{\\tau_{\\text{cycle}}}',
+        TauGroup: '{\\tau_b}',
+        MLE: ['{\\widetilde{#1}}', 1],
+        tf: ['{\\widetilde{#1}}', 1],
+        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+        Def: '{:=}',
+        ChallengeSet: '{\\mathsf{C}}',
+        Complement: ['{\\overline{#1}}', 1],
+        Size: ['{\\left|#1\\right|}', 1],
+        Exp: ['{2^{#1}}', 1],
+        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+        BigO: ['{O\\ \\left(#1\\right)}', 1],
+        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
+        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
+        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+        poly: '{\\operatorname{poly}}',
+        criticalAlpha: ['{\\alpha_{#1}}', 1],
+        bit: '{\\{0,1\\}}',
+        CStar: '{C^{\\star}}',
+        GraphNbrs: ['{N_G(#1)}', 1],
+        ClauseNbrs: ['{N_C(#1)}', 1],
+        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        SmallO: ['{o\\!(#1)}', 1],
+        Naturals: '{\\mathbb{N}}',
+        Closure: ['{\\operatorname{Cl}(#1)}', 1],
+        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+        Dim: ['{\\dim(#1)}', 1],
+        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+        domain: ['{\\operatorname{dom}(#1)}', 1],
+        False: '{\\bot}',
+        opening: ['{r^{(#1)}_{\\text{#2}}}', 2]
+      }
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="/">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
+        <a href="/misc/">Random</a>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
+          <option value="bw-light">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
+        </select>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+<article class="post">
+  <header class="post-header">
+    
+    
+    <a href="&#x2F;blog&#x2F;" class="back-link">&larr; Notes</a>
+    
+    <h1>Sumchecks Bloody Sumchecks</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-02-20</time>
+      
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/sumcheck/" class="tag">sumcheck</a><a href="/tags/jolt/" class="tag">jolt</a><a href="/tags/python/" class="tag">python</a><a href="/tags/tooling/" class="tag">tooling</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <p>I think that's what <a rel="external" href="https://youtu.be/SCKcULlEydo?si=yTmoPklI5FnhkIvp">Bono</a> really meant to say.
+But it was the 80s, disco was alive, Ozzy Osbourne was biting heads off bats, and <a rel="external" href="https://www.youtube.com/watch?v=9GkVhgIeGJQ&amp;list=RD9GkVhgIeGJQ&amp;start_radio=1">boys didn't cry</a>; so we must have lost it in the smoke.</p>
+<p>The <a rel="external" href="https://github.com/a16z/jolt">cryptography team at A16z</a>, however, did not get it mixed up.
+They've designed this zk-VM, <a rel="external" href="https://jolt.a16zcrypto.com/intro.html">Jolt</a>, that essentially reduces proving correct program execution to proving that a sequence of polynomial constraints are satisfied.</p>
+<p>Once these constraints are defined, they go on to use the sum-check algorithm to efficiently prove that the constraints are indeed satisfied.
+There's a lot of drama about how to do this efficiently and correctly, and it can get quite complicated.
+Each constraint takes the form</p>
+<p>$$
+g(X) = f(X) \quad \forall X \in \bit^n
+$$</p>
+<p>where $g, f \in \mathbb{F}[X_1, \ldots, X_n]$ are multi-linear extensions of functions over the program trace.
+To show that the two polynomials are the same, we sample a random point $r \xleftarrow{$} \mathbb{F}^n$, and check if</p>
+<div class="math-display">
+$$
+\begin{align*}
+f(r) &= g(r) \\[10pt]
+&= \sum_{X \in \bit^n }\eq{r}{X} g(X) 
+\end{align*}
+$$
+</div>
+<p>From the guarantees of <a rel="external" href="https://en.wikipedia.org/wiki/Schwartz%E2%80%93Zippel_lemma">Schwartz–Zippel lemma</a>, we are guaranteed that the constraints are satisfied with high probability if the check passes.</p>
+<p>The problem we have is — if we ask you to list every constraint (or equivalently, its randomised sum-check representation, as shown above) — it is actually non-trivial to extract this information from the source code.</p>
+<p>So we went ahead, read through the code, and rewrote the sum-checks as an abstract syntax tree.
+This lets us programmatically extract the sum-check equations, print them in any format we want, and also verify that virtual polynomial openings are reduced to real committed polynomial openings<sup class="footnote-reference"><a href="#a">1</a></sup>.</p>
+<p>Below is a brief description of what we did.
+<a rel="external" href="https://github.com/abiswas3/jolt-sumchecks">Here</a> is the code.</p>
+<blockquote>
+<p>⚠️ <strong>Caveat:</strong> The specs currently omit Jolt's <em>Advice</em> polynomials — auxiliary inputs the prover supplies to shortcut certain computations. They participate in some sumchecks but are not yet modelled in the AST. Consider the specs a faithful-but-incomplete picture of the full pipeline.
+In the coming weeks, we will integrate this into the actual Rust codebase, so we can auto-generate the sum-checks as a zero-cost abstraction.
+For now we live with the potential noise of translating Rust into Python and generating specs from it.</p>
+</blockquote>
+<div class="footnote-definition" id="a"><sup class="footnote-definition-label">1</sup>
+<p>Typically the way a sum-check oracle is simulated in practice is by having the prover commit to the polynomial using a polynomial commitment scheme, and then open the commitment at a random point. There are 21 sum-checks in Jolt, over 50-odd polynomials. Only 7 of them are committed. In Jolt we reduce the correctness of opening the other non-committed polynomials to opening a committed polynomial.</p>
+</div>
+<h2 id="each-sumcheck-is-an-abstract-syntax-tree">Each sumcheck is an abstract syntax tree</h2>
+<p>As described above, every sumcheck in Jolt proves a statement of this shape:</p>
+<p>$$\sum_{\text{vars}} f(\text{vars}) = \text{claimed sum}$$</p>
+<p>We represent each one as a <code>SumcheckSpec</code> with three core fields and four pieces of protocol metadata:</p>
+<table><thead><tr><th>Field</th><th>What it is</th></tr></thead><tbody>
+<tr><td><code>sum_vars</code></td><td>The variables being summed over (list of <code>Var</code>)</td></tr>
+<tr><td><code>integrand</code></td><td>The expression tree $f$ inside the $\sum$</td></tr>
+<tr><td><code>input_claim</code></td><td>What the sum equals — the RHS</td></tr>
+<tr><td><code>opening_point</code></td><td>The fresh random point the protocol produces</td></tr>
+<tr><td><code>degree</code></td><td>Max degree of the round polynomials</td></tr>
+<tr><td><code>rounds</code></td><td>How many rounds (e.g. <code>log2(T)</code>)</td></tr>
+<tr><td><code>openings</code></td><td>Which polynomial openings are produced afterward</td></tr>
+</tbody></table>
+<p>The first three are the mathematics. The rest is protocol metadata. And <code>degree</code> is auto-checkable: we can walk the integrand tree and infer it from the MLE structure, since every polynomial in Jolt is multilinear (degree $\leq 1$ in each variable).</p>
+<p><code>sumcheck/spec.py:76</code></p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span class="z-punctuation">@</span><span class="z-entity z-name z-entity z-name z-function z-decorator">dataclass</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-class z-python">class</span><span class="z-entity z-name z-type"> SumcheckSpec</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span>    name</span><span class="z-punctuation">:</span><span class="z-support z-support z-type"> str</span></span>
+<span class="giallo-l"><span>    sum_vars</span><span class="z-punctuation">:</span><span> list</span><span class="z-punctuation">[</span><span>Var</span><span class="z-punctuation">]</span><span class="z-punctuation z-punctuation z-definition z-comment">            #</span><span class="z-comment"> what we sum over</span></span>
+<span class="giallo-l"><span>    integrand</span><span class="z-punctuation">:</span><span> Expr</span><span class="z-punctuation z-punctuation z-definition z-comment">                #</span><span class="z-comment"> the expression tree inside the Σ</span></span>
+<span class="giallo-l"><span>    input_claim</span><span class="z-punctuation">:</span><span> Expr</span><span class="z-punctuation z-punctuation z-definition z-comment">              #</span><span class="z-comment"> what the sum equals (RHS)</span></span>
+<span class="giallo-l"><span>    opening_point</span><span class="z-punctuation">:</span><span> list</span><span class="z-punctuation">[</span><span>Opening</span><span class="z-punctuation">]</span><span class="z-punctuation z-punctuation z-definition z-comment">   #</span><span class="z-comment"> fresh random point from the protocol</span></span>
+<span class="giallo-l"><span>    rounds</span><span class="z-punctuation">:</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation z-punctuation z-definition z-comment">                    #</span><span class="z-comment"> e.g. &quot;log2(T)&quot;</span></span>
+<span class="giallo-l"><span>    degree</span><span class="z-punctuation">:</span><span class="z-support z-support z-type"> int</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation z-punctuation z-definition z-comment">              #</span><span class="z-comment"> max degree of round polynomials</span></span>
+<span class="giallo-l"><span>    openings</span><span class="z-punctuation">:</span><span> list</span><span class="z-punctuation">[</span><span>tuple</span><span class="z-punctuation">[</span><span class="z-support z-support z-type">str</span><span class="z-punctuation">,</span><span> list</span><span class="z-punctuation">[</span><span>Arg</span><span class="z-punctuation">]</span><span class="z-punctuation">]</span><span class="z-punctuation">]</span><span class="z-punctuation z-punctuation z-definition z-comment">  #</span><span class="z-comment"> polynomial openings produced</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation">    @</span><span class="z-support z-support z-type">property</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> inferred_degree</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">)</span><span class="z-punctuation"> -&gt;</span><span class="z-support z-support z-type"> int</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        return</span><span class="z-meta z-function-call z-generic"> degree</span><span class="z-punctuation">(</span><span class="z-variable z-language z-variable">self</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-arguments">integrand</span><span class="z-punctuation">)</span></span></code></pre>
+<p>The degree is inferred automatically — every polynomial in Jolt is an MLE (multilinear extension), so each polynomial leaf has degree exactly 1. The rest follows from how leaves combine:</p>
+<p><code>sumcheck/ast.py:332</code></p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">def</span><span class="z-entity z-name z-entity z-name z-function z-python"> degree</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">expr</span><span class="z-punctuation">:</span><span class="z-meta z-function z-python"> Expr</span><span class="z-punctuation">)</span><span class="z-punctuation"> -&gt;</span><span class="z-support z-support z-type"> int</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">    if</span><span class="z-support z-function z-support z-function z-builtin"> isinstance</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> Const</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span><span class="z-keyword z-keyword z-control">                                    return</span><span class="z-constant z-numeric z-constant"> 0</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">    if</span><span class="z-support z-function z-support z-function z-builtin"> isinstance</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">,</span><span class="z-punctuation"> (</span><span class="z-meta z-function-call z-arguments">CommittedPoly</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> VirtualPoly</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> VerifierPoly</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span><span class="z-keyword z-keyword z-control"> return</span><span class="z-constant z-numeric z-constant"> 1</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">    if</span><span class="z-support z-function z-support z-function z-builtin"> isinstance</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> Add</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span><span class="z-keyword z-keyword z-control">  return</span><span class="z-support z-function z-support z-function z-builtin"> max</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-generic">degree</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-arguments">left</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> degree</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-arguments">right</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">    if</span><span class="z-support z-function z-support z-function z-builtin"> isinstance</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> Mul</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span><span class="z-keyword z-keyword z-control">  return</span><span class="z-meta z-function-call z-generic"> degree</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-arguments">left</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> +</span><span class="z-meta z-function-call z-generic"> degree</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-arguments">right</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">    if</span><span class="z-support z-function z-support z-function z-builtin"> isinstance</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> Pow</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span><span class="z-keyword z-keyword z-control">  return</span><span> expr</span><span class="z-punctuation">.</span><span>exponent</span><span class="z-keyword z-keyword z-operator"> *</span><span class="z-meta z-function-call z-generic"> degree</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-arguments">base</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">    if</span><span class="z-support z-function z-support z-function z-builtin"> isinstance</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> Neg</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span><span class="z-keyword z-keyword z-control">  return</span><span class="z-meta z-function-call z-generic"> degree</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-arguments">expr</span><span class="z-punctuation">)</span></span></code></pre>
+<p>A product of two MLEs has degree 2. A booleanity check $p^2 - p$ has degree 2. The degree directly determines proof size — the prover sends a univariate polynomial of this degree in each round.</p>
+<h2 id="building-a-sumcheck">Building a sumcheck</h2>
+<p>Here's a real example — the Stage 4 registers read/write checking sumcheck. It verifies that register reads and writes are consistent across all cycles, batched together with a random challenge $\gamma$:</p>
+<div class="math-display">
+\begin{aligned}
+\sum_{X_k, X_t} \text{eq}(r^{(3)}_{\text{cycle}}, X_t) \cdot \Big( &\text{RdWa}(X_k, X_t) \cdot (\text{RdInc}(X_t) + \text{RegistersVal}(X_k, X_t)) \\
++ \gamma \cdot &\text{Rs1Ra}(X_k, X_t) \cdot \text{RegistersVal}(X_k, X_t) \\
++ \gamma^2 \cdot &\text{Rs2Ra}(X_k, X_t) \cdot \text{RegistersVal}(X_k, X_t) \Big) \\
+= \text{RdWriteValue}(r^{(3)}_{\text{cycle}}) &+ \gamma \cdot \text{Rs1Value}(r^{(3)}_{\text{cycle}}) + \gamma^2 \cdot \text{Rs2Value}(r^{(3)}_{\text{cycle}})
+\end{aligned}
+</div>
+<p>Each polynomial in Jolt lives in a registry as a <code>PolyDef</code> — it knows its name, its kind (committed, virtual, or verifier-computable), and its domain. Since <code>PolyDef</code> is callable, we import polynomials directly from the registry and call them with arguments to build AST nodes:</p>
+<p><code>sumcheck/examples/stage4/registers_read_write.py:24</code></p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span class="z-keyword z-keyword z-control">from</span><span> sumcheck</span><span class="z-punctuation">.</span><span>defs</span><span class="z-keyword z-keyword z-control"> import</span><span> Var</span><span class="z-punctuation">,</span><span> Opening</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_K_REG</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">from</span><span> sumcheck</span><span class="z-punctuation">.</span><span>registry</span><span class="z-keyword z-keyword z-control"> import</span><span> virtual</span><span class="z-punctuation">,</span><span> committed</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">from</span><span> sumcheck</span><span class="z-punctuation">.</span><span>ast</span><span class="z-keyword z-keyword z-control"> import</span><span> Const</span><span class="z-punctuation">,</span><span> Mul</span><span class="z-punctuation">,</span><span> Pow</span><span class="z-punctuation">,</span><span> eq</span><span class="z-punctuation">,</span><span> add</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">from</span><span> sumcheck</span><span class="z-punctuation">.</span><span>spec</span><span class="z-keyword z-keyword z-control"> import</span><span> SumcheckSpec</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">def</span><span class="z-entity z-name z-entity z-name z-function z-python"> stage4_registers_read_write</span><span class="z-punctuation">(</span><span class="z-punctuation">)</span><span class="z-punctuation"> -&gt;</span><span class="z-meta z-function z-python"> SumcheckSpec</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    #</span><span class="z-comment"> Variables we sum over</span></span>
+<span class="giallo-l"><span>    X_k</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-meta z-function-call z-generic"> Var</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">X_k</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_K_REG</span><span class="z-punctuation">)</span><span class="z-punctuation z-punctuation z-definition z-comment">     #</span><span class="z-comment"> register index</span></span>
+<span class="giallo-l"><span>    X_t</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-meta z-function-call z-generic"> Var</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">X_t</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span><span class="z-punctuation z-punctuation z-definition z-comment">     #</span><span class="z-comment"> cycle/timestep</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    #</span><span class="z-comment"> Fixed point from Stage 3</span></span>
+<span class="giallo-l"><span>    r3_cycle</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-meta z-function-call z-generic"> Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">3</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span>    gamma</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-meta z-function-call z-generic"> Const</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">γ</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    #</span><span class="z-comment"> Polynomial leaves -- imported from registry, called with args.</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    #</span><span class="z-comment"> The registry knows RdWa is virtual, RdInc is committed, etc.</span></span>
+<span class="giallo-l"><span>    rd_wa</span><span class="z-keyword z-keyword z-operator">   =</span><span> virtual</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">RdWa</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">X_k</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> X_t</span><span class="z-punctuation">)</span><span class="z-punctuation z-punctuation z-definition z-comment">           #</span><span class="z-comment"> → VirtualPoly(&quot;RdWa&quot;, [X_k, X_t])</span></span>
+<span class="giallo-l"><span>    rs1_ra</span><span class="z-keyword z-keyword z-operator">  =</span><span> virtual</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">Rs1Ra</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">X_k</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> X_t</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span>    rs2_ra</span><span class="z-keyword z-keyword z-operator">  =</span><span> virtual</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">Rs2Ra</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">X_k</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> X_t</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span>    reg_val</span><span class="z-keyword z-keyword z-operator"> =</span><span> virtual</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">RegistersVal</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">X_k</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> X_t</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span>    rd_inc</span><span class="z-keyword z-keyword z-operator">  =</span><span> committed</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">RdInc</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">X_t</span><span class="z-punctuation">)</span><span class="z-punctuation z-punctuation z-definition z-comment">              #</span><span class="z-comment"> → CommittedPoly(&quot;RdInc&quot;, [X_t])</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    #</span><span class="z-comment"> Build the integrand tree</span></span>
+<span class="giallo-l"><span>    integrand</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-meta z-function-call z-generic"> Mul</span><span class="z-punctuation">(</span></span>
+<span class="giallo-l"><span class="z-meta z-function-call z-generic">        eq</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">r3_cycle</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> X_t</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">                      #</span><span class="z-comment"> verifier-computable</span></span>
+<span class="giallo-l"><span class="z-meta z-function-call z-generic">        add</span><span class="z-punctuation">(</span></span>
+<span class="giallo-l"><span class="z-meta z-function-call z-generic">            Mul</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">rd_wa</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> add</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">rd_inc</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> reg_val</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-meta z-function-call z-generic">            Mul</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">gamma</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> Mul</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">rs1_ra</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> reg_val</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-meta z-function-call z-generic">            Mul</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-generic">Pow</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">gamma</span><span class="z-punctuation">,</span><span class="z-constant z-numeric z-constant"> 2</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> Mul</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">rs2_ra</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> reg_val</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">        )</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">    )</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    #</span><span class="z-comment"> RHS -- what the sum equals</span></span>
+<span class="giallo-l"><span>    rhs</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-meta z-function-call z-generic"> add</span><span class="z-punctuation">(</span></span>
+<span class="giallo-l"><span class="z-meta z-function-call z-arguments">        virtual</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">RdWriteValue</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">r3_cycle</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-meta z-function-call z-generic">        Mul</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">gamma</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> virtual</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">Rs1Value</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">r3_cycle</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-meta z-function-call z-generic">        Mul</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-generic">Pow</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">gamma</span><span class="z-punctuation">,</span><span class="z-constant z-numeric z-constant"> 2</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> virtual</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">Rs2Value</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">r3_cycle</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">    )</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">    return</span><span class="z-meta z-function-call z-generic"> SumcheckSpec</span><span class="z-punctuation">(</span></span>
+<span class="giallo-l"><span class="z-variable z-parameter">        name</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">RegistersReadWriteChecking</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-parameter">        sum_vars</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation">[</span><span class="z-meta z-function-call z-arguments">X_k</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-arguments"> X_t</span><span class="z-punctuation">]</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-parameter">        integrand</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-meta z-function-call z-arguments">integrand</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-parameter">        input_claim</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-meta z-function-call z-arguments">rhs</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-parameter">        opening_point</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation">[</span><span class="z-meta z-function-call z-generic">Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_K_REG</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-parameter">        rounds</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">log2(K_reg) + log2(T)</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-variable z-parameter">        degree</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-constant z-numeric z-constant">3</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">   #</span><span class="z-comment"> eq(1) · RdWa(1) · Val(1) = 3</span></span>
+<span class="giallo-l"><span class="z-variable z-parameter">        openings</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation">[</span></span>
+<span class="giallo-l"><span class="z-punctuation">            (</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">RegistersVal</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation"> [</span><span class="z-meta z-function-call z-generic">Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_K_REG</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">            (</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">Rs1Ra</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation">        [</span><span class="z-meta z-function-call z-generic">Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_K_REG</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">            (</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">Rs2Ra</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation">        [</span><span class="z-meta z-function-call z-generic">Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_K_REG</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">            (</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">RdWa</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation">         [</span><span class="z-meta z-function-call z-generic">Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_K_REG</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">            (</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">RdInc</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation">        [</span><span class="z-meta z-function-call z-generic">Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">        ]</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">    )</span></span></code></pre>
+<p>No more <code>vp("Rs1Ra", ...)</code> or <code>cp("RdInc", ...)</code> string literals — the registry is the single source of truth for polynomial names and kinds. The three colours still show up in the output: committed (green), virtual (orange), verifier-computable (blue). The degree is 3 — the deepest product chain is <code>eq</code> $\times$ <code>RdWa</code> $\times$ <code>Val</code>, three MLEs multiplied together.</p>
+<h3 id="vars-and-openings">Vars and Openings</h3>
+<p>Every polynomial in the tree is evaluated at some arguments. There are exactly two kinds:</p>
+<p><code>sumcheck/defs.py:64</code></p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span class="z-punctuation">@</span><span class="z-entity z-name z-entity z-name z-function z-decorator">dataclass</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">frozen</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-constant z-language z-constant">True</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-class z-python">class</span><span class="z-entity z-name z-type"> Var</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-punctuation z-definition z-string z-punctuation">    &quot;&quot;&quot;</span><span class="z-string">A free variable being summed over.</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;&quot;&quot;</span></span>
+<span class="giallo-l"><span>    name</span><span class="z-punctuation">:</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation z-punctuation z-definition z-comment">       #</span><span class="z-comment"> &quot;X_t&quot;, &quot;X_k&quot;</span></span>
+<span class="giallo-l"><span>    dim</span><span class="z-punctuation">:</span><span> DimDef</span><span class="z-punctuation z-punctuation z-definition z-comment">     #</span><span class="z-comment"> which domain dimension it ranges over</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation">@</span><span class="z-entity z-name z-entity z-name z-function z-decorator">dataclass</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">frozen</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-constant z-language z-constant">True</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-class z-python">class</span><span class="z-entity z-name z-type"> Opening</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-punctuation z-definition z-string z-punctuation">    &quot;&quot;&quot;</span><span class="z-string">A fixed point from a prior-stage sumcheck.</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;&quot;&quot;</span></span>
+<span class="giallo-l"><span>    stage</span><span class="z-punctuation">:</span><span class="z-support z-support z-type"> int</span><span class="z-punctuation z-punctuation z-definition z-comment">      #</span><span class="z-comment"> which stage produced it (1-7)</span></span>
+<span class="giallo-l"><span>    dim</span><span class="z-punctuation">:</span><span> DimDef</span><span class="z-punctuation z-punctuation z-definition z-comment">     #</span><span class="z-comment"> which domain dimension</span></span>
+<span class="giallo-l"><span>    label</span><span class="z-punctuation">:</span><span class="z-support z-support z-type"> str</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation z-punctuation z-definition z-comment"> #</span><span class="z-comment"> override print label; defaults to dim.label</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Arg</span><span class="z-keyword z-keyword z-operator"> =</span><span> Union</span><span class="z-punctuation">[</span><span>Var</span><span class="z-punctuation">,</span><span> Opening</span><span class="z-punctuation">]</span></span></code></pre>
+<p>A <code>Var</code> is what the sumcheck sums over -- it's a free variable ranging over a hypercube $\{0,1\}^n$. After the protocol completes, the verifier's random challenges bind it to a concrete point, producing an <code>Opening</code> for the next stage. That's the whole pipeline: today's <code>Var</code> becomes tomorrow's <code>Opening</code>.</p>
+<p>In the Stage 4 example above, <code>X_k</code> and <code>X_t</code> are the free variables being summed out. After the sumcheck, the verifier has random points $\opening{4}{K_reg}$ and $\opening{4}{cycle}$ — these become <code>Opening(4, DIM_K_REG)</code> and <code>Opening(4, DIM_CYCLE)</code> that later stages reference. Meanwhile, <code>r3_cycle = Opening(3, DIM_CYCLE)</code> is a fixed point <em>received</em> from Stage 3 -- it appears in the <code>eq(r3_cycle, X_t)</code> selector and in the RHS evaluations.</p>
+<p>Both <code>DIM_K_REG</code> and <code>DIM_CYCLE</code> are <code>DimDef</code> constants. A <code>DimDef</code> names one factor of a polynomial's hypercube domain — a polynomial over $\{0,1\}^{\log_2 T} \times {0,1}^{\log_2 K_{\text{reg}}}$ has two <code>DimDef</code>s, one for each factor:</p>
+<p><code>sumcheck/defs.py:29</code></p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span class="z-punctuation">@</span><span class="z-entity z-name z-entity z-name z-function z-decorator">dataclass</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">frozen</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-constant z-language z-constant">True</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-class z-python">class</span><span class="z-entity z-name z-type"> DimDef</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-punctuation z-definition z-string z-punctuation">    &quot;&quot;&quot;</span><span class="z-string">One dimension of a polynomial&#39;s hypercube domain.</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;&quot;&quot;</span></span>
+<span class="giallo-l"><span>    size</span><span class="z-punctuation">:</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation z-punctuation z-definition z-comment">          #</span><span class="z-comment"> symbolic parameter: &quot;T&quot;, &quot;K_ram&quot;, &quot;N_instr&quot;</span></span>
+<span class="giallo-l"><span>    label</span><span class="z-punctuation">:</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation z-punctuation z-definition z-comment">         #</span><span class="z-comment"> short label for openings: &quot;cycle&quot;, &quot;K_ram&quot;, &quot;addr&quot;</span></span>
+<span class="giallo-l"><span>    description</span><span class="z-punctuation">:</span><span class="z-support z-support z-type"> str</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation z-punctuation z-definition z-comment">  #</span><span class="z-comment"> human-readable: &quot;RAM address&quot;, &quot;one-hot chunk&quot;</span></span></code></pre>
+<p>The standard dimensions used across Jolt:</p>
+<p><code>sumcheck/defs.py:48</code></p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span class="z-constant">DIM_CYCLE</span><span class="z-keyword z-keyword z-operator">   =</span><span class="z-meta z-function-call z-generic"> DimDef</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">T</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">       &quot;</span><span class="z-string">cycle</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">   &quot;</span><span class="z-string">cycle/timestep</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-constant">DIM_K_REG</span><span class="z-keyword z-keyword z-operator">   =</span><span class="z-meta z-function-call z-generic"> DimDef</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">K_reg</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">   &quot;</span><span class="z-string">K_reg</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">   &quot;</span><span class="z-string">register index</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-constant">DIM_K_RAM</span><span class="z-keyword z-keyword z-operator">   =</span><span class="z-meta z-function-call z-generic"> DimDef</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">K_ram</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">   &quot;</span><span class="z-string">K_ram</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">   &quot;</span><span class="z-string">RAM address</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-constant">DIM_ADDR</span><span class="z-keyword z-keyword z-operator">    =</span><span class="z-meta z-function-call z-generic"> DimDef</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">N_instr</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">addr</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">    &quot;</span><span class="z-string">one-hot chunk</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-constant">DIM_K_INSTR</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-meta z-function-call z-generic"> DimDef</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">K_instr</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">K_instr</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">instruction address</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-constant">DIM_K_BC</span><span class="z-keyword z-keyword z-operator">    =</span><span class="z-meta z-function-call z-generic"> DimDef</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">K_bc</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">    &quot;</span><span class="z-string">K_bc</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">    &quot;</span><span class="z-string">bytecode address</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-constant">DIM_N_V</span><span class="z-keyword z-keyword z-operator">     =</span><span class="z-meta z-function-call z-generic"> DimDef</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">N_v</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">     &quot;</span><span class="z-string">N_v</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">     &quot;</span><span class="z-string">virtual chunk</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-constant">DIM_GROUP</span><span class="z-keyword z-keyword z-operator">   =</span><span class="z-meta z-function-call z-generic"> DimDef</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">2</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">       &quot;</span><span class="z-string">group</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation">   &quot;</span><span class="z-string">constraint group</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span></span></code></pre>
+<p>The <code>size</code> field is a symbolic parameter name (<code>"T"</code>, <code>"K_reg"</code>) -- <code>Var</code> uses it to compute <code>log_size</code> (e.g. <code>"log2(T)"</code>), which determines how many rounds that variable contributes to the sumcheck. The <code>label</code> field is what shows up in opening notation: <code>Opening(3, DIM_CYCLE)</code> renders as $\opening{3}{cycle}$.</p>
+<p>This is why an opening point is a <em>list</em> of <code>Opening</code>s -- one per dimension of the polynomial's domain. A polynomial like <code>RegistersVal</code> lives on $\{0,1\}^{\log_2 K_{\text{reg}}} \times {0,1}^{\log_2 T}$, so its full opening is two points:</p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span>opening_point</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation">[</span><span class="z-meta z-function-call z-generic">Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_K_REG</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span></span></code></pre>
+<p>Both happen to come from Stage 4 here, but that's not always the case. A polynomial's dimensions can be pinned by <em>different</em> stages. For example, <code>RamRa</code> lives on $\{0,1\}^{\log_2 K_{\text{ram}}} \times {0,1}^{\log_2 T}$ and its opening might be:</p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span class="z-punctuation">[</span><span class="z-meta z-function-call z-generic">Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">2</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_K_RAM</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">#</span><span class="z-comment">  ↑ address part from Stage 2    ↑ cycle part from Stage 4</span></span></code></pre>
+<p>The address dimension was summed out in Stage 2, the cycle dimension in Stage 4 -- so each component carries the stage that produced it.</p>
+<h2 id="formatting-the-tree">Formatting the tree</h2>
+<p>We have an AST. Now we need to print it. The key idea: each node type gets its own format method. Define a <code>Format</code> base class with one abstract method per node type, then subclass it for each output format (plain text, LaTeX, HTML, ...).</p>
+<p>Start with the leaves — arguments and polynomial evaluations:</p>
+<p><code>sumcheck/format.py:36</code></p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span class="z-storage z-type z-storage z-type z-class z-python">class</span><span class="z-entity z-name z-type"> Format</span><span class="z-punctuation">(</span><span class="z-constant">ABC</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    #</span><span class="z-comment"> ── Arguments ──</span></span>
+<span class="giallo-l"><span class="z-punctuation">    @</span><span class="z-entity z-name z-entity z-name z-function z-decorator">abstractmethod</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_var</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> v</span><span class="z-punctuation">:</span><span class="z-meta z-function z-python"> Var</span><span class="z-punctuation">)</span><span class="z-punctuation"> -&gt;</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation">:</span><span class="z-constant"> ...</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation">    @</span><span class="z-entity z-name z-entity z-name z-function z-decorator">abstractmethod</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_opening</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> o</span><span class="z-punctuation">:</span><span class="z-meta z-function z-python"> Opening</span><span class="z-punctuation">)</span><span class="z-punctuation"> -&gt;</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation">:</span><span class="z-constant"> ...</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">    #</span><span class="z-comment"> ── Leaves ──</span></span>
+<span class="giallo-l"><span class="z-punctuation">    @</span><span class="z-entity z-name z-entity z-name z-function z-decorator">abstractmethod</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_const</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> value</span><span class="z-punctuation">:</span><span class="z-meta z-function z-python"> Union</span><span class="z-punctuation">[</span><span class="z-support z-support z-type">int</span><span class="z-punctuation">,</span><span class="z-support z-support z-type"> float</span><span class="z-punctuation">,</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation">]</span><span class="z-punctuation">)</span><span class="z-punctuation"> -&gt;</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation">:</span><span class="z-constant"> ...</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation">    @</span><span class="z-entity z-name z-entity z-name z-function z-decorator">abstractmethod</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_committed_poly</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> name</span><span class="z-punctuation">:</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> args</span><span class="z-punctuation">:</span><span class="z-meta z-function z-python"> list</span><span class="z-punctuation">[</span><span class="z-support z-support z-type">str</span><span class="z-punctuation">]</span><span class="z-punctuation">)</span><span class="z-punctuation"> -&gt;</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation">:</span><span class="z-constant"> ...</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation">    @</span><span class="z-entity z-name z-entity z-name z-function z-decorator">abstractmethod</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_virtual_poly</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> name</span><span class="z-punctuation">:</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> args</span><span class="z-punctuation">:</span><span class="z-meta z-function z-python"> list</span><span class="z-punctuation">[</span><span class="z-support z-support z-type">str</span><span class="z-punctuation">]</span><span class="z-punctuation">)</span><span class="z-punctuation"> -&gt;</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation">:</span><span class="z-constant"> ...</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation">    @</span><span class="z-entity z-name z-entity z-name z-function z-decorator">abstractmethod</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_verifier_poly</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> name</span><span class="z-punctuation">:</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> args</span><span class="z-punctuation">:</span><span class="z-meta z-function z-python"> list</span><span class="z-punctuation">[</span><span class="z-support z-support z-type">str</span><span class="z-punctuation">]</span><span class="z-punctuation">)</span><span class="z-punctuation"> -&gt;</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation">:</span><span class="z-constant"> ...</span></span></code></pre>
+<p>For plain text, the leaf implementations are straightforward — prefix with the kind and list the arguments:</p>
+<p><code>sumcheck/format.py:180</code></p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span class="z-storage z-type z-storage z-type z-class z-python">class</span><span class="z-entity z-name z-type"> TextFormat</span><span class="z-punctuation">(</span><span class="z-entity z-other z-inherited-class">Format</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_var</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> v</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        return</span><span> v</span><span class="z-punctuation">.</span><span>name</span><span class="z-punctuation z-punctuation z-definition z-comment">                          #</span><span class="z-comment"> &quot;X_t&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_opening</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> o</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        return</span><span class="z-storage z-type z-storage z-type z-string z-python"> f</span><span class="z-string">&quot;</span><span class="z-string">r_</span><span class="z-constant">{</span><span>o</span><span class="z-punctuation">.</span><span>print_label</span><span class="z-constant">}</span><span class="z-string">^(</span><span class="z-constant">{</span><span>o</span><span class="z-punctuation">.</span><span>stage</span><span class="z-constant">}</span><span class="z-string">)</span><span class="z-string">&quot;</span><span class="z-punctuation z-punctuation z-definition z-comment">  #</span><span class="z-comment"> &quot;r_cycle^(3)&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_const</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> value</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        return</span><span class="z-support z-support z-type"> str</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">value</span><span class="z-punctuation">)</span><span class="z-punctuation z-punctuation z-definition z-comment">                      #</span><span class="z-comment"> &quot;γ&quot;, &quot;0&quot;, &quot;2^64&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_committed_poly</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> name</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> args</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span>        arg_str</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">, </span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">join</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">args</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        return</span><span class="z-storage z-type z-storage z-type z-string z-python"> f</span><span class="z-string">&quot;</span><span class="z-string">cp:</span><span class="z-constant">{</span><span>name</span><span class="z-constant">}</span><span class="z-string">(</span><span class="z-constant">{</span><span>arg_str</span><span class="z-constant">}</span><span class="z-string">)</span><span class="z-string">&quot;</span><span class="z-punctuation z-punctuation z-definition z-comment">         #</span><span class="z-comment"> &quot;cp:RdInc(X_t)&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_virtual_poly</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> name</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> args</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span>        arg_str</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">, </span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">join</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">args</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        return</span><span class="z-storage z-type z-storage z-type z-string z-python"> f</span><span class="z-string">&quot;</span><span class="z-string">vp:</span><span class="z-constant">{</span><span>name</span><span class="z-constant">}</span><span class="z-string">(</span><span class="z-constant">{</span><span>arg_str</span><span class="z-constant">}</span><span class="z-string">)</span><span class="z-string">&quot;</span><span class="z-punctuation z-punctuation z-definition z-comment">         #</span><span class="z-comment"> &quot;vp:Rs1Ra(X_k, X_t)&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_verifier_poly</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> name</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> args</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span>        arg_str</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">, </span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">join</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">args</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        return</span><span class="z-storage z-type z-storage z-type z-string z-python"> f</span><span class="z-string">&quot;</span><span class="z-constant">{</span><span>name</span><span class="z-constant">}</span><span class="z-string">:</span><span class="z-constant">{</span><span>name</span><span class="z-constant">}</span><span class="z-string">(</span><span class="z-constant">{</span><span>arg_str</span><span class="z-constant">}</span><span class="z-string">)</span><span class="z-string">&quot;</span><span class="z-punctuation z-punctuation z-definition z-comment">     #</span><span class="z-comment"> &quot;eq:eq(r_cycle^(3), X_t)&quot;</span></span></code></pre>
+<p>For LaTeX, the same leaves become coloured and properly typeset:</p>
+<p><code>sumcheck/format.py:323</code></p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span class="z-storage z-type z-storage z-type z-class z-python">class</span><span class="z-entity z-name z-type"> LatexFormat</span><span class="z-punctuation">(</span><span class="z-entity z-other z-inherited-class">Format</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_var</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> v</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        return</span><span> v</span><span class="z-punctuation">.</span><span>name</span><span class="z-punctuation z-punctuation z-definition z-comment">                          #</span><span class="z-comment"> X_t -- already valid LaTeX</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_opening</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> o</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span>        label</span><span class="z-keyword z-keyword z-operator"> =</span><span> o</span><span class="z-punctuation">.</span><span>print_label</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">replace</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">_</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-storage z-type z-storage z-type z-string z-python"> r</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-constant">\_</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        return</span><span class="z-storage z-type z-storage z-type z-string z-python"> f</span><span class="z-string">&quot;</span><span class="z-string">r_</span><span class="z-constant">{{</span><span class="z-constant">\\</span><span class="z-string">text</span><span class="z-constant">{{</span><span class="z-constant">{</span><span>label</span><span class="z-constant">}</span><span class="z-constant">}}</span><span class="z-constant">}}</span><span class="z-string">^</span><span class="z-constant">{{</span><span class="z-string">(</span><span class="z-constant">{</span><span>o</span><span class="z-punctuation">.</span><span>stage</span><span class="z-constant">}</span><span class="z-string">)</span><span class="z-constant">}}</span><span class="z-string">&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_committed_poly</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> name</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> args</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span>        arg_str</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">, </span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">join</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">args</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span>        latex_name</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-meta z-function-call z-generic"> _latex_poly_name</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">name</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span>        colored</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-storage z-type z-storage z-type z-string z-python"> f</span><span class="z-string">&quot;</span><span class="z-constant">\\</span><span class="z-string">textcolor</span><span class="z-constant">{{</span><span class="z-string">ForestGreen</span><span class="z-constant">}}</span><span class="z-constant">{{</span><span class="z-constant">{</span><span>latex_name</span><span class="z-constant">}</span><span class="z-constant">}}</span><span class="z-string">&quot;</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        return</span><span class="z-storage z-type z-storage z-type z-string z-python"> f</span><span class="z-string">&quot;</span><span class="z-constant">{</span><span>colored</span><span class="z-constant">}</span><span class="z-string">(</span><span class="z-constant">{</span><span>arg_str</span><span class="z-constant">}</span><span class="z-string">)</span><span class="z-string">&quot;</span><span class="z-punctuation z-punctuation z-definition z-comment">         #</span><span class="z-comment"> green</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_virtual_poly</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> name</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> args</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span>        arg_str</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">, </span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">join</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">args</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span>        latex_name</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-meta z-function-call z-generic"> _latex_poly_name</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">name</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span>        colored</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-storage z-type z-storage z-type z-string z-python"> f</span><span class="z-string">&quot;</span><span class="z-constant">\\</span><span class="z-string">textcolor</span><span class="z-constant">{{</span><span class="z-string">BurntOrange</span><span class="z-constant">}}</span><span class="z-constant">{{</span><span class="z-constant">{</span><span>latex_name</span><span class="z-constant">}</span><span class="z-constant">}}</span><span class="z-string">&quot;</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        return</span><span class="z-storage z-type z-storage z-type z-string z-python"> f</span><span class="z-string">&quot;</span><span class="z-constant">{</span><span>colored</span><span class="z-constant">}</span><span class="z-string">(</span><span class="z-constant">{</span><span>arg_str</span><span class="z-constant">}</span><span class="z-string">)</span><span class="z-string">&quot;</span><span class="z-punctuation z-punctuation z-definition z-comment">         #</span><span class="z-comment"> orange</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-storage z-type z-storage z-type z-function z-python">    def</span><span class="z-entity z-name z-entity z-name z-function z-python"> fmt_verifier_poly</span><span class="z-punctuation">(</span><span class="z-variable z-parameter">self</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> name</span><span class="z-punctuation">,</span><span class="z-variable z-parameter"> args</span><span class="z-punctuation">)</span><span class="z-punctuation">:</span></span>
+<span class="giallo-l"><span>        arg_str</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">, </span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">join</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">args</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span>        latex_name</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-meta z-function-call z-generic"> _latex_verifier_name</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">name</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">        return</span><span class="z-storage z-type z-storage z-type z-string z-python"> f</span><span class="z-string">&quot;</span><span class="z-constant">{</span><span>latex_name</span><span class="z-constant">}</span><span class="z-string">(</span><span class="z-constant">{</span><span>arg_str</span><span class="z-constant">}</span><span class="z-string">)</span><span class="z-string">&quot;</span><span class="z-punctuation z-punctuation z-definition z-comment">      #</span><span class="z-comment"> eq → \widetilde{\text{eq}}</span></span></code></pre>
+<p>Same tree, different format object, different output. The leaves are the easy part — the interesting bit is how the tree walker handles arithmetic and precedence.</p>
+<p>Once the AST was in place, <a rel="external" href="https://github.com/clabra">Claudio Bravo</a> built the HTML and LaTeX front-ends with relatively little intervention — a clean demonstration that the per-node format architecture pays off in practice.</p>
+<h2 id="how-resolution-works-in-ast-land">How resolution works in AST land</h2>
+<p>Having a nice AST for each sumcheck immediately raises a question: is the whole pipeline <em>consistent</em>? Specifically, Jolt has two kinds of polynomial:</p>
+<ul>
+<li><strong>Committed</strong> polynomials (<code>cp:*</code>) are backed by the PCS — the prover sends a commitment, and any claimed evaluation can be verified by the verifier directly.</li>
+<li><strong>Virtual</strong> polynomials (<code>vp:*</code>) are not committed. The prover <em>claims</em> evaluations, and correctness is only established by a later sumcheck whose RHS consumes that claim.</li>
+</ul>
+<p>So a virtual polynomial opening produced by stage $k$ is only valid once a sumcheck in a later stage $k' &gt; k$ has its RHS reduce to that very evaluation. If a virtual claim is never consumed, the protocol is broken.</p>
+<p>The AST gives us everything we need to check this mechanically.</p>
+<h3 id="claims-as-ast-leaves">Claims as AST leaves</h3>
+<p>When a sumcheck runs, the protocol binds the free summation variables to a fresh random point. This produces a list of <em>opening claims</em> — one per polynomial that appeared in the integrand. In the AST, these are exactly the leaf nodes evaluated at <code>Var</code> arguments: after the protocol they become <code>Opening</code> nodes for the next stage.</p>
+<p>The <code>openings</code> field of each <code>SumcheckSpec</code> records exactly which claims are produced:</p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span>openings</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation">[</span></span>
+<span class="giallo-l"><span class="z-punctuation">    (</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">RegistersVal</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation"> [</span><span class="z-meta z-function-call z-generic">Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_K_REG</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">    (</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">Rs1Ra</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation">        [</span><span class="z-meta z-function-call z-generic">Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_K_REG</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-meta z-function-call z-generic"> Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span></span>
+<span class="giallo-l"><span class="z-punctuation">    (</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">RdInc</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-punctuation">        [</span><span class="z-meta z-function-call z-generic">Opening</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">4</span><span class="z-punctuation">,</span><span class="z-constant"> DIM_CYCLE</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span><span class="z-punctuation">)</span><span class="z-punctuation">,</span><span class="z-punctuation z-punctuation z-definition z-comment">   #</span><span class="z-comment"> committed — goes to PCS</span></span>
+<span class="giallo-l"><span class="z-punctuation">]</span></span></code></pre>
+<p>Each entry is a <code>(name, args)</code> pair. The <code>name</code> identifies the polynomial; the <code>args</code> are the opening point (all <code>Opening</code> nodes, since the <code>Var</code>s have been bound). The kind (<code>cp</code> vs <code>vp</code>) is inferred by scanning the integrand for a matching polynomial leaf.</p>
+<h3 id="the-resolution-loop">The resolution loop</h3>
+<p>The resolver walks all 21 sumchecks in stage order, maintaining a dict of <em>outstanding claims</em> — those produced but not yet consumed:</p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span>outstanding</span><span class="z-punctuation">:</span><span> dict</span><span class="z-punctuation">[</span><span class="z-support z-support z-type">str</span><span class="z-punctuation">,</span><span class="z-support z-support z-type"> dict</span><span class="z-punctuation">]</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation"> {</span><span class="z-punctuation">}</span><span class="z-punctuation z-punctuation z-definition z-comment">  #</span><span class="z-comment"> claim_key → {node_id, kind, name}</span></span></code></pre>
+<p>The claim key is <code>"PolyName@(r_label^(stage), ...)"</code> — the polynomial name plus its opening point, stringified. For each sumcheck:</p>
+<ol>
+<li><strong>Consume</strong>: walk the RHS (<code>input_claim</code>) for polynomial leaves evaluated at <code>Opening</code> args. For each one, look up its claim key in <code>outstanding</code>. If found, mark it resolved and delete it. If not found (it's a public input or constant), note it.</li>
+<li><strong>Produce</strong>: iterate <code>spec.openings</code>. For each, compute the claim key and insert into <code>outstanding</code>.</li>
+</ol>
+<p>Committed openings that reach the end of the pipeline without being consumed are fine — they go to the PCS for direct verification. Unclaimed <em>virtual</em> openings are a bug.</p>
+<h3 id="parametric-matching">Parametric matching</h3>
+<p>Many polynomials are parametric — <code>InstructionRa(i)</code> is a family, one poly per chunk index $i$. The integrand references a single template like <code>vp("InstructionRa(i)", X_k, X_t)</code>, while the <code>openings</code> field might produce $N_{ra}$ individual claims <code>InstructionRa(0)</code>, <code>InstructionRa(1)</code>, ... When the RHS of a later sumcheck references <code>InstructionRa(i)</code>, the resolver matches it against all outstanding claims whose base name starts with <code>InstructionRa(</code> at the same opening point:</p>
+<pre class="giallo z-code"><code data-lang="python"><span class="giallo-l"><span>matches</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-punctuation"> [</span></span>
+<span class="giallo-l"><span>    okey</span><span class="z-keyword z-keyword z-control"> for</span><span> okey</span><span class="z-keyword z-keyword z-control"> in</span><span> outstanding</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-control">    if</span><span> okey</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">endswith</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">point_suffix</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-keyword z-keyword z-operator z-logical">    and</span><span> okey</span><span class="z-punctuation">[</span><span class="z-punctuation">:</span><span class="z-keyword z-keyword z-operator">-</span><span class="z-support z-function z-support z-function z-builtin">len</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">point_suffix</span><span class="z-punctuation">)</span><span class="z-punctuation">]</span><span class="z-punctuation">.</span><span class="z-meta z-function-call z-generic">startswith</span><span class="z-punctuation">(</span><span class="z-meta z-function-call z-arguments">base</span><span class="z-keyword z-keyword z-operator"> +</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span class="z-punctuation">]</span></span></code></pre>
+<p>This bulk-resolves the entire family in one go.</p>
+<h3 id="the-claim-flow-dag">The claim-flow DAG</h3>
+<p>Running <code>python3 -m sumcheck resolve</code> prints the full resolution trace on the terminal — which sumcheck consumed which claim, and a final verdict on unresolved virtuals.</p>
+<p>The HTML site (<code>python3 -m sumcheck html</code>) also generates an interactive <code>resolve.html</code> page. It renders the same data as a directed acyclic graph using <a rel="external" href="https://js.cytoscape.org/">Cytoscape.js</a> with a dagre layout: nodes are individual sumchecks coloured by stage, edges are claim flows (orange for virtual, green for committed → PCS). Clicking a node shows what it consumes and produces; clicking an edge lists the polynomials flowing along it.</p>
+<p>For Jolt's 21 sumchecks, the graph has 22 nodes (21 sumchecks + 1 PCS sink) and 37 grouped edges. Every virtual claim resolves — the pipeline is consistent.</p>
+
+  </div>
+
+  
+
+  
+  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
+  <nav class="toc toc-panel" id="toc-panel">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#each-sumcheck-is-an-abstract-syntax-tree">Each sumcheck is an abstract syntax tree</a></li><li><a href="#building-a-sumcheck">Building a sumcheck</a><ol><li><a href="#vars-and-openings">Vars and Openings</a></li></ol></li><li><a href="#formatting-the-tree">Formatting the tree</a></li><li><a href="#how-resolution-works-in-ast-land">How resolution works in AST land</a><ol><li><a href="#claims-as-ast-leaves">Claims as AST leaves</a></li><li><a href="#the-resolution-loop">The resolution loop</a></li><li><a href="#parametric-matching">Parametric matching</a></li><li><a href="#the-claim-flow-dag">The claim-flow DAG</a></li></ol></li></ol>
+  </nav>
+  <script>
+    (function() {
+      var btn = document.getElementById('toc-toggle');
+      var panel = document.getElementById('toc-panel');
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target)) {
+          panel.classList.remove('open');
+        }
+      });
+      panel.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          panel.classList.remove('open');
+        });
+      });
+    })();
+  </script>
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const select = document.getElementById('theme-select');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      const lightThemes = ['rose-pine-dawn', 'bw-light'];
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        }
+      }
+
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
+
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
+    })();
+  </script>
+  <script>
+    // Smooth scroll + highlight for eqref and citation links.
+    // Citations get a ↩ back-link to return to reading position.
+    document.addEventListener('click', function(e) {
+      // Handle back-arrow clicks
+      var back = e.target.closest('.bib-back');
+      if (back) {
+        e.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Clean up previous highlights and back-links
+      document.querySelectorAll('.eq-highlight').forEach(function(el) {
+        el.classList.remove('eq-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function(el) {
+        el.remove();
+      });
+
+      var href = link.getAttribute('href');
+      var id = decodeURIComponent(href.slice(1));
+      var target = document.getElementById(id);
+      if (!target) return;
+
+      var highlight = target.closest('mjx-container[display="true"]') || target;
+      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlight.classList.add('eq-highlight');
+
+      // For citations, add a back-arrow to return to reading position
+      if (link.classList.contains('citation')) {
+        if (!link.id) link.id = 'cite-src-' + id;
+        var arrow = document.createElement('a');
+        arrow.className = 'bib-back';
+        arrow.setAttribute('data-source', link.id);
+        arrow.textContent = ' \u21A9';
+        arrow.title = 'Back to text';
+        highlight.appendChild(arrow);
+      }
+    });
+  </script>
+
+</body>
+</html>
