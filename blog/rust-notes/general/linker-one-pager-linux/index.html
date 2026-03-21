@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'rose-pine-ink' : 'vitesse-dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Linker Basics | Random Walks</title>
+  <link rel="stylesheet" href="/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  
+  
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      tags: 'ams',
+      macros: {
+        field: ['{\\mathbb{#1}}', 1],
+        hei: ['{\\mathbb{F}(#1)}', 1],
+        Field: '{\\mathbb{F}}',
+        Mont: ['{\\widetilde{#1}}', 1],
+        samples: '{\\xleftarrow{\\$}}',
+        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+        TauConstraints: '{\\tau_y}',
+        TauTime: '{\\tau_{\\text{cycle}}}',
+        TauGroup: '{\\tau_b}',
+        MLE: ['{\\widetilde{#1}}', 1],
+        tf: ['{\\widetilde{#1}}', 1],
+        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+        Def: '{:=}',
+        ChallengeSet: '{\\mathsf{C}}',
+        Complement: ['{\\overline{#1}}', 1],
+        Size: ['{\\left|#1\\right|}', 1],
+        Exp: ['{2^{#1}}', 1],
+        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+        BigO: ['{O\\ \\left(#1\\right)}', 1],
+        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
+        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
+        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+        poly: '{\\operatorname{poly}}',
+        criticalAlpha: ['{\\alpha_{#1}}', 1],
+        bit: '{\\{0,1\\}}',
+        CStar: '{C^{\\star}}',
+        GraphNbrs: ['{N_G(#1)}', 1],
+        ClauseNbrs: ['{N_C(#1)}', 1],
+        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        SmallO: ['{o\\!(#1)}', 1],
+        Naturals: '{\\mathbb{N}}',
+        Closure: ['{\\operatorname{Cl}(#1)}', 1],
+        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+        Dim: ['{\\dim(#1)}', 1],
+        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+        domain: ['{\\operatorname{dom}(#1)}', 1],
+        False: '{\\bot}',
+        opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+        // ── Complexity Theory & Turing Machines ──────────────────────────
+        // Complexity classes
+        NP: '{\\mathsf{NP}}',
+        coNP: '{\\mathsf{coNP}}',
+        Pclass: '{\\mathsf{P}}',
+        PSPACE: '{\\mathsf{PSPACE}}',
+        EXP: '{\\mathsf{EXP}}',
+        // Turing machine components
+        States: '{\\mathcal{Q}}',
+        TransFunc: '{\\delta}',
+        InitState: '{q_0}',
+        AcceptState: '{q_{\\text{acc}}}',
+        RejectState: '{q_{\\text{rej}}}',
+        InitConfig: '{C_0}',
+        AcceptConfig: '{C_{\\text{acc}}}',
+        Moves: '{\\{\\mathsf{L},\\, \\mathsf{R}\\}}',
+        // Languages & notation
+        Lang: ['{L(#1)}', 1],
+        RE: '{\\mathsf{RE}}',
+        // General math
+        NN: '{\\mathbb{N}}',
+        ZZ: '{\\mathbb{Z}}',
+        RR: '{\\mathbb{R}}'
+      }
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="/">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
+        <a href="/misc/">Random</a>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
+          <option value="rose-pine-ink">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
+        </select>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+
+
+
+  
+  
+
+
+<article class="post">
+  <header class="post-header">
+    
+    
+    <a href="&#x2F;blog&#x2F;rust-notes&#x2F;general&#x2F;" class="back-link">&larr; Misc</a>
+    
+    <h1>Linker Basics</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-03-20</time>
+      
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/linkers/" class="tag">linkers</a><a href="/tags/systems/" class="tag">systems</a><a href="/tags/linux/" class="tag">linux</a>
+    </div>
+    
+  </header>
+
+  
+  <nav class="toc toc-side">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#basic-setup">Basic Setup</a></li><li><a href="#the-missing-pieces">The Missing Pieces</a></li><li><a href="#the-linker">The linker</a></li><li><a href="#duplicate-symbols">Duplicate symbols</a><ol><li><a href="#case-1-initialized-duplicates">Case 1: Initialized duplicates</a></li><li><a href="#case-2-uninitialized-duplicates-common-symbols">Case 2: Uninitialized duplicates (common symbols)</a></li></ol></li><li><a href="#static-libraries">Static libraries</a></li><li><a href="#what-the-os-does-with-the-executable">What the OS does with the executable</a><ol><li><a href="#what-happens-when-you-run-sample1">What happens when you run .&#x2F;sample1</a></li></ol></li><li><a href="#shared-libraries">Shared libraries</a></li><li><a href="#dynamically-loaded-libraries-plugins">Dynamically loaded libraries (plugins)</a></li><li><a href="#aside-what-is-elf">Aside: what is ELF?</a></li><li><a href="#aside-how-symbol-resolution-actually-works-pic-got-plt">Aside: how symbol resolution actually works (PIC, GOT, PLT)</a><ol><li><a href="#lazy-binding-rtld-lazy">Lazy binding (RTLD_LAZY)</a></li><li><a href="#eager-binding-rtld-now">Eager binding (RTLD_NOW)</a></li><li><a href="#the-key-insight">The key insight</a></li></ol></li><li><a href="#further-reading">Further reading</a></li><li><a href="#credits">Credits</a></li></ol>
+  </nav>
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <h2 id="basic-setup">Basic Setup</h2>
+<p>A hands-on tutorial on how linkers work, adapted from
+David Drysdale's <a rel="external" href="https://www.lurklurk.org/linkers/linkers.html">Beginner's Guide to Linkers</a>
+for <strong>Linux</strong> (x86-64).
+Code lives <a rel="external" href="https://github.com/abiswas3/Mini-lectures/tree/main/linker-tutorial">here</a>.
+We start with this simple C program that declares most of the symbols you would expect in a program.</p>
+<pre class="giallo z-code"><code data-lang="c" data-name="/Users/francis/Projects/linker-tutorial/c_parts.c"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 1</span><span class="z-punctuation z-punctuation z-definition z-comment">/*</span><span class="z-comment"> Definition of an uninitialized global variable </span><span class="z-punctuation z-punctuation z-definition z-comment">*/</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 2</span><span class="z-storage z-type">int</span><span> x_global_uninit</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 3</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 4</span><span class="z-punctuation z-punctuation z-definition z-comment">/*</span><span class="z-comment"> Definition of an initialized global variable </span><span class="z-punctuation z-punctuation z-definition z-comment">*/</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 5</span><span class="z-storage z-type">int</span><span> x_global_init </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-constant z-numeric z-constant"> 1</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 6</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 7</span><span class="z-punctuation z-punctuation z-definition z-comment">/*</span><span class="z-comment"> Static uninitialized global -- only visible in this file </span><span class="z-punctuation z-punctuation z-definition z-comment">*/</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 8</span><span class="z-storage z-modifier">static</span><span class="z-storage z-type"> int</span><span> y_global_uninit</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 9</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">10</span><span class="z-punctuation z-punctuation z-definition z-comment">/*</span><span class="z-comment"> Static initialized global -- only visible in this file </span><span class="z-punctuation z-punctuation z-definition z-comment">*/</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">11</span><span class="z-storage z-modifier">static</span><span class="z-storage z-type"> int</span><span> y_global_init </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-constant z-numeric z-constant"> 2</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">12</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">13</span><span class="z-punctuation z-punctuation z-definition z-comment">/*</span><span class="z-comment"> Declaration: this variable is defined in another file </span><span class="z-punctuation z-punctuation z-definition z-comment">*/</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">14</span><span class="z-storage z-modifier">extern</span><span class="z-storage z-type"> int</span><span> z_global</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">15</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">16</span><span class="z-punctuation z-punctuation z-definition z-comment">/*</span><span class="z-comment"> Declaration: this function is defined in another file </span><span class="z-punctuation z-punctuation z-definition z-comment">*/</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">17</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> fn_a</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-variable z-parameter"> x</span><span class="z-punctuation">,</span><span class="z-storage z-type"> int</span><span class="z-variable z-parameter"> y</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">18</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">19</span><span class="z-punctuation z-punctuation z-definition z-comment">/*</span><span class="z-comment"> Static function definition -- only callable from this file </span><span class="z-punctuation z-punctuation z-definition z-comment">*/</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">20</span><span class="z-storage z-modifier">static</span><span class="z-storage z-type"> int</span><span class="z-entity z-name z-entity z-name z-function"> fn_b</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-variable z-parameter"> x</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">21</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">22</span><span class="z-keyword z-keyword z-control">  return</span><span> x</span><span class="z-keyword z-keyword z-operator">+</span><span class="z-constant z-numeric z-constant">1</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">23</span><span class="z-punctuation">}</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">24</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">25</span><span class="z-punctuation z-punctuation z-definition z-comment">/*</span><span class="z-comment"> Function definition </span><span class="z-punctuation z-punctuation z-definition z-comment">*/</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">26</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> fn_c</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-variable z-parameter"> x_local</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">27</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">28</span><span class="z-storage z-type">  int</span><span> y_local_uninit</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">29</span><span class="z-storage z-type">  int</span><span> y_local_init </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-constant z-numeric z-constant"> 3</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">30</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">31</span><span>  x_global_uninit </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-entity z-name z-entity z-name z-function"> fn_a</span><span class="z-punctuation">(</span><span>x_local</span><span class="z-punctuation">,</span><span> x_global_init</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">32</span><span>  y_local_uninit </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-entity z-name z-entity z-name z-function"> fn_a</span><span class="z-punctuation">(</span><span>x_local</span><span class="z-punctuation">,</span><span> y_local_init</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">33</span><span>  y_local_uninit </span><span class="z-keyword z-keyword z-operator">+=</span><span class="z-entity z-name z-entity z-name z-function"> fn_b</span><span class="z-punctuation">(</span><span>z_global</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">34</span><span class="z-keyword z-keyword z-control">  return</span><span class="z-punctuation"> (</span><span>y_global_uninit </span><span class="z-keyword z-keyword z-operator">+</span><span> y_local_uninit </span><span class="z-keyword z-keyword z-operator">+</span><span> y_global_init</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">35</span><span class="z-punctuation">}</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">36</span></span></code></pre>
+<p>For us to be able to run this program, we need to compile this down to machine code that the CPU understands.
+However certain functions and variables, like <code>fn_a</code> are not defined at all.
+So the how does the compiler find its implemenation?
+One would expect the compiler would complain, and we will not get machine code.
+Surprisingly, compilation goes through without any errors.</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-constant"> -</span><span class="z-constant">c</span><span class="z-string"> c_parts.c</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> c_parts.o</span></span></code></pre>
+<p>It compiles fine -- <code>cc -c</code> only produces an object file, it does not try to make a runnable program. But if you try to run the object file directly:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">./c_parts.o</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>bash: ./c_parts.o: cannot execute binary file: Exec format error</span></span></code></pre>
+<p>An object file is not an executable<sup class="footnote-reference"><a href="#elf">1</a></sup>. It has no entry point, no memory layout, and unresolved blanks. Something else needs to finish the job.</p>
+<p>What really happens is that when the compiler sees a declaration (a definition without an implementation), it treats the declaration as a promise that the implementation for this function (or variable) exists somewhere, just not in this file.</p>
+<p>We can peek inside the object file with <code>objdump</code>.
+It shows the <strong>sections</strong> (how the object file is organized) and the <strong>disassembly</strong> (the machine instructions the compiler generated):</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">objdump</span><span class="z-constant"> -</span><span class="z-constant">d</span><span class="z-constant"> -</span><span class="z-constant">-section-headers</span><span class="z-string"> c_parts.o</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>c_parts.o:	file format elf64-x86-64</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Sections:</span></span>
+<span class="giallo-l"><span>Idx Name             Size     VMA              Type</span></span>
+<span class="giallo-l"><span>  0 .text            00000083 0000000000000000 TEXT</span></span>
+<span class="giallo-l"><span>  1 .data            00000008 0000000000000000 DATA</span></span>
+<span class="giallo-l"><span>  2 .bss             00000004 0000000000000000 BSS</span></span>
+<span class="giallo-l"><span>  3 .comment         0000002c 0000000000000000</span></span>
+<span class="giallo-l"><span>  4 .note.GNU-stack  00000000 0000000000000000</span></span>
+<span class="giallo-l"><span>  5 .eh_frame        00000058 0000000000000000</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Disassembly of section .text:</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>0000000000000000 &lt;fn_c&gt;:</span></span>
+<span class="giallo-l"><span>       0: 55                    push   %rbp</span></span>
+<span class="giallo-l"><span>       1: 48 89 e5              mov    %rsp,%rbp</span></span>
+<span class="giallo-l"><span>       ...</span></span>
+<span class="giallo-l"><span>      2a: e8 00 00 00 00        call   2f &lt;fn_c+0x2f&gt;</span></span>
+<span class="giallo-l"><span>       ...</span></span>
+<span class="giallo-l"><span>      6e: c3                    ret</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>000000000000006f &lt;fn_b&gt;:</span></span>
+<span class="giallo-l"><span>      6f: 55                    push   %rbp</span></span>
+<span class="giallo-l"><span>       ...</span></span>
+<span class="giallo-l"><span>      82: c3                    ret</span></span></code></pre>
+<p>(Output trimmed for readability.) A few things to notice:</p>
+<ul>
+<li>The <strong>VMA</strong> column stands for <strong>Virtual Memory Address</strong> -- where the section would start in the process's virtual memory (see <a rel="external" href="https://man7.org/linux/man-pages/man1/objdump.1.html">objdump docs</a>). In an object file these are all zero or relative offsets because the linker hasn't assigned final addresses yet. The <strong>Size</strong> column is in bytes (hex). We will get to who the linker is.</li>
+<li>The object file has separate sections: <code>.text</code> for code, <code>.data</code> for initialized globals, <code>.bss</code> for uninitialized globals.</li>
+<li><code>fn_c</code> starts at offset <code>0x0</code> and <code>fn_b</code> at <code>0x6f</code> in the <code>.text</code> section -- these match the <code>nm</code> offsets we are about to see.</li>
+<li>The instruction <code>call 2f</code> is a function call to <code>fn_a</code> -- but the target address is just <code>0x2f</code> (pointing at itself). That's a <strong>blank</strong>. The compiler didn't know where <code>fn_a</code> lives, so it wrote a placeholder. The linker will patch this later.</li>
+</ul>
+<p>To see that the compiler actually leaves the implementation blank, we can look at the <strong>symbol table</strong>.
+A symbol table is a data structure inside the object file that maps names (like <code>fn_a</code>, <code>x_global_init</code>) to their addresses and metadata.
+For every function or global variable defined in the file, the symbol table records where it lives (using relative addressing).
+For every name that is declared but not defined, the symbol table records it as <strong>undefined</strong> -- a blank that needs to be filled later.
+The <code>objdump</code> output showed us raw bytes and instructions. The symbol table is what gives those bytes names -- without it, we'd just see addresses and opcodes with no way to know which function or variable is which.
+(For more background, see the <a rel="external" href="https://refspecs.linuxfoundation.org/elf/gabi4+/ch4.symtab.html">ELF symbol table specification</a> or this <a rel="external" href="https://en.wikipedia.org/wiki/Symbol_table">Wikipedia overview</a>.)</p>
+<p>We can dump the symbol table with <code>nm</code>. Here is what <code>c_parts.c</code> puts into it:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">nm</span><span class="z-string"> c_parts.o</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span># address          type  name</span></span>
+<span class="giallo-l"><span>                 U      fn_a</span></span>
+<span class="giallo-l"><span>000000000000006f t      fn_b</span></span>
+<span class="giallo-l"><span>0000000000000000 T      fn_c</span></span>
+<span class="giallo-l"><span>0000000000000000 D      x_global_init</span></span>
+<span class="giallo-l"><span>0000000000000004 C      x_global_uninit</span></span>
+<span class="giallo-l"><span>0000000000000004 d      y_global_init</span></span>
+<span class="giallo-l"><span>0000000000000000 b      y_global_uninit</span></span>
+<span class="giallo-l"><span>                 U      z_global</span></span></code></pre>
+<p>See those <code>U</code> entries for <code>fn_a</code> and <code>z_global</code>?
+No address<sup class="footnote-reference"><a href="#a">2</a></sup>, just <code>U</code> for <strong>undefined</strong>.
+Those are the blanks.
+The other type letters tell you what kind of definition each symbol is (full list in the <a rel="external" href="https://man7.org/linux/man-pages/man1/nm.1.html">nm man page</a>):</p>
+<table><thead><tr><th>Type</th><th>Meaning</th></tr></thead><tbody>
+<tr><td><code>U</code></td><td><strong>Undefined</strong> -- a blank. The object file references this name but does not define it.</td></tr>
+<tr><td><code>T</code></td><td>A function definition. Code lives in the <code>.text</code> section.</td></tr>
+<tr><td><code>t</code></td><td>Same as <code>T</code>, but marked <code>static</code> (visible only within this file -- what "visible" means here will become clear once we introduce the linker).</td></tr>
+<tr><td><code>D</code></td><td>An initialized global variable. Data lives in the <code>.data</code> section.</td></tr>
+<tr><td><code>d</code></td><td>Same as <code>D</code>, but marked <code>static</code> (visible only within this file).</td></tr>
+<tr><td><code>C</code></td><td><strong>Common</strong> -- an uninitialized global variable. In practice, <code>int x;</code> at file scope shows up as <code>C</code>, not <code>B</code>. The linker may merge duplicates across files (a historical C convention; disable with <code>-fno-common</code>).</td></tr>
+<tr><td><code>B</code></td><td>An uninitialized global variable placed in the <code>.bss</code> section (zeroed at runtime). Appears after linking, or when compiled with <code>-fno-common</code>.</td></tr>
+<tr><td><code>b</code></td><td>Same as <code>B</code>, but marked <code>static</code> (visible only within this file).</td></tr>
+</tbody></table>
+<p><strong>Lowercase = <code>static</code></strong> (the name is not exported from this object file -- the linker, which we are about to introduce, will not let other files reference it).
+<strong>Uppercase = not <code>static</code></strong> (the name is exported and other object files can reference it).</p>
+<p>The things we see in the symbol table are the global variables, function names and declared functions (and variables).</p>
+<ul>
+<li><code>int x_global_init = 1;</code> -- <strong>definition</strong> of a global variable, initialized.</li>
+<li><code>int x_global_uninit;</code> -- <strong>definition</strong> of a global variable, uninitialized.</li>
+<li><code>static int y_global_init = 2;</code> -- <strong>definition</strong> of a <code>static</code> global variable, initialized.</li>
+<li><code>static int y_global_uninit;</code> -- <strong>definition</strong> of a <code>static</code> global variable, uninitialized.</li>
+<li><code>extern int z_global;</code> -- <strong>declaration</strong>. No storage allocated, no code generated. A promise that the definition exists elsewhere.</li>
+<li><code>int fn_a(int x, int y);</code> -- <strong>declaration</strong> of a function. Same idea: a promise, no code generated.</li>
+<li><code>static int fn_b(int x) { ... }</code> -- <strong>definition</strong> of a <code>static</code> function. Code is generated.</li>
+<li><code>int fn_c(int x_local) { ... }</code> -- <strong>definition</strong> of a function. Code is generated.</li>
+</ul>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">Aside: No underscore prefix on Linux</div>
+  
+  <p>On macOS, <code>nm</code> shows C symbols with a leading underscore: <code>_fn_a</code>, <code>_x_global_init</code>, etc.
+This is a Mach-O convention inherited from classic Mac toolchains. On Linux (ELF), there is <strong>no underscore prefix</strong> -- <code>fn_a</code> appears as <code>fn_a</code>, not <code>_fn_a</code>. All the symbol names in this article reflect the Linux convention.</p>
+
+</div>
+<div class="footnote-definition" id="a"><sup class="footnote-definition-label">2</sup>
+<p>The addresses in the first column are <strong>offsets</strong>, not final memory addresses. <code>fn_b</code> at <code>0x6f</code> means "111 bytes from the start of the <code>.text</code> (code) section in <code>c_parts.o</code>." At this stage we have no idea where in the final process's virtual memory the <code>.text</code> section will land -- but that does not matter. These are relative positions: <code>fn_b</code> starts 111 bytes after the beginning of <code>.text</code>, wherever that ends up. Deciding the final placement is the job of the <strong>linker</strong> -- a program we are about to describe.</p>
+</div>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">What about local variables?</div>
+  
+  <p><code>int y_local_uninit;</code> and <code>int y_local_init = 3;</code> inside <code>fn_c</code> do <strong>not</strong> appear in the symbol table. These are <strong>local variables</strong>. A local variable may be initialized or uninitialized (in which case its value is whatever garbage is on the stack), but either way the compiler already knows its offset from the stack pointer. There is no promise of "I exist somewhere, my location will be filled in later" -- so there is no reason to put local variables in the symbol table.</p>
+
+</div>
+<p>The <code>static</code> keyword and the definition-vs-declaration distinction affect how each name shows up in the <code>nm</code> output above -- uppercase vs lowercase class letters, <code>U</code> for blanks. We will come back to this.</p>
+<h2 id="the-missing-pieces">The Missing Pieces</h2>
+<p>Now say the things <code>c_parts.c</code> is referencing -- <code>fn_a</code> and <code>z_global</code> -- were defined in another file. Save this as <code>c_rest.c</code>:</p>
+<pre class="giallo z-code"><code data-lang="c" data-name="https://github.com/abiswas3/Mini-lectures/blob/main/linker-tutorial/c_rest.c"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 1</span><span class="z-punctuation z-punctuation z-definition z-comment">/*</span><span class="z-comment"> Definition of the variable c_parts.c declared as extern </span><span class="z-punctuation z-punctuation z-definition z-comment">*/</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 2</span><span class="z-storage z-type">int</span><span> z_global </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-constant z-numeric z-constant"> 11</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 3</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 4</span><span class="z-punctuation z-punctuation z-definition z-comment">/*</span><span class="z-comment"> A separate static with the same name -- no conflict, file-local </span><span class="z-punctuation z-punctuation z-definition z-comment">*/</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 5</span><span class="z-storage z-modifier">static</span><span class="z-storage z-type"> int</span><span> y_global_init </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-constant z-numeric z-constant"> 2</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 6</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 7</span><span class="z-punctuation z-punctuation z-definition z-comment">/*</span><span class="z-comment"> Declaration: refers to x_global_init from c_parts.c </span><span class="z-punctuation z-punctuation z-definition z-comment">*/</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 8</span><span class="z-storage z-modifier">extern</span><span class="z-storage z-type"> int</span><span> x_global_init</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 9</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">10</span><span class="z-punctuation z-punctuation z-definition z-comment">/*</span><span class="z-comment"> Definition of the function c_parts.c declared </span><span class="z-punctuation z-punctuation z-definition z-comment">*/</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">11</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> fn_a</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-variable z-parameter"> x</span><span class="z-punctuation">,</span><span class="z-storage z-type"> int</span><span class="z-variable z-parameter"> y</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">12</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">13</span><span class="z-keyword z-keyword z-control">  return</span><span class="z-punctuation">(</span><span>x</span><span class="z-keyword z-keyword z-operator">+</span><span>y</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">14</span><span class="z-punctuation">}</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">15</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">16</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> main</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-variable z-parameter"> argc</span><span class="z-punctuation">,</span><span class="z-storage z-type"> char</span><span class="z-keyword z-keyword z-operator"> *</span><span class="z-variable z-parameter">argv</span><span class="z-storage z-modifier">[]</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">17</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">18</span><span class="z-storage z-modifier">  const</span><span class="z-storage z-type"> char</span><span class="z-keyword z-keyword z-operator"> *</span><span>message </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">Hello, world</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">19</span><span class="z-keyword z-keyword z-control">  return</span><span class="z-entity z-name z-entity z-name z-function"> fn_a</span><span class="z-punctuation">(</span><span>x_global_init</span><span class="z-punctuation">,</span><span> y_global_init</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">20</span><span class="z-punctuation">}</span></span></code></pre>
+<p>Compile <code>c_rest.c</code> the same way -- compile only, no linking:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-constant"> -</span><span class="z-constant">c</span><span class="z-string"> c_rest.c</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> c_rest.o</span></span>
+<span class="giallo-l"><span class="z-entity z-name">objdump</span><span class="z-constant"> -</span><span class="z-constant">d</span><span class="z-constant"> -</span><span class="z-constant">-section-headers</span><span class="z-string"> c_rest.o</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>c_rest.o:	file format elf64-x86-64</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Sections:</span></span>
+<span class="giallo-l"><span>Idx Name             Size     VMA              Type</span></span>
+<span class="giallo-l"><span>  0 .text            00000050 0000000000000000 TEXT</span></span>
+<span class="giallo-l"><span>  1 .data            00000008 0000000000000000 DATA</span></span>
+<span class="giallo-l"><span>  2 .rodata          0000000d 0000000000000000</span></span>
+<span class="giallo-l"><span>  3 .comment         0000002c 0000000000000000</span></span>
+<span class="giallo-l"><span>  4 .note.GNU-stack  00000000 0000000000000000</span></span>
+<span class="giallo-l"><span>  5 .eh_frame        00000058 0000000000000000</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Disassembly of section .text:</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>0000000000000000 &lt;fn_a&gt;:</span></span>
+<span class="giallo-l"><span>       0: 55                    push   %rbp</span></span>
+<span class="giallo-l"><span>       ...</span></span>
+<span class="giallo-l"><span>      12: c3                    ret</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>0000000000000013 &lt;main&gt;:</span></span>
+<span class="giallo-l"><span>      13: 55                    push   %rbp</span></span>
+<span class="giallo-l"><span>       ...</span></span>
+<span class="giallo-l"><span>      3f: e8 00 00 00 00        call   44 &lt;main+0x31&gt;</span></span>
+<span class="giallo-l"><span>       ...</span></span>
+<span class="giallo-l"><span>      4f: c3                    ret</span></span></code></pre>
+<p>Same structure: <code>.text</code> for code, <code>.data</code> for initialized globals, plus a <code>.rodata</code> section for the <code>"Hello, world"</code> string literal. Again, <code>call 44</code> is a blank -- <code>main</code> calls <code>fn_a</code> but the compiler doesn't know where <code>fn_a</code> lives yet.</p>
+<p>Dump the symbol table:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">nm</span><span class="z-string"> c_rest.o</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span># address          type  name</span></span>
+<span class="giallo-l"><span>0000000000000000 T      fn_a</span></span>
+<span class="giallo-l"><span>0000000000000013 T      main</span></span>
+<span class="giallo-l"><span>                 U      x_global_init</span></span>
+<span class="giallo-l"><span>0000000000000004 d      y_global_init</span></span>
+<span class="giallo-l"><span>0000000000000000 D      z_global</span></span></code></pre>
+<p><code>fn_a</code> is <code>T</code> (function definition) and <code>z_global</code> is <code>D</code> (initialized global) -- exactly what <code>c_parts.o</code> left as <code>U</code> blanks. <code>x_global_init</code> is <code>U</code> here -- <code>c_rest.c</code> declared it with <code>extern</code> and uses it, but the definition lives in <code>c_parts.o</code>. Notice <code>y_global_init</code> appears here too as <code>d</code> (lowercase -- <code>static</code>), just like in <code>c_parts.o</code>.</p>
+<p>Now we have two separate object files. <code>c_parts.o</code> depends on symbols defined in <code>c_rest.o</code>, but neither file knows the other exists. The compiler processed each file in isolation. Somebody needs to combine these two symbol tables, match every <code>U</code> blank in one file to a definition in the other, and produce a single executable with real addresses.</p>
+<p>That somebody is the <strong>linker</strong>.</p>
+<h2 id="the-linker">The linker</h2>
+<p>The linker is a program called <code>ld</code> on Linux (and macOS).<sup class="footnote-reference"><a href="#ldvsldlinux">3</a></sup> It takes object files as input and produces an executable. Let's invoke it directly:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">ld</span><span class="z-string"> c_parts.o</span><span class="z-string"> c_rest.o</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> sample1</span><span class="z-constant"> -</span><span class="z-constant">lc</span><span class="z-constant"> -</span><span class="z-constant">dynamic-linker</span><span class="z-string"> /lib64/ld-linux-x86-64.so.2</span></span></code></pre>
+<p>The flags:</p>
+<ul>
+<li><code>c_parts.o c_rest.o</code> -- the two object files to combine.</li>
+<li><code>-o sample1</code> -- name of the output executable.</li>
+<li><code>-lc -dynamic-linker /lib64/ld-linux-x86-64.so.2</code> -- boilerplate needed because <code>libc</code> is a shared library on Linux. We explain what these flags mean and why they're necessary in the <a href="/blog/rust-notes/general/linker-one-pager-linux/#shared-libraries">Shared libraries</a> section.</li>
+</ul>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">cc does this for you</div>
+  
+  <p>When you run <code>cc c_parts.o c_rest.o -o sample1</code> (without <code>-c</code>), <code>cc</code> invokes <code>ld</code> behind the scenes and supplies <code>-lc</code>, <code>-dynamic-linker</code>, and other platform flags automatically. Using <code>ld</code> directly makes visible what <code>cc</code> hides.</p>
+
+</div>
+<p>The linker:</p>
+<ol>
+<li>Collects the symbol tables from both <code>c_parts.o</code> and <code>c_rest.o</code></li>
+<li>Matches every <code>U</code> (undefined) symbol to a matching definition (<code>T</code>, <code>D</code>, <code>B</code>, etc.)</li>
+<li>Assigns real virtual addresses to every symbol</li>
+<li>Writes the final executable</li>
+</ol>
+<p>Examine the result:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">nm</span><span class="z-string"> sample1</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-constant"> -</span><span class="z-constant">v</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">^$</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span></span></code></pre><div class="callout callout-box thm-box">
+  
+  <div class="callout-title">What does the grep do?</div>
+  
+  <p><code>grep -v "^$"</code> filters out blank lines -- <code>nm</code> prints empty lines between sections in the executable, and removing them keeps the output compact.</p>
+
+</div>
+<p>Compare the two input symbol tables side by side with the merged result:</p>
+
+
+
+
+
+
+
+<div class="comparison-dual">
+  <figure class="comparison-left">
+    <pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>                 U  fn_a</span></span>
+<span class="giallo-l"><span>000000000000006f t  fn_b</span></span>
+<span class="giallo-l"><span>0000000000000000 T  fn_c</span></span>
+<span class="giallo-l"><span>0000000000000000 D  x_global_init</span></span>
+<span class="giallo-l"><span>0000000000000004 C  x_global_uninit</span></span>
+<span class="giallo-l"><span>0000000000000004 d  y_global_init</span></span>
+<span class="giallo-l"><span>0000000000000000 b  y_global_uninit</span></span>
+<span class="giallo-l"><span>                 U  z_global</span></span></code></pre>
+    <figcaption>c_parts.o</figcaption>
+  </figure>
+  <figure class="comparison-right">
+    <pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>0000000000000000 T  fn_a</span></span>
+<span class="giallo-l"><span>0000000000000013 T  main</span></span>
+<span class="giallo-l"><span>                 U  x_global_init</span></span>
+<span class="giallo-l"><span>0000000000000004 d  y_global_init</span></span>
+<span class="giallo-l"><span>0000000000000000 D  z_global</span></span></code></pre>
+    <figcaption>c_rest.o</figcaption>
+  </figure>
+</div>
+
+<p>Both files have <code>U</code> blanks that the other file fills: <code>c_parts.o</code> needs <code>fn_a</code> and <code>z_global</code> from <code>c_rest.o</code>, and <code>c_rest.o</code> needs <code>x_global_init</code> from <code>c_parts.o</code>. Both files have their own <code>y_global_init</code> as <code>d</code> (lowercase -- <code>static</code>).</p>
+<p>After linking -- the merged symbol table in <code>sample1</code>:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span># address            type  name</span></span>
+<span class="giallo-l"><span>0000000000401150 T      fn_a</span></span>
+<span class="giallo-l"><span>0000000000401138 t      fn_b</span></span>
+<span class="giallo-l"><span>00000000004010b0 T      fn_c</span></span>
+<span class="giallo-l"><span>0000000000401163 T      main</span></span>
+<span class="giallo-l"><span>0000000000404000 D      x_global_init</span></span>
+<span class="giallo-l"><span>0000000000404014 B      x_global_uninit</span></span>
+<span class="giallo-l"><span>0000000000404004 d      y_global_init</span></span>
+<span class="giallo-l"><span>000000000040400c d      y_global_init</span></span>
+<span class="giallo-l"><span>0000000000404010 b      y_global_uninit</span></span>
+<span class="giallo-l"><span>0000000000404008 D      z_global</span></span></code></pre>
+<p>No more <code>U</code> symbols. Every blank has been filled. The <code>U fn_a</code> from <code>c_parts.o</code> matched the <code>T fn_a</code> from <code>c_rest.o</code>. The <code>U z_global</code> matched <code>D z_global</code>. The <code>U x_global_init</code> from <code>c_rest.o</code> matched the <code>D x_global_init</code> from <code>c_parts.o</code>.</p>
+<p>Notice the addresses have changed. In the object files, addresses like <code>0x6f</code> were offsets relative to a section (e.g. "111 bytes into <code>.text</code>"). Now they are <strong>virtual addresses</strong> -- locations in the process's virtual memory space, not physical memory. <code>ld</code> decided where every section lands in the process's address space and rewrote all the offsets into final addresses. For example, <code>fn_b</code> went from offset <code>0x6f</code> in <code>c_parts.o</code> to virtual address <code>0x401138</code> in the executable.</p>
+<p>Now the lowercase/uppercase distinction from earlier makes sense. Look at <code>y_global_init</code> -- it appears <strong>twice</strong> in the merged table, at two different addresses (<code>0x404004</code> and <code>0x40400c</code>). Both <code>c_parts.c</code> and <code>c_rest.c</code> defined <code>static int y_global_init = 2;</code>, and because both are <code>static</code> (lowercase <code>d</code>), <code>ld</code> treats them as separate, file-local symbols that do not conflict. Each file gets its own copy.</p>
+<p>But what happens if both files define the same <strong>non-<code>static</code></strong> global variable? We address this next.</p>
+<h2 id="duplicate-symbols">Duplicate symbols</h2>
+<p>What if two files both define the same global (non-<code>static</code>) name? Let's try it.</p>
+<h3 id="case-1-initialized-duplicates">Case 1: Initialized duplicates</h3>
+<p>Two files both define <code>int shared</code> with a value:</p>
+<pre class="giallo z-code"><code data-lang="c" data-name="/Users/francis/Projects/linker-tutorial/dup_a.c"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">1</span><span class="z-storage z-type">int</span><span> shared </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-constant z-numeric z-constant"> 10</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">2</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">3</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> get_a</span><span class="z-punctuation">(</span><span class="z-storage z-type">void</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">4</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">5</span><span class="z-keyword z-keyword z-control">  return</span><span> shared</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">6</span><span class="z-punctuation">}</span></span></code></pre><pre class="giallo z-code"><code data-lang="c" data-name="/Users/francis/Projects/linker-tutorial/dup_b.c"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">1</span><span class="z-storage z-type">int</span><span> shared </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-constant z-numeric z-constant"> 20</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">2</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">3</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> get_b</span><span class="z-punctuation">(</span><span class="z-storage z-type">void</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">4</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">5</span><span class="z-keyword z-keyword z-control">  return</span><span> shared</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">6</span><span class="z-punctuation">}</span></span></code></pre>
+<p>Compile both, then try to link:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-constant"> -</span><span class="z-constant">c</span><span class="z-string"> dup_a.c</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> dup_a.o</span></span>
+<span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-constant"> -</span><span class="z-constant">c</span><span class="z-string"> dup_b.c</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> dup_b.o</span></span>
+<span class="giallo-l"><span class="z-entity z-name">ld</span><span class="z-string"> dup_a.o</span><span class="z-string"> dup_b.o</span><span class="z-string"> dup_main.o</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> dup_test</span><span class="z-constant"> -</span><span class="z-constant">lc</span><span class="z-constant"> -</span><span class="z-constant">dynamic-linker</span><span class="z-string"> /lib64/ld-linux-x86-64.so.2</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>dup_b.o: in function `get_b&#39;:</span></span>
+<span class="giallo-l"><span>dup_b.c:(.text+0x0): multiple definition of `shared&#39;; dup_a.o:dup_a.c:(.text+0x0): first defined here</span></span>
+<span class="giallo-l"><span>ld: 1 duplicate symbols</span></span></code></pre>
+<p><code>ld</code> refuses. Two definitions, one name -- which value should <code>shared</code> have, 10 or 20?</p>
+<h3 id="case-2-uninitialized-duplicates-common-symbols">Case 2: Uninitialized duplicates (common symbols)</h3>
+<p>Now try the same thing but without initializers:</p>
+<pre class="giallo z-code"><code data-lang="c" data-name="/Users/francis/Projects/linker-tutorial/dup_common_a.c"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">1</span><span class="z-storage z-type">int</span><span> shared</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">2</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">3</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> get_a</span><span class="z-punctuation">(</span><span class="z-storage z-type">void</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">4</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">5</span><span class="z-keyword z-keyword z-control">  return</span><span> shared</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">6</span><span class="z-punctuation">}</span></span></code></pre><pre class="giallo z-code"><code data-lang="c" data-name="/Users/francis/Projects/linker-tutorial/dup_common_b.c"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">1</span><span class="z-storage z-type">int</span><span> shared</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">2</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">3</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> get_b</span><span class="z-punctuation">(</span><span class="z-storage z-type">void</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">4</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">5</span><span class="z-keyword z-keyword z-control">  return</span><span> shared</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">6</span><span class="z-punctuation">}</span></span></code></pre>
+<p>Both show up as <code>C</code> (common) in the symbol table:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">nm</span><span class="z-string"> dup_common_a.o</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-string"> shared</span></span>
+<span class="giallo-l"><span class="z-entity z-name">nm</span><span class="z-string"> dup_common_b.o</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-string"> shared</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>0000000000000004 C shared</span></span>
+<span class="giallo-l"><span>0000000000000004 C shared</span></span></code></pre>
+<p>Link them:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">ld</span><span class="z-string"> dup_common_a.o</span><span class="z-string"> dup_common_b.o</span><span class="z-string"> dup_main.o</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> dup_common_test</span><span class="z-constant"> -</span><span class="z-constant">lc</span><span class="z-constant"> -</span><span class="z-constant">dynamic-linker</span><span class="z-string"> /lib64/ld-linux-x86-64.so.2</span></span></code></pre>
+<p>No error. <code>ld</code> silently merges both <code>C shared</code> into a single symbol:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">nm</span><span class="z-string"> dup_common_test</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-string"> shared</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>0000000000404000 B shared</span></span></code></pre>
+<p>This is a historical C convention -- uninitialized globals are "common" symbols that <code>ld</code> is allowed to merge. You can disable this with <code>-fno-common</code>, which makes the compiler emit <code>B</code> instead of <code>C</code>, and then <code>ld</code> will error on duplicates just like the initialized case:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-constant"> -</span><span class="z-constant">fno-common</span><span class="z-constant"> -</span><span class="z-constant">c</span><span class="z-string"> dup_common_a.c</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> dup_common_a.o</span></span>
+<span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-constant"> -</span><span class="z-constant">fno-common</span><span class="z-constant"> -</span><span class="z-constant">c</span><span class="z-string"> dup_common_b.c</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> dup_common_b.o</span></span>
+<span class="giallo-l"><span class="z-entity z-name">ld</span><span class="z-string"> dup_common_a.o</span><span class="z-string"> dup_common_b.o</span><span class="z-string"> dup_main.o</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> dup_test</span><span class="z-constant"> -</span><span class="z-constant">lc</span><span class="z-constant"> -</span><span class="z-constant">dynamic-linker</span><span class="z-string"> /lib64/ld-linux-x86-64.so.2</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>dup_common_b.o: in function `get_b&#39;:</span></span>
+<span class="giallo-l"><span>dup_common_b.c:(.text+0x0): multiple definition of `shared&#39;; dup_common_a.o:dup_common_a.c:(.text+0x0): first defined here</span></span>
+<span class="giallo-l"><span>ld: 1 duplicate symbols</span></span></code></pre><h2 id="static-libraries">Static libraries</h2>
+<p>When you have useful functions you want to reuse across programs, you can bundle object
+files into a <strong>static library</strong> (<code>.a</code> file on macOS/Linux).</p>
+<p>Split the math functions into separate files, plus one extra function we won't use:</p>
+<pre class="giallo z-code"><code data-lang="c" data-name="/Users/francis/Projects/linker-tutorial/add.c"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">1</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> add</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-variable z-parameter"> x</span><span class="z-punctuation">,</span><span class="z-storage z-type"> int</span><span class="z-variable z-parameter"> y</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">2</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">3</span><span class="z-keyword z-keyword z-control">  return</span><span> x </span><span class="z-keyword z-keyword z-operator">+</span><span> y</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">4</span><span class="z-punctuation">}</span></span></code></pre><pre class="giallo z-code"><code data-lang="c" data-name="/Users/francis/Projects/linker-tutorial/multiply.c"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">1</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> multiply</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-variable z-parameter"> x</span><span class="z-punctuation">,</span><span class="z-storage z-type"> int</span><span class="z-variable z-parameter"> y</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">2</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">3</span><span class="z-keyword z-keyword z-control">  return</span><span> x </span><span class="z-keyword z-keyword z-operator">*</span><span> y</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">4</span><span class="z-punctuation">}</span></span></code></pre><pre class="giallo z-code"><code data-lang="c" data-name="/Users/francis/Projects/linker-tutorial/unused.c"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">1</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> subtract</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-variable z-parameter"> x</span><span class="z-punctuation">,</span><span class="z-storage z-type"> int</span><span class="z-variable z-parameter"> y</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">2</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">3</span><span class="z-keyword z-keyword z-control">  return</span><span> x </span><span class="z-keyword z-keyword z-operator">-</span><span> y</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">4</span><span class="z-punctuation">}</span></span></code></pre>
+<p>And a program that uses <code>add</code> and <code>multiply</code> but not <code>subtract</code>. Save as <code>use_mathlib.c</code>:</p>
+<pre class="giallo z-code"><code data-lang="c" data-name="/Users/francis/Projects/linker-tutorial/use_mathlib.c"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 1</span><span class="z-storage z-modifier">extern</span><span class="z-storage z-type"> int</span><span class="z-entity z-name z-entity z-name z-function"> add</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-variable z-parameter"> x</span><span class="z-punctuation">,</span><span class="z-storage z-type"> int</span><span class="z-variable z-parameter"> y</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 2</span><span class="z-storage z-modifier">extern</span><span class="z-storage z-type"> int</span><span class="z-entity z-name z-entity z-name z-function"> multiply</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-variable z-parameter"> x</span><span class="z-punctuation">,</span><span class="z-storage z-type"> int</span><span class="z-variable z-parameter"> y</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 3</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 4</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> main</span><span class="z-punctuation">(</span><span class="z-storage z-type">void</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 5</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 6</span><span class="z-storage z-type">  int</span><span> a </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-entity z-name z-entity z-name z-function"> add</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">3</span><span class="z-punctuation">,</span><span class="z-constant z-numeric z-constant"> 4</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 7</span><span class="z-storage z-type">  int</span><span> b </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-entity z-name z-entity z-name z-function"> multiply</span><span class="z-punctuation">(</span><span>a</span><span class="z-punctuation">,</span><span class="z-constant z-numeric z-constant"> 2</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 8</span><span class="z-keyword z-keyword z-control">  return</span><span> b</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 9</span><span class="z-punctuation">}</span></span></code></pre>
+<p>Compile each source file into its own <code>.o</code>:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-constant"> -</span><span class="z-constant">c</span><span class="z-string"> add.c</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> add.o</span></span>
+<span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-constant"> -</span><span class="z-constant">c</span><span class="z-string"> multiply.c</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> multiply.o</span></span>
+<span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-constant"> -</span><span class="z-constant">c</span><span class="z-string"> unused.c</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> unused.o</span></span></code></pre>
+<p>Now bundle all three <code>.o</code> files into a single <code>.a</code> archive:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">ar</span><span class="z-string"> rcs</span><span class="z-string"> libmathstuff.a</span><span class="z-string"> add.o</span><span class="z-string"> multiply.o</span><span class="z-string"> unused.o</span></span></code></pre>
+<p>The flags: <code>r</code> inserts files into the archive, <code>c</code> creates the archive if it doesn't exist, <code>s</code> writes a symbol index. A <code>.a</code> file is just multiple <code>.o</code> files concatenated together with a table of contents at the front. The table of contents (the symbol index) maps symbol names to which <code>.o</code> file defines them -- so <code>ld</code> can look up <code>add</code> and immediately know it's in <code>add.o</code> without cracking open every <code>.o</code> in the archive.</p>
+<p>We can see what's inside:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">ar</span><span class="z-constant"> -</span><span class="z-constant">t</span><span class="z-string"> libmathstuff.a</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>add.o</span></span>
+<span class="giallo-l"><span>multiply.o</span></span>
+<span class="giallo-l"><span>unused.o</span></span></code></pre>
+<p>We can even <code>objdump</code> the <code>.a</code> file directly -- it processes each <code>.o</code> inside:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">objdump</span><span class="z-constant"> -</span><span class="z-constant">-section-headers</span><span class="z-string"> libmathstuff.a</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>libmathstuff.a(add.o):	file format elf64-x86-64</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Sections:</span></span>
+<span class="giallo-l"><span>Idx Name             Size     VMA              Type</span></span>
+<span class="giallo-l"><span>  0 .text            00000014 0000000000000000 TEXT</span></span>
+<span class="giallo-l"><span>  1 .comment         0000002c 0000000000000000</span></span>
+<span class="giallo-l"><span>  2 .note.GNU-stack  00000000 0000000000000000</span></span>
+<span class="giallo-l"><span>  3 .eh_frame        00000038 0000000000000000</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>libmathstuff.a(multiply.o):	file format elf64-x86-64</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Sections:</span></span>
+<span class="giallo-l"><span>Idx Name             Size     VMA              Type</span></span>
+<span class="giallo-l"><span>  0 .text            00000014 0000000000000000 TEXT</span></span>
+<span class="giallo-l"><span>  1 .comment         0000002c 0000000000000000</span></span>
+<span class="giallo-l"><span>  2 .note.GNU-stack  00000000 0000000000000000</span></span>
+<span class="giallo-l"><span>  3 .eh_frame        00000038 0000000000000000</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>libmathstuff.a(unused.o):	file format elf64-x86-64</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Sections:</span></span>
+<span class="giallo-l"><span>Idx Name             Size     VMA              Type</span></span>
+<span class="giallo-l"><span>  0 .text            00000014 0000000000000000 TEXT</span></span>
+<span class="giallo-l"><span>  1 .comment         0000002c 0000000000000000</span></span>
+<span class="giallo-l"><span>  2 .note.GNU-stack  00000000 0000000000000000</span></span>
+<span class="giallo-l"><span>  3 .eh_frame        00000038 0000000000000000</span></span></code></pre>
+<p>Three separate object files, each with its own <code>.text</code> section. The archive is just a container.</p>
+<p>Now compile the program and look at its blanks:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-constant"> -</span><span class="z-constant">c</span><span class="z-string"> use_mathlib.c</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> use_mathlib.o</span></span>
+<span class="giallo-l"><span class="z-entity z-name">nm</span><span class="z-string"> use_mathlib.o</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>                 U add</span></span>
+<span class="giallo-l"><span>0000000000000000 T main</span></span>
+<span class="giallo-l"><span>                 U multiply</span></span></code></pre>
+<p><code>main</code> is defined, but <code>add</code> and <code>multiply</code> are <code>U</code> -- blanks. No mention of <code>subtract</code> because <code>use_mathlib.c</code> never references it. Let's link:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">ld</span><span class="z-string"> use_mathlib.o</span><span class="z-constant"> -</span><span class="z-constant">L.</span><span class="z-constant"> -</span><span class="z-constant">lmathstuff</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> use_mathlib</span><span class="z-constant"> -</span><span class="z-constant">lc</span><span class="z-constant"> -</span><span class="z-constant">dynamic-linker</span><span class="z-string"> /lib64/ld-linux-x86-64.so.2</span></span></code></pre>
+<p>The flags:</p>
+<ul>
+<li><code>-L.</code> -- add the current directory to <code>ld</code>'s library search path. By default <code>ld</code> only looks in system directories like <code>/usr/lib</code> and <code>/lib</code>. Without <code>-L.</code>, <code>ld</code> would not find <code>libmathstuff.a</code> in the current directory.</li>
+<li><code>-lmathstuff</code> -- look for a library called <code>libmathstuff</code>. <code>ld</code> prepends <code>lib</code> and tries <code>.so</code> first, then <code>.a</code>. Since we only have the <code>.a</code>, it uses that.</li>
+</ul>
+<p>Check the result:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">nm</span><span class="z-string"> use_mathlib</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-constant"> -</span><span class="z-constant">v</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">^$</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>0000000000401168 T add</span></span>
+<span class="giallo-l"><span>0000000000401128 T main</span></span>
+<span class="giallo-l"><span>0000000000401188 T multiply</span></span></code></pre>
+<p><code>add</code> and <code>multiply</code> are no longer <code>U</code> -- <code>ld</code> found them in <code>libmathstuff.a</code>, pulled in <code>add.o</code> and <code>multiply.o</code>, and copied their code directly into the executable. But <code>subtract</code> is nowhere to be seen. <code>ld</code> looked at the archive's symbol index, saw that nothing needed <code>subtract</code>, and left <code>unused.o</code> out entirely.</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">./use_mathlib</span><span class="z-punctuation">;</span><span class="z-support z-function z-support z-function z-builtin"> echo</span><span class="z-variable z-language z-variable"> $</span><span class="z-variable z-language z-variable">?</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>14</span></span></code></pre>
+<p>(3+4=7, 7*2=14, returned as the exit code.)</p>
+<p>This is the point of a <code>.a</code> over just passing <code>.o</code> files directly. If we had written <code>ld use_mathlib.o add.o multiply.o unused.o ...</code>, <code>ld</code> would include all three. With <code>-lmathstuff</code>, <code>ld</code> is selective -- it only pulls in the <code>.o</code> files it actually needs.</p>
+<p><strong>Order matters.</strong> <code>ld</code> processes arguments left to right, maintaining a list of unresolved <code>U</code> symbols as it goes. When it encounters a library (<code>-l</code>), it searches the library's symbol index for definitions that match the current unresolved list. If <code>-lmathstuff</code> appears <em>before</em> <code>use_mathlib.o</code>, the unresolved list is empty at that point, so nothing gets pulled in. Rule of thumb: <strong>libraries go last</strong>.</p>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">-l prefers .so over .a</div>
+  
+  <p>When both <code>libmathstuff.so</code> and <code>libmathstuff.a</code> exist in the same directory, <code>-lmathstuff</code> will pick the <code>.so</code>. To force static linking, pass the <code>.a</code> path directly instead of using <code>-l</code>: <code>ld use_mathlib.o libmathstuff.a -o use_mathlib ...</code> Or use <code>-Bstatic -lmathstuff -Bdynamic</code> to temporarily force static linking for just that library.</p>
+
+</div>
+<h2 id="what-the-os-does-with-the-executable">What the OS does with the executable</h2>
+<p>The linker's job is done. <code>ld</code> wrote <code>sample1</code> and exited. Now when you run <code>./sample1</code>, the OS kernel and <code>ld-linux</code> (the dynamic linker we introduced earlier) take over.</p>
+<p>First, let's look at what <code>ld</code> left behind. The sections in the executable:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">objdump</span><span class="z-constant"> -</span><span class="z-constant">-section-headers</span><span class="z-string"> sample1</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>sample1:	file format elf64-x86-64</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Sections:</span></span>
+<span class="giallo-l"><span>Idx Name          Size     VMA              Type</span></span>
+<span class="giallo-l"><span>  0 .text         00000108 00000000004010b0 TEXT</span></span>
+<span class="giallo-l"><span>  1 .rodata       0000000d 00000000004011c0 DATA</span></span>
+<span class="giallo-l"><span>  2 .eh_frame     00000090 00000000004011d0 DATA</span></span>
+<span class="giallo-l"><span>  3 .data         00000010 0000000000404000 DATA</span></span>
+<span class="giallo-l"><span>  4 .bss          00000008 0000000000404010 BSS</span></span></code></pre>
+<p>Compare this to the object files: the VMA column now has real virtual addresses (like <code>0x4010b0</code>), not zeros. <code>ld</code> placed every section at a specific location in the process's address space. Where sections get placed, in what order, and at what alignment is controlled by a <a rel="external" href="https://sourceware.org/binutils/docs/ld/Scripts.html">linker script</a> -- <code>ld</code> has a default one built in, but it can be overridden with <code>ld -T script.ld</code>.</p>
+<h3 id="what-happens-when-you-run-sample1">What happens when you run <code>./sample1</code></h3>
+<p><code>ld</code> is done. <code>sample1</code> is a file on disk. When you type <code>./sample1</code>, the following sequence happens:</p>
+<ol>
+<li>
+<p><strong>Your shell calls <code>execve("./sample1", ...)</code></strong> -- this is a system call that asks the kernel to replace the current process with a new program.<sup class="footnote-reference"><a href="#ostep">4</a></sup></p>
+</li>
+<li>
+<p><strong>The kernel reads the ELF header</strong> of <code>sample1</code>. It sees the file is <code>ET_EXEC</code> (an executable) and reads the program headers to find out which segments need to be loaded and where. You can see exactly what the kernel sees with <a rel="external" href="https://man7.org/linux/man-pages/man1/readelf.1.html"><code>readelf -h</code></a>:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">readelf</span><span class="z-constant"> -</span><span class="z-constant">h</span><span class="z-string"> sample1</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>  Magic:   7f 45 4c 46 02 01 01 00 ...</span></span>
+<span class="giallo-l"><span>  Class:                             ELF64</span></span>
+<span class="giallo-l"><span>  Type:                              EXEC (Executable file)</span></span>
+<span class="giallo-l"><span>  Entry point address:               0x4010b0</span></span>
+<span class="giallo-l"><span>  ...</span></span>
+<span class="giallo-l"><span>  Number of program headers:         6</span></span></code></pre>
+<p>The <code>Entry point address</code> is where execution will eventually start. The <code>program headers</code> describe the segments to load. <!-- TODO: verify this output on Linux and replace with actual dump --></p>
+</li>
+<li>
+<p><strong>The kernel creates a new virtual address space</strong> for the process. At this point the process has no code, no data, no stack -- just an empty address space.</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Virtual Address Space</span></span>
+<span class="giallo-l"><span>─────────────────────</span></span>
+<span class="giallo-l"><span>0xFFFF...FFFF (high)</span></span>
+<span class="giallo-l"><span>┌───────────────────┐</span></span>
+<span class="giallo-l"><span>│                   │</span></span>
+<span class="giallo-l"><span>│                   │</span></span>
+<span class="giallo-l"><span>│   unmapped        │</span></span>
+<span class="giallo-l"><span>│   no permissions  │</span></span>
+<span class="giallo-l"><span>│   nothing here    │</span></span>
+<span class="giallo-l"><span>│                   │</span></span>
+<span class="giallo-l"><span>│                   │</span></span>
+<span class="giallo-l"><span>└───────────────────┘</span></span>
+<span class="giallo-l"><span>0x0000...0000 (low)</span></span></code></pre></li>
+<li>
+<p><strong>The kernel maps the executable's segments into memory.</strong> The ELF file contains <code>LOAD</code> segments that tell the kernel exactly what to put where. You can see these with <a rel="external" href="https://man7.org/linux/man-pages/man1/readelf.1.html"><code>readelf -l</code></a>:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">readelf</span><span class="z-constant"> -</span><span class="z-constant">l</span><span class="z-string"> sample1</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Program Headers:</span></span>
+<span class="giallo-l"><span>  Type    Offset   VirtAddr           FileSiz  MemSiz   Flg</span></span>
+<span class="giallo-l"><span>  LOAD    0x000000 0x0000000000400000 0x001260 0x001260 R</span></span>
+<span class="giallo-l"><span>  LOAD    0x001000 0x0000000000401000 0x000108 0x000108 R E</span></span>
+<span class="giallo-l"><span>  LOAD    0x002000 0x0000000000402000 0x0000a0 0x0000a0 R</span></span>
+<span class="giallo-l"><span>  LOAD    0x003000 0x0000000000404000 0x000010 0x000018 RW</span></span>
+<span class="giallo-l"><span>  INTERP  0x000318 0x0000000000400318 0x00001c 0x00001c R</span></span>
+<span class="giallo-l"><span>        [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]</span></span></code></pre> <!-- TODO: verify this output on Linux and replace with actual dump -->
+<p>The <code>R E</code> segment is <code>.text</code> -- <strong>readable and executable</strong>, but not writable. The <code>RW</code> segment is <code>.data</code> and <code>.bss</code> -- <strong>readable and writable</strong>.<sup class="footnote-reference"><a href="#sharing">5</a></sup> The <code>.data</code> bytes are copied from the executable file. The <code>.bss</code> bytes are zeroed (the OS allocates zero-filled pages, which is why uninitialized globals start as zero without taking up space in the file).</p>
+<p>After this step the address space looks like:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Virtual Address Space</span></span>
+<span class="giallo-l"><span>─────────────────────</span></span>
+<span class="giallo-l"><span>0xFFFF...FFFF (high)</span></span>
+<span class="giallo-l"><span>┌───────────────────┐</span></span>
+<span class="giallo-l"><span>│   unmapped         │</span></span>
+<span class="giallo-l"><span>│                    │</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   .bss     (rw-)   │  ← zeroed by kernel</span></span>
+<span class="giallo-l"><span>│   .data    (rw-)   │  ← copied from file</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   .text    (r-x)   │  ← code, read-only</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   unmapped         │</span></span>
+<span class="giallo-l"><span>└────────────────────┘</span></span>
+<span class="giallo-l"><span>0x0000...0000 (low)</span></span></code></pre></li>
+<li>
+<p><strong>The kernel sees the <code>INTERP</code> program header</strong> -- visible in the <code>readelf -l</code> output above as <code>[Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]</code>. This is the <code>-dynamic-linker</code> path we passed to <code>ld</code>. The kernel loads <code>ld-linux</code> into the address space too.</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Virtual Address Space</span></span>
+<span class="giallo-l"><span>─────────────────────</span></span>
+<span class="giallo-l"><span>0xFFFF...FFFF (high)</span></span>
+<span class="giallo-l"><span>┌───────────────────┐</span></span>
+<span class="giallo-l"><span>│   unmapped         │</span></span>
+<span class="giallo-l"><span>│                    │</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   ld-linux  (r-x)  │  ← loaded by kernel</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   unmapped         │</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   .bss     (rw-)   │</span></span>
+<span class="giallo-l"><span>│   .data    (rw-)   │</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   .text    (r-x)   │</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   unmapped         │</span></span>
+<span class="giallo-l"><span>└────────────────────┘</span></span>
+<span class="giallo-l"><span>0x0000...0000 (low)</span></span></code></pre></li>
+<li>
+<p><strong>The kernel jumps to <code>ld-linux</code></strong>, not to the program's code. <code>ld-linux</code> is now running inside the new process.</p>
+</li>
+<li>
+<p><strong><code>ld-linux</code> loads shared libraries.</strong> It reads the <code>NEEDED</code> entries in the executable (these came from <code>-lc</code>) and loads <code>libc.so.6</code> into the address space. It resolves <code>U</code> symbols in the executable to addresses in <code>libc.so</code>. You can see the <code>NEEDED</code> entries with:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">readelf</span><span class="z-constant"> -</span><span class="z-constant">d</span><span class="z-string"> sample1</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-string"> NEEDED</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span> 0x0000000000000001 (NEEDED)   Shared library: [libc.so.6]</span></span></code></pre> <!-- TODO: verify this output on Linux -->
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Virtual Address Space</span></span>
+<span class="giallo-l"><span>─────────────────────</span></span>
+<span class="giallo-l"><span>0xFFFF...FFFF (high)</span></span>
+<span class="giallo-l"><span>┌───────────────────┐</span></span>
+<span class="giallo-l"><span>│   stack    (rw-)   │  ← set up by kernel</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   unmapped         │</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   ld-linux  (r-x)  │</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   libc.so.6 (r-x)  │  ← loaded by ld-linux</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   unmapped         │</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   .bss     (rw-)   │</span></span>
+<span class="giallo-l"><span>│   .data    (rw-)   │</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   .text    (r-x)   │</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   unmapped         │</span></span>
+<span class="giallo-l"><span>└────────────────────┘</span></span>
+<span class="giallo-l"><span>0x0000...0000 (low)</span></span></code></pre></li>
+<li>
+<p><strong><code>ld-linux</code> jumps to <code>_start</code></strong> (provided by <code>libc</code>). <code>_start</code> sets up the C runtime (argc, argv, environment), then calls <code>main</code>.</p>
+</li>
+<li>
+<p><strong><code>main</code> runs.</strong> When <code>main</code> returns, the C runtime calls <code>exit()</code> to terminate the process.</p>
+</li>
+</ol>
+<p>We can watch steps 6-8 happen by setting <code>LD_DEBUG</code>:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-variable z-other">LD_DEBUG</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-string">f</span><span class="z-string">i</span><span class="z-string">l</span><span class="z-string">e</span><span class="z-string">s</span><span class="z-entity z-name"> ./sample1</span><span class="z-keyword z-keyword z-operator"> 2</span><span class="z-keyword z-keyword z-operator">&gt;&amp;1</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> head</span><span class="z-constant"> -</span><span class="z-constant">20</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>      calling init: /lib/x86_64-linux-gnu/libc.so.6</span></span>
+<span class="giallo-l"><span>      ...</span></span>
+<span class="giallo-l"><span>      initialize program: ./sample1</span></span>
+<span class="giallo-l"><span>      transferring control: ./sample1</span></span></code></pre><div class="callout callout-box thm-box">
+  
+  <div class="callout-title">LD_DEBUG</div>
+  
+  <p><code>LD_DEBUG</code> is a powerful diagnostic variable. Some useful values:</p>
+<ul>
+<li><code>LD_DEBUG=files</code> -- show which files are being loaded</li>
+<li><code>LD_DEBUG=libs</code> -- show library search paths</li>
+<li><code>LD_DEBUG=symbols</code> -- show symbol resolution</li>
+<li><code>LD_DEBUG=all</code> -- show everything (very verbose)</li>
+</ul>
+
+</div>
+<p>The kernel also prevents access to low virtual addresses via the <code>vm.mmap_min_addr</code> sysctl (typically 65536), which catches null pointer dereferences.</p>
+<p>The complete memory layout of the running process:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>High addresses</span></span>
+<span class="giallo-l"><span>┌─────────────────┐</span></span>
+<span class="giallo-l"><span>│     Stack        │  ← grows downward (local variables, return addresses)</span></span>
+<span class="giallo-l"><span>│        ↓         │</span></span>
+<span class="giallo-l"><span>│                  │</span></span>
+<span class="giallo-l"><span>│        ↑         │</span></span>
+<span class="giallo-l"><span>│     Heap         │  ← grows upward (malloc)</span></span>
+<span class="giallo-l"><span>├─────────────────┤</span></span>
+<span class="giallo-l"><span>│  libc.so.6       │  ← mapped by ld-linux (step 7)</span></span>
+<span class="giallo-l"><span>├─────────────────┤</span></span>
+<span class="giallo-l"><span>│     BSS          │  ← uninitialized globals (zeroed by kernel, step 4)</span></span>
+<span class="giallo-l"><span>├─────────────────┤</span></span>
+<span class="giallo-l"><span>│     Data         │  ← initialized globals (copied from file, step 4)</span></span>
+<span class="giallo-l"><span>├─────────────────┤</span></span>
+<span class="giallo-l"><span>│     Text         │  ← machine code (read-only, executable, step 4)</span></span>
+<span class="giallo-l"><span>├─────────────────┤</span></span>
+<span class="giallo-l"><span>│  (unmapped low   │  ← kernel prevents access here (null pointer trap)</span></span>
+<span class="giallo-l"><span>│   addresses)     │</span></span>
+<span class="giallo-l"><span>└─────────────────┘</span></span>
+<span class="giallo-l"><span>Low addresses</span></span></code></pre>
+<p>Local variables and heap allocations are invisible to <code>ld</code>. <code>ld</code> only dealt with code and global data -- the stack and heap are set up by the OS at runtime.</p>
+<h2 id="shared-libraries">Shared libraries</h2>
+<p>With static libraries, <code>ld</code> copies code into every executable that uses it. If ten programs link against <code>libmathstuff.a</code>, ten executables each contain their own copy of <code>add</code> and <code>multiply</code>. Shared libraries solve this -- the code stays in a separate file on disk, and the OS loads it once into memory at runtime.</p>
+<p>On Linux, shared libraries are <code>.so</code> files (shared objects). On macOS, <code>.dylib</code> files.</p>
+<p>This is also the right place to explain the <code>-lc -dynamic-linker</code> flags we've been passing to <code>ld</code> throughout this tutorial. <code>-lc</code> tells <code>ld</code> to link against <code>libc.so</code> -- the C standard library. <code>ld</code> prepends <code>lib</code> and appends <code>.so</code>, so <code>-lc</code> becomes <code>libc.so</code>. This library provides <code>_start</code> (the real entry point the kernel jumps to), which calls <code>__libc_start_main</code>, which eventually calls your <code>main</code>. Without <code>-lc</code>, the executable has no entry point and will crash.</p>
+<p><code>-dynamic-linker /lib64/ld-linux-x86-64.so.2</code> is needed because <code>libc.so</code> is a shared library. The kernel doesn't know how to load <code>.so</code> files itself -- it needs <code>ld-linux</code> to do that. This flag embeds the path to <code>ld-linux</code> into the executable's ELF header. When you run <code>./sample1</code>, the kernel sees that path, loads <code>ld-linux</code> first, and <code>ld-linux</code> then loads <code>libc.so</code> and resolves symbols before jumping to <code>_start</code>. The two flags go together: <code>-lc</code> says <em>what</em> to link, <code>-dynamic-linker</code> says <em>how</em> to load it at runtime.</p>
+<p>Build a shared library from the same <code>.o</code> files we used for the static library:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-constant"> -</span><span class="z-constant">shared</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> libmathstuff.so</span><span class="z-string"> add.o</span><span class="z-string"> multiply.o</span><span class="z-string"> unused.o</span></span></code></pre>
+<p>Inspect it:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">nm</span><span class="z-string"> libmathstuff.so</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string"> T </span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>00000000000010f0 T add</span></span>
+<span class="giallo-l"><span>0000000000001110 T multiply</span></span>
+<span class="giallo-l"><span>0000000000001130 T subtract</span></span></code></pre>
+<p>All three functions are in the shared library -- <code>add</code>, <code>multiply</code>, and <code>subtract</code>. Unlike a static library, there is no selective inclusion. The entire <code>.so</code> is one unit.</p>
+<p>Now delete the <code>.a</code> file (so <code>-l</code> doesn't pick it up) and link against the shared library:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">rm</span><span class="z-string"> libmathstuff.a</span></span>
+<span class="giallo-l"><span class="z-entity z-name">ld</span><span class="z-string"> use_mathlib.o</span><span class="z-constant"> -</span><span class="z-constant">L.</span><span class="z-constant"> -</span><span class="z-constant">lmathstuff</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> use_mathlib_dyn</span><span class="z-constant"> -</span><span class="z-constant">lc</span><span class="z-constant"> -</span><span class="z-constant">dynamic-linker</span><span class="z-string"> /lib64/ld-linux-x86-64.so.2</span></span></code></pre>
+<p>Check the result:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">nm</span><span class="z-string"> use_mathlib_dyn</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-constant"> -</span><span class="z-constant">v</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">^$</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>                 U add</span></span>
+<span class="giallo-l"><span>0000000000401140 T main</span></span>
+<span class="giallo-l"><span>                 U multiply</span></span></code></pre>
+<p>Compare this to the static library result where <code>add</code> and <code>multiply</code> were <code>T</code> (code copied in). Here they are still <code>U</code> -- <strong>undefined</strong>. The executable does not contain the code for <code>add</code> or <code>multiply</code>. Instead, the executable records a dependency: "at runtime, find <code>libmathstuff.so</code> and resolve these symbols from it."</p>
+<p>We can see this dependency with <code>ldd</code> (the Linux equivalent of macOS's <code>otool -L</code>):</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">ldd</span><span class="z-string"> use_mathlib_dyn</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>	linux-vdso.so.1 (0x00007ffcc3bfe000)</span></span>
+<span class="giallo-l"><span>	libmathstuff.so =&gt; ./libmathstuff.so (0x00007f4a12340000)</span></span>
+<span class="giallo-l"><span>	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f4a12100000)</span></span>
+<span class="giallo-l"><span>	/lib64/ld-linux-x86-64.so.2 (0x00007f4a12350000)</span></span></code></pre>
+<p>Two <code>.so</code> dependencies now: our <code>libmathstuff.so</code> and <code>libc.so.6</code>. When the OS runs <code>use_mathlib_dyn</code>, the same sequence from <a href="/blog/rust-notes/general/linker-one-pager-linux/#what-happens-when-you-run-sample1">What happens when you run <code>./sample1</code></a> plays out -- the kernel loads the executable, finds <code>ld-linux</code> via the <code>INTERP</code> header, and <code>ld-linux</code> loads both <code>.so</code> files into the address space and resolves the <code>U</code> symbols.</p>
+<p>We can watch this with <code>LD_DEBUG</code>:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-variable z-other">LD_DEBUG</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-string">f</span><span class="z-string">i</span><span class="z-string">l</span><span class="z-string">e</span><span class="z-string">s</span><span class="z-entity z-name"> ./use_mathlib_dyn</span><span class="z-keyword z-keyword z-operator"> 2</span><span class="z-keyword z-keyword z-operator">&gt;&amp;1</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-constant"> -</span><span class="z-constant">E</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">calling|initialize|transferring|needed</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>      file=libmathstuff.so [0];  needed by ./use_mathlib_dyn [0]</span></span>
+<span class="giallo-l"><span>      file=libc.so.6 [0];  needed by ./use_mathlib_dyn [0]</span></span>
+<span class="giallo-l"><span>      calling init: /lib/x86_64-linux-gnu/libc.so.6</span></span>
+<span class="giallo-l"><span>      calling init: ./libmathstuff.so</span></span>
+<span class="giallo-l"><span>      initialize program: ./use_mathlib_dyn</span></span>
+<span class="giallo-l"><span>      transferring control: ./use_mathlib_dyn</span></span></code></pre><!-- TODO: verify this output on Linux -->
+<p><code>ld-linux</code> loads <code>libmathstuff.so</code> and <code>libc.so.6</code>, initializes them in dependency order, then hands control to the program.</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">./use_mathlib_dyn</span><span class="z-punctuation">;</span><span class="z-support z-function z-support z-function z-builtin"> echo</span><span class="z-variable z-language z-variable"> $</span><span class="z-variable z-language z-variable">?</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>14</span></span></code></pre>
+<p>Same result, but the mechanism is completely different:</p>
+
+
+
+
+
+
+
+<div class="comparison-dual">
+  <figure class="comparison-left">
+    <ul>
+<li>Code for <code>add</code> and <code>multiply</code> is <strong>copied into</strong> the executable</li>
+<li><code>subtract</code> is <strong>left out</strong> (not needed)</li>
+<li>Executable is self-contained</li>
+<li>Each program gets its own copy</li>
+</ul>
+
+    <figcaption>Static (-lmathstuff.a)</figcaption>
+  </figure>
+  <figure class="comparison-right">
+    <ul>
+<li>Code for <code>add</code>, <code>multiply</code>, and <code>subtract</code> stays <strong>in the .so</strong></li>
+<li>Executable records a <strong>dependency</strong>, resolved at runtime by <code>ld-linux</code></li>
+<li>Multiple programs share the same <code>.so</code> in physical memory</li>
+<li>Bug fixes to the <code>.so</code> benefit all programs without recompilation</li>
+</ul>
+
+    <figcaption>Dynamic (-lmathstuff.so)</figcaption>
+  </figure>
+</div>
+
+<h2 id="dynamically-loaded-libraries-plugins">Dynamically loaded libraries (plugins)</h2>
+<p>Shared libraries are loaded at program startup -- as we saw in <a href="/blog/rust-notes/general/linker-one-pager-linux/#what-happens-when-you-run-sample1">What happens when you run <code>./sample1</code></a>, <code>ld-linux</code> resolves all <code>.so</code> dependencies before <code>main</code> runs (steps 6-8). But you can also load a shared library <strong>while the program is already running</strong>. This is the plugin pattern.</p>
+<p>The API on macOS/Linux:</p>
+<ul>
+<li><code>dlopen(path, flags)</code> -- load a <code>.so</code> at runtime, returns a handle</li>
+<li><code>dlsym(handle, "name")</code> -- look up a symbol by name string, returns a pointer</li>
+<li><code>dlclose(handle)</code> -- unload the library</li>
+</ul>
+<p>Save this as <code>plugin_user.c</code>:</p>
+<pre class="giallo z-code"><code data-lang="c" data-name="/Users/francis/Projects/linker-tutorial/plugin_user.c"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 1</span><span class="z-punctuation">#</span><span class="z-keyword z-keyword z-control z-directive">include</span><span class="z-punctuation z-definition z-string z-punctuation"> &lt;</span><span class="z-string">stdio.h</span><span class="z-punctuation z-definition z-string z-punctuation">&gt;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 2</span><span class="z-punctuation">#</span><span class="z-keyword z-keyword z-control z-directive">include</span><span class="z-punctuation z-definition z-string z-punctuation"> &lt;</span><span class="z-string">dlfcn.h</span><span class="z-punctuation z-definition z-string z-punctuation">&gt;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 3</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 4</span><span class="z-storage z-type">int</span><span class="z-entity z-name z-entity z-name z-function"> main</span><span class="z-punctuation">(</span><span class="z-storage z-type">void</span><span class="z-punctuation">)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 5</span><span class="z-punctuation">{</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 6</span><span class="z-storage z-type">  void</span><span class="z-keyword z-keyword z-operator"> *</span><span>handle </span><span class="z-keyword z-keyword z-operator">=</span><span class="z-entity z-name z-entity z-name z-function"> dlopen</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">./libmathstuff.so</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span> RTLD_LAZY</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 7</span><span class="z-keyword z-keyword z-control">  if</span><span class="z-punctuation"> (</span><span class="z-keyword z-keyword z-operator z-logical">!</span><span>handle</span><span class="z-punctuation">)</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 8</span><span class="z-entity z-name z-entity z-name z-function">    printf</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">dlopen failed: </span><span class="z-constant">%s</span><span class="z-constant">\n</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-entity z-name z-entity z-name z-function"> dlerror</span><span class="z-punctuation">(</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln"> 9</span><span class="z-keyword z-keyword z-control">    return</span><span class="z-constant z-numeric z-constant"> 1</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">10</span><span class="z-punctuation">  }</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">11</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">12</span><span class="z-storage z-type">  int</span><span class="z-punctuation"> (</span><span class="z-keyword z-keyword z-operator">*</span><span>add</span><span class="z-punctuation">)</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-punctuation">,</span><span class="z-storage z-type"> int</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-entity z-name z-function"> dlsym</span><span class="z-punctuation">(</span><span>handle</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">add</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">13</span><span class="z-storage z-type">  int</span><span class="z-punctuation"> (</span><span class="z-keyword z-keyword z-operator">*</span><span>multiply</span><span class="z-punctuation">)</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-punctuation">,</span><span class="z-storage z-type"> int</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-entity z-name z-function"> dlsym</span><span class="z-punctuation">(</span><span>handle</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">multiply</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">14</span><span class="z-storage z-type">  int</span><span class="z-punctuation"> (</span><span class="z-keyword z-keyword z-operator">*</span><span>subtract</span><span class="z-punctuation">)</span><span class="z-punctuation">(</span><span class="z-storage z-type">int</span><span class="z-punctuation">,</span><span class="z-storage z-type"> int</span><span class="z-punctuation">)</span><span class="z-keyword z-keyword z-operator"> =</span><span class="z-entity z-name z-entity z-name z-function"> dlsym</span><span class="z-punctuation">(</span><span>handle</span><span class="z-punctuation">,</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">subtract</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">15</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">16</span><span class="z-keyword z-keyword z-control">  if</span><span class="z-punctuation"> (</span><span class="z-keyword z-keyword z-operator z-logical">!</span><span>add </span><span class="z-keyword z-keyword z-operator z-logical">||</span><span class="z-keyword z-keyword z-operator z-logical"> !</span><span>multiply </span><span class="z-keyword z-keyword z-operator z-logical">||</span><span class="z-keyword z-keyword z-operator z-logical"> !</span><span>subtract</span><span class="z-punctuation">)</span><span class="z-punctuation"> {</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">17</span><span class="z-entity z-name z-entity z-name z-function">    printf</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">dlsym failed: </span><span class="z-constant">%s</span><span class="z-constant">\n</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-entity z-name z-entity z-name z-function"> dlerror</span><span class="z-punctuation">(</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">18</span><span class="z-keyword z-keyword z-control">    return</span><span class="z-constant z-numeric z-constant"> 1</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">19</span><span class="z-punctuation">  }</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">20</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">21</span><span class="z-entity z-name z-entity z-name z-function">  printf</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">add(3, 4) = </span><span class="z-constant">%d</span><span class="z-constant">\n</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-entity z-name z-entity z-name z-function"> add</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">3</span><span class="z-punctuation">,</span><span class="z-constant z-numeric z-constant"> 4</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">22</span><span class="z-entity z-name z-entity z-name z-function">  printf</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">multiply(3, 4) = </span><span class="z-constant">%d</span><span class="z-constant">\n</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-entity z-name z-entity z-name z-function"> multiply</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">3</span><span class="z-punctuation">,</span><span class="z-constant z-numeric z-constant"> 4</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">23</span><span class="z-entity z-name z-entity z-name z-function">  printf</span><span class="z-punctuation">(</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-string">subtract(10, 3) = </span><span class="z-constant">%d</span><span class="z-constant">\n</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span><span class="z-punctuation">,</span><span class="z-entity z-name z-entity z-name z-function"> subtract</span><span class="z-punctuation">(</span><span class="z-constant z-numeric z-constant">10</span><span class="z-punctuation">,</span><span class="z-constant z-numeric z-constant"> 3</span><span class="z-punctuation">)</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">24</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">25</span><span class="z-entity z-name z-entity z-name z-function">  dlclose</span><span class="z-punctuation">(</span><span>handle</span><span class="z-punctuation">)</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">26</span><span class="z-keyword z-keyword z-control">  return</span><span class="z-constant z-numeric z-constant"> 0</span><span class="z-punctuation">;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">27</span><span class="z-punctuation">}</span></span></code></pre>
+<p>Build and run:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-string"> plugin_user.c</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> plugin_user</span><span class="z-constant"> -</span><span class="z-constant">ldl</span></span>
+<span class="giallo-l"><span class="z-entity z-name">./plugin_user</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>add(3, 4) = 7</span></span>
+<span class="giallo-l"><span>multiply(3, 4) = 12</span></span>
+<span class="giallo-l"><span>subtract(10, 3) = 7</span></span></code></pre><div class="callout callout-box thm-box">
+  
+  <div class="callout-title">Linking with -ldl</div>
+  
+  <p>On Linux, <code>dlopen</code>, <code>dlsym</code>, and <code>dlclose</code> live in <code>libdl.so</code>, so you need <code>-ldl</code>:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">cc</span><span class="z-string"> plugin_user.c</span><span class="z-constant"> -</span><span class="z-constant">o</span><span class="z-string"> plugin_user</span><span class="z-constant"> -</span><span class="z-constant">ldl</span></span></code></pre>
+<p>On some newer glibc versions, these symbols have been moved into <code>libc.so.6</code> itself, so <code>-ldl</code> may be optional -- but it's good practice to include it for portability.</p>
+
+</div>
+<p>Look at the symbol table of <code>plugin_user</code>:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">nm</span><span class="z-string"> plugin_user</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-constant"> -</span><span class="z-constant">v</span><span class="z-punctuation z-definition z-string z-punctuation"> &quot;</span><span class="z-string">^$</span><span class="z-punctuation z-definition z-string z-punctuation">&quot;</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>                 U dlclose</span></span>
+<span class="giallo-l"><span>                 U dlerror</span></span>
+<span class="giallo-l"><span>                 U dlopen</span></span>
+<span class="giallo-l"><span>                 U dlsym</span></span>
+<span class="giallo-l"><span>0000000000401160 T main</span></span>
+<span class="giallo-l"><span>                 U printf</span></span></code></pre>
+<p>No <code>add</code>, no <code>multiply</code>, no <code>subtract</code> -- not even as <code>U</code>. The executable has no idea <code>libmathstuff.so</code> exists. It only knows about <code>dlopen</code>, <code>dlsym</code>, etc. (which come from <code>libdl</code>/<code>libc</code>). The connection to <code>libmathstuff.so</code> is made entirely at runtime, by passing the <strong>string</strong> <code>"add"</code> to <code>dlsym</code>.</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">ldd</span><span class="z-string"> plugin_user</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>	linux-vdso.so.1 (0x00007ffcc3bfe000)</span></span>
+<span class="giallo-l"><span>	libdl.so.2 =&gt; /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f4a12300000)</span></span>
+<span class="giallo-l"><span>	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f4a12100000)</span></span>
+<span class="giallo-l"><span>	/lib64/ld-linux-x86-64.so.2 (0x00007f4a12350000)</span></span></code></pre>
+<p>Only system libraries. No mention of <code>libmathstuff</code> at all. Compare this to <a href="/blog/rust-notes/general/linker-one-pager-linux/#shared-libraries"><code>ldd use_mathlib_dyn</code></a> above, which listed <code>libmathstuff.so</code> as a dependency. That's the difference: shared libraries are declared at link time and show up in <code>ldd</code>; plugins are loaded at runtime and are invisible to <code>ldd</code>.</p>
+<p><code>RTLD_LAZY</code> means "resolve symbols one by one as they are called."<sup class="footnote-reference"><a href="#resolve">6</a></sup> <code>RTLD_NOW</code> means "resolve all symbols immediately when <code>dlopen</code> is called." <code>RTLD_LAZY</code> makes <code>dlopen</code> faster but defers errors; <code>RTLD_NOW</code> is safer because it fails early if a symbol is missing.</p>
+<p><code>dlsym</code> works because the shared library contains a symbol table -- the same name-to-address mapping we've been looking at with <code>nm</code>. <code>dlsym</code> does the same lookup at runtime: given the string <code>"add"</code>, find the address of <code>add</code> in the loaded <code>.so</code>.</p>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">This is how Sail plugins work</div>
+  
+  <p>The Sail compiler uses exactly this mechanism. The <code>sail</code> binary calls <code>dlopen</code> to load backend plugins like <code>sail_plugin_lean.cmxs</code> (OCaml's equivalent of a <code>.so</code>). The plugin's initialization code registers new command-line flags (like <code>--lean</code>) with the compiler. Without the plugin loaded, the <code>sail</code> binary doesn't know the <code>--lean</code> flag exists.</p>
+
+</div>
+<h2 id="aside-what-is-elf">Aside: what is ELF?</h2>
+<p>Throughout this tutorial, <code>objdump</code> has been printing <code>file format elf64-x86-64</code>. <strong>ELF</strong> (Executable and Linkable Format) is the container format Linux uses for all binary files. It's the Linux equivalent of macOS's Mach-O format.</p>
+<p>Every <code>.o</code> file, <code>.so</code> file, and executable we've created in this tutorial is an ELF file -- but they are different <em>types</em> of ELF:</p>
+<table><thead><tr><th>ELF type</th><th>Flag</th><th>What it is</th><th>Example</th></tr></thead><tbody>
+<tr><td>Relocatable</td><td><code>ET_REL</code></td><td>Sections and symbols, but no entry point and no final addresses. Cannot be run.</td><td><code>c_parts.o</code></td></tr>
+<tr><td>Executable</td><td><code>ET_EXEC</code></td><td>Entry point and virtual addresses assigned by the linker. Can be run.</td><td><code>sample1</code></td></tr>
+<tr><td>Shared object</td><td><code>ET_DYN</code></td><td>Like an executable but can be loaded at any address.</td><td><code>libmathstuff.so</code></td></tr>
+</tbody></table>
+<p>You can check a file's ELF type with <code>readelf -h</code>:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">readelf</span><span class="z-constant"> -</span><span class="z-constant">h</span><span class="z-string"> c_parts.o</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-string"> Type</span></span>
+<span class="giallo-l"><span class="z-entity z-name">readelf</span><span class="z-constant"> -</span><span class="z-constant">h</span><span class="z-string"> sample1</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-string"> Type</span></span>
+<span class="giallo-l"><span class="z-entity z-name">readelf</span><span class="z-constant"> -</span><span class="z-constant">h</span><span class="z-string"> libmathstuff.so</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-string"> Type</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>  Type:  REL (Relocatable file)</span></span>
+<span class="giallo-l"><span>  Type:  EXEC (Executable file)</span></span>
+<span class="giallo-l"><span>  Type:  DYN (Shared object file)</span></span></code></pre>
+<p>Same container format, different contents. The ELF header tells the OS and tools what kind of file it is and how to use it. For the full specification, see the <a rel="external" href="https://refspecs.linuxfoundation.org/elf/gabi4+/contents.html">ELF spec</a>.</p>
+<h2 id="aside-how-symbol-resolution-actually-works-pic-got-plt">Aside: how symbol resolution actually works (PIC, GOT, PLT)</h2>
+<p>Throughout this tutorial we've said <code>ld-linux</code> "resolves" symbols at runtime. What does that mean concretely?</p>
+<p><strong>PIC</strong> (Position Independent Code) is a <strong>compilation choice</strong>, not an inherent property of the code. When you pass <code>-fPIC</code> to the compiler, it generates code that uses GOT indirection instead of hardcoding absolute virtual addresses. You can apply <code>-fPIC</code> to any C file. Shared libraries <strong>require</strong> it (otherwise the <code>.text</code> section would need patching at load time). Regular executables don't need it, but can opt in with <code>-fPIE</code> / <code>-pie</code> to enable ASLR on the executable itself.</p>
+<p>When compiled with PIC, the code in <code>.text</code> never contains absolute addresses for external symbols -- so it never needs to be modified, and can stay read-only and shared across processes (see <sup class="footnote-reference"><a href="#sharing">5</a></sup>).</p>
+<p>To see why this matters, consider what happens when <code>main</code> calls <code>add</code>, where <code>add</code> lives in <code>libmathstuff.so</code>. In both cases the C source is the same: <code>add(3, 4)</code>. The difference is what the compiler and linker generate.</p>
+<p><strong>Without PIC</strong> (the old way), <code>ld</code> hardcodes the virtual address of <code>add</code> into the <code>call</code> instruction:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>.text of main:</span></span>
+<span class="giallo-l"><span>    call 0x7f4a12340100       ← virtual address of add() baked into the instruction</span></span></code></pre>
+<p>The problem: the virtual address where <code>libmathstuff.so</code> gets loaded can change between runs. The kernel uses ASLR (Address Space Layout Randomization) for security, or another library might already occupy that region of virtual memory. If <code>libmathstuff.so</code> loads at <code>0x7f4a12340000</code> this time, <code>add</code> is at <code>0x7f4a12340100</code>. Next time it might load at <code>0x7f4a99990000</code>, and <code>add</code> would be at <code>0x7f4a99990100</code>. The hardcoded <code>call 0x7f4a12340100</code> in <code>.text</code> would jump to the wrong virtual address. The loader would have to <strong>rewrite the instruction</strong> in <code>.text</code> to patch in the correct address. Once <code>.text</code> is modified, it can't be shared across processes and can't be read-only.</p>
+<p><strong>With PIC</strong> (what modern systems do), the compiler and linker generate something different. The <code>call add(3, 4)</code> in the source becomes a <code>call</code> to a small stub (the PLT entry for <code>add</code>), and that stub reads the real address from a table (the GOT). Two new data structures appear in the binary:</p>
+<p>The <strong>GOT</strong> (Global Offset Table) is a table of pointers that lives in the <strong>writable</strong> data segment. Each slot holds the virtual address of one external function or variable. <code>ld</code> creates the GOT with empty slots, and <code>ld-linux</code> fills them in at runtime. For our <code>use_mathlib_dyn</code> example (which calls <code>add</code> and <code>multiply</code> from <code>libmathstuff.so</code>), the GOT looks like:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>GOT (in .data, writable)</span></span>
+<span class="giallo-l"><span>┌───────┬──────────────────────────────────────────────┐</span></span>
+<span class="giallo-l"><span>│ slot  │ contents (filled by ld-linux at runtime)     │</span></span>
+<span class="giallo-l"><span>├───────┼──────────────────────────────────────────────┤</span></span>
+<span class="giallo-l"><span>│ [0]   │ (reserved for ld-linux internal use)         │</span></span>
+<span class="giallo-l"><span>│ [1]   │ (reserved for ld-linux internal use)         │</span></span>
+<span class="giallo-l"><span>│ [2]   │ (reserved for ld-linux internal use)         │</span></span>
+<span class="giallo-l"><span>│ [3]   │ 0x7f4a12340100  → add() in libmathstuff.so  │</span></span>
+<span class="giallo-l"><span>│ [4]   │ 0x7f4a12340120  → multiply() in libmathstuff│</span></span>
+<span class="giallo-l"><span>│ [5]   │ 0x7f4a12100450  → printf() in libc.so.6     │</span></span>
+<span class="giallo-l"><span>│  ...  │  ...                                         │</span></span>
+<span class="giallo-l"><span>└───────┴──────────────────────────────────────────────┘</span></span></code></pre>
+<p>Each slot is just a pointer (8 bytes on x86-64). The addresses can differ each time the process is started (due to ASLR), so <code>ld-linux</code> must write them fresh every time the program runs. The GOT is writable precisely because it needs to be patched at process startup.</p>
+<p>The <strong>PLT</strong> (Procedure Linkage Table) is a set of small stubs that live in the <code>.text</code> section of the <strong>executable</strong> (i.e. <code>use_mathlib_dyn</code>, the binary doing the calling -- not <code>libmathstuff.so</code>). <code>ld</code> generates one PLT stub per external function. Each stub reads an address from the corresponding GOT slot and jumps there:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>PLT (in .text, read-only)</span></span>
+<span class="giallo-l"><span>┌─────────────────────────────────┐</span></span>
+<span class="giallo-l"><span>│ add_PLT_stub:                   │</span></span>
+<span class="giallo-l"><span>│   load address from GOT[3]      │</span></span>
+<span class="giallo-l"><span>│   jump to it                    │</span></span>
+<span class="giallo-l"><span>├─────────────────────────────────┤</span></span>
+<span class="giallo-l"><span>│ multiply_PLT_stub:              │</span></span>
+<span class="giallo-l"><span>│   load address from GOT[4]      │</span></span>
+<span class="giallo-l"><span>│   jump to it                    │</span></span>
+<span class="giallo-l"><span>├─────────────────────────────────┤</span></span>
+<span class="giallo-l"><span>│ printf_PLT_stub:                │</span></span>
+<span class="giallo-l"><span>│   load address from GOT[5]      │</span></span>
+<span class="giallo-l"><span>│   jump to it                    │</span></span>
+<span class="giallo-l"><span>└─────────────────────────────────┘</span></span></code></pre>
+<p>The PLT stubs are identical in structure -- they differ only in which GOT slot they read.<sup class="footnote-reference"><a href="#plt_slots">7</a></sup> The stubs themselves never change (read-only <code>.text</code>). Only the GOT entries (writable <code>.data</code>) get patched.</p>
+<p>Here's what <code>ld</code> generates for <code>add(3, 4)</code>:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>.text (read-only):                  .data (writable):</span></span>
+<span class="giallo-l"><span>┌──────────────────────┐            ┌─────────────────────────────┐</span></span>
+<span class="giallo-l"><span>│ main:                │            │ GOT[0]: ...                 │</span></span>
+<span class="giallo-l"><span>│   call add_PLT_stub ────────┐    │ GOT[1]: ...                 │</span></span>
+<span class="giallo-l"><span>│                      │      │    │ GOT[2]: ...                 │</span></span>
+<span class="giallo-l"><span>│                      │      │    │ GOT[3]: 0x7f4a12340100 ◄──┐ │</span></span>
+<span class="giallo-l"><span>└──────────────────────┘      │    └─────────────────────────────┘ │</span></span>
+<span class="giallo-l"><span>                              │                                     │</span></span>
+<span class="giallo-l"><span>┌──────────────────────┐      │    address of add() in              │</span></span>
+<span class="giallo-l"><span>│ add_PLT_stub:        │◄─────┘    libmathstuff.so, written         │</span></span>
+<span class="giallo-l"><span>│   load GOT[3] ───────────────────by ld-linux at runtime ─────────┘</span></span>
+<span class="giallo-l"><span>│   jump to it         │</span></span>
+<span class="giallo-l"><span>└──────────────────────┘</span></span></code></pre>
+<p><code>main</code> calls <code>add_PLT_stub</code> (a fixed offset within the same <code>.text</code> section -- no absolute address needed). The stub loads whatever address is in <code>GOT[3]</code> and jumps there. <code>ld-linux</code> wrote the real address of <code>add</code> into <code>GOT[3]</code> at startup.</p>
+<p>The <code>.text</code> instructions are identical no matter where <code>libmathstuff.so</code> gets loaded. The code says "jump to whatever address is in GOT slot 3" -- it never says "jump to <code>0x7f4a12340100</code>." Only the GOT entry (in writable <code>.data</code>) changes. That's what "no absolute addresses in <code>.text</code>" means.</p>
+<h3 id="lazy-binding-rtld-lazy">Lazy binding (<code>RTLD_LAZY</code>)</h3>
+<p>With lazy binding (the default), <code>ld-linux</code> does <strong>not</strong> fill in GOT entries at startup. Instead, <code>ld</code> sets each GOT entry to point at the <strong>resolver</strong>.<sup class="footnote-reference"><a href="#resolver">8</a></sup></p>
+<p><strong>First call to <code>add</code>:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>main                PLT                  GOT                    ld-linux</span></span>
+<span class="giallo-l"><span>  │                  │                    │                       │</span></span>
+<span class="giallo-l"><span>  │  call add_stub   │                    │                       │</span></span>
+<span class="giallo-l"><span>  │─────────────────&gt;│                    │                       │</span></span>
+<span class="giallo-l"><span>  │                  │  load GOT[3]       │                       │</span></span>
+<span class="giallo-l"><span>  │                  │───────────────────&gt;│                       │</span></span>
+<span class="giallo-l"><span>  │                  │                    │                       │</span></span>
+<span class="giallo-l"><span>  │                  │  GOT[3] currently points to ld-linux&#39;s     │</span></span>
+<span class="giallo-l"><span>  │                  │  resolver (not add -- add hasn&#39;t been      │</span></span>
+<span class="giallo-l"><span>  │                  │  looked up yet)                             │</span></span>
+<span class="giallo-l"><span>  │                  │                    │                       │</span></span>
+<span class="giallo-l"><span>  │                  │  jump to GOT[3] ──────────────────────────&gt;│</span></span>
+<span class="giallo-l"><span>  │                  │                    │                       │</span></span>
+<span class="giallo-l"><span>  │                  │                    │  resolver:             │</span></span>
+<span class="giallo-l"><span>  │                  │                    │  1. look up &quot;add&quot; in   │</span></span>
+<span class="giallo-l"><span>  │                  │                    │     libmathstuff.so    │</span></span>
+<span class="giallo-l"><span>  │                  │                    │  2. find add() is at   │</span></span>
+<span class="giallo-l"><span>  │                  │                    │     0x7f4a...100       │</span></span>
+<span class="giallo-l"><span>  │                  │                    │  3. write 0x7f4a...100 │</span></span>
+<span class="giallo-l"><span>  │                  │                    │     into GOT[3]        │</span></span>
+<span class="giallo-l"><span>  │                  │                    │  4. jump to 0x7f4a...100</span></span>
+<span class="giallo-l"><span>  │                  │                    │                       │</span></span>
+<span class="giallo-l"><span>  │&lt;────────────────────────────────── now running add() ─────────┘</span></span></code></pre>
+<p><strong>Second call to <code>add</code>:</strong></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>main                PLT                  GOT</span></span>
+<span class="giallo-l"><span>  │                  │                    │</span></span>
+<span class="giallo-l"><span>  │  call add_stub   │                    │</span></span>
+<span class="giallo-l"><span>  │─────────────────&gt;│  load GOT[3]       │</span></span>
+<span class="giallo-l"><span>  │                  │───────────────────&gt;│ GOT[3] = 0x7f4a...100</span></span>
+<span class="giallo-l"><span>  │                  │                    │       (already patched)</span></span>
+<span class="giallo-l"><span>  │&lt;──────────────────────────────────────── jump to add()</span></span></code></pre>
+<p>The first call is slow (resolver runs), every subsequent call is fast (one indirect jump). No resolver involved.</p>
+<h3 id="eager-binding-rtld-now">Eager binding (<code>RTLD_NOW</code>)</h3>
+<p>With <code>RTLD_NOW</code>, <code>ld-linux</code> patches <strong>all</strong> GOT entries during <code>dlopen</code> (or at program startup). Every call goes directly from the start -- no resolver, no first-call penalty. Slower startup, but no surprise failures later if a symbol is missing.</p>
+<h3 id="the-key-insight">The key insight</h3>
+<p>The <code>.text</code> section is <strong>never modified</strong>. All patching happens in GOT entries, which live in the writable data segment. This is what makes it possible for multiple processes to share the same physical pages of library code in RAM.</p>
+<p>For a full walkthrough with disassembly, see Eli Bendersky's articles on <a rel="external" href="https://eli.thegreenplace.net/2011/08/25/load-time-relocation-of-shared-libraries">load-time relocation</a> and <a rel="external" href="https://eli.thegreenplace.net/2011/11/03/position-independent-code-pic-in-shared-libraries">PIC in shared libraries</a>.</p>
+<h2 id="further-reading">Further reading</h2>
+<ul>
+<li><a rel="external" href="https://www.airs.com/blog/archives/38">Ian Lance Taylor's 20-part linker series</a> -- by the author of GNU gold</li>
+<li><a rel="external" href="https://eli.thegreenplace.net/2011/08/25/load-time-relocation-of-shared-libraries">Eli Bendersky's PIC/relocation articles</a> -- see it in disassembly</li>
+<li><a rel="external" href="https://www.akkadia.org/drepper/dsohowto.pdf">Ulrich Drepper's "How To Write Shared Libraries"</a> -- the definitive reference</li>
+<li><a rel="external" href="https://csapp.cs.cmu.edu/">CS:APP Chapter 7</a> -- the standard textbook treatment</li>
+</ul>
+<h2 id="credits">Credits</h2>
+<p>Adapted from David Drysdale's <a rel="external" href="https://www.lurklurk.org/linkers/linkers.html">Beginner's Guide to Linkers</a>,
+licensed under the GNU Free Documentation License.</p>
+<div class="footnote-definition" id="elf"><sup class="footnote-definition-label">1</sup>
+<p>Both <code>.o</code> files and executables are ELF files, but different types. A <code>.o</code> is a <em>relocatable</em> ELF (<code>ET_REL</code>) -- it has sections and symbols but no entry point. An executable is <code>ET_EXEC</code> -- it has an entry point and final addresses. See the <a href="/blog/rust-notes/general/linker-one-pager-linux/#aside-what-is-elf">Aside: what is ELF?</a> section for details.</p>
+</div>
+<div class="footnote-definition" id="ldvsldlinux"><sup class="footnote-definition-label">3</sup>
+<p><code>ld</code> and the dynamic linker (<code>ld-linux</code>) are two different programs that happen to both be called "linkers." <strong><code>ld</code></strong> runs at build time -- it combines <code>.o</code> files, resolves symbols, and writes the executable. Its job is done before the program ever runs. <strong><code>ld-linux</code></strong> (<code>/lib64/ld-linux-x86-64.so.2</code>) runs at program startup -- the kernel loads it first, and it maps shared libraries (<code>.so</code> files) into memory and resolves any remaining <code>U</code> symbols that point to those libraries. We cover this in detail in the <a href="/blog/rust-notes/general/linker-one-pager-linux/#shared-libraries">Shared libraries</a> and <a href="/blog/rust-notes/general/linker-one-pager-linux/#what-the-os-does-with-the-executable">What the OS does with the executable</a> sections.</p>
+</div>
+<div class="footnote-definition" id="ostep"><sup class="footnote-definition-label">4</sup>
+<p>For background on processes, system calls, and how the OS virtualizes the CPU, see <a rel="external" href="https://pages.cs.wisc.edu/~remzi/OSTEP/">Operating Systems: Three Easy Pieces</a> by Remzi and Andrea Arpaci-Dusseau, particularly the CPU virtualization chapters.</p>
+</div>
+<div class="footnote-definition" id="sharing"><sup class="footnote-definition-label">5</sup>
+<p>Each process gets its own virtual address space, but the physical pages backing read-only segments (like <code>.text</code>, <code>ld-linux</code>, <code>libc.so.6</code>) are <strong>shared</strong> across processes. The kernel maps the same physical pages into multiple processes' page tables. If 100 processes all use <code>libc.so.6</code>, there is only one copy of the code in physical RAM. Only writable segments (<code>.data</code>, <code>.bss</code>, stack, heap) get their own physical pages per process, via copy-on-write. This is why the read/write distinction matters -- it's not just about safety, it's about memory efficiency. See <a href="/blog/rust-notes/general/linker-one-pager-linux/#aside-how-symbol-resolution-actually-works-pic-got-plt">Aside: how symbol resolution actually works</a> for the mechanism (PIC/GOT) that makes this possible.</p>
+</div>
+<div class="footnote-definition" id="resolve"><sup class="footnote-definition-label">6</sup>
+<p>See the <a href="/blog/rust-notes/general/linker-one-pager-linux/#aside-how-symbol-resolution-actually-works-pic-got-plt">Aside: how symbol resolution actually works</a> section for details on what "resolving" means concretely (GOT, PLT, lazy vs eager binding).</p>
+</div>
+<div class="footnote-definition" id="plt_slots"><sup class="footnote-definition-label">7</sup>
+<p>How does each PLT stub know which GOT slot to read? <code>ld</code> decides the layout at link time: "slot 3 is for <code>add</code>, slot 4 is for <code>multiply</code>." It hardcodes <code>load GOT[3]</code> into <code>add</code>'s PLT stub and <code>load GOT[4]</code> into <code>multiply</code>'s PLT stub -- these are just fixed offsets within the same binary, no absolute addresses. At startup, <code>ld-linux</code> knows the same mapping (it's recorded in the ELF's relocation table): "GOT slot 3 needs the address of <code>add</code> from <code>libmathstuff.so</code>." So it loads the <code>.so</code>, finds <code>add</code>, and writes the address into slot 3. The PLT stub doesn't know or care which <code>.so</code> file <code>add</code> lives in -- it just reads slot 3 and jumps. <code>ld</code> and <code>ld-linux</code> agree on what each slot means because they both read the same relocation entries in the ELF file.</p>
+</div>
+<div class="footnote-definition" id="resolver"><sup class="footnote-definition-label">8</sup>
+<p>The resolver is a function inside <code>ld-linux</code>. Its job: given a symbol name (like <code>"add"</code>), search the loaded <code>.so</code> files' symbol tables, find the address of that function, write the address into the GOT entry, and then jump to the function. After the resolver patches the GOT, subsequent calls bypass the resolver entirely -- the PLT stub reads the now-patched GOT entry and jumps directly to the real function.</p>
+</div>
+
+  </div>
+
+  
+
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const select = document.getElementById('theme-select');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      const lightThemes = ['rose-pine-dawn'];
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        }
+      }
+
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
+
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
+    })();
+  </script>
+  <script>
+    // Smooth scroll + highlight for eqref and citation links.
+    // Citations get a ↩ back-link to return to reading position.
+    document.addEventListener('click', function(e) {
+      // Handle back-arrow clicks
+      var back = e.target.closest('.bib-back');
+      if (back) {
+        e.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Clean up previous highlights and back-links
+      document.querySelectorAll('.eq-highlight').forEach(function(el) {
+        el.classList.remove('eq-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function(el) {
+        el.remove();
+      });
+
+      var href = link.getAttribute('href');
+      var id = decodeURIComponent(href.slice(1));
+      var target = document.getElementById(id);
+      if (!target) return;
+
+      var highlight = target.closest('mjx-container[display="true"]') || target;
+      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlight.classList.add('eq-highlight');
+
+      // For citations, add a back-arrow to return to reading position
+      if (link.classList.contains('citation')) {
+        if (!link.id) link.id = 'cite-src-' + id;
+        var arrow = document.createElement('a');
+        arrow.className = 'bib-back';
+        arrow.setAttribute('data-source', link.id);
+        arrow.textContent = ' \u21A9';
+        arrow.title = 'Back to text';
+        highlight.appendChild(arrow);
+      }
+    });
+  </script>
+
+</body>
+</html>

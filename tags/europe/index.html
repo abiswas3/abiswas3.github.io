@@ -5,7 +5,7 @@
     (function() {
       var theme = localStorage.getItem('theme');
       if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'rose-pine-ink' : 'vitesse-dark';
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -112,7 +112,7 @@
         <a href="/blog/">Notes</a>
         <a href="/misc/">Random</a>
         <select class="theme-select" id="theme-select" aria-label="Theme">
-          <option value="bw-light">Light</option>
+          <option value="rose-pine-ink">Light</option>
           <option value="gruvbox-dark">Gruvbox</option>
           <option value="tokyo-night">Tokyo</option>
           <option value="vitesse-dark">Vitesse</option>
@@ -131,6 +131,16 @@
 <section class="section">
   <h1>#europe</h1>
   <ul class="post-list">
+    
+    <li>
+      <div class="post-list-main">
+        <a href="&#x2F;travel&#x2F;scotland&#x2F;">Scotland: With J, M, A and H</a>
+      </div>
+      <div class="post-list-side">
+        
+        <time>2026-03-17</time>
+      </div>
+    </li>
     
     <li>
       <div class="post-list-main">
@@ -271,7 +281,7 @@
       const darkLink = document.getElementById('giallo-dark');
       const lightLink = document.getElementById('giallo-light');
 
-      const lightThemes = ['rose-pine-dawn', 'bw-light'];
+      const lightThemes = ['rose-pine-dawn'];
 
       function setTheme(theme) {
         html.setAttribute('data-theme', theme);

@@ -5,7 +5,7 @@
     (function() {
       var theme = localStorage.getItem('theme');
       if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'rose-pine-ink' : 'vitesse-dark';
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -112,7 +112,7 @@
         <a href="/blog/">Notes</a>
         <a href="/misc/">Random</a>
         <select class="theme-select" id="theme-select" aria-label="Theme">
-          <option value="bw-light">Light</option>
+          <option value="rose-pine-ink">Light</option>
           <option value="gruvbox-dark">Gruvbox</option>
           <option value="tokyo-night">Tokyo</option>
           <option value="vitesse-dark">Vitesse</option>
@@ -140,9 +140,9 @@
     
     <a href="&#x2F;categories&#x2F;snarks&#x2F;" class="tag">snarks <span class="tag-count">3</span></a>
     
-    <a href="&#x2F;categories&#x2F;software&#x2F;" class="tag">software <span class="tag-count">1</span></a>
+    <a href="&#x2F;categories&#x2F;software&#x2F;" class="tag">Software <span class="tag-count">3</span></a>
     
-    <a href="&#x2F;categories&#x2F;travel&#x2F;" class="tag">travel <span class="tag-count">1</span></a>
+    <a href="&#x2F;categories&#x2F;travel&#x2F;" class="tag">travel <span class="tag-count">2</span></a>
     
   </div>
 </section>
@@ -273,7 +273,7 @@
       const darkLink = document.getElementById('giallo-dark');
       const lightLink = document.getElementById('giallo-light');
 
-      const lightThemes = ['rose-pine-dawn', 'bw-light'];
+      const lightThemes = ['rose-pine-dawn'];
 
       function setTheme(theme) {
         html.setAttribute('data-theme', theme);

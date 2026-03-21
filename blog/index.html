@@ -5,7 +5,7 @@
     (function() {
       var theme = localStorage.getItem('theme');
       if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'rose-pine-ink' : 'vitesse-dark';
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -112,7 +112,7 @@
         <a href="/blog/">Notes</a>
         <a href="/misc/">Random</a>
         <select class="theme-select" id="theme-select" aria-label="Theme">
-          <option value="bw-light">Light</option>
+          <option value="rose-pine-ink">Light</option>
           <option value="gruvbox-dark">Gruvbox</option>
           <option value="tokyo-night">Tokyo</option>
           <option value="vitesse-dark">Vitesse</option>
@@ -236,6 +236,21 @@
           <h2 class="card-title">Proof Complexity Notes</h2>
           
           <p class="card-desc">Working notes on proof complexity (potentially incomplete and&#x2F;or wrong)</p>
+          
+          <div class="card-meta">
+            <span>Ari</span>
+            
+          </div>
+        </div>
+      </a>
+      
+    
+      
+      
+      <a href="&#x2F;blog&#x2F;rust-notes&#x2F;" class="card series-entry" data-date="1970-01-01">
+        
+        <div class="card-body">
+          <h2 class="card-title">General Notes On Software</h2>
           
           <div class="card-meta">
             <span>Ari</span>
@@ -446,6 +461,20 @@
           <a href="&#x2F;blog&#x2F;proof-complexity&#x2F;">Proof Complexity Notes</a>
           
           <p class="post-list-desc">Working notes on proof complexity (potentially incomplete and&#x2F;or wrong)</p>
+          
+        </div>
+        <div class="post-list-side">
+          <span class="post-list-author">Ari</span>
+          
+        </div>
+      </li>
+      
+    
+      
+      
+      <li class="series-entry" data-date="1970-01-01">
+        <div class="post-list-main">
+          <a href="&#x2F;blog&#x2F;rust-notes&#x2F;">General Notes On Software</a>
           
         </div>
         <div class="post-list-side">
@@ -669,6 +698,14 @@
       
       <li class="series-entry" data-date="1970-01-01">
         <a href="&#x2F;blog&#x2F;proof-complexity&#x2F;">Proof Complexity Notes</a>
+        <time></time>
+      </li>
+      
+    
+      
+      
+      <li class="series-entry" data-date="1970-01-01">
+        <a href="&#x2F;blog&#x2F;rust-notes&#x2F;">General Notes On Software</a>
         <time></time>
       </li>
       
@@ -961,7 +998,7 @@
       const darkLink = document.getElementById('giallo-dark');
       const lightLink = document.getElementById('giallo-light');
 
-      const lightThemes = ['rose-pine-dawn', 'bw-light'];
+      const lightThemes = ['rose-pine-dawn'];
 
       function setTheme(theme) {
         html.setAttribute('data-theme', theme);
