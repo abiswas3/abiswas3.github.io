@@ -8,6 +8,21 @@
   
   
   <entry xml:lang="en">
+    <title>Mallorca</title>
+    <published>2026-03-21T00:00:00+00:00</published>
+    <updated>2026-03-21T00:00:00+00:00</updated>
+    <author>
+      <name></name>
+    </author>
+    <link rel="alternate" type="text/html" href="/travel/mallorca/"/>
+    <id>/travel/mallorca/</id>
+    
+    <content type="html" xml:base="/travel/mallorca/"></content>
+  </entry>
+  
+  
+  
+  <entry xml:lang="en">
     <title>Linker Basics</title>
     <published>2026-03-20T00:00:00+00:00</published>
     <updated>2026-03-20T00:00:00+00:00</updated>
@@ -468,7 +483,7 @@ files into a &lt;strong&gt;static library&lt;&#x2F;strong&gt; (&lt;code&gt;.a&lt
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  Entry point address:               0x4010b0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  Number of program headers:         6&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;The &lt;code&gt;Entry point address&lt;&#x2F;code&gt; is where execution will eventually start. The &lt;code&gt;program headers&lt;&#x2F;code&gt; describe the segments to load. &lt;!-- TODO: verify this output on Linux and replace with actual dump --&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;Entry point address&lt;&#x2F;code&gt; is where execution will eventually start. The &lt;code&gt;program headers&lt;&#x2F;code&gt; describe the segments to load -- we show them with &lt;code&gt;readelf -l&lt;&#x2F;code&gt; in step 4 below. &lt;!-- TODO: verify this output on Linux and replace with actual dump --&gt;&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;The kernel creates a new virtual address space&lt;&#x2F;strong&gt; for the process. At this point the process has no code, no data, no stack -- just an empty address space.&lt;&#x2F;p&gt;
@@ -495,7 +510,7 @@ files into a &lt;strong&gt;static library&lt;&#x2F;strong&gt; (&lt;code&gt;.a&lt
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  LOAD    0x003000 0x0000000000404000 0x000010 0x000018 RW&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  INTERP  0x000318 0x0000000000400318 0x00001c 0x00001c R&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        [Requesting program interpreter: &#x2F;lib64&#x2F;ld-linux-x86-64.so.2]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt; &lt;!-- TODO: verify this output on Linux and replace with actual dump --&gt;
-&lt;p&gt;The &lt;code&gt;R E&lt;&#x2F;code&gt; segment is &lt;code&gt;.text&lt;&#x2F;code&gt; -- &lt;strong&gt;readable and executable&lt;&#x2F;strong&gt;, but not writable. The &lt;code&gt;RW&lt;&#x2F;code&gt; segment is &lt;code&gt;.data&lt;&#x2F;code&gt; and &lt;code&gt;.bss&lt;&#x2F;code&gt; -- &lt;strong&gt;readable and writable&lt;&#x2F;strong&gt;.&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#sharing&quot;&gt;5&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; The &lt;code&gt;.data&lt;&#x2F;code&gt; bytes are copied from the executable file. The &lt;code&gt;.bss&lt;&#x2F;code&gt; bytes are zeroed (the OS allocates zero-filled pages, which is why uninitialized globals start as zero without taking up space in the file).&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;R E&lt;&#x2F;code&gt; segment is &lt;code&gt;.text&lt;&#x2F;code&gt; -- &lt;strong&gt;readable and executable&lt;&#x2F;strong&gt;, but not writable. The &lt;code&gt;RW&lt;&#x2F;code&gt; segment is &lt;code&gt;.data&lt;&#x2F;code&gt; and &lt;code&gt;.bss&lt;&#x2F;code&gt; -- &lt;strong&gt;readable and writable&lt;&#x2F;strong&gt;.&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#sharing&quot;&gt;5&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#filesiz&quot;&gt;6&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; The &lt;code&gt;.data&lt;&#x2F;code&gt; bytes are copied from the executable file. The &lt;code&gt;.bss&lt;&#x2F;code&gt; bytes are zeroed (the OS allocates zero-filled pages, which is why uninitialized globals start as zero without taking up space in the file).&lt;&#x2F;p&gt;
 &lt;p&gt;After this step the address space looks like:&lt;&#x2F;p&gt;
 &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;Virtual Address Space&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;─────────────────────&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -513,7 +528,7 @@ files into a &lt;strong&gt;static library&lt;&#x2F;strong&gt; (&lt;code&gt;.a&lt
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;└────────────────────┘&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;0x0000...0000 (low)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;&#x2F;li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;The kernel sees the &lt;code&gt;INTERP&lt;&#x2F;code&gt; program header&lt;&#x2F;strong&gt; -- visible in the &lt;code&gt;readelf -l&lt;&#x2F;code&gt; output above as &lt;code&gt;[Requesting program interpreter: &#x2F;lib64&#x2F;ld-linux-x86-64.so.2]&lt;&#x2F;code&gt;. This is the &lt;code&gt;-dynamic-linker&lt;&#x2F;code&gt; path we passed to &lt;code&gt;ld&lt;&#x2F;code&gt;. The kernel loads &lt;code&gt;ld-linux&lt;&#x2F;code&gt; into the address space too.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;The kernel sees the &lt;code&gt;INTERP&lt;&#x2F;code&gt; program header&lt;&#x2F;strong&gt; -- visible in the &lt;code&gt;readelf -l&lt;&#x2F;code&gt; output above as &lt;code&gt;[Requesting program interpreter: &#x2F;lib64&#x2F;ld-linux-x86-64.so.2]&lt;&#x2F;code&gt;. This is the &lt;code&gt;-dynamic-linker&lt;&#x2F;code&gt; path we passed to &lt;code&gt;ld&lt;&#x2F;code&gt;. The kernel loads &lt;code&gt;ld-linux&lt;&#x2F;code&gt; into the address space too.&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#loading&quot;&gt;7&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;&lt;&#x2F;p&gt;
 &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;Virtual Address Space&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;─────────────────────&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;0xFFFF...FFFF (high)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -537,35 +552,39 @@ files into a &lt;strong&gt;static library&lt;&#x2F;strong&gt; (&lt;code&gt;.a&lt
 &lt;p&gt;&lt;strong&gt;The kernel jumps to &lt;code&gt;ld-linux&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt;, not to the program&#x27;s code. &lt;code&gt;ld-linux&lt;&#x2F;code&gt; is now running inside the new process.&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;code&gt;ld-linux&lt;&#x2F;code&gt; loads shared libraries.&lt;&#x2F;strong&gt; It reads the &lt;code&gt;NEEDED&lt;&#x2F;code&gt; entries in the executable (these came from &lt;code&gt;-lc&lt;&#x2F;code&gt;) and loads &lt;code&gt;libc.so.6&lt;&#x2F;code&gt; into the address space. It resolves &lt;code&gt;U&lt;&#x2F;code&gt; symbols in the executable to addresses in &lt;code&gt;libc.so&lt;&#x2F;code&gt;. You can see the &lt;code&gt;NEEDED&lt;&#x2F;code&gt; entries with:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;ld-linux&lt;&#x2F;code&gt; loads shared libraries&lt;&#x2F;strong&gt; (we cover shared libraries in detail in the &lt;a href=&quot;&#x2F;blog&#x2F;rust-notes&#x2F;general&#x2F;linker-one-pager-linux&#x2F;#shared-libraries&quot;&gt;Shared libraries&lt;&#x2F;a&gt; section -- for now, just think of them as &lt;code&gt;.so&lt;&#x2F;code&gt; files containing code that gets loaded at runtime instead of being copied into the executable).&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#ldmmap&quot;&gt;8&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; It reads the &lt;code&gt;NEEDED&lt;&#x2F;code&gt; entries in the executable (these came from &lt;code&gt;-lc&lt;&#x2F;code&gt;) and loads &lt;code&gt;libc.so.6&lt;&#x2F;code&gt; into the address space. It resolves &lt;code&gt;U&lt;&#x2F;code&gt; symbols in the executable to addresses in &lt;code&gt;libc.so&lt;&#x2F;code&gt;. You can see the &lt;code&gt;NEEDED&lt;&#x2F;code&gt; entries with:&lt;&#x2F;p&gt;
 &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;readelf&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;d&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; sample1&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt; |&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt; grep&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; NEEDED&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt; 0x0000000000000001 (NEEDED)   Shared library: [libc.so.6]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt; &lt;!-- TODO: verify this output on Linux --&gt;
 &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;Virtual Address Space&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;─────────────────────&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;0xFFFF...FFFF (high)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;┌───────────────────┐&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   stack    (rw-)   │  ← set up by kernel&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   stack    (rw-)   │  ← set up by kernel, grows ↓&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;├────────────────────┤&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   unmapped         │&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;├────────────────────┤&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   ld-linux  (r-x)  │&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;├────────────────────┤&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   libc.so.6 (r-x)  │  ← loaded by ld-linux&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   libc.so.6 (r-x)  │  ← loaded by ld-linux (_start lives here)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;├────────────────────┤&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   unmapped         │&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;├────────────────────┤&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   heap     (rw-)   │  ← grows ↑ (malloc)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;├────────────────────┤&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   .bss     (rw-)   │&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   .data    (rw-)   │&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;├────────────────────┤&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   .text    (r-x)   │&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   .text    (r-x)   │  ← main() lives here&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;├────────────────────┤&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   unmapped         │&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;└────────────────────┘&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;0x0000...0000 (low)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;&#x2F;li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;&lt;code&gt;ld-linux&lt;&#x2F;code&gt; jumps to &lt;code&gt;_start&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; (provided by &lt;code&gt;libc&lt;&#x2F;code&gt;). &lt;code&gt;_start&lt;&#x2F;code&gt; sets up the C runtime (argc, argv, environment), then calls &lt;code&gt;main&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;PC (program counter) trace:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;─────────────────────────────&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;ld-linux  ──→  _start (in libc.so.6)  ──→  main (in .text of sample1)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;&#x2F;li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;code&gt;main&lt;&#x2F;code&gt; runs.&lt;&#x2F;strong&gt; When &lt;code&gt;main&lt;&#x2F;code&gt; returns, the C runtime calls &lt;code&gt;exit()&lt;&#x2F;code&gt; to terminate the process.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;main&lt;&#x2F;code&gt; runs.&lt;&#x2F;strong&gt; The PC is now in the &lt;code&gt;.text&lt;&#x2F;code&gt; section of &lt;code&gt;sample1&lt;&#x2F;code&gt;. When &lt;code&gt;main&lt;&#x2F;code&gt; returns, the C runtime calls &lt;code&gt;exit()&lt;&#x2F;code&gt; to terminate the process.&lt;&#x2F;p&gt;
 &lt;&#x2F;li&gt;
 &lt;&#x2F;ol&gt;
 &lt;p&gt;We can watch steps 6-8 happen by setting &lt;code&gt;LD_DEBUG&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
@@ -736,7 +755,7 @@ files into a &lt;strong&gt;static library&lt;&#x2F;strong&gt; (&lt;code&gt;.a&lt
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	libc.so.6 =&amp;gt; &#x2F;lib&#x2F;x86_64-linux-gnu&#x2F;libc.so.6 (0x00007f4a12100000)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	&#x2F;lib64&#x2F;ld-linux-x86-64.so.2 (0x00007f4a12350000)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
 &lt;p&gt;Only system libraries. No mention of &lt;code&gt;libmathstuff&lt;&#x2F;code&gt; at all. Compare this to &lt;a href=&quot;&#x2F;blog&#x2F;rust-notes&#x2F;general&#x2F;linker-one-pager-linux&#x2F;#shared-libraries&quot;&gt;&lt;code&gt;ldd use_mathlib_dyn&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; above, which listed &lt;code&gt;libmathstuff.so&lt;&#x2F;code&gt; as a dependency. That&#x27;s the difference: shared libraries are declared at link time and show up in &lt;code&gt;ldd&lt;&#x2F;code&gt;; plugins are loaded at runtime and are invisible to &lt;code&gt;ldd&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;code&gt;RTLD_LAZY&lt;&#x2F;code&gt; means &quot;resolve symbols one by one as they are called.&quot;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#resolve&quot;&gt;6&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; &lt;code&gt;RTLD_NOW&lt;&#x2F;code&gt; means &quot;resolve all symbols immediately when &lt;code&gt;dlopen&lt;&#x2F;code&gt; is called.&quot; &lt;code&gt;RTLD_LAZY&lt;&#x2F;code&gt; makes &lt;code&gt;dlopen&lt;&#x2F;code&gt; faster but defers errors; &lt;code&gt;RTLD_NOW&lt;&#x2F;code&gt; is safer because it fails early if a symbol is missing.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;RTLD_LAZY&lt;&#x2F;code&gt; means &quot;resolve symbols one by one as they are called.&quot;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#resolve&quot;&gt;9&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; &lt;code&gt;RTLD_NOW&lt;&#x2F;code&gt; means &quot;resolve all symbols immediately when &lt;code&gt;dlopen&lt;&#x2F;code&gt; is called.&quot; &lt;code&gt;RTLD_LAZY&lt;&#x2F;code&gt; makes &lt;code&gt;dlopen&lt;&#x2F;code&gt; faster but defers errors; &lt;code&gt;RTLD_NOW&lt;&#x2F;code&gt; is safer because it fails early if a symbol is missing.&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;code&gt;dlsym&lt;&#x2F;code&gt; works because the shared library contains a symbol table -- the same name-to-address mapping we&#x27;ve been looking at with &lt;code&gt;nm&lt;&#x2F;code&gt;. &lt;code&gt;dlsym&lt;&#x2F;code&gt; does the same lookup at runtime: given the string &lt;code&gt;&quot;add&quot;&lt;&#x2F;code&gt;, find the address of &lt;code&gt;add&lt;&#x2F;code&gt; in the loaded &lt;code&gt;.so&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
 &lt;div class=&quot;callout callout-box thm-box&quot;&gt;
   
@@ -799,7 +818,7 @@ files into a &lt;strong&gt;static library&lt;&#x2F;strong&gt; (&lt;code&gt;.a&lt
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   load address from GOT[5]      │&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;│   jump to it                    │&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;└─────────────────────────────────┘&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;The PLT stubs are identical in structure -- they differ only in which GOT slot they read.&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#plt_slots&quot;&gt;7&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; The stubs themselves never change (read-only &lt;code&gt;.text&lt;&#x2F;code&gt;). Only the GOT entries (writable &lt;code&gt;.data&lt;&#x2F;code&gt;) get patched.&lt;&#x2F;p&gt;
+&lt;p&gt;The PLT stubs are identical in structure -- they differ only in which GOT slot they read.&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#plt_slots&quot;&gt;10&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; The stubs themselves never change (read-only &lt;code&gt;.text&lt;&#x2F;code&gt;). Only the GOT entries (writable &lt;code&gt;.data&lt;&#x2F;code&gt;) get patched.&lt;&#x2F;p&gt;
 &lt;p&gt;Here&#x27;s what &lt;code&gt;ld&lt;&#x2F;code&gt; generates for &lt;code&gt;add(3, 4)&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
 &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;.text (read-only):                  .data (writable):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;┌──────────────────────┐            ┌─────────────────────────────┐&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -817,7 +836,7 @@ files into a &lt;strong&gt;static library&lt;&#x2F;strong&gt; (&lt;code&gt;.a&lt
 &lt;p&gt;&lt;code&gt;main&lt;&#x2F;code&gt; calls &lt;code&gt;add_PLT_stub&lt;&#x2F;code&gt; (a fixed offset within the same &lt;code&gt;.text&lt;&#x2F;code&gt; section -- no absolute address needed). The stub loads whatever address is in &lt;code&gt;GOT[3]&lt;&#x2F;code&gt; and jumps there. &lt;code&gt;ld-linux&lt;&#x2F;code&gt; wrote the real address of &lt;code&gt;add&lt;&#x2F;code&gt; into &lt;code&gt;GOT[3]&lt;&#x2F;code&gt; at startup.&lt;&#x2F;p&gt;
 &lt;p&gt;The &lt;code&gt;.text&lt;&#x2F;code&gt; instructions are identical no matter where &lt;code&gt;libmathstuff.so&lt;&#x2F;code&gt; gets loaded. The code says &quot;jump to whatever address is in GOT slot 3&quot; -- it never says &quot;jump to &lt;code&gt;0x7f4a12340100&lt;&#x2F;code&gt;.&quot; Only the GOT entry (in writable &lt;code&gt;.data&lt;&#x2F;code&gt;) changes. That&#x27;s what &quot;no absolute addresses in &lt;code&gt;.text&lt;&#x2F;code&gt;&quot; means.&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;lazy-binding-rtld-lazy&quot;&gt;Lazy binding (&lt;code&gt;RTLD_LAZY&lt;&#x2F;code&gt;)&lt;&#x2F;h3&gt;
-&lt;p&gt;With lazy binding (the default), &lt;code&gt;ld-linux&lt;&#x2F;code&gt; does &lt;strong&gt;not&lt;&#x2F;strong&gt; fill in GOT entries at startup. Instead, &lt;code&gt;ld&lt;&#x2F;code&gt; sets each GOT entry to point at the &lt;strong&gt;resolver&lt;&#x2F;strong&gt;.&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#resolver&quot;&gt;8&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;With lazy binding (the default), &lt;code&gt;ld-linux&lt;&#x2F;code&gt; does &lt;strong&gt;not&lt;&#x2F;strong&gt; fill in GOT entries at startup. Instead, &lt;code&gt;ld&lt;&#x2F;code&gt; sets each GOT entry to point at the &lt;strong&gt;resolver&lt;&#x2F;strong&gt;.&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#resolver&quot;&gt;11&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;strong&gt;First call to &lt;code&gt;add&lt;&#x2F;code&gt;:&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
 &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;main                PLT                  GOT                    ld-linux&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  │                  │                    │                       │&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -878,14 +897,23 @@ licensed under the GNU Free Documentation License.&lt;&#x2F;p&gt;
 &lt;div class=&quot;footnote-definition&quot; id=&quot;sharing&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;5&lt;&#x2F;sup&gt;
 &lt;p&gt;Each process gets its own virtual address space, but the physical pages backing read-only segments (like &lt;code&gt;.text&lt;&#x2F;code&gt;, &lt;code&gt;ld-linux&lt;&#x2F;code&gt;, &lt;code&gt;libc.so.6&lt;&#x2F;code&gt;) are &lt;strong&gt;shared&lt;&#x2F;strong&gt; across processes. The kernel maps the same physical pages into multiple processes&#x27; page tables. If 100 processes all use &lt;code&gt;libc.so.6&lt;&#x2F;code&gt;, there is only one copy of the code in physical RAM. Only writable segments (&lt;code&gt;.data&lt;&#x2F;code&gt;, &lt;code&gt;.bss&lt;&#x2F;code&gt;, stack, heap) get their own physical pages per process, via copy-on-write. This is why the read&#x2F;write distinction matters -- it&#x27;s not just about safety, it&#x27;s about memory efficiency. See &lt;a href=&quot;&#x2F;blog&#x2F;rust-notes&#x2F;general&#x2F;linker-one-pager-linux&#x2F;#aside-how-symbol-resolution-actually-works-pic-got-plt&quot;&gt;Aside: how symbol resolution actually works&lt;&#x2F;a&gt; for the mechanism (PIC&#x2F;GOT) that makes this possible.&lt;&#x2F;p&gt;
 &lt;&#x2F;div&gt;
-&lt;div class=&quot;footnote-definition&quot; id=&quot;resolve&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;6&lt;&#x2F;sup&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;resolve&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;9&lt;&#x2F;sup&gt;
 &lt;p&gt;See the &lt;a href=&quot;&#x2F;blog&#x2F;rust-notes&#x2F;general&#x2F;linker-one-pager-linux&#x2F;#aside-how-symbol-resolution-actually-works-pic-got-plt&quot;&gt;Aside: how symbol resolution actually works&lt;&#x2F;a&gt; section for details on what &quot;resolving&quot; means concretely (GOT, PLT, lazy vs eager binding).&lt;&#x2F;p&gt;
 &lt;&#x2F;div&gt;
-&lt;div class=&quot;footnote-definition&quot; id=&quot;plt_slots&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;7&lt;&#x2F;sup&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;plt_slots&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;10&lt;&#x2F;sup&gt;
 &lt;p&gt;How does each PLT stub know which GOT slot to read? &lt;code&gt;ld&lt;&#x2F;code&gt; decides the layout at link time: &quot;slot 3 is for &lt;code&gt;add&lt;&#x2F;code&gt;, slot 4 is for &lt;code&gt;multiply&lt;&#x2F;code&gt;.&quot; It hardcodes &lt;code&gt;load GOT[3]&lt;&#x2F;code&gt; into &lt;code&gt;add&lt;&#x2F;code&gt;&#x27;s PLT stub and &lt;code&gt;load GOT[4]&lt;&#x2F;code&gt; into &lt;code&gt;multiply&lt;&#x2F;code&gt;&#x27;s PLT stub -- these are just fixed offsets within the same binary, no absolute addresses. At startup, &lt;code&gt;ld-linux&lt;&#x2F;code&gt; knows the same mapping (it&#x27;s recorded in the ELF&#x27;s relocation table): &quot;GOT slot 3 needs the address of &lt;code&gt;add&lt;&#x2F;code&gt; from &lt;code&gt;libmathstuff.so&lt;&#x2F;code&gt;.&quot; So it loads the &lt;code&gt;.so&lt;&#x2F;code&gt;, finds &lt;code&gt;add&lt;&#x2F;code&gt;, and writes the address into slot 3. The PLT stub doesn&#x27;t know or care which &lt;code&gt;.so&lt;&#x2F;code&gt; file &lt;code&gt;add&lt;&#x2F;code&gt; lives in -- it just reads slot 3 and jumps. &lt;code&gt;ld&lt;&#x2F;code&gt; and &lt;code&gt;ld-linux&lt;&#x2F;code&gt; agree on what each slot means because they both read the same relocation entries in the ELF file.&lt;&#x2F;p&gt;
 &lt;&#x2F;div&gt;
-&lt;div class=&quot;footnote-definition&quot; id=&quot;resolver&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;8&lt;&#x2F;sup&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;resolver&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;11&lt;&#x2F;sup&gt;
 &lt;p&gt;The resolver is a function inside &lt;code&gt;ld-linux&lt;&#x2F;code&gt;. Its job: given a symbol name (like &lt;code&gt;&quot;add&quot;&lt;&#x2F;code&gt;), search the loaded &lt;code&gt;.so&lt;&#x2F;code&gt; files&#x27; symbol tables, find the address of that function, write the address into the GOT entry, and then jump to the function. After the resolver patches the GOT, subsequent calls bypass the resolver entirely -- the PLT stub reads the now-patched GOT entry and jumps directly to the real function.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;filesiz&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;6&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;code&gt;FileSiz&lt;&#x2F;code&gt; is how many bytes the segment occupies in the &lt;strong&gt;file on disk&lt;&#x2F;strong&gt;. &lt;code&gt;MemSiz&lt;&#x2F;code&gt; is how many bytes it needs in &lt;strong&gt;memory&lt;&#x2F;strong&gt;. These can differ: notice the &lt;code&gt;RW&lt;&#x2F;code&gt; segment has &lt;code&gt;FileSiz = 0x10&lt;&#x2F;code&gt; but &lt;code&gt;MemSiz = 0x18&lt;&#x2F;code&gt;. The extra 8 bytes are &lt;code&gt;.bss&lt;&#x2F;code&gt; -- uninitialized globals that need memory but take zero space in the file. The kernel allocates zero-filled pages for the difference, which is why uninitialized globals start as zero without bloating the executable.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;loading&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;7&lt;&#x2F;sup&gt;
+&lt;p&gt;&quot;Loading into the address space&quot; means the kernel reads &lt;code&gt;ld-linux&lt;&#x2F;code&gt; from disk (it&#x27;s a file at &lt;code&gt;&#x2F;lib64&#x2F;ld-linux-x86-64.so.2&lt;&#x2F;code&gt;), picks an unused range of virtual addresses in the process, and maps the file&#x27;s segments into those addresses -- the same &lt;code&gt;mmap&lt;&#x2F;code&gt; mechanism used for the executable&#x27;s own segments. After this, the bytes of &lt;code&gt;ld-linux&lt;&#x2F;code&gt; are accessible at those virtual addresses and the CPU can execute its code. &lt;code&gt;ld-linux&lt;&#x2F;code&gt; is itself an ELF shared object (&lt;code&gt;ET_DYN&lt;&#x2F;code&gt;), so it has its own &lt;code&gt;.text&lt;&#x2F;code&gt;, &lt;code&gt;.data&lt;&#x2F;code&gt;, etc. that get mapped with the same read&#x2F;write&#x2F;execute permissions as any other ELF.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;ldmmap&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;8&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;code&gt;ld-linux&lt;&#x2F;code&gt; maps &lt;code&gt;.so&lt;&#x2F;code&gt; files into the address space using &lt;code&gt;mmap&lt;&#x2F;code&gt; -- the same system call the kernel used to load the executable itself. It picks unused virtual addresses, maps the file&#x27;s segments in with the right read&#x2F;write&#x2F;execute permissions, and the &lt;code&gt;.so&lt;&#x2F;code&gt;&#x27;s code becomes accessible. Unlike static libraries, there is no selective inclusion: the entire &lt;code&gt;.so&lt;&#x2F;code&gt; is mapped, even if you only call one function from it. However, &lt;code&gt;mmap&lt;&#x2F;code&gt; is lazy -- the kernel only loads physical pages from disk when they are actually accessed (via page faults). So unused functions occupy virtual address space but don&#x27;t necessarily consume physical RAM.&lt;&#x2F;p&gt;
 &lt;&#x2F;div&gt;
 </content>
   </entry>

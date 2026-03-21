@@ -628,7 +628,7 @@ files into a <strong>static library</strong> (<code>.a</code> file on macOS/Linu
 <span class="giallo-l"><span>  Entry point address:               0x4010b0</span></span>
 <span class="giallo-l"><span>  ...</span></span>
 <span class="giallo-l"><span>  Number of program headers:         6</span></span></code></pre>
-<p>The <code>Entry point address</code> is where execution will eventually start. The <code>program headers</code> describe the segments to load. <!-- TODO: verify this output on Linux and replace with actual dump --></p>
+<p>The <code>Entry point address</code> is where execution will eventually start. The <code>program headers</code> describe the segments to load -- we show them with <code>readelf -l</code> in step 4 below. <!-- TODO: verify this output on Linux and replace with actual dump --></p>
 </li>
 <li>
 <p><strong>The kernel creates a new virtual address space</strong> for the process. At this point the process has no code, no data, no stack -- just an empty address space.</p>
@@ -655,7 +655,7 @@ files into a <strong>static library</strong> (<code>.a</code> file on macOS/Linu
 <span class="giallo-l"><span>  LOAD    0x003000 0x0000000000404000 0x000010 0x000018 RW</span></span>
 <span class="giallo-l"><span>  INTERP  0x000318 0x0000000000400318 0x00001c 0x00001c R</span></span>
 <span class="giallo-l"><span>        [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]</span></span></code></pre> <!-- TODO: verify this output on Linux and replace with actual dump -->
-<p>The <code>R E</code> segment is <code>.text</code> -- <strong>readable and executable</strong>, but not writable. The <code>RW</code> segment is <code>.data</code> and <code>.bss</code> -- <strong>readable and writable</strong>.<sup class="footnote-reference"><a href="#sharing">5</a></sup> The <code>.data</code> bytes are copied from the executable file. The <code>.bss</code> bytes are zeroed (the OS allocates zero-filled pages, which is why uninitialized globals start as zero without taking up space in the file).</p>
+<p>The <code>R E</code> segment is <code>.text</code> -- <strong>readable and executable</strong>, but not writable. The <code>RW</code> segment is <code>.data</code> and <code>.bss</code> -- <strong>readable and writable</strong>.<sup class="footnote-reference"><a href="#sharing">5</a></sup><sup class="footnote-reference"><a href="#filesiz">6</a></sup> The <code>.data</code> bytes are copied from the executable file. The <code>.bss</code> bytes are zeroed (the OS allocates zero-filled pages, which is why uninitialized globals start as zero without taking up space in the file).</p>
 <p>After this step the address space looks like:</p>
 <pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Virtual Address Space</span></span>
 <span class="giallo-l"><span>─────────────────────</span></span>
@@ -673,7 +673,7 @@ files into a <strong>static library</strong> (<code>.a</code> file on macOS/Linu
 <span class="giallo-l"><span>└────────────────────┘</span></span>
 <span class="giallo-l"><span>0x0000...0000 (low)</span></span></code></pre></li>
 <li>
-<p><strong>The kernel sees the <code>INTERP</code> program header</strong> -- visible in the <code>readelf -l</code> output above as <code>[Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]</code>. This is the <code>-dynamic-linker</code> path we passed to <code>ld</code>. The kernel loads <code>ld-linux</code> into the address space too.</p>
+<p><strong>The kernel sees the <code>INTERP</code> program header</strong> -- visible in the <code>readelf -l</code> output above as <code>[Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]</code>. This is the <code>-dynamic-linker</code> path we passed to <code>ld</code>. The kernel loads <code>ld-linux</code> into the address space too.<sup class="footnote-reference"><a href="#loading">7</a></sup></p>
 <pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Virtual Address Space</span></span>
 <span class="giallo-l"><span>─────────────────────</span></span>
 <span class="giallo-l"><span>0xFFFF...FFFF (high)</span></span>
@@ -697,35 +697,39 @@ files into a <strong>static library</strong> (<code>.a</code> file on macOS/Linu
 <p><strong>The kernel jumps to <code>ld-linux</code></strong>, not to the program's code. <code>ld-linux</code> is now running inside the new process.</p>
 </li>
 <li>
-<p><strong><code>ld-linux</code> loads shared libraries.</strong> It reads the <code>NEEDED</code> entries in the executable (these came from <code>-lc</code>) and loads <code>libc.so.6</code> into the address space. It resolves <code>U</code> symbols in the executable to addresses in <code>libc.so</code>. You can see the <code>NEEDED</code> entries with:</p>
+<p><strong><code>ld-linux</code> loads shared libraries</strong> (we cover shared libraries in detail in the <a href="/blog/rust-notes/general/linker-one-pager-linux/#shared-libraries">Shared libraries</a> section -- for now, just think of them as <code>.so</code> files containing code that gets loaded at runtime instead of being copied into the executable).<sup class="footnote-reference"><a href="#ldmmap">8</a></sup> It reads the <code>NEEDED</code> entries in the executable (these came from <code>-lc</code>) and loads <code>libc.so.6</code> into the address space. It resolves <code>U</code> symbols in the executable to addresses in <code>libc.so</code>. You can see the <code>NEEDED</code> entries with:</p>
 <pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">readelf</span><span class="z-constant"> -</span><span class="z-constant">d</span><span class="z-string"> sample1</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-string"> NEEDED</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span> 0x0000000000000001 (NEEDED)   Shared library: [libc.so.6]</span></span></code></pre> <!-- TODO: verify this output on Linux -->
 <pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Virtual Address Space</span></span>
 <span class="giallo-l"><span>─────────────────────</span></span>
 <span class="giallo-l"><span>0xFFFF...FFFF (high)</span></span>
 <span class="giallo-l"><span>┌───────────────────┐</span></span>
-<span class="giallo-l"><span>│   stack    (rw-)   │  ← set up by kernel</span></span>
+<span class="giallo-l"><span>│   stack    (rw-)   │  ← set up by kernel, grows ↓</span></span>
 <span class="giallo-l"><span>├────────────────────┤</span></span>
 <span class="giallo-l"><span>│   unmapped         │</span></span>
 <span class="giallo-l"><span>├────────────────────┤</span></span>
 <span class="giallo-l"><span>│   ld-linux  (r-x)  │</span></span>
 <span class="giallo-l"><span>├────────────────────┤</span></span>
-<span class="giallo-l"><span>│   libc.so.6 (r-x)  │  ← loaded by ld-linux</span></span>
+<span class="giallo-l"><span>│   libc.so.6 (r-x)  │  ← loaded by ld-linux (_start lives here)</span></span>
 <span class="giallo-l"><span>├────────────────────┤</span></span>
 <span class="giallo-l"><span>│   unmapped         │</span></span>
+<span class="giallo-l"><span>├────────────────────┤</span></span>
+<span class="giallo-l"><span>│   heap     (rw-)   │  ← grows ↑ (malloc)</span></span>
 <span class="giallo-l"><span>├────────────────────┤</span></span>
 <span class="giallo-l"><span>│   .bss     (rw-)   │</span></span>
 <span class="giallo-l"><span>│   .data    (rw-)   │</span></span>
 <span class="giallo-l"><span>├────────────────────┤</span></span>
-<span class="giallo-l"><span>│   .text    (r-x)   │</span></span>
+<span class="giallo-l"><span>│   .text    (r-x)   │  ← main() lives here</span></span>
 <span class="giallo-l"><span>├────────────────────┤</span></span>
 <span class="giallo-l"><span>│   unmapped         │</span></span>
 <span class="giallo-l"><span>└────────────────────┘</span></span>
 <span class="giallo-l"><span>0x0000...0000 (low)</span></span></code></pre></li>
 <li>
 <p><strong><code>ld-linux</code> jumps to <code>_start</code></strong> (provided by <code>libc</code>). <code>_start</code> sets up the C runtime (argc, argv, environment), then calls <code>main</code>.</p>
-</li>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>PC (program counter) trace:</span></span>
+<span class="giallo-l"><span>─────────────────────────────</span></span>
+<span class="giallo-l"><span>ld-linux  ──→  _start (in libc.so.6)  ──→  main (in .text of sample1)</span></span></code></pre></li>
 <li>
-<p><strong><code>main</code> runs.</strong> When <code>main</code> returns, the C runtime calls <code>exit()</code> to terminate the process.</p>
+<p><strong><code>main</code> runs.</strong> The PC is now in the <code>.text</code> section of <code>sample1</code>. When <code>main</code> returns, the C runtime calls <code>exit()</code> to terminate the process.</p>
 </li>
 </ol>
 <p>We can watch steps 6-8 happen by setting <code>LD_DEBUG</code>:</p>
@@ -896,7 +900,7 @@ files into a <strong>static library</strong> (<code>.a</code> file on macOS/Linu
 <span class="giallo-l"><span>	libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007f4a12100000)</span></span>
 <span class="giallo-l"><span>	/lib64/ld-linux-x86-64.so.2 (0x00007f4a12350000)</span></span></code></pre>
 <p>Only system libraries. No mention of <code>libmathstuff</code> at all. Compare this to <a href="/blog/rust-notes/general/linker-one-pager-linux/#shared-libraries"><code>ldd use_mathlib_dyn</code></a> above, which listed <code>libmathstuff.so</code> as a dependency. That's the difference: shared libraries are declared at link time and show up in <code>ldd</code>; plugins are loaded at runtime and are invisible to <code>ldd</code>.</p>
-<p><code>RTLD_LAZY</code> means "resolve symbols one by one as they are called."<sup class="footnote-reference"><a href="#resolve">6</a></sup> <code>RTLD_NOW</code> means "resolve all symbols immediately when <code>dlopen</code> is called." <code>RTLD_LAZY</code> makes <code>dlopen</code> faster but defers errors; <code>RTLD_NOW</code> is safer because it fails early if a symbol is missing.</p>
+<p><code>RTLD_LAZY</code> means "resolve symbols one by one as they are called."<sup class="footnote-reference"><a href="#resolve">9</a></sup> <code>RTLD_NOW</code> means "resolve all symbols immediately when <code>dlopen</code> is called." <code>RTLD_LAZY</code> makes <code>dlopen</code> faster but defers errors; <code>RTLD_NOW</code> is safer because it fails early if a symbol is missing.</p>
 <p><code>dlsym</code> works because the shared library contains a symbol table -- the same name-to-address mapping we've been looking at with <code>nm</code>. <code>dlsym</code> does the same lookup at runtime: given the string <code>"add"</code>, find the address of <code>add</code> in the loaded <code>.so</code>.</p>
 <div class="callout callout-box thm-box">
   
@@ -959,7 +963,7 @@ files into a <strong>static library</strong> (<code>.a</code> file on macOS/Linu
 <span class="giallo-l"><span>│   load address from GOT[5]      │</span></span>
 <span class="giallo-l"><span>│   jump to it                    │</span></span>
 <span class="giallo-l"><span>└─────────────────────────────────┘</span></span></code></pre>
-<p>The PLT stubs are identical in structure -- they differ only in which GOT slot they read.<sup class="footnote-reference"><a href="#plt_slots">7</a></sup> The stubs themselves never change (read-only <code>.text</code>). Only the GOT entries (writable <code>.data</code>) get patched.</p>
+<p>The PLT stubs are identical in structure -- they differ only in which GOT slot they read.<sup class="footnote-reference"><a href="#plt_slots">10</a></sup> The stubs themselves never change (read-only <code>.text</code>). Only the GOT entries (writable <code>.data</code>) get patched.</p>
 <p>Here's what <code>ld</code> generates for <code>add(3, 4)</code>:</p>
 <pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>.text (read-only):                  .data (writable):</span></span>
 <span class="giallo-l"><span>┌──────────────────────┐            ┌─────────────────────────────┐</span></span>
@@ -977,7 +981,7 @@ files into a <strong>static library</strong> (<code>.a</code> file on macOS/Linu
 <p><code>main</code> calls <code>add_PLT_stub</code> (a fixed offset within the same <code>.text</code> section -- no absolute address needed). The stub loads whatever address is in <code>GOT[3]</code> and jumps there. <code>ld-linux</code> wrote the real address of <code>add</code> into <code>GOT[3]</code> at startup.</p>
 <p>The <code>.text</code> instructions are identical no matter where <code>libmathstuff.so</code> gets loaded. The code says "jump to whatever address is in GOT slot 3" -- it never says "jump to <code>0x7f4a12340100</code>." Only the GOT entry (in writable <code>.data</code>) changes. That's what "no absolute addresses in <code>.text</code>" means.</p>
 <h3 id="lazy-binding-rtld-lazy">Lazy binding (<code>RTLD_LAZY</code>)</h3>
-<p>With lazy binding (the default), <code>ld-linux</code> does <strong>not</strong> fill in GOT entries at startup. Instead, <code>ld</code> sets each GOT entry to point at the <strong>resolver</strong>.<sup class="footnote-reference"><a href="#resolver">8</a></sup></p>
+<p>With lazy binding (the default), <code>ld-linux</code> does <strong>not</strong> fill in GOT entries at startup. Instead, <code>ld</code> sets each GOT entry to point at the <strong>resolver</strong>.<sup class="footnote-reference"><a href="#resolver">11</a></sup></p>
 <p><strong>First call to <code>add</code>:</strong></p>
 <pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>main                PLT                  GOT                    ld-linux</span></span>
 <span class="giallo-l"><span>  │                  │                    │                       │</span></span>
@@ -1038,14 +1042,23 @@ licensed under the GNU Free Documentation License.</p>
 <div class="footnote-definition" id="sharing"><sup class="footnote-definition-label">5</sup>
 <p>Each process gets its own virtual address space, but the physical pages backing read-only segments (like <code>.text</code>, <code>ld-linux</code>, <code>libc.so.6</code>) are <strong>shared</strong> across processes. The kernel maps the same physical pages into multiple processes' page tables. If 100 processes all use <code>libc.so.6</code>, there is only one copy of the code in physical RAM. Only writable segments (<code>.data</code>, <code>.bss</code>, stack, heap) get their own physical pages per process, via copy-on-write. This is why the read/write distinction matters -- it's not just about safety, it's about memory efficiency. See <a href="/blog/rust-notes/general/linker-one-pager-linux/#aside-how-symbol-resolution-actually-works-pic-got-plt">Aside: how symbol resolution actually works</a> for the mechanism (PIC/GOT) that makes this possible.</p>
 </div>
-<div class="footnote-definition" id="resolve"><sup class="footnote-definition-label">6</sup>
+<div class="footnote-definition" id="resolve"><sup class="footnote-definition-label">9</sup>
 <p>See the <a href="/blog/rust-notes/general/linker-one-pager-linux/#aside-how-symbol-resolution-actually-works-pic-got-plt">Aside: how symbol resolution actually works</a> section for details on what "resolving" means concretely (GOT, PLT, lazy vs eager binding).</p>
 </div>
-<div class="footnote-definition" id="plt_slots"><sup class="footnote-definition-label">7</sup>
+<div class="footnote-definition" id="plt_slots"><sup class="footnote-definition-label">10</sup>
 <p>How does each PLT stub know which GOT slot to read? <code>ld</code> decides the layout at link time: "slot 3 is for <code>add</code>, slot 4 is for <code>multiply</code>." It hardcodes <code>load GOT[3]</code> into <code>add</code>'s PLT stub and <code>load GOT[4]</code> into <code>multiply</code>'s PLT stub -- these are just fixed offsets within the same binary, no absolute addresses. At startup, <code>ld-linux</code> knows the same mapping (it's recorded in the ELF's relocation table): "GOT slot 3 needs the address of <code>add</code> from <code>libmathstuff.so</code>." So it loads the <code>.so</code>, finds <code>add</code>, and writes the address into slot 3. The PLT stub doesn't know or care which <code>.so</code> file <code>add</code> lives in -- it just reads slot 3 and jumps. <code>ld</code> and <code>ld-linux</code> agree on what each slot means because they both read the same relocation entries in the ELF file.</p>
 </div>
-<div class="footnote-definition" id="resolver"><sup class="footnote-definition-label">8</sup>
+<div class="footnote-definition" id="resolver"><sup class="footnote-definition-label">11</sup>
 <p>The resolver is a function inside <code>ld-linux</code>. Its job: given a symbol name (like <code>"add"</code>), search the loaded <code>.so</code> files' symbol tables, find the address of that function, write the address into the GOT entry, and then jump to the function. After the resolver patches the GOT, subsequent calls bypass the resolver entirely -- the PLT stub reads the now-patched GOT entry and jumps directly to the real function.</p>
+</div>
+<div class="footnote-definition" id="filesiz"><sup class="footnote-definition-label">6</sup>
+<p><code>FileSiz</code> is how many bytes the segment occupies in the <strong>file on disk</strong>. <code>MemSiz</code> is how many bytes it needs in <strong>memory</strong>. These can differ: notice the <code>RW</code> segment has <code>FileSiz = 0x10</code> but <code>MemSiz = 0x18</code>. The extra 8 bytes are <code>.bss</code> -- uninitialized globals that need memory but take zero space in the file. The kernel allocates zero-filled pages for the difference, which is why uninitialized globals start as zero without bloating the executable.</p>
+</div>
+<div class="footnote-definition" id="loading"><sup class="footnote-definition-label">7</sup>
+<p>"Loading into the address space" means the kernel reads <code>ld-linux</code> from disk (it's a file at <code>/lib64/ld-linux-x86-64.so.2</code>), picks an unused range of virtual addresses in the process, and maps the file's segments into those addresses -- the same <code>mmap</code> mechanism used for the executable's own segments. After this, the bytes of <code>ld-linux</code> are accessible at those virtual addresses and the CPU can execute its code. <code>ld-linux</code> is itself an ELF shared object (<code>ET_DYN</code>), so it has its own <code>.text</code>, <code>.data</code>, etc. that get mapped with the same read/write/execute permissions as any other ELF.</p>
+</div>
+<div class="footnote-definition" id="ldmmap"><sup class="footnote-definition-label">8</sup>
+<p><code>ld-linux</code> maps <code>.so</code> files into the address space using <code>mmap</code> -- the same system call the kernel used to load the executable itself. It picks unused virtual addresses, maps the file's segments in with the right read/write/execute permissions, and the <code>.so</code>'s code becomes accessible. Unlike static libraries, there is no selective inclusion: the entire <code>.so</code> is mapped, even if you only call one function from it. However, <code>mmap</code> is lazy -- the kernel only loads physical pages from disk when they are actually accessed (via page faults). So unused functions occupy virtual address space but don't necessarily consume physical RAM.</p>
 </div>
 
   </div>
