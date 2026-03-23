@@ -8,6 +8,224 @@
   
   
   <entry xml:lang="en">
+    <title>Compiling RISCV-SAIL Into Lean4 Cpuu</title>
+    <published>2026-03-22T00:00:00+00:00</published>
+    <updated>2026-03-22T00:00:00+00:00</updated>
+    <author>
+      <name></name>
+    </author>
+    <link rel="alternate" type="text/html" href="/blog/sail-to-lean/"/>
+    <id>/blog/sail-to-lean/</id>
+    
+    <content type="html" xml:base="/blog/sail-to-lean/">&lt;div class=&quot;callout callout-caution&quot;&gt;
+  
+  &lt;p&gt;These notes re-cap the steps required to transplile the RISC-V sail specification to Lean.
+NOTE: As confirmed from the original documentation, only the non-computable Lean code builds and compiles cleanly.
+Some work is still needed to get the executable CPU to work.
+I do not imagine a whole lot, but as of the date of writing this, the executable build is not clean.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;p&gt;Tested on:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;macOS (Apple Silicon)&lt;&#x2F;li&gt;
+&lt;li&gt;Intel CPU Arch Linux (TODO:)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;step-0-clone-both-repos&quot;&gt;Step 0: Clone Both Repos&lt;&#x2F;h2&gt;
+&lt;p&gt;Here I&#x27;ve forked the two repositories with the hope of eventually fixing the executable issue.
+But there&#x27;s nothing special about my fork right now. Cloning the original repos will also work.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;git&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; clone&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; git@github.com:abiswas3&#x2F;sail-riscv.git&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;git&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; clone&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; git@github.com:abiswas3&#x2F;sail.git&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;parent&#x2F;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;├── sail&#x2F;                  # Sail compiler (transpiler) -- clone from github.com&#x2F;rems-project&#x2F;sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;└── sail-riscv&#x2F;            # This repo -- RISC-V ISA model written in Sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;step-1-install-system-dependencies&quot;&gt;Step 1: Install System Dependencies&lt;&#x2F;h2&gt;
+&lt;div class=&quot;callout callout-warning&quot;&gt;
+  
+  &lt;div class=&quot;callout-title&quot;&gt;Note To Reader&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;I do not particularly understand the Sail DSL, nor am I an expert ocaml programmer.
+These steps mostly follow the &lt;code&gt;README.md&lt;&#x2F;code&gt;&#x27;s in the repo, a bit of googling and some Claude code help.
+Hopefully with time, I will be able to write a better version of what the hell is going on.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;h3 id=&quot;macos-homebrew&quot;&gt;macOS (Homebrew)&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;xcode-select&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-install&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;    #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; if not already done&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;brew&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; install&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; opam&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; gmp&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; z3&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; pkgconf&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; cmake&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;arch-linux&quot;&gt;Arch Linux&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; pacman&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;S&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; opam&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;        #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; OCaml package manager -- needed to fetch and install Sail&amp;#39;s OCaml dependencies&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; pacman&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;S&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; gmp&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;         #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; GNU Multiple Precision arithmetic library -- Sail uses it internally for big integer arithmetic&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; pacman&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;S&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; z3&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;          #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; SMT solver from Microsoft Research -- Sail calls Z3 during type-checking to prove&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;                           #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt;   arithmetic constraints on dependent types (e.g. that bitvector widths are correct)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; pacman&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;S&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; cmake&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;       #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; build system generator -- sail-riscv uses CMake to orchestrate the Sail-to-Lean code generation&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; pacman&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;S&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; base-devel&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;  #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; C compiler, make, binutils, etc. -- OCaml&amp;#39;s runtime is written in C and some opam&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;                           #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt;   packages have C bindings (e.g. GMP). Also provides C++ compiler which sail-riscv&amp;#39;s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;                           #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt;   CMake build needs for the emulator harness, even if you only want Lean output.&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; pacman&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;S&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; pkgconf&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;     #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; pkg-config implementation -- CMake uses it to locate system libraries like GMP&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;both-platforms-initialize-opam-one-time&quot;&gt;Both Platforms: Initialize opam (one-time)&lt;&#x2F;h3&gt;
+&lt;p&gt;Run the following code from anywhere -- opam stores its state in &lt;code&gt;~&#x2F;.opam&#x2F;&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;TODO:&lt;&#x2F;strong&gt; ocaml crash course&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;opam&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; init&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;                 #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; follow prompts, say yes to shell setup&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-support z-function z-support z-function z-builtin&quot;&gt;eval&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt; $(&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;opam&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; env&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;          #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; or restart your shell&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;opam init&lt;&#x2F;code&gt; creates the &lt;code&gt;~&#x2F;.opam&#x2F;&lt;&#x2F;code&gt; directory, downloads the OCaml package registry, and
+installs a default OCaml compiler.
+&lt;code&gt;eval $(opam env)&lt;&#x2F;code&gt; sets shell environment variables (&lt;code&gt;PATH&lt;&#x2F;code&gt;, &lt;code&gt;OCAML_TOPLEVEL_PATH&lt;&#x2F;code&gt;, etc.) so that your shell can find the OCaml tools and
+libraries that opam installed.
+You need to run &lt;code&gt;eval $(opam env)&lt;&#x2F;code&gt; in each new shell session, or let opam&#x27;s shell hook do it automatically (it offers to set this up during
+&lt;code&gt;opam init&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;step-2-build-and-install-the-sail-compiler-locally&quot;&gt;Step 2: Build and Install the Sail Compiler Locally&lt;&#x2F;h2&gt;
+&lt;p&gt;You should be in the &lt;code&gt;parent&#x2F;&lt;&#x2F;code&gt; directory (the one containing both &lt;code&gt;sail&#x2F;&lt;&#x2F;code&gt; and &lt;code&gt;sail-riscv&#x2F;&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
+&lt;p&gt;The Sail compiler is a single binary called &lt;code&gt;sail&lt;&#x2F;code&gt;.
+On its own, it can only parse and type-check Sail code.
+To actually generate output for a specific language (Lean, C++, Coq, etc.), it needs a &lt;strong&gt;backend plugin&lt;&#x2F;strong&gt; loaded at startup.&lt;&#x2F;p&gt;
+&lt;div class=&quot;callout callout-box thm-box&quot;&gt;
+  
+  &lt;div class=&quot;callout-title&quot;&gt;What The Hell Is A Plugin&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;Note that I do not understand ocaml&#x27;s plugin infrastructure properly.
+I had to ask Calude and this is what it gave me:&lt;&#x2F;p&gt;
+&lt;p&gt;A plugin is a &lt;code&gt;.cmxs&lt;&#x2F;code&gt; file -- an OCaml shared library (see &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;manual&#x2F;5.2&#x2F;native.html#s:native:dynlink&quot;&gt;OCaml manual on native plugins&lt;&#x2F;a&gt;).
+When &lt;code&gt;sail&lt;&#x2F;code&gt; starts, it scans a known directory for &lt;code&gt;.cmxs&lt;&#x2F;code&gt; files and loads them.
+Each plugin registers new command-line flags.
+For example, loading &lt;code&gt;sail_plugin_lean.cmxs&lt;&#x2F;code&gt; adds the &lt;code&gt;--lean&lt;&#x2F;code&gt; flag to the &lt;code&gt;sail&lt;&#x2F;code&gt; binary.
+There is no separate &quot;lean binary&quot; -- it&#x27;s all one &lt;code&gt;sail&lt;&#x2F;code&gt; binary with plugins extending its capabilities.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;p&gt;&lt;strong&gt;dune&lt;&#x2F;strong&gt; is OCaml&#x27;s build system (like &lt;code&gt;make&lt;&#x2F;code&gt; or &lt;code&gt;cargo&lt;&#x2F;code&gt;).
+It reads build instructions from &lt;code&gt;dune&lt;&#x2F;code&gt; files in the source tree.
+Below, we use three commands. Each is explained with what it does and what it produces:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-support z-function z-support z-function z-builtin&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;2a-install-ocaml-dependencies&quot;&gt;2a. Install OCaml dependencies&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;opam&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; install&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; .&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-deps-only&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Reads the &lt;code&gt;.opam&lt;&#x2F;code&gt; files in the sail repo and installs all required OCaml libraries
+into the current opam switch. Does not build sail itself.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;2b-build-the-compiler-and-plugins&quot;&gt;2b. Build the compiler and plugins&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;dune&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; build&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-release&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Compiles everything in the sail repo. Produces build artifacts under &lt;code&gt;_build&#x2F;&lt;&#x2F;code&gt;, including:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;_build&#x2F;default&#x2F;src&#x2F;bin&#x2F;sail.exe&lt;&#x2F;code&gt; -- the core sail binary&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;_build&#x2F;default&#x2F;src&#x2F;sail_lean_backend&#x2F;sail_plugin_lean.cmxs&lt;&#x2F;code&gt; -- the Lean plugin&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;At this point the binary exists but doesn&#x27;t know where to find its plugins.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;2c-install-into-a-local-prefix&quot;&gt;2c. Install into a local prefix&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;dune&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; install&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-prefix&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; _local_install&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Copies the binary, plugins, and standard library files into a structured directory:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;_local_install&#x2F;bin&#x2F;sail&lt;&#x2F;code&gt; -- the sail binary&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;_local_install&#x2F;share&#x2F;libsail&#x2F;plugins&#x2F;sail_plugin_lean.cmxs&lt;&#x2F;code&gt; -- the Lean plugin&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;_local_install&#x2F;share&#x2F;sail&#x2F;lib&#x2F;&lt;&#x2F;code&gt; -- Sail&#x27;s standard library (prelude, etc.)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;This is what &quot;installing a plugin&quot; means concretely: copying the &lt;code&gt;.cmxs&lt;&#x2F;code&gt; file into the
+&lt;code&gt;share&#x2F;libsail&#x2F;plugins&#x2F;&lt;&#x2F;code&gt; directory where the &lt;code&gt;sail&lt;&#x2F;code&gt; binary knows to look for it.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-support z-function z-support z-function z-builtin&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; ..&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;verify-the-lean-backend-is-loaded&quot;&gt;Verify the Lean backend is loaded&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;s&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;a&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;i&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;l&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;_&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;l&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;o&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;c&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;a&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;l&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;_&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;i&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;n&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;s&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;t&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;a&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;l&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;l&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;s&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;h&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;a&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;r&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;e&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;s&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;a&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;i&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;l&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt; sail&#x2F;_local_install&#x2F;bin&#x2F;sail&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-help&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt; |&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt; grep&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; lean&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;SAIL_DIR&lt;&#x2F;code&gt; tells the sail binary where to find its standard library and plugins.
+You should see &lt;code&gt;--lean&lt;&#x2F;code&gt; and related flags listed. If you don&#x27;t, the plugin file is
+not in the expected &lt;code&gt;share&#x2F;libsail&#x2F;plugins&#x2F;&lt;&#x2F;code&gt; directory -- re-run &lt;code&gt;dune install&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;step-3-configure-the-sail-riscv-build&quot;&gt;Step 3: Configure the sail-riscv Build&lt;&#x2F;h2&gt;
+&lt;p&gt;From the parent directory (or from &lt;code&gt;sail-riscv&#x2F;&lt;&#x2F;code&gt;):&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-support z-function z-support z-function z-builtin&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; sail-riscv&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;$(&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;cmake&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;S&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; .&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;B&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; build&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-constant&quot;&gt;  -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;DCMAKE_BUILD_TYPE=RelWithDebInfo&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-constant&quot;&gt;  -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;DSAIL_BIN=&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;$(&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;bin&#x2F;sail&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Key variables:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;SAIL_DIR&lt;&#x2F;code&gt; -- points to the installed Sail share directory. This is where the
+compiler finds its standard library, include files, and plugins.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;SAIL_BIN&lt;&#x2F;code&gt; -- path to the locally-installed sail binary.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;&lt;strong&gt;Important:&lt;&#x2F;strong&gt; Both paths must be &lt;strong&gt;absolute&lt;&#x2F;strong&gt;. CMake runs &lt;code&gt;sail --dir&lt;&#x2F;code&gt; internally
+to locate the Sail library directory, and the sail binary echoes back whatever
+&lt;code&gt;SAIL_DIR&lt;&#x2F;code&gt; was set to. If that&#x27;s a relative path like &lt;code&gt;..&#x2F;sail&#x2F;...&lt;&#x2F;code&gt;, CMake
+resolves it relative to the build directory (&lt;code&gt;build&#x2F;&lt;&#x2F;code&gt;), not the source directory,
+causing &quot;Cannot find source file&quot; errors for the C runtime files.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;step-4-generate-lean-code&quot;&gt;Step 4: Generate Lean Code&lt;&#x2F;h2&gt;
+&lt;p&gt;Two variants can be generated. Both take a few minutes (the Sail compiler
+type-checks the full model, calling Z3 to solve arithmetic constraints).&lt;&#x2F;p&gt;
+&lt;div class=&quot;callout callout-warning&quot;&gt;
+  
+  &lt;p&gt;I also do not understand any of the Z3 stuff right now.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;h3 id=&quot;noncomputable-for-theorem-proving&quot;&gt;Noncomputable (for theorem proving)&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;$(&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-string&quot;&gt;  cmake&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-build&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; build&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-target&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; generated_lean_rv64d&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Output: &lt;code&gt;build&#x2F;model&#x2F;Lean_RV64D&#x2F;&lt;&#x2F;code&gt; (~155 &lt;code&gt;.lean&lt;&#x2F;code&gt; files)&lt;&#x2F;p&gt;
+&lt;p&gt;This version uses &lt;code&gt;noncomputable&lt;&#x2F;code&gt; sections, suitable for interactive proof in Lean.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;executable-for-running-theorem-provin-theorem-provingg&quot;&gt;Executable (for running + theorem provin + theorem provingg)&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;$(&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-string&quot;&gt;  cmake&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-build&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; build&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-target&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; generated_lean_executable_rv64d&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Output: &lt;code&gt;build&#x2F;model&#x2F;Lean_RV64D_executable&#x2F;&lt;&#x2F;code&gt; (~155 &lt;code&gt;.lean&lt;&#x2F;code&gt; files)&lt;&#x2F;p&gt;
+&lt;p&gt;This version generates computable code that can be built and executed with &lt;code&gt;lake build&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;rv32-variants&quot;&gt;RV32 Variants&lt;&#x2F;h3&gt;
+&lt;p&gt;Replace &lt;code&gt;rv64d&lt;&#x2F;code&gt; with &lt;code&gt;rv32d&lt;&#x2F;code&gt; in the target names for 32-bit:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;generated_lean_rv32d&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;generated_lean_executable_rv32d&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;step-5-build-the-generated-lean-code-optional&quot;&gt;Step 5: Build the Generated Lean Code (Optional)&lt;&#x2F;h2&gt;
+&lt;p&gt;Each output directory contains a &lt;code&gt;lakefile.toml&lt;&#x2F;code&gt; and &lt;code&gt;lean-toolchain&lt;&#x2F;code&gt;. To compile:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-support z-function z-support z-function z-builtin&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; build&#x2F;model&#x2F;Lean_RV64D&#x2F;&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;          #&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; or Lean_RV64D_executable&#x2F;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;lake&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; update&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;lake&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; build&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The generated Lean requires a specific Lean toolchain version (specified in
+&lt;code&gt;lean-toolchain&lt;&#x2F;code&gt;) and the &lt;code&gt;lean-sail&lt;&#x2F;code&gt; support library (fetched automatically by &lt;code&gt;lake&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;rebuilding-after-sail-compiler-changes&quot;&gt;Rebuilding After Sail Compiler Changes&lt;&#x2F;h2&gt;
+&lt;p&gt;Since you&#x27;re running from source, after modifying the Sail compiler:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; 1. Rebuild and reinstall the compiler&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-support z-function z-support z-function z-builtin&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; ..&#x2F;sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;dune&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; build&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-release&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;dune&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; install&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-prefix&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; _local_install&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-punctuation z-punctuation z-definition z-comment&quot;&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; 2. Clean stale outputs and re-generate Lean (from sail-riscv)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-support z-function z-support z-function z-builtin&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; ..&#x2F;sail-riscv&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;rm&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;rf&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; build&#x2F;model&#x2F;Lean_RV64D&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; build&#x2F;model&#x2F;Lean_RV64D_executable&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;$(&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-string&quot;&gt;  cmake&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-build&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; build&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-target&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; generated_lean_rv64d&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-variable z-other&quot;&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword z-keyword z-operator&quot;&gt;=&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;$(&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span class=&quot;z-punctuation&quot;&gt;)&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-string&quot;&gt;  cmake&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-build&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; build&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt; -&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant&quot;&gt;-target&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt; generated_lean_executable_rv64d&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;troubleshooting&quot;&gt;Troubleshooting&lt;&#x2F;h2&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;Cannot find source file: ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&#x2F;lib&#x2F;elf.c&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt;: You used
+relative paths for &lt;code&gt;SAIL_DIR&lt;&#x2F;code&gt;. CMake resolves paths relative to the build directory,
+not where you ran the command. Use &lt;code&gt;$(realpath ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail)&lt;&#x2F;code&gt; to
+get an absolute path.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;--lean&lt;&#x2F;code&gt; flag not found&lt;&#x2F;strong&gt;: The plugin wasn&#x27;t installed. Make sure you ran
+&lt;code&gt;dune install --prefix _local_install&lt;&#x2F;code&gt; and that &lt;code&gt;SAIL_DIR&lt;&#x2F;code&gt; points to the
+&lt;code&gt;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;code&gt; directory (not the repo root or &lt;code&gt;lib&#x2F;&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;sail: command not found&lt;&#x2F;code&gt; during cmake&lt;&#x2F;strong&gt;: You need to pass &lt;code&gt;-DSAIL_BIN=&lt;&#x2F;code&gt; pointing
+to your local install, and set &lt;code&gt;SAIL_DIR&lt;&#x2F;code&gt; as an environment variable.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Plugin load error (&lt;code&gt;symbol not found&lt;&#x2F;code&gt;)&lt;&#x2F;strong&gt;: Version mismatch between the sail binary
+and the plugin. Run &lt;code&gt;dune build --release &amp;amp;&amp;amp; dune install --prefix _local_install&lt;&#x2F;code&gt;
+again to rebuild both from the same source.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;CMake cache error about mismatched source directory&lt;&#x2F;strong&gt;: Delete &lt;code&gt;build&#x2F;&lt;&#x2F;code&gt; and
+reconfigure: &lt;code&gt;rm -rf build &amp;amp;&amp;amp; cmake -S . -B build ...&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;what-gets-generated&quot;&gt;What Gets Generated&lt;&#x2F;h2&gt;
+&lt;p&gt;The Sail compiler translates the entire RISC-V ISA model into Lean definitions:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Instruction encodings&#x2F;decodings&lt;&#x2F;li&gt;
+&lt;li&gt;Instruction semantics&lt;&#x2F;li&gt;
+&lt;li&gt;CSR definitions&lt;&#x2F;li&gt;
+&lt;li&gt;Memory model&lt;&#x2F;li&gt;
+&lt;li&gt;Exception handling&lt;&#x2F;li&gt;
+&lt;li&gt;Extension support (M, A, F, D, C, V, etc.)&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;The noncomputable version is for reasoning about the spec in Lean&#x27;s type theory.
+The executable version can simulate RISC-V binaries.&lt;&#x2F;p&gt;
+</content>
+  </entry>
+  
+  
+  
+  <entry xml:lang="en">
     <title>Lost in Translation</title>
     <published>2026-03-09T00:00:00+00:00</published>
     <updated>2026-03-09T00:00:00+00:00</updated>

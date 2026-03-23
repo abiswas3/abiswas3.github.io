@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'rose-pine-ink' : 'vitesse-dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compiling RISCV-SAIL Into Lean4 Cpuu | Random Walks</title>
+  <link rel="stylesheet" href="/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  
+  
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      tags: 'ams',
+      macros: {
+        field: ['{\\mathbb{#1}}', 1],
+        hei: ['{\\mathbb{F}(#1)}', 1],
+        Field: '{\\mathbb{F}}',
+        Mont: ['{\\widetilde{#1}}', 1],
+        samples: '{\\xleftarrow{\\$}}',
+        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+        TauConstraints: '{\\tau_y}',
+        TauTime: '{\\tau_{\\text{cycle}}}',
+        TauGroup: '{\\tau_b}',
+        MLE: ['{\\widetilde{#1}}', 1],
+        tf: ['{\\widetilde{#1}}', 1],
+        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+        Def: '{:=}',
+        ChallengeSet: '{\\mathsf{C}}',
+        Complement: ['{\\overline{#1}}', 1],
+        Size: ['{\\left|#1\\right|}', 1],
+        Exp: ['{2^{#1}}', 1],
+        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+        BigO: ['{O\\ \\left(#1\\right)}', 1],
+        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
+        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
+        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+        poly: '{\\operatorname{poly}}',
+        criticalAlpha: ['{\\alpha_{#1}}', 1],
+        bit: '{\\{0,1\\}}',
+        CStar: '{C^{\\star}}',
+        GraphNbrs: ['{N_G(#1)}', 1],
+        ClauseNbrs: ['{N_C(#1)}', 1],
+        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        SmallO: ['{o\\!(#1)}', 1],
+        Naturals: '{\\mathbb{N}}',
+        Closure: ['{\\operatorname{Cl}(#1)}', 1],
+        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+        Dim: ['{\\dim(#1)}', 1],
+        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+        domain: ['{\\operatorname{dom}(#1)}', 1],
+        False: '{\\bot}',
+        opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+        // ── Complexity Theory & Turing Machines ──────────────────────────
+        // Complexity classes
+        NP: '{\\mathsf{NP}}',
+        coNP: '{\\mathsf{coNP}}',
+        Pclass: '{\\mathsf{P}}',
+        PSPACE: '{\\mathsf{PSPACE}}',
+        EXP: '{\\mathsf{EXP}}',
+        // Turing machine components
+        States: '{\\mathcal{Q}}',
+        TransFunc: '{\\delta}',
+        InitState: '{q_0}',
+        AcceptState: '{q_{\\text{acc}}}',
+        RejectState: '{q_{\\text{rej}}}',
+        InitConfig: '{C_0}',
+        AcceptConfig: '{C_{\\text{acc}}}',
+        Moves: '{\\{\\mathsf{L},\\, \\mathsf{R}\\}}',
+        // Languages & notation
+        Lang: ['{L(#1)}', 1],
+        RE: '{\\mathsf{RE}}',
+        // General math
+        NN: '{\\mathbb{N}}',
+        ZZ: '{\\mathbb{Z}}',
+        RR: '{\\mathbb{R}}'
+      }
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="/">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
+        <a href="/misc/">Random</a>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
+          <option value="rose-pine-ink">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
+        </select>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+
+
+
+  
+  
+
+
+<article class="post">
+  <header class="post-header">
+    
+    
+    <a href="&#x2F;blog&#x2F;" class="back-link">&larr; Notes</a>
+    
+    <h1>Compiling RISCV-SAIL Into Lean4 Cpuu</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-03-22</time>
+      
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/jolt/" class="tag">jolt</a><a href="/tags/compilers/" class="tag">compilers</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <div class="callout callout-caution">
+  
+  <p>These notes re-cap the steps required to transplile the RISC-V sail specification to Lean.
+NOTE: As confirmed from the original documentation, only the non-computable Lean code builds and compiles cleanly.
+Some work is still needed to get the executable CPU to work.
+I do not imagine a whole lot, but as of the date of writing this, the executable build is not clean.</p>
+
+</div>
+<p>Tested on:</p>
+<ul>
+<li>macOS (Apple Silicon)</li>
+<li>Intel CPU Arch Linux (TODO:)</li>
+</ul>
+<h2 id="step-0-clone-both-repos">Step 0: Clone Both Repos</h2>
+<p>Here I've forked the two repositories with the hope of eventually fixing the executable issue.
+But there's nothing special about my fork right now. Cloning the original repos will also work.</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">git</span><span class="z-string"> clone</span><span class="z-string"> git@github.com:abiswas3/sail-riscv.git</span></span>
+<span class="giallo-l"><span class="z-entity z-name">git</span><span class="z-string"> clone</span><span class="z-string"> git@github.com:abiswas3/sail.git</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>parent/</span></span>
+<span class="giallo-l"><span>├── sail/                  # Sail compiler (transpiler) -- clone from github.com/rems-project/sail</span></span>
+<span class="giallo-l"><span>└── sail-riscv/            # This repo -- RISC-V ISA model written in Sail</span></span></code></pre><h2 id="step-1-install-system-dependencies">Step 1: Install System Dependencies</h2>
+<div class="callout callout-warning">
+  
+  <div class="callout-title">Note To Reader</div>
+  
+  <p>I do not particularly understand the Sail DSL, nor am I an expert ocaml programmer.
+These steps mostly follow the <code>README.md</code>'s in the repo, a bit of googling and some Claude code help.
+Hopefully with time, I will be able to write a better version of what the hell is going on.</p>
+
+</div>
+<h3 id="macos-homebrew">macOS (Homebrew)</h3>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">xcode-select</span><span class="z-constant"> -</span><span class="z-constant">-install</span><span class="z-punctuation z-punctuation z-definition z-comment">    #</span><span class="z-comment"> if not already done</span></span>
+<span class="giallo-l"><span class="z-entity z-name">brew</span><span class="z-string"> install</span><span class="z-string"> opam</span><span class="z-string"> gmp</span><span class="z-string"> z3</span><span class="z-string"> pkgconf</span><span class="z-string"> cmake</span></span></code></pre><h3 id="arch-linux">Arch Linux</h3>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">sudo</span><span class="z-string"> pacman</span><span class="z-constant"> -</span><span class="z-constant">S</span><span class="z-string"> opam</span><span class="z-punctuation z-punctuation z-definition z-comment">        #</span><span class="z-comment"> OCaml package manager -- needed to fetch and install Sail&#39;s OCaml dependencies</span></span>
+<span class="giallo-l"><span class="z-entity z-name">sudo</span><span class="z-string"> pacman</span><span class="z-constant"> -</span><span class="z-constant">S</span><span class="z-string"> gmp</span><span class="z-punctuation z-punctuation z-definition z-comment">         #</span><span class="z-comment"> GNU Multiple Precision arithmetic library -- Sail uses it internally for big integer arithmetic</span></span>
+<span class="giallo-l"><span class="z-entity z-name">sudo</span><span class="z-string"> pacman</span><span class="z-constant"> -</span><span class="z-constant">S</span><span class="z-string"> z3</span><span class="z-punctuation z-punctuation z-definition z-comment">          #</span><span class="z-comment"> SMT solver from Microsoft Research -- Sail calls Z3 during type-checking to prove</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">                           #</span><span class="z-comment">   arithmetic constraints on dependent types (e.g. that bitvector widths are correct)</span></span>
+<span class="giallo-l"><span class="z-entity z-name">sudo</span><span class="z-string"> pacman</span><span class="z-constant"> -</span><span class="z-constant">S</span><span class="z-string"> cmake</span><span class="z-punctuation z-punctuation z-definition z-comment">       #</span><span class="z-comment"> build system generator -- sail-riscv uses CMake to orchestrate the Sail-to-Lean code generation</span></span>
+<span class="giallo-l"><span class="z-entity z-name">sudo</span><span class="z-string"> pacman</span><span class="z-constant"> -</span><span class="z-constant">S</span><span class="z-string"> base-devel</span><span class="z-punctuation z-punctuation z-definition z-comment">  #</span><span class="z-comment"> C compiler, make, binutils, etc. -- OCaml&#39;s runtime is written in C and some opam</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">                           #</span><span class="z-comment">   packages have C bindings (e.g. GMP). Also provides C++ compiler which sail-riscv&#39;s</span></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">                           #</span><span class="z-comment">   CMake build needs for the emulator harness, even if you only want Lean output.</span></span>
+<span class="giallo-l"><span class="z-entity z-name">sudo</span><span class="z-string"> pacman</span><span class="z-constant"> -</span><span class="z-constant">S</span><span class="z-string"> pkgconf</span><span class="z-punctuation z-punctuation z-definition z-comment">     #</span><span class="z-comment"> pkg-config implementation -- CMake uses it to locate system libraries like GMP</span></span></code></pre><h3 id="both-platforms-initialize-opam-one-time">Both Platforms: Initialize opam (one-time)</h3>
+<p>Run the following code from anywhere -- opam stores its state in <code>~/.opam/</code>.</p>
+<p><strong>TODO:</strong> ocaml crash course</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">opam</span><span class="z-string"> init</span><span class="z-punctuation z-punctuation z-definition z-comment">                 #</span><span class="z-comment"> follow prompts, say yes to shell setup</span></span>
+<span class="giallo-l"><span class="z-support z-function z-support z-function z-builtin">eval</span><span class="z-punctuation"> $(</span><span class="z-entity z-name">opam</span><span class="z-string"> env</span><span class="z-punctuation">)</span><span class="z-punctuation z-punctuation z-definition z-comment">          #</span><span class="z-comment"> or restart your shell</span></span></code></pre>
+<p><code>opam init</code> creates the <code>~/.opam/</code> directory, downloads the OCaml package registry, and
+installs a default OCaml compiler.
+<code>eval $(opam env)</code> sets shell environment variables (<code>PATH</code>, <code>OCAML_TOPLEVEL_PATH</code>, etc.) so that your shell can find the OCaml tools and
+libraries that opam installed.
+You need to run <code>eval $(opam env)</code> in each new shell session, or let opam's shell hook do it automatically (it offers to set this up during
+<code>opam init</code>).</p>
+<h2 id="step-2-build-and-install-the-sail-compiler-locally">Step 2: Build and Install the Sail Compiler Locally</h2>
+<p>You should be in the <code>parent/</code> directory (the one containing both <code>sail/</code> and <code>sail-riscv/</code>).</p>
+<p>The Sail compiler is a single binary called <code>sail</code>.
+On its own, it can only parse and type-check Sail code.
+To actually generate output for a specific language (Lean, C++, Coq, etc.), it needs a <strong>backend plugin</strong> loaded at startup.</p>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">What The Hell Is A Plugin</div>
+  
+  <p>Note that I do not understand ocaml's plugin infrastructure properly.
+I had to ask Calude and this is what it gave me:</p>
+<p>A plugin is a <code>.cmxs</code> file -- an OCaml shared library (see <a rel="external" href="https://ocaml.org/manual/5.2/native.html#s:native:dynlink">OCaml manual on native plugins</a>).
+When <code>sail</code> starts, it scans a known directory for <code>.cmxs</code> files and loads them.
+Each plugin registers new command-line flags.
+For example, loading <code>sail_plugin_lean.cmxs</code> adds the <code>--lean</code> flag to the <code>sail</code> binary.
+There is no separate "lean binary" -- it's all one <code>sail</code> binary with plugins extending its capabilities.</p>
+
+</div>
+<p><strong>dune</strong> is OCaml's build system (like <code>make</code> or <code>cargo</code>).
+It reads build instructions from <code>dune</code> files in the source tree.
+Below, we use three commands. Each is explained with what it does and what it produces:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-support z-function z-support z-function z-builtin">cd</span><span class="z-string"> sail</span></span></code></pre><h3 id="2a-install-ocaml-dependencies">2a. Install OCaml dependencies</h3>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">opam</span><span class="z-string"> install</span><span class="z-string"> .</span><span class="z-constant"> -</span><span class="z-constant">-deps-only</span></span></code></pre>
+<p>Reads the <code>.opam</code> files in the sail repo and installs all required OCaml libraries
+into the current opam switch. Does not build sail itself.</p>
+<h3 id="2b-build-the-compiler-and-plugins">2b. Build the compiler and plugins</h3>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">dune</span><span class="z-string"> build</span><span class="z-constant"> -</span><span class="z-constant">-release</span></span></code></pre>
+<p>Compiles everything in the sail repo. Produces build artifacts under <code>_build/</code>, including:</p>
+<ul>
+<li><code>_build/default/src/bin/sail.exe</code> -- the core sail binary</li>
+<li><code>_build/default/src/sail_lean_backend/sail_plugin_lean.cmxs</code> -- the Lean plugin</li>
+</ul>
+<p>At this point the binary exists but doesn't know where to find its plugins.</p>
+<h3 id="2c-install-into-a-local-prefix">2c. Install into a local prefix</h3>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-entity z-name">dune</span><span class="z-string"> install</span><span class="z-constant"> -</span><span class="z-constant">-prefix</span><span class="z-string"> _local_install</span></span></code></pre>
+<p>Copies the binary, plugins, and standard library files into a structured directory:</p>
+<ul>
+<li><code>_local_install/bin/sail</code> -- the sail binary</li>
+<li><code>_local_install/share/libsail/plugins/sail_plugin_lean.cmxs</code> -- the Lean plugin</li>
+<li><code>_local_install/share/sail/lib/</code> -- Sail's standard library (prelude, etc.)</li>
+</ul>
+<p>This is what "installing a plugin" means concretely: copying the <code>.cmxs</code> file into the
+<code>share/libsail/plugins/</code> directory where the <code>sail</code> binary knows to look for it.</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-support z-function z-support z-function z-builtin">cd</span><span class="z-string"> ..</span></span></code></pre><h3 id="verify-the-lean-backend-is-loaded">Verify the Lean backend is loaded</h3>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-variable z-other">SAIL_DIR</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-string">s</span><span class="z-string">a</span><span class="z-string">i</span><span class="z-string">l</span><span class="z-string">/</span><span class="z-string">_</span><span class="z-string">l</span><span class="z-string">o</span><span class="z-string">c</span><span class="z-string">a</span><span class="z-string">l</span><span class="z-string">_</span><span class="z-string">i</span><span class="z-string">n</span><span class="z-string">s</span><span class="z-string">t</span><span class="z-string">a</span><span class="z-string">l</span><span class="z-string">l</span><span class="z-string">/</span><span class="z-string">s</span><span class="z-string">h</span><span class="z-string">a</span><span class="z-string">r</span><span class="z-string">e</span><span class="z-string">/</span><span class="z-string">s</span><span class="z-string">a</span><span class="z-string">i</span><span class="z-string">l</span><span class="z-entity z-name"> sail/_local_install/bin/sail</span><span class="z-constant"> -</span><span class="z-constant">-help</span><span class="z-keyword z-keyword z-operator"> |</span><span class="z-entity z-name"> grep</span><span class="z-string"> lean</span></span></code></pre>
+<p><code>SAIL_DIR</code> tells the sail binary where to find its standard library and plugins.
+You should see <code>--lean</code> and related flags listed. If you don't, the plugin file is
+not in the expected <code>share/libsail/plugins/</code> directory -- re-run <code>dune install</code>.</p>
+<h2 id="step-3-configure-the-sail-riscv-build">Step 3: Configure the sail-riscv Build</h2>
+<p>From the parent directory (or from <code>sail-riscv/</code>):</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-support z-function z-support z-function z-builtin">cd</span><span class="z-string"> sail-riscv</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-variable z-other">SAIL_DIR</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation">$(</span><span class="z-entity z-name">realpath</span><span class="z-string"> ../sail/_local_install/share/sail</span><span class="z-punctuation">)</span><span class="z-entity z-name"> \</span></span>
+<span class="giallo-l"><span>cmake</span><span class="z-constant"> -</span><span class="z-constant">S</span><span class="z-string"> .</span><span class="z-constant"> -</span><span class="z-constant">B</span><span class="z-string"> build</span><span class="z-constant"> \</span></span>
+<span class="giallo-l"><span class="z-constant">  -</span><span class="z-constant">DCMAKE_BUILD_TYPE=RelWithDebInfo</span><span class="z-constant"> \</span></span>
+<span class="giallo-l"><span class="z-constant">  -</span><span class="z-constant">DSAIL_BIN=</span><span class="z-punctuation">$(</span><span class="z-entity z-name">realpath</span><span class="z-string"> ../sail/_local_install/bin/sail</span><span class="z-punctuation">)</span></span></code></pre>
+<p>Key variables:</p>
+<ul>
+<li><code>SAIL_DIR</code> -- points to the installed Sail share directory. This is where the
+compiler finds its standard library, include files, and plugins.</li>
+<li><code>SAIL_BIN</code> -- path to the locally-installed sail binary.</li>
+</ul>
+<p><strong>Important:</strong> Both paths must be <strong>absolute</strong>. CMake runs <code>sail --dir</code> internally
+to locate the Sail library directory, and the sail binary echoes back whatever
+<code>SAIL_DIR</code> was set to. If that's a relative path like <code>../sail/...</code>, CMake
+resolves it relative to the build directory (<code>build/</code>), not the source directory,
+causing "Cannot find source file" errors for the C runtime files.</p>
+<h2 id="step-4-generate-lean-code">Step 4: Generate Lean Code</h2>
+<p>Two variants can be generated. Both take a few minutes (the Sail compiler
+type-checks the full model, calling Z3 to solve arithmetic constraints).</p>
+<div class="callout callout-warning">
+  
+  <p>I also do not understand any of the Z3 stuff right now.</p>
+
+</div>
+<h3 id="noncomputable-for-theorem-proving">Noncomputable (for theorem proving)</h3>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-variable z-other">SAIL_DIR</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation">$(</span><span class="z-entity z-name">realpath</span><span class="z-string"> ../sail/_local_install/share/sail</span><span class="z-punctuation">)</span><span class="z-entity z-name"> \</span></span>
+<span class="giallo-l"><span class="z-string">  cmake</span><span class="z-constant"> -</span><span class="z-constant">-build</span><span class="z-string"> build</span><span class="z-constant"> -</span><span class="z-constant">-target</span><span class="z-string"> generated_lean_rv64d</span></span></code></pre>
+<p>Output: <code>build/model/Lean_RV64D/</code> (~155 <code>.lean</code> files)</p>
+<p>This version uses <code>noncomputable</code> sections, suitable for interactive proof in Lean.</p>
+<h3 id="executable-for-running-theorem-provin-theorem-provingg">Executable (for running + theorem provin + theorem provingg)</h3>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-variable z-other">SAIL_DIR</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation">$(</span><span class="z-entity z-name">realpath</span><span class="z-string"> ../sail/_local_install/share/sail</span><span class="z-punctuation">)</span><span class="z-entity z-name"> \</span></span>
+<span class="giallo-l"><span class="z-string">  cmake</span><span class="z-constant"> -</span><span class="z-constant">-build</span><span class="z-string"> build</span><span class="z-constant"> -</span><span class="z-constant">-target</span><span class="z-string"> generated_lean_executable_rv64d</span></span></code></pre>
+<p>Output: <code>build/model/Lean_RV64D_executable/</code> (~155 <code>.lean</code> files)</p>
+<p>This version generates computable code that can be built and executed with <code>lake build</code>.</p>
+<h3 id="rv32-variants">RV32 Variants</h3>
+<p>Replace <code>rv64d</code> with <code>rv32d</code> in the target names for 32-bit:</p>
+<ul>
+<li><code>generated_lean_rv32d</code></li>
+<li><code>generated_lean_executable_rv32d</code></li>
+</ul>
+<h2 id="step-5-build-the-generated-lean-code-optional">Step 5: Build the Generated Lean Code (Optional)</h2>
+<p>Each output directory contains a <code>lakefile.toml</code> and <code>lean-toolchain</code>. To compile:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-support z-function z-support z-function z-builtin">cd</span><span class="z-string"> build/model/Lean_RV64D/</span><span class="z-punctuation z-punctuation z-definition z-comment">          #</span><span class="z-comment"> or Lean_RV64D_executable/</span></span>
+<span class="giallo-l"><span class="z-entity z-name">lake</span><span class="z-string"> update</span></span>
+<span class="giallo-l"><span class="z-entity z-name">lake</span><span class="z-string"> build</span></span></code></pre>
+<p>The generated Lean requires a specific Lean toolchain version (specified in
+<code>lean-toolchain</code>) and the <code>lean-sail</code> support library (fetched automatically by <code>lake</code>).</p>
+<h2 id="rebuilding-after-sail-compiler-changes">Rebuilding After Sail Compiler Changes</h2>
+<p>Since you're running from source, after modifying the Sail compiler:</p>
+<pre class="giallo z-code"><code data-lang="shellscript"><span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">#</span><span class="z-comment"> 1. Rebuild and reinstall the compiler</span></span>
+<span class="giallo-l"><span class="z-support z-function z-support z-function z-builtin">cd</span><span class="z-string"> ../sail</span></span>
+<span class="giallo-l"><span class="z-entity z-name">dune</span><span class="z-string"> build</span><span class="z-constant"> -</span><span class="z-constant">-release</span></span>
+<span class="giallo-l"><span class="z-entity z-name">dune</span><span class="z-string"> install</span><span class="z-constant"> -</span><span class="z-constant">-prefix</span><span class="z-string"> _local_install</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-punctuation z-punctuation z-definition z-comment">#</span><span class="z-comment"> 2. Clean stale outputs and re-generate Lean (from sail-riscv)</span></span>
+<span class="giallo-l"><span class="z-support z-function z-support z-function z-builtin">cd</span><span class="z-string"> ../sail-riscv</span></span>
+<span class="giallo-l"><span class="z-entity z-name">rm</span><span class="z-constant"> -</span><span class="z-constant">rf</span><span class="z-string"> build/model/Lean_RV64D</span><span class="z-string"> build/model/Lean_RV64D_executable</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-variable z-other">SAIL_DIR</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation">$(</span><span class="z-entity z-name">realpath</span><span class="z-string"> ../sail/_local_install/share/sail</span><span class="z-punctuation">)</span><span class="z-entity z-name"> \</span></span>
+<span class="giallo-l"><span class="z-string">  cmake</span><span class="z-constant"> -</span><span class="z-constant">-build</span><span class="z-string"> build</span><span class="z-constant"> -</span><span class="z-constant">-target</span><span class="z-string"> generated_lean_rv64d</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-variable z-other">SAIL_DIR</span><span class="z-keyword z-keyword z-operator">=</span><span class="z-punctuation">$(</span><span class="z-entity z-name">realpath</span><span class="z-string"> ../sail/_local_install/share/sail</span><span class="z-punctuation">)</span><span class="z-entity z-name"> \</span></span>
+<span class="giallo-l"><span class="z-string">  cmake</span><span class="z-constant"> -</span><span class="z-constant">-build</span><span class="z-string"> build</span><span class="z-constant"> -</span><span class="z-constant">-target</span><span class="z-string"> generated_lean_executable_rv64d</span></span></code></pre><h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li>
+<p><strong><code>Cannot find source file: ../sail/_local_install/share/sail/lib/elf.c</code></strong>: You used
+relative paths for <code>SAIL_DIR</code>. CMake resolves paths relative to the build directory,
+not where you ran the command. Use <code>$(realpath ../sail/_local_install/share/sail)</code> to
+get an absolute path.</p>
+</li>
+<li>
+<p><strong><code>--lean</code> flag not found</strong>: The plugin wasn't installed. Make sure you ran
+<code>dune install --prefix _local_install</code> and that <code>SAIL_DIR</code> points to the
+<code>_local_install/share/sail</code> directory (not the repo root or <code>lib/</code>).</p>
+</li>
+<li>
+<p><strong><code>sail: command not found</code> during cmake</strong>: You need to pass <code>-DSAIL_BIN=</code> pointing
+to your local install, and set <code>SAIL_DIR</code> as an environment variable.</p>
+</li>
+<li>
+<p><strong>Plugin load error (<code>symbol not found</code>)</strong>: Version mismatch between the sail binary
+and the plugin. Run <code>dune build --release &amp;&amp; dune install --prefix _local_install</code>
+again to rebuild both from the same source.</p>
+</li>
+<li>
+<p><strong>CMake cache error about mismatched source directory</strong>: Delete <code>build/</code> and
+reconfigure: <code>rm -rf build &amp;&amp; cmake -S . -B build ...</code></p>
+</li>
+</ul>
+<h2 id="what-gets-generated">What Gets Generated</h2>
+<p>The Sail compiler translates the entire RISC-V ISA model into Lean definitions:</p>
+<ul>
+<li>Instruction encodings/decodings</li>
+<li>Instruction semantics</li>
+<li>CSR definitions</li>
+<li>Memory model</li>
+<li>Exception handling</li>
+<li>Extension support (M, A, F, D, C, V, etc.)</li>
+</ul>
+<p>The noncomputable version is for reasoning about the spec in Lean's type theory.
+The executable version can simulate RISC-V binaries.</p>
+
+  </div>
+
+  
+
+  
+  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
+  <nav class="toc toc-panel" id="toc-panel">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#step-0-clone-both-repos">Step 0: Clone Both Repos</a></li><li><a href="#step-1-install-system-dependencies">Step 1: Install System Dependencies</a><ol><li><a href="#macos-homebrew">macOS (Homebrew)</a></li><li><a href="#arch-linux">Arch Linux</a></li><li><a href="#both-platforms-initialize-opam-one-time">Both Platforms: Initialize opam (one-time)</a></li></ol></li><li><a href="#step-2-build-and-install-the-sail-compiler-locally">Step 2: Build and Install the Sail Compiler Locally</a><ol><li><a href="#2a-install-ocaml-dependencies">2a. Install OCaml dependencies</a></li><li><a href="#2b-build-the-compiler-and-plugins">2b. Build the compiler and plugins</a></li><li><a href="#2c-install-into-a-local-prefix">2c. Install into a local prefix</a></li><li><a href="#verify-the-lean-backend-is-loaded">Verify the Lean backend is loaded</a></li></ol></li><li><a href="#step-3-configure-the-sail-riscv-build">Step 3: Configure the sail-riscv Build</a></li><li><a href="#step-4-generate-lean-code">Step 4: Generate Lean Code</a><ol><li><a href="#noncomputable-for-theorem-proving">Noncomputable (for theorem proving)</a></li><li><a href="#executable-for-running-theorem-provin-theorem-provingg">Executable (for running + theorem provin + theorem provingg)</a></li><li><a href="#rv32-variants">RV32 Variants</a></li></ol></li><li><a href="#step-5-build-the-generated-lean-code-optional">Step 5: Build the Generated Lean Code (Optional)</a></li><li><a href="#rebuilding-after-sail-compiler-changes">Rebuilding After Sail Compiler Changes</a></li><li><a href="#troubleshooting">Troubleshooting</a></li><li><a href="#what-gets-generated">What Gets Generated</a></li></ol>
+  </nav>
+  <script>
+    (function() {
+      var btn = document.getElementById('toc-toggle');
+      var panel = document.getElementById('toc-panel');
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target)) {
+          panel.classList.remove('open');
+        }
+      });
+      panel.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          panel.classList.remove('open');
+        });
+      });
+    })();
+  </script>
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const select = document.getElementById('theme-select');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      const lightThemes = ['rose-pine-dawn'];
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        }
+      }
+
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
+
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
+    })();
+  </script>
+  <script>
+    // Smooth scroll + highlight for eqref and citation links.
+    // Citations get a ↩ back-link to return to reading position.
+    document.addEventListener('click', function(e) {
+      // Handle back-arrow clicks
+      var back = e.target.closest('.bib-back');
+      if (back) {
+        e.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Clean up previous highlights and back-links
+      document.querySelectorAll('.eq-highlight').forEach(function(el) {
+        el.classList.remove('eq-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function(el) {
+        el.remove();
+      });
+
+      var href = link.getAttribute('href');
+      var id = decodeURIComponent(href.slice(1));
+      var target = document.getElementById(id);
+      if (!target) return;
+
+      var highlight = target.closest('mjx-container[display="true"]') || target;
+      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlight.classList.add('eq-highlight');
+
+      // For citations, add a back-arrow to return to reading position
+      if (link.classList.contains('citation')) {
+        if (!link.id) link.id = 'cite-src-' + id;
+        var arrow = document.createElement('a');
+        arrow.className = 'bib-back';
+        arrow.setAttribute('data-source', link.id);
+        arrow.textContent = ' \u21A9';
+        arrow.title = 'Back to text';
+        highlight.appendChild(arrow);
+      }
+    });
+  </script>
+
+</body>
+</html>
