@@ -172,7 +172,12 @@
   
 
   <div class="post-content">
-    <p>Notes on <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/The-Monad-Type-Class/">Chapter 4.2: The Monad Type Class</a> from <em>Functional Programming in Lean</em>.</p>
+    <div class="callout callout-remark">
+  
+  <p>This post is a draft and not yet ready.</p>
+
+</div>
+<p>Notes on <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/The-Monad-Type-Class/">Chapter 4.2: The Monad Type Class</a> from <em>Functional Programming in Lean</em>.</p>
 <p>Working code: <code>FunctionalProgramming/monad-typeclass.lean</code></p>
 <p>In the <a href="/blog/monads/monads/">previous post</a> we wrote <code>bind</code> and <code>unit</code> four times — once for <code>Option</code>, once for <code>Error</code>, once for <code>WithLog</code>, once for <code>State</code>. The book called <code>bind</code> "<code>andThen</code>" and <code>unit</code> was <code>some</code>, <code>Error.ok</code>, <code>okLog</code>, or <code>okState</code> depending on the type. Each time it was the same pattern. The Monad type class eliminates this repetition.</p>
 <h2 id="the-type-class">The Type Class</h2>

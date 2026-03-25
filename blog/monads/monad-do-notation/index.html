@@ -172,7 +172,12 @@
   
 
   <div class="post-content">
-    <p>Notes on <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/do--Notation-for-Monads/">Chapter 4.4: do-Notation for Monads</a> from <em>Functional Programming in Lean</em>.</p>
+    <div class="callout callout-remark">
+  
+  <p>This post is a draft and not yet ready.</p>
+
+</div>
+<p>Notes on <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/do--Notation-for-Monads/">Chapter 4.4: do-Notation for Monads</a> from <em>Functional Programming in Lean</em>.</p>
 <p>Working code: <code>FunctionalProgramming/monad-do.lean</code></p>
 <p>In the <a href="/blog/monads/monad-type-class/">previous post</a> we unified <code>bind</code> and <code>pure</code> into a type class. But writing <code>&gt;&gt;= fun x =&gt;</code> everywhere is still noisy. <code>do</code> notation is syntactic sugar that the compiler rewrites into <code>&gt;&gt;=</code> calls — making monadic code look imperative.</p>
 <p>This is the same <code>do</code> you've been using in <code>IO</code>. Now you know what it actually means.</p>
