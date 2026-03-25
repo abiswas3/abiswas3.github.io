@@ -144,10 +144,43 @@
   
 
   
-  <div class="post-content"><p>I am still not sure I fully understand what a monad is, or if I can concretely point to something and say this is monadic programming.
-However, just like the million people before me, this has not prevented me from writing yet another set of  notes that make sense only to the author<sup class="footnote-reference"><a href="#a">1</a></sup>.</p>
-<div class="footnote-definition" id="a"><sup class="footnote-definition-label">1</sup>
-<p>This is somewhat debatable.</p>
+  <div class="post-content"><p>The goal of this series is to somehow get to the bottom of how to use the <code>mvcgen</code> tactic in Lean, which is advertised as a way to reason about imperative code in Lean<sup class="footnote-reference"><a href="#himmel">1</a></sup>.
+But Lean is a functional programming language, and although it lets the user type imperative looking code using <code>do</code> blocks, under the hood it transforms the same block of code into functional blocks using machinery called monads.
+But what the feck is a monad?
+I cannot for the life of me seem to find a clean definition<sup class="footnote-reference"><a href="#def">2</a></sup>.
+After about 48 hours of reading and scouring through different blogs and lecture notes<sup class="footnote-reference"><a href="#refs">3</a></sup>, here's my opinionated<sup class="footnote-reference"><a href="#risk">4</a></sup> take on what a monad is.
+When I say functions from here on -- I don't mean a method or a function in a programming language, but a function as introduced in an introductory textbook for mathematics.</p>
+<div class="callout callout-definition thm-numbered">
+  
+  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> (My Imprecise Monad Definition)</span></div>
+  
+  <p>Given some computation $C$ that cannot be expressed as a composition of functions, a monad is the "machinery" needed to write $C$ as a composition of functions.</p>
+
+</div>
+<p>Now chances are that this definition is even more confusing, and conveys about as much information as the definition I criticised.
+But hopefully this starter post <a href="/blog/monads/./monads-simplified/index.md">Monads-What is</a>, clears up some confusion; and I come to the conclusion that there is no easy 3 sentence definition.
+We'll start with a simple computation that is composable, and then change it so it becomes non-composable.
+Then we will make it composable again -- and everything that we did to make it composable will be a monad.</p>
+<p>If that does not convince you, we will take the monad starter pack from the <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/One-API___-Many-Applications/">Lean documentation</a>
+and <a href="/blog/monads/./monads/index.md">re-write</a> it in terms of the same composition notation from <a href="/blog/monads/./monads-simplified/index.md">the above post</a>.</p>
+<p>At this point, we've either convinced ourselves that the above definition somewhat makes sense, or I still don't understand what the feck a monad is, and in that case you should stop reading.
+Were we to have understood monads, we go into some Lean4 specific machinery that makes writing monadic code easier <a href="/blog/monads/./monad-type-class/index.md">here</a> and <a href="/blog/monads/./monad-do-notation/index.md">here</a>.</p>
+<p>With that intro to monad crash course done, hopefully we have the background to understand what is going on in Markus' post.</p>
+<h2 id="links-to-notes">Links To Notes</h2>
+<div class="footnote-definition" id="himmel"><sup class="footnote-definition-label">1</sup>
+<p>See <a rel="external" href="https://markushimmel.de/blog/my-first-verified-imperative-program/">Markus Himmel's blog post</a>.</p>
+</div>
+<div class="footnote-definition" id="refs"><sup class="footnote-definition-label">3</sup>
+<p>Such as these: <a rel="external" href="http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html">You Could Have Invented Monads</a> (Dan Piponi), <a rel="external" href="https://homepages.inf.ed.ac.uk/wadler/papers/marktoberdorf/baastad.pdf">Monads for Functional Programming</a> (Philip Wadler), <a rel="external" href="https://bartoszmilewski.com/2016/11/21/monads-programmers-definition/">Monads: Programmer's Definition</a> (Bartosz Milewski), and <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/monads.html">FP in Lean Ch. 4</a>.</p>
+</div>
+<div class="footnote-definition" id="func"><sup class="footnote-definition-label">5</sup>
+<p>Functions here are mathematical functions in that it's a list of tuples mapping a domain to a co-domain.</p>
+</div>
+<div class="footnote-definition" id="risk"><sup class="footnote-definition-label">4</sup>
+<p>Possibly wrong opinion.</p>
+</div>
+<div class="footnote-definition" id="def"><sup class="footnote-definition-label">2</sup>
+<p>By clean definition, I mean how we have a nice definition say for something like an injective function.This excerpt in italics is from hovering over Monads in the Functional programming book. Perhaps, to functional programming experts, this is a much better definition, but I was no cleverer about what Monads do from this. <em>Monads are an abstraction of sequential control flow and side effects used in functional programming. Monads allow both sequencing of effects and data-dependent effects: the values that result from an early step may influence the effects carried out in a later step.</em></p>
 </div>
 </div>
   
@@ -189,7 +222,7 @@ However, just like the million people before me, this has not prevented me from 
       
       
       <li>
-        <a href="&#x2F;blog&#x2F;monads&#x2F;monads-simplified&#x2F;">Monads Simplified</a>
+        <a href="&#x2F;blog&#x2F;monads&#x2F;monads-simplified&#x2F;">Monads: What Is?</a>
         
       </li>
       
