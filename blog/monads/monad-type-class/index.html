@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'rose-pine-ink' : 'vitesse-dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Monad Type Class | Random Walks</title>
+  <link rel="stylesheet" href="/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  
+  
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      tags: 'ams',
+      macros: {
+        field: ['{\\mathbb{#1}}', 1],
+        hei: ['{\\mathbb{F}(#1)}', 1],
+        Field: '{\\mathbb{F}}',
+        Mont: ['{\\widetilde{#1}}', 1],
+        samples: '{\\xleftarrow{\\$}}',
+        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+        TauConstraints: '{\\tau_y}',
+        TauTime: '{\\tau_{\\text{cycle}}}',
+        TauGroup: '{\\tau_b}',
+        MLE: ['{\\widetilde{#1}}', 1],
+        tf: ['{\\widetilde{#1}}', 1],
+        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+        Def: '{:=}',
+        ChallengeSet: '{\\mathsf{C}}',
+        Complement: ['{\\overline{#1}}', 1],
+        Size: ['{\\left|#1\\right|}', 1],
+        Exp: ['{2^{#1}}', 1],
+        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+        BigO: ['{O\\ \\left(#1\\right)}', 1],
+        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
+        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
+        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+        poly: '{\\operatorname{poly}}',
+        criticalAlpha: ['{\\alpha_{#1}}', 1],
+        bit: '{\\{0,1\\}}',
+        CStar: '{C^{\\star}}',
+        GraphNbrs: ['{N_G(#1)}', 1],
+        ClauseNbrs: ['{N_C(#1)}', 1],
+        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        SmallO: ['{o\\!(#1)}', 1],
+        Naturals: '{\\mathbb{N}}',
+        Closure: ['{\\operatorname{Cl}(#1)}', 1],
+        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+        Dim: ['{\\dim(#1)}', 1],
+        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+        domain: ['{\\operatorname{dom}(#1)}', 1],
+        False: '{\\bot}',
+        opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+        // ── Complexity Theory & Turing Machines ──────────────────────────
+        // Complexity classes
+        NP: '{\\mathsf{NP}}',
+        coNP: '{\\mathsf{coNP}}',
+        Pclass: '{\\mathsf{P}}',
+        PSPACE: '{\\mathsf{PSPACE}}',
+        EXP: '{\\mathsf{EXP}}',
+        // Turing machine components
+        States: '{\\mathcal{Q}}',
+        TransFunc: '{\\delta}',
+        InitState: '{q_0}',
+        AcceptState: '{q_{\\text{acc}}}',
+        RejectState: '{q_{\\text{rej}}}',
+        InitConfig: '{C_0}',
+        AcceptConfig: '{C_{\\text{acc}}}',
+        Moves: '{\\{\\mathsf{L},\\, \\mathsf{R}\\}}',
+        // Languages & notation
+        Lang: ['{L(#1)}', 1],
+        RE: '{\\mathsf{RE}}',
+        // General math
+        NN: '{\\mathbb{N}}',
+        ZZ: '{\\mathbb{Z}}',
+        RR: '{\\mathbb{R}}'
+      }
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="/">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
+        <a href="/misc/">Random</a>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
+          <option value="rose-pine-ink">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
+        </select>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+
+
+
+  
+  
+
+
+<article class="post">
+  <header class="post-header">
+    
+    
+    <a href="&#x2F;blog&#x2F;monads&#x2F;" class="back-link">&larr; Money For Nothing Monads For Free</a>
+    
+    <h1>The Monad Type Class</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-03-24</time>
+      
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/basic/" class="tag">basic</a><a href="/tags/monads/" class="tag">monads</a><a href="/tags/type-classes/" class="tag">type classes</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <p>Notes on <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/The-Monad-Type-Class/">Chapter 4.2: The Monad Type Class</a> from <em>Functional Programming in Lean</em>.</p>
+<p>Working code: <code>FunctionalProgramming/monad-typeclass.lean</code></p>
+<p>In the <a href="/blog/monads/monads/">previous post</a> we wrote <code>bind</code> and <code>unit</code> four times — once for <code>Option</code>, once for <code>Error</code>, once for <code>WithLog</code>, once for <code>State</code>. The book called <code>bind</code> "<code>andThen</code>" and <code>unit</code> was <code>some</code>, <code>Error.ok</code>, <code>okLog</code>, or <code>okState</code> depending on the type. Each time it was the same pattern. The Monad type class eliminates this repetition.</p>
+<h2 id="the-type-class">The Type Class</h2>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">class</span><span class="z-entity z-name z-entity z-name z-function"> Monad</span><span> (m : </span><span class="z-storage z-type">Type</span><span> → </span><span class="z-storage z-type">Type</span><span>) </span><span class="z-keyword">where</span></span>
+<span class="giallo-l"><span>  pure : α → m α</span></span>
+<span class="giallo-l"><span>  bind : m α → (α → m β) → m β</span></span></code></pre>
+<p>That's it.</p>
+<ul>
+<li><code>pure</code> is our <code>unit</code>/<code>ok</code> (Lifter)</li>
+<li><code>bind</code> is our <code>andThen</code>. (Composer)</li>
+</ul>
+<p>The type class just says: "any type <code>m</code> that provides these two operations is a monad." Recall from the <a href="/blog/monads/monads/">previous posts</a> that <code>m</code> was <code>Option</code>, <code>Except ε</code> (which has two type parameters — the error type <code>ε</code> is fixed, so <code>Except ε</code> is a <code>Type → Type</code>), <code>WithLog logged</code>, <code>State σ</code>, <code>List</code>, etc. Note that <code>m</code> must be <code>Type → Type</code> — it takes a type parameter. That's why it's <code>Except ε</code> (not <code>Except</code>), <code>State σ</code> (not <code>State</code>), etc.</p>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">Terminology Recap</div>
+  
+  <table><thead><tr><th>Piponi</th><th>FP in Lean book</th><th>Type class</th></tr></thead><tbody>
+<tr><td><code>unit</code></td><td><code>ok</code></td><td><code>pure</code></td></tr>
+<tr><td><code>bind</code></td><td><code>andThen</code></td><td><code>bind</code> (or <code>&gt;&gt;=</code>)</td></tr>
+</tbody></table>
+
+</div>
+<h2 id="instances">Instances</h2>
+<p>Now instead of writing separate <code>andThenError</code>, <code>andThenLog</code>, <code>andThenState</code> functions, we register each as a <code>Monad</code> instance:</p>
+<p><strong>Option:</strong></p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">instance</span><span> : Monad Option </span><span class="z-keyword">where</span></span>
+<span class="giallo-l"><span>  pure x := some x</span></span>
+<span class="giallo-l"><span>  bind opt next := </span><span class="z-keyword">match</span><span> opt </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>    | none =&gt; none</span></span>
+<span class="giallo-l"><span>    | some x =&gt; next x</span></span></code></pre>
+<p><strong>Except:</strong></p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">instance</span><span> : Monad (Except ε) </span><span class="z-keyword">where</span></span>
+<span class="giallo-l"><span>  pure x := Except.ok x</span></span>
+<span class="giallo-l"><span>  bind attempt next := </span><span class="z-keyword">match</span><span> attempt </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>    | Except.error e =&gt; Except.error e</span></span>
+<span class="giallo-l"><span>    | Except.ok x =&gt; next x</span></span></code></pre>
+<p><strong>WithLog:</strong></p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">instance</span><span> : Monad (WithLog logged) </span><span class="z-keyword">where</span></span>
+<span class="giallo-l"><span>  pure x := { log := [], val := x }</span></span>
+<span class="giallo-l"><span>  bind result next :=</span></span>
+<span class="giallo-l"><span class="z-keyword">    let</span><span> { log := thisOut, val := thisRes } := result</span></span>
+<span class="giallo-l"><span class="z-keyword">    let</span><span> { log := nextOut, val := nextRes } := next thisRes</span></span>
+<span class="giallo-l"><span>    { log := thisOut ++ nextOut, val := nextRes }</span></span></code></pre>
+<p><strong>State:</strong></p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">instance</span><span> : Monad (State σ) </span><span class="z-keyword">where</span></span>
+<span class="giallo-l"><span>  pure x := </span><span class="z-keyword">fun</span><span> s =&gt; (s, x)</span></span>
+<span class="giallo-l"><span>  bind first next := </span><span class="z-keyword">fun</span><span> s =&gt;</span></span>
+<span class="giallo-l"><span class="z-keyword">    let</span><span> (s&#39;, x) := first s</span></span>
+<span class="giallo-l"><span>    next x s&#39;</span></span></code></pre>
+<p>These are exactly the same definitions we wrote before — just registered as instances of a type class.</p>
+<h2 id="the-payoff-polymorphic-code">The Payoff: Polymorphic Code</h2>
+<p>The whole point: we can now write functions that work with <strong>any</strong> monad. Compare with the <a href="/blog/monads/monads/">previous post</a> where we had to write <code>firstThird</code> separately for <code>Option</code> and <code>Error</code>.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> firstThirdFifthSeventh</span><span> [Monad m]</span></span>
+<span class="giallo-l"><span>    (lookup : List α → Nat → m α)</span></span>
+<span class="giallo-l"><span>    (xs : List α) : m (α × α × α × α) :=</span></span>
+<span class="giallo-l"><span>  lookup xs </span><span class="z-constant z-numeric z-constant">0</span><span> &gt;&gt;= </span><span class="z-keyword">fun</span><span> first =&gt;</span></span>
+<span class="giallo-l"><span>  lookup xs </span><span class="z-constant z-numeric z-constant">2</span><span> &gt;&gt;= </span><span class="z-keyword">fun</span><span> third =&gt;</span></span>
+<span class="giallo-l"><span>  lookup xs </span><span class="z-constant z-numeric z-constant">4</span><span> &gt;&gt;= </span><span class="z-keyword">fun</span><span> fifth =&gt;</span></span>
+<span class="giallo-l"><span>  lookup xs </span><span class="z-constant z-numeric z-constant">6</span><span> &gt;&gt;= </span><span class="z-keyword">fun</span><span> seventh =&gt;</span></span>
+<span class="giallo-l"><span>  pure (first, third, fifth, seventh)</span></span></code></pre>
+<p>The <code>[Monad m]</code> constraint says: "this works for any <code>m</code> that is a monad." <code>&gt;&gt;=</code> is the infix notation for <code>bind</code> — so <code>x &gt;&gt;= f</code> is <code>bind x f</code>, same as our <code>andThen x f</code> or <code>x ~~&gt; f</code>.</p>
+<p>Now we define two different lookup functions — one for <code>Option</code>, one for <code>Except</code>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> lookupOption</span><span> (xs : List α) (i : Nat) : Option α :=</span></span>
+<span class="giallo-l"><span>  xs[i]?</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> lookupExcept</span><span> (xs : List α) (i : Nat) : Except String α :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  match</span><span> xs[i]? </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>  | none =&gt; Except.error </span><span class="z-keyword">s!</span><span class="z-string">&quot;</span><span class="z-string">Index </span><span class="z-keyword">{</span><span class="z-string">i</span><span class="z-keyword">}</span><span class="z-string"> not found (maximum is </span><span class="z-keyword">{</span><span class="z-string">xs.length - </span><span class="z-constant z-numeric z-constant">1</span><span class="z-keyword">}</span><span class="z-string">)</span><span class="z-string">&quot;</span></span>
+<span class="giallo-l"><span>  | some x =&gt; Except.ok x</span></span></code></pre>
+<p>Same function, different effects:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupOption [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>, </span><span class="z-constant z-numeric z-constant">6</span><span>, </span><span class="z-constant z-numeric z-constant">7</span><span>, </span><span class="z-constant z-numeric z-constant">8</span><span>]</span></span>
+<span class="giallo-l"><span>-- some (</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>, </span><span class="z-constant z-numeric z-constant">7</span><span>)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupOption [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]</span></span>
+<span class="giallo-l"><span>-- none (silent failure — list too short)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupExcept [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>, </span><span class="z-constant z-numeric z-constant">6</span><span>, </span><span class="z-constant z-numeric z-constant">7</span><span>, </span><span class="z-constant z-numeric z-constant">8</span><span>]</span></span>
+<span class="giallo-l"><span>-- Except.ok (</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>, </span><span class="z-constant z-numeric z-constant">7</span><span>)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupExcept [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]</span></span>
+<span class="giallo-l"><span>-- Except.error </span><span class="z-string">&quot;</span><span class="z-string">Index 4 not found (maximum is 2)</span><span class="z-string">&quot;</span></span></code></pre>
+<p>Pass in <code>lookupOption</code> and you get silent failure. Pass in <code>lookupExcept</code> and you get error messages. One function, two behaviours — determined entirely by which monad <code>m</code> is.</p>
+<h2 id="mapm-mapping-with-effects">mapM: Mapping with Effects</h2>
+<p>A common pattern — apply a monadic function to every element of a list:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mapM</span><span> [Monad m] (f : α → m β) : List α → m (List β)</span></span>
+<span class="giallo-l"><span>  | [] =&gt; pure []</span></span>
+<span class="giallo-l"><span>  | x :: xs =&gt; f x &gt;&gt;= </span><span class="z-keyword">fun</span><span> hd =&gt;</span></span>
+<span class="giallo-l"><span>      mapM f xs &gt;&gt;= </span><span class="z-keyword">fun</span><span> tl =&gt;</span></span>
+<span class="giallo-l"><span>      pure (hd :: tl)</span></span></code></pre>
+<p>This is <code>List.map</code> but where the function can have side effects. Because it's polymorphic over <code>m</code>, it works with any monad:</p>
+<ul>
+<li>With <code>Option</code>: stops at the first <code>none</code></li>
+<li>With <code>Except</code>: stops at the first error</li>
+<li>With <code>State</code>: threads state through each application</li>
+<li>With <code>WithLog</code>: accumulates logs from each application</li>
+</ul>
+<h2 id="the-identity-monad">The Identity Monad</h2>
+<p>What if you need no effects at all but have a function that requires a <code>Monad</code>?</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> Id</span><span> (t : </span><span class="z-storage z-type">Type</span><span>) : </span><span class="z-storage z-type">Type</span><span> := t</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">instance</span><span> : Monad Id </span><span class="z-keyword">where</span></span>
+<span class="giallo-l"><span>  pure x := x</span></span>
+<span class="giallo-l"><span>  bind x f := f x</span></span></code></pre>
+<p><code>Id</code> is the "do nothing" monad. <code>pure</code> is the identity function. <code>bind</code> is just function application. It's the monad equivalent of multiplying by 1.</p>
+<h2 id="the-monad-contract">The Monad Contract</h2>
+<p>Every <code>Monad</code> instance should satisfy three laws:</p>
+<ol>
+<li><strong>Left identity:</strong> <code>bind (pure v) f = f v</code> — <code>pure</code> then <code>bind</code> is the same as just calling <code>f</code></li>
+<li><strong>Right identity:</strong> <code>bind v pure = v</code> — <code>bind</code> then <code>pure</code> does nothing</li>
+<li><strong>Associativity:</strong> <code>bind (bind v f) g = bind v (fun x =&gt; bind (f x) g)</code> — chaining order doesn't matter</li>
+</ol>
+<p>The first two are the identity laws from the <a href="/blog/monads/monads-simplified/">Piponi post</a>: <code>unit * f' = f'</code> and <code>f' * unit = f'</code>. The third (associativity) says chaining order doesn't matter — you can group compositions however you like. Same laws, different notation.</p>
+<div class="callout callout-remark">
+  
+  <p>A broken example: <code>instance : Monad Option where pure x := some x; bind _ _ := none</code>. This satisfies the types but violates left identity — <code>bind (pure v) f</code> gives <code>none</code> instead of <code>f v</code>. The monad laws are not enforced by the compiler; they are a contract you must uphold.</p>
+
+</div>
+<h2 id="references">References</h2>
+<ul>
+<li><a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/The-Monad-Type-Class/">Chapter 4.2: The Monad Type Class</a> — The FP in Lean chapter.</li>
+<li><a href="/blog/monads/monads/">Previous post: Monads in FP in Lean</a> — The four examples before the type class.</li>
+<li><a href="/blog/monads/monads-simplified/">Monads Simplified</a> — Piponi's examples, where we first met <code>bind</code>, <code>unit</code>, and the monad laws.</li>
+</ul>
+
+  </div>
+
+  
+
+  
+  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
+  <nav class="toc toc-panel" id="toc-panel">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#the-type-class">The Type Class</a></li><li><a href="#instances">Instances</a></li><li><a href="#the-payoff-polymorphic-code">The Payoff: Polymorphic Code</a></li><li><a href="#mapm-mapping-with-effects">mapM: Mapping with Effects</a></li><li><a href="#the-identity-monad">The Identity Monad</a></li><li><a href="#the-monad-contract">The Monad Contract</a></li><li><a href="#references">References</a></li></ol>
+  </nav>
+  <script>
+    (function() {
+      var btn = document.getElementById('toc-toggle');
+      var panel = document.getElementById('toc-panel');
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target)) {
+          panel.classList.remove('open');
+        }
+      });
+      panel.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          panel.classList.remove('open');
+        });
+      });
+    })();
+  </script>
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const select = document.getElementById('theme-select');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      const lightThemes = ['rose-pine-dawn'];
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        }
+      }
+
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
+
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
+    })();
+  </script>
+  <script>
+    // Smooth scroll + highlight for eqref and citation links.
+    // Citations get a ↩ back-link to return to reading position.
+    document.addEventListener('click', function(e) {
+      // Handle back-arrow clicks
+      var back = e.target.closest('.bib-back');
+      if (back) {
+        e.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Clean up previous highlights and back-links
+      document.querySelectorAll('.eq-highlight').forEach(function(el) {
+        el.classList.remove('eq-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function(el) {
+        el.remove();
+      });
+
+      var href = link.getAttribute('href');
+      var id = decodeURIComponent(href.slice(1));
+      var target = document.getElementById(id);
+      if (!target) return;
+
+      var highlight = target.closest('mjx-container[display="true"]') || target;
+      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlight.classList.add('eq-highlight');
+
+      // For citations, add a back-arrow to return to reading position
+      if (link.classList.contains('citation')) {
+        if (!link.id) link.id = 'cite-src-' + id;
+        var arrow = document.createElement('a');
+        arrow.className = 'bib-back';
+        arrow.setAttribute('data-source', link.id);
+        arrow.textContent = ' \u21A9';
+        arrow.title = 'Back to text';
+        highlight.appendChild(arrow);
+      }
+    });
+  </script>
+
+</body>
+</html>

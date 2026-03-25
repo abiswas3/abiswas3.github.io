@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'rose-pine-ink' : 'vitesse-dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monads in FP in Lean | Random Walks</title>
+  <link rel="stylesheet" href="/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  
+  
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      tags: 'ams',
+      macros: {
+        field: ['{\\mathbb{#1}}', 1],
+        hei: ['{\\mathbb{F}(#1)}', 1],
+        Field: '{\\mathbb{F}}',
+        Mont: ['{\\widetilde{#1}}', 1],
+        samples: '{\\xleftarrow{\\$}}',
+        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+        TauConstraints: '{\\tau_y}',
+        TauTime: '{\\tau_{\\text{cycle}}}',
+        TauGroup: '{\\tau_b}',
+        MLE: ['{\\widetilde{#1}}', 1],
+        tf: ['{\\widetilde{#1}}', 1],
+        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+        Def: '{:=}',
+        ChallengeSet: '{\\mathsf{C}}',
+        Complement: ['{\\overline{#1}}', 1],
+        Size: ['{\\left|#1\\right|}', 1],
+        Exp: ['{2^{#1}}', 1],
+        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+        BigO: ['{O\\ \\left(#1\\right)}', 1],
+        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
+        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
+        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+        poly: '{\\operatorname{poly}}',
+        criticalAlpha: ['{\\alpha_{#1}}', 1],
+        bit: '{\\{0,1\\}}',
+        CStar: '{C^{\\star}}',
+        GraphNbrs: ['{N_G(#1)}', 1],
+        ClauseNbrs: ['{N_C(#1)}', 1],
+        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        SmallO: ['{o\\!(#1)}', 1],
+        Naturals: '{\\mathbb{N}}',
+        Closure: ['{\\operatorname{Cl}(#1)}', 1],
+        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+        Dim: ['{\\dim(#1)}', 1],
+        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+        domain: ['{\\operatorname{dom}(#1)}', 1],
+        False: '{\\bot}',
+        opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+        // ── Complexity Theory & Turing Machines ──────────────────────────
+        // Complexity classes
+        NP: '{\\mathsf{NP}}',
+        coNP: '{\\mathsf{coNP}}',
+        Pclass: '{\\mathsf{P}}',
+        PSPACE: '{\\mathsf{PSPACE}}',
+        EXP: '{\\mathsf{EXP}}',
+        // Turing machine components
+        States: '{\\mathcal{Q}}',
+        TransFunc: '{\\delta}',
+        InitState: '{q_0}',
+        AcceptState: '{q_{\\text{acc}}}',
+        RejectState: '{q_{\\text{rej}}}',
+        InitConfig: '{C_0}',
+        AcceptConfig: '{C_{\\text{acc}}}',
+        Moves: '{\\{\\mathsf{L},\\, \\mathsf{R}\\}}',
+        // Languages & notation
+        Lang: ['{L(#1)}', 1],
+        RE: '{\\mathsf{RE}}',
+        // General math
+        NN: '{\\mathbb{N}}',
+        ZZ: '{\\mathbb{Z}}',
+        RR: '{\\mathbb{R}}'
+      }
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="/">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
+        <a href="/misc/">Random</a>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
+          <option value="rose-pine-ink">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
+        </select>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+
+
+
+  
+  
+
+
+<article class="post">
+  <header class="post-header">
+    
+    
+    <a href="&#x2F;blog&#x2F;monads&#x2F;" class="back-link">&larr; Money For Nothing Monads For Free</a>
+    
+    <h1>Monads in FP in Lean</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-03-23</time>
+      
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/basic/" class="tag">basic</a><a href="/tags/monads/" class="tag">monads</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <p>Notes on <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/One-API___-Many-Applications/">Chapter 4.1: One API, Many Applications</a> from <em>Functional Programming in Lean</em>. See also our <a href="/blog/monads/monads-simplified/">companion post on Dan Piponi's monads</a>.</p>
+<p>The key idea from the Piponi post: a monad is <code>(m, unit, bind)</code> — a type, an identity, and a way to compose functions whose return types are wrapped in that type. Here the book shows the same pattern across four examples.</p>
+<p>Working code: <code>FunctionalProgramming/monad.lean</code></p>
+<h2 id="1-option-silent-failure">1. Option: Silent Failure</h2>
+<p><code>Option α</code> is either <code>none</code> or <code>some x</code>. List indexing with <code>xs[i]?</code> returns an <code>Option</code>.</p>
+<div class="callout callout-warning">
+  
+  <div class="callout-title">Problem</div>
+  
+  <p>Get the first and third elements of a list. Each access can fail.</p>
+
+</div>
+<p>Without <code>bind</code>, we match-and-unwrap at every step:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> firstThird</span><span> (xs : List α) : Option (α × α) :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  match</span><span> xs[</span><span class="z-constant z-numeric z-constant">0</span><span>]? </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>  | none =&gt; none</span></span>
+<span class="giallo-l"><span>  | some first =&gt;</span></span>
+<span class="giallo-l"><span class="z-keyword">    match</span><span> xs[</span><span class="z-constant z-numeric z-constant">2</span><span>]? </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>    | none =&gt; none</span></span>
+<span class="giallo-l"><span>    | some third =&gt; some (first, third)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThird [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>]        -- none</span></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThird [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>]  -- some (</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>)</span></span></code></pre>
+<p>The pattern repeats: "if <code>none</code>, return <code>none</code>; if <code>some</code>, unwrap and continue." This is the composition problem — <code>xs[0]?</code> returns <code>Option α</code>, but the next step expects <code>α</code>.</p>
+<p><strong>bind</strong> (<code>andThen</code>) restores composition:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> andThen</span><span> (opt : Option α) (next : α → Option β) : Option β :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  match</span><span> opt </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>  | none =&gt; none</span></span>
+<span class="giallo-l"><span>  | some x =&gt; next x</span></span></code></pre>
+<p><strong>unit</strong> is <code>some</code> — wrap a value, no failure.</p>
+<p>Now:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> firstThirdSuccinct</span><span> (xs : List α) : Option (α × α) :=</span></span>
+<span class="giallo-l"><span>  andThen xs[</span><span class="z-constant z-numeric z-constant">0</span><span>]? (</span><span class="z-keyword">fun</span><span> first =&gt;</span></span>
+<span class="giallo-l"><span>    andThen xs[</span><span class="z-constant z-numeric z-constant">2</span><span>]? (</span><span class="z-keyword">fun</span><span> third =&gt;</span></span>
+<span class="giallo-l"><span>    some (first, third)))</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdSuccinct [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]  -- some (</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>)</span></span></code></pre>
+<p>With an infix operator <code>~~&gt;</code> for <code>andThen</code>, it gets even cleaner:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">infixl</span><span>:</span><span class="z-constant z-numeric z-constant">55</span><span class="z-string"> &quot;</span><span class="z-string"> ~~&gt; </span><span class="z-string">&quot;</span><span> =&gt; andThen</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> firstThirdFifthInfix</span><span> (xs : List α) : Option (α × α × α) :=</span></span>
+<span class="giallo-l"><span>  xs[</span><span class="z-constant z-numeric z-constant">0</span><span>]? ~~&gt; </span><span class="z-keyword">fun</span><span> first =&gt;</span></span>
+<span class="giallo-l"><span>  xs[</span><span class="z-constant z-numeric z-constant">2</span><span>]? ~~&gt; </span><span class="z-keyword">fun</span><span> third =&gt;</span></span>
+<span class="giallo-l"><span>  xs[</span><span class="z-constant z-numeric z-constant">4</span><span>]? ~~&gt; </span><span class="z-keyword">fun</span><span> fifth =&gt;</span></span>
+<span class="giallo-l"><span>  some (first, third, fifth)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthInfix [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>]  -- some (</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>)</span></span></code></pre><h2 id="2-except-error-messages">2. Except: Error Messages</h2>
+<p><code>Except ε α</code> is like <code>Option</code> but carries an error message instead of silent <code>none</code>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">inductive</span><span class="z-entity z-name z-entity z-name z-function"> Error</span><span> (ε : </span><span class="z-storage z-type">Type</span><span>) (α : </span><span class="z-storage z-type">Type</span><span>) </span><span class="z-keyword">where</span></span>
+<span class="giallo-l"><span>  | error : ε → Error ε α</span></span>
+<span class="giallo-l"><span>  | ok : α → Error ε α</span></span>
+<span class="giallo-l"><span class="z-keyword">deriving</span><span> Repr</span></span></code></pre>
+<p>Same problem — can't compose because <code>get</code> returns <code>Error String α</code>, not <code>α</code>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> get</span><span> (xs : List α) (i : Nat) : Error String α :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  match</span><span> xs[i]? </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>  | none =&gt; Error.error </span><span class="z-keyword">s!</span><span class="z-string">&quot;</span><span class="z-string">Index </span><span class="z-keyword">{</span><span class="z-string">i</span><span class="z-keyword">}</span><span class="z-string"> not found (maximum is </span><span class="z-keyword">{</span><span class="z-string">xs.length - </span><span class="z-constant z-numeric z-constant">1</span><span class="z-keyword">}</span><span class="z-string">)</span><span class="z-string">&quot;</span></span>
+<span class="giallo-l"><span>  | some x =&gt; Error.ok x</span></span></code></pre>
+<p><strong>bind</strong>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> andThenError</span><span> (attempt : Error e α) (next : α → Error e β) : Error e β :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  match</span><span> attempt </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>  | Error.error msg =&gt; Error.error msg</span></span>
+<span class="giallo-l"><span>  | Error.ok x =&gt; next x</span></span></code></pre>
+<p><strong>unit</strong>: <code>Error.ok</code></p>
+<p>Now:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> firstThirdError</span><span> (xs : List α) : Error String (α × α) :=</span></span>
+<span class="giallo-l"><span>  andThenError (get xs </span><span class="z-constant z-numeric z-constant">0</span><span>) </span><span class="z-keyword">fun</span><span> first =&gt;</span></span>
+<span class="giallo-l"><span>    andThenError (get xs </span><span class="z-constant z-numeric z-constant">2</span><span>) </span><span class="z-keyword">fun</span><span> third =&gt;</span></span>
+<span class="giallo-l"><span>    Error.ok (first, third)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdError [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>] -- Error.ok (</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>)</span></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdError [</span><span class="z-constant z-numeric z-constant">1</span><span>]          -- Error.error </span><span class="z-string">&quot;</span><span class="z-string">Index 2 not found (maximum is 0)</span><span class="z-string">&quot;</span></span></code></pre><h2 id="3-withlog-accumulating-a-log">3. WithLog: Accumulating a Log</h2>
+<p>A value paired with accumulated log entries — like the debuggable functions from the <a href="/blog/monads/monads-simplified/">Piponi post</a>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">structure</span><span class="z-entity z-name z-entity z-name z-function"> WithLog</span><span> (logged : </span><span class="z-storage z-type">Type</span><span>) (α : </span><span class="z-storage z-type">Type</span><span>) </span><span class="z-keyword">where</span></span>
+<span class="giallo-l"><span>  log : List logged</span></span>
+<span class="giallo-l"><span>  val : α</span></span>
+<span class="giallo-l"><span class="z-keyword">deriving</span><span> Repr</span></span></code></pre>
+<p><strong>bind</strong> (<code>andThenLog</code>) — run the first computation, then the next, concatenate the logs:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> andThenLog</span><span> (result : WithLog α β) (next : β → WithLog α γ) : WithLog α γ :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> { log := thisOut, val := thisRes } := result</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> { log := nextOut, val := nextRes } := next thisRes</span></span>
+<span class="giallo-l"><span>  { log := thisOut ++ nextOut, val := nextRes }</span></span></code></pre>
+<p><strong>unit</strong> (<code>okLog</code>) — wrap a value with an empty log:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> okLog</span><span> (x : β) : WithLog α β := { log := [], val := x }</span></span></code></pre>
+<p>Extra operation — save a log entry:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> save</span><span> (data : α) : WithLog α Unit :=</span></span>
+<span class="giallo-l"><span>  { log := [data], val := () }</span></span></code></pre>
+<p>This is the Writer monad. Compare with the Piponi post: there <code>bind</code> concatenated <code>String</code>s, here it concatenates <code>List</code>s. Same idea.</p>
+<p>Usage with <code>~~&gt;L</code> as infix for <code>andThenLog</code>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> sumAndFindEvens</span><span> : List Int → WithLog Int Int</span></span>
+<span class="giallo-l"><span>  | [] =&gt; okLog </span><span class="z-constant z-numeric z-constant">0</span></span>
+<span class="giallo-l"><span>  | i :: is =&gt;</span></span>
+<span class="giallo-l"><span>    (</span><span class="z-keyword">if</span><span> isEven i </span><span class="z-keyword">then</span><span> save i </span><span class="z-keyword">else</span><span> okLog ()) ~~&gt;L </span><span class="z-keyword">fun</span><span> () =&gt;</span></span>
+<span class="giallo-l"><span>    sumAndFindEvens is ~~&gt;L </span><span class="z-keyword">fun</span><span> sum =&gt;</span></span>
+<span class="giallo-l"><span>    okLog (i + sum)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> sumAndFindEvens [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>]</span></span>
+<span class="giallo-l"><span>-- { log := [</span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>], val := </span><span class="z-constant z-numeric z-constant">15</span><span> }</span></span></code></pre><h2 id="4-state-mutable-variables">4. State: Mutable Variables</h2>
+<p>State is modeled as a function from input state to output state and value — like the random seed example from the <a href="/blog/monads/monads-simplified/">Piponi post</a>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> State</span><span> (σ : </span><span class="z-storage z-type">Type</span><span>) (α : </span><span class="z-storage z-type">Type</span><span>) : </span><span class="z-storage z-type">Type</span><span> :=</span></span>
+<span class="giallo-l"><span>  σ → (σ × α)</span></span></code></pre>
+<p><strong>bind</strong> (<code>andThenState</code>) — thread the state through:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> andThenState</span><span> (first : State σ α) (next : α → State σ β) : State σ β :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  fun</span><span> s =&gt;</span></span>
+<span class="giallo-l"><span class="z-keyword">    let</span><span> (s&#39;, x) := first s</span></span>
+<span class="giallo-l"><span>    next x s&#39;</span></span></code></pre>
+<p><strong>unit</strong> (<code>okState</code>) — return a value, leave the state unchanged:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> okState</span><span> (x : α) : State σ α :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  fun</span><span> s =&gt; (s, x)</span></span></code></pre>
+<p>Extra operations — read and write the state:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> getState</span><span> : State σ σ :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  fun</span><span> s =&gt; (s, s)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> setState</span><span> (s : σ) : State σ Unit :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  fun</span><span> _ =&gt; (s, ())</span></span></code></pre>
+<p>Usage — number the nodes of a binary tree with a counter as state, using <code>~~&gt;S</code> as infix for <code>andThenState</code>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> numberHelper</span><span> : BinTree α → State Nat (BinTree (Nat × α))</span></span>
+<span class="giallo-l"><span>  | BinTree.leaf =&gt; okState BinTree.leaf</span></span>
+<span class="giallo-l"><span>  | BinTree.branch left x right =&gt;</span></span>
+<span class="giallo-l"><span>    numberHelper left ~~&gt;S </span><span class="z-keyword">fun</span><span> numberedLeft =&gt;</span></span>
+<span class="giallo-l"><span>    getState ~~&gt;S </span><span class="z-keyword">fun</span><span> n =&gt;</span></span>
+<span class="giallo-l"><span>    setState (n + </span><span class="z-constant z-numeric z-constant">1</span><span>) ~~&gt;S </span><span class="z-keyword">fun</span><span> () =&gt;</span></span>
+<span class="giallo-l"><span>    numberHelper right ~~&gt;S </span><span class="z-keyword">fun</span><span> numberedRight =&gt;</span></span>
+<span class="giallo-l"><span>    okState (BinTree.branch numberedLeft (n, x) numberedRight)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> number</span><span> (t : BinTree α) : BinTree (Nat × α) :=</span></span>
+<span class="giallo-l"><span>  (numberHelper t </span><span class="z-constant z-numeric z-constant">0</span><span>).</span><span class="z-constant z-numeric z-constant">2</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> number (BinTree.branch</span></span>
+<span class="giallo-l"><span>  (BinTree.branch BinTree.leaf </span><span class="z-string">&quot;</span><span class="z-string">a</span><span class="z-string">&quot;</span><span> BinTree.leaf) </span><span class="z-string">&quot;</span><span class="z-string">b</span><span class="z-string">&quot;</span></span>
+<span class="giallo-l"><span>  (BinTree.branch BinTree.leaf </span><span class="z-string">&quot;</span><span class="z-string">c</span><span class="z-string">&quot;</span><span> BinTree.leaf))</span></span>
+<span class="giallo-l"><span>-- branch (branch leaf (</span><span class="z-constant z-numeric z-constant">0</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">a</span><span class="z-string">&quot;</span><span>) leaf) (</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">b</span><span class="z-string">&quot;</span><span>) (branch leaf (</span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">c</span><span class="z-string">&quot;</span><span>) leaf)</span></span></code></pre><h2 id="the-pattern">The Pattern</h2>
+<p>In the <a href="/blog/monads/monads-simplified/">Piponi post</a> we saw three monads:</p>
+<table><thead><tr><th></th><th>Type <code>m α</code></th><th>bind</th><th>unit</th><th>Side effect</th></tr></thead><tbody>
+<tr><td><strong>Debuggable</strong></td><td><code>α × String</code></td><td>unwrap, apply, concat strings</td><td><code>(x, "")</code></td><td>debug logging</td></tr>
+<tr><td><strong>Multivalued</strong></td><td><code>List α</code></td><td>apply to each, flatten</td><td><code>[x]</code></td><td>multiple values</td></tr>
+<tr><td><strong>Randomised</strong></td><td><code>StdGen → α × StdGen</code></td><td>thread seed through</td><td><code>fun s =&gt; (x, s)</code></td><td>randomness</td></tr>
+</tbody></table>
+<p>The FP in Lean book gives us four more — all the same structure:</p>
+<table><thead><tr><th></th><th>Type <code>m α</code></th><th>bind</th><th>unit</th><th>Side effect</th></tr></thead><tbody>
+<tr><td><strong>Option</strong></td><td><code>Option α</code></td><td>if <code>none</code> stop, else unwrap</td><td><code>some</code></td><td>silent failure</td></tr>
+<tr><td><strong>Except</strong></td><td><code>Error ε α</code></td><td>if <code>error</code> stop, else unwrap</td><td><code>Error.ok</code></td><td>error messages</td></tr>
+<tr><td><strong>WithLog</strong></td><td><code>WithLog logged α</code></td><td>run both, concat logs</td><td><code>okLog</code></td><td>logging</td></tr>
+<tr><td><strong>State</strong></td><td><code>σ → σ × α</code></td><td>thread state through</td><td><code>okState</code></td><td>mutable state</td></tr>
+</tbody></table>
+<p>The triple <code>(m, unit, bind)</code> is a <strong>monad</strong>:</p>
+<ul>
+<li><code>m</code> is the context (failure, error, log, state)</li>
+<li><code>unit</code> is the identity (enter the monadic world doing nothing)</li>
+<li><code>bind</code> is the composer (chain operations, handling the plumbing)</li>
+</ul>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">Terminology</div>
+  
+  <p>Different sources use different names for the same things:</p>
+<table><thead><tr><th>Our name (Piponi)</th><th>FP in Lean book</th><th>This post</th><th>Lean's actual API</th></tr></thead><tbody>
+<tr><td><code>bind</code></td><td><code>andThen</code></td><td><code>andThen</code>, <code>andThenError</code>, <code>andThenLog</code>, <code>andThenState</code></td><td><code>&gt;&gt;=</code> (or <code>Bind.bind</code>)</td></tr>
+<tr><td><code>unit</code></td><td><code>ok</code></td><td><code>some</code>, <code>Error.ok</code>, <code>okLog</code>, <code>okState</code></td><td><code>pure</code> (or <code>Pure.pure</code>)</td></tr>
+</tbody></table>
+<p>The book uses generic names <code>andThen</code> and <code>ok</code> for all four (in separate namespaces). In our Lean file we use distinct names to avoid conflicts. Lean's <code>Monad</code> type class unifies them all under <code>pure</code> and <code>&gt;&gt;=</code>.</p>
+
+</div>
+<h2 id="references">References</h2>
+<ul>
+<li><a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/One-API___-Many-Applications/">Chapter 4.1: One API, Many Applications</a> — The FP in Lean chapter these notes follow.</li>
+<li><a rel="external" href="http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html">You Could Have Invented Monads!</a> — Dan Piponi's classic post.</li>
+<li><a href="/blog/monads/monads-simplified/">Our companion post: Monads Simplified</a> — The same ideas via Piponi's examples in Lean.</li>
+</ul>
+
+  </div>
+
+  
+
+  
+  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
+  <nav class="toc toc-panel" id="toc-panel">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#1-option-silent-failure">1. Option: Silent Failure</a></li><li><a href="#2-except-error-messages">2. Except: Error Messages</a></li><li><a href="#3-withlog-accumulating-a-log">3. WithLog: Accumulating a Log</a></li><li><a href="#4-state-mutable-variables">4. State: Mutable Variables</a></li><li><a href="#the-pattern">The Pattern</a></li><li><a href="#references">References</a></li></ol>
+  </nav>
+  <script>
+    (function() {
+      var btn = document.getElementById('toc-toggle');
+      var panel = document.getElementById('toc-panel');
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target)) {
+          panel.classList.remove('open');
+        }
+      });
+      panel.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          panel.classList.remove('open');
+        });
+      });
+    })();
+  </script>
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const select = document.getElementById('theme-select');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      const lightThemes = ['rose-pine-dawn'];
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        }
+      }
+
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
+
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
+    })();
+  </script>
+  <script>
+    // Smooth scroll + highlight for eqref and citation links.
+    // Citations get a ↩ back-link to return to reading position.
+    document.addEventListener('click', function(e) {
+      // Handle back-arrow clicks
+      var back = e.target.closest('.bib-back');
+      if (back) {
+        e.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Clean up previous highlights and back-links
+      document.querySelectorAll('.eq-highlight').forEach(function(el) {
+        el.classList.remove('eq-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function(el) {
+        el.remove();
+      });
+
+      var href = link.getAttribute('href');
+      var id = decodeURIComponent(href.slice(1));
+      var target = document.getElementById(id);
+      if (!target) return;
+
+      var highlight = target.closest('mjx-container[display="true"]') || target;
+      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlight.classList.add('eq-highlight');
+
+      // For citations, add a back-arrow to return to reading position
+      if (link.classList.contains('citation')) {
+        if (!link.id) link.id = 'cite-src-' + id;
+        var arrow = document.createElement('a');
+        arrow.className = 'bib-back';
+        arrow.setAttribute('data-source', link.id);
+        arrow.textContent = ' \u21A9';
+        arrow.title = 'Back to text';
+        highlight.appendChild(arrow);
+      }
+    });
+  </script>
+
+</body>
+</html>

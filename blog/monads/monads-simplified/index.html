@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'rose-pine-ink' : 'vitesse-dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monads Simplified | Random Walks</title>
+  <link rel="stylesheet" href="/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  
+  
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      tags: 'ams',
+      macros: {
+        field: ['{\\mathbb{#1}}', 1],
+        hei: ['{\\mathbb{F}(#1)}', 1],
+        Field: '{\\mathbb{F}}',
+        Mont: ['{\\widetilde{#1}}', 1],
+        samples: '{\\xleftarrow{\\$}}',
+        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+        TauConstraints: '{\\tau_y}',
+        TauTime: '{\\tau_{\\text{cycle}}}',
+        TauGroup: '{\\tau_b}',
+        MLE: ['{\\widetilde{#1}}', 1],
+        tf: ['{\\widetilde{#1}}', 1],
+        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+        Def: '{:=}',
+        ChallengeSet: '{\\mathsf{C}}',
+        Complement: ['{\\overline{#1}}', 1],
+        Size: ['{\\left|#1\\right|}', 1],
+        Exp: ['{2^{#1}}', 1],
+        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+        BigO: ['{O\\ \\left(#1\\right)}', 1],
+        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
+        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
+        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+        poly: '{\\operatorname{poly}}',
+        criticalAlpha: ['{\\alpha_{#1}}', 1],
+        bit: '{\\{0,1\\}}',
+        CStar: '{C^{\\star}}',
+        GraphNbrs: ['{N_G(#1)}', 1],
+        ClauseNbrs: ['{N_C(#1)}', 1],
+        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        SmallO: ['{o\\!(#1)}', 1],
+        Naturals: '{\\mathbb{N}}',
+        Closure: ['{\\operatorname{Cl}(#1)}', 1],
+        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+        Dim: ['{\\dim(#1)}', 1],
+        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+        domain: ['{\\operatorname{dom}(#1)}', 1],
+        False: '{\\bot}',
+        opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+        // ── Complexity Theory & Turing Machines ──────────────────────────
+        // Complexity classes
+        NP: '{\\mathsf{NP}}',
+        coNP: '{\\mathsf{coNP}}',
+        Pclass: '{\\mathsf{P}}',
+        PSPACE: '{\\mathsf{PSPACE}}',
+        EXP: '{\\mathsf{EXP}}',
+        // Turing machine components
+        States: '{\\mathcal{Q}}',
+        TransFunc: '{\\delta}',
+        InitState: '{q_0}',
+        AcceptState: '{q_{\\text{acc}}}',
+        RejectState: '{q_{\\text{rej}}}',
+        InitConfig: '{C_0}',
+        AcceptConfig: '{C_{\\text{acc}}}',
+        Moves: '{\\{\\mathsf{L},\\, \\mathsf{R}\\}}',
+        // Languages & notation
+        Lang: ['{L(#1)}', 1],
+        RE: '{\\mathsf{RE}}',
+        // General math
+        NN: '{\\mathbb{N}}',
+        ZZ: '{\\mathbb{Z}}',
+        RR: '{\\mathbb{R}}'
+      }
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="/">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
+        <a href="/misc/">Random</a>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
+          <option value="rose-pine-ink">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
+        </select>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+
+
+
+  
+  
+
+
+<article class="post">
+  <header class="post-header">
+    
+    
+    <a href="&#x2F;blog&#x2F;monads&#x2F;" class="back-link">&larr; Money For Nothing Monads For Free</a>
+    
+    <h1>Monads Simplified</h1>
+    <div class="post-meta">
+      <span class="post-author">AB</span>
+      <time>2026-03-22</time>
+      
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/tag1/" class="tag">tag1</a><a href="/tags/tag2/" class="tag">tag2</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <p>Re-doing <a rel="external" href="http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html">this</a> blog post but in Lean.
+My big take away messages is monadic programming just a way to bring composition back when there are side effects.</p>
+<h2 id="debug-messages">Debug Messages</h2>
+<div class="callout callout-warning">
+  
+  <div class="callout-title">Problem 1</div>
+  
+  <p>Consider this problem in a pure functional language: we have functions $f$ and $g$ that both map reals to reals, but we'd like to modify these functions to also output strings for debugging purposes.</p>
+
+</div>
+<p>In Lean, <code>f</code> and <code>g</code> might have types given by <code>ℝ → ℝ</code>.</p>
+<p>How can we modify the types of <code>f</code> and <code>g</code> to admit side effects<sup class="footnote-reference"><a href="#1">1</a></sup>?</p>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>By "side effect" here we just mean returning something extra alongside the main result — in this case, a debugging string. In a pure language, the only way to produce extra output is to include it in the return type.
+<strong>Well there really isn't any choice at all.</strong>
+If we'd like <code>f'</code> and <code>g'</code> to produce strings as well as real numbers as output, then the only possible way is for these strings to be returned alongside the real numbers.
+In other words, we need <code>f'</code> and <code>g'</code> to be of type <code>ℝ → ℝ × String</code>. We'll call these <strong>debuggable functions</strong> — functions that take a normal input but return a pair: the result and a log string.</p>
+</div>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> f&#39;</span><span> (x : ℝ) : ℝ × String := (x + </span><span class="z-constant z-numeric z-constant">1</span><span>.</span><span class="z-constant z-numeric z-constant">0</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">f was called.</span><span class="z-string">&quot;</span><span>)</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> g&#39;</span><span> (x : ℝ) : ℝ × String := (x * </span><span class="z-constant z-numeric z-constant">2</span><span>.</span><span class="z-constant z-numeric z-constant">0</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">g was called.</span><span class="z-string">&quot;</span><span>)</span></span></code></pre><pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>    x                       x</span></span>
+<span class="giallo-l"><span>    |                       |</span></span>
+<span class="giallo-l"><span>  +---+                   +---+</span></span>
+<span class="giallo-l"><span>  | f |  normal           | f&#39;|  debuggable</span></span>
+<span class="giallo-l"><span>  +---+                   +---+</span></span>
+<span class="giallo-l"><span>    |                      |   \</span></span>
+<span class="giallo-l"><span>   f(x)                  f(x)  &quot;f was called.&quot;</span></span></code></pre>
+<p>Now we'd like to compose <code>f'</code> and <code>g'</code> — apply <code>g'</code> then <code>f'</code>, concatenating the debug strings. But we can't just do <code>f' (g' x)</code> because <code>g'</code> returns <code>ℝ × String</code>, not <code>ℝ</code>. We have to manually unwrap:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> compose</span><span> (x : ℝ) : ℝ × String :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (y, s) := g&#39; x</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (z, t) := f&#39; y</span></span>
+<span class="giallo-l"><span>  (z, String.append s t)</span></span></code></pre>
+<p>Here's the plumbing drawn out:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>      x</span></span>
+<span class="giallo-l"><span>      |</span></span>
+<span class="giallo-l"><span>    +---+</span></span>
+<span class="giallo-l"><span>    | g&#39;|</span></span>
+<span class="giallo-l"><span>    +---+</span></span>
+<span class="giallo-l"><span>     |   \</span></span>
+<span class="giallo-l"><span>   +---+  | &quot;g was called.&quot;</span></span>
+<span class="giallo-l"><span>   | f&#39;|  |</span></span>
+<span class="giallo-l"><span>   +---+  |</span></span>
+<span class="giallo-l"><span>    |  \   |</span></span>
+<span class="giallo-l"><span>    |   \ |</span></span>
+<span class="giallo-l"><span>    |  +---------------+</span></span>
+<span class="giallo-l"><span>    |  | String.append |</span></span>
+<span class="giallo-l"><span>    |  +---------------+</span></span>
+<span class="giallo-l"><span>    |     |</span></span>
+<span class="giallo-l"><span>  f(g x) &quot;g was called.f was called.&quot;</span></span></code></pre>
+<p>The result of <code>g'</code> is split: the real goes into <code>f'</code>, and the two strings are concatenated with <code>String.append</code>.</p>
+<p>Now imagine we add a third debuggable function and want to compose all three:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> h&#39;</span><span> (x : ℝ) : ℝ × String := (x - </span><span class="z-constant z-numeric z-constant">3</span><span>.</span><span class="z-constant z-numeric z-constant">0</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">h was called.</span><span class="z-string">&quot;</span><span>)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> compose3</span><span> (x : ℝ) : ℝ × String :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (y, s1) := g&#39; x</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (z, s2) := f&#39; y</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (w, s3) := h&#39; z</span></span>
+<span class="giallo-l"><span>  (w, String.append (String.append s1 s2) s3)</span></span></code></pre>
+<p>Every time we add another function, we add another <code>let</code> to unwrap and another <code>String.append</code> to glue the logs. Four functions:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> k&#39;</span><span> (x : ℝ) : ℝ × String := (x / </span><span class="z-constant z-numeric z-constant">2</span><span>.</span><span class="z-constant z-numeric z-constant">0</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">k was called.</span><span class="z-string">&quot;</span><span>)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> compose4</span><span> (x : ℝ) : ℝ × String :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (y, s1) := g&#39; x</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (z, s2) := f&#39; y</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (w, s3) := h&#39; z</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (v, s4) := k&#39; w</span></span>
+<span class="giallo-l"><span>  (v, String.append (String.append (String.append s1 s2) s3) s4)</span></span></code></pre>
+<p>Notice that without the debugging strings, composing four functions is just:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> compose4_pure</span><span> (x : ℝ) : ℝ := k (h (f (g x)))</span></span></code></pre>
+<p>Or equivalently <code>k ∘ h ∘ f ∘ g</code>. The side effect of outputting strings is what breaks this natural composition — we can no longer just plug one function into the next because the types don't line up (<code>ℝ × String</code> vs <code>ℝ</code>).</p>
+<p>But note that we have a pattern that is always the same:</p>
+<ol>
+<li>unwrap the pair,</li>
+<li>feed the value to the next function,</li>
+<li>accumulate the strings.</li>
+</ol>
+<p>We're copying and pasting the same plumbing every time. So we do the most obvious thing possible, we factor that bit out and call it <code>bind</code>.
+What <code>bind</code> does is <strong>bring back composition</strong>.
+It's a function that handles the plumbing so we can chain the functions as easily as we chain pure ones.</p>
+<p><code>bind</code> takes two things:</p>
+<ul>
+<li>a pair of result and log</li>
+<li>the <strong>next</strong> function we wish to apply.</li>
+</ul>
+<p>And it does the unwrap-apply-concat step for you:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> bind</span><span> (pair : ℝ × String) (next : ℝ → ℝ × String) : ℝ × String :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (value, log1) := pair          -- </span><span class="z-constant z-numeric z-constant">1</span><span>. unwrap the pair</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (result, log2) := next value   -- </span><span class="z-constant z-numeric z-constant">2</span><span>. feed value to next function</span></span>
+<span class="giallo-l"><span>  (result, String.append log1 log2)  -- </span><span class="z-constant z-numeric z-constant">3</span><span>. glue the logs together</span></span></code></pre>
+<p>So instead of all that manual plumbing:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> compose4</span><span> (x : ℝ) : ℝ × String :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (y, s1) := g&#39; x</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (z, s2) := f&#39; y</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (w, s3) := h&#39; z</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (v, s4) := k&#39; w</span></span>
+<span class="giallo-l"><span>  (v, String.append (String.append (String.append s1 s2) s3) s4)</span></span></code></pre>
+<p>We write:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> compose4</span><span> (x : ℝ) : ℝ × String :=</span></span>
+<span class="giallo-l"><span>  bind (bind (bind (g&#39; x) f&#39;) h&#39;) k&#39;</span></span></code></pre>
+<p>Each <code>bind</code> handles one unwrap-apply-concat step. Composition is back.</p>
+<h3 id="lift-and-unit">Lift and Unit</h3>
+<div class="callout callout-remark">
+  
+  <p><code>bind</code> lets us compose things already in the debuggable world. But how do we <strong>enter</strong> the debuggable world from outside? If we have a plain value <code>5</code> or a plain function <code>f : ℝ → ℝ</code>, how do we use them with <code>bind</code>?</p>
+
+</div>
+<p>We can now compose debuggable functions using <code>bind</code>. Write this composition as <code>f' * g' = bind (g' x) f'</code><sup class="footnote-reference"><a href="#2">2</a></sup>. Even though the output of <code>g'</code> is incompatible with the input of <code>f'</code>, we have a nice way to chain them.</p>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>We use <code>*</code> instead of <code>∘</code> because this is a different operation from ordinary composition. <code>f' ∘ g'</code> is a type error — <code>g'</code> returns <code>ℝ × String</code> but <code>f'</code> expects <code>ℝ</code>. The <code>*</code> composition goes through <code>bind</code> to handle the plumbing.</p>
+</div>
+<p>This suggests a question: is there an <strong>identity</strong> for this composition?</p>
+<p>Ordinary composition has <code>id</code> (where <code>def id (x : α) : α := x</code>), satisfying <code>f ∘ id = f</code> and <code>id ∘ f = f</code>. So we're looking for a debuggable function <code>unit</code> such that <code>unit * f' = f' * unit = f'</code>. It should do nothing — return the value unchanged and produce the empty string:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> unit</span><span> (x : ℝ) : ℝ × String := (x, </span><span class="z-string">&quot;</span><span class="z-string">&quot;</span><span>)</span></span></code></pre>
+<p><code>unit</code> also lets us <strong>lift</strong> any ordinary function into a debuggable one. If <code>f : ℝ → ℝ</code> is a plain function, then <code>lift f = unit ∘ f</code> — apply <code>f</code> first, then wrap the result with <code>unit</code>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> lift</span><span> (f : ℝ → ℝ) (x : ℝ) : ℝ × String := unit (f x)</span></span></code></pre>
+<p>The lifted version does the same as the original and produces the empty string as its side effect.</p>
+<p>In summary: <code>bind</code> and <code>unit</code> allow us to compose debuggable functions in a straightforward way, and compose ordinary functions with debuggable functions in a natural way.</p>
+<p>Believe it or not, you've just defined your first monad.</p>
+<h2 id="the-container-multivalued-functions">The Container: Multivalued Functions</h2>
+<p>Now a completely different problem. Consider square roots and cube roots of complex numbers. Over the complex numbers, every nonzero number has <strong>two</strong> square roots and <strong>three</strong> cube roots. For example, $-1$ has two square roots: $i$ and $-i$. So these functions naturally return lists:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> sqrt&#39;</span><span> (x : ℂ) : List ℂ := </span><span class="z-invalid z-invalid z-illegal">sorry</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> cbrt&#39;</span><span> (x : ℂ) : List ℂ := </span><span class="z-invalid z-invalid z-illegal">sorry</span></span></code></pre>
+<p>We'll call these <strong>multivalued functions</strong> — functions of type <code>ℂ → List ℂ</code>.</p>
+<p>Now suppose we want to find all six sixth roots of a number. A sixth root is a square root of a cube root, or equivalently a cube root of a square root. With ordinary functions we'd just compose: <code>sixthroot x = sqrt (cbrt x)</code>.</p>
+<p>But <code>sqrt'</code> and <code>cbrt'</code> can't be composed with <code>∘</code> — <code>cbrt'</code> returns <code>List ℂ</code>, not <code>ℂ</code>. We need to apply the next function to <strong>every</strong> element of the list, then flatten the results into one list.</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>         x</span></span>
+<span class="giallo-l"><span>         |</span></span>
+<span class="giallo-l"><span>     +------+</span></span>
+<span class="giallo-l"><span>     | sqrt&#39;|</span></span>
+<span class="giallo-l"><span>     +------+</span></span>
+<span class="giallo-l"><span>      |    |</span></span>
+<span class="giallo-l"><span>      a    b</span></span>
+<span class="giallo-l"><span>      |    |</span></span>
+<span class="giallo-l"><span>  +------+  +------+</span></span>
+<span class="giallo-l"><span>  | cbrt&#39;|  | cbrt&#39;|</span></span>
+<span class="giallo-l"><span>  +------+  +------+</span></span>
+<span class="giallo-l"><span>   |  |  |   |  |  |</span></span>
+<span class="giallo-l"><span>   .  .  .   .  .  .</span></span></code></pre>
+<p>Either way we get 6 results. But we can't just compose — we need a helper.</p>
+<p>We want to write <code>cbrt'</code> once but have it applied to both <code>sqrt'</code> values. Sound familiar? We need another <code>bind</code> — a function that handles the plumbing for multivalued composition:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> bindList</span><span> (x : List ℂ) (f : ℂ → List ℂ) : List ℂ :=</span></span>
+<span class="giallo-l"><span>  x.flatMap f</span></span></code></pre>
+<p>That's it. <code>bind</code> for lists is just <code>flatMap</code> — apply the function to each element and concatenate all the results. Now composing is easy:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- If these were composable, we&#39;d write: cbrt&#39; (sqrt&#39; x)</span></span>
+<span class="giallo-l"><span>-- i.e. B(A(x)) </span><span class="z-keyword">where</span><span> A = sqrt&#39; and B = cbrt&#39;.</span></span>
+<span class="giallo-l"><span>-- But A returns List ℂ, not ℂ, so we use bind instead:</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> sixthRoots</span><span> (x : ℂ) : List ℂ :=</span></span>
+<span class="giallo-l"><span>  bindList (sqrt&#39; x) cbrt&#39;</span></span></code></pre>
+<p>And the identity? A multivalued function that returns exactly one value — a singleton list:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> unitList</span><span> (x : ℂ) : List ℂ := [x]</span></span></code></pre>
+<p>You've defined your second monad. Two entirely different problems, same structure:</p>
+
+
+
+
+
+
+
+<div class="comparison-dual">
+  <figure class="comparison-left">
+    <p><strong>Type:</strong> <code>α × String</code></p>
+<p><strong>bind:</strong></p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> bind</span><span> (pair : ℝ × String)</span></span>
+<span class="giallo-l"><span>    (next : ℝ → ℝ × String) : ℝ × String :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (value, log1) := pair</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (result, log2) := next value</span></span>
+<span class="giallo-l"><span>  (result, String.append log1 log2)</span></span></code></pre>
+<p><strong>unit:</strong></p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> unit</span><span> (x : ℝ) : ℝ × String := (x, </span><span class="z-string">&quot;</span><span class="z-string">&quot;</span><span>)</span></span></code></pre>
+<p>unwrap the pair, apply next, concat strings.</p>
+
+    <figcaption>Debuggable</figcaption>
+  </figure>
+  <figure class="comparison-right">
+    <p><strong>Type:</strong> <code>List α</code></p>
+<p><strong>bind:</strong></p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> bindList</span><span> (x : List ℂ)</span></span>
+<span class="giallo-l"><span>    (next : ℂ → List ℂ) : List ℂ :=</span></span>
+<span class="giallo-l"><span>  x.flatMap next</span></span></code></pre>
+<p><strong>unit:</strong></p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> unitList</span><span> (x : ℂ) : List ℂ := [x]</span></span></code></pre>
+<p>apply next to each element, flatten the lists.</p>
+
+    <figcaption>Multivalued</figcaption>
+  </figure>
+</div>
+
+<h2 id="a-more-complex-side-effect-state">A More Complex Side Effect: State</h2>
+<p>A third problem. Suppose we want to generate random numbers in a pure language. A random number generator needs a <strong>seed</strong> — you pass one in, get a value and a new seed out:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- RandomGen.next : StdGen → Nat × StdGen</span></span></code></pre>
+<p>Note the similarity to the debuggable case: we're returning extra data alongside the result. But this time we're <strong>passing in</strong> extra data too. The seed goes in and comes out.</p>
+<p>A function that adds a random digit to a number looks like this:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> addDigit</span><span> (n : Nat) (seed : StdGen) : Nat × StdGen :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (rand, seed&#39;) := RandomGen.next seed</span></span>
+<span class="giallo-l"><span>  (n + rand % </span><span class="z-constant z-numeric z-constant">10</span><span>, seed&#39;)</span></span></code></pre>
+<p>And a plain function that multiplies by 10:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> shift</span><span> (n : Nat) : Nat := n * </span><span class="z-constant z-numeric z-constant">10</span></span></code></pre>
+<p>We want to build a random 2-digit number: add a digit, shift by 10, add another digit. Without the seed this would just be <code>addDigit (shift (addDigit 0))</code>. But we have to thread the seed manually:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> twoDigitManual</span><span> (seed : StdGen) : Nat × StdGen :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (n1, seed1) := addDigit </span><span class="z-constant z-numeric z-constant">0</span><span> seed</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> n2 := shift n1</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> (n3, seed2) := addDigit n2 seed1</span></span>
+<span class="giallo-l"><span>  (n3, seed2)</span></span></code></pre>
+<p>Same pattern again: unwrap, apply, thread the extra stuff. So we write <code>bind</code>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> bindState</span><span> (x : StdGen → α × StdGen) (next : α → StdGen → β × StdGen)</span></span>
+<span class="giallo-l"><span>    : StdGen → β × StdGen :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  fun</span><span> seed =&gt;</span></span>
+<span class="giallo-l"><span class="z-keyword">    let</span><span> (a, seed&#39;) := x seed    -- run first computation, get value and new seed</span></span>
+<span class="giallo-l"><span>    next a seed&#39;                 -- pass both to the next computation</span></span></code></pre>
+<p>The seed from the first computation is fed into the second. And <code>unit</code>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> unitState</span><span> (x : α) : StdGen → α × StdGen :=</span></span>
+<span class="giallo-l"><span class="z-keyword">  fun</span><span> seed =&gt; (x, seed)</span></span></code></pre>
+<p>Returns the value, passes the seed through unchanged. We can lift plain functions too:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> liftState</span><span> (f : α → β) (x : α) : StdGen → β × StdGen :=</span></span>
+<span class="giallo-l"><span>  unitState (f x)</span></span></code></pre>
+<p>Now composing without manual plumbing:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> twoDigit</span><span> : StdGen → Nat × StdGen :=</span></span>
+<span class="giallo-l"><span>  bindState (addDigit </span><span class="z-constant z-numeric z-constant">0</span><span>) (</span><span class="z-keyword">fun</span><span> n1 =&gt;</span></span>
+<span class="giallo-l"><span>    bindState (liftState shift n1) (</span><span class="z-keyword">fun</span><span> n2 =&gt;</span></span>
+<span class="giallo-l"><span>      addDigit n2))</span></span></code></pre>
+<p>Same pattern, third time.</p>
+<h2 id="monads">Monads</h2>
+<p>It's now time to step back and discern the common structure.</p>
+<p>In all three cases we had:</p>
+<ul>
+<li>A type that wraps values with some extra context<sup class="footnote-reference"><a href="#3">3</a></sup> — call it <code>m α</code> (<code>α × String</code>, <code>List α</code>, <code>StdGen → α × StdGen</code>)</li>
+</ul>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
+<p>"Extra context" means different things in each case. For <code>α × String</code>, the context is a log string. For <code>StdGen → α × StdGen</code>, it's a seed threaded through. For <code>List α</code>, it's not really extra data attached to the value — it's the fact that there are <strong>multiple possible values</strong>. Piponi himself notes that monads cover both side effects and containers, and the two don't fit neatly under one word.</p>
+</div>
+<ul>
+<li>A function <code>α → m β</code> that we couldn't compose directly because the types didn't line up (like <code>f'</code> and <code>g'</code> in example 1, <code>sqrt'</code> and <code>cbrt'</code> in example 2, <code>addDigit</code> in example 3)</li>
+<li>A <code>bind : m α → (α → m β) → m β</code> that restored composition (<code>bind</code>, <code>bindList</code>, <code>bindState</code>)</li>
+<li>A <code>unit : α → m α</code> that acted as the identity (<code>unit</code>, <code>unitList</code>, <code>unitState</code>)</li>
+</ul>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- Debuggable:  m α = α × String</span></span>
+<span class="giallo-l"><span>-- Multivalued: m α = List α</span></span>
+<span class="giallo-l"><span>-- Randomised:  m α = StdGen → α × StdGen</span></span></code></pre>
+<p>In each case we were faced with the same problem: we had a function <code>α → m β</code> but needed to apply it to something of type <code>m α</code> instead of <code>α</code>. In each case we solved it by writing <code>bind</code> and <code>unit</code>.</p>
+<p>The triple <code>(m, unit, bind)</code> is a <strong>monad</strong> — where <code>m</code> is the context/multiplicity, <code>unit</code> is the identity (how you enter the monadic world doing nothing), and <code>bind</code> is the composer (how you chain operations inside it). <code>lift f = unit ∘ f</code> is derived from <code>unit</code> and lets you upgrade any ordinary function into a monadic one.</p>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">What is a monadic function?</div>
+  
+  <p>A <strong>monadic function</strong> is any function of type <code>α → m β</code>. Before we had the word, we were calling them "debuggable functions" (<code>ℝ → ℝ × String</code>), "multivalued functions" (<code>ℂ → List ℂ</code>), and "randomised functions" (<code>α → StdGen → β × StdGen</code>). They are all the same thing — functions whose return type is wrapped in a monadic context <code>m</code>.</p>
+
+</div>
+<p>In Lean, <code>unit</code> is called <code>pure</code> and <code>bind</code> is written <code>&gt;&gt;=</code>. The <code>Debuggable</code> pattern is the <a rel="external" href="https://leanprover-community.github.io/mathlib4_docs/Mathlib/Control/Monad/Writer.html"><strong>Writer</strong> monad</a>, the <code>Multivalued</code> pattern is the <a rel="external" href="https://leanprover-community.github.io/mathlib4_docs/Mathlib/Data/List/Monad.html"><strong>List</strong> monad</a>, and the <code>Randomised</code> pattern is the <a rel="external" href="https://leanprover-community.github.io/mathlib4_docs/Init/Control/State.html"><strong>State</strong> monad</a>.</p>
+<p>You could have invented monads.</p>
+
+  </div>
+
+  
+
+  
+  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
+  <nav class="toc toc-panel" id="toc-panel">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#debug-messages">Debug Messages</a><ol><li><a href="#lift-and-unit">Lift and Unit</a></li></ol></li><li><a href="#the-container-multivalued-functions">The Container: Multivalued Functions</a></li><li><a href="#a-more-complex-side-effect-state">A More Complex Side Effect: State</a></li><li><a href="#monads">Monads</a></li></ol>
+  </nav>
+  <script>
+    (function() {
+      var btn = document.getElementById('toc-toggle');
+      var panel = document.getElementById('toc-panel');
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target)) {
+          panel.classList.remove('open');
+        }
+      });
+      panel.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          panel.classList.remove('open');
+        });
+      });
+    })();
+  </script>
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const select = document.getElementById('theme-select');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      const lightThemes = ['rose-pine-dawn'];
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        }
+      }
+
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
+
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
+    })();
+  </script>
+  <script>
+    // Smooth scroll + highlight for eqref and citation links.
+    // Citations get a ↩ back-link to return to reading position.
+    document.addEventListener('click', function(e) {
+      // Handle back-arrow clicks
+      var back = e.target.closest('.bib-back');
+      if (back) {
+        e.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Clean up previous highlights and back-links
+      document.querySelectorAll('.eq-highlight').forEach(function(el) {
+        el.classList.remove('eq-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function(el) {
+        el.remove();
+      });
+
+      var href = link.getAttribute('href');
+      var id = decodeURIComponent(href.slice(1));
+      var target = document.getElementById(id);
+      if (!target) return;
+
+      var highlight = target.closest('mjx-container[display="true"]') || target;
+      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlight.classList.add('eq-highlight');
+
+      // For citations, add a back-arrow to return to reading position
+      if (link.classList.contains('citation')) {
+        if (!link.id) link.id = 'cite-src-' + id;
+        var arrow = document.createElement('a');
+        arrow.className = 'bib-back';
+        arrow.setAttribute('data-source', link.id);
+        arrow.textContent = ' \u21A9';
+        arrow.title = 'Back to text';
+        highlight.appendChild(arrow);
+      }
+    });
+  </script>
+
+</body>
+</html>

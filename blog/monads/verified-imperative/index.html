@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'rose-pine-ink' : 'vitesse-dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Proving Imperative Programs In Lean | Random Walks</title>
+  <link rel="stylesheet" href="/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  
+  
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      tags: 'ams',
+      macros: {
+        field: ['{\\mathbb{#1}}', 1],
+        hei: ['{\\mathbb{F}(#1)}', 1],
+        Field: '{\\mathbb{F}}',
+        Mont: ['{\\widetilde{#1}}', 1],
+        samples: '{\\xleftarrow{\\$}}',
+        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+        TauConstraints: '{\\tau_y}',
+        TauTime: '{\\tau_{\\text{cycle}}}',
+        TauGroup: '{\\tau_b}',
+        MLE: ['{\\widetilde{#1}}', 1],
+        tf: ['{\\widetilde{#1}}', 1],
+        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+        Def: '{:=}',
+        ChallengeSet: '{\\mathsf{C}}',
+        Complement: ['{\\overline{#1}}', 1],
+        Size: ['{\\left|#1\\right|}', 1],
+        Exp: ['{2^{#1}}', 1],
+        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+        BigO: ['{O\\ \\left(#1\\right)}', 1],
+        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
+        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
+        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+        poly: '{\\operatorname{poly}}',
+        criticalAlpha: ['{\\alpha_{#1}}', 1],
+        bit: '{\\{0,1\\}}',
+        CStar: '{C^{\\star}}',
+        GraphNbrs: ['{N_G(#1)}', 1],
+        ClauseNbrs: ['{N_C(#1)}', 1],
+        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        SmallO: ['{o\\!(#1)}', 1],
+        Naturals: '{\\mathbb{N}}',
+        Closure: ['{\\operatorname{Cl}(#1)}', 1],
+        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+        Dim: ['{\\dim(#1)}', 1],
+        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+        domain: ['{\\operatorname{dom}(#1)}', 1],
+        False: '{\\bot}',
+        opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+        // ── Complexity Theory & Turing Machines ──────────────────────────
+        // Complexity classes
+        NP: '{\\mathsf{NP}}',
+        coNP: '{\\mathsf{coNP}}',
+        Pclass: '{\\mathsf{P}}',
+        PSPACE: '{\\mathsf{PSPACE}}',
+        EXP: '{\\mathsf{EXP}}',
+        // Turing machine components
+        States: '{\\mathcal{Q}}',
+        TransFunc: '{\\delta}',
+        InitState: '{q_0}',
+        AcceptState: '{q_{\\text{acc}}}',
+        RejectState: '{q_{\\text{rej}}}',
+        InitConfig: '{C_0}',
+        AcceptConfig: '{C_{\\text{acc}}}',
+        Moves: '{\\{\\mathsf{L},\\, \\mathsf{R}\\}}',
+        // Languages & notation
+        Lang: ['{L(#1)}', 1],
+        RE: '{\\mathsf{RE}}',
+        // General math
+        NN: '{\\mathbb{N}}',
+        ZZ: '{\\mathbb{Z}}',
+        RR: '{\\mathbb{R}}'
+      }
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="/">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
+        <a href="/misc/">Random</a>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
+          <option value="rose-pine-ink">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
+        </select>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+
+
+
+  
+  
+
+
+<article class="post">
+  <header class="post-header">
+    
+    
+    <a href="&#x2F;blog&#x2F;monads&#x2F;" class="back-link">&larr; Money For Nothing Monads For Free</a>
+    
+    <h1>Proving Imperative Programs In Lean</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-03-26</time>
+      
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/lean-notes/" class="tag">lean-notes</a><a href="/tags/monads/" class="tag">monads</a><a href="/tags/verification/" class="tag">verification</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <p>Working code: <code>FunctionalProgramming/VerifiedImperative.lean</code>. Based on <a rel="external" href="https://markushimmel.de/blog/my-first-verified-imperative-program/">Markus Himmel's blog post</a>.</p>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">Prerequisites</div>
+  
+  <p>This post assumes you know what <code>do</code> notation is and what the <code>Id</code> monad does. See the <a href="/blog/monads/">monad series</a> if not.</p>
+
+</div>
+<p>Lean can prove that programs are correct. Not just test them — <em>prove</em> them, for all possible inputs. This post builds up the machinery to do that for imperative-looking <code>do</code> blocks.</p>
+<h2 id="what-does-it-mean-to-prove-code-correct">What does it mean to prove code correct?</h2>
+<p>Take a function that increments a register:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">structure</span><span class="z-entity z-name z-entity z-name z-function"> CPU</span><span class="z-keyword"> where</span></span>
+<span class="giallo-l"><span>  acc : Nat</span></span>
+<span class="giallo-l"><span>  pc  : Nat</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> step</span><span> (cpu : CPU) : CPU := Id.run </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span class="z-keyword"> mut</span><span> acc := cpu.acc</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span class="z-keyword"> mut</span><span> pc := cpu.pc</span></span>
+<span class="giallo-l"><span>  acc := acc + </span><span class="z-constant z-numeric z-constant">1</span></span>
+<span class="giallo-l"><span>  pc := pc + </span><span class="z-constant z-numeric z-constant">1</span></span>
+<span class="giallo-l"><span class="z-keyword">  return</span><span> { acc, pc : CPU }</span></span></code></pre>
+<p>"Proving it correct" means stating a precise claim and proving it holds for <strong>all</strong> inputs:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> step_correct</span><span> (cpu : CPU) :</span></span>
+<span class="giallo-l"><span>    step cpu = { acc := cpu.acc + </span><span class="z-constant z-numeric z-constant">1</span><span>, pc := cpu.pc + </span><span class="z-constant z-numeric z-constant">1</span><span> : CPU }</span></span></code></pre>
+<p>This says: for <strong>any</strong> CPU state, <code>step</code> increments both <code>acc</code> and <code>pc</code> by 1. Not just for one test case — for every possible CPU state.</p>
+<h2 id="how-do-you-prove-things-about-code">How do you prove things about code?</h2>
+<p>You need a way to reason about what code does. The idea is old — from 1969 — and it's called a <strong>Hoare triple</strong>:</p>
+<p>$$\{P\} ; C ; \{Q\}$$</p>
+<ul>
+<li><strong>C</strong> = the code</li>
+<li><strong>Q</strong> = what you want true AFTER</li>
+<li><strong>P</strong> = what must be true BEFORE</li>
+</ul>
+<p>Read it as: "if P holds before running C, then Q holds after."</p>
+<h3 id="simple-example">Simple example</h3>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Code:   x := 5</span></span>
+<span class="giallo-l"><span>After:  x = 5        ← this is Q</span></span>
+<span class="giallo-l"><span>Before: True          ← this is P (no requirements)</span></span></code></pre>
+<p>$$\{True\} \quad x := 5 \quad \{x = 5\}$$</p>
+<h3 id="using-current-values">Using current values</h3>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Code:   out := out + i</span></span>
+<span class="giallo-l"><span>After:  out = 6                ← Q</span></span>
+<span class="giallo-l"><span>Before: out + i = 6            ← P</span></span></code></pre>
+<p>Why <code>out + i = 6</code>? The assignment replaces <code>out</code> with <code>out + i</code>. So if <code>out + i = 6</code> before (say <code>out = 4, i = 2</code>), then <code>out = 6</code> after.</p>
+<p>$$\{out + i = 6\} \quad out := out + i \quad \{out = 6\}$$</p>
+<h3 id="computing-p-from-q-weakest-precondition">Computing P from Q: Weakest Precondition</h3>
+<p>Given code C and desired postcondition Q, <strong>weakest precondition</strong> (WP) computes the P for you. The rule for assignment is substitution:</p>
+<p>$$WP(x := E, ; Q) = Q[x \mapsto E]$$</p>
+<p>Take Q, replace every <code>x</code> with <code>E</code>. That's P. This rule comes from Dijkstra (1975)<sup class="footnote-reference"><a href="#1">1</a></sup>.</p>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>The full WP calculus (assignment, sequential, conditional, loop) was developed in Dijkstra's <a rel="external" href="https://dl.acm.org/doi/10.1145/360933.360975">Guarded Commands paper (1975)</a> and his book <em>A Discipline of Programming</em>. For accessible lecture notes with worked examples, see <a rel="external" href="https://www.cs.cmu.edu/~15414/s22/lectures/11-weakest-preconditions.pdf">CMU 15-414: Weakest Preconditions</a> or <a rel="external" href="https://adam.blank.org/AdamBlanksNotes/cs102_lecture_notes/32-weakest-preconditions.pdf">Caltech CS 102: WP Notes</a>. For the mechanized treatment, see <a rel="external" href="https://concrete-semantics.org/concrete-semantics.pdf">Concrete Semantics Ch. 12</a>.</p>
+</div>
+<p>Examples:</p>
+<ul>
+<li>$WP(x := 5, ; x = 5) = (5 = 5) = True$</li>
+<li>$WP(out := out + i, ; out = 6) = (out + i = 6)$</li>
+<li>$WP(x := x * 2, ; x = 10) = (x * 2 = 10)$, so $x = 5$</li>
+</ul>
+<p>For sequential code, chain backwards:</p>
+<p>$$WP(S_1;; S_2, ; Q) = WP(S_1, ; WP(S_2, ; Q))$$</p>
+<p>Compute what $S_2$ needs, then compute what $S_1$ needs to deliver that.</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Code:   x := x + 1; x := x * 2</span></span>
+<span class="giallo-l"><span>Q:      x = 10</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>WP(x := x * 2,  x = 10)  =  x * 2 = 10  =  x = 5</span></span>
+<span class="giallo-l"><span>WP(x := x + 1,  x = 5)   =  x + 1 = 5   =  x = 4</span></span></code></pre>
+<p>So P = <code>x = 4</code>. And indeed: 4 → 5 → 10. ✓</p>
+<h2 id="mvcgen-wp-for-do-blocks">mvcgen: WP for do blocks</h2>
+<p>Lean's <code>mvcgen</code> tactic automates this WP reasoning for <code>do</code> blocks. For the CPU example:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> step_correct</span><span> (cpu : CPU) :</span></span>
+<span class="giallo-l"><span>    step cpu = { acc := cpu.acc + </span><span class="z-constant z-numeric z-constant">1</span><span>, pc := cpu.pc + </span><span class="z-constant z-numeric z-constant">1</span><span> : CPU } := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span>  generalize h : step cpu = x       -- name the result</span></span>
+<span class="giallo-l"><span>  apply Id.of_wp_run_eq h           -- use WP instead of unfolding the </span><span class="z-keyword">do</span><span> block</span></span>
+<span class="giallo-l"><span>  mvcgen                             -- compute WP through each assignment</span></span>
+<span class="giallo-l"><span>  all_goals grind                    -- finish off the proof</span></span></code></pre>
+<p>What each line does:</p>
+<ul>
+<li><code>generalize</code> — gives the result a name so we can reason about it</li>
+<li><code>Id.of_wp_run_eq</code> — tells Lean "reason about this <code>do</code> block using WP, don't unfold it into raw code"</li>
+<li><code>mvcgen</code> — walks backwards through the assignments, computing WP at each step</li>
+<li><code>grind</code> — an automated tactic that proves the resulting goals (arithmetic, equalities, library facts)</li>
+</ul>
+<p>No loop, no invariant. <code>mvcgen</code> handles straight-line code entirely on its own.</p>
+<h3 id="what-s-happening-under-the-hood">What's happening under the hood?</h3>
+<p>After <code>mvcgen</code>, the Infoview shows something like:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>⊢ₛ</span></span>
+<span class="giallo-l"><span>  wp⟦have acc := cpu.acc;</span></span>
+<span class="giallo-l"><span>      have pc := cpu.pc;</span></span>
+<span class="giallo-l"><span>      have acc := acc + 1;</span></span>
+<span class="giallo-l"><span>      have pc := pc + 1;</span></span>
+<span class="giallo-l"><span>      pure { acc := acc, pc := pc }⟧</span></span>
+<span class="giallo-l"><span>    (PostCond.noThrow fun a =&gt;</span></span>
+<span class="giallo-l"><span>      { down := a = { acc := cpu.acc + 1, pc := cpu.pc + 1 } })</span></span></code></pre>
+<p>Reading this:</p>
+<ul>
+<li><strong><code>wp⟦...⟧</code></strong> — "weakest precondition of this code." The code inside is your <code>do</code> block desugared into individual assignments (<code>have</code> = each <code>let mut</code> or <code>:=</code>)</li>
+<li><strong><code>PostCond.noThrow fun a =&gt; ...</code></strong> — the postcondition: "no exceptions, and the return value <code>a</code> satisfies..."</li>
+<li><strong><code>a = { acc := cpu.acc + 1, pc := cpu.pc + 1 }</code></strong> — your theorem statement, wrapped in the assertion language</li>
+</ul>
+<p>The whole thing reads: "compute the WP of this straight-line code such that the result equals <code>{ acc := cpu.acc + 1, pc := cpu.pc + 1 }</code>." Since there's no loop, <code>grind</code> substitutes backwards through each <code>have</code> and it resolves to <code>True</code> — done.</p>
+<h2 id="the-problem-with-loops">The problem with loops</h2>
+<p>WP works by substitution — it walks backwards, one statement at a time. But a loop runs an unknown number of times:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mySum</span><span> (l : Array Nat) : Nat := Id.run </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span class="z-keyword"> mut</span><span> out := </span><span class="z-constant z-numeric z-constant">0</span></span>
+<span class="giallo-l"><span class="z-keyword">  for</span><span> i </span><span class="z-keyword">in</span><span> l </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span>    out := out + i</span></span>
+<span class="giallo-l"><span class="z-keyword">  return</span><span> out</span></span></code></pre>
+<p>How many times does <code>out := out + i</code> execute? Depends on <code>l</code>. WP can't just substitute — it doesn't know when to stop.</p>
+<p>The solution: you provide a <strong>loop invariant</strong> — a property that:</p>
+<ol>
+<li>Holds <strong>before</strong> the loop starts</li>
+<li><strong>Stays true</strong> after each iteration</li>
+<li>After the loop, <strong>implies</strong> what you want to prove</li>
+</ol>
+<p>For <code>mySum</code>, the invariant is: "<code>out</code> equals the sum of elements processed so far."</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>l = #[1, 2, 3]</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Before loop:  out = 0, processed = []       → sum([]) = 0 = out       ✓</span></span>
+<span class="giallo-l"><span>After i=1:    out = 1, processed = [1]      → sum([1]) = 1 = out      ✓</span></span>
+<span class="giallo-l"><span>After i=2:    out = 3, processed = [1,2]    → sum([1,2]) = 3 = out    ✓</span></span>
+<span class="giallo-l"><span>After i=3:    out = 6, processed = [1,2,3]  → sum([1,2,3]) = 6 = out  ✓</span></span>
+<span class="giallo-l"><span>Loop done:    processed = entire array       → out = l.sum              ✓</span></span></code></pre>
+<p>You provide the invariant. <code>mvcgen</code> checks it works by generating three proof obligations (base case, inductive step, conclusion). <code>grind</code> proves them.</p>
+<p>This is where the <code>mySum</code> proof will go — to be continued.</p>
+<h2 id="references">References</h2>
+<h3 id="hoare-logic-and-weakest-preconditions">Hoare logic and weakest preconditions</h3>
+<ul>
+<li><a rel="external" href="https://hoare-logic-tutor.mirdin.com/">Hoare Logic interactive tutor</a> — Learn by doing. Start here.</li>
+<li><a rel="external" href="https://cmath.eu/02245-F22/lecture-01/wp.html">WP tutorial with worked examples</a> — Clean walkthrough of the rules.</li>
+<li><a rel="external" href="https://softwarefoundations.cis.upenn.edu/plf-current/Hoare.html">Software Foundations — Hoare Logic</a> — The classic textbook chapter.</li>
+</ul>
+<h3 id="loop-invariants">Loop invariants</h3>
+<ul>
+<li><a rel="external" href="https://yourbasic.org/algorithms/loop-invariants-explained/">Loop invariants explained</a> — Three examples for working programmers.</li>
+</ul>
+<h3 id="lean-verification">Lean verification</h3>
+<ul>
+<li><a rel="external" href="https://lean-lang.org/doc/reference/latest/The--mvcgen--tactic/">Lean Reference — mvcgen</a> — Official docs.</li>
+<li><a rel="external" href="https://lean-lang.org/doc/reference/latest/The--grind--tactic/">Lean Reference — grind</a> — The automated prover.</li>
+<li><a rel="external" href="https://markushimmel.de/blog/my-first-verified-imperative-program/">Markus Himmel — My First Verified Imperative Program</a> — The original blog post.</li>
+<li><a href="/blog/monads/">Monad series</a> — Prerequisites: monads, <code>do</code> notation, <code>Id</code>.</li>
+</ul>
+<h2 id="old">Old</h2>
+<p>Everything below is from an earlier draft. Keeping for reference.</p>
+<hr />
+<h3 id="mysum-proof-detailed">mySum proof (detailed)</h3>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> mySum_correct</span><span> (l : Array Nat) : mySum l = l.sum := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span>  generalize h : mySum l = x</span></span>
+<span class="giallo-l"><span>  apply Id.of_wp_run_eq h</span></span>
+<span class="giallo-l"><span>  mvcgen</span></span>
+<span class="giallo-l"><span>  invariants</span></span>
+<span class="giallo-l"><span>  · ⇓⟨xs, out⟩ =&gt; ⌜xs.prefix.sum = out⌝</span></span>
+<span class="giallo-l"><span class="z-keyword">  with</span><span> grind</span></span></code></pre><h3 id="nodup-early-return">nodup (early return)</h3>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> nodup</span><span> (l : List Int) : Bool := Id.run </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span class="z-keyword"> mut</span><span> seen : Std.HashSet Int := ∅</span></span>
+<span class="giallo-l"><span class="z-keyword">  for</span><span> x </span><span class="z-keyword">in</span><span> l </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">    if</span><span> x ∈ seen </span><span class="z-keyword">then</span></span>
+<span class="giallo-l"><span class="z-keyword">      return</span><span class="z-constant z-language z-constant"> false</span></span>
+<span class="giallo-l"><span>    seen := seen.insert x</span></span>
+<span class="giallo-l"><span class="z-keyword">  return</span><span class="z-constant z-language z-constant"> true</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> nodup_correct</span><span> (l : List Int) : nodup l ↔ l.Nodup := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span>  generalize h : nodup l = r</span></span>
+<span class="giallo-l"><span>  apply Id.of_wp_run_eq h</span></span>
+<span class="giallo-l"><span>  mvcgen</span></span>
+<span class="giallo-l"><span>  invariants</span></span>
+<span class="giallo-l"><span>  · Invariant.withEarlyReturn</span></span>
+<span class="giallo-l"><span>      (onReturn := </span><span class="z-keyword">fun</span><span> ret seen =&gt; ⌜ret = </span><span class="z-constant z-language z-constant">false</span><span> ∧ ¬l.Nodup⌝)</span></span>
+<span class="giallo-l"><span>      (onContinue := </span><span class="z-keyword">fun</span><span> xs seen =&gt;</span></span>
+<span class="giallo-l"><span>        ⌜(∀ x, x ∈ seen ↔ x ∈ xs.prefix) ∧ xs.prefix.Nodup⌝)</span></span>
+<span class="giallo-l"><span class="z-keyword">  with</span><span> grind</span></span></code></pre><h3 id="pairssumtozero">pairsSumToZero</h3>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> pairsSumToZero</span><span> (l : List Int) : Bool := Id.run </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span class="z-keyword"> mut</span><span> seen : Std.HashSet Int := ∅</span></span>
+<span class="giallo-l"><span class="z-keyword">  for</span><span> x </span><span class="z-keyword">in</span><span> l </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">    if</span><span> -x ∈ seen </span><span class="z-keyword">then</span></span>
+<span class="giallo-l"><span class="z-keyword">      return</span><span class="z-constant z-language z-constant"> true</span></span>
+<span class="giallo-l"><span>    seen := seen.insert x</span></span>
+<span class="giallo-l"><span class="z-keyword">  return</span><span class="z-constant z-language z-constant"> false</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> pairsSumToZero_correct</span><span> (l : List Int) :</span></span>
+<span class="giallo-l"><span>    pairsSumToZero l ↔ l.ExistsPair (</span><span class="z-keyword">fun</span><span> a b =&gt; a + b = </span><span class="z-constant z-numeric z-constant">0</span><span>) := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span>  generalize h : pairsSumToZero l = r</span></span>
+<span class="giallo-l"><span>  apply Id.of_wp_run_eq h</span></span>
+<span class="giallo-l"><span>  mvcgen</span></span>
+<span class="giallo-l"><span>  invariants</span></span>
+<span class="giallo-l"><span>  · Invariant.withEarlyReturn</span></span>
+<span class="giallo-l"><span>      (onReturn := </span><span class="z-keyword">fun</span><span> ret seen =&gt;</span></span>
+<span class="giallo-l"><span>        ⌜ret = </span><span class="z-constant z-language z-constant">true</span><span> ∧ l.ExistsPair (</span><span class="z-keyword">fun</span><span> a b =&gt; a + b = </span><span class="z-constant z-numeric z-constant">0</span><span>)⌝)</span></span>
+<span class="giallo-l"><span>      (onContinue := </span><span class="z-keyword">fun</span><span> xs seen =&gt;</span></span>
+<span class="giallo-l"><span>        ⌜(∀ x, x ∈ seen ↔ x ∈ xs.prefix) ∧</span></span>
+<span class="giallo-l"><span>         ¬xs.prefix.ExistsPair (</span><span class="z-keyword">fun</span><span> a b =&gt; a + b = </span><span class="z-constant z-numeric z-constant">0</span><span>)⌝)</span></span>
+<span class="giallo-l"><span class="z-keyword">  with</span><span> simp_all &lt;;&gt; grind</span></span></code></pre>
+  </div>
+
+  
+
+  
+  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
+  <nav class="toc toc-panel" id="toc-panel">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#what-does-it-mean-to-prove-code-correct">What does it mean to prove code correct?</a></li><li><a href="#how-do-you-prove-things-about-code">How do you prove things about code?</a><ol><li><a href="#simple-example">Simple example</a></li><li><a href="#using-current-values">Using current values</a></li><li><a href="#computing-p-from-q-weakest-precondition">Computing P from Q: Weakest Precondition</a></li></ol></li><li><a href="#mvcgen-wp-for-do-blocks">mvcgen: WP for do blocks</a><ol><li><a href="#what-s-happening-under-the-hood">What&#x27;s happening under the hood?</a></li></ol></li><li><a href="#the-problem-with-loops">The problem with loops</a></li><li><a href="#references">References</a><ol><li><a href="#hoare-logic-and-weakest-preconditions">Hoare logic and weakest preconditions</a></li><li><a href="#loop-invariants">Loop invariants</a></li><li><a href="#lean-verification">Lean verification</a></li></ol></li><li><a href="#old">Old</a><ol><li><a href="#mysum-proof-detailed">mySum proof (detailed)</a></li><li><a href="#nodup-early-return">nodup (early return)</a></li><li><a href="#pairssumtozero">pairsSumToZero</a></li></ol></li></ol>
+  </nav>
+  <script>
+    (function() {
+      var btn = document.getElementById('toc-toggle');
+      var panel = document.getElementById('toc-panel');
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target)) {
+          panel.classList.remove('open');
+        }
+      });
+      panel.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          panel.classList.remove('open');
+        });
+      });
+    })();
+  </script>
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var text = (code || pre).textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const select = document.getElementById('theme-select');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      const lightThemes = ['rose-pine-dawn'];
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        }
+      }
+
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
+
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
+    })();
+  </script>
+  <script>
+    // Smooth scroll + highlight for eqref and citation links.
+    // Citations get a ↩ back-link to return to reading position.
+    document.addEventListener('click', function(e) {
+      // Handle back-arrow clicks
+      var back = e.target.closest('.bib-back');
+      if (back) {
+        e.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Clean up previous highlights and back-links
+      document.querySelectorAll('.eq-highlight').forEach(function(el) {
+        el.classList.remove('eq-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function(el) {
+        el.remove();
+      });
+
+      var href = link.getAttribute('href');
+      var id = decodeURIComponent(href.slice(1));
+      var target = document.getElementById(id);
+      if (!target) return;
+
+      var highlight = target.closest('mjx-container[display="true"]') || target;
+      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlight.classList.add('eq-highlight');
+
+      // For citations, add a back-arrow to return to reading position
+      if (link.classList.contains('citation')) {
+        if (!link.id) link.id = 'cite-src-' + id;
+        var arrow = document.createElement('a');
+        arrow.className = 'bib-back';
+        arrow.setAttribute('data-source', link.id);
+        arrow.textContent = ' \u21A9';
+        arrow.title = 'Back to text';
+        highlight.appendChild(arrow);
+      }
+    });
+  </script>
+
+</body>
+</html>
