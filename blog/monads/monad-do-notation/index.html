@@ -160,6 +160,11 @@
   </header>
 
   
+  <nav class="toc toc-side">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#mapm">mapM</a></li><li><a href="#translation-rules">Translation Rules</a></li></ol>
+  </nav>
+  
 
   
 
@@ -174,80 +179,20 @@
   <div class="post-content">
     <div class="callout callout-remark">
   
-  <p>This post is a draft and not yet ready.</p>
+  <p>All code for this post can be found at <a rel="external" href="https://codeberg.org/catNotStevens/LearningLean/src/branch/main/FunctionalProgramming/monad-do.lean">monad-do.lean</a>.</p>
 
 </div>
 <p>Notes on <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/do--Notation-for-Monads/">Chapter 4.4: do-Notation for Monads</a> from <em>Functional Programming in Lean</em>.</p>
-<p>Working code: <code>FunctionalProgramming/monad-do.lean</code></p>
-<p>In the <a href="/blog/monads/monad-type-class/">previous post</a> we unified <code>bind</code> and <code>pure</code> into a type class. But writing <code>&gt;&gt;= fun x =&gt;</code> everywhere is still noisy. <code>do</code> notation is syntactic sugar that the compiler rewrites into <code>&gt;&gt;=</code> calls — making monadic code look imperative.</p>
-<p>This is the same <code>do</code> you've been using in <code>IO</code>. Now you know what it actually means.</p>
-<h2 id="which-monad-does-do-use">Which Monad Does <code>do</code> Use?</h2>
-<p>Every <code>do</code> block needs a monad — because <code>do</code> desugars to <code>bind</code> and <code>pure</code>, and those come from a <code>Monad</code> instance. Lean infers which monad from the return type:</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- Return type is IO Unit → </span><span class="z-keyword">do</span><span> uses IO&#39;s bind and pure</span></span>
-<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> main</span><span> : IO Unit := </span><span class="z-keyword">do</span></span>
-<span class="giallo-l"><span>  IO.println </span><span class="z-string">&quot;</span><span class="z-string">Hello</span><span class="z-string">&quot;</span></span>
-<span class="giallo-l"><span class="z-keyword">  let</span><span> name ← IO.getLine</span></span>
-<span class="giallo-l"><span>  IO.println </span><span class="z-keyword">s!</span><span class="z-string">&quot;</span><span class="z-string">Hi, </span><span class="z-keyword">{</span><span class="z-string">name</span><span class="z-keyword">}</span><span class="z-string">!</span><span class="z-string">&quot;</span></span></code></pre><pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- Return type is Option (Nat × Nat) → </span><span class="z-keyword">do</span><span> uses Option&#39;s bind and pure</span></span>
-<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> findBoth</span><span> (xs : List Nat) : Option (Nat × Nat) := </span><span class="z-keyword">do</span></span>
-<span class="giallo-l"><span class="z-keyword">  let</span><span> first ← xs[</span><span class="z-constant z-numeric z-constant">0</span><span>]?    -- </span><span class="z-keyword">if</span><span> none, Option&#39;s bind short-circuits</span></span>
-<span class="giallo-l"><span class="z-keyword">  let</span><span> third ← xs[</span><span class="z-constant z-numeric z-constant">2</span><span>]?</span></span>
-<span class="giallo-l"><span>  pure (first, third)</span></span>
-<span class="giallo-l"></span>
-<span class="giallo-l"><span class="z-keyword">#eval</span><span> findBoth [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]  -- some (</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>)</span></span>
-<span class="giallo-l"><span class="z-keyword">#eval</span><span> findBoth [</span><span class="z-constant z-numeric z-constant">1</span><span>]         -- none</span></span></code></pre>
-<p>What if the return type is plain — like <code>Nat</code> or <code>CPU</code> — and not monadic? Then <code>do</code> has no monad to work with. You use <code>Id.run</code>:</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- With </span><span class="z-keyword">do</span><span> + Id.run:</span></span>
-<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mySum</span><span> (l : Array Nat) : Nat := Id.run </span><span class="z-keyword">do</span></span>
-<span class="giallo-l"><span class="z-keyword">  let</span><span class="z-keyword"> mut</span><span> out := </span><span class="z-constant z-numeric z-constant">0</span></span>
-<span class="giallo-l"><span class="z-keyword">  for</span><span> i </span><span class="z-keyword">in</span><span> l </span><span class="z-keyword">do</span></span>
-<span class="giallo-l"><span>    out := out + i</span></span>
-<span class="giallo-l"><span class="z-keyword">  return</span><span> out</span></span>
-<span class="giallo-l"></span>
-<span class="giallo-l"><span>-- Without </span><span class="z-keyword">do</span><span> — the </span><span class="z-keyword">for</span><span> loop becomes foldl, the mutable </span><span class="z-keyword">variable</span><span> becomes the accumulator:</span></span>
-<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mySum&#39;</span><span> (l : Array Nat) : Nat :=</span></span>
-<span class="giallo-l"><span>  go l.toList </span><span class="z-constant z-numeric z-constant">0</span></span>
-<span class="giallo-l"><span class="z-keyword">where</span></span>
-<span class="giallo-l"><span>  go : List Nat → Nat → Nat</span></span>
-<span class="giallo-l"><span>    | [], out =&gt; out</span></span>
-<span class="giallo-l"><span>    | i :: rest, out =&gt; go rest (out + i)</span></span></code></pre>
-<p>Both compute the same thing. The <code>do</code> block is just a nicer way to write the recursion. The <code>for</code> loop becomes <code>go</code>, the <code>let mut out</code> becomes the accumulator parameter, and <code>return out</code> becomes the base case.</p>
-<div class="callout callout-box thm-box">
-  
-  <div class="callout-title">Aside: what is go and where?</div>
-  
-  <p><code>where</code> defines a local function — like a <code>let</code> but written after the main definition. <code>go</code> is just the name we gave it. The same code without <code>where</code>:</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> go</span><span> : List Nat → Nat → Nat</span></span>
-<span class="giallo-l"><span>  | [], out =&gt; out                    -- empty list: </span><span class="z-keyword">return</span><span> accumulator</span></span>
-<span class="giallo-l"><span>  | i :: rest, out =&gt; go rest (out + i) -- add i to accumulator, recurse</span></span>
-<span class="giallo-l"></span>
-<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mySum&#39;</span><span> (l : Array Nat) : Nat := go l.toList </span><span class="z-constant z-numeric z-constant">0</span><span>  -- start </span><span class="z-keyword">with</span><span> accumulator = </span><span class="z-constant z-numeric z-constant">0</span></span></code></pre>
-</div>
-<p>You can't mix two monads in one <code>do</code> block. A <code>do</code> block uses exactly one monad, determined by the return type.</p>
-<h2 id="translation-rules">Translation Rules</h2>
-<p>Four rules. The compiler applies them mechanically.</p>
-<p><strong>Rule 1</strong> — base case, a single expression. Just strip the <code>do</code>:</p>
-<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>do E   →   E</span></span></code></pre>
-<p>Example: <code>do pure 5</code> → <code>pure 5</code></p>
-<p><strong>Rule 2</strong> — <code>let</code> with <code>←</code> (extract from monadic context):</p>
-<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>do let x ← E₁       →     E₁ &gt;&gt;= fun x =&gt;</span></span>
-<span class="giallo-l"><span>   ...                        do ...</span></span></code></pre>
-<p>Example:</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">do</span><span class="z-keyword"> let</span><span> x ← lookupOption xs </span><span class="z-constant z-numeric z-constant">0</span><span>    →    lookupOption xs </span><span class="z-constant z-numeric z-constant">0</span><span> &gt;&gt;= </span><span class="z-keyword">fun</span><span> x =&gt;</span></span>
-<span class="giallo-l"><span>   pure x                               pure x</span></span></code></pre>
-<p><strong>Rule 3</strong> — expression statement (returns <code>Unit</code>):</p>
-<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>do E₁                →     E₁ &gt;&gt;= fun () =&gt;</span></span>
-<span class="giallo-l"><span>   ...                        do ...</span></span></code></pre>
-<p>Example:</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">do</span><span> setState (n + </span><span class="z-constant z-numeric z-constant">1</span><span>)         →    setState (n + </span><span class="z-constant z-numeric z-constant">1</span><span>) &gt;&gt;= </span><span class="z-keyword">fun</span><span> () =&gt;</span></span>
-<span class="giallo-l"><span>   pure n                          pure n</span></span></code></pre>
-<p><strong>Rule 4</strong> — plain <code>let</code> with <code>:=</code> (no monad, just a local binding):</p>
-<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>do let x := E₁       →     let x := E₁</span></span>
-<span class="giallo-l"><span>   ...                      do ...</span></span></code></pre>
-<p>Example:</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">do</span><span class="z-keyword"> let</span><span> y := x + </span><span class="z-constant z-numeric z-constant">1</span><span>       →    </span><span class="z-keyword">let</span><span> y := x + </span><span class="z-constant z-numeric z-constant">1</span></span>
-<span class="giallo-l"><span>   pure y                     pure y</span></span></code></pre>
-<p>That's it. <code>←</code> means "use <code>bind</code> to extract the value." <code>:=</code> means "ordinary let, no binding." A bare expression means "run it, ignore the result."</p>
-<h2 id="firstthirdfifthseventh">firstThirdFifthSeventh</h2>
+<p>In the <a href="/blog/monads/monad-type-class/">previous post</a> we the monad type as types that have the operations <code>bind</code> and <code>pure</code> as instances of a type class.
+As, we have discussed ad nauseam by now, monads enable composition.
+It does so via the <code>bind</code> operator, but this leads to heavily nested code that can be hard to reason about — recall from the <a href="/blog/monads/monads-simplified/">first post</a> how composing four debuggable functions with <code>bind</code> gave us <code>bind (bind (bind (g' x) f') h') k'</code>.
+But writing <code>m x &gt;&gt;= fun x =&gt;...</code> everywhere is sort of annoying.
+Lean offers <code>do</code> notation is syntactic sugar that allows us to write these nested function calls as imperative code, which is much easier to read, and possibly reason about.
+We give examples below.</p>
+<p>Before we get into translation rules, let's see what <code>do</code> buys us with examples from the <a href="/blog/monads/monads/">earlier posts</a>.
+Recall the code that gets the first, third, fifth, and seventh elements of a list.
+We wrap the output in a monad (like <code>Option</code> or <code>Except ε</code>) because the list might not be large enough — the monad handles the failure plumbing.
+Even with <code>&gt;&gt;=</code>, reading the chain takes effort:</p>
 
 
 
@@ -284,12 +229,100 @@
   </figure>
 </div>
 
-<p>Each <code>let x ← ...</code> on the right is rewritten to <code>... &gt;&gt;= fun x =&gt;</code> on the left by Rule 2. The compiler inserts the <code>bind</code> calls for you.</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupOption [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>, </span><span class="z-constant z-numeric z-constant">6</span><span>, </span><span class="z-constant z-numeric z-constant">7</span><span>, </span><span class="z-constant z-numeric z-constant">8</span><span>]</span></span>
-<span class="giallo-l"><span>-- some (</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>, </span><span class="z-constant z-numeric z-constant">7</span><span>)</span></span>
-<span class="giallo-l"></span>
-<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupExcept [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]</span></span>
-<span class="giallo-l"><span>-- Except.error </span><span class="z-string">&quot;</span><span class="z-string">Index 4 not found (maximum is 2)</span><span class="z-string">&quot;</span></span></code></pre><h2 id="mapm">mapM</h2>
+<p>Now you're right to look at these two blocks of code and say, meh, hardly any difference.
+I could live with the bind notation, especially after we sugared it into a binary operation.
+The difference becomes noticeable when we attempt to describe logic involving loops.
+Take a program that sums the elements of a list, while also counting how many are even along the way:</p>
+
+
+
+
+
+
+
+<div class="comparison-dual">
+  <figure class="comparison-left">
+    <pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> sumAndCountEvens</span><span> (xs : List Nat) : Nat × Nat :=</span></span>
+<span class="giallo-l"><span>  go xs </span><span class="z-constant z-numeric z-constant">0</span><span class="z-constant z-numeric z-constant"> 0</span></span>
+<span class="giallo-l"><span class="z-keyword">where</span></span>
+<span class="giallo-l"><span>  go : List Nat → Nat → Nat → Nat × Nat</span></span>
+<span class="giallo-l"><span>    | [], sum, count =&gt; (sum, count)</span></span>
+<span class="giallo-l"><span>    | x :: rest, sum, count =&gt;</span></span>
+<span class="giallo-l"><span class="z-keyword">      if</span><span> x % </span><span class="z-constant z-numeric z-constant">2</span><span> == </span><span class="z-constant z-numeric z-constant">0</span></span>
+<span class="giallo-l"><span class="z-keyword">      then</span><span> go rest (sum + x) (count + </span><span class="z-constant z-numeric z-constant">1</span><span>)</span></span>
+<span class="giallo-l"><span class="z-keyword">      else</span><span> go rest (sum + x) count</span></span></code></pre>
+    <figcaption>Functional</figcaption>
+  </figure>
+  <figure class="comparison-right">
+    <pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> sumAndCountEvens</span><span> (xs : List Nat) : Nat × Nat := Id.run </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span class="z-keyword"> mut</span><span> sum := </span><span class="z-constant z-numeric z-constant">0</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span class="z-keyword"> mut</span><span> count := </span><span class="z-constant z-numeric z-constant">0</span></span>
+<span class="giallo-l"><span class="z-keyword">  for</span><span> x </span><span class="z-keyword">in</span><span> xs </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span>    sum := sum + x</span></span>
+<span class="giallo-l"><span class="z-keyword">    if</span><span> x % </span><span class="z-constant z-numeric z-constant">2</span><span> == </span><span class="z-constant z-numeric z-constant">0</span><span class="z-keyword"> then</span></span>
+<span class="giallo-l"><span>      count := count + </span><span class="z-constant z-numeric z-constant">1</span></span>
+<span class="giallo-l"><span class="z-keyword">  return</span><span> (sum, count)</span></span></code></pre>
+    <figcaption>do notation</figcaption>
+  </figure>
+</div>
+
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">#eval</span><span> sumAndCountEvens [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>]  -- (</span><span class="z-constant z-numeric z-constant">15</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>)</span></span></code></pre>
+<p>The functional version needs a recursive helper that threads both accumulators through every call.
+The <code>do</code> version is a flat loop with two mutable variables — the same code you'd write in Python.
+Now the <code>do</code> version is just syntactic sugar.
+Under the hood we are still using <code>pure</code> and <code>bind</code> — for the identity monad, hence <code>Id.run do</code>.
+If the return type is already monadic, then <code>do</code> uses that monad directly and <code>Id.run</code> is not needed. Better yet, we can make the function generic over any monad — just take a <code>lookup</code> parameter like we did with <code>firstThirdFifthSeventh</code>. The <code>do</code> version barely changes. But the functional version gets much worse — it now threads <code>&gt;&gt;=</code> through every recursive call:</p>
+
+
+
+
+
+
+
+<div class="comparison-dual">
+  <figure class="comparison-left">
+    <pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> sumAndCountEvens</span><span> [Monad m]</span></span>
+<span class="giallo-l"><span>    (lookup : List Nat → Nat → m Nat)</span></span>
+<span class="giallo-l"><span>    (xs : List Nat) (n : Nat)</span></span>
+<span class="giallo-l"><span>    : m (Nat × Nat) :=</span></span>
+<span class="giallo-l"><span>  go </span><span class="z-constant z-numeric z-constant">0</span><span class="z-constant z-numeric z-constant"> 0</span><span class="z-constant z-numeric z-constant"> 0</span></span>
+<span class="giallo-l"><span class="z-keyword">where</span></span>
+<span class="giallo-l"><span>  go (i sum count : Nat) : m (Nat × Nat) :=</span></span>
+<span class="giallo-l"><span class="z-keyword">    if</span><span> i &gt;= n </span><span class="z-keyword">then</span><span> pure (sum, count)</span></span>
+<span class="giallo-l"><span class="z-keyword">    else</span><span> lookup xs i &gt;&gt;= </span><span class="z-keyword">fun</span><span> x =&gt;</span></span>
+<span class="giallo-l"><span>      go (i + </span><span class="z-constant z-numeric z-constant">1</span><span>) (sum + x)</span></span>
+<span class="giallo-l"><span>        (</span><span class="z-keyword">if</span><span> x % </span><span class="z-constant z-numeric z-constant">2</span><span> == </span><span class="z-constant z-numeric z-constant">0</span><span class="z-keyword"> then</span><span> count + </span><span class="z-constant z-numeric z-constant">1</span></span>
+<span class="giallo-l"><span class="z-keyword">         else</span><span> count)</span></span></code></pre>
+    <figcaption>Functional (&gt;&gt;=)</figcaption>
+  </figure>
+  <figure class="comparison-right">
+    <pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> sumAndCountEvens</span><span> [Monad m]</span></span>
+<span class="giallo-l"><span>    (lookup : List Nat → Nat → m Nat)</span></span>
+<span class="giallo-l"><span>    (xs : List Nat) (n : Nat)</span></span>
+<span class="giallo-l"><span>    : m (Nat × Nat) := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span class="z-keyword"> mut</span><span> sum := </span><span class="z-constant z-numeric z-constant">0</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span class="z-keyword"> mut</span><span> count := </span><span class="z-constant z-numeric z-constant">0</span></span>
+<span class="giallo-l"><span class="z-keyword">  for</span><span> i </span><span class="z-keyword">in</span><span> [:n] </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">    let</span><span> x ← lookup xs i</span></span>
+<span class="giallo-l"><span>    sum := sum + x</span></span>
+<span class="giallo-l"><span class="z-keyword">    if</span><span> x % </span><span class="z-constant z-numeric z-constant">2</span><span> == </span><span class="z-constant z-numeric z-constant">0</span><span class="z-keyword"> then</span></span>
+<span class="giallo-l"><span>      count := count + </span><span class="z-constant z-numeric z-constant">1</span></span>
+<span class="giallo-l"><span>  pure (sum, count)</span></span></code></pre>
+    <figcaption>do notation</figcaption>
+  </figure>
+</div>
+
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">#eval</span><span> sumAndCountEvens lookupOption [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>] </span><span class="z-constant z-numeric z-constant">5</span></span>
+<span class="giallo-l"><span>-- some (</span><span class="z-constant z-numeric z-constant">15</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>)</span></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> sumAndCountEvens lookupOption [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>] </span><span class="z-constant z-numeric z-constant">5</span></span>
+<span class="giallo-l"><span>-- none</span></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> sumAndCountEvens lookupExcept [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>] </span><span class="z-constant z-numeric z-constant">5</span></span>
+<span class="giallo-l"><span>-- Except.ok (</span><span class="z-constant z-numeric z-constant">15</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>)</span></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> sumAndCountEvens lookupExcept [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>] </span><span class="z-constant z-numeric z-constant">5</span></span>
+<span class="giallo-l"><span>-- Except.error </span><span class="z-string">&quot;</span><span class="z-string">Index 3 not found (maximum is 2)</span><span class="z-string">&quot;</span></span></code></pre>
+<p>Same function, same <code>do</code> block — swap the <code>lookup</code> and it works with <code>Option</code>, <code>Except</code>, or any other monad. The functional version has to manually call <code>&gt;&gt;=</code> and thread the result through the recursion.</p>
+<h2 id="mapm">mapM</h2>
+<p>Here's another example where <code>do</code> makes life easier. We want a monadic map — apply <code>f : α → m β</code> to every element of a list, collecting the results. In the <code>&gt;&gt;=</code> version we have to bind each call and name the intermediate results explicitly. In the <code>do</code> version we just say: <code>hd</code> is the result of applying <code>f</code> to the head, <code>tl</code> is the recursive call on the tail — much cleaner.</p>
 
 
 
@@ -326,102 +359,13 @@
 <pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mapM&#39;&#39;</span><span> [Monad m] (f : α → m β) : List α → m (List β)</span></span>
 <span class="giallo-l"><span>  | [] =&gt; pure []</span></span>
 <span class="giallo-l"><span>  | x :: xs =&gt; </span><span class="z-keyword">do</span></span>
-<span class="giallo-l"><span>    pure ((← f x) :: (← mapM&#39;&#39; f xs))</span></span></code></pre><h2 id="tree-numbering">Tree Numbering</h2>
-
-
-
-
-
-
-
-<div class="comparison-dual">
-  <figure class="comparison-left">
-    <pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> numberHelper_v1</span></span>
-<span class="giallo-l"><span>    : BinTree α →</span></span>
-<span class="giallo-l"><span>      State Nat (BinTree (Nat × α))</span></span>
-<span class="giallo-l"><span>  | BinTree.leaf =&gt; pure BinTree.leaf</span></span>
-<span class="giallo-l"><span>  | BinTree.branch left x right =&gt;</span></span>
-<span class="giallo-l"><span>    numberHelper_v1 left</span></span>
-<span class="giallo-l"><span>      &gt;&gt;= </span><span class="z-keyword">fun</span><span> numberedLeft =&gt;</span></span>
-<span class="giallo-l"><span>    getState &gt;&gt;= </span><span class="z-keyword">fun</span><span> n =&gt;</span></span>
-<span class="giallo-l"><span>    setState (n + </span><span class="z-constant z-numeric z-constant">1</span><span>) &gt;&gt;= </span><span class="z-keyword">fun</span><span> () =&gt;</span></span>
-<span class="giallo-l"><span>    numberHelper_v1 right</span></span>
-<span class="giallo-l"><span>      &gt;&gt;= </span><span class="z-keyword">fun</span><span> numberedRight =&gt;</span></span>
-<span class="giallo-l"><span>    pure (BinTree.branch</span></span>
-<span class="giallo-l"><span>      numberedLeft (n, x)</span></span>
-<span class="giallo-l"><span>      numberedRight)</span></span></code></pre>
-    <figcaption>Monadic (&gt;&gt;=)</figcaption>
-  </figure>
-  <figure class="comparison-right">
-    <pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> numberHelper</span></span>
-<span class="giallo-l"><span>    : BinTree α →</span></span>
-<span class="giallo-l"><span>      State Nat (BinTree (Nat × α))</span></span>
-<span class="giallo-l"><span>  | BinTree.leaf =&gt; pure BinTree.leaf</span></span>
-<span class="giallo-l"><span>  | BinTree.branch left x right =&gt; </span><span class="z-keyword">do</span></span>
-<span class="giallo-l"><span class="z-keyword">    let</span><span> numberedLeft ← numberHelper left</span></span>
-<span class="giallo-l"><span class="z-keyword">    let</span><span> n ← getState</span></span>
-<span class="giallo-l"><span>    setState (n + </span><span class="z-constant z-numeric z-constant">1</span><span>)</span></span>
-<span class="giallo-l"><span class="z-keyword">    let</span><span> numberedRight ← numberHelper right</span></span>
-<span class="giallo-l"><span>    pure (BinTree.branch</span></span>
-<span class="giallo-l"><span>      numberedLeft (n, x)</span></span>
-<span class="giallo-l"><span>      numberedRight)</span></span></code></pre>
-    <figcaption>do notation</figcaption>
-  </figure>
-</div>
-
-<p>Note how <code>setState (n + 1)</code> on its own line uses Rule 3 — it's an expression statement returning <code>Unit</code>, so the compiler inserts <code>&gt;&gt;= fun () =&gt;</code>.</p>
-<p><strong>With nested actions</strong> — extract <code>increment</code> and use <code>(← ...)</code>:</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> increment</span><span> : State Nat Nat := </span><span class="z-keyword">do</span></span>
-<span class="giallo-l"><span class="z-keyword">  let</span><span> n ← getState</span></span>
-<span class="giallo-l"><span>  setState (n + </span><span class="z-constant z-numeric z-constant">1</span><span>)</span></span>
-<span class="giallo-l"><span>  pure n</span></span>
-<span class="giallo-l"></span>
-<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> numberHelper&#39;</span><span> : BinTree α → State Nat (BinTree (Nat × α))</span></span>
-<span class="giallo-l"><span>  | BinTree.leaf =&gt; pure BinTree.leaf</span></span>
-<span class="giallo-l"><span>  | BinTree.branch left x right =&gt; </span><span class="z-keyword">do</span></span>
-<span class="giallo-l"><span>    pure (BinTree.branch</span></span>
-<span class="giallo-l"><span>      (← numberHelper&#39; left)</span></span>
-<span class="giallo-l"><span>      ((← increment), x)</span></span>
-<span class="giallo-l"><span>      (← numberHelper&#39; right))</span></span></code></pre><h2 id="summary">Summary</h2>
-<p><code>do</code> notation is not magic — it's four mechanical rewrite rules that convert readable sequential-looking code into <code>&gt;&gt;=</code> chains. The <code>←</code> means <code>bind</code>. The <code>:=</code> means ordinary <code>let</code>. A bare expression means "run it for the side effect."</p>
-<p>Every <code>do</code> block you've ever written in <code>IO</code> was doing this. Now you know what's underneath.</p>
-<h2 id="references">References</h2>
-<ul>
-<li><a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/do--Notation-for-Monads/">Chapter 4.4: do-Notation for Monads</a> — The FP in Lean chapter.</li>
-<li><a href="/blog/monads/monad-type-class/">Previous post: The Monad Type Class</a> — Where we defined the type class.</li>
-<li><a href="/blog/monads/monads-simplified/">Monads Simplified</a> — Where we first met <code>bind</code>.</li>
-</ul>
+<span class="giallo-l"><span>    pure ((← f x) :: (← mapM&#39;&#39; f xs))</span></span></code></pre><h2 id="translation-rules">Translation Rules</h2>
+<p><code>do</code> notation is just syntactic sugar. Under the hood we always write pure functional code with the help of the monadic machinery — <code>pure</code> and <code>&gt;&gt;=</code>. The compiler mechanically rewrites every <code>do</code> block into these primitives. The full translation rules are given in <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/do--Notation-for-Monads/">Chapter 4.4: do-Notation for Monads</a>.</p>
 
   </div>
 
   
 
-  
-  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
-  <nav class="toc toc-panel" id="toc-panel">
-    <div class="toc-title">Contents</div>
-    <ol><li><a href="#which-monad-does-do-use">Which Monad Does do Use?</a></li><li><a href="#translation-rules">Translation Rules</a></li><li><a href="#firstthirdfifthseventh">firstThirdFifthSeventh</a></li><li><a href="#mapm">mapM</a></li><li><a href="#tree-numbering">Tree Numbering</a></li><li><a href="#summary">Summary</a></li><li><a href="#references">References</a></li></ol>
-  </nav>
-  <script>
-    (function() {
-      var btn = document.getElementById('toc-toggle');
-      var panel = document.getElementById('toc-panel');
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        panel.classList.toggle('open');
-      });
-      document.addEventListener('click', function(e) {
-        if (!panel.contains(e.target)) {
-          panel.classList.remove('open');
-        }
-      });
-      panel.querySelectorAll('a').forEach(function(a) {
-        a.addEventListener('click', function() {
-          panel.classList.remove('open');
-        });
-      });
-    })();
-  </script>
   
 </article>
 

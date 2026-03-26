@@ -230,80 +230,20 @@
     
     <content type="html" xml:base="/blog/monads/monad-do-notation/">&lt;div class=&quot;callout callout-remark&quot;&gt;
   
-  &lt;p&gt;This post is a draft and not yet ready.&lt;&#x2F;p&gt;
+  &lt;p&gt;All code for this post can be found at &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;codeberg.org&#x2F;catNotStevens&#x2F;LearningLean&#x2F;src&#x2F;branch&#x2F;main&#x2F;FunctionalProgramming&#x2F;monad-do.lean&quot;&gt;monad-do.lean&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;div&gt;
 &lt;p&gt;Notes on &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;lean-lang.org&#x2F;functional_programming_in_lean&#x2F;Monads&#x2F;do--Notation-for-Monads&#x2F;&quot;&gt;Chapter 4.4: do-Notation for Monads&lt;&#x2F;a&gt; from &lt;em&gt;Functional Programming in Lean&lt;&#x2F;em&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;Working code: &lt;code&gt;FunctionalProgramming&#x2F;monad-do.lean&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
-&lt;p&gt;In the &lt;a href=&quot;&#x2F;blog&#x2F;monads&#x2F;monad-type-class&#x2F;&quot;&gt;previous post&lt;&#x2F;a&gt; we unified &lt;code&gt;bind&lt;&#x2F;code&gt; and &lt;code&gt;pure&lt;&#x2F;code&gt; into a type class. But writing &lt;code&gt;&amp;gt;&amp;gt;= fun x =&amp;gt;&lt;&#x2F;code&gt; everywhere is still noisy. &lt;code&gt;do&lt;&#x2F;code&gt; notation is syntactic sugar that the compiler rewrites into &lt;code&gt;&amp;gt;&amp;gt;=&lt;&#x2F;code&gt; calls — making monadic code look imperative.&lt;&#x2F;p&gt;
-&lt;p&gt;This is the same &lt;code&gt;do&lt;&#x2F;code&gt; you&#x27;ve been using in &lt;code&gt;IO&lt;&#x2F;code&gt;. Now you know what it actually means.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;which-monad-does-do-use&quot;&gt;Which Monad Does &lt;code&gt;do&lt;&#x2F;code&gt; Use?&lt;&#x2F;h2&gt;
-&lt;p&gt;Every &lt;code&gt;do&lt;&#x2F;code&gt; block needs a monad — because &lt;code&gt;do&lt;&#x2F;code&gt; desugars to &lt;code&gt;bind&lt;&#x2F;code&gt; and &lt;code&gt;pure&lt;&#x2F;code&gt;, and those come from a &lt;code&gt;Monad&lt;&#x2F;code&gt; instance. Lean infers which monad from the return type:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- Return type is IO Unit → &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;span&gt; uses IO&amp;#39;s bind and pure&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; main&lt;&#x2F;span&gt;&lt;span&gt; : IO Unit := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  IO.println &lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;Hello&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; name ← IO.getLine&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  IO.println &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;s!&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;Hi, &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;{&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;name&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;}&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;!&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- Return type is Option (Nat × Nat) → &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;span&gt; uses Option&amp;#39;s bind and pure&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; findBoth&lt;&#x2F;span&gt;&lt;span&gt; (xs : List Nat) : Option (Nat × Nat) := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; first ← xs[&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;]?    -- &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;if&lt;&#x2F;span&gt;&lt;span&gt; none, Option&amp;#39;s bind short-circuits&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; third ← xs[&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;]?&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  pure (first, third)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;#eval&lt;&#x2F;span&gt;&lt;span&gt; findBoth [&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;]  -- some (&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;#eval&lt;&#x2F;span&gt;&lt;span&gt; findBoth [&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;]         -- none&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;What if the return type is plain — like &lt;code&gt;Nat&lt;&#x2F;code&gt; or &lt;code&gt;CPU&lt;&#x2F;code&gt; — and not monadic? Then &lt;code&gt;do&lt;&#x2F;code&gt; has no monad to work with. You use &lt;code&gt;Id.run&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- With &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;span&gt; + Id.run:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; mySum&lt;&#x2F;span&gt;&lt;span&gt; (l : Array Nat) : Nat := Id.run &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; mut&lt;&#x2F;span&gt;&lt;span&gt; out := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  for&lt;&#x2F;span&gt;&lt;span&gt; i &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;in&lt;&#x2F;span&gt;&lt;span&gt; l &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    out := out + i&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  return&lt;&#x2F;span&gt;&lt;span&gt; out&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- Without &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;span&gt; — the &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;for&lt;&#x2F;span&gt;&lt;span&gt; loop becomes foldl, the mutable &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;variable&lt;&#x2F;span&gt;&lt;span&gt; becomes the accumulator:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; mySum&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt; (l : Array Nat) : Nat :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  go l.toList &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;where&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  go : List Nat → Nat → Nat&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    | [], out =&amp;gt; out&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    | i :: rest, out =&amp;gt; go rest (out + i)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Both compute the same thing. The &lt;code&gt;do&lt;&#x2F;code&gt; block is just a nicer way to write the recursion. The &lt;code&gt;for&lt;&#x2F;code&gt; loop becomes &lt;code&gt;go&lt;&#x2F;code&gt;, the &lt;code&gt;let mut out&lt;&#x2F;code&gt; becomes the accumulator parameter, and &lt;code&gt;return out&lt;&#x2F;code&gt; becomes the base case.&lt;&#x2F;p&gt;
-&lt;div class=&quot;callout callout-box thm-box&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;Aside: what is go and where?&lt;&#x2F;div&gt;
-  
-  &lt;p&gt;&lt;code&gt;where&lt;&#x2F;code&gt; defines a local function — like a &lt;code&gt;let&lt;&#x2F;code&gt; but written after the main definition. &lt;code&gt;go&lt;&#x2F;code&gt; is just the name we gave it. The same code without &lt;code&gt;where&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; go&lt;&#x2F;span&gt;&lt;span&gt; : List Nat → Nat → Nat&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | [], out =&amp;gt; out                    -- empty list: &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;return&lt;&#x2F;span&gt;&lt;span&gt; accumulator&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | i :: rest, out =&amp;gt; go rest (out + i) -- add i to accumulator, recurse&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; mySum&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt; (l : Array Nat) : Nat := go l.toList &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;  -- start &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;span&gt; accumulator = &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;&#x2F;div&gt;
-&lt;p&gt;You can&#x27;t mix two monads in one &lt;code&gt;do&lt;&#x2F;code&gt; block. A &lt;code&gt;do&lt;&#x2F;code&gt; block uses exactly one monad, determined by the return type.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;translation-rules&quot;&gt;Translation Rules&lt;&#x2F;h2&gt;
-&lt;p&gt;Four rules. The compiler applies them mechanically.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;strong&gt;Rule 1&lt;&#x2F;strong&gt; — base case, a single expression. Just strip the &lt;code&gt;do&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;do E   →   E&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Example: &lt;code&gt;do pure 5&lt;&#x2F;code&gt; → &lt;code&gt;pure 5&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;strong&gt;Rule 2&lt;&#x2F;strong&gt; — &lt;code&gt;let&lt;&#x2F;code&gt; with &lt;code&gt;←&lt;&#x2F;code&gt; (extract from monadic context):&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;do let x ← E₁       →     E₁ &amp;gt;&amp;gt;= fun x =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;   ...                        do ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Example:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; let&lt;&#x2F;span&gt;&lt;span&gt; x ← lookupOption xs &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;    →    lookupOption xs &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt; &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; x =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;   pure x                               pure x&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;&lt;strong&gt;Rule 3&lt;&#x2F;strong&gt; — expression statement (returns &lt;code&gt;Unit&lt;&#x2F;code&gt;):&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;do E₁                →     E₁ &amp;gt;&amp;gt;= fun () =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;   ...                        do ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Example:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;span&gt; setState (n + &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)         →    setState (n + &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;) &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; () =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;   pure n                          pure n&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;&lt;strong&gt;Rule 4&lt;&#x2F;strong&gt; — plain &lt;code&gt;let&lt;&#x2F;code&gt; with &lt;code&gt;:=&lt;&#x2F;code&gt; (no monad, just a local binding):&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;do let x := E₁       →     let x := E₁&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;   ...                      do ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Example:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; let&lt;&#x2F;span&gt;&lt;span&gt; y := x + &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;       →    &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; y := x + &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;   pure y                     pure y&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;That&#x27;s it. &lt;code&gt;←&lt;&#x2F;code&gt; means &quot;use &lt;code&gt;bind&lt;&#x2F;code&gt; to extract the value.&quot; &lt;code&gt;:=&lt;&#x2F;code&gt; means &quot;ordinary let, no binding.&quot; A bare expression means &quot;run it, ignore the result.&quot;&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;firstthirdfifthseventh&quot;&gt;firstThirdFifthSeventh&lt;&#x2F;h2&gt;
+&lt;p&gt;In the &lt;a href=&quot;&#x2F;blog&#x2F;monads&#x2F;monad-type-class&#x2F;&quot;&gt;previous post&lt;&#x2F;a&gt; we the monad type as types that have the operations &lt;code&gt;bind&lt;&#x2F;code&gt; and &lt;code&gt;pure&lt;&#x2F;code&gt; as instances of a type class.
+As, we have discussed ad nauseam by now, monads enable composition.
+It does so via the &lt;code&gt;bind&lt;&#x2F;code&gt; operator, but this leads to heavily nested code that can be hard to reason about — recall from the &lt;a href=&quot;&#x2F;blog&#x2F;monads&#x2F;monads-simplified&#x2F;&quot;&gt;first post&lt;&#x2F;a&gt; how composing four debuggable functions with &lt;code&gt;bind&lt;&#x2F;code&gt; gave us &lt;code&gt;bind (bind (bind (g&#x27; x) f&#x27;) h&#x27;) k&#x27;&lt;&#x2F;code&gt;.
+But writing &lt;code&gt;m x &amp;gt;&amp;gt;= fun x =&amp;gt;...&lt;&#x2F;code&gt; everywhere is sort of annoying.
+Lean offers &lt;code&gt;do&lt;&#x2F;code&gt; notation is syntactic sugar that allows us to write these nested function calls as imperative code, which is much easier to read, and possibly reason about.
+We give examples below.&lt;&#x2F;p&gt;
+&lt;p&gt;Before we get into translation rules, let&#x27;s see what &lt;code&gt;do&lt;&#x2F;code&gt; buys us with examples from the &lt;a href=&quot;&#x2F;blog&#x2F;monads&#x2F;monads&#x2F;&quot;&gt;earlier posts&lt;&#x2F;a&gt;.
+Recall the code that gets the first, third, fifth, and seventh elements of a list.
+We wrap the output in a monad (like &lt;code&gt;Option&lt;&#x2F;code&gt; or &lt;code&gt;Except ε&lt;&#x2F;code&gt;) because the list might not be large enough — the monad handles the failure plumbing.
+Even with &lt;code&gt;&amp;gt;&amp;gt;=&lt;&#x2F;code&gt;, reading the chain takes effort:&lt;&#x2F;p&gt;
 
 
 
@@ -340,12 +280,100 @@
   &lt;&#x2F;figure&gt;
 &lt;&#x2F;div&gt;
 
-&lt;p&gt;Each &lt;code&gt;let x ← ...&lt;&#x2F;code&gt; on the right is rewritten to &lt;code&gt;... &amp;gt;&amp;gt;= fun x =&amp;gt;&lt;&#x2F;code&gt; on the left by Rule 2. The compiler inserts the &lt;code&gt;bind&lt;&#x2F;code&gt; calls for you.&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;#eval&lt;&#x2F;span&gt;&lt;span&gt; firstThirdFifthSeventh lookupOption [&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;6&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;7&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;8&lt;&#x2F;span&gt;&lt;span&gt;]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- some (&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;7&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;#eval&lt;&#x2F;span&gt;&lt;span&gt; firstThirdFifthSeventh lookupExcept [&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- Except.error &lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;Index 4 not found (maximum is 2)&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;mapm&quot;&gt;mapM&lt;&#x2F;h2&gt;
+&lt;p&gt;Now you&#x27;re right to look at these two blocks of code and say, meh, hardly any difference.
+I could live with the bind notation, especially after we sugared it into a binary operation.
+The difference becomes noticeable when we attempt to describe logic involving loops.
+Take a program that sums the elements of a list, while also counting how many are even along the way:&lt;&#x2F;p&gt;
+
+
+
+
+
+
+
+&lt;div class=&quot;comparison-dual&quot;&gt;
+  &lt;figure class=&quot;comparison-left&quot;&gt;
+    &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; sumAndCountEvens&lt;&#x2F;span&gt;&lt;span&gt; (xs : List Nat) : Nat × Nat :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  go xs &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;where&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  go : List Nat → Nat → Nat → Nat × Nat&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    | [], sum, count =&amp;gt; (sum, count)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    | x :: rest, sum, count =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      if&lt;&#x2F;span&gt;&lt;span&gt; x % &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt; == &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      then&lt;&#x2F;span&gt;&lt;span&gt; go rest (sum + x) (count + &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      else&lt;&#x2F;span&gt;&lt;span&gt; go rest (sum + x) count&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+    &lt;figcaption&gt;Functional&lt;&#x2F;figcaption&gt;
+  &lt;&#x2F;figure&gt;
+  &lt;figure class=&quot;comparison-right&quot;&gt;
+    &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; sumAndCountEvens&lt;&#x2F;span&gt;&lt;span&gt; (xs : List Nat) : Nat × Nat := Id.run &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; mut&lt;&#x2F;span&gt;&lt;span&gt; sum := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; mut&lt;&#x2F;span&gt;&lt;span&gt; count := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  for&lt;&#x2F;span&gt;&lt;span&gt; x &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;in&lt;&#x2F;span&gt;&lt;span&gt; xs &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    sum := sum + x&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;    if&lt;&#x2F;span&gt;&lt;span&gt; x % &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt; == &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; then&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      count := count + &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  return&lt;&#x2F;span&gt;&lt;span&gt; (sum, count)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+    &lt;figcaption&gt;do notation&lt;&#x2F;figcaption&gt;
+  &lt;&#x2F;figure&gt;
+&lt;&#x2F;div&gt;
+
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;#eval&lt;&#x2F;span&gt;&lt;span&gt; sumAndCountEvens [&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;]  -- (&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;15&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The functional version needs a recursive helper that threads both accumulators through every call.
+The &lt;code&gt;do&lt;&#x2F;code&gt; version is a flat loop with two mutable variables — the same code you&#x27;d write in Python.
+Now the &lt;code&gt;do&lt;&#x2F;code&gt; version is just syntactic sugar.
+Under the hood we are still using &lt;code&gt;pure&lt;&#x2F;code&gt; and &lt;code&gt;bind&lt;&#x2F;code&gt; — for the identity monad, hence &lt;code&gt;Id.run do&lt;&#x2F;code&gt;.
+If the return type is already monadic, then &lt;code&gt;do&lt;&#x2F;code&gt; uses that monad directly and &lt;code&gt;Id.run&lt;&#x2F;code&gt; is not needed. Better yet, we can make the function generic over any monad — just take a &lt;code&gt;lookup&lt;&#x2F;code&gt; parameter like we did with &lt;code&gt;firstThirdFifthSeventh&lt;&#x2F;code&gt;. The &lt;code&gt;do&lt;&#x2F;code&gt; version barely changes. But the functional version gets much worse — it now threads &lt;code&gt;&amp;gt;&amp;gt;=&lt;&#x2F;code&gt; through every recursive call:&lt;&#x2F;p&gt;
+
+
+
+
+
+
+
+&lt;div class=&quot;comparison-dual&quot;&gt;
+  &lt;figure class=&quot;comparison-left&quot;&gt;
+    &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; sumAndCountEvens&lt;&#x2F;span&gt;&lt;span&gt; [Monad m]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (lookup : List Nat → Nat → m Nat)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (xs : List Nat) (n : Nat)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    : m (Nat × Nat) :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  go &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;where&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  go (i sum count : Nat) : m (Nat × Nat) :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;    if&lt;&#x2F;span&gt;&lt;span&gt; i &amp;gt;= n &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;then&lt;&#x2F;span&gt;&lt;span&gt; pure (sum, count)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;    else&lt;&#x2F;span&gt;&lt;span&gt; lookup xs i &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; x =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      go (i + &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;) (sum + x)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;if&lt;&#x2F;span&gt;&lt;span&gt; x % &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt; == &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; then&lt;&#x2F;span&gt;&lt;span&gt; count + &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;         else&lt;&#x2F;span&gt;&lt;span&gt; count)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+    &lt;figcaption&gt;Functional (&amp;gt;&amp;gt;=)&lt;&#x2F;figcaption&gt;
+  &lt;&#x2F;figure&gt;
+  &lt;figure class=&quot;comparison-right&quot;&gt;
+    &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; sumAndCountEvens&lt;&#x2F;span&gt;&lt;span&gt; [Monad m]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (lookup : List Nat → Nat → m Nat)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (xs : List Nat) (n : Nat)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    : m (Nat × Nat) := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; mut&lt;&#x2F;span&gt;&lt;span&gt; sum := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; mut&lt;&#x2F;span&gt;&lt;span&gt; count := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  for&lt;&#x2F;span&gt;&lt;span&gt; i &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;in&lt;&#x2F;span&gt;&lt;span&gt; [:n] &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;    let&lt;&#x2F;span&gt;&lt;span&gt; x ← lookup xs i&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    sum := sum + x&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;    if&lt;&#x2F;span&gt;&lt;span&gt; x % &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt; == &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; then&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      count := count + &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  pure (sum, count)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+    &lt;figcaption&gt;do notation&lt;&#x2F;figcaption&gt;
+  &lt;&#x2F;figure&gt;
+&lt;&#x2F;div&gt;
+
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;#eval&lt;&#x2F;span&gt;&lt;span&gt; sumAndCountEvens lookupOption [&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;] &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- some (&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;15&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;#eval&lt;&#x2F;span&gt;&lt;span&gt; sumAndCountEvens lookupOption [&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;] &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- none&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;#eval&lt;&#x2F;span&gt;&lt;span&gt; sumAndCountEvens lookupExcept [&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;] &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- Except.ok (&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;15&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;#eval&lt;&#x2F;span&gt;&lt;span&gt; sumAndCountEvens lookupExcept [&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;] &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- Except.error &lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;Index 3 not found (maximum is 2)&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Same function, same &lt;code&gt;do&lt;&#x2F;code&gt; block — swap the &lt;code&gt;lookup&lt;&#x2F;code&gt; and it works with &lt;code&gt;Option&lt;&#x2F;code&gt;, &lt;code&gt;Except&lt;&#x2F;code&gt;, or any other monad. The functional version has to manually call &lt;code&gt;&amp;gt;&amp;gt;=&lt;&#x2F;code&gt; and thread the result through the recursion.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;mapm&quot;&gt;mapM&lt;&#x2F;h2&gt;
+&lt;p&gt;Here&#x27;s another example where &lt;code&gt;do&lt;&#x2F;code&gt; makes life easier. We want a monadic map — apply &lt;code&gt;f : α → m β&lt;&#x2F;code&gt; to every element of a list, collecting the results. In the &lt;code&gt;&amp;gt;&amp;gt;=&lt;&#x2F;code&gt; version we have to bind each call and name the intermediate results explicitly. In the &lt;code&gt;do&lt;&#x2F;code&gt; version we just say: &lt;code&gt;hd&lt;&#x2F;code&gt; is the result of applying &lt;code&gt;f&lt;&#x2F;code&gt; to the head, &lt;code&gt;tl&lt;&#x2F;code&gt; is the recursive call on the tail — much cleaner.&lt;&#x2F;p&gt;
 
 
 
@@ -382,71 +410,8 @@
 &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; mapM&amp;#39;&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt; [Monad m] (f : α → m β) : List α → m (List β)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | [] =&amp;gt; pure []&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | x :: xs =&amp;gt; &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    pure ((← f x) :: (← mapM&amp;#39;&amp;#39; f xs))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;tree-numbering&quot;&gt;Tree Numbering&lt;&#x2F;h2&gt;
-
-
-
-
-
-
-
-&lt;div class=&quot;comparison-dual&quot;&gt;
-  &lt;figure class=&quot;comparison-left&quot;&gt;
-    &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; numberHelper_v1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    : BinTree α →&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      State Nat (BinTree (Nat × α))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | BinTree.leaf =&amp;gt; pure BinTree.leaf&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | BinTree.branch left x right =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    numberHelper_v1 left&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; numberedLeft =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    getState &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; n =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    setState (n + &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;) &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; () =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    numberHelper_v1 right&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; numberedRight =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    pure (BinTree.branch&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      numberedLeft (n, x)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      numberedRight)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-    &lt;figcaption&gt;Monadic (&amp;gt;&amp;gt;=)&lt;&#x2F;figcaption&gt;
-  &lt;&#x2F;figure&gt;
-  &lt;figure class=&quot;comparison-right&quot;&gt;
-    &lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; numberHelper&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    : BinTree α →&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      State Nat (BinTree (Nat × α))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | BinTree.leaf =&amp;gt; pure BinTree.leaf&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | BinTree.branch left x right =&amp;gt; &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;    let&lt;&#x2F;span&gt;&lt;span&gt; numberedLeft ← numberHelper left&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;    let&lt;&#x2F;span&gt;&lt;span&gt; n ← getState&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    setState (n + &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;    let&lt;&#x2F;span&gt;&lt;span&gt; numberedRight ← numberHelper right&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    pure (BinTree.branch&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      numberedLeft (n, x)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      numberedRight)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-    &lt;figcaption&gt;do notation&lt;&#x2F;figcaption&gt;
-  &lt;&#x2F;figure&gt;
-&lt;&#x2F;div&gt;
-
-&lt;p&gt;Note how &lt;code&gt;setState (n + 1)&lt;&#x2F;code&gt; on its own line uses Rule 3 — it&#x27;s an expression statement returning &lt;code&gt;Unit&lt;&#x2F;code&gt;, so the compiler inserts &lt;code&gt;&amp;gt;&amp;gt;= fun () =&amp;gt;&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;strong&gt;With nested actions&lt;&#x2F;strong&gt; — extract &lt;code&gt;increment&lt;&#x2F;code&gt; and use &lt;code&gt;(← ...)&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; increment&lt;&#x2F;span&gt;&lt;span&gt; : State Nat Nat := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; n ← getState&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  setState (n + &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  pure n&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; numberHelper&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt; : BinTree α → State Nat (BinTree (Nat × α))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | BinTree.leaf =&amp;gt; pure BinTree.leaf&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | BinTree.branch left x right =&amp;gt; &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    pure (BinTree.branch&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      (← numberHelper&amp;#39; left)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      ((← increment), x)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      (← numberHelper&amp;#39; right))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;&#x2F;h2&gt;
-&lt;p&gt;&lt;code&gt;do&lt;&#x2F;code&gt; notation is not magic — it&#x27;s four mechanical rewrite rules that convert readable sequential-looking code into &lt;code&gt;&amp;gt;&amp;gt;=&lt;&#x2F;code&gt; chains. The &lt;code&gt;←&lt;&#x2F;code&gt; means &lt;code&gt;bind&lt;&#x2F;code&gt;. The &lt;code&gt;:=&lt;&#x2F;code&gt; means ordinary &lt;code&gt;let&lt;&#x2F;code&gt;. A bare expression means &quot;run it for the side effect.&quot;&lt;&#x2F;p&gt;
-&lt;p&gt;Every &lt;code&gt;do&lt;&#x2F;code&gt; block you&#x27;ve ever written in &lt;code&gt;IO&lt;&#x2F;code&gt; was doing this. Now you know what&#x27;s underneath.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;references&quot;&gt;References&lt;&#x2F;h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;lean-lang.org&#x2F;functional_programming_in_lean&#x2F;Monads&#x2F;do--Notation-for-Monads&#x2F;&quot;&gt;Chapter 4.4: do-Notation for Monads&lt;&#x2F;a&gt; — The FP in Lean chapter.&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;monads&#x2F;monad-type-class&#x2F;&quot;&gt;Previous post: The Monad Type Class&lt;&#x2F;a&gt; — Where we defined the type class.&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;a href=&quot;&#x2F;blog&#x2F;monads&#x2F;monads-simplified&#x2F;&quot;&gt;Monads Simplified&lt;&#x2F;a&gt; — Where we first met &lt;code&gt;bind&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    pure ((← f x) :: (← mapM&amp;#39;&amp;#39; f xs))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;translation-rules&quot;&gt;Translation Rules&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;code&gt;do&lt;&#x2F;code&gt; notation is just syntactic sugar. Under the hood we always write pure functional code with the help of the monadic machinery — &lt;code&gt;pure&lt;&#x2F;code&gt; and &lt;code&gt;&amp;gt;&amp;gt;=&lt;&#x2F;code&gt;. The compiler mechanically rewrites every &lt;code&gt;do&lt;&#x2F;code&gt; block into these primitives. The full translation rules are given in &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;lean-lang.org&#x2F;functional_programming_in_lean&#x2F;Monads&#x2F;do--Notation-for-Monads&#x2F;&quot;&gt;Chapter 4.4: do-Notation for Monads&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 </content>
   </entry>
   
