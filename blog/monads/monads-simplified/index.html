@@ -148,7 +148,7 @@
     
     <h1>Monads: What Is?</h1>
     <div class="post-meta">
-      <span class="post-author">AB</span>
+      <span class="post-author">Ari</span>
       <time>2026-03-22</time>
       
     </div>
@@ -159,6 +159,11 @@
     
   </header>
 
+  
+  <nav class="toc toc-side">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#composable-problem">Composable Problem</a><ol><li><a href="#lift-and-unit">Lift and Unit</a></li></ol></li><li><a href="#the-container-multivalued-functions">The Container: Multivalued Functions</a></li><li><a href="#a-more-complex-side-effect-state">A More Complex Side Effect: State</a></li><li><a href="#monads">Monads</a></li></ol>
+  </nav>
   
 
   
@@ -513,32 +518,6 @@ In all three cases we had:</p>
 
   
 
-  
-  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
-  <nav class="toc toc-panel" id="toc-panel">
-    <div class="toc-title">Contents</div>
-    <ol><li><a href="#composable-problem">Composable Problem</a><ol><li><a href="#lift-and-unit">Lift and Unit</a></li></ol></li><li><a href="#the-container-multivalued-functions">The Container: Multivalued Functions</a></li><li><a href="#a-more-complex-side-effect-state">A More Complex Side Effect: State</a></li><li><a href="#monads">Monads</a></li></ol>
-  </nav>
-  <script>
-    (function() {
-      var btn = document.getElementById('toc-toggle');
-      var panel = document.getElementById('toc-panel');
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        panel.classList.toggle('open');
-      });
-      document.addEventListener('click', function(e) {
-        if (!panel.contains(e.target)) {
-          panel.classList.remove('open');
-        }
-      });
-      panel.querySelectorAll('a').forEach(function(a) {
-        a.addEventListener('click', function() {
-          panel.classList.remove('open');
-        });
-      });
-    })();
-  </script>
   
 </article>
 

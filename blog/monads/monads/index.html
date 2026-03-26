@@ -160,6 +160,11 @@
   </header>
 
   
+  <nav class="toc toc-side">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#1-option-silent-failure">1. Option: Silent Failure</a></li><li><a href="#some-decoration">Some Decoration</a></li><li><a href="#2-except-error-messages">2. Except: Error Messages</a></li><li><a href="#3-withlog-accumulating-a-log">3. WithLog: Accumulating a Log</a></li><li><a href="#4-state-mutable-variables">4. State: Mutable Variables</a></li><li><a href="#the-pattern">The Pattern</a></li></ol>
+  </nav>
+  
 
   
 
@@ -441,32 +446,6 @@ Since <code>bind</code> takes two arguments — the data with side-effects and t
 
   
 
-  
-  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
-  <nav class="toc toc-panel" id="toc-panel">
-    <div class="toc-title">Contents</div>
-    <ol><li><a href="#1-option-silent-failure">1. Option: Silent Failure</a></li><li><a href="#some-decoration">Some Decoration</a></li><li><a href="#2-except-error-messages">2. Except: Error Messages</a></li><li><a href="#3-withlog-accumulating-a-log">3. WithLog: Accumulating a Log</a></li><li><a href="#4-state-mutable-variables">4. State: Mutable Variables</a></li><li><a href="#the-pattern">The Pattern</a></li></ol>
-  </nav>
-  <script>
-    (function() {
-      var btn = document.getElementById('toc-toggle');
-      var panel = document.getElementById('toc-panel');
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        panel.classList.toggle('open');
-      });
-      document.addEventListener('click', function(e) {
-        if (!panel.contains(e.target)) {
-          panel.classList.remove('open');
-        }
-      });
-      panel.querySelectorAll('a').forEach(function(a) {
-        a.addEventListener('click', function() {
-          panel.classList.remove('open');
-        });
-      });
-    })();
-  </script>
   
 </article>
 
