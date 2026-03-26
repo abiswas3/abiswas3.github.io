@@ -172,59 +172,48 @@
   
 
   <div class="post-content">
-    <p>Notes on <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/The-Monad-Type-Class/">Chapter 4.2: The Monad Type Class</a> from <em>Functional Programming in Lean</em>.</p>
-<p>Working code: <code>FunctionalProgramming/monad-typeclass.lean</code></p>
-<p>In the <a href="/blog/monads/monads/">previous post</a> we wrote <code>bind</code> and <code>unit</code> four times — once for <code>Option</code>, once for <code>Error</code>, once for <code>WithLog</code>, once for <code>State</code>. The book called <code>bind</code> "<code>andThen</code>" and <code>unit</code> was <code>some</code>, <code>Error.ok</code>, <code>okLog</code>, or <code>okState</code> depending on the type. Each time it was the same pattern. The Monad type class eliminates this repetition.</p>
+    <p>These are notes for <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/Monads/The-Monad-Type-Class/">Chapter 4.2: The Monad Type Class</a> from <em>Functional Programming in Lean</em>.</p>
+<div class="callout callout-remark">
+  
+  <p>All code for this post can be found at <a rel="external" href="https://codeberg.org/catNotStevens/LearningLean/src/branch/main/FunctionalProgramming/monad-typeclass.lean">monad-typeclass.lean</a>.</p>
+
+</div>
+<p>It builds on the <a href="/blog/monads/monads-simplified/">first post</a> (where we defined <code>bind</code> and <code>unit</code> from scratch) and the <a href="/blog/monads/monads/">second post</a> (where we wrote them four times for <code>Option</code>, <code>Error</code>, <code>WithLog</code>, and <code>State</code>).
+Each type had a fair amount of overlap in logic — which indicates that they can be grouped to be instances of the Monad type class.
+This is akin to <code>traits</code> in Rust — each type must implement the trait's functions. See the <a href="/blog/lean/lectures/typeclasses/">type class notes</a> for more on how type classes work in Lean.</p>
 <h2 id="the-type-class">The Type Class</h2>
+<p>Rather than having to import <code>ok</code> or <code>andThen</code> for each type that is a monad, Lean has a type class that overloads them — so the same operators work for any monad. The simplified definition:</p>
 <pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">class</span><span class="z-entity z-name z-entity z-name z-function"> Monad</span><span> (m : </span><span class="z-storage z-type">Type</span><span> → </span><span class="z-storage z-type">Type</span><span>) </span><span class="z-keyword">where</span></span>
 <span class="giallo-l"><span>  pure : α → m α</span></span>
 <span class="giallo-l"><span>  bind : m α → (α → m β) → m β</span></span></code></pre>
-<p>That's it.</p>
 <ul>
-<li><code>pure</code> is our <code>unit</code>/<code>ok</code> (Lifter)</li>
-<li><code>bind</code> is our <code>andThen</code>. (Composer)</li>
+<li><strong><code>pure</code></strong> — our <code>unit</code>/<code>ok</code> (the lifter)</li>
+<li><strong><code>bind</code></strong> — our <code>andThen</code> (the composer)</li>
 </ul>
-<p>The type class just says: "any type <code>m</code> that provides these two operations is a monad." Recall from the <a href="/blog/monads/monads/">previous posts</a> that <code>m</code> was <code>Option</code>, <code>Except ε</code> (which has two type parameters — the error type <code>ε</code> is fixed, so <code>Except ε</code> is a <code>Type → Type</code>), <code>WithLog logged</code>, <code>State σ</code>, <code>List</code>, etc. Note that <code>m</code> must be <code>Type → Type</code> — it takes a type parameter. That's why it's <code>Except ε</code> (not <code>Except</code>), <code>State σ</code> (not <code>State</code>), etc.</p>
-<div class="callout callout-box thm-box">
-  
-  <div class="callout-title">Terminology Recap</div>
-  
-  <table><thead><tr><th>Piponi</th><th>FP in Lean book</th><th>Type class</th></tr></thead><tbody>
-<tr><td><code>unit</code></td><td><code>ok</code></td><td><code>pure</code></td></tr>
-<tr><td><code>bind</code></td><td><code>andThen</code></td><td><code>bind</code> (or <code>&gt;&gt;=</code>)</td></tr>
-</tbody></table>
-
+<p>The <a rel="external" href="https://leanprover-community.github.io/mathlib4_docs/Init/Prelude.html#Monad">actual definition</a> in Lean is more involved (it inherits from <code>Functor</code> and <code>Applicative</code>, which add <code>map</code> and other operations). We'll get to that later.</p>
+<p>Any type <code>m : Type → Type</code><sup class="footnote-reference"><a href="#kind">1</a></sup> that provides <code>pure</code> and <code>bind</code> can be registered as a <code>Monad</code>. From our previous posts, <code>m</code> was <code>Option</code>, <code>Except ε</code>, <code>WithLog logged</code>, <code>State σ</code>, etc.</p>
+<div class="footnote-definition" id="kind"><sup class="footnote-definition-label">1</sup>
+<p><code>Monad</code> requires <code>m : Type → Type</code>. <code>Except</code> has two type parameters (<code>Except ε α</code>), so <code>Except</code> alone is <code>Type → Type → Type</code> — wrong kind. You fix <code>ε</code> to get <code>Except ε : Type → Type</code>. For example, <code>Monad (Except String)</code> works but <code>Monad Except</code> doesn't.</p>
 </div>
 <h2 id="instances">Instances</h2>
-<p>Now instead of writing separate <code>andThenError</code>, <code>andThenLog</code>, <code>andThenState</code> functions, we register each as a <code>Monad</code> instance:</p>
-<p><strong>Option:</strong></p>
+<p>The <code>Monad</code> instances for <code>Option</code> and <code>Except ε</code> are just our <code>andThen</code>/<code>unit</code> definitions from the <a href="/blog/monads/monads/">previous post</a>, registered as a type class:</p>
+<p><strong>Option</strong> — <code>pure</code> is <code>some</code> (our <code>unit</code>), <code>bind</code> is <code>andThen</code>:</p>
 <pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">instance</span><span> : Monad Option </span><span class="z-keyword">where</span></span>
-<span class="giallo-l"><span>  pure x := some x</span></span>
-<span class="giallo-l"><span>  bind opt next := </span><span class="z-keyword">match</span><span> opt </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>  pure x := some x              -- pure : α → Option α</span></span>
+<span class="giallo-l"><span>  bind opt next :=               -- bind : Option α → (α → Option β) → Option β</span></span>
+<span class="giallo-l"><span class="z-keyword">    match</span><span> opt </span><span class="z-keyword">with</span></span>
 <span class="giallo-l"><span>    | none =&gt; none</span></span>
 <span class="giallo-l"><span>    | some x =&gt; next x</span></span></code></pre>
-<p><strong>Except:</strong></p>
+<p><strong>Except</strong> — <code>pure</code> is <code>Except.ok</code> (our <code>unit</code>), <code>bind</code> is <code>andThenError</code>:</p>
 <pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">instance</span><span> : Monad (Except ε) </span><span class="z-keyword">where</span></span>
-<span class="giallo-l"><span>  pure x := Except.ok x</span></span>
-<span class="giallo-l"><span>  bind attempt next := </span><span class="z-keyword">match</span><span> attempt </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>  pure x := Except.ok x         -- pure : α → Except ε α</span></span>
+<span class="giallo-l"><span>  bind attempt next :=           -- bind : Except ε α → (α → Except ε β) → Except ε β</span></span>
+<span class="giallo-l"><span class="z-keyword">    match</span><span> attempt </span><span class="z-keyword">with</span></span>
 <span class="giallo-l"><span>    | Except.error e =&gt; Except.error e</span></span>
 <span class="giallo-l"><span>    | Except.ok x =&gt; next x</span></span></code></pre>
-<p><strong>WithLog:</strong></p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">instance</span><span> : Monad (WithLog logged) </span><span class="z-keyword">where</span></span>
-<span class="giallo-l"><span>  pure x := { log := [], val := x }</span></span>
-<span class="giallo-l"><span>  bind result next :=</span></span>
-<span class="giallo-l"><span class="z-keyword">    let</span><span> { log := thisOut, val := thisRes } := result</span></span>
-<span class="giallo-l"><span class="z-keyword">    let</span><span> { log := nextOut, val := nextRes } := next thisRes</span></span>
-<span class="giallo-l"><span>    { log := thisOut ++ nextOut, val := nextRes }</span></span></code></pre>
-<p><strong>State:</strong></p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">instance</span><span> : Monad (State σ) </span><span class="z-keyword">where</span></span>
-<span class="giallo-l"><span>  pure x := </span><span class="z-keyword">fun</span><span> s =&gt; (s, x)</span></span>
-<span class="giallo-l"><span>  bind first next := </span><span class="z-keyword">fun</span><span> s =&gt;</span></span>
-<span class="giallo-l"><span class="z-keyword">    let</span><span> (s&#39;, x) := first s</span></span>
-<span class="giallo-l"><span>    next x s&#39;</span></span></code></pre>
-<p>These are exactly the same definitions we wrote before — just registered as instances of a type class.</p>
+<p>Exactly the same code as before — just wrapped in <code>instance : Monad ...</code>.</p>
 <h2 id="the-payoff-polymorphic-code">The Payoff: Polymorphic Code</h2>
-<p>The whole point: we can now write functions that work with <strong>any</strong> monad. Compare with the <a href="/blog/monads/monads/">previous post</a> where we had to write <code>firstThird</code> separately for <code>Option</code> and <code>Error</code>.</p>
+<p>In the <a href="/blog/monads/monads/">previous post</a> we wrote <code>firstThird</code> separately for <code>Option</code> and <code>Error</code>. Now we can write it once for any monad. The infix <code>&gt;&gt;=</code> is <code>bind</code> (same role as our <code>~~&gt;</code>):</p>
 <pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> firstThirdFifthSeventh</span><span> [Monad m]</span></span>
 <span class="giallo-l"><span>    (lookup : List α → Nat → m α)</span></span>
 <span class="giallo-l"><span>    (xs : List α) : m (α × α × α × α) :=</span></span>
@@ -233,61 +222,133 @@
 <span class="giallo-l"><span>  lookup xs </span><span class="z-constant z-numeric z-constant">4</span><span> &gt;&gt;= </span><span class="z-keyword">fun</span><span> fifth =&gt;</span></span>
 <span class="giallo-l"><span>  lookup xs </span><span class="z-constant z-numeric z-constant">6</span><span> &gt;&gt;= </span><span class="z-keyword">fun</span><span> seventh =&gt;</span></span>
 <span class="giallo-l"><span>  pure (first, third, fifth, seventh)</span></span></code></pre>
-<p>The <code>[Monad m]</code> constraint says: "this works for any <code>m</code> that is a monad." <code>&gt;&gt;=</code> is the infix notation for <code>bind</code> — so <code>x &gt;&gt;= f</code> is <code>bind x f</code>, same as our <code>andThen x f</code> or <code>x ~~&gt; f</code>.</p>
-<p>Now we define two different lookup functions — one for <code>Option</code>, one for <code>Except</code>:</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> lookupOption</span><span> (xs : List α) (i : Nat) : Option α :=</span></span>
+<p><code>&gt;&gt;=</code> is just syntactic sugar for <code>Bind.bind</code>, and <code>pure</code> for <code>Pure.pure</code>. Without the sugar, the same function looks like:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> firstThirdFifthSeventh&#39;</span><span> [Monad m]</span></span>
+<span class="giallo-l"><span>    (lookup : List α → Nat → m α)</span></span>
+<span class="giallo-l"><span>    (xs : List α) : m (α × α × α × α) :=</span></span>
+<span class="giallo-l"><span>  Bind.bind (lookup xs </span><span class="z-constant z-numeric z-constant">0</span><span>) (</span><span class="z-keyword">fun</span><span> first =&gt;</span></span>
+<span class="giallo-l"><span>  Bind.bind (lookup xs </span><span class="z-constant z-numeric z-constant">2</span><span>) (</span><span class="z-keyword">fun</span><span> third =&gt;</span></span>
+<span class="giallo-l"><span>  Bind.bind (lookup xs </span><span class="z-constant z-numeric z-constant">4</span><span>) (</span><span class="z-keyword">fun</span><span> fifth =&gt;</span></span>
+<span class="giallo-l"><span>  Bind.bind (lookup xs </span><span class="z-constant z-numeric z-constant">6</span><span>) (</span><span class="z-keyword">fun</span><span> seventh =&gt;</span></span>
+<span class="giallo-l"><span>  Pure.pure (first, third, fifth, seventh)))))</span></span></code></pre>
+<p><code>Bind.bind</code> and <code>Pure.pure</code> are the functions we registered in the instance<sup class="footnote-reference"><a href="#split">2</a></sup>. When <code>m = Option</code>, Lean looks up the <code>Monad Option</code> instance and calls the <code>bind</code> and <code>pure</code> we defined there. When <code>m = Except String</code>, it finds the <code>Monad (Except ε)</code> instance instead.</p>
+<div class="footnote-definition" id="split"><sup class="footnote-definition-label">2</sup>
+<p>It might seem confusing that we write <code>Pure.pure</code> and <code>Bind.bind</code> when these are methods of <code>Monad</code>. Here's roughly what's going on: Lean's <code>Monad</code> doesn't directly own <code>pure</code> and <code>bind</code> — it inherits them from separate type classes (<code>Pure</code> owns <code>pure</code>, <code>Bind</code> owns <code>bind</code>). The hierarchy is <code>Pure</code> → <code>Applicative</code> → <code>Monad</code> ← <code>Bind</code>. When you write <code>instance : Monad Option</code>, Lean registers both <code>Pure.pure</code> and <code>Bind.bind</code> for <code>Option</code>. This is an internal detail we'll discuss later — the simplified definition with <code>pure</code> and <code>bind</code> directly in <code>Monad</code> is the right mental model for now.</p>
+</div>
+<p><code>[Monad m]</code> says "this works for any <code>m</code> that is a monad" — both <code>Option</code> and <code>Except</code> qualify. Which one do we use? Lean infers <code>m</code> from the <code>lookup</code> function you pass in. If <code>lookup</code> returns <code>Option α</code>, then <code>m = Option</code>. If it returns <code>Except String α</code>, then <code>m = Except String</code>.</p>
+<p>Given some example data:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> slowMammals</span><span> : List String :=</span></span>
+<span class="giallo-l"><span>  [</span><span class="z-string">&quot;</span><span class="z-string">Three-toed sloth</span><span class="z-string">&quot;</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">Slow loris</span><span class="z-string">&quot;</span><span>]</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> fastBirds</span><span> : List String := [</span></span>
+<span class="giallo-l"><span class="z-string">  &quot;</span><span class="z-string">Peregrine falcon</span><span class="z-string">&quot;</span><span>,</span></span>
+<span class="giallo-l"><span class="z-string">  &quot;</span><span class="z-string">Saker falcon</span><span class="z-string">&quot;</span><span>,</span></span>
+<span class="giallo-l"><span class="z-string">  &quot;</span><span class="z-string">Golden eagle</span><span class="z-string">&quot;</span><span>,</span></span>
+<span class="giallo-l"><span class="z-string">  &quot;</span><span class="z-string">Gray-headed albatross</span><span class="z-string">&quot;</span><span>,</span></span>
+<span class="giallo-l"><span class="z-string">  &quot;</span><span class="z-string">Spur-winged goose</span><span class="z-string">&quot;</span><span>,</span></span>
+<span class="giallo-l"><span class="z-string">  &quot;</span><span class="z-string">Swift</span><span class="z-string">&quot;</span><span>,</span></span>
+<span class="giallo-l"><span class="z-string">  &quot;</span><span class="z-string">Anna&#39;s hummingbird</span><span class="z-string">&quot;</span></span>
+<span class="giallo-l"><span>]</span></span></code></pre>
+<p>We define two lookup functions — they do the same thing (get element at index) but return different monads:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- Returns Option α — silent failure</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> lookupSilent</span><span> (xs : List α) (i : Nat) : Option α :=</span></span>
 <span class="giallo-l"><span>  xs[i]?</span></span>
 <span class="giallo-l"></span>
-<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> lookupExcept</span><span> (xs : List α) (i : Nat) : Except String α :=</span></span>
+<span class="giallo-l"><span>-- Returns Except String α — failure </span><span class="z-keyword">with</span><span> error message</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> lookupVerbose</span><span> (xs : List α) (i : Nat) : Except String α :=</span></span>
 <span class="giallo-l"><span class="z-keyword">  match</span><span> xs[i]? </span><span class="z-keyword">with</span></span>
 <span class="giallo-l"><span>  | none =&gt; Except.error </span><span class="z-keyword">s!</span><span class="z-string">&quot;</span><span class="z-string">Index </span><span class="z-keyword">{</span><span class="z-string">i</span><span class="z-keyword">}</span><span class="z-string"> not found (maximum is </span><span class="z-keyword">{</span><span class="z-string">xs.length - </span><span class="z-constant z-numeric z-constant">1</span><span class="z-keyword">}</span><span class="z-string">)</span><span class="z-string">&quot;</span></span>
 <span class="giallo-l"><span>  | some x =&gt; Except.ok x</span></span></code></pre>
-<p>Same function, different effects:</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupOption [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>, </span><span class="z-constant z-numeric z-constant">6</span><span>, </span><span class="z-constant z-numeric z-constant">7</span><span>, </span><span class="z-constant z-numeric z-constant">8</span><span>]</span></span>
-<span class="giallo-l"><span>-- some (</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>, </span><span class="z-constant z-numeric z-constant">7</span><span>)</span></span>
+<p>Now pass each one into the same <code>firstThirdFifthSeventh</code>. The lookup's return type determines which monad <code>m</code> becomes:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- lookupSilent returns Option α, so m = Option</span></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupSilent slowMammals</span></span>
+<span class="giallo-l"><span>-- none</span></span>
 <span class="giallo-l"></span>
-<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupOption [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]</span></span>
-<span class="giallo-l"><span>-- none (silent failure — list too short)</span></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupSilent fastBirds</span></span>
+<span class="giallo-l"><span>-- some (</span><span class="z-string">&quot;</span><span class="z-string">Peregrine falcon</span><span class="z-string">&quot;</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">Golden eagle</span><span class="z-string">&quot;</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">Spur-winged goose</span><span class="z-string">&quot;</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">Anna&#39;s hummingbird</span><span class="z-string">&quot;</span><span>)</span></span>
 <span class="giallo-l"></span>
-<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupExcept [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">4</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>, </span><span class="z-constant z-numeric z-constant">6</span><span>, </span><span class="z-constant z-numeric z-constant">7</span><span>, </span><span class="z-constant z-numeric z-constant">8</span><span>]</span></span>
-<span class="giallo-l"><span>-- Except.ok (</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>, </span><span class="z-constant z-numeric z-constant">5</span><span>, </span><span class="z-constant z-numeric z-constant">7</span><span>)</span></span>
+<span class="giallo-l"><span>-- lookupVerbose returns Except String α, so m = Except String</span></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupVerbose slowMammals</span></span>
+<span class="giallo-l"><span>-- Except.error </span><span class="z-string">&quot;</span><span class="z-string">Index 2 not found (maximum is 1)</span><span class="z-string">&quot;</span></span>
 <span class="giallo-l"></span>
-<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupExcept [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]</span></span>
-<span class="giallo-l"><span>-- Except.error </span><span class="z-string">&quot;</span><span class="z-string">Index 4 not found (maximum is 2)</span><span class="z-string">&quot;</span></span></code></pre>
-<p>Pass in <code>lookupOption</code> and you get silent failure. Pass in <code>lookupExcept</code> and you get error messages. One function, two behaviours — determined entirely by which monad <code>m</code> is.</p>
-<h2 id="mapm-mapping-with-effects">mapM: Mapping with Effects</h2>
-<p>A common pattern — apply a monadic function to every element of a list:</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mapM</span><span> [Monad m] (f : α → m β) : List α → m (List β)</span></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> firstThirdFifthSeventh lookupVerbose fastBirds</span></span>
+<span class="giallo-l"><span>-- Except.ok (</span><span class="z-string">&quot;</span><span class="z-string">Peregrine falcon</span><span class="z-string">&quot;</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">Golden eagle</span><span class="z-string">&quot;</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">Spur-winged goose</span><span class="z-string">&quot;</span><span>, </span><span class="z-string">&quot;</span><span class="z-string">Anna&#39;s hummingbird</span><span class="z-string">&quot;</span><span>)</span></span></code></pre>
+<p>One function, two behaviours. Swap the lookup, swap the monad.</p>
+<h2 id="mapm-how-powerful-this-gets">mapM: How Powerful This Gets</h2>
+<p>Because many types are monads, functions polymorphic over any monad are very general. <code>mapM</code> is a version of <code>List.map</code> where the function applied to each element returns a monadic type (e.g. <code>Option β</code> or <code>Except String β</code> instead of plain <code>β</code>), and <code>mapM</code> uses <code>bind</code> to sequence the results and handle the side effects:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mapM&#39;</span><span> [Monad m] (f : α → m β) : List α → m (List β)</span></span>
 <span class="giallo-l"><span>  | [] =&gt; pure []</span></span>
-<span class="giallo-l"><span>  | x :: xs =&gt; f x &gt;&gt;= </span><span class="z-keyword">fun</span><span> hd =&gt;</span></span>
-<span class="giallo-l"><span>      mapM f xs &gt;&gt;= </span><span class="z-keyword">fun</span><span> tl =&gt;</span></span>
-<span class="giallo-l"><span>      pure (hd :: tl)</span></span></code></pre>
-<p>This is <code>List.map</code> but where the function can have side effects. Because it's polymorphic over <code>m</code>, it works with any monad:</p>
+<span class="giallo-l"><span>  | x :: xs =&gt;</span></span>
+<span class="giallo-l"><span>    f x &gt;&gt;= </span><span class="z-keyword">fun</span><span> hd =&gt;</span></span>
+<span class="giallo-l"><span>    mapM&#39; f xs &gt;&gt;= </span><span class="z-keyword">fun</span><span> tl =&gt;</span></span>
+<span class="giallo-l"><span>    pure (hd :: tl)</span></span></code></pre><div class="callout callout-box thm-box">
+  
+  <div class="callout-title">Aside: List.map without sugar</div>
+  
+  <p><code>::</code> is sugar for <code>List.cons</code> and <code>[]</code> is sugar for <code>List.nil</code>. The same symbol does double duty: on the left of <code>=&gt;</code> it destructures (splits head from tail), on the right it constructs (puts an element at the front).</p>
+<p>Here's <code>map</code> without any sugar:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> map</span><span> (f : α → β) : List α → List β</span></span>
+<span class="giallo-l"><span>  | List.nil =&gt; List.nil</span></span>
+<span class="giallo-l"><span>  | List.cons x xs =&gt; List.cons (f x) (map f xs)</span></span></code></pre>
+<p>With sugar it's the same thing:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> map</span><span> (f : α → β) : List α → List β</span></span>
+<span class="giallo-l"><span>  | [] =&gt; []</span></span>
+<span class="giallo-l"><span>  | x :: xs =&gt; f x :: map f xs</span></span></code></pre>
+</div>
+<p>In <code>map</code>, <code>f</code> returns a plain <code>β</code>. In <code>mapM'</code>, <code>f</code> returns <code>m β</code> — a <code>β</code> wrapped in a monad. So <code>f x</code> doesn't give us <code>β</code> directly; we need <code>bind</code> to extract it.</p>
+<p>Line by line:</p>
 <ul>
-<li>With <code>Option</code>: stops at the first <code>none</code></li>
-<li>With <code>Except</code>: stops at the first error</li>
-<li>With <code>State</code>: threads state through each application</li>
-<li>With <code>WithLog</code>: accumulates logs from each application</li>
+<li><strong><code>| [] =&gt; pure []</code></strong> — empty list: return an empty list, lifted into the monad with <code>pure</code></li>
+<li><strong><code>f x</code></strong> — apply <code>f</code> to the head. This gives us <code>m β</code>, not <code>β</code></li>
+<li><strong><code>&gt;&gt;= fun hd =&gt;</code></strong> — <code>bind</code>: extract the <code>β</code> from <code>m β</code>, call it <code>hd</code></li>
+<li><strong><code>mapM' f xs</code></strong> — recurse on the tail. This gives us <code>m (List β)</code></li>
+<li><strong><code>&gt;&gt;= fun tl =&gt;</code></strong> — <code>bind</code>: extract the <code>List β</code>, call it <code>tl</code></li>
+<li><strong><code>pure (hd :: tl)</code></strong> — cons <code>hd</code> onto <code>tl</code>, wrap the result in the monad with <code>pure</code></li>
 </ul>
-<h2 id="the-identity-monad">The Identity Monad</h2>
-<p>What if you need no effects at all but have a function that requires a <code>Monad</code>?</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> Id</span><span> (t : </span><span class="z-storage z-type">Type</span><span>) : </span><span class="z-storage z-type">Type</span><span> := t</span></span>
+<p>Every step that could have a side effect (calling <code>f</code>, recursing) goes through <code>bind</code>. <code>bind</code> handles the side effect — if <code>f x</code> returns <code>none</code>, <code>bind</code> short-circuits and the whole thing is <code>none</code>. If <code>f x</code> returns <code>Except.error</code>, same thing.</p>
+<p>The return type of <code>f</code> determines which <code>Monad</code> instance gets used. Same <code>mapM'</code>, completely different behaviour depending on what <code>f</code> returns:</p>
+<p>With <code>Option</code> — if any element fails, the whole thing fails:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">#eval</span><span> mapM&#39; (</span><span class="z-keyword">fun</span><span> x =&gt; </span><span class="z-keyword">if</span><span> x &gt; </span><span class="z-constant z-numeric z-constant">0</span><span class="z-keyword"> then</span><span> some x </span><span class="z-keyword">else</span><span> none) [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]</span></span>
+<span class="giallo-l"><span>-- some [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]</span></span>
 <span class="giallo-l"></span>
-<span class="giallo-l"><span class="z-keyword">instance</span><span> : Monad Id </span><span class="z-keyword">where</span></span>
-<span class="giallo-l"><span>  pure x := x</span></span>
-<span class="giallo-l"><span>  bind x f := f x</span></span></code></pre>
-<p><code>Id</code> is the "do nothing" monad. <code>pure</code> is the identity function. <code>bind</code> is just function application. It's the monad equivalent of multiplying by 1.</p>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> mapM&#39; (</span><span class="z-keyword">fun</span><span> x =&gt; </span><span class="z-keyword">if</span><span> x &gt; </span><span class="z-constant z-numeric z-constant">0</span><span class="z-keyword"> then</span><span> some x </span><span class="z-keyword">else</span><span> none) [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">0</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]</span></span>
+<span class="giallo-l"><span>-- none</span></span></code></pre>
+<p>With <code>Except</code> — if any element fails, you get an error message saying which one:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">#eval</span><span> mapM&#39; (</span><span class="z-keyword">fun</span><span> x =&gt; </span><span class="z-keyword">if</span><span> x &gt; </span><span class="z-constant z-numeric z-constant">0</span><span class="z-keyword"> then</span><span> Except.ok x</span></span>
+<span class="giallo-l"><span class="z-keyword">             else</span><span> Except.error </span><span class="z-keyword">s!</span><span class="z-string">&quot;</span><span class="z-keyword">{</span><span class="z-string">x</span><span class="z-keyword">}</span><span class="z-string"> is not positive</span><span class="z-string">&quot;</span><span>) [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]</span></span>
+<span class="giallo-l"><span>-- Except.ok [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> mapM&#39; (</span><span class="z-keyword">fun</span><span> x =&gt; </span><span class="z-keyword">if</span><span> x &gt; </span><span class="z-constant z-numeric z-constant">0</span><span class="z-keyword"> then</span><span> Except.ok x</span></span>
+<span class="giallo-l"><span class="z-keyword">             else</span><span> Except.error </span><span class="z-keyword">s!</span><span class="z-string">&quot;</span><span class="z-keyword">{</span><span class="z-string">x</span><span class="z-keyword">}</span><span class="z-string"> is not positive</span><span class="z-string">&quot;</span><span>) [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">0</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]</span></span>
+<span class="giallo-l"><span>-- Except.error </span><span class="z-string">&quot;</span><span class="z-string">0 is not positive</span><span class="z-string">&quot;</span></span></code></pre>
+<p>We wrote <code>mapM'</code> once. It works with <code>Option</code>, <code>Except</code>, <code>State</code>, <code>WithLog</code> — any monad. The function <code>f</code> controls which effects are available, and the type system enforces it.</p>
 <h2 id="the-monad-contract">The Monad Contract</h2>
-<p>Every <code>Monad</code> instance should satisfy three laws:</p>
-<ol>
-<li><strong>Left identity:</strong> <code>bind (pure v) f = f v</code> — <code>pure</code> then <code>bind</code> is the same as just calling <code>f</code></li>
-<li><strong>Right identity:</strong> <code>bind v pure = v</code> — <code>bind</code> then <code>pure</code> does nothing</li>
-<li><strong>Associativity:</strong> <code>bind (bind v f) g = bind v (fun x =&gt; bind (f x) g)</code> — chaining order doesn't matter</li>
-</ol>
-<p>The first two are the identity laws from the <a href="/blog/monads/monads-simplified/">Piponi post</a>: <code>unit * f' = f'</code> and <code>f' * unit = f'</code>. The third (associativity) says chaining order doesn't matter — you can group compositions however you like. Same laws, different notation.</p>
+<p>Every <code>Monad</code> instance should obey three laws:</p>
+<p><strong>1. Left identity:</strong> <code>bind (pure v) f</code> should be the same as <code>f v</code></p>
+<p><code>pure</code> then <code>bind</code> is the same as just calling <code>f</code>:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Option:  bind (some 5) (fun x =&gt; some (x + 1))  =  some 6  =  (fun x =&gt; some (x + 1)) 5    -- ok</span></span>
+<span class="giallo-l"><span>Except:  bind (Except.ok 5) (fun x =&gt; Except.ok (x + 1))  =  Except.ok 6                    -- ok</span></span></code></pre>
+<p>This makes sense because the problem all along in our <a href="/blog/monads/monads-simplified/">original post</a> was that <code>f</code> takes type <code>α</code> not <code>m α</code>.
+What <code>bind</code> does is act as a router — stripping away the monadic wrapper and feeding <code>f</code> the correct input.</p>
+<p><strong>2. Right identity:</strong> <code>bind v pure</code> should be the same as <code>v</code> (where <code>v : m α</code>, not plain <code>α</code> — <code>bind</code> always takes a monadic value as its first argument)</p>
+<p><code>bind</code> unwraps <code>v</code>, passes the inner value to <code>pure</code>, which wraps it again. Net result: same as <code>v</code>:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>Option:  bind (some 5) some      =  some 5     -- ok</span></span>
+<span class="giallo-l"><span>Option:  bind none some          =  none        -- ok</span></span>
+<span class="giallo-l"><span>Except:  bind (Except.ok 5) Except.ok    =  Except.ok 5              -- ok</span></span>
+<span class="giallo-l"><span>Except:  bind (Except.error &quot;bad&quot;) Except.ok  =  Except.error &quot;bad&quot;  -- ok</span></span></code></pre>
+<p><strong>3. Associativity:</strong> <code>bind (bind v f) g</code> should be the same as <code>bind v (fun x =&gt; bind (f x) g)</code></p>
+<p>Chaining order doesn't matter — so long as the sequence is preserved:</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>let f := fun x =&gt; some (x + 1)</span></span>
+<span class="giallo-l"><span>let g := fun x =&gt; some (x * 2)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Option:  bind (bind (some 3) f) g  =  bind (some 4) g  =  some 8</span></span>
+<span class="giallo-l"><span>         bind (some 3) (fun x =&gt; bind (f x) g)  =  bind (some 3) (fun x =&gt; bind (some (x+1)) g)</span></span>
+<span class="giallo-l"><span>                                                  =  bind (some 3) (fun x =&gt; some ((x+1)*2))</span></span>
+<span class="giallo-l"><span>                                                  =  some 8                                       -- ok</span></span></code></pre>
+<p>Since <code>pure</code> has no effects, sequencing it with <code>bind</code> shouldn't change the result — that's what the first two laws say. The third says that the sequencing bookkeeping itself doesn't matter, so long as the order in which things happen is preserved.</p>
 <div class="callout callout-remark">
   
-  <p>A broken example: <code>instance : Monad Option where pure x := some x; bind _ _ := none</code>. This satisfies the types but violates left identity — <code>bind (pure v) f</code> gives <code>none</code> instead of <code>f v</code>. The monad laws are not enforced by the compiler; they are a contract you must uphold.</p>
+  <p>These laws are not enforced by the compiler. A broken example: <code>instance : Monad Option where pure x := some x; bind _ _ := none</code>. This satisfies the types but violates left identity — <code>bind (pure v) f</code> gives <code>none</code> instead of <code>f v</code>. The monad laws are a contract you must uphold.</p>
 
 </div>
 <h2 id="references">References</h2>
@@ -305,7 +366,7 @@
   <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
   <nav class="toc toc-panel" id="toc-panel">
     <div class="toc-title">Contents</div>
-    <ol><li><a href="#the-type-class">The Type Class</a></li><li><a href="#instances">Instances</a></li><li><a href="#the-payoff-polymorphic-code">The Payoff: Polymorphic Code</a></li><li><a href="#mapm-mapping-with-effects">mapM: Mapping with Effects</a></li><li><a href="#the-identity-monad">The Identity Monad</a></li><li><a href="#the-monad-contract">The Monad Contract</a></li><li><a href="#references">References</a></li></ol>
+    <ol><li><a href="#the-type-class">The Type Class</a></li><li><a href="#instances">Instances</a></li><li><a href="#the-payoff-polymorphic-code">The Payoff: Polymorphic Code</a></li><li><a href="#mapm-how-powerful-this-gets">mapM: How Powerful This Gets</a></li><li><a href="#the-monad-contract">The Monad Contract</a></li><li><a href="#references">References</a></li></ol>
   </nav>
   <script>
     (function() {
