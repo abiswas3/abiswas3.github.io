@@ -181,6 +181,48 @@
 <p>Working code: <code>FunctionalProgramming/monad-do.lean</code></p>
 <p>In the <a href="/blog/monads/monad-type-class/">previous post</a> we unified <code>bind</code> and <code>pure</code> into a type class. But writing <code>&gt;&gt;= fun x =&gt;</code> everywhere is still noisy. <code>do</code> notation is syntactic sugar that the compiler rewrites into <code>&gt;&gt;=</code> calls — making monadic code look imperative.</p>
 <p>This is the same <code>do</code> you've been using in <code>IO</code>. Now you know what it actually means.</p>
+<h2 id="which-monad-does-do-use">Which Monad Does <code>do</code> Use?</h2>
+<p>Every <code>do</code> block needs a monad — because <code>do</code> desugars to <code>bind</code> and <code>pure</code>, and those come from a <code>Monad</code> instance. Lean infers which monad from the return type:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- Return type is IO Unit → </span><span class="z-keyword">do</span><span> uses IO&#39;s bind and pure</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> main</span><span> : IO Unit := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span>  IO.println </span><span class="z-string">&quot;</span><span class="z-string">Hello</span><span class="z-string">&quot;</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> name ← IO.getLine</span></span>
+<span class="giallo-l"><span>  IO.println </span><span class="z-keyword">s!</span><span class="z-string">&quot;</span><span class="z-string">Hi, </span><span class="z-keyword">{</span><span class="z-string">name</span><span class="z-keyword">}</span><span class="z-string">!</span><span class="z-string">&quot;</span></span></code></pre><pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- Return type is Option (Nat × Nat) → </span><span class="z-keyword">do</span><span> uses Option&#39;s bind and pure</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> findBoth</span><span> (xs : List Nat) : Option (Nat × Nat) := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> first ← xs[</span><span class="z-constant z-numeric z-constant">0</span><span>]?    -- </span><span class="z-keyword">if</span><span> none, Option&#39;s bind short-circuits</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> third ← xs[</span><span class="z-constant z-numeric z-constant">2</span><span>]?</span></span>
+<span class="giallo-l"><span>  pure (first, third)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> findBoth [</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">2</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>]  -- some (</span><span class="z-constant z-numeric z-constant">1</span><span>, </span><span class="z-constant z-numeric z-constant">3</span><span>)</span></span>
+<span class="giallo-l"><span class="z-keyword">#eval</span><span> findBoth [</span><span class="z-constant z-numeric z-constant">1</span><span>]         -- none</span></span></code></pre>
+<p>What if the return type is plain — like <code>Nat</code> or <code>CPU</code> — and not monadic? Then <code>do</code> has no monad to work with. You use <code>Id.run</code>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>-- With </span><span class="z-keyword">do</span><span> + Id.run:</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mySum</span><span> (l : Array Nat) : Nat := Id.run </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span class="z-keyword"> mut</span><span> out := </span><span class="z-constant z-numeric z-constant">0</span></span>
+<span class="giallo-l"><span class="z-keyword">  for</span><span> i </span><span class="z-keyword">in</span><span> l </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span>    out := out + i</span></span>
+<span class="giallo-l"><span class="z-keyword">  return</span><span> out</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- Without </span><span class="z-keyword">do</span><span> — the </span><span class="z-keyword">for</span><span> loop becomes foldl, the mutable </span><span class="z-keyword">variable</span><span> becomes the accumulator:</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mySum&#39;</span><span> (l : Array Nat) : Nat :=</span></span>
+<span class="giallo-l"><span>  go l.toList </span><span class="z-constant z-numeric z-constant">0</span></span>
+<span class="giallo-l"><span class="z-keyword">where</span></span>
+<span class="giallo-l"><span>  go : List Nat → Nat → Nat</span></span>
+<span class="giallo-l"><span>    | [], out =&gt; out</span></span>
+<span class="giallo-l"><span>    | i :: rest, out =&gt; go rest (out + i)</span></span></code></pre>
+<p>Both compute the same thing. The <code>do</code> block is just a nicer way to write the recursion. The <code>for</code> loop becomes <code>go</code>, the <code>let mut out</code> becomes the accumulator parameter, and <code>return out</code> becomes the base case.</p>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">Aside: what is go and where?</div>
+  
+  <p><code>where</code> defines a local function — like a <code>let</code> but written after the main definition. <code>go</code> is just the name we gave it. The same code without <code>where</code>:</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> go</span><span> : List Nat → Nat → Nat</span></span>
+<span class="giallo-l"><span>  | [], out =&gt; out                    -- empty list: </span><span class="z-keyword">return</span><span> accumulator</span></span>
+<span class="giallo-l"><span>  | i :: rest, out =&gt; go rest (out + i) -- add i to accumulator, recurse</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mySum&#39;</span><span> (l : Array Nat) : Nat := go l.toList </span><span class="z-constant z-numeric z-constant">0</span><span>  -- start </span><span class="z-keyword">with</span><span> accumulator = </span><span class="z-constant z-numeric z-constant">0</span></span></code></pre>
+</div>
+<p>You can't mix two monads in one <code>do</code> block. A <code>do</code> block uses exactly one monad, determined by the return type.</p>
 <h2 id="translation-rules">Translation Rules</h2>
 <p>Four rules. The compiler applies them mechanically.</p>
 <p><strong>Rule 1</strong> — base case, a single expression. Just strip the <code>do</code>:</p>
@@ -358,7 +400,7 @@
   <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
   <nav class="toc toc-panel" id="toc-panel">
     <div class="toc-title">Contents</div>
-    <ol><li><a href="#translation-rules">Translation Rules</a></li><li><a href="#firstthirdfifthseventh">firstThirdFifthSeventh</a></li><li><a href="#mapm">mapM</a></li><li><a href="#tree-numbering">Tree Numbering</a></li><li><a href="#summary">Summary</a></li><li><a href="#references">References</a></li></ol>
+    <ol><li><a href="#which-monad-does-do-use">Which Monad Does do Use?</a></li><li><a href="#translation-rules">Translation Rules</a></li><li><a href="#firstthirdfifthseventh">firstThirdFifthSeventh</a></li><li><a href="#mapm">mapM</a></li><li><a href="#tree-numbering">Tree Numbering</a></li><li><a href="#summary">Summary</a></li><li><a href="#references">References</a></li></ol>
   </nav>
   <script>
     (function() {
