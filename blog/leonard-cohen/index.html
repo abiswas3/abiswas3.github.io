@@ -12,7 +12,7 @@
   </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>#music | onATangent</title>
+  <title>That Really Is No Way To Say Goodbye | Random Walks</title>
   <link rel="stylesheet" href="/style.css">
   <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
   <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
@@ -126,34 +126,98 @@
     </div>
   </nav>
   
+
+
   <main class="content">
     
-<section class="section">
-  <h1>#music</h1>
-  <ul class="post-list">
+
+
+
+
+
+
+  
+  
+
+
+<article class="post">
+  <header class="post-header">
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;leonard-cohen&#x2F;">That Really Is No Way To Say Goodbye</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-04-06</time>
-      </div>
-    </li>
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;lockdown-music-project&#x2F;">The Lockdown Music Project</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari, David Smith</span>
-        <time>2020-03-01</time>
-      </div>
-    </li>
+    <a href="&#x2F;blog&#x2F;" class="back-link">&larr; Notes</a>
     
-  </ul>
-</section>
+    <h1>That Really Is No Way To Say Goodbye</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-04-06</time>
+      
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/cohen/" class="tag">cohen</a><a href="/tags/music/" class="tag">music</a>
+    </div>
+    
+  </header>
+
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <p>Leonard Cohen has been with me longer than almost any other musician.
+Over the years, I've collected some clips that I often reflect on.</p>
+<h2 id="comedy">Comedy</h2>
+<p>Short clips that show he was just as good a comedian as he was a poet.</p>
+<ul>
+<li><a rel="external" href="https://www.youtube.com/shorts/M4DHoXefEMA">On Anxiety</a></li>
+<li><a rel="external" href="https://www.youtube.com/shorts/ZIX-s5bQCpc">His quest for coffee</a></li>
+</ul>
+<h2 id="live-performances">Live Performances</h2>
+<h2 id="covers">Covers</h2>
+<ul>
+<li><a rel="external" href="https://www.youtube.com/watch?v=TFWug6KlvMI&amp;list=RDTFWug6KlvMI&amp;start_radio=1">Tonight Will Be Fine</a> - Teddy Thomson</li>
+</ul>
+
+  </div>
+
+  
+
+  
+  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
+  <nav class="toc toc-panel" id="toc-panel">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#comedy">Comedy</a></li><li><a href="#live-performances">Live Performances</a></li><li><a href="#covers">Covers</a></li></ol>
+  </nav>
+  <script>
+    (function() {
+      var btn = document.getElementById('toc-toggle');
+      var panel = document.getElementById('toc-panel');
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target)) {
+          panel.classList.remove('open');
+        }
+      });
+      panel.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          panel.classList.remove('open');
+        });
+      });
+    })();
+  </script>
+  
+</article>
 
   </main>
   <!-- ====================================================================
