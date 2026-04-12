@@ -185,7 +185,7 @@
 <p>All file references are relative to commit <code>dd348a2</code> on branch <code>embedded-sail-state</code> of <a rel="external" href="https://github.com/abiswas3/jolt-qed">jolt-qed</a>.</p>
 
 </div>
-<p>Before diving into the details of a theorem, we briefly review how the RISCV cpu is currently modelled in the above transpilation.
+<p>Before diving into the details of a theorem, we briefly review how the RISC-V CPU is currently modelled in the above transpilation.
 At the centre of the modelling decision is the <code>SailM</code> Monad.</p>
 <h2 id="the-sail-monad">The Sail Monad</h2>
 <p><code>SailM</code> is the monad that all transpiled RISC-V instructions live in.
@@ -278,7 +278,7 @@ So what it really models is the step function of a single fetch-decode-execute c
 <p>A 5-bit index into the 32 general-purpose RISC-V registers.</p>
 <h2 id="jolt-monad">Jolt Monad</h2>
 <p>Jolt has virtual registers that are not present in the above state definition.
-So to model Jolt state we just define <code>SailJoltState</code> which the Sail state with extra virtual registers:</p>
+So to model Jolt state we just define <code>SailJoltState</code> which is the Sail state with extra virtual registers:</p>
 <pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/Defs.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">29</span><span class="z-keyword">structure</span><span class="z-entity z-name z-entity z-name z-function"> SailJoltState</span><span class="z-keyword"> where</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln">30</span><span>  sail : SailState</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln">31</span><span>  vregs : BitVec </span><span class="z-constant z-numeric z-constant">7</span><span> → BitVec </span><span class="z-constant z-numeric z-constant">64</span><span> := </span><span class="z-keyword">fun</span><span> _ =&gt; </span><span class="z-constant z-numeric z-constant">0</span></span></code></pre><pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/Defs.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">35</span><span class="z-keyword">abbrev</span><span class="z-entity z-name z-entity z-name z-function"> JoltMonad</span><span> (α : </span><span class="z-storage z-type">Type</span><span>) := EStateM (Error exception) SailJoltState α</span></span></code></pre>

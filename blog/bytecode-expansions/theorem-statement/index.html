@@ -185,9 +185,9 @@
 <p>All file references are relative to commit <code>dd348a2</code> on branch <code>embedded-sail-state</code> of <a rel="external" href="https://github.com/abiswas3/jolt-qed">jolt-qed</a>.</p>
 
 </div>
-<p>With the definitions out of the way lets get to an actual theorem statement.
-The theorem below says that Jolts sequence of instructions for <code>ADDIW</code> leave the final Sail state component of the Jolt State machine in the same way as the <code>ADDIW</code> instruction defined in by Sail.</p>
-<p>In formal theorem proving language this looks like this.</p>
+<p>With the definitions out of the way, let's get to an actual theorem statement.
+The theorem below says that Jolt's sequence of instructions for <code>ADDIW</code> leaves the final Sail state component of the Jolt state machine in the same way as the <code>ADDIW</code> instruction defined by Sail.</p>
+<p>In formal theorem proving language, this looks like the following.</p>
 <pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/InstructionEquivalence/Addiw.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">108</span><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> jolt_addiw_eq_sail</span><span> (imm : BitVec </span><span class="z-constant z-numeric z-constant">12</span><span>) (rs1 rd : regidx)</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln">109</span><span>    (hrd : rd ≠ regidx.Regidx </span><span class="z-constant z-numeric z-constant">0</span><span>) (js : SailJoltState) (hwf : WellFormed js) :</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln">110</span><span>    projectResult ((jolt_addiw imm rs1 rd).run js) =</span></span>

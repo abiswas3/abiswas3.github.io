@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'rose-pine-ink' : 'vitesse-dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The R-type-W Framework | Random Walks</title>
+  <link rel="stylesheet" href="/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  
+  
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      tags: 'ams',
+      macros: {
+        field: ['{\\mathbb{#1}}', 1],
+        hei: ['{\\mathbb{F}(#1)}', 1],
+        Field: '{\\mathbb{F}}',
+        Mont: ['{\\widetilde{#1}}', 1],
+        samples: '{\\xleftarrow{\\$}}',
+        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+        TauConstraints: '{\\tau_y}',
+        TauTime: '{\\tau_{\\text{cycle}}}',
+        TauGroup: '{\\tau_b}',
+        MLE: ['{\\widetilde{#1}}', 1],
+        tf: ['{\\widetilde{#1}}', 1],
+        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+        Def: '{:=}',
+        ChallengeSet: '{\\mathsf{C}}',
+        Complement: ['{\\overline{#1}}', 1],
+        Size: ['{\\left|#1\\right|}', 1],
+        Exp: ['{2^{#1}}', 1],
+        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+        BigO: ['{O\\ \\left(#1\\right)}', 1],
+        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
+        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
+        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+        poly: '{\\operatorname{poly}}',
+        criticalAlpha: ['{\\alpha_{#1}}', 1],
+        bit: '{\\{0,1\\}}',
+        CStar: '{C^{\\star}}',
+        GraphNbrs: ['{N_G(#1)}', 1],
+        ClauseNbrs: ['{N_C(#1)}', 1],
+        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        SmallO: ['{o\\!(#1)}', 1],
+        Naturals: '{\\mathbb{N}}',
+        Closure: ['{\\operatorname{Cl}(#1)}', 1],
+        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+        Dim: ['{\\dim(#1)}', 1],
+        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+        domain: ['{\\operatorname{dom}(#1)}', 1],
+        False: '{\\bot}',
+        opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+        // ── Complexity Theory & Turing Machines ──────────────────────────
+        // Complexity classes
+        NP: '{\\mathsf{NP}}',
+        coNP: '{\\mathsf{coNP}}',
+        Pclass: '{\\mathsf{P}}',
+        PSPACE: '{\\mathsf{PSPACE}}',
+        EXP: '{\\mathsf{EXP}}',
+        // Turing machine components
+        States: '{\\mathcal{Q}}',
+        TransFunc: '{\\delta}',
+        InitState: '{q_0}',
+        AcceptState: '{q_{\\text{acc}}}',
+        RejectState: '{q_{\\text{rej}}}',
+        InitConfig: '{C_0}',
+        AcceptConfig: '{C_{\\text{acc}}}',
+        Moves: '{\\{\\mathsf{L},\\, \\mathsf{R}\\}}',
+        // Languages & notation
+        Lang: ['{L(#1)}', 1],
+        RE: '{\\mathsf{RE}}',
+        // General math
+        NN: '{\\mathbb{N}}',
+        ZZ: '{\\mathbb{Z}}',
+        RR: '{\\mathbb{R}}'
+      }
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="/">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
+        <a href="/misc/">Random</a>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
+          <option value="rose-pine-ink">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+          <option value="rose-pine-dawn">Rosé Pine</option>
+        </select>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+
+      </div>
+    </div>
+  </nav>
+  
+
+
+  <main class="content">
+    
+
+
+
+
+
+
+  
+  
+
+
+<article class="post">
+  <header class="post-header">
+    
+    
+    <a href="&#x2F;blog&#x2F;bytecode-expansions&#x2F;" class="back-link">&larr; Formally Verifying Jolt Bytecode Expansions</a>
+    
+    <h1>The R-type-W Framework</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-04-14</time>
+      
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/jolt/" class="tag">jolt</a><a href="/tags/lean/" class="tag">lean</a>
+    </div>
+    
+  </header>
+
+  
+  <nav class="toc toc-side">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#the-pattern">The Pattern</a></li><li><a href="#the-generic-definition">The Generic Definition</a></li><li><a href="#the-generic-concrete-lemma">The Generic Concrete Lemma</a></li><li><a href="#the-generic-main-theorem">The Generic Main Theorem</a></li><li><a href="#the-proof">The Proof</a></li><li><a href="#instantiation-addw">Instantiation: ADDW</a></li><li><a href="#instantiation-subw">Instantiation: SUBW</a></li><li><a href="#what-about-non-w-r-type">What About Non-W R-type?</a></li></ol>
+  </nav>
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <div class="callout callout-box thm-box">
+  
+  <div class="callout-title">Disclaimer</div>
+  
+  <p>Throughout this series, when we refer to "Sail" code, we mean the Lean 4 code generated by the <a rel="external" href="https://randomwalks.xyz/blog/sail-to-lean/">Galois and Cambridge transpiler</a> from the official RISC-V specification written in the Sail language.</p>
+<p>All file references are relative to commit <code>dd348a2</code> on branch <code>embedded-sail-state</code> of <a rel="external" href="https://github.com/abiswas3/jolt-qed">jolt-qed</a>.</p>
+
+</div>
+<p>In the <a href="../proof/">previous post</a>, we walked through the proof of <code>jolt_addiw_eq_sail</code> — one specific instruction. But RISC-V has many instructions, and writing a bespoke proof for each would be tedious. The R-type-W instructions (ADDW, SUBW, SLLW, SRLW, SRAW) all follow the same pattern. Can we prove them all at once?</p>
+<h2 id="the-pattern">The Pattern</h2>
+<p>Every R-type-W instruction has the same shape on both sides:</p>
+<p><strong>Sail (native):</strong> <code>execute_RTYPEW rs2 rs1 rd opw</code> — reads <code>rs1</code> and <code>rs2</code> (both 64-bit), truncates each to 32 bits, applies the 32-bit operation, sign-extends the result back to 64 bits, writes to <code>rd</code>.</p>
+<p><strong>Jolt (decomposed):</strong> <code>execute_RTYPE rs2 rs1 rd op</code> followed by <code>jolt_virtual_sign_extend_word rd</code> — does the full 64-bit operation first, writes to <code>rd</code>, then reads <code>rd</code> back, truncates to 32 bits, sign-extends to 64, writes back.</p>
+<p>The only things that differ per instruction are:</p>
+<ol>
+<li><strong>The 64-bit operation</strong> <code>f : BitVec 64 → BitVec 64 → BitVec 64</code> (e.g. <code>(· + ·)</code> for ADDW, <code>(· - ·)</code> for SUBW)</li>
+<li><strong>The math lemma</strong> proving that truncation distributes over the operation: <code>extractLsb (f a b) 31 0 = opw_result(extractLsb a 31 0, extractLsb b 31 0)</code></li>
+</ol>
+<p>Everything else — the monadic plumbing, the state threading, the <code>projectResult</code> stripping — is identical.</p>
+<h2 id="the-generic-definition">The Generic Definition</h2>
+<p>The framework defines a single Jolt decomposition parameterised by the R-type opcode:</p>
+<pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/RtypeW.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">140</span><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> jolt_rtype_w</span><span> (op : rop) (rs2 rs1 rd : regidx) : JoltMonad ExecutionResult := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">141</span><span class="z-keyword">  let</span><span> _ ← liftSail (execute_RTYPE rs2 rs1 rd op)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">142</span><span>  jolt_virtual_sign_extend_word rd</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">143</span><span>  pure RETIRE_SUCCESS</span></span></code></pre>
+<p>This is the same structure as <code>jolt_addw</code>, <code>jolt_subw</code>, etc. — just parameterised by <code>op</code>.</p>
+<h2 id="the-generic-concrete-lemma">The Generic Concrete Lemma</h2>
+<p>The worker lemma is also generic. It takes a factoring hypothesis <code>hf</code> that says how <code>execute_RTYPE</code> decomposes for the given <code>op</code>:</p>
+<pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/RtypeW.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">147</span><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> jolt_rtype_w_concrete</span><span> (op : rop)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">148</span><span>    (f : BitVec </span><span class="z-constant z-numeric z-constant">64</span><span> → BitVec </span><span class="z-constant z-numeric z-constant">64</span><span> → BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">149</span><span>    (hf : ∀ rs2 rs1 rd, execute_RTYPE rs2 rs1 rd op = </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">150</span><span class="z-keyword">      let</span><span> v1 ← rX_bits rs1; </span><span class="z-keyword">let</span><span> v2 ← rX_bits rs2</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">151</span><span>      wX_bits rd (f v1 v2); pure RETIRE_SUCCESS)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">152</span><span>    (rs2 rs1 rd : regidx) (hrd : rd ≠ regidx.Regidx </span><span class="z-constant z-numeric z-constant">0</span><span>)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">153</span><span>    (js : SailJoltState) (hwf : WellFormed js) :</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">154</span><span>    ∃ (js&#39; : SailJoltState) (v1 : BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>) (v2 : BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>),</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">155</span><span>      rX_bits rs1 js.sail = .ok v1 js.sail ∧</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">156</span><span>      rX_bits rs2 js.sail = .ok v2 js.sail ∧</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">157</span><span>      (jolt_rtype_w op rs2 rs1 rd).run js = .ok RETIRE_SUCCESS js&#39; ∧</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">158</span><span>      js&#39;.sail = stateAfterWrite js.sail rd</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">159</span><span>        (sign_extend (m := </span><span class="z-constant z-numeric z-constant">64</span><span>) (Sail.BitVec.extractLsb (f v1 v2) </span><span class="z-constant z-numeric z-constant">31</span><span class="z-constant z-numeric z-constant"> 0</span><span>))</span></span></code></pre><div class="callout callout-remark">
+  
+  <p>Compare this with <code>jolt_addiw_concrete</code> from the previous post. The structure is identical — it says Jolt's decomposition succeeds and writes a specific value to <code>rd</code>. The differences are:</p>
+<ul>
+<li>Two register reads (<code>v1</code> from <code>rs1</code>, <code>v2</code> from <code>rs2</code>) instead of one register + immediate</li>
+<li>The value written is <code>sign_extend(extractLsb(f v1 v2, 31, 0))</code> where <code>f</code> is a parameter, not hardcoded to addition</li>
+<li>The factoring hypothesis <code>hf</code> is a parameter instead of being baked into the proof</li>
+</ul>
+
+</div>
+<h2 id="the-generic-main-theorem">The Generic Main Theorem</h2>
+<p>The main theorem adds one more parameter: the math lemma <code>h_math</code> connecting the 64-bit operation with the 32-bit W operation.</p>
+<pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/RtypeW.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">188</span><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> jolt_rtype_w_eq_sail</span><span> (op : rop) (opw : ropw)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">189</span><span>    (f : BitVec </span><span class="z-constant z-numeric z-constant">64</span><span> → BitVec </span><span class="z-constant z-numeric z-constant">64</span><span> → BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">190</span><span>    (hf : ∀ rs2 rs1 rd, execute_RTYPE rs2 rs1 rd op = </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">191</span><span class="z-keyword">      let</span><span> v1 ← rX_bits rs1; </span><span class="z-keyword">let</span><span> v2 ← rX_bits rs2</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">192</span><span>      wX_bits rd (f v1 v2); pure RETIRE_SUCCESS)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">193</span><span>    (h_math : ∀ a b : BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>,</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">194</span><span>      Sail.BitVec.extractLsb (f a b) </span><span class="z-constant z-numeric z-constant">31</span><span class="z-constant z-numeric z-constant"> 0</span><span> =</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">195</span><span>      (</span><span class="z-keyword">match</span><span> opw </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">196</span><span>        | ropw.ADDW =&gt; Sail.BitVec.extractLsb a </span><span class="z-constant z-numeric z-constant">31</span><span class="z-constant z-numeric z-constant"> 0</span><span> + Sail.BitVec.extractLsb b </span><span class="z-constant z-numeric z-constant">31</span><span class="z-constant z-numeric z-constant"> 0</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">197</span><span>        | ropw.SUBW =&gt; Sail.BitVec.extractLsb a </span><span class="z-constant z-numeric z-constant">31</span><span class="z-constant z-numeric z-constant"> 0</span><span> - Sail.BitVec.extractLsb b </span><span class="z-constant z-numeric z-constant">31</span><span class="z-constant z-numeric z-constant"> 0</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">198</span><span>        | ropw.SLLW =&gt; ...</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">199</span><span>        | ropw.SRLW =&gt; ...</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">200</span><span>        | ropw.SRAW =&gt; ...))</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">201</span><span>    (rs2 rs1 rd : regidx) (hrd : rd ≠ regidx.Regidx </span><span class="z-constant z-numeric z-constant">0</span><span>)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">202</span><span>    (js : SailJoltState) (hwf : WellFormed js) :</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">203</span><span>    projectResult ((jolt_rtype_w op rs2 rs1 rd).run js) =</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">204</span><span>    (execute_RTYPEW rs2 rs1 rd opw).run js.sail</span></span></code></pre><div class="callout callout-remark">
+  
+  <p><code>h_math</code> is the only per-instruction proof obligation that requires actual mathematics. For ADDW it says <code>extractLsb (a + b) 31 0 = extractLsb a 31 0 + extractLsb b 31 0</code> — truncation distributes over addition. For SUBW, truncation distributes over subtraction. And so on.</p>
+<p>Everything else — the monadic plumbing, the <code>projectResult</code> stripping, the <code>wX_shape</code>/<code>wX_bits_eq_stateAfterWrite</code> bridge — is handled once in this generic theorem.</p>
+
+</div>
+<h2 id="the-proof">The Proof</h2>
+<p>The proof follows exactly the same steps as the ADDIW proof from the <a href="../proof/">previous post</a>, with one extra step: <code>rw [h_math]</code>.</p>
+<pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/RtypeW.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">204</span><span>  obtain ⟨js&#39;, v1, v2, hj_rx1, hj_rx2, hj, hj_sail⟩ :=</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">205</span><span>    jolt_rtype_w_concrete op f hf rs2 rs1 rd hrd js hwf</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">206</span><span>  unfold execute_RTYPEW</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">207</span><span>  simp only [EStateM.run, bind, EStateM.bind, pure, EStateM.pure, hj_rx1, hj_rx2]</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">208</span><span class="z-keyword">  show</span><span> projectResult ((jolt_rtype_w op rs2 rs1 rd).run js) = _</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">209</span><span>  rw [hj]</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">210</span><span>  simp only [projectResult, project]</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">211</span><span>  rw [hj_sail]</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">212</span><span>  rw [h_math]      -- ← the one new step: apply the math </span><span class="z-keyword">lemma</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">213</span><span class="z-entity z-name z-entity z-name z-function">  obtain</span><span> ⟨</span><span class="z-entity z-name z-entity z-name z-function">s&#39;,</span><span class="z-entity z-name z-entity z-name z-function"> hw⟩</span><span> := wX_shape rd _ js.sail</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">214</span><span>  rw [hw]</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">215</span><span>  congr </span><span class="z-constant z-numeric z-constant">1</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">216</span><span>  exact (wX_bits_eq_stateAfterWrite rd _ js.sail s&#39; hw).symm</span></span></code></pre><div class="callout callout-box thm-box">
+  
+  <div class="callout-title">The extra step</div>
+  
+  <p>After <code>rw [hj_sail]</code>, the LHS has <code>stateAfterWrite js.sail rd (sign_extend (extractLsb (f v1 v2) 31 0))</code> and the RHS has <code>stateAfterWrite js.sail rd (sign_extend (opw_result 31 0))</code>.</p>
+<p>The <code>rw [h_math]</code> step rewrites <code>extractLsb (f v1 v2) 31 0</code> to the W-operation's expression (e.g. <code>extractLsb v1 31 0 + extractLsb v2 31 0</code> for ADDW). After this, both sides have the same <code>stateAfterWrite</code> argument, and the rest is identical to the ADDIW proof.</p>
+
+</div>
+<h2 id="instantiation-addw">Instantiation: ADDW</h2>
+<p>With the framework in place, proving ADDW is three things:</p>
+<p><strong>1. Factoring lemma</strong> — <code>execute_RTYPE</code> with <code>rop.ADD</code> factors as read-read-write:</p>
+<pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/InstructionEquivalence/Addw.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">10</span><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> execute_RTYPE_ADD_factored</span><span> (rs2 rs1 rd : regidx) :</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">11</span><span>    execute_RTYPE rs2 rs1 rd rop.ADD = (</span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">12</span><span class="z-keyword">      let</span><span> v1 ← rX_bits rs1; </span><span class="z-keyword">let</span><span> v2 ← rX_bits rs2</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">13</span><span>      wX_bits rd (v1 + v2); pure RETIRE_SUCCESS) := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">14</span><span>  simp [execute_RTYPE, bind_pure_comp]</span></span></code></pre>
+<p><strong>2. The main theorem</strong> — one line:</p>
+<pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/InstructionEquivalence/Addw.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">23</span><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> jolt_addw_eq_sail</span><span> (rs2 rs1 rd : regidx) (hrd : rd ≠ regidx.Regidx </span><span class="z-constant z-numeric z-constant">0</span><span>)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">24</span><span>    (js : SailJoltState) (hwf : WellFormed js) :</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">25</span><span>    projectResult ((jolt_addw rs2 rs1 rd).run js) =</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">26</span><span>    (execute_RTYPEW rs2 rs1 rd ropw.ADDW).run js.sail := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">27</span><span>  exact jolt_rtype_w_eq_sail rop.ADD ropw.ADDW (· + ·) execute_RTYPE_ADD_factored</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">28</span><span>    (</span><span class="z-keyword">by</span><span> intro a b; exact extractLsb_add a b) rs2 rs1 rd hrd js hwf</span></span></code></pre><div class="callout callout-remark">
+  
+  <p>The entire proof is a single <code>exact</code> — we instantiate the generic theorem with:</p>
+<ul>
+<li><code>rop.ADD</code> and <code>ropw.ADDW</code> — the R-type and R-type-W opcodes</li>
+<li><code>(· + ·)</code> — the 64-bit operation</li>
+<li><code>execute_RTYPE_ADD_factored</code> — the factoring proof</li>
+<li><code>extractLsb_add</code> — the math lemma (truncation distributes over addition)</li>
+</ul>
+<p>That's it. No monadic plumbing, no <code>simp</code>, no <code>projectResult</code>. The framework handles all of that.</p>
+
+</div>
+<h2 id="instantiation-subw">Instantiation: SUBW</h2>
+<p>SUBW is nearly identical. The only differences are the operation (<code>(· - ·)</code>) and the math lemma (<code>extractLsb_sub</code>):</p>
+<pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/InstructionEquivalence/Subw.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">17</span><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> extractLsb_sub</span><span> (a b : BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>) :</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">18</span><span>    Sail.BitVec.extractLsb (a - b) </span><span class="z-constant z-numeric z-constant">31</span><span class="z-constant z-numeric z-constant"> 0</span><span> =</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">19</span><span>    Sail.BitVec.extractLsb a </span><span class="z-constant z-numeric z-constant">31</span><span class="z-constant z-numeric z-constant"> 0</span><span> - Sail.BitVec.extractLsb b </span><span class="z-constant z-numeric z-constant">31</span><span class="z-constant z-numeric z-constant"> 0</span><span> := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">20</span><span>  simp only [Sail.BitVec.extractLsb, BitVec.extractLsb]</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">21</span><span>  apply BitVec.eq_of_toNat_eq</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">22</span><span>  simp [BitVec.toNat_sub]</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">23</span><span>  omega</span></span></code></pre><pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/InstructionEquivalence/Subw.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">32</span><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> jolt_subw_eq_sail</span><span> (rs2 rs1 rd : regidx) (hrd : rd ≠ regidx.Regidx </span><span class="z-constant z-numeric z-constant">0</span><span>)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">33</span><span>    (js : SailJoltState) (hwf : WellFormed js) :</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">34</span><span>    projectResult ((jolt_subw rs2 rs1 rd).run js) =</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">35</span><span>    (execute_RTYPEW rs2 rs1 rd ropw.SUBW).run js.sail := </span><span class="z-keyword">by</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">36</span><span>  exact jolt_rtype_w_eq_sail rop.SUB ropw.SUBW (· - ·) execute_RTYPE_SUB_factored</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">37</span><span>    (</span><span class="z-keyword">by</span><span> intro a b; exact extractLsb_sub a b) rs2 rs1 rd hrd js hwf</span></span></code></pre><div class="callout callout-box thm-box">
+  
+  <div class="callout-title">What each instruction must provide</div>
+  
+  <p>To add a new R-type-W instruction to the framework, you need exactly two things:</p>
+<ol>
+<li><strong>Factoring lemma</strong>: show that <code>execute_RTYPE</code> with your opcode factors as read-read-write with your <code>f</code></li>
+<li><strong>Math lemma</strong>: show that <code>extractLsb (f a b) 31 0</code> equals the W-variant's 32-bit computation</li>
+</ol>
+<p>The main theorem is then a one-line <code>exact</code> instantiating the generic framework. All the monadic plumbing, state threading, <code>projectResult</code> stripping, and <code>wX_shape</code> bridging is done once and reused.</p>
+
+</div>
+<h2 id="what-about-non-w-r-type">What About Non-W R-type?</h2>
+<p>The non-W R-type instructions (SLL, SRA, SRL) are simpler — Jolt's decomposition directly matches the Sail instruction without the sign-extend-word step. A <code>FormatR</code> framework would be the same idea but without the <code>jolt_virtual_sign_extend_word</code> and without the <code>h_math</code> lemma — the value written to <code>rd</code> is just <code>f v1 v2</code> on both sides.</p>
+
+  </div>
+
+  
+
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var source = code || pre;
+        var clone = source.cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function(el) { el.remove(); });
+        var text = clone.textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const select = document.getElementById('theme-select');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      const lightThemes = ['rose-pine-dawn'];
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        }
+      }
+
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
+
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
+    })();
+  </script>
+  <script>
+    // Smooth scroll + highlight for eqref and citation links.
+    // Citations get a ↩ back-link to return to reading position.
+    document.addEventListener('click', function(e) {
+      // Handle back-arrow clicks
+      var back = e.target.closest('.bib-back');
+      if (back) {
+        e.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Clean up previous highlights and back-links
+      document.querySelectorAll('.eq-highlight').forEach(function(el) {
+        el.classList.remove('eq-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function(el) {
+        el.remove();
+      });
+
+      var href = link.getAttribute('href');
+      var id = decodeURIComponent(href.slice(1));
+      var target = document.getElementById(id);
+      if (!target) return;
+
+      var highlight = target.closest('mjx-container[display="true"]') || target;
+      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlight.classList.add('eq-highlight');
+
+      // For citations, add a back-arrow to return to reading position
+      if (link.classList.contains('citation')) {
+        if (!link.id) link.id = 'cite-src-' + id;
+        var arrow = document.createElement('a');
+        arrow.className = 'bib-back';
+        arrow.setAttribute('data-source', link.id);
+        arrow.textContent = ' \u21A9';
+        arrow.title = 'Back to text';
+        highlight.appendChild(arrow);
+      }
+    });
+  </script>
+
+</body>
+</html>

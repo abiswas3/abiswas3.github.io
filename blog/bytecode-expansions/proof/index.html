@@ -162,7 +162,7 @@
   
   <nav class="toc toc-side">
     <div class="toc-title">Contents</div>
-    <ol><li><a href="#step-0-the-initial-goal">Step 0: The initial goal</a></li><li><a href="#helpers">Helpers</a><ol><li><a href="#stateafterwrite">stateAfterWrite</a></li><li><a href="#wx-update-regs">wX_update_regs</a></li><li><a href="#wx-shape">wX_shape</a></li><li><a href="#wx-bits-eq-stateafterwrite">wX_bits_eq_stateAfterWrite</a></li><li><a href="#jolt-addiw-concrete">jolt_addiw_concrete</a></li></ol></li><li><a href="#the-proof">The Proof</a><ol><li><a href="#step-1-obtain">Step 1: obtain</a></li><li><a href="#step-2-simplify-the-rhs">Step 2: Simplify the RHS</a></li><li><a href="#step-3-show-rw-hj">Step 3: show + rw [hj]</a></li><li><a href="#step-4-simp-only-projectresult-project">Step 4: simp only [projectResult, project]</a></li><li><a href="#step-5-rw-hj-sail">Step 5: rw [hj_sail]</a></li><li><a href="#step-6-obtain-s-hw-wx-shape-rd-js-sail-rw-hw">Step 6: obtain ⟨s&#x27;, hw⟩ := wX_shape rd _ js.sail + rw [hw]</a></li><li><a href="#step-7-congr-1">Step 7: congr 1</a></li><li><a href="#step-8-exact">Step 8: exact</a></li></ol></li></ol>
+    <ol><li><a href="#step-0-the-initial-goal">Step 0: The initial goal</a></li><li><a href="#helpers">Helpers</a><ol><li><a href="#jolt-addiw-concrete">jolt_addiw_concrete</a></li><li><a href="#other-concrete-lemmas">Other _concrete lemmas</a></li></ol></li><li><a href="#the-proof">The Proof</a><ol><li><a href="#step-1-obtain">Step 1: obtain</a></li><li><a href="#step-2-simplify-the-rhs">Step 2: Simplify the RHS</a></li><li><a href="#step-3-show-rw-hj">Step 3: show + rw [hj]</a></li><li><a href="#step-4-simp-only-projectresult-project">Step 4: simp only [projectResult, project]</a></li><li><a href="#step-5-rw-hj-sail">Step 5: rw [hj_sail]</a></li><li><a href="#step-6-obtain-s-hw-wx-shape-rd-js-sail-rw-hw">Step 6: obtain ⟨s&#x27;, hw⟩ := wX_shape rd _ js.sail + rw [hw]</a></li><li><a href="#step-7-congr-1">Step 7: congr 1</a></li><li><a href="#step-8-exact">Step 8: exact</a></li></ol></li></ol>
   </nav>
   
 
@@ -194,11 +194,11 @@
   <div class="callout-title">A Note On The General Proof Technique</div>
   
   <p>Although we focus on the <code>ADDIW</code> instruction in this post, the general proof outline will hold for all <code>FormatR</code> and <code>FormatI</code> instructions.
-The crux of the idea is that all these instructions simply read from registers and an intermediate.
-Reading bits do not change state.
+The crux of the idea is that all these instructions simply read from registers and an immediate.
+Reads do not change state.
 After reading values in the source registers, the final outcome is to update a single register <code>rd</code>.
 No other field in the state machine apart from <code>rd</code> changes.
-So all the proofs really boil down to, is checking whether the value written to <code>rd</code> is the same, and both the jolt sequence and the original RISCV instruction write the same value register to the same <code>rd</code>.</p>
+So all the proofs really boil down to, is checking whether the value written to <code>rd</code> is the same, and both the jolt sequence and the original RISCV instruction write the same value to the same <code>rd</code>.</p>
 <p>However, to formally prove two imperative programs are equivalent, we will have to explicitly prove that every field of the state machine and the return values are the same.
 Given what we said above, this means a lot of the proof will constitute machinery to get rid of the monadic plumbing, saying both LHS and RHS do not touch memory, so they must be equal.
 It is not interesting, but necessary for correctness.
@@ -235,68 +235,12 @@ Whether this approach will fully generalise is still unclear, but it seems to wo
 <span class="giallo-l"><span>  (execute_ADDIW imm rs1 rd).run js.sail</span></span></code></pre>
 <p>This is exactly the theorem statement. Now we begin.</p>
 <h2 id="helpers">Helpers</h2>
-<p>Before going over every line of the proof, we go over some helper lemmas and definitions that almost every proof re-uses.</p>
-<h3 id="stateafterwrite"><code>stateAfterWrite</code></h3>
-<div class="callout callout-remark">
-  
-  <div class="callout-title">In Plain English</div>
-  
-  <p><code>stateAfterWrite s rd val</code> returns a new <code>SailState</code> identical to <code>s</code> except that register <code>rd</code> now holds <code>val</code>. It is a specification-level way of describing a register write — without going through the monadic <code>wX_bits</code>.
-It also guarantees that the only change in state is the write to <code>rd</code>.
-See <code>wX_bits_eq_stateAfterWrite</code> later.</p>
-
-</div>
-<pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/RegisterOps.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">248</span><span class="z-storage z-modifier">noncomputable</span><span class="z-keyword"> def</span><span class="z-entity z-name z-entity z-name z-function"> stateAfterWrite</span><span> (s : SailState) (rd : regidx) (val : BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>) : SailState :=</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">249</span><span>  { s </span><span class="z-keyword">with</span><span> regs := wX_update_regs rd val s.regs }</span></span></code></pre><h3 id="wx-update-regs"><code>wX_update_regs</code></h3>
-<div class="callout callout-remark">
-  
-  <p><code>wX_update_regs r v regs</code> takes a register index <code>r</code>, a 64-bit value <code>v</code>, and the current register file hash map <code>regs</code>. It inserts <code>v</code> at the <code>Register</code> key corresponding to <code>r</code>. Writing to <code>x0</code> (index 0) is a no-op — <code>x0</code> is hardwired to zero in RISC-V.</p>
-
-</div>
-<pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/RegisterOps.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">119</span><span class="z-storage z-modifier">noncomputable</span><span class="z-keyword"> def</span><span class="z-entity z-name z-entity z-name z-function"> wX_update_regs</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">120</span><span>    (r : regidx)                                    -- which register to write</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">121</span><span>    (v : BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>)                                  -- the value to write</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">122</span><span>    (regs : Std.ExtDHashMap Register RegisterType)   -- the current register file</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">123</span><span>    : Std.ExtDHashMap Register RegisterType :=       -- returns updated register file</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">124</span><span class="z-keyword">  match</span><span> r </span><span class="z-keyword">with</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">125</span><span>  | ⟨i⟩ =&gt;                          -- destructure regidx to get the </span><span class="z-constant z-numeric z-constant">5</span><span>-bit index</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">126</span><span class="z-keyword">    let</span><span> w := regval_into_reg v       -- convert BitVec </span><span class="z-constant z-numeric z-constant">64</span><span> to register value type (identity)</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">127</span><span class="z-keyword">    match</span><span> i.toNat </span><span class="z-keyword">with</span><span>               -- </span><span class="z-keyword">match</span><span> on the natural number index</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">128</span><span>    | </span><span class="z-constant z-numeric z-constant">0</span><span> =&gt; regs                      -- x0: no-op, hardwired to zero</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">129</span><span>    | </span><span class="z-constant z-numeric z-constant">1</span><span> =&gt; regs.insert Register.x1 w  | </span><span class="z-constant z-numeric z-constant">2</span><span> =&gt; regs.insert Register.x2 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">130</span><span>    | </span><span class="z-constant z-numeric z-constant">3</span><span> =&gt; regs.insert Register.x3 w  | </span><span class="z-constant z-numeric z-constant">4</span><span> =&gt; regs.insert Register.x4 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">131</span><span>    | </span><span class="z-constant z-numeric z-constant">5</span><span> =&gt; regs.insert Register.x5 w  | </span><span class="z-constant z-numeric z-constant">6</span><span> =&gt; regs.insert Register.x6 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">132</span><span>    | </span><span class="z-constant z-numeric z-constant">7</span><span> =&gt; regs.insert Register.x7 w  | </span><span class="z-constant z-numeric z-constant">8</span><span> =&gt; regs.insert Register.x8 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">133</span><span>    | </span><span class="z-constant z-numeric z-constant">9</span><span> =&gt; regs.insert Register.x9 w  | </span><span class="z-constant z-numeric z-constant">10</span><span> =&gt; regs.insert Register.x10 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">134</span><span>    | </span><span class="z-constant z-numeric z-constant">11</span><span> =&gt; regs.insert Register.x11 w | </span><span class="z-constant z-numeric z-constant">12</span><span> =&gt; regs.insert Register.x12 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">135</span><span>    | </span><span class="z-constant z-numeric z-constant">13</span><span> =&gt; regs.insert Register.x13 w | </span><span class="z-constant z-numeric z-constant">14</span><span> =&gt; regs.insert Register.x14 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">136</span><span>    | </span><span class="z-constant z-numeric z-constant">15</span><span> =&gt; regs.insert Register.x15 w | </span><span class="z-constant z-numeric z-constant">16</span><span> =&gt; regs.insert Register.x16 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">137</span><span>    | </span><span class="z-constant z-numeric z-constant">17</span><span> =&gt; regs.insert Register.x17 w | </span><span class="z-constant z-numeric z-constant">18</span><span> =&gt; regs.insert Register.x18 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">138</span><span>    | </span><span class="z-constant z-numeric z-constant">19</span><span> =&gt; regs.insert Register.x19 w | </span><span class="z-constant z-numeric z-constant">20</span><span> =&gt; regs.insert Register.x20 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">139</span><span>    | </span><span class="z-constant z-numeric z-constant">21</span><span> =&gt; regs.insert Register.x21 w | </span><span class="z-constant z-numeric z-constant">22</span><span> =&gt; regs.insert Register.x22 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">140</span><span>    | </span><span class="z-constant z-numeric z-constant">23</span><span> =&gt; regs.insert Register.x23 w | </span><span class="z-constant z-numeric z-constant">24</span><span> =&gt; regs.insert Register.x24 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">141</span><span>    | </span><span class="z-constant z-numeric z-constant">25</span><span> =&gt; regs.insert Register.x25 w | </span><span class="z-constant z-numeric z-constant">26</span><span> =&gt; regs.insert Register.x26 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">142</span><span>    | </span><span class="z-constant z-numeric z-constant">27</span><span> =&gt; regs.insert Register.x27 w | </span><span class="z-constant z-numeric z-constant">28</span><span> =&gt; regs.insert Register.x28 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">143</span><span>    | </span><span class="z-constant z-numeric z-constant">29</span><span> =&gt; regs.insert Register.x29 w | </span><span class="z-constant z-numeric z-constant">30</span><span> =&gt; regs.insert Register.x30 w</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">144</span><span>    | _ =&gt; regs.insert Register.x31 w</span></span></code></pre>
-<p>Note: <code>_</code> here works because <code>i</code> comes from a <code>BitVec 5</code> (via <code>regidx</code>), so <code>i.toNat</code> can only be 0–31. Cases 0–30 are matched explicitly, so <code>_</code> can only match 31.</p>
-<h3 id="wx-shape"><code>wX_shape</code></h3>
-<p><code>wX_shape</code> says that writing to a register via <code>wX_bits</code> always succeeds — for any register <code>r</code> (a bit string of length 5), value <code>v</code>, and state <code>s</code>, there exists a resulting state <code>s'</code> such that <code>wX_bits r v s = .ok () s'</code>.</p>
-<pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/RegisterOps.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">86</span><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> wX_shape</span><span> (r : regidx) (v : BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>) (s : SailState) :</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">87</span><span>    ∃ s&#39;, wX_bits r v s = .ok () s&#39;</span></span></code></pre><div class="callout callout-remark">
-  
-  <p>Register writes cannot fail. Unlike <code>readReg</code> (which can throw <code>Error.Unreachable</code> if a key is missing from the hash map), <code>wX_bits</code> always produces an <code>.ok</code> result. This is why we don't need a <code>WellFormed</code>-like precondition for writes.</p>
-
-</div>
-<h3 id="wx-bits-eq-stateafterwrite"><code>wX_bits_eq_stateAfterWrite</code></h3>
-<p>This lemma connects the monadic <code>wX_bits</code> with the specification-level <code>stateAfterWrite</code>: if <code>wX_bits rd v s = .ok () s'</code>, then <code>s' = stateAfterWrite s rd v</code>.</p>
-<pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/RegisterOps.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">262</span><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> wX_bits_eq_stateAfterWrite</span><span> (rd : regidx) (v : BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>) (s s&#39; : SailState)</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">263</span><span>    (hw : wX_bits rd v s = .ok () s&#39;) :</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">264</span><span>    s&#39; = stateAfterWrite s rd v</span></span></code></pre><div class="callout callout-remark">
-  
-  <p>Running the monadic register write <code>wX_bits</code> produces exactly the same state as the pure <code>stateAfterWrite</code>. This lets us move between the monadic world (used in the actual computation) and the specification world (used in the proof).</p>
-
-</div>
+<p>The proof uses several helper lemmas for reasoning about register operations. These are documented in detail in the <a href="../helpers/">Register Operation Helpers</a> post. The key ones are:</p>
+<ul>
+<li><a href="../helpers/#stateafterwrite"><code>stateAfterWrite</code></a> — pure specification-level register write</li>
+<li><a href="../helpers/#wx-shape"><code>wX_shape</code></a> — register writes always succeed</li>
+<li><a href="../helpers/#wx-bits-eq-stateafterwrite"><code>wX_bits_eq_stateAfterWrite</code></a> — monadic write = pure write</li>
+</ul>
 <h3 id="jolt-addiw-concrete"><code>jolt_addiw_concrete</code></h3>
 <p><strong>This is the main worker lemma</strong>. All the heavy lifting happens here.</p>
 <pre class="giallo z-code"><code data-lang="lean" data-name="JoltBytecode/EmbeddedSailJoltState/InstructionEquivalence/Addiw.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">71</span><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> jolt_addiw_concrete</span><span> (imm : BitVec </span><span class="z-constant z-numeric z-constant">12</span><span>) (rs1 rd : regidx)</span></span>
@@ -329,6 +273,22 @@ So we replace <code>Y</code> with <code>X</code> here.
 When we invoke this in the main theorem, we will observe that all fields of <code>SailState</code> will be definitionally equal.</p>
 
 </div>
+<h3 id="other-concrete-lemmas">Other <code>_concrete</code> lemmas</h3>
+<p>Every instruction follows this same pattern. Here are all the <code>_concrete</code> lemmas across the codebase:</p>
+<table><thead><tr><th>Instruction</th><th>Lemma</th><th>File</th><th>Line</th></tr></thead><tbody>
+<tr><td>ADDIW</td><td><code>jolt_addiw_concrete</code></td><td><code>InstructionEquivalence/Addiw.lean</code></td><td>71</td></tr>
+<tr><td>ADDW</td><td><code>jolt_addw_concrete</code></td><td><code>InstructionEquivalence/Addw.lean</code></td><td>67</td></tr>
+<tr><td>SUBW</td><td><code>jolt_subw_concrete</code></td><td><code>InstructionEquivalence/Subw.lean</code></td><td>79</td></tr>
+<tr><td>SLL</td><td><code>jolt_sll_concrete</code></td><td><code>InstructionEquivalence/Sll.lean</code></td><td>63</td></tr>
+<tr><td>SLLW</td><td><code>jolt_sllw_concrete</code></td><td><code>InstructionEquivalence/Sllw.lean</code></td><td>103</td></tr>
+<tr><td>SRA</td><td><code>jolt_sra_concrete</code></td><td><code>InstructionEquivalence/Sra.lean</code></td><td>49</td></tr>
+<tr><td>SRAI</td><td><code>jolt_srai_concrete</code></td><td><code>InstructionEquivalence/Srai.lean</code></td><td>69</td></tr>
+<tr><td>SRAIW</td><td><code>jolt_sraiw_concrete</code></td><td><code>InstructionEquivalence/Sraiw.lean</code></td><td>133</td></tr>
+<tr><td>SRAW</td><td><code>jolt_sraw_concrete</code></td><td><code>InstructionEquivalence/Sraw.lean</code></td><td>115</td></tr>
+<tr><td>SRL</td><td><code>jolt_srl_concrete</code></td><td><code>InstructionEquivalence/Srl.lean</code></td><td>48</td></tr>
+<tr><td>SRLW</td><td><code>jolt_srlw_concrete</code></td><td><code>InstructionEquivalence/Srlw.lean</code></td><td>145</td></tr>
+</tbody></table>
+<p>All files are under <code>JoltBytecode/EmbeddedSailJoltState/</code>. Each <code>_concrete</code> lemma says: Jolt's decomposition succeeds with <code>RETIRE_SUCCESS</code> and the final Sail state equals <code>stateAfterWrite js.sail rd (value)</code> — where <code>value</code> is the instruction-specific computation. The main <code>_eq_sail</code> theorem then shows the Sail instruction writes the same value via the uniform plumbing pattern described below.</p>
 <h2 id="the-proof">The Proof</h2>
 <p>With the helpers defined, we now show how the main proof just decomposes into mechanical unwinding of the monadic machinery.</p>
 <h3 id="step-1-obtain">Step 1: <code>obtain</code></h3>
