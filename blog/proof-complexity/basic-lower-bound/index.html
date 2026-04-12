@@ -490,7 +490,10 @@ And as $S_0 \le \Size{\pi}$, we get a lower bound on the size of any refutation.
       btn.textContent = 'Copy';
       btn.addEventListener('click', function() {
         var code = pre.querySelector('code');
-        var text = (code || pre).textContent;
+        var source = code || pre;
+        var clone = source.cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function(el) { el.remove(); });
+        var text = clone.textContent;
         navigator.clipboard.writeText(text).then(function() {
           btn.textContent = 'Copied!';
           btn.classList.add('copied');

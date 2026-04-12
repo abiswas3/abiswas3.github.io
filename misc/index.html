@@ -156,13 +156,19 @@
   </header>
 
   
+  <nav class="toc toc-side">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#articles">Articles</a></li><li><a href="#music-recs">Music Recs</a></li><li><a href="#travel-pictures">Travel&#x2F;Pictures</a></li></ol>
+  </nav>
+  
 
   
 
   
 
   <div class="post-content">
-    <p>A collection of random walks.</p>
+    <p>A collection of random walks in the hope we bring rss feeds replace all metric based algorithmic recommendations.</p>
+<h2 id="articles">Articles</h2>
 <ol>
 <li>
 <p><a rel="external" href="https://www.theredhandfiles.com/">Nick Cave's Red Letters</a>. If you have a few minutes to spare, please spend some time with these letters. Amidst the relentless stream of junk we now call news, these might offer a quiet moment of reflection.</p>
@@ -170,19 +176,24 @@
 <li>
 <p><a rel="external" href="https://www.cricketetal.com/">Cricket et al</a> A writing clinic by <a rel="external" href="https://www.gideonhaigh.com/biography/">Gideon Haigh</a>, disguised as a cricket blog.</p>
 </li>
-<li>
-<p><strong>Triathlon Rankings:</strong> I looked into rankings in triathlon a while back. I never really got to a solution that I thought was robust, but [these] [are] [some] [thoughts] about rankings and biases. My conclusion was that sport rankings have a much larger human element that I'd previously believed. I have lost track on what the latest system triathlon employs.</p>
-</li>
-<li>
-<p><a rel="external" href="https://photos.app.goo.gl/yReBhJCLQNQyQxvu6">My time as a high school soccer coach, Seattle, USA</a> I coached high school for 3 years in Seattle for Soccer Without Borders. It was the best job I've never had, and <a rel="external" href="https://inhercorner.org/episodes/episode-11-mary-mcveigh-connor">Mary</a> is the best boss I never had.</p>
-</li>
-<li>
-<p><a href="/posts/lockdown-project.html">The Lockdown Music Project</a></p>
-</li>
-<li>
-<p><a href="/blog/leonard-cohen/">Leonard Cohen Diaries</a></p>
-</li>
 </ol>
+<!-- 4. **Triathlon Rankings:** I looked into rankings in triathlon a while back. I never really got to a solution that I thought was robust, but [these] [are] [some] [thoughts] about rankings and biases. My conclusion was that sport rankings have a much larger human element that I'd previously believed. I have lost track on what the latest system triathlon employs. -->
+<h2 id="music-recs">Music Recs</h2>
+<div class="footnote-definition" id="good"><sup class="footnote-definition-label">1</sup>
+<p>Or good, if you can conjure up such a friend.</p>
+</div>
+<p>You do not need Spotify to find new music.
+You just need an enthusiastic friend who recommends you bad<sup class="footnote-reference"><a href="#good">1</a></sup> music.
+Should you feel such an absence, let me be a poor substitute, or use <a rel="external" href="https://www.youtube.com/@nprmusic">these guys</a>  as a more than able alternative.
+Either way, bin the algorithmic recs.</p>
+<ul>
+<li><a href="/blog/lockdown-music-project/">The Lockdown Music Project</a>: <strong>Incomplete</strong> much<sup class="footnote-reference"><a href="#not">2</a></sup> like the <a rel="external" href="https://www.youtube.com/watch?v=WVe80iZtlYU&amp;list=RDWVe80iZtlYU&amp;start_radio=1">Backstreet Boys</a>.</li>
+<li><a href="/blog/leonard-cohen/">Leonard Cohen</a></li>
+</ul>
+<div class="footnote-definition" id="not"><sup class="footnote-definition-label">2</sup>
+<p>On second thought, not that incomplete.</p>
+</div>
+<p>More organised music recs are incoming.</p>
 <h2 id="travel-pictures">Travel/Pictures</h2>
 <p>I spent my childhood in Kurseong and Calcutta in India.
 My youth in Madison and Seattle, USA.
@@ -193,6 +204,9 @@ I took the low-quality photos. The pretty ones were captured by Vicky.
 I plan to write an open-source self-hosting software which is a bit more defensive against being scraped by our AI overlords.
 But for now, I bow to Mother Google.</p>
 <ol>
+<li>
+<p><a rel="external" href="https://photos.app.goo.gl/yReBhJCLQNQyQxvu6">My time as a high school soccer coach, Seattle, USA</a> I coached high school for 3 years in Seattle for Soccer Without Borders. It was the best job I've never had, and <a rel="external" href="https://inhercorner.org/episodes/episode-11-mary-mcveigh-connor">Mary</a> is the best boss I never had.</p>
+</li>
 <li>
 <p><a rel="external" href="https://photos.app.goo.gl/cAizXym8JaRcLXrt5">Road Trip Across Alaska, USA</a> An Irish man and a Brit rent an RV, with no prior experiences with RVs, to drive across Alaska. What could go wrong? -- A fair amount, but we are still here, so it could not have been that bad.</p>
 </li>
@@ -368,7 +382,10 @@ But for now, I bow to Mother Google.</p>
       btn.textContent = 'Copy';
       btn.addEventListener('click', function() {
         var code = pre.querySelector('code');
-        var text = (code || pre).textContent;
+        var source = code || pre;
+        var clone = source.cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function(el) { el.remove(); });
+        var text = clone.textContent;
         navigator.clipboard.writeText(text).then(function() {
           btn.textContent = 'Copied!';
           btn.classList.add('copied');

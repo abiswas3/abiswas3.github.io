@@ -436,7 +436,10 @@ Were we to have understood monads, we go into some Lean4 specific machinery that
       btn.textContent = 'Copy';
       btn.addEventListener('click', function() {
         var code = pre.querySelector('code');
-        var text = (code || pre).textContent;
+        var source = code || pre;
+        var clone = source.cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function(el) { el.remove(); });
+        var text = clone.textContent;
         navigator.clipboard.writeText(text).then(function() {
           btn.textContent = 'Copied!';
           btn.classList.add('copied');

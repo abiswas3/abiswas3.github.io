@@ -134,6 +134,33 @@
     
     <li>
       <div class="post-list-main">
+        <a href="&#x2F;blog&#x2F;bytecode-expansions&#x2F;proof&#x2F;">The Proof</a>
+      </div>
+      <div class="post-list-side">
+        <time>2026-04-13</time>
+      </div>
+    </li>
+    
+    <li>
+      <div class="post-list-main">
+        <a href="&#x2F;blog&#x2F;bytecode-expansions&#x2F;theorem-statement&#x2F;">The Theorem Statement</a>
+      </div>
+      <div class="post-list-side">
+        <time>2026-04-12</time>
+      </div>
+    </li>
+    
+    <li>
+      <div class="post-list-main">
+        <a href="&#x2F;blog&#x2F;bytecode-expansions&#x2F;state&#x2F;">Modelling the CPU State</a>
+      </div>
+      <div class="post-list-side">
+        <time>2026-04-11</time>
+      </div>
+    </li>
+    
+    <li>
+      <div class="post-list-main">
         <a href="&#x2F;blog&#x2F;monads&#x2F;estatem&#x2F;">Leans Built In Monad System: EStateM Monad</a>
       </div>
       <div class="post-list-side">
@@ -286,7 +313,10 @@
       btn.textContent = 'Copy';
       btn.addEventListener('click', function() {
         var code = pre.querySelector('code');
-        var text = (code || pre).textContent;
+        var source = code || pre;
+        var clone = source.cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function(el) { el.remove(); });
+        var text = clone.textContent;
         navigator.clipboard.writeText(text).then(function() {
           btn.textContent = 'Copied!';
           btn.classList.add('copied');

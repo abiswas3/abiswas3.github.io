@@ -148,9 +148,9 @@
     
     <a href="&#x2F;tags&#x2F;instrumentation&#x2F;" class="tag">#instrumentation <span class="tag-count">1</span></a>
     
-    <a href="&#x2F;tags&#x2F;jolt&#x2F;" class="tag">#jolt <span class="tag-count">5</span></a>
+    <a href="&#x2F;tags&#x2F;jolt&#x2F;" class="tag">#jolt <span class="tag-count">8</span></a>
     
-    <a href="&#x2F;tags&#x2F;lean&#x2F;" class="tag">#lean <span class="tag-count">2</span></a>
+    <a href="&#x2F;tags&#x2F;lean&#x2F;" class="tag">#lean <span class="tag-count">5</span></a>
     
     <a href="&#x2F;tags&#x2F;lists&#x2F;" class="tag">#lists <span class="tag-count">1</span></a>
     
@@ -289,7 +289,10 @@
       btn.textContent = 'Copy';
       btn.addEventListener('click', function() {
         var code = pre.querySelector('code');
-        var text = (code || pre).textContent;
+        var source = code || pre;
+        var clone = source.cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function(el) { el.remove(); });
+        var text = clone.textContent;
         navigator.clipboard.writeText(text).then(function() {
           btn.textContent = 'Copied!';
           btn.classList.add('copied');

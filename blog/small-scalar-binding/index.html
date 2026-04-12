@@ -169,6 +169,10 @@
     
     
     
+    <div class="callout callout-warning stale-disclaimer">
+      This post has not been updated since it was published and the website has since been moved. Some links may be broken.
+    </div>
+    
   
 
   <div class="post-content">
@@ -513,7 +517,10 @@ So we clear the first 3 bits of $x$ to ensure that $x$ is <strong>ALWAYS</strong
       btn.textContent = 'Copy';
       btn.addEventListener('click', function() {
         var code = pre.querySelector('code');
-        var text = (code || pre).textContent;
+        var source = code || pre;
+        var clone = source.cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function(el) { el.remove(); });
+        var text = clone.textContent;
         navigator.clipboard.writeText(text).then(function() {
           btn.textContent = 'Copied!';
           btn.classList.add('copied');

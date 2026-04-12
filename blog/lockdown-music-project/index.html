@@ -172,7 +172,12 @@
   
 
   <div class="post-content">
-    <div class="callout callout-box thm-box">
+    <div class="callout callout-remark">
+  
+  <p>Will I ever actually finish this?</p>
+
+</div>
+<div class="callout callout-box thm-box">
   
   <p><strong>Disclaimer</strong>: In compiling this list, we have endeavoured to achieve the impossible -- that of separating the art from the artist.
 <em>Our only criterion for selection was that their music brought us enormous joy at some point in our lives.</em></p>
@@ -632,7 +637,10 @@ Of course the same was likely true of Abbey Road too at one point, but I can't r
       btn.textContent = 'Copy';
       btn.addEventListener('click', function() {
         var code = pre.querySelector('code');
-        var text = (code || pre).textContent;
+        var source = code || pre;
+        var clone = source.cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function(el) { el.remove(); });
+        var text = clone.textContent;
         navigator.clipboard.writeText(text).then(function() {
           btn.textContent = 'Copied!';
           btn.classList.add('copied');
