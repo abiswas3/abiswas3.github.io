@@ -110,6 +110,589 @@ See &lt;code&gt;wX_bits_eq_stateAfterWrite&lt;&#x2F;code&gt; later.&lt;&#x2F;p&g
   
   
   <entry xml:lang="en">
+    <title>The Proof</title>
+    <published>2026-04-13T00:00:00+00:00</published>
+    <updated>2026-04-13T00:00:00+00:00</updated>
+    <author>
+      <name></name>
+    </author>
+    <link rel="alternate" type="text/html" href="/blog/bytecode-expansions/proof-addw/"/>
+    <id>/blog/bytecode-expansions/proof-addw/</id>
+    
+    <content type="html" xml:base="/blog/bytecode-expansions/proof-addw/">&lt;p&gt;Before we start the proof, we provide a brief overview of the general structure.
+The rest of the document will focus on the concrete proof for &lt;code&gt;ADDW&lt;&#x2F;code&gt; - but the details specific to this instruction will be restricted to just one lemma.
+The rest will be plumbing.&lt;&#x2F;p&gt;
+&lt;div class=&quot;callout callout-remark&quot;&gt;
+  
+  &lt;div class=&quot;callout-title&quot;&gt;A Note On The General Proof Technique&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;Although we focus on the &lt;code&gt;ADDW&lt;&#x2F;code&gt; instruction in this post, the general proof outline will hold for all &lt;code&gt;FormatR&lt;&#x2F;code&gt; and &lt;code&gt;FormatI&lt;&#x2F;code&gt; instructions.
+The crux of the idea is that all these instructions simply read from registers and an immediate.
+Reads do not change state.
+After reading values in the source registers, the final outcome is to update a single register &lt;code&gt;rd&lt;&#x2F;code&gt;.
+No other field in the state machine apart from &lt;code&gt;rd&lt;&#x2F;code&gt; changes.
+So what all the proofs really boil down to is checking whether the value written to &lt;code&gt;rd&lt;&#x2F;code&gt; is the same, and both the jolt sequence and the original RISCV instruction write the same value to the same &lt;code&gt;rd&lt;&#x2F;code&gt;.
+Nothing else should be touched ever.&lt;&#x2F;p&gt;
+&lt;p&gt;However, to formally prove two imperative programs are equivalent, we will have to explicitly prove that every field of the state machine and the return values are the same.
+Given what we said above, this means a lot of the proof will constitute machinery to get rid of the monadic plumbing, saying both LHS and RHS sequences do not touch memory, so they must be equal.
+Lean cannot infer this on its own.
+At the same time, this is not interesting, and we do not want to spend time and energy doing this for every proof.
+As a result, we will try to &quot;templatise&quot; this and &quot;generalise&quot; this as much as possible (see below, as to how).&lt;&#x2F;p&gt;
+&lt;p&gt;All the real work will happen in a helper lemma with the suffix &lt;code&gt;_concrete&lt;&#x2F;code&gt; in its name.
+Here we do the main &quot;math&quot; of the proof via a bridge lemma (the concrete example below will further elucidate this).
+This &lt;code&gt;_concrete&lt;&#x2F;code&gt; theorem statement will say, &lt;em&gt;look this sequence of jolt instructions only affects register &lt;code&gt;rd&lt;&#x2F;code&gt;.
+And the value written to &lt;code&gt;rd&lt;&#x2F;code&gt; is exactly the value written by the RISCV instruction&lt;&#x2F;em&gt;.
+Once we prove this lemma, in the main proof we just substitute this lemma in place of the jolt-update.
+The net effect is that the main-theorem is a sequence of unfolding the monadic binds and re-writing, with one application of our helper lemma -- and bang the proof passes.&lt;&#x2F;p&gt;
+&lt;p&gt;The hope then is for each &lt;code&gt;FormatR&lt;&#x2F;code&gt; and &lt;code&gt;FormatI&lt;&#x2F;code&gt; instruction, we&#x27;ll just have to write 1 helper lemma, and the rest of the proof machinery, once written will just follow.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;p&gt;We now walk through the proof of theorem &lt;code&gt;jolt_addw_eq_sail&lt;&#x2F;code&gt; one tactic at a time. At each step, we show the goal before the tactic, the tactic itself, and how the goal changes.&lt;&#x2F;p&gt;
+&lt;p&gt;The full proof:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;JoltBytecode&#x2F;EmbeddedSailJoltState&#x2F;InstructionEquivalence&#x2F;Addw.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 87&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; jolt_addw_eq_sail&lt;&#x2F;span&gt;&lt;span&gt; (rs2 rs1 rd : regidx) (hrd : rd ≠ regidx.Regidx &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 88&lt;&#x2F;span&gt;&lt;span&gt;    (js : SailJoltState) (hwf : WellFormed js) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 89&lt;&#x2F;span&gt;&lt;span&gt;    projectResult ((jolt_addw rs2 rs1 rd).run js) =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 90&lt;&#x2F;span&gt;&lt;span&gt;    (execute_RTYPEW rs2 rs1 rd ropw.ADDW).run js.sail := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 91&lt;&#x2F;span&gt;&lt;span&gt;  obtain ⟨js&amp;#39;, v1, v2, hj_rx1, hj_rx2, hj, hj_sail⟩ :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 92&lt;&#x2F;span&gt;&lt;span&gt;    jolt_addw_concrete rs2 rs1 rd hrd js hwf&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 93&lt;&#x2F;span&gt;&lt;span&gt;  -- Sail side: unfold and rewrite &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;span&gt; the same v1, v2&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 94&lt;&#x2F;span&gt;&lt;span&gt;  rw [execute_RTYPEW_ADDW_factored]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 95&lt;&#x2F;span&gt;&lt;span&gt;  simp only [EStateM.run, bind, EStateM.bind, pure, EStateM.pure, hj_rx1, hj_rx2]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 96&lt;&#x2F;span&gt;&lt;span&gt;  -- Jolt side: rewrite &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;span&gt; concrete result&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 97&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;  show&lt;&#x2F;span&gt;&lt;span&gt; projectResult ((jolt_addw rs2 rs1 rd).run js) = _&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 98&lt;&#x2F;span&gt;&lt;span&gt;  rw [hj]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt; 99&lt;&#x2F;span&gt;&lt;span&gt;  simp only [projectResult, project]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;100&lt;&#x2F;span&gt;&lt;span&gt;  rw [hj_sail]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;101&lt;&#x2F;span&gt;&lt;span&gt;  -- Both sides now write the same value.&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;102&lt;&#x2F;span&gt;&lt;span&gt;  obtain ⟨s&amp;#39;, hw⟩ := wX_shape rd _ js.sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;103&lt;&#x2F;span&gt;&lt;span&gt;  rw [hw]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;104&lt;&#x2F;span&gt;&lt;span&gt;  congr &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;105&lt;&#x2F;span&gt;&lt;span&gt;  exact (wX_bits_eq_stateAfterWrite rd _ js.sail s&amp;#39; hw).symm&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;step-0-the-initial-goal&quot;&gt;Step 0: The initial goal&lt;&#x2F;h2&gt;
+&lt;p&gt;After &lt;code&gt;by&lt;&#x2F;code&gt;, Lean presents us with the goal we need to prove:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;⊢ projectResult ((jolt_addw rs2 rs1 rd).run js) =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  (execute_RTYPEW rs2 rs1 rd ropw.ADDW).run js.sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This is exactly the theorem statement. Now we begin.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;helpers&quot;&gt;Helpers&lt;&#x2F;h2&gt;
+&lt;p&gt;The proof uses several helper lemmas for reasoning about register operations. These are documented in detail in the &lt;a href=&quot;..&#x2F;helpers&#x2F;&quot;&gt;Register Operation Helpers&lt;&#x2F;a&gt; post. The key ones are:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;..&#x2F;helpers&#x2F;#stateafterwrite&quot;&gt;&lt;code&gt;stateAfterWrite&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; — returns a new &lt;code&gt;SailState&lt;&#x2F;code&gt; identical to the original except that register &lt;code&gt;rd&lt;&#x2F;code&gt; now holds the given value. It is a specification-level way of describing a register write — without going through the monadic &lt;code&gt;wX_bits&lt;&#x2F;code&gt;. It also guarantees that the only change in state is the write to &lt;code&gt;rd&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;..&#x2F;helpers&#x2F;#wx-shape&quot;&gt;&lt;code&gt;wX_shape&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; — writing to a register via &lt;code&gt;wX_bits&lt;&#x2F;code&gt; always succeeds. Unlike &lt;code&gt;readReg&lt;&#x2F;code&gt; (which can throw &lt;code&gt;Error.Unreachable&lt;&#x2F;code&gt; if a key is missing), &lt;code&gt;wX_bits&lt;&#x2F;code&gt; always produces an &lt;code&gt;.ok&lt;&#x2F;code&gt; result. This is why we don&#x27;t need a &lt;code&gt;WellFormed&lt;&#x2F;code&gt;-like precondition for writes.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;..&#x2F;helpers&#x2F;#wx-bits-eq-stateafterwrite&quot;&gt;&lt;code&gt;wX_bits_eq_stateAfterWrite&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; — running the monadic register write &lt;code&gt;wX_bits&lt;&#x2F;code&gt; produces exactly the same state as the pure &lt;code&gt;stateAfterWrite&lt;&#x2F;code&gt;. This lets us move between the monadic world (used in the actual computation) and the specification world (used in the proof).&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h3 id=&quot;jolt-addw-concrete&quot;&gt;&lt;code&gt;jolt_addw_concrete&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;strong&gt;This is the main worker lemma&lt;&#x2F;strong&gt;. All the heavy lifting happens here.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;JoltBytecode&#x2F;EmbeddedSailJoltState&#x2F;InstructionEquivalence&#x2F;Addw.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; jolt_addw_concrete&lt;&#x2F;span&gt;&lt;span&gt; (rs2 rs1 rd : regidx)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;68&lt;&#x2F;span&gt;&lt;span&gt;    (hrd : rd ≠ regidx.Regidx &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;) (js : SailJoltState) (hwf : WellFormed js) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;69&lt;&#x2F;span&gt;&lt;span&gt;    ∃ (js&amp;#39; : SailJoltState) (v1 v2 : BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;),&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;70&lt;&#x2F;span&gt;&lt;span&gt;      rX_bits rs1 js.sail = .ok v1 js.sail ∧ -- item &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;71&lt;&#x2F;span&gt;&lt;span&gt;      rX_bits rs2 js.sail = .ok v2 js.sail ∧ -- item &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;72&lt;&#x2F;span&gt;&lt;span&gt;      (jolt_addw rs2 rs1 rd).run js = .ok RETIRE_SUCCESS js&amp;#39; ∧ -- item &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;73&lt;&#x2F;span&gt;&lt;span&gt;      -- item &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;4&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;74&lt;&#x2F;span&gt;&lt;span&gt;      js&amp;#39;.sail = stateAfterWrite js.sail rd &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;75&lt;&#x2F;span&gt;&lt;span&gt;        (sign_extend (m := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) (Sail.BitVec.extractLsb v1 &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt; + Sail.BitVec.extractLsb v2 &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The above Lean lemma in plain English:&lt;&#x2F;p&gt;
+&lt;div class=&quot;callout callout-theorem thm-numbered&quot;&gt;
+  
+  &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;thm-title&quot;&gt; (Jolt ADDW Concrete)&lt;&#x2F;span&gt;&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;It says: there exist a final Jolt state &lt;code&gt;js&#x27;&lt;&#x2F;code&gt; and values &lt;code&gt;v1&lt;&#x2F;code&gt;, &lt;code&gt;v2&lt;&#x2F;code&gt; such that (see comments on code block that map items below to lean statements):&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Reading rs1 succeeds&lt;&#x2F;strong&gt;: &lt;code&gt;rX_bits rs1 js.sail = .ok v1 js.sail&lt;&#x2F;code&gt; — reading register &lt;code&gt;rs1&lt;&#x2F;code&gt; from the initial state returns value &lt;code&gt;v1&lt;&#x2F;code&gt; without modifying the state.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Reading rs2 succeeds&lt;&#x2F;strong&gt;: &lt;code&gt;rX_bits rs2 js.sail = .ok v2 js.sail&lt;&#x2F;code&gt; — reading register &lt;code&gt;rs2&lt;&#x2F;code&gt; returns value &lt;code&gt;v2&lt;&#x2F;code&gt; without modifying the state.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Execution succeeds&lt;&#x2F;strong&gt;: &lt;code&gt;(jolt_addw rs2 rs1 rd).run js = .ok RETIRE_SUCCESS js&#x27;&lt;&#x2F;code&gt; — running Jolt&#x27;s &lt;code&gt;ADDW&lt;&#x2F;code&gt; on the initial state succeeds with &lt;code&gt;RETIRE_SUCCESS&lt;&#x2F;code&gt; and produces final state &lt;code&gt;js&#x27;&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;The Sail state is characterised&lt;&#x2F;strong&gt;: &lt;code&gt;js&#x27;.sail = stateAfterWrite js.sail rd (sign_extend (m := 64) (Sail.BitVec.extractLsb v1 31 0 + Sail.BitVec.extractLsb v2 31 0))&lt;&#x2F;code&gt; — the Sail component of the final state is the original Sail state with register &lt;code&gt;rd&lt;&#x2F;code&gt; overwritten by &lt;code&gt;sign_extend(v1[31:0] + v2[31:0])&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+
+&lt;&#x2F;div&gt;
+&lt;p&gt;What this theorem really allows us to do is the following.&lt;&#x2F;p&gt;
+&lt;p&gt;Let &lt;code&gt;X = sign_extend(v1[31:0] +₃₂ v2[31:0])&lt;&#x2F;code&gt;.
+Note that we know by staring at the &lt;code&gt;execute_RTYPEW&lt;&#x2F;code&gt; code that Sail&#x27;s native &lt;code&gt;ADDW&lt;&#x2F;code&gt; writes &lt;code&gt;X&lt;&#x2F;code&gt; to &lt;code&gt;rd&lt;&#x2F;code&gt; — this is visible directly from its definition.&lt;&#x2F;p&gt;
+&lt;p&gt;But &lt;code&gt;jolt_addw&lt;&#x2F;code&gt; does two separate steps:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;ADD writes &lt;code&gt;Y = v1 +₆₄ v2&lt;&#x2F;code&gt; to &lt;code&gt;rd&lt;&#x2F;code&gt; (the full 64-bit sum)&lt;&#x2F;li&gt;
+&lt;li&gt;sign-extend-word reads &lt;code&gt;rd&lt;&#x2F;code&gt; back, gets &lt;code&gt;Y&lt;&#x2F;code&gt;, extracts the lower 32 bits, sign-extends to 64, and writes back &lt;code&gt;sext₆₄(Y[31:0])&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;The claim in &lt;code&gt;jolt_addw_concrete&lt;&#x2F;code&gt; is that after both steps, &lt;code&gt;rd&lt;&#x2F;code&gt; holds &lt;code&gt;X&lt;&#x2F;code&gt;.
+This requires the bridge lemma &lt;code&gt;extractLsb_add&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;JoltBytecode&#x2F;EmbeddedSailJoltState&#x2F;RegisterOps.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;237&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; extractLsb_add&lt;&#x2F;span&gt;&lt;span&gt; (a b : BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;238&lt;&#x2F;span&gt;&lt;span&gt;    Sail.BitVec.extractLsb (a + b) &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt; =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;239&lt;&#x2F;span&gt;&lt;span&gt;    Sail.BitVec.extractLsb a &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt; + Sail.BitVec.extractLsb b &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;which says truncation distributes over addition: &lt;code&gt;(a +₆₄ b)[31:0] = a[31:0] +₃₂ b[31:0]&lt;&#x2F;code&gt;.
+This rewrites the Jolt result &lt;code&gt;sext₆₄((v1 + v2)[31:0])&lt;&#x2F;code&gt; into &lt;code&gt;sext₆₄(v1[31:0] + v2[31:0]) = X&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;div class=&quot;callout callout-remark&quot;&gt;
+  
+  &lt;div class=&quot;callout-title&quot;&gt;The Main Benefit Of This Work&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;When we invoke this in the main theorem, we will observe that all fields of &lt;code&gt;SailState&lt;&#x2F;code&gt; will be definitionally equal.
+The RHS by definition writes &lt;code&gt;X&lt;&#x2F;code&gt; to &lt;code&gt;rd&lt;&#x2F;code&gt; and, we just showed that the LHS also writes &lt;code&gt;X&lt;&#x2F;code&gt; to &lt;code&gt;rd&lt;&#x2F;code&gt;.
+Furthermore, the &lt;code&gt;StateAfterWrite&lt;&#x2F;code&gt; business tells us that nothing else could have changed!&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;h2 id=&quot;the-proof&quot;&gt;The Proof&lt;&#x2F;h2&gt;
+&lt;p&gt;With the helpers defined, we now show how the main proof just decomposes into mechanical unwinding of the monadic machinery.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;step-1-obtain&quot;&gt;Step 1: &lt;code&gt;obtain&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;obtain ⟨js&amp;#39;, v1, v2, hj_rx1, hj_rx2, hj, hj_sail⟩ :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    jolt_addw_concrete rs2 rs1 rd hrd js hwf&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This applies &lt;code&gt;jolt_addw_concrete&lt;&#x2F;code&gt; (which we just described above) to our hypotheses &lt;code&gt;rs2&lt;&#x2F;code&gt;, &lt;code&gt;rs1&lt;&#x2F;code&gt;, &lt;code&gt;rd&lt;&#x2F;code&gt;, &lt;code&gt;hrd&lt;&#x2F;code&gt;, &lt;code&gt;js&lt;&#x2F;code&gt;, and &lt;code&gt;hwf&lt;&#x2F;code&gt;. The result is an existential — &lt;code&gt;obtain&lt;&#x2F;code&gt; destructures it, introducing seven new facts into the context:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;js&#x27; : SailJoltState&lt;&#x2F;code&gt; — the final Jolt state after running &lt;code&gt;jolt_addw&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;v1 : BitVec 64&lt;&#x2F;code&gt; — the value read from register &lt;code&gt;rs1&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;v2 : BitVec 64&lt;&#x2F;code&gt; — the value read from register &lt;code&gt;rs2&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;hj_rx1 : rX_bits rs1 js.sail = .ok v1 js.sail&lt;&#x2F;code&gt; — reading &lt;code&gt;rs1&lt;&#x2F;code&gt; succeeds (and state is unchanged).&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;hj_rx2 : rX_bits rs2 js.sail = .ok v2 js.sail&lt;&#x2F;code&gt; — reading &lt;code&gt;rs2&lt;&#x2F;code&gt; succeeds (and state is unchanged).&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;hj : (jolt_addw rs2 rs1 rd).run js = .ok RETIRE_SUCCESS js&#x27;&lt;&#x2F;code&gt; — &lt;code&gt;jolt_addw&lt;&#x2F;code&gt; succeeds&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;hj_sail : js&#x27;.sail = stateAfterWrite js.sail rd (sign_extend ...)&lt;&#x2F;code&gt; — the final Sail state is characterised with &lt;code&gt;rd&lt;&#x2F;code&gt; set to the value given by &lt;code&gt;(sign_extend .. )&lt;&#x2F;code&gt;. Nothing else about &lt;code&gt;js&#x27;&lt;&#x2F;code&gt; is different from &lt;code&gt;js&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Obviously, applying the above lemma in no way should change our goal.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;⊢ projectResult ((jolt_addw rs2 rs1 rd).run js) =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  (execute_RTYPEW rs2 rs1 rd ropw.ADDW).run js.sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;But now we have concrete facts about what &lt;code&gt;rX_bits rs1&lt;&#x2F;code&gt;, &lt;code&gt;rX_bits rs2&lt;&#x2F;code&gt;, and &lt;code&gt;jolt_addw&lt;&#x2F;code&gt; compute, which we can use to rewrite both sides.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;step-2-simplify-the-rhs&quot;&gt;Step 2: Simplify the RHS&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;rw [execute_RTYPEW_ADDW_factored]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;simp only [EStateM.run, bind, EStateM.bind, pure, EStateM.pure, hj_rx1, hj_rx2]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;First, &lt;code&gt;rw [execute_RTYPEW_ADDW_factored]&lt;&#x2F;code&gt; replaces &lt;code&gt;execute_RTYPEW rs2 rs1 rd ropw.ADDW&lt;&#x2F;code&gt; with the factored form that directly reads &lt;code&gt;rs1&lt;&#x2F;code&gt; and &lt;code&gt;rs2&lt;&#x2F;code&gt;, adds their lower 32 bits, sign-extends, and writes to &lt;code&gt;rd&lt;&#x2F;code&gt;.
+This eliminates the &lt;code&gt;match&lt;&#x2F;code&gt; on &lt;code&gt;ropw&lt;&#x2F;code&gt;, and expresses the sail side in pure monadic form.&lt;&#x2F;p&gt;
+&lt;p&gt;Then &lt;code&gt;simp only&lt;&#x2F;code&gt; targets the RHS. It:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Unfolds the monadic plumbing&lt;&#x2F;strong&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#monads&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; — &lt;code&gt;bind&lt;&#x2F;code&gt;, &lt;code&gt;EStateM.bind&lt;&#x2F;code&gt;, &lt;code&gt;pure&lt;&#x2F;code&gt;, &lt;code&gt;EStateM.pure&lt;&#x2F;code&gt;, &lt;code&gt;EStateM.run&lt;&#x2F;code&gt; — turning the &lt;code&gt;do&lt;&#x2F;code&gt; block into concrete function applications on the state.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;monads&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;For a gentle introduction to monads and bind, see &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;randomwalks.xyz&#x2F;blog&#x2F;monads&#x2F;&quot;&gt;this post&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;ol start=&quot;2&quot;&gt;
+&lt;li&gt;&lt;strong&gt;Rewrites with &lt;code&gt;hj_rx1&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; — replaces &lt;code&gt;rX_bits rs1 js.sail&lt;&#x2F;code&gt; with &lt;code&gt;.ok v1 js.sail&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Rewrites with &lt;code&gt;hj_rx2&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; — replaces &lt;code&gt;rX_bits rs2 js.sail&lt;&#x2F;code&gt; with &lt;code&gt;.ok v2 js.sail&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;After this, the RHS is fully evaluated: the monadic chain is gone, &lt;code&gt;v1&lt;&#x2F;code&gt; and &lt;code&gt;v2&lt;&#x2F;code&gt; are substituted in, and what remains is the concrete result of writing to &lt;code&gt;rd&lt;&#x2F;code&gt; and returning &lt;code&gt;RETIRE_SUCCESS&lt;&#x2F;code&gt;.
+The &lt;code&gt;simp only&lt;&#x2F;code&gt; in Step 2 unfolded &lt;code&gt;EStateM.run&lt;&#x2F;code&gt; on the LHS, turning &lt;code&gt;(jolt_addw rs2 rs1 rd).run js&lt;&#x2F;code&gt; into &lt;code&gt;jolt_addw rs2 rs1 rd js&lt;&#x2F;code&gt; (direct function application).
+The goal is now:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;⊢ projectResult (jolt_addw rs2 rs1 rd js)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  match wX_bits rd (sign_extend (Sail.BitVec.extractLsb v1 31 0 + Sail.BitVec.extractLsb v2 31 0)) js.sail with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.ok a s =&amp;gt; EStateM.Result.ok RETIRE_SUCCESS s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The RHS is now a &lt;code&gt;match&lt;&#x2F;code&gt; on the result of &lt;code&gt;wX_bits&lt;&#x2F;code&gt; — if the write succeeds (&lt;code&gt;.ok&lt;&#x2F;code&gt;), return &lt;code&gt;RETIRE_SUCCESS&lt;&#x2F;code&gt; with the new state; if it errors, propagate the error.
+Next we need to simplify the LHS to match.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;step-3-show-rw-hj&quot;&gt;Step 3: &lt;code&gt;show&lt;&#x2F;code&gt; + &lt;code&gt;rw [hj]&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;show&lt;&#x2F;span&gt;&lt;span&gt; projectResult ((jolt_addw rs2 rs1 rd).run js) = _&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;rw [hj]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The &lt;code&gt;show&lt;&#x2F;code&gt; tactic re-folds this back to the &lt;code&gt;.run&lt;&#x2F;code&gt; form so that it matches the shape of &lt;code&gt;hj : (jolt_addw rs2 rs1 rd).run js = .ok RETIRE_SUCCESS js&#x27;&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Then &lt;code&gt;rw [hj]&lt;&#x2F;code&gt; replaces &lt;code&gt;(jolt_addw rs2 rs1 rd).run js&lt;&#x2F;code&gt; with &lt;code&gt;.ok RETIRE_SUCCESS js&#x27;&lt;&#x2F;code&gt; on the LHS. The goal is now:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;⊢ projectResult (EStateM.Result.ok RETIRE_SUCCESS js&amp;#39;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  match wX_bits rd (sign_extend (Sail.BitVec.extractLsb v1 31 0 + Sail.BitVec.extractLsb v2 31 0)) js.sail with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.ok a s =&amp;gt; EStateM.Result.ok RETIRE_SUCCESS s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The LHS now has a concrete &lt;code&gt;Result&lt;&#x2F;code&gt; value — &lt;code&gt;projectResult&lt;&#x2F;code&gt; applied to &lt;code&gt;.ok RETIRE_SUCCESS js&#x27;&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;step-4-simp-only-projectresult-project&quot;&gt;Step 4: &lt;code&gt;simp only [projectResult, project]&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;simp only [projectResult, project]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now we unfold &lt;code&gt;projectResult&lt;&#x2F;code&gt; and &lt;code&gt;project&lt;&#x2F;code&gt; on the LHS. &lt;code&gt;projectResult (.ok RETIRE_SUCCESS js&#x27;)&lt;&#x2F;code&gt; reduces to &lt;code&gt;.ok RETIRE_SUCCESS js&#x27;.sail&lt;&#x2F;code&gt;, and &lt;code&gt;project js&#x27;&lt;&#x2F;code&gt; reduces to &lt;code&gt;js&#x27;.sail&lt;&#x2F;code&gt;. The goal becomes:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;⊢ EStateM.Result.ok RETIRE_SUCCESS js&amp;#39;.sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  match wX_bits rd (sign_extend (Sail.BitVec.extractLsb v1 31 0 + Sail.BitVec.extractLsb v2 31 0)) js.sail with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.ok a s =&amp;gt; EStateM.Result.ok RETIRE_SUCCESS s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The LHS is now fully concrete: &lt;code&gt;.ok RETIRE_SUCCESS js&#x27;.sail&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;step-5-rw-hj-sail&quot;&gt;Step 5: &lt;code&gt;rw [hj_sail]&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;rw [hj_sail]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;We rewrite &lt;code&gt;js&#x27;.sail&lt;&#x2F;code&gt; using &lt;code&gt;hj_sail : js&#x27;.sail = stateAfterWrite js.sail rd (sign_extend ...)&lt;&#x2F;code&gt;. The goal becomes:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;⊢ EStateM.Result.ok RETIRE_SUCCESS&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (stateAfterWrite js.sail rd&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      (sign_extend (Sail.BitVec.extractLsb v1 31 0 + Sail.BitVec.extractLsb v2 31 0)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  match wX_bits rd (sign_extend (Sail.BitVec.extractLsb v1 31 0 + Sail.BitVec.extractLsb v2 31 0)) js.sail with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.ok a s =&amp;gt; EStateM.Result.ok RETIRE_SUCCESS s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The LHS now says: &lt;code&gt;.ok RETIRE_SUCCESS&lt;&#x2F;code&gt; with the state after writing the computed value to &lt;code&gt;rd&lt;&#x2F;code&gt;. The RHS still has the &lt;code&gt;match&lt;&#x2F;code&gt; on &lt;code&gt;wX_bits&lt;&#x2F;code&gt;. We need to collapse that &lt;code&gt;match&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;step-6-obtain-s-hw-wx-shape-rd-js-sail-rw-hw&quot;&gt;Step 6: &lt;code&gt;obtain ⟨s&#x27;, hw⟩ := wX_shape rd _ js.sail&lt;&#x2F;code&gt; + &lt;code&gt;rw [hw]&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;obtain ⟨s&amp;#39;, hw⟩ := wX_shape rd _ js.sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;rw [hw]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;We use the helper lemma &lt;a href=&quot;..&#x2F;helpers&#x2F;#wx-shape&quot;&gt;&lt;code&gt;wX_shape&lt;&#x2F;code&gt;&lt;&#x2F;a&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#wx_shape&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;. The &lt;code&gt;obtain&lt;&#x2F;code&gt; gives us &lt;code&gt;s&#x27;&lt;&#x2F;code&gt; and &lt;code&gt;hw : wX_bits rd (...) js.sail = .ok () s&#x27;&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;wx_shape&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;code&gt;wX_shape&lt;&#x2F;code&gt; says &lt;code&gt;wX_bits&lt;&#x2F;code&gt; always succeeds: there exists some state &lt;code&gt;s&#x27;&lt;&#x2F;code&gt; such that &lt;code&gt;wX_bits rd val js.sail = .ok () s&#x27;&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;p&gt;Then &lt;code&gt;rw [hw]&lt;&#x2F;code&gt; substitutes this into the RHS &lt;code&gt;match&lt;&#x2F;code&gt;, collapsing it to the &lt;code&gt;.ok&lt;&#x2F;code&gt; branch. The goal becomes:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;⊢ EStateM.Result.ok RETIRE_SUCCESS&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (stateAfterWrite js.sail rd&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      (sign_extend (Sail.BitVec.extractLsb v1 31 0 + Sail.BitVec.extractLsb v2 31 0)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  match EStateM.Result.ok () s&amp;#39; with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.ok a s =&amp;gt; EStateM.Result.ok RETIRE_SUCCESS s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The &lt;code&gt;match&lt;&#x2F;code&gt; on &lt;code&gt;.ok () s&#x27;&lt;&#x2F;code&gt; reduces to &lt;code&gt;.ok RETIRE_SUCCESS s&#x27;&lt;&#x2F;code&gt;, so the goal is really:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;⊢ EStateM.Result.ok RETIRE_SUCCESS&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (stateAfterWrite js.sail rd&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      (sign_extend (Sail.BitVec.extractLsb v1 31 0 + Sail.BitVec.extractLsb v2 31 0)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  EStateM.Result.ok RETIRE_SUCCESS s&amp;#39;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;step-7-congr-1&quot;&gt;Step 7: &lt;code&gt;congr 1&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;congr &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Both sides are &lt;code&gt;.ok RETIRE_SUCCESS _&lt;&#x2F;code&gt;. The &lt;code&gt;congr 1&lt;&#x2F;code&gt; tactic says: since the constructors and the first argument (&lt;code&gt;RETIRE_SUCCESS&lt;&#x2F;code&gt;) match, it suffices to show the second arguments are equal. The goal reduces to:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;⊢ stateAfterWrite js.sail rd (sign_extend (Sail.BitVec.extractLsb v1 31 0 + Sail.BitVec.extractLsb v2 31 0)) = s&amp;#39;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;step-8-exact&quot;&gt;Step 8: &lt;code&gt;exact&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;exact (wX_bits_eq_stateAfterWrite rd _ js.sail s&amp;#39; hw).symm&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;wX_bits_eq_stateAfterWrite&lt;&#x2F;code&gt; is a lemma that connects &lt;code&gt;wX_bits&lt;&#x2F;code&gt; and &lt;code&gt;stateAfterWrite&lt;&#x2F;code&gt;: if &lt;code&gt;wX_bits rd val s = .ok () s&#x27;&lt;&#x2F;code&gt;, then &lt;code&gt;s&#x27; = stateAfterWrite s rd val&lt;&#x2F;code&gt;. We have &lt;code&gt;hw : wX_bits rd (...) js.sail = .ok () s&#x27;&lt;&#x2F;code&gt;, so this gives us &lt;code&gt;s&#x27; = stateAfterWrite js.sail rd (...)&lt;&#x2F;code&gt;. The &lt;code&gt;.symm&lt;&#x2F;code&gt; flips it to &lt;code&gt;stateAfterWrite js.sail rd (...) = s&#x27;&lt;&#x2F;code&gt;, which is exactly our goal. QED.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;other-concrete-lemmas&quot;&gt;Other &lt;code&gt;_concrete&lt;&#x2F;code&gt; lemmas&lt;&#x2F;h2&gt;
+&lt;p&gt;For every other &lt;code&gt;FormatR&lt;&#x2F;code&gt; and &lt;code&gt;FormatI&lt;&#x2F;code&gt; instruction that we have proven so far, we have a bridge lemma and a concrete lemma.
+Every instruction follows this same pattern. Here are all the &lt;code&gt;_concrete&lt;&#x2F;code&gt; lemmas and their bridge lemmas across the codebase:&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Instruction&lt;&#x2F;th&gt;&lt;th&gt;Concrete Lemma&lt;&#x2F;th&gt;&lt;th&gt;Bridge Lemma&lt;&#x2F;th&gt;&lt;th&gt;File&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;ADDW&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_addw_concrete&lt;&#x2F;code&gt; (line 67)&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;extractLsb_add&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Addw.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;ADDIW&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_addiw_concrete&lt;&#x2F;code&gt; (line 71)&lt;&#x2F;td&gt;&lt;td&gt;—&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Addiw.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SUBW&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_subw_concrete&lt;&#x2F;code&gt; (line 79)&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;extractLsb_sub&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Subw.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;MULW&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_mulw_concrete&lt;&#x2F;code&gt; (line 49)&lt;&#x2F;td&gt;&lt;td&gt;truncate distributes over multiply&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Mulw.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;MULH&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_mulh_concrete&lt;&#x2F;code&gt; (line 67)&lt;&#x2F;td&gt;&lt;td&gt;7-step computation = &lt;code&gt;mult_to_bits_half&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Mulh.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SLL&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_sll_concrete&lt;&#x2F;code&gt; (line 63)&lt;&#x2F;td&gt;&lt;td&gt;multiply by 2^(rs2[5:0]) = &lt;code&gt;shift_bits_left&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Sll.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SLLI&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_slli_concrete&lt;&#x2F;code&gt; (line 56)&lt;&#x2F;td&gt;&lt;td&gt;multiply by 2^shamt = &lt;code&gt;shift_bits_left&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Slli.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SLLIW&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_slliw_concrete&lt;&#x2F;code&gt; (line 54)&lt;&#x2F;td&gt;&lt;td&gt;multiply + truncate = 32-bit shift&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Slliw.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SLLW&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_sllw_concrete&lt;&#x2F;code&gt; (line 103)&lt;&#x2F;td&gt;&lt;td&gt;—&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Sllw.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SRA&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_sra_concrete&lt;&#x2F;code&gt; (line 49)&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;sshiftRight&lt;&#x2F;code&gt; via ctz(bitmask) = &lt;code&gt;shift_bits_right_arith&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Sra.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SRAI&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_srai_concrete&lt;&#x2F;code&gt; (line 69)&lt;&#x2F;td&gt;&lt;td&gt;—&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Srai.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SRAIW&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_sraiw_concrete&lt;&#x2F;code&gt; (line 133)&lt;&#x2F;td&gt;&lt;td&gt;3-step Jolt value = arithmetic right shift&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Sraiw.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SRAW&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_sraw_concrete&lt;&#x2F;code&gt; (line 115)&lt;&#x2F;td&gt;&lt;td&gt;—&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Sraw.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SRL&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_srl_concrete&lt;&#x2F;code&gt; (line 48)&lt;&#x2F;td&gt;&lt;td&gt;logical shift via ctz(bitmask) = &lt;code&gt;shift_bits_right&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Srl.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SRLI&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_srli_concrete&lt;&#x2F;code&gt; (line 63)&lt;&#x2F;td&gt;&lt;td&gt;logical shift via ctz(bitmask) = &lt;code&gt;shift_bits_right&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Srli.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SRLIW&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_srliw_concrete&lt;&#x2F;code&gt; (line 84)&lt;&#x2F;td&gt;&lt;td&gt;slli-32 + srli via bitmask = 32-bit logical right shift&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Srliw.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;SRLW&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;jolt_srlw_concrete&lt;&#x2F;code&gt; (line 145)&lt;&#x2F;td&gt;&lt;td&gt;—&lt;&#x2F;td&gt;&lt;td&gt;&lt;code&gt;Srlw.lean&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;All files are under &lt;code&gt;JoltBytecode&#x2F;EmbeddedSailJoltState&#x2F;InstructionEquivalence&#x2F;&lt;&#x2F;code&gt;. Each &lt;code&gt;_concrete&lt;&#x2F;code&gt; lemma says: Jolt&#x27;s decomposition succeeds with &lt;code&gt;RETIRE_SUCCESS&lt;&#x2F;code&gt; and the final Sail state equals &lt;code&gt;stateAfterWrite js.sail rd (value)&lt;&#x2F;code&gt; — where &lt;code&gt;value&lt;&#x2F;code&gt; is the instruction-specific computation. The bridge lemma (where needed) connects the Jolt computation to the Sail computation. The main &lt;code&gt;_eq_sail&lt;&#x2F;code&gt; theorem then shows the Sail instruction writes the same value via the uniform plumbing pattern described above.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;did-we-need-this-modularisation&quot;&gt;Did We Need This Modularisation&lt;&#x2F;h2&gt;
+&lt;p&gt;We made a huge deal about having this concrete lemma.
+Here&#x27;s a glimpse into the goal state the same theorem passing cleanly but with everything done in the main proof for &lt;code&gt;ADDW&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;match&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;    match&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      match&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;        match&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;          match&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            rX_bits rs1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;              { regs := js.regs, choiceState := js.choiceState, mem := js.mem, tags := js.tags,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                cycleCount := js.cycleCount, sailOutput := js.sailOutput } &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          | EStateM.Result.ok a s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;            match&lt;&#x2F;span&gt;&lt;span&gt; rX_bits rs2 s &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            | EStateM.Result.ok a_1 s =&amp;gt; EStateM.Result.ok (a + a_1) s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        | EStateM.Result.ok a s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;          match&lt;&#x2F;span&gt;&lt;span&gt; wX_bits rd a s &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          | EStateM.Result.ok a s =&amp;gt; EStateM.Result.ok RETIRE_SUCCESS s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | EStateM.Result.ok a ss&amp;#39; =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        EStateM.Result.ok a&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          { regs := ss&amp;#39;.regs, choiceState := ss&amp;#39;.choiceState, mem := ss&amp;#39;.mem, tags := ss&amp;#39;.tags,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            cycleCount := ss&amp;#39;.cycleCount, sailOutput := ss&amp;#39;.sailOutput, vregs := js.vregs }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | EStateM.Result.error e ss&amp;#39; =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        EStateM.Result.error e&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          { regs := ss&amp;#39;.regs, choiceState := ss&amp;#39;.choiceState, mem := ss&amp;#39;.mem, tags := ss&amp;#39;.tags,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            cycleCount := ss&amp;#39;.cycleCount, sailOutput := ss&amp;#39;.sailOutput, vregs := js.vregs } &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    | EStateM.Result.ok a s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      match&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;        match&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;          match&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            rX_bits rd&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;              { regs := s.regs, choiceState := s.choiceState, mem := s.mem, tags := s.tags, cycleCount := s.cycleCount,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                sailOutput := s.sailOutput } &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          | EStateM.Result.ok a ss&amp;#39; =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            EStateM.Result.ok a&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;              { regs := ss&amp;#39;.regs, choiceState := ss&amp;#39;.choiceState, mem := ss&amp;#39;.mem, tags := ss&amp;#39;.tags,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                cycleCount := ss&amp;#39;.cycleCount, sailOutput := ss&amp;#39;.sailOutput, vregs := s.vregs }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          | EStateM.Result.error e ss&amp;#39; =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            EStateM.Result.error e&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;              { regs := ss&amp;#39;.regs, choiceState := ss&amp;#39;.choiceState, mem := ss&amp;#39;.mem, tags := ss&amp;#39;.tags,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                cycleCount := ss&amp;#39;.cycleCount, sailOutput := ss&amp;#39;.sailOutput, vregs := s.vregs } &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        | EStateM.Result.ok a s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;          match&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            wX_bits rd (sign_extend (Sail.BitVec.extractLsb a &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;              { regs := s.regs, choiceState := s.choiceState, mem := s.mem, tags := s.tags, cycleCount := s.cycleCount,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                sailOutput := s.sailOutput } &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          | EStateM.Result.ok a ss&amp;#39; =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            EStateM.Result.ok a&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;              { regs := ss&amp;#39;.regs, choiceState := ss&amp;#39;.choiceState, mem := ss&amp;#39;.mem, tags := ss&amp;#39;.tags,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                cycleCount := ss&amp;#39;.cycleCount, sailOutput := ss&amp;#39;.sailOutput, vregs := s.vregs }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          | EStateM.Result.error e ss&amp;#39; =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            EStateM.Result.error e&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;              { regs := ss&amp;#39;.regs, choiceState := ss&amp;#39;.choiceState, mem := ss&amp;#39;.mem, tags := ss&amp;#39;.tags,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                cycleCount := ss&amp;#39;.cycleCount, sailOutput := ss&amp;#39;.sailOutput, vregs := s.vregs }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | EStateM.Result.ok a s =&amp;gt; EStateM.Result.ok RETIRE_SUCCESS s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.ok a js&amp;#39; =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    EStateM.Result.ok a&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      { regs := js&amp;#39;.regs, choiceState := js&amp;#39;.choiceState, mem := js&amp;#39;.mem, tags := js&amp;#39;.tags,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        cycleCount := js&amp;#39;.cycleCount, sailOutput := js&amp;#39;.sailOutput }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.error e js&amp;#39; =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    EStateM.Result.error e&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      { regs := js&amp;#39;.regs, choiceState := js&amp;#39;.choiceState, mem := js&amp;#39;.mem, tags := js&amp;#39;.tags,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        cycleCount := js&amp;#39;.cycleCount, sailOutput := js&amp;#39;.sailOutput }) =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  match&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    rX_bits rs1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      { regs := js.regs, choiceState := js.choiceState, mem := js.mem, tags := js.tags, cycleCount := js.cycleCount,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        sailOutput := js.sailOutput } &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.ok a s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;    match&lt;&#x2F;span&gt;&lt;span&gt; rX_bits rs2 s &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    | EStateM.Result.ok a_1 s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      match&lt;&#x2F;span&gt;&lt;span&gt; wX_bits rd (sign_extend (Sail.BitVec.extractLsb a &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt; + Sail.BitVec.extractLsb a_1 &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;)) s &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | EStateM.Result.ok a s =&amp;gt; EStateM.Result.ok RETIRE_SUCCESS s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Remember that Lean is a functional programming language.
+So every time we have multiple of lines of code in the &lt;code&gt;do&lt;&#x2F;code&gt; block, it leads to a match and bind call.&lt;&#x2F;p&gt;
+</content>
+  </entry>
+  
+  
+  
+  <entry xml:lang="en">
+    <title>The Theorem Statement</title>
+    <published>2026-04-13T00:00:00+00:00</published>
+    <updated>2026-04-13T00:00:00+00:00</updated>
+    <author>
+      <name></name>
+    </author>
+    <link rel="alternate" type="text/html" href="/blog/bytecode-expansions/theorem-statement-addw/"/>
+    <id>/blog/bytecode-expansions/theorem-statement-addw/</id>
+    
+    <content type="html" xml:base="/blog/bytecode-expansions/theorem-statement-addw/">&lt;div class=&quot;callout callout-remark&quot;&gt;
+  
+  &lt;div class=&quot;callout-title&quot;&gt;Pre-requisites&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;Basics of Lean theorem proving and understanding of the &lt;code&gt;EStateM&lt;&#x2F;code&gt; Monad.
+See TODO: Bhavik Mehta&#x27;s refresher for Lean basics.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;p&gt;With the state definitions out of the way, let&#x27;s get to an actual theorem statement.
+The theorem below says that Jolt&#x27;s sequence of instructions for &lt;code&gt;ADDW&lt;&#x2F;code&gt; leaves the final Sail state component of the Jolt state machine in the same way as the &lt;code&gt;ADDW&lt;&#x2F;code&gt; instruction defined by Sail.
+In formal theorem proving language, this looks like the following.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;JoltBytecode&#x2F;EmbeddedSailJoltState&#x2F;InstructionEquivalence&#x2F;Addw.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;87&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; jolt_addw_eq_sail&lt;&#x2F;span&gt;&lt;span&gt; (rs2 rs1 rd : regidx) (hrd : rd ≠ regidx.Regidx &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;88&lt;&#x2F;span&gt;&lt;span&gt;    (js : SailJoltState) (hwf : WellFormed js) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;89&lt;&#x2F;span&gt;&lt;span&gt;    projectResult ((jolt_addw rs2 rs1 rd).run js) =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;90&lt;&#x2F;span&gt;&lt;span&gt;    (execute_RTYPEW rs2 rs1 rd ropw.ADDW).run js.sail := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now let&#x27;s take apart this definition.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;the-inputs&quot;&gt;The Inputs&lt;&#x2F;h2&gt;
+&lt;p&gt;The bits in between &lt;code&gt;()&lt;&#x2F;code&gt; on &lt;code&gt;Line 87&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;rs2-rs1-rd-regidx&quot;&gt;&lt;code&gt;rs2 rs1 rd : regidx&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;p&gt;Source and destination register indices — all of type &lt;code&gt;regidx&lt;&#x2F;code&gt; which is a wrapper for &lt;code&gt;BitVec 5&lt;&#x2F;code&gt;.
+These are 5-bit indices into the general-purpose register file.
+&lt;code&gt;rs1&lt;&#x2F;code&gt; and &lt;code&gt;rs2&lt;&#x2F;code&gt; are the two source registers whose values will be added, and &lt;code&gt;rd&lt;&#x2F;code&gt; is the destination register where the result is written.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;hrd-rd-regidx-regidx-0&quot;&gt;&lt;code&gt;hrd : rd ≠ regidx.Regidx 0&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;p&gt;A proof that the destination register is not &lt;code&gt;x0&lt;&#x2F;code&gt;.
+In RISC-V, &lt;code&gt;x0&lt;&#x2F;code&gt; is hardwired to zero — writes to it are discarded.
+This hypothesis is needed because the Jolt sequence relies on reading back the value written to &lt;code&gt;rd&lt;&#x2F;code&gt;, and if we write to register &lt;code&gt;x0&lt;&#x2F;code&gt;, we always read back 0.
+To not handle this redundant case explicitly, we just don&#x27;t allow jolt sequences to write to register 0.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;js-sailjoltstate&quot;&gt;&lt;code&gt;js : SailJoltState&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;p&gt;The initial Jolt machine state, containing both the Sail state (&lt;code&gt;js.sail&lt;&#x2F;code&gt;) and the virtual registers (&lt;code&gt;js.vregs&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;hwf-wellformed-js&quot;&gt;&lt;code&gt;hwf : WellFormed js&lt;&#x2F;code&gt;&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;WellFormed&lt;&#x2F;code&gt; is defined as:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;JoltBytecode&#x2F;EmbeddedSailJoltState&#x2F;RtypeW.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;35&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; WellFormed&lt;&#x2F;span&gt;&lt;span&gt; (js : SailJoltState) : &lt;&#x2F;span&gt;&lt;span class=&quot;z-storage z-type&quot;&gt;Prop&lt;&#x2F;span&gt;&lt;span&gt; :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;36&lt;&#x2F;span&gt;&lt;span&gt;  ∀ r : regidx, ∃ v, rX_bits r js.sail = .ok v js.sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;It says: for every register index &lt;code&gt;r&lt;&#x2F;code&gt;, reading that register via &lt;code&gt;rX_bits&lt;&#x2F;code&gt; succeeds — it returns &lt;code&gt;.ok v js.sail&lt;&#x2F;code&gt; for some value &lt;code&gt;v&lt;&#x2F;code&gt;, and does not modify the state. Without this, &lt;code&gt;rX_bits&lt;&#x2F;code&gt; could return &lt;code&gt;.error&lt;&#x2F;code&gt;, and the proof would not go through.&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#run_call&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;
+Simply put, this is saying that we are able to read the values of the registers without anything going wrong.
+Why might it go wrong?
+See &lt;a href=&quot;&#x2F;blog&#x2F;bytecode-expansions&#x2F;theorem-statement-addw&#x2F;#appendix-why-rx-bits-can-fail&quot;&gt;Appendix: Why &lt;code&gt;rX_bits&lt;&#x2F;code&gt; can fail&lt;&#x2F;a&gt; for a detailed explanation.
+The short answer is that &lt;code&gt;readReg&lt;&#x2F;code&gt; does a hash-map lookup that throws &lt;code&gt;Error.Unreachable&lt;&#x2F;code&gt; if the key is missing.
+So say you asked to read register &lt;code&gt;x56&lt;&#x2F;code&gt;, which does not exist — it will error.
+All that &lt;code&gt;WellFormed&lt;&#x2F;code&gt; is really saying is that if you write your instruction correctly, then every general-purpose register is present in the hash map, and reads will go through without issues.&lt;&#x2F;p&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;run_call&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;strong&gt;Syntax Alert&lt;&#x2F;strong&gt;: Note that &lt;code&gt;rX_bits r js.sail&lt;&#x2F;code&gt; is direct function application — &lt;code&gt;rX_bits r&lt;&#x2F;code&gt; produces a &lt;code&gt;SailM (BitVec 64)&lt;&#x2F;code&gt; which is a term of the function type that models a step of the CPU i.e. &lt;code&gt;SailState → Result ...&lt;&#x2F;code&gt;, and &lt;code&gt;js.sail&lt;&#x2F;code&gt; is passed as the argument.
+This is definitionally equal to &lt;code&gt;(rX_bits r).run js.sail&lt;&#x2F;code&gt;. We can do this here because we are in a &lt;code&gt;Prop&lt;&#x2F;code&gt;, not inside a &lt;code&gt;do&lt;&#x2F;code&gt; block. Inside a &lt;code&gt;do&lt;&#x2F;code&gt; block, state threading is handled implicitly by &lt;code&gt;bind&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;h2 id=&quot;the-theorem-statement&quot;&gt;The Theorem Statement&lt;&#x2F;h2&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;JoltBytecode&#x2F;EmbeddedSailJoltState&#x2F;InstructionEquivalence&#x2F;Addw.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;89&lt;&#x2F;span&gt;&lt;span&gt;    projectResult ((jolt_addw rs2 rs1 rd).run js) =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;90&lt;&#x2F;span&gt;&lt;span&gt;    (execute_RTYPEW rs2 rs1 rd ropw.ADDW).run js.sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;the-right-hand-side&quot;&gt;The Right-Hand Side&lt;&#x2F;h3&gt;
+&lt;p&gt;The right-hand side just invokes functions exposed by the Sail transpilation.
+As we treat the transpilation as the ground truth, we will &lt;strong&gt;NEVER&lt;&#x2F;strong&gt; write custom code to define RISCV operations.
+The way Sail implements a step of the &lt;code&gt;ADDW&lt;&#x2F;code&gt; instruction is shown in the following code.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;(execute_RTYPEW rs2 rs1 rd ropw.ADDW).run js.sail&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;execute_RTYPEW&lt;&#x2F;code&gt; handles all R-type word (32-bit) instructions.
+It takes two source registers &lt;code&gt;rs1&lt;&#x2F;code&gt; and &lt;code&gt;rs2&lt;&#x2F;code&gt;, a destination register &lt;code&gt;rd&lt;&#x2F;code&gt;, and an opcode &lt;code&gt;op&lt;&#x2F;code&gt;, and returns a monadic computation in &lt;code&gt;SailM&lt;&#x2F;code&gt;.
+The transpiled code:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;LeanRV64D&#x2F;InstsEnd.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67346&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; execute_RTYPEW&lt;&#x2F;span&gt;&lt;span&gt; (rs2 : regidx) (rs1 : regidx) (rd : regidx) (op : ropw) : SailM ExecutionResult := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67347&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; rs1_val ← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;span&gt; (pure (Sail.BitVec.extractLsb (← (rX_bits rs1)) &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67348&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; rs2_val ← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;span&gt; (pure (Sail.BitVec.extractLsb (← (rX_bits rs2)) &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67349&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; result : (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;32&lt;&#x2F;span&gt;&lt;span&gt;) :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67350&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;    match&lt;&#x2F;span&gt;&lt;span&gt; op &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67351&lt;&#x2F;span&gt;&lt;span&gt;    | ADDW =&amp;gt; (rs1_val + rs2_val)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67352&lt;&#x2F;span&gt;&lt;span&gt;    | SUBW =&amp;gt; (rs1_val - rs2_val)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67353&lt;&#x2F;span&gt;&lt;span&gt;    | SLLW =&amp;gt; (shift_bits_left rs1_val (Sail.BitVec.extractLsb rs2_val &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;4&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67354&lt;&#x2F;span&gt;&lt;span&gt;    | SRLW =&amp;gt; (shift_bits_right rs1_val (Sail.BitVec.extractLsb rs2_val &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;4&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67355&lt;&#x2F;span&gt;&lt;span&gt;    | SRAW =&amp;gt; (shift_bits_right_arith rs1_val (Sail.BitVec.extractLsb rs2_val &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;4&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67356&lt;&#x2F;span&gt;&lt;span&gt;  (wX_bits rd (sign_extend (m := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) result))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67357&lt;&#x2F;span&gt;&lt;span&gt;  (pure RETIRE_SUCCESS)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;strong&gt;Line 67347:&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; rs1_val ← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  pure (Sail.BitVec.extractLsb (← rX_bits rs1) &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;← rX_bits rs1&lt;&#x2F;code&gt; reads the full 64-bit value from register &lt;code&gt;rs1&lt;&#x2F;code&gt;. &lt;code&gt;Sail.BitVec.extractLsb ... 31 0&lt;&#x2F;code&gt; extracts bits 31 down to 0 — the lower 32 bits. So &lt;code&gt;rs1_val&lt;&#x2F;code&gt; is a &lt;code&gt;BitVec 32&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Line 67348:&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; rs2_val ← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  pure (Sail.BitVec.extractLsb (← rX_bits rs2) &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Same for &lt;code&gt;rs2&lt;&#x2F;code&gt;: read the 64-bit value, extract the lower 32 bits.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Lines 67349–67355:&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; result : (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;32&lt;&#x2F;span&gt;&lt;span&gt;) :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  match&lt;&#x2F;span&gt;&lt;span&gt; op &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | ADDW =&amp;gt; (rs1_val + rs2_val)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;For &lt;code&gt;ropw.ADDW&lt;&#x2F;code&gt;, the match selects &lt;code&gt;rs1_val + rs2_val&lt;&#x2F;code&gt; — a 32-bit addition of the two truncated values. The result type is &lt;code&gt;BitVec 32&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Line 67356:&lt;&#x2F;strong&gt;&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;wX_bits rd (sign_extend (m := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) result)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;sign_extend (m := 64)&lt;&#x2F;code&gt; sign-extends the 32-bit result back to 64 bits. &lt;code&gt;wX_bits rd&lt;&#x2F;code&gt; writes this value to the destination register &lt;code&gt;rd&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;Line 67357:&lt;&#x2F;strong&gt; &lt;code&gt;pure RETIRE_SUCCESS&lt;&#x2F;code&gt; — returns &lt;code&gt;RETIRE_SUCCESS&lt;&#x2F;code&gt; as the final value of the computation.&lt;&#x2F;p&gt;
+&lt;div class=&quot;callout callout-box thm-box&quot;&gt;
+  
+  &lt;div class=&quot;callout-title&quot;&gt;Summary&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;The &lt;code&gt;do&lt;&#x2F;code&gt; block composes four monadic operations, threading the &lt;code&gt;SailState&lt;&#x2F;code&gt; through sequentially:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Read rs1&lt;&#x2F;strong&gt; — read register &lt;code&gt;rs1&lt;&#x2F;code&gt; and extract lower 32 bits. State unchanged.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Read rs2&lt;&#x2F;strong&gt; — read register &lt;code&gt;rs2&lt;&#x2F;code&gt; and extract lower 32 bits. State unchanged.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Write&lt;&#x2F;strong&gt; — add the two 32-bit values, sign-extend back to 64, and write to &lt;code&gt;rd&lt;&#x2F;code&gt;. State changes.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Return&lt;&#x2F;strong&gt; — return &lt;code&gt;RETIRE_SUCCESS&lt;&#x2F;code&gt;. State unchanged.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;Only step 3 mutates the state. Note that the addition is 32-bit — both operands are truncated &lt;em&gt;before&lt;&#x2F;em&gt; adding.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;h3 id=&quot;the-left-hand-side&quot;&gt;The Left-Hand Side&lt;&#x2F;h3&gt;
+&lt;p&gt;&lt;code&gt;projectResult ((jolt_addw rs2 rs1 rd).run js)&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;This is Jolt&#x27;s version of the same instruction. Jolt decomposes &lt;code&gt;ADDW&lt;&#x2F;code&gt; into two simpler operations: a 64-bit &lt;code&gt;ADD&lt;&#x2F;code&gt; followed by a virtual sign-extend of the lower 32 bits. Here is &lt;code&gt;jolt_addw&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;JoltBytecode&#x2F;EmbeddedSailJoltState&#x2F;InstructionEquivalence&#x2F;Addw.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;57&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; jolt_addw&lt;&#x2F;span&gt;&lt;span&gt; (rs2 rs1 rd : regidx) : JoltMonad ExecutionResult := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;58&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← liftSail (execute_RTYPE rs2 rs1 rd rop.ADD)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;59&lt;&#x2F;span&gt;&lt;span&gt;  jolt_virtual_sign_extend_word rd&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;60&lt;&#x2F;span&gt;&lt;span&gt;  pure RETIRE_SUCCESS&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Note this returns &lt;code&gt;JoltMonad ExecutionResult&lt;&#x2F;code&gt;, not &lt;code&gt;SailM ExecutionResult&lt;&#x2F;code&gt; — it operates on &lt;code&gt;SailJoltState&lt;&#x2F;code&gt;, not &lt;code&gt;SailState&lt;&#x2F;code&gt;. Going line by line, the three steps are:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;liftSail (execute_RTYPE rs2 rs1 rd rop.ADD)&lt;&#x2F;code&gt; — runs Sail&#x27;s 64-bit &lt;code&gt;ADD&lt;&#x2F;code&gt; instruction, lifted into the Jolt monad via &lt;code&gt;liftSail&lt;&#x2F;code&gt;&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#helper&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;.
+The relevant branch of &lt;code&gt;execute_RTYPE&lt;&#x2F;code&gt;:&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;helper&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;See &lt;a href=&quot;..&#x2F;state&#x2F;#liftsail&quot;&gt;helpers&lt;&#x2F;a&gt; for details on how &lt;code&gt;liftSail&lt;&#x2F;code&gt; works.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;LeanRV64D&#x2F;InstsEnd.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67359&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; execute_RTYPE&lt;&#x2F;span&gt;&lt;span&gt; (rs2 : regidx) (rs1 : regidx) (rd : regidx) (op : rop) : SailM ExecutionResult := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67360&lt;&#x2F;span&gt;&lt;span&gt;  (wX_bits rd&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67361&lt;&#x2F;span&gt;&lt;span&gt;    (← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67362&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;      match&lt;&#x2F;span&gt;&lt;span&gt; op &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67363&lt;&#x2F;span&gt;&lt;span&gt;      | ADD =&amp;gt; (pure ((← (rX_bits rs1)) + (← (rX_bits rs2))))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67364&lt;&#x2F;span&gt;&lt;span&gt;      ...))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;67365&lt;&#x2F;span&gt;&lt;span&gt;  (pure RETIRE_SUCCESS)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;For &lt;code&gt;rop.ADD&lt;&#x2F;code&gt;, this reads both &lt;code&gt;rs1&lt;&#x2F;code&gt; and &lt;code&gt;rs2&lt;&#x2F;code&gt; as full 64-bit values, adds them, and writes the 64-bit sum to &lt;code&gt;rd&lt;&#x2F;code&gt;. No truncation happens here — this is a full-width addition.&lt;&#x2F;p&gt;
+&lt;ol start=&quot;2&quot;&gt;
+&lt;li&gt;&lt;code&gt;jolt_virtual_sign_extend_word rd&lt;&#x2F;code&gt; — reads &lt;code&gt;rd&lt;&#x2F;code&gt;, extracts the lower 32 bits, sign-extends back to 64 bits, and writes the result back to &lt;code&gt;rd&lt;&#x2F;code&gt;:&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;JoltBytecode&#x2F;EmbeddedSailJoltState&#x2F;Defs.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;253&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; jolt_virtual_sign_extend_word&lt;&#x2F;span&gt;&lt;span&gt; (rd : regidx) : JoltMonad Unit := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;254&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; v ← liftSail (rX_bits rd)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;255&lt;&#x2F;span&gt;&lt;span&gt;  liftSail (wX_bits rd (sign_extend (m := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) (Sail.BitVec.extractLsb v &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;31&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;ol start=&quot;3&quot;&gt;
+&lt;li&gt;&lt;code&gt;pure RETIRE_SUCCESS&lt;&#x2F;code&gt; — returns the success value.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;&lt;code&gt;.run js&lt;&#x2F;code&gt; runs this computation on the full &lt;code&gt;SailJoltState&lt;&#x2F;code&gt; (not just &lt;code&gt;js.sail&lt;&#x2F;code&gt;), producing an &lt;code&gt;EStateM.Result (Error exception) SailJoltState ExecutionResult&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Then &lt;a href=&quot;..&#x2F;state&#x2F;#projectresult&quot;&gt;&lt;code&gt;projectResult&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; strips out the Jolt-specific state (the virtual registers), keeping only the &lt;code&gt;SailState&lt;&#x2F;code&gt; component.&lt;&#x2F;p&gt;
+&lt;!-- &lt;div class=&quot;callout callout-box thm-box&quot;&gt;
+  
+  &lt;div class=&quot;callout-title&quot;&gt;The key difference&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;--&amp;gt;&lt;&#x2F;p&gt;
+&lt;!-- Sail&#x27;s `execute_RTYPEW` truncates each operand to 32 bits *before* adding: --&gt;
+&lt;!----&gt;
+&lt;!-- `sext₆₄(rs1[31:0] +₃₂ rs2[31:0])` --&gt;
+&lt;!----&gt;
+&lt;!-- Jolt&#x27;s `jolt_addw` adds the full 64-bit values *first*, then truncates and sign-extends: --&gt;
+&lt;!----&gt;
+&lt;!-- `sext₆₄((rs1 +₆₄ rs2)[31:0])` --&gt;
+&lt;!----&gt;
+&lt;!-- These are equal because truncation distributes over addition — the lower 32 bits of a 64-bit sum depend only on the lower 32 bits of the operands. This is the bridge lemma `extractLsb_add`, and it is the mathematical heart of the proof. --&gt;
+&lt;!--
+&lt;&#x2F;div&gt;
+ --&gt;
+&lt;!----&gt;
+&lt;h2 id=&quot;what-the-theorem-says&quot;&gt;What the theorem says&lt;&#x2F;h2&gt;
+&lt;p&gt;Both sides produce an &lt;code&gt;EStateM.Result (Error exception) SailState ExecutionResult&lt;&#x2F;code&gt;. The theorem asserts these are equal, which means all three components match:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Same branch&lt;&#x2F;strong&gt; — if one returns &lt;code&gt;.ok&lt;&#x2F;code&gt;, so does the other; if one returns &lt;code&gt;.error&lt;&#x2F;code&gt;, so does the other.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Same return value&lt;&#x2F;strong&gt; — the &lt;code&gt;ExecutionResult&lt;&#x2F;code&gt; (e.g. &lt;code&gt;RETIRE_SUCCESS&lt;&#x2F;code&gt;) is identical.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;Same new state&lt;&#x2F;strong&gt; — the resulting &lt;code&gt;SailState&lt;&#x2F;code&gt; is identical.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;In other words, Jolt&#x27;s decomposition of &lt;code&gt;ADDW&lt;&#x2F;code&gt; into &lt;code&gt;ADD&lt;&#x2F;code&gt; + sign-extend is faithful — after projecting away the virtual registers, it leaves the Sail state in exactly the same condition as running the native &lt;code&gt;ADDW&lt;&#x2F;code&gt; instruction directly.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;appendices&quot;&gt;Appendices&lt;&#x2F;h2&gt;
+&lt;h3 id=&quot;appendix-why-rx-bits-can-fail&quot;&gt;Appendix: Why &lt;code&gt;rX_bits&lt;&#x2F;code&gt; can fail&lt;&#x2F;h3&gt;
+&lt;p&gt;The call stack from &lt;code&gt;rX_bits&lt;&#x2F;code&gt; down to the point of failure:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;rX_bits&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;LeanRV64D&#x2F;Regs.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;696&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; rX_bits&lt;&#x2F;span&gt;&lt;span&gt; (app_0 : regidx) : SailM (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;697&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; .Regidx i := app_0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;698&lt;&#x2F;span&gt;&lt;span&gt;  (rX (Regno (BitVec.toNatInt i)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;which converts the 5-bit index to a &lt;code&gt;Nat&lt;&#x2F;code&gt; and calls &lt;code&gt;rX&lt;&#x2F;code&gt;. &lt;code&gt;regno&lt;&#x2F;code&gt; is just a &lt;code&gt;Nat&lt;&#x2F;code&gt; wrapper (&lt;code&gt;inductive regno where | Regno (_ : Nat)&lt;&#x2F;code&gt;):&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;LeanRV64D&#x2F;Regs.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;618&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; rX&lt;&#x2F;span&gt;&lt;span&gt; (app_0 : regno) : SailM (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;619&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; .Regno r := app_0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;620&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; v ← (( &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;621&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;    match&lt;&#x2F;span&gt;&lt;span&gt; r &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;622&lt;&#x2F;span&gt;&lt;span&gt;    | &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt; =&amp;gt; (pure zero_reg)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;623&lt;&#x2F;span&gt;&lt;span&gt;    | &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt; =&amp;gt; readReg x1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;624&lt;&#x2F;span&gt;&lt;span&gt;    | &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt; =&amp;gt; readReg x2&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;625&lt;&#x2F;span&gt;&lt;span&gt;    -- ... cases &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt;–&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;30&lt;&#x2F;span&gt;&lt;span&gt; ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;626&lt;&#x2F;span&gt;&lt;span&gt;    | _ =&amp;gt; readReg x31 ) : SailM regtype )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;627&lt;&#x2F;span&gt;&lt;span&gt;  (pure (regval_from_reg v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;where &lt;code&gt;regval_from_reg&lt;&#x2F;code&gt; is just the identity:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;LeanRV64D&#x2F;RegType.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;204&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; regval_from_reg&lt;&#x2F;span&gt;&lt;span&gt; (r : (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;)) : (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;205&lt;&#x2F;span&gt;&lt;span&gt;  r&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;rX&lt;&#x2F;code&gt; then calls &lt;code&gt;readReg&lt;&#x2F;code&gt;.
+Note the return type uses &lt;code&gt;PreSailM&lt;&#x2F;code&gt; rather than &lt;code&gt;SailM&lt;&#x2F;code&gt; — &lt;code&gt;readReg&lt;&#x2F;code&gt; is defined in the Sail library before the RISC-V-specific types exist, so it must use the generic version (see &lt;a href=&quot;..&#x2F;state&#x2F;#the-sail-monad&quot;&gt;The Sail Monad&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;Register&lt;&#x2F;code&gt;, &lt;code&gt;RegisterType&lt;&#x2F;code&gt;, &lt;code&gt;c&lt;&#x2F;code&gt;, and &lt;code&gt;ue&lt;&#x2F;code&gt; in the signature below are all implicit.
+Lean infers their concrete values because &lt;code&gt;rX&lt;&#x2F;code&gt; returns &lt;code&gt;SailM (RegisterType r)&lt;&#x2F;code&gt;, which fixes the monad to &lt;code&gt;EStateM (Error exception) SailState (RegisterType r)&lt;&#x2F;code&gt;.
+This gives us &lt;code&gt;ue = exception&lt;&#x2F;code&gt;, &lt;code&gt;c = trivialChoiceSource&lt;&#x2F;code&gt;, and &lt;code&gt;RegisterType&lt;&#x2F;code&gt; = the RISC-V register type function &lt;a href=&quot;..&#x2F;state&#x2F;#state&quot;&gt;described in the state post&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;.lake&#x2F;packages&#x2F;Sail&#x2F;Sail&#x2F;Sail.lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;534&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; readReg&lt;&#x2F;span&gt;&lt;span&gt; (r : Register) : PreSailM RegisterType c ue (RegisterType r) := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;535&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; .some s := (← get).regs.get? r&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;536&lt;&#x2F;span&gt;&lt;span&gt;    | throw .Unreachable&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot;&gt;537&lt;&#x2F;span&gt;&lt;span&gt;  pure s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;div class=&quot;callout callout-box thm-box&quot;&gt;
+  
+  &lt;div class=&quot;callout-title&quot;&gt;Lean syntax: do-notation pattern match&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;The syntax &lt;code&gt;let .some s := expr | throw .Unreachable&lt;&#x2F;code&gt; is Lean&#x27;s do-notation pattern matching with a failure branch. It is equivalent to:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt; expr &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;| .some s =&amp;gt; ... rest of &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;span&gt; block ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;| .none =&amp;gt; throw .Unreachable&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The &lt;code&gt;|&lt;&#x2F;code&gt; line is the else branch — what to do if the pattern doesn&#x27;t match.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;p&gt;Recall that on the &lt;code&gt;.ok&lt;&#x2F;code&gt; branch of &lt;code&gt;EStateM.Result ε σ α&lt;&#x2F;code&gt;, the value carried has type &lt;code&gt;α&lt;&#x2F;code&gt;.
+Here &lt;code&gt;α = RegisterType r&lt;&#x2F;code&gt;, which depends on which register &lt;code&gt;r&lt;&#x2F;code&gt; you pass in. For &lt;code&gt;x1&lt;&#x2F;code&gt;–&lt;code&gt;x31&lt;&#x2F;code&gt;, &lt;code&gt;RegisterType r&lt;&#x2F;code&gt; resolves to &lt;code&gt;BitVec 64&lt;&#x2F;code&gt; (see &lt;a href=&quot;..&#x2F;state&#x2F;#state&quot;&gt;State&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
+&lt;p&gt;Breaking down &lt;code&gt;(← get).regs.get? r&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;← get&lt;&#x2F;code&gt; retrieves the current &lt;code&gt;SequentialState&lt;&#x2F;code&gt; from the monad&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;.regs&lt;&#x2F;code&gt; accesses the dependent hash map field&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;leanprover-community.github.io&#x2F;mathlib4_docs&#x2F;Std&#x2F;Data&#x2F;DHashMap&#x2F;Basic.html&quot;&gt;&lt;code&gt;.get? r&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; does a hash map lookup, returning &lt;code&gt;Option (RegisterType r)&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;If the key is missing — i.e. &lt;code&gt;.get?&lt;&#x2F;code&gt; returns &lt;code&gt;none&lt;&#x2F;code&gt; — it throws &lt;code&gt;Error.Unreachable&lt;&#x2F;code&gt;. So &lt;code&gt;WellFormed&lt;&#x2F;code&gt; is really saying: every general-purpose register is present in the hash map. This is a reasonable assumption because we only ever start from states where the register file has been fully initialised.&lt;&#x2F;p&gt;
+&lt;div class=&quot;callout callout-box thm-box&quot;&gt;
+  
+  &lt;div class=&quot;callout-title&quot;&gt;EStateM vs Result&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;&lt;code&gt;pure s&lt;&#x2F;code&gt; returns an &lt;code&gt;EStateM&lt;&#x2F;code&gt; value, not a &lt;code&gt;Result&lt;&#x2F;code&gt;. Remember &lt;code&gt;EStateM ε σ α&lt;&#x2F;code&gt; is just &lt;code&gt;σ → Result ε σ α&lt;&#x2F;code&gt; — it&#x27;s a function. So &lt;code&gt;pure s&lt;&#x2F;code&gt; constructs the function &lt;code&gt;fun state =&amp;gt; .ok s state&lt;&#x2F;code&gt;. You only get a &lt;code&gt;Result&lt;&#x2F;code&gt; when you actually run the computation via &lt;code&gt;.run&lt;&#x2F;code&gt;, which applies that function to a state.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;h3 id=&quot;appendix-do-notation-and-bind&quot;&gt;Appendix: Do-notation and bind&lt;&#x2F;h3&gt;
+&lt;p&gt;In Lean&#x27;s do-notation, &lt;code&gt;let x ← e&lt;&#x2F;code&gt; desugars to &lt;code&gt;e &amp;gt;&amp;gt;= fun x =&amp;gt; ...&lt;&#x2F;code&gt;, where &lt;code&gt;e&lt;&#x2F;code&gt; is some monadic expression — that is, &lt;code&gt;e&lt;&#x2F;code&gt; has type &lt;code&gt;M α&lt;&#x2F;code&gt; for some monad &lt;code&gt;M&lt;&#x2F;code&gt;. For example, &lt;code&gt;e&lt;&#x2F;code&gt; could be &lt;code&gt;lookup &quot;name&quot;&lt;&#x2F;code&gt; which has type &lt;code&gt;Option Nat&lt;&#x2F;code&gt;, or &lt;code&gt;rX_bits rs1&lt;&#x2F;code&gt; which has type &lt;code&gt;SailM (BitVec 64)&lt;&#x2F;code&gt;. If you&#x27;re familiar with Rust, &lt;code&gt;&amp;gt;&amp;gt;=&lt;&#x2F;code&gt; (bind) is the same idea as &lt;code&gt;and_then&lt;&#x2F;code&gt; on &lt;code&gt;Option&lt;&#x2F;code&gt; — if the value is &lt;code&gt;Some&lt;&#x2F;code&gt;, unwrap it and pass it to the next function; if it&#x27;s &lt;code&gt;None&lt;&#x2F;code&gt;, short-circuit.&lt;&#x2F;p&gt;
+&lt;p&gt;To build intuition, let&#x27;s use the &lt;code&gt;Option&lt;&#x2F;code&gt; monad. Consider a dictionary lookup that might fail:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; lookup&lt;&#x2F;span&gt;&lt;span&gt; (key : String) : Option Nat := ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;lookup&lt;&#x2F;code&gt; returns &lt;code&gt;some v&lt;&#x2F;code&gt; if the key exists, or &lt;code&gt;none&lt;&#x2F;code&gt; if it doesn&#x27;t. Now suppose we want to look up two keys and add their values:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; addEntries&lt;&#x2F;span&gt;&lt;span&gt; (k1 k2 : String) : Option Nat := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; v1 ← lookup k1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; v2 ← lookup k2&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  pure (v1 + v2)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;let v1 ← lookup k1&lt;&#x2F;code&gt; means: run &lt;code&gt;lookup k1&lt;&#x2F;code&gt;. If it returns &lt;code&gt;some v&lt;&#x2F;code&gt;, bind &lt;code&gt;v1 := v&lt;&#x2F;code&gt; and continue. If it returns &lt;code&gt;none&lt;&#x2F;code&gt;, short-circuit — the whole function returns &lt;code&gt;none&lt;&#x2F;code&gt;. So &lt;code&gt;v1&lt;&#x2F;code&gt; is a plain &lt;code&gt;Nat&lt;&#x2F;code&gt;, not an &lt;code&gt;Option Nat&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;This desugars to:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; addEntries&lt;&#x2F;span&gt;&lt;span&gt; (k1 k2 : String) : Option Nat :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  (lookup k1) &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; v1 =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (lookup k2) &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; v2 =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      pure (v1 + v2)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;&amp;gt;&amp;gt;=&lt;&#x2F;code&gt; (bind) for &lt;code&gt;Option&lt;&#x2F;code&gt; is:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;some v &amp;gt;&amp;gt;= f&lt;&#x2F;code&gt; evaluates to &lt;code&gt;f v&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;none &amp;gt;&amp;gt;= f&lt;&#x2F;code&gt; evaluates to &lt;code&gt;none&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;The same pattern applies to &lt;code&gt;EStateM&lt;&#x2F;code&gt;. Instead of &lt;code&gt;some&lt;&#x2F;code&gt;&#x2F;&lt;code&gt;none&lt;&#x2F;code&gt;, we have &lt;code&gt;.ok value newState&lt;&#x2F;code&gt;&#x2F;&lt;code&gt;.error e newState&lt;&#x2F;code&gt;. The &lt;code&gt;←&lt;&#x2F;code&gt; extracts &lt;code&gt;value&lt;&#x2F;code&gt; from the &lt;code&gt;.ok&lt;&#x2F;code&gt; branch and threads the state through. If the computation errors, the whole &lt;code&gt;do&lt;&#x2F;code&gt; block short-circuits with that error.&lt;&#x2F;p&gt;
+&lt;p&gt;For a gentler introduction to monads and bind, see &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;randomwalks.xyz&#x2F;blog&#x2F;monads&#x2F;&quot;&gt;this post&lt;&#x2F;a&gt;. For the formal Lean syntax, see the &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;lean-lang.org&#x2F;doc&#x2F;reference&#x2F;latest&#x2F;Functors___-Monads-and--do--Notation&#x2F;Syntax&#x2F;&quot;&gt;official Lean reference on do-notation&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+</content>
+  </entry>
+  
+  
+  
+  <entry xml:lang="en">
     <title>Modelling the CPU State</title>
     <published>2026-04-11T00:00:00+00:00</published>
     <updated>2026-04-11T00:00:00+00:00</updated>
