@@ -12,7 +12,7 @@
   </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>#instrumentation | onATangent</title>
+  <title>The Sum-Check Protocol over the Monomial Basis, and other Optimizations | onATangent</title>
   <link rel="stylesheet" href="/style.css">
   <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
   <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
@@ -129,22 +129,70 @@
   
   <main class="content">
     
-<section class="section">
-  <h1>#instrumentation</h1>
-  <ul class="post-list">
+<article class="post pub-page">
+  <header class="post-header">
+    <h1>The Sum-Check Protocol over the Monomial Basis, and other Optimizations</h1>
+    <div class="post-meta">
+      
+      <a href="" class="pub-venue-link">In Submission</a>
+      
+      <time>2026-04-15</time>
+    </div>
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;dyn-instrument&#x2F;">Montgomery Multiplication: Theory Vs Practice</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari, Squirrel</span>
-        <time>2025-05-15</time>
-      </div>
-    </li>
+    <div class="pub-authors pub-authors-page">
+      <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;"
+         >
+        Ari Biswas
+      </a>, <a href="https:&#x2F;&#x2F;quangvdao.github.io&#x2F;"
+         class="author-primary">
+        Quang Dao
+      </a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;liam-eagen-b9271786"
+         >
+        Liam Eagen
+      </a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;amilson"
+         >
+        Andrew Milson
+      </a>, <a href="https:&#x2F;&#x2F;il.linkedin.com&#x2F;in&#x2F;shahar-papini-a846b68"
+         >
+        Shahar Papini
+      </a>, <a href="https:&#x2F;&#x2F;people.cs.georgetown.edu&#x2F;jthaler&#x2F;"
+         >
+        Justin Thaler
+      </a>
+    </div>
     
-  </ul>
-</section>
+    
+    <div class="pub-artefacts">
+      
+      <a href="https:&#x2F;&#x2F;eprint.iacr.org&#x2F;2026&#x2F;762" class="pub-artefact">e-print</a>
+      
+    </div>
+    
+  </header>
+
+  <div class="post-content">
+    <h2 id="abstract">Abstract</h2>
+<p>The sum-check protocol underpins SNARKs with the fastest known provers.
+For an $n$-variate polynomial $g$ defined over a finite field $\field$, the protocol enables an untrusted prover to convince a verifier of the sum of all evaluations of $g$ over a product set $H^n$ with $H \subset \field$.
+The standard choice for $H^n$ is the <em>Boolean hypercube</em> $\{0,1\}^n$, which serves as a natural interpolating set for multilinear polynomials.</p>
+<p>We propose a <em>projective variant</em> of the sum-check protocol, obtained by changing the interpolating set from $\{0,1\}^n$ to the <em>infinity hypercube</em> $\{0,\infty\}^n$.
+Under a suitable notion of evaluation at $\infty$, evaluating a multilinear polynomial at a point in $\{0,\infty\}^n$ directly extracts its corresponding monomial coefficient.</p>
+<p>This projective viewpoint is a near-drop-in replacement for applications of sum-check, requiring only local changes to polynomial representations, round identities, and evaluation formulas.
+It yields up to $1.16\times$ end-to-end speedup for the sum-check prover on BN254, and $1.09\times$ on a pseudo-Mersenne 128-bit prime field, against a fair baseline.
+It eliminates all field subtractions when binding a multilinear polynomial, and for structured polynomials such as equality and less-than, the projective interpolants admit evaluation procedures with fewer field operations.
+Moreover, the monomial-coefficient form aligns naturally with polynomial commitment schemes like WHIR, removing a basis mismatch that these schemes otherwise need to work around.</p>
+<p>Finally, we describe an optimization for sum-check over $\approx 256$-bit prime fields.
+When targeting $\approx 128$ bits of security, it suffices to sample challenges from a subset of size $\approx 2^{128}$.
+We show that a suitable choice of this subset, interpreted as upper-limb values in Montgomery form, yields a $1.92\times$ speedup for field multiplication.
+Combined with the projective binding formula, this gives a $1.82\times$ speedup for sum-check binding (a key component of fast sum-check proving).</p>
+<h3 id="comment">Comment</h3>
+<p>My contribution was primarily in the "other" implementing small limb challenge sets in Jolt and showing the CIOS proof, and had little to do with the sumcheck optimisations.
+Quang Dao was responsible for all those optimisations.</p>
+
+  </div>
+
+  
+</article>
 
   </main>
   <!-- ====================================================================

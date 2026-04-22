@@ -28,6 +28,7 @@
         field: ['{\\mathbb{#1}}', 1],
         hei: ['{\\mathbb{F}(#1)}', 1],
         Field: '{\\mathbb{F}}',
+        field: '{\\mathbb{F}}',
         Mont: ['{\\widetilde{#1}}', 1],
         samples: '{\\xleftarrow{\\$}}',
         Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
@@ -170,14 +171,23 @@
       
     </div>
     
-    
   </header>
 
   <div class="post-content">
-    <div class="callout callout-box thm-box">
+    <div class="callout callout-remark">
   
-  <p>The poster appeared at <a href='https://tpdp.journalprivacyconfidentiality.org/2024/'>TPDP 2024</a>. Graham gave the conference talk @ PODS.</p>
-<p>A newer version exists -- that needs to be uploaded.</p>
+  <p><strong>2026-04-22</strong>: <a rel="external" href="https://christianlebeda.github.io/">Christian</a> and his co-authors identified a bug in the proof for non-streaming version.
+As written the first protocol is not private.
+The sketch of the non-privacy argument is that a single $\gamma \samples \text{Laplace(1/$\epsilon$)}$ is used across every node in the tree.
+This re-use means the adversary can infer more information about $\gamma$ than they should, and thereby we lose privacy.</p>
+<p>We will fix this shortly in the coming weeks.
+It can be shown that while a single $\gamma$ is not enough, a constant number of them independent of the height of the tree is sufficient.</p>
+
+</div>
+<div class="callout callout-box thm-box">
+  
+  <p>The poster appeared at <a href='https://tpdp.journalprivacyconfidentiality.org/2024/'>TPDP 2024</a>. Graham gave the conference talk @ PODS.
+A newer version exists -- that needs to be uploaded.</p>
 
 </div>
 <h2 id="abstract">Abstract</h2>
