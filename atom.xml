@@ -8,6 +8,490 @@
   
   
   <entry xml:lang="en">
+    <title>Chain Proving: A Strategy To Deal With Monadic Monstrosity</title>
+    <published>2026-04-23T00:00:00+00:00</published>
+    <updated>2026-04-23T00:00:00+00:00</updated>
+    <author>
+      <name></name>
+    </author>
+    <link rel="alternate" type="text/html" href="/blog/bytecode-expansions/chainsmokers/"/>
+    <id>/blog/bytecode-expansions/chainsmokers/</id>
+    
+    <content type="html" xml:base="/blog/bytecode-expansions/chainsmokers/">&lt;h2 id=&quot;motivating-problem&quot;&gt;Motivating Problem&lt;&#x2F;h2&gt;
+&lt;p&gt;As a motivating problem we look at how division is implemented in Jolt.
+In a typical RISC CPU, we perform one fetch-decode-execute cycle with the &lt;code&gt;DIV rd rs2 rs1&lt;&#x2F;code&gt; instruction, and the quotient of the contents of &lt;code&gt;rs1&lt;&#x2F;code&gt; divided by &lt;code&gt;rs2&lt;&#x2F;code&gt; is written into the destination register &lt;code&gt;rd&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;In Jolt, division is implemented very differently.
+Some untrusted oracle leaves two 64 bit values on the advice tape, calls them the quotient and remainder and claims that it was computed as if we were executing the real RISC division instruction.
+To validate the oracle&#x27;s claim we perform 4 tests, which gives us the following completeness and soundness theorems.&lt;&#x2F;p&gt;
+&lt;p&gt;Completeness tells us that if the claimed quotient and remainder were indeed computed correctly, then none of the 4 tests will error.
+The final state of the RISC CPU will be identical to the RISC CPU that executed the &lt;code&gt;DIV&lt;&#x2F;code&gt; instruction.&lt;&#x2F;p&gt;
+&lt;p&gt;Soundness tells us that for any (quotient, remainder) different from the correct pair, at least one of the tests will fail.&lt;&#x2F;p&gt;
+&lt;p&gt;Based on how we have defined CPU state so far in the series, this is what implementing Jolt&#x27;s version of division looks like in Lean.
+Each line represents a Jolt ISA instruction, which behind the scenes is an imperative program that steps the Jolt CPU one step.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; jolt_div&lt;&#x2F;span&gt;&lt;span&gt; (rs2 rs1 rd : regidx)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (quotient rem_abs : BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) : JoltMonad ExecutionResult := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_advice &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt; quotient                      -- VirtualAdvice v0, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;    (quotient)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_advice &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt; rem_abs                       -- VirtualAdvice v1, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;    (|remainder|)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_assert_valid_div0 rs2 &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;                -- VirtualAssertValidDiv0 rs2, v0, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_change_divisor &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt; rs1 rs2               -- VirtualChangeDivisor   v2, rs1, rs2&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_MULH &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span&gt;                             -- MULH                   v3, v0, v2&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_MUL &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;4&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span&gt;                              -- MUL                    v4, v0, v2&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_SRAI &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 63&lt;&#x2F;span&gt;&lt;span&gt;                            -- SRAI                   v5, v4, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;63&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_assert_eq &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 5&lt;&#x2F;span&gt;&lt;span&gt;                          -- VirtualAssertEQ        v3, v5, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_SRAI_from_real &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span&gt; rs1 &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;63&lt;&#x2F;span&gt;&lt;span&gt;                -- SRAI                   v3, rs1, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;63&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_XOR &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 1&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 3&lt;&#x2F;span&gt;&lt;span&gt;                              -- XOR                    v5, v1, v3&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_SUB &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 5&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 3&lt;&#x2F;span&gt;&lt;span&gt;                              -- SUB                    v5, v5, v3&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_ADD &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;4&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 5&lt;&#x2F;span&gt;&lt;span&gt;                              -- ADD                    v4, v4, v5&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_assert_eq_real &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt; rs1                   -- VirtualAssertEQ        v4, rs1, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_SRAI &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 63&lt;&#x2F;span&gt;&lt;span&gt;                            -- SRAI                   v3, v2, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;63&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_XOR &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 3&lt;&#x2F;span&gt;&lt;span&gt;                              -- XOR                    v5, v2, v3&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_SUB &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 5&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 3&lt;&#x2F;span&gt;&lt;span&gt;                              -- SUB                    v5, v5, v3&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_assert_valid_unsigned_remainder &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 5&lt;&#x2F;span&gt;&lt;span&gt;    -- VirtualAssertValidUnsignedRemainder v1, v5, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  vreg_ADDI_to_real rd &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;                            -- ADDI                   rd, v0, &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;   (move quotient)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The completeness theorem against the trusted transpilation looks like the following:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; jolt_div_concrete&lt;&#x2F;span&gt;&lt;span&gt; (rs2 rs1 rd : regidx)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (hrd : rd ≠ regidx.Regidx &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;) (js : SailJoltState) (hwf : WellFormed js)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (dividend divisor : BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (hrs1 : rX_bits rs1 js.sail = .ok dividend js.sail)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (hrs2 : rX_bits rs2 js.sail = .ok divisor js.sail) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    projectResult (&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                    (jolt_div rs2 rs1 rd&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                      (sail_div_value dividend divisor &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-language z-constant&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;) -- Correct quotient&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                      (bv_abs (sail_rem_value dividend divisor &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-language z-constant&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;)) -- Correct Remainder&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                    ).run js&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                 ) &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (execute_DIV rs2 rs1 rd &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-language z-constant&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;).run js.sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The theorem statement simply says, run the &lt;code&gt;jolt_div&lt;&#x2F;code&gt; sequence with the correct advice, and the final RISC CPU state will be identical to that if we had run the original DIV instruction to begin with.&lt;&#x2F;p&gt;
+&lt;p&gt;Now if we wanted to reason about the LHS and RHS top down as monolithic blocks, we very quickly drive ourselves into a corner of monadic monstrosity.
+Concretely, the most obvious move is to unfold &lt;code&gt;jolt_div&lt;&#x2F;code&gt; and peel one layer of &lt;code&gt;EStateM.run&lt;&#x2F;code&gt; off each &lt;code&gt;bind&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  unfold jolt_div&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  simp only [EStateM.run_bind]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Two lines of tactic, and the goal state Lean hands back is this:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;⊢ projectResult&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (match EStateM.run (vreg_advice 0 (sail_div_value dividend divisor false)) js with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      match EStateM.run (vreg_advice 1 (bv_abs (sail_rem_value dividend divisor false))) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        match EStateM.run (vreg_assert_valid_div0 rs2 0) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          match EStateM.run (vreg_change_divisor 2 rs1 rs2) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            match EStateM.run (vreg_MULH 3 0 2) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;              match EStateM.run (vreg_MUL 4 0 2) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;              | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                match EStateM.run (vreg_SRAI 5 4 63) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                  match EStateM.run (vreg_assert_eq 3 5) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                  | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                    match EStateM.run (vreg_SRAI_from_real 3 rs1 63) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                    | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                      match EStateM.run (vreg_XOR 5 1 3) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                      | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                        match EStateM.run (vreg_SUB 5 5 3) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                        | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                          match EStateM.run (vreg_ADD 4 4 5) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                          | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                            match EStateM.run (vreg_assert_eq_real 4 rs1) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                            | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                              match EStateM.run (vreg_SRAI 3 2 63) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                              | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                match EStateM.run (vreg_XOR 5 2 3) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                  match EStateM.run (vreg_SUB 5 5 3) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                  | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                    match EStateM.run (vreg_assert_valid_unsigned_remainder 1 5) s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                    | EStateM.Result.ok x s =&amp;gt; EStateM.run (vreg_ADDI_to_real rd 0 0) s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                    | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                  | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                              | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                            | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                          | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                        | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                      | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                    | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                  | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;              | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s) =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    EStateM.run (execute_DIV rs2 rs1 rd false) js.sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Eighteen levels of nested &lt;code&gt;match&lt;&#x2F;code&gt;, one per instruction, every single one with a dead &lt;code&gt;.error e s =&amp;gt; .error e s&lt;&#x2F;code&gt; arm that does nothing but re-raise an error through the stack.
+Note, this blowup is just from the outer &lt;code&gt;unfold&lt;&#x2F;code&gt;.
+We are yet to unfold each instruction, which would lead to the goal state looking much much worse.
+No one wants to mechanically deal with each &lt;code&gt;match&lt;&#x2F;code&gt;, and unwind the plumbing.
+We do not want to do this not only because it is physically intractable and error prone, but no one thinks of the proof of this theorem this way.
+So in this post, we outline a general strategy that mimics how humans write proofs, without letting the goal state go out of control.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;a-simpler-program&quot;&gt;A Simpler Program&lt;&#x2F;h2&gt;
+&lt;p&gt;To better describe how we deal with the above problem, we first describe a simpler program.
+We will manifest the same problem in a much more miniature scale.
+Although significantly simpler, it captures the exact core of the complexity above.&lt;&#x2F;p&gt;
+&lt;p&gt;Consider the following simplistic definition of state.
+Its state is two natural-number registers.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;structure&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; State&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; where&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  x : Nat&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  y : Nat&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  deriving&lt;&#x2F;span&gt;&lt;span&gt; Repr&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;inductive&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; Err&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; where&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | assertFailed : String → Err&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  deriving&lt;&#x2F;span&gt;&lt;span&gt; Repr&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;abbrev&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; M&lt;&#x2F;span&gt;&lt;span&gt; (α : &lt;&#x2F;span&gt;&lt;span class=&quot;z-storage z-type&quot;&gt;Type&lt;&#x2F;span&gt;&lt;span&gt;) : &lt;&#x2F;span&gt;&lt;span class=&quot;z-storage z-type&quot;&gt;Type&lt;&#x2F;span&gt;&lt;span&gt; := EStateM Err State α&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;We will use Lean&#x27;s inbuilt Error State Monad &lt;code&gt;EStateM&lt;&#x2F;code&gt; to model a state transition of this state, which we abbreviate with &lt;code&gt;M&lt;&#x2F;code&gt;.
+So far we have nothing special.
+We have done exactly what we did in the post introducing &lt;a href=&quot;&#x2F;blog&#x2F;bytecode-expansions&#x2F;state&#x2F;&quot;&gt;Jolt State&lt;&#x2F;a&gt;, but we are using a significantly simpler definition of state and error.&lt;&#x2F;p&gt;
+&lt;p&gt;This CPU has two instructions:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;doubleX&lt;&#x2F;code&gt; reads &lt;code&gt;x&lt;&#x2F;code&gt;, writes back &lt;code&gt;2 * x&lt;&#x2F;code&gt;, and returns the new value. It never fails.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;divYbyX&lt;&#x2F;code&gt; reads the state, throws &lt;code&gt;assertFailed &quot;division by zero&quot;&lt;&#x2F;code&gt; if &lt;code&gt;x = 0&lt;&#x2F;code&gt;, and otherwise returns &lt;code&gt;y &#x2F; x&lt;&#x2F;code&gt; without ever updating the state.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; doubleX&lt;&#x2F;span&gt;&lt;span&gt; : M Nat := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; s ← get&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; new := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt; * s.x&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  set { s &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;span&gt; x := new }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  pure new&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; divYbyX&lt;&#x2F;span&gt;&lt;span&gt; : M Nat := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; s ← get&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  if&lt;&#x2F;span&gt;&lt;span&gt; s.x = &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; then&lt;&#x2F;span&gt;&lt;span&gt; throw (Err.assertFailed &lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;division by zero&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  else&lt;&#x2F;span&gt;&lt;span&gt; pure (s.y &#x2F; s.x)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;A toy program is given here.
+Given initial state &lt;code&gt;s&lt;&#x2F;code&gt; we double &lt;code&gt;x&lt;&#x2F;code&gt; 3 times, and then we divide &lt;code&gt;s.y&lt;&#x2F;code&gt; with the final value of &lt;code&gt;s.x&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; prog1&lt;&#x2F;span&gt;&lt;span&gt; : M Nat := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← doubleX&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← doubleX&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← doubleX&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  divYbyX&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Evaluated on initial state &lt;code&gt;{ x := 5, y := 320 }&lt;&#x2F;code&gt; everything should pass — the different values of &lt;code&gt;x&lt;&#x2F;code&gt; are 5 → 10 → 20 → 40, and the final &lt;code&gt;divYbyX&lt;&#x2F;code&gt; computes &lt;code&gt;320 &#x2F; 40 = 8&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;#eval&lt;&#x2F;span&gt;&lt;span&gt; prog1.run { x := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;, y := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;320&lt;&#x2F;span&gt;&lt;span&gt; }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- EStateM.Result.ok &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;8&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Error Evaluation — if we start with &lt;code&gt;x = 0&lt;&#x2F;code&gt;, doubling preserves zero, so when we reach &lt;code&gt;divYbyX&lt;&#x2F;code&gt; the divisor is still &lt;code&gt;0&lt;&#x2F;code&gt; and we throw:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;#eval&lt;&#x2F;span&gt;&lt;span&gt; prog1.run { x := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;, y := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;320&lt;&#x2F;span&gt;&lt;span&gt; }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- EStateM.Result.error (Err.assertFailed &lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;division by zero&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now we can write a couple of theorems.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-comment&quot;&gt;&#x2F;--&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; If we start with `x = 0`, `prog1` errors on the final `divYbyX`. &lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt;-&#x2F;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; prog1_errors_on_zero&lt;&#x2F;span&gt;&lt;span&gt; (s : State) (h : s.x = &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ∃ s&amp;#39;, prog1.run s = .error (Err.assertFailed &lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;division by zero&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;) s&amp;#39; := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-invalid z-invalid z-illegal&quot;&gt;  sorry&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-comment&quot;&gt;&#x2F;--&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; Starting from `x = 5, y = 320`, three doublings take `x` to 40 and&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-comment&quot;&gt;`divYbyX` returns 320 &#x2F; 40 = 8. &lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt;-&#x2F;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; prog1_on_5_320&lt;&#x2F;span&gt;&lt;span&gt; :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    prog1.run { x := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;, y := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;320&lt;&#x2F;span&gt;&lt;span&gt; } = .ok &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;8&lt;&#x2F;span&gt;&lt;span&gt; { x := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;40&lt;&#x2F;span&gt;&lt;span&gt;, y := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;320&lt;&#x2F;span&gt;&lt;span&gt; } := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-invalid z-invalid z-illegal&quot;&gt;  sorry&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Trying the same &lt;code&gt;unfold + simp only [EStateM.run_bind]&lt;&#x2F;code&gt; move on &lt;code&gt;prog1_on_5_320&lt;&#x2F;code&gt; —&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  unfold prog1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  simp only [EStateM.run_bind]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;— gives us back the same monster, at smaller scale:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;⊢ (match EStateM.run doubleX { x := 5, y := 320 } with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      match EStateM.run doubleX s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | EStateM.Result.ok x s =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        match EStateM.run doubleX s with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        | EStateM.Result.ok x s =&amp;gt; EStateM.run divYbyX s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    | EStateM.Result.error e s =&amp;gt; EStateM.Result.error e s) =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    EStateM.Result.ok 8 { x := 40, y := 320 }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Same problem -- just 3 levels instead of 18.
+The crux of the problem is that I do not wish to deal with this.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;how-would-you-solve-this-on-an-exam&quot;&gt;How Would You Solve This On An Exam?&lt;&#x2F;h3&gt;
+&lt;p&gt;Before going into Lean proving malarkey, we ask if you were tasked with solving the above problem on paper, how would you go about it?
+You would say well we start with &lt;code&gt;s := { x := 5, y := 320 }&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;After one invocation of &lt;code&gt;doubleX&lt;&#x2F;code&gt; we would have &lt;code&gt;{ x := 10, y := 320 }&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;Then one more and we have &lt;code&gt;{ x := 20, y := 320 }&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;Then one more and we have &lt;code&gt;{ x := 40, y := 320 }&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;Now &lt;code&gt;x ≠ 0&lt;&#x2F;code&gt;, so &lt;code&gt;divYbyX&lt;&#x2F;code&gt; succeeds — it returns &lt;code&gt;320 &#x2F; 40 = 8&lt;&#x2F;code&gt;, and the final state is still &lt;code&gt;{ x := 40, y := 320 }&lt;&#x2F;code&gt; (since &lt;code&gt;divYbyX&lt;&#x2F;code&gt; only reads, never writes).&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;That would qualify as a perfectly acceptable proof.
+Essentially, we would like to do the same in Lean.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;understanding-the-do-notation&quot;&gt;Understanding The Do Notation&lt;&#x2F;h2&gt;
+&lt;p&gt;If we look at the goal state of &lt;code&gt;prog1&lt;&#x2F;code&gt; we see this.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;EStateM.run&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      let&lt;&#x2F;span&gt;&lt;span&gt; __discr ← doubleX&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      have&lt;&#x2F;span&gt;&lt;span&gt; x : Nat := __discr&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      let&lt;&#x2F;span&gt;&lt;span&gt; __discr ← doubleX&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      have&lt;&#x2F;span&gt;&lt;span&gt; x : Nat := __discr&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      let&lt;&#x2F;span&gt;&lt;span&gt; __discr ← doubleX&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      have&lt;&#x2F;span&gt;&lt;span&gt; x : Nat := __discr&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      divYbyX)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    init_state =&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  EStateM.Result.ok &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;8&lt;&#x2F;span&gt;&lt;span&gt; final_state&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;But Lean is a functional programming language.
+What we see above is syntax sugar for things to look nice.
+What Lean&#x27;s type-checker sees is this:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; prog1&lt;&#x2F;span&gt;&lt;span&gt; : M Nat :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  doubleX &amp;gt;&amp;gt;= (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    doubleX &amp;gt;&amp;gt;= (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      doubleX &amp;gt;&amp;gt;= (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        divYbyX)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;How do we know this?
+Well we can ask the type-checker if this functional version is actually the same as the goal state.
+If we wrote this as the first line of the proof, it passes.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  show&lt;&#x2F;span&gt;&lt;span&gt; (doubleX &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;           doubleX &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;           doubleX &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;           divYbyX).run init_state = .ok &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;8&lt;&#x2F;span&gt;&lt;span&gt; final_state &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;div class=&quot;callout callout-box thm-box&quot;&gt;
+  
+  &lt;p&gt;For a valid lean expression &lt;code&gt;G&lt;&#x2F;code&gt;, &lt;code&gt;show G&lt;&#x2F;code&gt; does exactly two things:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;Lean confirms that &lt;code&gt;G&lt;&#x2F;code&gt; is &lt;strong&gt;definitionally&lt;&#x2F;strong&gt; equal to the current goal. If not, it errors.&lt;&#x2F;li&gt;
+&lt;li&gt;Rewrite the goal with &lt;code&gt;G&lt;&#x2F;code&gt;. All later tactics now see &lt;code&gt;G&lt;&#x2F;code&gt; as the target.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+
+&lt;&#x2F;div&gt;
+&lt;p&gt;Given what the Lean type-checker really sees, we write this helper lemma.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; bind_run_of_ok&lt;&#x2F;span&gt;&lt;span&gt; {α β : &lt;&#x2F;span&gt;&lt;span class=&quot;z-storage z-type&quot;&gt;Type&lt;&#x2F;span&gt;&lt;span&gt;} {m : M α} {f : α → M β}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    {s s₁ : State} {a : α}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (h : m.run s = .ok a s₁) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (m &amp;gt;&amp;gt;= f).run s = (f a).run s₁ := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  show&lt;&#x2F;span&gt;&lt;span&gt; (m &amp;gt;&amp;gt;= f) s = (f a) s₁&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  simp only [bind, EStateM.bind]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rw [&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;show&lt;&#x2F;span&gt;&lt;span&gt; m s = .ok a s₁ &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt; h]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;div class=&quot;callout callout-remark&quot;&gt;
+  
+  &lt;div class=&quot;callout-title&quot;&gt;In Plain English&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;It says we start in state &lt;code&gt;s&lt;&#x2F;code&gt; and then perform one step described by instruction &lt;code&gt;m&lt;&#x2F;code&gt; successfully to get to &lt;code&gt;s₁&lt;&#x2F;code&gt;
+with return value &lt;code&gt;a&lt;&#x2F;code&gt;.
+Then running the second computation given by &lt;code&gt;f a&lt;&#x2F;code&gt; on state &lt;code&gt;s₁&lt;&#x2F;code&gt; is the same as running the whole chain &lt;code&gt;m &amp;gt;&amp;gt;= f&lt;&#x2F;code&gt; starting from the original state &lt;code&gt;s&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;p&gt;We also prove two theorems about each instruction.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; doubleX_run&lt;&#x2F;span&gt;&lt;span&gt; (s : State) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    doubleX.run s = .ok (&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt; * s.x) { s &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;span&gt; x := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt; * s.x } := rfl&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; divYbyX_run_ok&lt;&#x2F;span&gt;&lt;span&gt; (s : State) (h : s.x ≠ &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    divYbyX.run s = .ok (s.y &#x2F; s.x) s := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  unfold divYbyX&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  simp only [EStateM.run_bind, EStateM.run_get]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rw [if_neg h]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rfl &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; divYbyX_run_err&lt;&#x2F;span&gt;&lt;span&gt; (s : State) (h : s.x = &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    divYbyX.run s = .error (Err.assertFailed &lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;division by zero&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;) s := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  unfold divYbyX&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  simp only [EStateM.run_bind, EStateM.run_get]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rw [if_pos h]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rfl &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; divYbyX_run&lt;&#x2F;span&gt;&lt;span&gt;  (s: State):&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    divYbyX.run s = &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;    if&lt;&#x2F;span&gt;&lt;span&gt; s.x = &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt; then&lt;&#x2F;span&gt;&lt;span&gt; .error (Err.assertFailed &lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;division by zero&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;) s &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;    else&lt;&#x2F;span&gt;&lt;span&gt; .ok (s.y&#x2F; s.x) s := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  by_cases h : s.x = &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  · rw [if_pos h] &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    exact divYbyX_run_err _ h &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  · rw [if_neg h] &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    exact divYbyX_run_ok s h  &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Four short lemmas, one per instruction behaviour:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;doubleX_run&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; — &lt;code&gt;doubleX&lt;&#x2F;code&gt; always succeeds, overwrites &lt;code&gt;x&lt;&#x2F;code&gt; with &lt;code&gt;2 * s.x&lt;&#x2F;code&gt;, and returns the new value. The proof is &lt;code&gt;rfl&lt;&#x2F;code&gt;: everything in the do-block reduces in the kernel.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;divYbyX_run_ok&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; — success branch. When &lt;code&gt;s.x ≠ 0&lt;&#x2F;code&gt;, &lt;code&gt;divYbyX&lt;&#x2F;code&gt; returns &lt;code&gt;s.y &#x2F; s.x&lt;&#x2F;code&gt; and leaves the state untouched.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;divYbyX_run_err&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; — failure branch. When &lt;code&gt;s.x = 0&lt;&#x2F;code&gt;, &lt;code&gt;divYbyX&lt;&#x2F;code&gt; throws &lt;code&gt;assertFailed &quot;division by zero&quot;&lt;&#x2F;code&gt;, again leaving the state untouched.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;divYbyX_run&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; — the combined &lt;code&gt;if&lt;&#x2F;code&gt;-then-else statement, derived by &lt;code&gt;by_cases&lt;&#x2F;code&gt; on &lt;code&gt;s.x = 0&lt;&#x2F;code&gt; and dispatching to the two branch lemmas.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;The point of splitting &lt;code&gt;_ok&lt;&#x2F;code&gt; and &lt;code&gt;_err&lt;&#x2F;code&gt; out is that downstream callers usually already know which side of the guard they&#x27;re on, and would rather feed &lt;code&gt;bind_run_of_ok&lt;&#x2F;code&gt; a clean equation than an &lt;code&gt;if&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;div class=&quot;callout callout-remark&quot;&gt;
+  
+  &lt;p&gt;Note that we are still actually going through the &lt;code&gt;match&lt;&#x2F;code&gt; code, but we are doing it at each instruction level once.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;h3 id=&quot;closing-out-theorem&quot;&gt;Closing Out Theorem&lt;&#x2F;h3&gt;
+&lt;p&gt;So now we show how that one lemma completely alleviates us from reasoning about the massively nested match.
+For starters, we do exactly what we did in our paper proof.
+We step through each instruction and reason about before and after state.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; prog1_on_5_320&lt;&#x2F;span&gt;&lt;span&gt; (init_state final_state : State) &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  (h_start : init_state = { x := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span&gt;, y := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;320&lt;&#x2F;span&gt;&lt;span&gt; }) &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  (h_end : final_state = { x := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;40&lt;&#x2F;span&gt;&lt;span&gt;, y := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;320&lt;&#x2F;span&gt;&lt;span&gt; }) &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    prog1.run init_state = .ok &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;8&lt;&#x2F;span&gt;&lt;span&gt; final_state := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; s1 : State := { x := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;10&lt;&#x2F;span&gt;&lt;span&gt;, y := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;320&lt;&#x2F;span&gt;&lt;span&gt; }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  have&lt;&#x2F;span&gt;&lt;span&gt; h1 : doubleX.run init_state = .ok &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;10&lt;&#x2F;span&gt;&lt;span&gt; s1 := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    rw [h_start]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    exact doubleX_run _&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; s2 : State := { x := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;20&lt;&#x2F;span&gt;&lt;span&gt;, y := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;320&lt;&#x2F;span&gt;&lt;span&gt; }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  have&lt;&#x2F;span&gt;&lt;span&gt; h2 : doubleX.run s1 = .ok &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;20&lt;&#x2F;span&gt;&lt;span&gt; s2 := doubleX_run _ &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  have&lt;&#x2F;span&gt;&lt;span&gt; h3 : doubleX.run s2 = .ok &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;40&lt;&#x2F;span&gt;&lt;span&gt; final_state := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    rw [h_end]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    exact doubleX_run _&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  have&lt;&#x2F;span&gt;&lt;span&gt; hs3ne : final_state.x ≠ &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt; := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    rw [h_end]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    decide &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  have&lt;&#x2F;span&gt;&lt;span&gt; h4 : divYbyX.run final_state = .ok &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;8&lt;&#x2F;span&gt;&lt;span&gt; final_state := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    rw [h_end]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    exact divYbyX_run_ok _ (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;span&gt; rw [h_end] at hs3ne; exact hs3ne)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  -- Nothing has happened so far to the goal&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Reading the &lt;code&gt;have&lt;&#x2F;code&gt;s in order — each one is a line straight out of the pen-and-paper proof:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;h1&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt;: After one &lt;code&gt;doubleX&lt;&#x2F;code&gt; from &lt;code&gt;init_state = { x := 5, y := 320 }&lt;&#x2F;code&gt;, we are at &lt;code&gt;s1 = { x := 10, y := 320 }&lt;&#x2F;code&gt; with return value &lt;code&gt;10&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;h2&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt;: Another &lt;code&gt;doubleX&lt;&#x2F;code&gt; from &lt;code&gt;s1&lt;&#x2F;code&gt; lands us at &lt;code&gt;s2 = { x := 20, y := 320 }&lt;&#x2F;code&gt; with return value &lt;code&gt;20&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;h3&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt;: One more &lt;code&gt;doubleX&lt;&#x2F;code&gt; from &lt;code&gt;s2&lt;&#x2F;code&gt; takes us to &lt;code&gt;final_state = { x := 40, y := 320 }&lt;&#x2F;code&gt; with return value &lt;code&gt;40&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;hs3ne&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt;: &lt;code&gt;final_state.x = 40&lt;&#x2F;code&gt;, so &lt;code&gt;final_state.x ≠ 0&lt;&#x2F;code&gt; — this is the guard &lt;code&gt;divYbyX_run_ok&lt;&#x2F;code&gt; needs.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;h4&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt;: With the nonzero guard in hand, &lt;code&gt;divYbyX&lt;&#x2F;code&gt; on &lt;code&gt;final_state&lt;&#x2F;code&gt; succeeds: it returns &lt;code&gt;320 &#x2F; 40 = 8&lt;&#x2F;code&gt; and leaves the state untouched.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;We close each of the mini haves with our per-theorem reasoning.
+So far the goal has not changed.
+We&#x27;ve just built a sequence of hypotheses.
+This is where our &lt;code&gt;bind_run_of_ok&lt;&#x2F;code&gt; lemma comes in.
+We can now simply chain them.&lt;&#x2F;p&gt;
+&lt;p&gt;To close out the proof we just write&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  unfold prog1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rw [bind_run_of_ok h1]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rw [bind_run_of_ok h2]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rw [bind_run_of_ok h3]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  exact h4&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Reading the program above in plain English — the goal starts out as&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;prog1.run init_state = .ok 8 final_state&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;and each line shrinks the left-hand side by one instruction, without ever touching the right-hand side:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;unfold prog1&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; — replace the name &lt;code&gt;prog1&lt;&#x2F;code&gt; with its body. The LHS is now the explicit bind chain &lt;code&gt;(doubleX &amp;gt;&amp;gt;= fun _ =&amp;gt; doubleX &amp;gt;&amp;gt;= fun _ =&amp;gt; doubleX &amp;gt;&amp;gt;= fun _ =&amp;gt; divYbyX).run init_state&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;rw [bind_run_of_ok h1]&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; — &lt;code&gt;h1&lt;&#x2F;code&gt; tells us the leading &lt;code&gt;doubleX&lt;&#x2F;code&gt; takes &lt;code&gt;init_state&lt;&#x2F;code&gt; to &lt;code&gt;.ok 10 s1&lt;&#x2F;code&gt;. The lemma converts that into &quot;the whole chain run from &lt;code&gt;init_state&lt;&#x2F;code&gt;&quot; = &quot;the tail chain run from &lt;code&gt;s1&lt;&#x2F;code&gt;&quot;. The first &lt;code&gt;doubleX&lt;&#x2F;code&gt; is gone; the LHS is now &lt;code&gt;(doubleX &amp;gt;&amp;gt;= fun _ =&amp;gt; doubleX &amp;gt;&amp;gt;= fun _ =&amp;gt; divYbyX).run s1&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;rw [bind_run_of_ok h2]&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; — same move with &lt;code&gt;h2&lt;&#x2F;code&gt;: peel off the next &lt;code&gt;doubleX&lt;&#x2F;code&gt;, advance the state to &lt;code&gt;s2&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;rw [bind_run_of_ok h3]&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; — peel off the third &lt;code&gt;doubleX&lt;&#x2F;code&gt;, advance to &lt;code&gt;final_state&lt;&#x2F;code&gt;. The LHS is now just &lt;code&gt;divYbyX.run final_state&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;exact h4&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt; — &lt;code&gt;h4&lt;&#x2F;code&gt; is exactly &lt;code&gt;divYbyX.run final_state = .ok 8 final_state&lt;&#x2F;code&gt;, which is the goal.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Each rewrite says the same thing: &lt;em&gt;&quot;I know that this step passed and here is the proof — so replace the whole &lt;code&gt;m &amp;gt;&amp;gt;= f&lt;&#x2F;code&gt; chain with &lt;code&gt;f a&lt;&#x2F;code&gt; run on the new state &lt;code&gt;s₁&lt;&#x2F;code&gt;.&quot;&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;To make that concrete, look at the very first rewrite, &lt;code&gt;rw [bind_run_of_ok h1]&lt;&#x2F;code&gt;. The generic names in the lemma get instantiated as:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;m := doubleX&lt;&#x2F;code&gt; — the head instruction of the chain.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;f := fun _ =&amp;gt; doubleX &amp;gt;&amp;gt;= fun _ =&amp;gt; doubleX &amp;gt;&amp;gt;= fun _ =&amp;gt; divYbyX&lt;&#x2F;code&gt; — the &lt;em&gt;tail&lt;&#x2F;em&gt; of the chain, i.e. everything after the first &lt;code&gt;doubleX&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;s := init_state&lt;&#x2F;code&gt; — the state we&#x27;re running from.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;a := 10&lt;&#x2F;code&gt;, &lt;code&gt;s₁ := s1&lt;&#x2F;code&gt; — what &lt;code&gt;h1&lt;&#x2F;code&gt; tells us &lt;code&gt;doubleX&lt;&#x2F;code&gt; produced.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;With those in hand, &lt;code&gt;bind_run_of_ok h1&lt;&#x2F;code&gt; converts&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;(doubleX &amp;gt;&amp;gt;= (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt; doubleX &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt; doubleX &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt; divYbyX)).run init_state&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;into&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;((&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt; doubleX &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt; doubleX &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt; divYbyX) &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;10&lt;&#x2F;span&gt;&lt;span&gt;).run s1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Since the continuation discards its argument (&lt;code&gt;fun _ =&amp;gt; ...&lt;&#x2F;code&gt;), the &lt;code&gt;10&lt;&#x2F;code&gt; just evaporates, leaving&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;(doubleX &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt; doubleX &amp;gt;&amp;gt;= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;fun&lt;&#x2F;span&gt;&lt;span&gt; _ =&amp;gt; divYbyX).run s1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The same chain, one step shorter, now running from &lt;code&gt;s1&lt;&#x2F;code&gt; instead of &lt;code&gt;init_state&lt;&#x2F;code&gt;. The next two rewrites do the same thing with &lt;code&gt;h2&lt;&#x2F;code&gt; and &lt;code&gt;h3&lt;&#x2F;code&gt;: each peels the leading &lt;code&gt;doubleX&lt;&#x2F;code&gt; off and bumps the state forward, until the LHS is just &lt;code&gt;divYbyX.run final_state&lt;&#x2F;code&gt; — which is exactly &lt;code&gt;h4&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;back-to-jolt-div&quot;&gt;Back to &lt;code&gt;jolt_div&lt;&#x2F;code&gt;&lt;&#x2F;h2&gt;
+&lt;p&gt;The general tactic is we will show two theorems:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;The RHS, when run, generates state &lt;code&gt;s&lt;&#x2F;code&gt;. As this is just one step of the trusted RISC CPU, we can prove this directly.&lt;&#x2F;li&gt;
+&lt;li&gt;The LHS, which is the Jolt sequence, when run, generates state &lt;code&gt;s&lt;&#x2F;code&gt;. As the LHS is a sequence of instructions, the same lemma closes the 18-step &lt;code&gt;jolt_div&lt;&#x2F;code&gt; sequence — but the real proof doesn&#x27;t apply &lt;code&gt;bind_run_of_ok&lt;&#x2F;code&gt; eighteen times at the top.
+It uses the same lemma at &lt;strong&gt;two granularities&lt;&#x2F;strong&gt;, with a phasing layer in between.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;p&gt;Once we have RHS and LHS lemmas -- the rest is mechanical 4-5 lines of re-writes.
+The rest of this post talks about how to handle item number 2.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;phasing&quot;&gt;Phasing&lt;&#x2F;h3&gt;
+&lt;p&gt;The 18 instructions group into five phases, 1 for setup and the rest for each test or assertion.
+The grouping into phases is given below.&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Phase&lt;&#x2F;th&gt;&lt;th&gt;Instructions&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;&lt;code&gt;phase_setup&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;advice, advice, assert_valid_div0&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;code&gt;phase_overflow_check&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;change_divisor, MULH, MUL, SRAI, assert_eq&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;code&gt;phase_quotient_product&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;SRAI_from_real, XOR, SUB, ADD, assert_eq_real&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;code&gt;phase_remainder_bound&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;SRAI, XOR, SUB, assert_valid_unsigned_remainder&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;code&gt;phase_writeback&lt;&#x2F;code&gt;&lt;&#x2F;td&gt;&lt;td&gt;ADDI_to_real&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;Each phase is a small monadic program — its own do-block of 1–5 instructions.
+For example, shown below are the first 2 phases.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-comment&quot;&gt;&#x2F;--&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; Phase 1 — advice loads + div-by-zero assert. &lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt;-&#x2F;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; phase_setup&lt;&#x2F;span&gt;&lt;span&gt; (rs2 : regidx) (quotient rem_abs : BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    JoltMonad ExecutionResult := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_advice &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt; quotient&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_advice &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt; rem_abs&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  vreg_assert_valid_div0 rs2 &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-comment&quot;&gt;&#x2F;--&lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt; Phase 2 — adjusted divisor, MULH&#x2F;MUL&#x2F;SRAI, overflow-check assert. &lt;&#x2F;span&gt;&lt;span class=&quot;z-comment&quot;&gt;-&#x2F;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; phase_overflow_check&lt;&#x2F;span&gt;&lt;span&gt; (rs1 rs2 : regidx) : JoltMonad ExecutionResult := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_change_divisor &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt; rs1 rs2&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_MULH &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_MUL &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;4&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 2&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; _ ← vreg_SRAI &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;5&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 4&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 63&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  vreg_assert_eq &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;3&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 5&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Next, we prove that this decomposition into phases is definitionally the same as running &lt;code&gt;jolt_div&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; jolt_div_phased&lt;&#x2F;span&gt;&lt;span&gt; (rs2 rs1 rd : regidx)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (quotient rem_abs : BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    jolt_div rs2 rs1 rd quotient rem_abs = (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      let&lt;&#x2F;span&gt;&lt;span&gt; _ ← phase_setup rs2 quotient rem_abs&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      let&lt;&#x2F;span&gt;&lt;span&gt; _ ← phase_overflow_check rs1 rs2&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      let&lt;&#x2F;span&gt;&lt;span&gt; _ ← phase_quotient_product rs1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      let&lt;&#x2F;span&gt;&lt;span&gt; _ ← phase_remainder_bound&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      phase_writeback rd) := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  simp [jolt_div, phase_setup, phase_overflow_check,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        phase_quotient_product, phase_remainder_bound,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        phase_writeback, bind_assoc]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;With this theorem in hand -- we are ready to just reason about the phased program instead of &lt;code&gt;jolt_div&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;run-lemmas-one-per-phase&quot;&gt;&lt;code&gt;_run&lt;&#x2F;code&gt; lemmas, one per phase&lt;&#x2F;h3&gt;
+&lt;p&gt;Each phase gets a characterisation lemma, analogous to &lt;code&gt;doubleX_run&lt;&#x2F;code&gt; and &lt;code&gt;divYbyX_run_ok&lt;&#x2F;code&gt; from the toy.
+It states: &lt;em&gt;&quot;given these preconditions and guards, this phase succeeds and establishes the following conditions on new state &lt;code&gt;js&#x27;&lt;&#x2F;code&gt;.&quot;&lt;&#x2F;em&gt; For example:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; phase_setup_run&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (rs2 : regidx) (q rem : BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) (js : SailJoltState)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (divisor : BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (hrs2 : rX_bits rs2 js.sail = .ok divisor js.sail)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (hguard_div0 : ¬ (divisor = &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt; ∧ q ≠ (-&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt; : BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;))) :&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    ∃ js&amp;#39;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      (phase_setup rs2 q rem).run js = .ok RETIRE_SUCCESS js&amp;#39; ∧&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      js&amp;#39;.vregs &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt; = q ∧&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      js&amp;#39;.vregs &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt; = rem ∧&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      js&amp;#39;.sail = js.sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Reading: if we enter &lt;code&gt;phase_setup&lt;&#x2F;code&gt; with &lt;code&gt;divisor&lt;&#x2F;code&gt; pinned in &lt;code&gt;rs2&lt;&#x2F;code&gt; and the div-by-zero guard satisfied, the phase succeeds; afterwards &lt;code&gt;v0&lt;&#x2F;code&gt; holds the quotient &lt;code&gt;q&lt;&#x2F;code&gt;, &lt;code&gt;v1&lt;&#x2F;code&gt; holds &lt;code&gt;|r|&lt;&#x2F;code&gt;, and the Sail state is untouched.&lt;&#x2F;p&gt;
+&lt;div class=&quot;callout callout-remark&quot;&gt;
+  
+  &lt;p&gt;This theorem will be like the lemma we proved above in the toy example.
+For each instruction in the phase, we will have &lt;code&gt;run_ok&lt;&#x2F;code&gt; lemmas -- which will help close this out.
+We just do not show this here for brevity.
+There&#x27;s nothing insightful here, just two stages of the same thing.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;h3 id=&quot;stitching-the-phases&quot;&gt;Stitching the phases&lt;&#x2F;h3&gt;
+&lt;p&gt;With the five phase-run lemmas in hand, the top-level &lt;code&gt;jolt_div_concrete&lt;&#x2F;code&gt; proof is the toy proof, again, one layer up:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;theorem&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; jolt_div_concrete&lt;&#x2F;span&gt;&lt;span&gt; ... &lt;&#x2F;span&gt;&lt;span&gt;:= &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;by&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  -- Four guards derived &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt; honest advice (pure math lemmas).&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  have&lt;&#x2F;span&gt;&lt;span&gt; hguard_div0             := hguard_div0_of_honest dividend divisor&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  have&lt;&#x2F;span&gt;&lt;span&gt; hguard_overflow         := hguard_overflow_of_honest dividend divisor&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  have&lt;&#x2F;span&gt;&lt;span&gt; hguard_quotient_product := hguard_quotient_product_of_honest dividend divisor&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  have&lt;&#x2F;span&gt;&lt;span&gt; hguard_rem_bound        := hguard_rem_bound_of_honest dividend divisor&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  -- Extract the five phase-run results &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;in&lt;&#x2F;span&gt;&lt;span&gt; order, threading state.&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  obtain ⟨js₁, hrun1, ...⟩ := phase_setup_run             ... hguard_div0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  obtain ⟨js₂, hrun2, ...⟩ := phase_overflow_check_run    ... hguard_overflow&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  obtain ⟨js₃, hrun3, ...⟩ := phase_quotient_product_run  ... hguard_quotient_product&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  obtain ⟨js₄, hrun4, ...⟩ := phase_remainder_bound_run   ... hguard_rem_bound&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  obtain ⟨js₅, hrun5, h5⟩  := phase_writeback_run          ...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  -- Reshape to a phase-chain, &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;then&lt;&#x2F;span&gt;&lt;span&gt; peel four times.&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  refine ⟨js₅, ?_, h5⟩&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rw [jolt_div_phased]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rw [bind_run_of_ok hrun1]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rw [bind_run_of_ok hrun2]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rw [bind_run_of_ok hrun3]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  rw [bind_run_of_ok hrun4]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  exact hrun5&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Four &lt;code&gt;bind_run_of_ok&lt;&#x2F;code&gt; calls, one &lt;code&gt;exact&lt;&#x2F;code&gt;. The shape is identical to &lt;code&gt;prog1_on_5_320&lt;&#x2F;code&gt; — just with phase-run lemmas where the toy had instruction-run lemmas.&lt;&#x2F;p&gt;
+</content>
+  </entry>
+  
+  
+  
+  <entry xml:lang="en">
+    <title>Jolt QED: Formally Verifying Jolt Bytecode Expansion</title>
+    <published>2026-04-22T00:00:00+00:00</published>
+    <updated>2026-04-22T00:00:00+00:00</updated>
+    <author>
+      <name></name>
+    </author>
+    <link rel="alternate" type="text/html" href="/publications/fv-bytecode/"/>
+    <id>/publications/fv-bytecode/</id>
+    
+    <content type="html" xml:base="/publications/fv-bytecode/">&lt;p&gt;This paper is currently in preparation, but I&#x27;d be happy to answer questions in the meantime.&lt;&#x2F;p&gt;
+</content>
+  </entry>
+  
+  
+  
+  <entry xml:lang="en">
     <title>The Sum-Check Protocol over the Monomial Basis, and other Optimizations</title>
     <published>2026-04-15T00:00:00+00:00</published>
     <updated>2026-04-15T00:00:00+00:00</updated>
@@ -3080,6 +3564,20 @@ Only &lt;code&gt;Nop&lt;&#x2F;code&gt; is valid here.&lt;&#x2F;li&gt;
   </entry>
   
   
+  
+  <entry xml:lang="en">
+    <title>Montgomery Multiplication Revisited</title>
+    <published>2026-03-02T00:00:00+00:00</published>
+    <updated>2026-03-02T00:00:00+00:00</updated>
+    <author>
+      <name></name>
+    </author>
+    <link rel="alternate" type="text/html" href="/publications/mont-mult-revisited/"/>
+    <id>/publications/mont-mult-revisited/</id>
+    
+    <content type="html" xml:base="/publications/mont-mult-revisited/">&lt;p&gt;This paper is currently in preparation, but I&#x27;d be happy to answer questions in the meantime.&lt;&#x2F;p&gt;
+</content>
+  </entry>
   
   
   
