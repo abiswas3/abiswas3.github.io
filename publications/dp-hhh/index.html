@@ -174,20 +174,21 @@
   </header>
 
   <div class="post-content">
-    <div class="callout callout-remark">
+    <p>The poster appeared at <a href='https://tpdp.journalprivacyconfidentiality.org/2024/'>TPDP 2024</a>. Graham gave the conference talk @ PODS.
+A newer version exists -- that needs to be uploaded.</p>
+<div class="callout callout-remark">
   
-  <p><strong>2026-04-22</strong>: <a rel="external" href="https://christianlebeda.github.io/">Christian</a> and his co-authors identified a bug in the proof for non-streaming version.
+  <div class="callout-title">Bug Report: 2026-04-22</div>
+  
+  <p><a rel="external" href="https://christianlebeda.github.io/">Christian</a> and his co-authors identified a bug in the proof for non-streaming version.
 As written the first protocol is not private.
 The sketch of the non-privacy argument is that a single $\gamma \samples \text{Laplace(1/$\epsilon$)}$ is used across every node in the tree.
-This re-use means the adversary can infer more information about $\gamma$ than they should, and thereby we lose privacy.</p>
-<p>We will fix this shortly in the coming weeks.
-It can be shown that while a single $\gamma$ is not enough, a constant number of them independent of the height of the tree is sufficient.</p>
-
-</div>
-<div class="callout callout-box thm-box">
-  
-  <p>The poster appeared at <a href='https://tpdp.journalprivacyconfidentiality.org/2024/'>TPDP 2024</a>. Graham gave the conference talk @ PODS.
-A newer version exists -- that needs to be uploaded.</p>
+But differential privacy mandates that every 1-sensitive query release uses a fresh sample Laplace distribution with appropriate variance.
+As we re-use $\gamma$, the adversary has more information about $\gamma$ then differential privacy allows.
+As a fix we will use $\bar{\gamma}_p$ for every node $p \in \mathcal{H}$ in the tree, where $\gamma_p \samples \text{Laplace}(O(1/\epsilon))$, and $\bar{\gamma}_p = \min\{\gamma_p, \Delta \}$, for some $\Delta \in O(1)$.
+This is just truncated laplace noise (aka stability histograms).</p>
+<p>I'll post the full corrected proof by end of May, but this fixes the issue above.
+Each release uses fresh-randomness, and these releases reveal nothing about the releases on the "important" path of the tree.</p>
 
 </div>
 <h2 id="abstract">Abstract</h2>

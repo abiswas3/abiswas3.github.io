@@ -6393,20 +6393,21 @@ They show for any $G$ that is $(r, \Delta, (1-\xi\cdot \frac{\log n}{\log m})\De
     <link rel="alternate" type="text/html" href="/publications/dp-hhh/"/>
     <id>/publications/dp-hhh/</id>
     
-    <content type="html" xml:base="/publications/dp-hhh/">&lt;div class=&quot;callout callout-remark&quot;&gt;
+    <content type="html" xml:base="/publications/dp-hhh/">&lt;p&gt;The poster appeared at &lt;a href=&#x27;https:&#x2F;&#x2F;tpdp.journalprivacyconfidentiality.org&#x2F;2024&#x2F;&#x27;&gt;TPDP 2024&lt;&#x2F;a&gt;. Graham gave the conference talk @ PODS.
+A newer version exists -- that needs to be uploaded.&lt;&#x2F;p&gt;
+&lt;div class=&quot;callout callout-remark&quot;&gt;
   
-  &lt;p&gt;&lt;strong&gt;2026-04-22&lt;&#x2F;strong&gt;: &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;christianlebeda.github.io&#x2F;&quot;&gt;Christian&lt;&#x2F;a&gt; and his co-authors identified a bug in the proof for non-streaming version.
+  &lt;div class=&quot;callout-title&quot;&gt;Bug Report: 2026-04-22&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;christianlebeda.github.io&#x2F;&quot;&gt;Christian&lt;&#x2F;a&gt; and his co-authors identified a bug in the proof for non-streaming version.
 As written the first protocol is not private.
 The sketch of the non-privacy argument is that a single $\gamma \samples \text{Laplace(1&#x2F;$\epsilon$)}$ is used across every node in the tree.
-This re-use means the adversary can infer more information about $\gamma$ than they should, and thereby we lose privacy.&lt;&#x2F;p&gt;
-&lt;p&gt;We will fix this shortly in the coming weeks.
-It can be shown that while a single $\gamma$ is not enough, a constant number of them independent of the height of the tree is sufficient.&lt;&#x2F;p&gt;
-
-&lt;&#x2F;div&gt;
-&lt;div class=&quot;callout callout-box thm-box&quot;&gt;
-  
-  &lt;p&gt;The poster appeared at &lt;a href=&#x27;https:&#x2F;&#x2F;tpdp.journalprivacyconfidentiality.org&#x2F;2024&#x2F;&#x27;&gt;TPDP 2024&lt;&#x2F;a&gt;. Graham gave the conference talk @ PODS.
-A newer version exists -- that needs to be uploaded.&lt;&#x2F;p&gt;
+But differential privacy mandates that every 1-sensitive query release uses a fresh sample Laplace distribution with appropriate variance.
+As we re-use $\gamma$, the adversary has more information about $\gamma$ then differential privacy allows.
+As a fix we will use $\bar{\gamma}_p$ for every node $p \in \mathcal{H}$ in the tree, where $\gamma_p \samples \text{Laplace}(O(1&#x2F;\epsilon))$, and $\bar{\gamma}_p = \min\{\gamma_p, \Delta \}$, for some $\Delta \in O(1)$.
+This is just truncated laplace noise (aka stability histograms).&lt;&#x2F;p&gt;
+&lt;p&gt;I&#x27;ll post the full corrected proof by end of May, but this fixes the issue above.
+Each release uses fresh-randomness, and these releases reveal nothing about the releases on the &quot;important&quot; path of the tree.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;div&gt;
 &lt;h2 id=&quot;abstract&quot;&gt;Abstract&lt;&#x2F;h2&gt;
