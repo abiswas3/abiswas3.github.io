@@ -117,7 +117,6 @@
           <option value="gruvbox-dark">Gruvbox</option>
           <option value="tokyo-night">Tokyo</option>
           <option value="vitesse-dark">Vitesse</option>
-          <option value="rose-pine-dawn">Rosé Pine</option>
         </select>
         <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
@@ -127,6 +126,23 @@
     </div>
   </nav>
   
+    <nav class="path-bar" aria-label="Path">
+      <a href="&#x2F;">~</a>
+      
+      
+        
+      
+        
+          
+          <span>/</span>
+          <a href="/travel">travel</a>
+        
+      
+        
+      
+    </nav>
+  
+  
   <main class="content">
     
 
@@ -134,7 +150,6 @@
 
 
 
-
   
     
       
@@ -145,18 +160,22 @@
   
 
 
-<section class="section" data-default-layout="minimal" data-layout-key="travel">
+
+
+
+
+
+
+  
+    
+  
+
+
+<section class="section">
   <div class="section-header">
     
     <h1>Travel</h1>
     
-    <select class="layout-select" id="layout-select" aria-label="Select layout">
-      
-        <option value="masonry">Masonry</option>
-        <option value="list">List</option>
-        <option value="minimal">Minimal</option>
-      
-    </select>
   </div>
   
   <p class="section-desc">Road Not Taken.</p>
@@ -169,133 +188,43 @@
   
 
   
-  <div class="layout-view" data-layout="masonry">
-    <div class="masonry">
-    
-    
-    
-    
-    
-      
-        
-      
-      
-        
-      
-    
-    <a href="&#x2F;travel&#x2F;slovenia&#x2F;" class="card card-stale" data-date="2026-02-10">
-      <h2 class="card-title"><span class="stale-mark"></span>Dragi Slovenia</h2>
-      
-      <div class="card-meta">
-        
-        <time>2026-02-10</time>
-      </div>
-      
-      <div class="card-tags">
-        <span class="tag">europe</span><span class="tag">slovenia</span>
-      </div>
-      
-    </a>
-    
-    
-    </div>
-  </div>
 
   
-  <div class="layout-view" data-layout="list">
-    <ul class="post-list">
-    
-    
-    
-    
+  <section class="section-index-group" aria-labelledby="posts-heading">
+    <h2 id="posts-heading">Posts</h2>
+    <ul class="post-list post-list-minimal section-index-list">
     
       
-        
       
       
         
+          
+        
+        
+          
+        
       
-    
-    <li data-date="2026-02-10" class="post-stale">
-      <div class="post-list-main">
+      <li data-date="2026-02-10" class="post-stale">
         <a href="&#x2F;travel&#x2F;slovenia&#x2F;"><span class="stale-mark"></span>Dragi Slovenia</a>
-        
-        
-        <div class="post-list-tags">
-          <a href="/tags/europe/" class="tag">europe</a><a href="/tags/slovenia/" class="tag">slovenia</a>
-        </div>
-        
-      </div>
-      <div class="post-list-side">
-        
         <time>2026-02-10</time>
-      </div>
-    </li>
-    
+      </li>
+      
     
     </ul>
-  </div>
-
+  </section>
   
-  <div class="layout-view" data-layout="minimal">
-    <ul class="post-list post-list-minimal">
-    
-    
-    
-    
-    
-      
-        
-      
-      
-        
-      
-    
-    <li data-date="2026-02-10" class="post-stale">
-      <a href="&#x2F;travel&#x2F;slovenia&#x2F;"><span class="stale-mark"></span>Dragi Slovenia</a>
-      <time>2026-02-10</time>
-    </li>
-    
-    
-    </ul>
-  </div>
 </section>
 
 <script>
 (function() {
-  var section = document.querySelector('.section[data-default-layout]');
-  if (!section) return;
-
-  var select = document.getElementById('layout-select');
-  var views = section.querySelectorAll('.layout-view');
-  var defaultLayout = section.getAttribute('data-default-layout');
-
-  var layoutKey = 'layout-' + (section.getAttribute('data-layout-key') || 'section');
-
-  // Sort items by data-date descending within each sortable container
-  section.querySelectorAll('.masonry, .post-list').forEach(function(container) {
-    var items = Array.from(container.children).filter(function(el) {
+  document.querySelectorAll('.section-index-list').forEach(function(list) {
+    var items = Array.from(list.children).filter(function(el) {
       return el.getAttribute('data-date');
     });
     items.sort(function(a, b) {
       return (b.getAttribute('data-date') || '').localeCompare(a.getAttribute('data-date') || '');
     });
-    items.forEach(function(item) { container.appendChild(item); });
-  });
-
-  function setLayout(layout) {
-    views.forEach(function(v) {
-      v.style.display = v.getAttribute('data-layout') === layout ? '' : 'none';
-    });
-    localStorage.setItem(layoutKey, layout);
-    select.value = layout;
-  }
-
-  var saved = localStorage.getItem(layoutKey);
-  setLayout(saved || defaultLayout);
-
-  select.addEventListener('change', function() {
-    setLayout(select.value);
+    items.forEach(function(item) { list.appendChild(item); });
   });
 })();
 </script>
