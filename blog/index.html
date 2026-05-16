@@ -5,7 +5,7 @@
     (function() {
       var theme = localStorage.getItem('theme');
       if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'rose-pine-ink' : 'vitesse-dark';
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
       }
       document.documentElement.setAttribute('data-theme', theme);
     })();
@@ -113,7 +113,7 @@
         <a href="/blog/">Notes</a>
         <a href="/misc/">Random</a>
         <select class="theme-select" id="theme-select" aria-label="Theme">
-          <option value="rose-pine-ink">Light</option>
+          <option value="bw-light">Light</option>
           <option value="gruvbox-dark">Gruvbox</option>
           <option value="tokyo-night">Tokyo</option>
           <option value="vitesse-dark">Vitesse</option>
@@ -270,6 +270,14 @@
     
       
       
+      <li class="series-entry" data-date="2026-04-11">
+        <a href="&#x2F;blog&#x2F;bytecode-expansions&#x2F;">Formally Verifying Jolt Bytecode Expansions</a>
+        <time>2026-04-11</time>
+      </li>
+      
+    
+      
+      
       <li class="series-entry" data-date="2026-03-25">
         <a href="&#x2F;blog&#x2F;monads&#x2F;">Money For Nothing Monads For Free</a>
         <time>2026-03-25</time>
@@ -281,14 +289,6 @@
       <li class="series-entry" data-date="1970-01-01">
         <a href="&#x2F;blog&#x2F;proof-complexity&#x2F;">Proof Complexity Notes</a>
         <time></time>
-      </li>
-      
-    
-      
-      
-      <li class="series-entry" data-date="2026-04-11">
-        <a href="&#x2F;blog&#x2F;bytecode-expansions&#x2F;">Formally Verifying Jolt Bytecode Expansions</a>
-        <time>2026-04-11</time>
       </li>
       
     
@@ -545,7 +545,7 @@
       const darkLink = document.getElementById('giallo-dark');
       const lightLink = document.getElementById('giallo-light');
 
-      const lightThemes = ['rose-pine-dawn'];
+      const lightThemes = ['rose-pine-dawn', 'bw-light'];
 
       function setTheme(theme) {
         html.setAttribute('data-theme', theme);
