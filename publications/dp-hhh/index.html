@@ -185,8 +185,6 @@
       
       <a href="https:&#x2F;&#x2F;dl.acm.org&#x2F;doi&#x2F;pdf&#x2F;10.1145&#x2F;3695826" class="pub-artefact">Conference version</a>
       
-      <a href="dp-hhh.pdf" class="pub-artefact">Proof Fix</a>
-      
       <a href="DP_HHH_Poster.pdf" class="pub-artefact">Poster @ TPDP</a>
       
       <a href="DP_HHH_Slides.pptx" class="pub-artefact">Slides From PODS Talk</a>
@@ -205,9 +203,9 @@
 The conference version of the non-streaming HHH protocol is not private.</p>
 <p>The sketch of the non-privacy argument is that a single $\gamma \samples \text{Laplace(1/$\epsilon$)}$ is used across every node in the tree.
 But differential privacy mandates that every 1-sensitive query release uses a fresh sample Laplace distribution with appropriate variance.
-As we re-use $\gamma$, the adversary has more information about $\gamma$ then differential privacy allows.
-As a fix we will use $\gamma_p$ for every node $p \in \mathcal{H}$ in the tree, where $\gamma_p \samples \text{Laplace}(O(1/\epsilon))$.
-The corrected proof is available <a href="dp-hhh.pdf">here</a>.</p>
+As we re-use $\gamma$, the adversary has more information about $\gamma$ then differential privacy allows.</p>
+<p>As a fix we will use $\gamma_p$ for every node $p \in \mathcal{H}$ in the tree, where $\gamma_p \samples \text{Laplace}(O(1/\epsilon))$, and truncate.
+Full proof available shortly.</p>
 
 </div>
 <h2 id="abstract">Abstract</h2>

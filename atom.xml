@@ -6402,9 +6402,9 @@ They show for any $G$ that is $(r, \Delta, (1-\xi\cdot \frac{\log n}{\log m})\De
 The conference version of the non-streaming HHH protocol is not private.&lt;&#x2F;p&gt;
 &lt;p&gt;The sketch of the non-privacy argument is that a single $\gamma \samples \text{Laplace(1&#x2F;$\epsilon$)}$ is used across every node in the tree.
 But differential privacy mandates that every 1-sensitive query release uses a fresh sample Laplace distribution with appropriate variance.
-As we re-use $\gamma$, the adversary has more information about $\gamma$ then differential privacy allows.
-As a fix we will use $\gamma_p$ for every node $p \in \mathcal{H}$ in the tree, where $\gamma_p \samples \text{Laplace}(O(1&#x2F;\epsilon))$.
-The corrected proof is available &lt;a href=&quot;dp-hhh.pdf&quot;&gt;here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+As we re-use $\gamma$, the adversary has more information about $\gamma$ then differential privacy allows.&lt;&#x2F;p&gt;
+&lt;p&gt;As a fix we will use $\gamma_p$ for every node $p \in \mathcal{H}$ in the tree, where $\gamma_p \samples \text{Laplace}(O(1&#x2F;\epsilon))$, and truncate.
+Full proof available shortly.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;div&gt;
 &lt;h2 id=&quot;abstract&quot;&gt;Abstract&lt;&#x2F;h2&gt;
