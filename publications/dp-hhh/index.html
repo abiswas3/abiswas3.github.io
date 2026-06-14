@@ -183,7 +183,7 @@
     
     <div class="pub-artefacts">
       
-      <a href="dp-hhh-fixed.pdf" class="pub-artefact">Full Version</a>
+      <a href="https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2606.13563" class="pub-artefact">Arxiv (Full Version)</a>
       
       <a href="https:&#x2F;&#x2F;dl.acm.org&#x2F;doi&#x2F;pdf&#x2F;10.1145&#x2F;3695826" class="pub-artefact">Conference version</a>
       
@@ -201,12 +201,16 @@
   
   <div class="callout-title">Bug Report: 2026-04-22</div>
   
-  <p><a rel="external" href="https://christianlebeda.github.io/">Christian</a> and his co-authors identified a bug in the proof for non-streaming version.
-The conference version of the non-streaming HHH protocol is not private.</p>
-<p>The sketch of the non-privacy argument is that a single $\gamma \samples \text{Laplace(1/$\epsilon$)}$ is used across every node in the tree.
-But differential privacy mandates that every 1-sensitive query release uses a fresh sample Laplace distribution with appropriate variance.
-As we re-use $\gamma$, the adversary has more information about $\gamma$ then differential privacy allows.</p>
+  <p><a rel="external" href="https://christianlebeda.github.io/">Christian</a> and his co-authors identified a bug in the proof for non-streaming version, which renders the algorithm to be non-private.</p>
+<p>The sketch of the non-privacy argument is that previously, a single $\gamma \samples \text{Laplace(1/$\epsilon$)}$, is used across every node in the tree (for the SVT argument)
+This is fine if there was only 1 leaf to root path only (as in the case of SVT).
+But as there are several leaf to root paths, and we have no idea where the privacy adversary puts $x'$, every 1-sensitive query release should use a fresh sample Laplace distribution with appropriate variance.
+As we re-use $\gamma$, the adversary has more information about $\gamma$ inferred from releases about non-critical leaf to root paths.</p>
 <p>As a fix we will use $\gamma_p$ for every node $p \in \mathcal{H}$ in the tree, where $\gamma_p \samples \text{Laplace}(O(1/\epsilon))$, and truncate.
+This solves the each release needs new randomness.
+Of course without the constant noise across all nodes, the SVT privacy analysis is lost, so we need a new way to argue for privacy.
+Luckily, <a rel="external" href="https://arxiv.org/pdf/2010.00917">Kaplan, Mansour and Stemmer</a> already did most of the work for us.
+In fact, they did too much, so we simplify their algorithm for our setting to get better params.
 The fixed proof is available in the full version.</p>
 
 </div>

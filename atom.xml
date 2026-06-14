@@ -6623,12 +6623,16 @@ They show for any $G$ that is $(r, \Delta, (1-\xi\cdot \frac{\log n}{\log m})\De
   
   &lt;div class=&quot;callout-title&quot;&gt;Bug Report: 2026-04-22&lt;&#x2F;div&gt;
   
-  &lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;christianlebeda.github.io&#x2F;&quot;&gt;Christian&lt;&#x2F;a&gt; and his co-authors identified a bug in the proof for non-streaming version.
-The conference version of the non-streaming HHH protocol is not private.&lt;&#x2F;p&gt;
-&lt;p&gt;The sketch of the non-privacy argument is that a single $\gamma \samples \text{Laplace(1&#x2F;$\epsilon$)}$ is used across every node in the tree.
-But differential privacy mandates that every 1-sensitive query release uses a fresh sample Laplace distribution with appropriate variance.
-As we re-use $\gamma$, the adversary has more information about $\gamma$ then differential privacy allows.&lt;&#x2F;p&gt;
+  &lt;p&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;christianlebeda.github.io&#x2F;&quot;&gt;Christian&lt;&#x2F;a&gt; and his co-authors identified a bug in the proof for non-streaming version, which renders the algorithm to be non-private.&lt;&#x2F;p&gt;
+&lt;p&gt;The sketch of the non-privacy argument is that previously, a single $\gamma \samples \text{Laplace(1&#x2F;$\epsilon$)}$, is used across every node in the tree (for the SVT argument)
+This is fine if there was only 1 leaf to root path only (as in the case of SVT).
+But as there are several leaf to root paths, and we have no idea where the privacy adversary puts $x&#x27;$, every 1-sensitive query release should use a fresh sample Laplace distribution with appropriate variance.
+As we re-use $\gamma$, the adversary has more information about $\gamma$ inferred from releases about non-critical leaf to root paths.&lt;&#x2F;p&gt;
 &lt;p&gt;As a fix we will use $\gamma_p$ for every node $p \in \mathcal{H}$ in the tree, where $\gamma_p \samples \text{Laplace}(O(1&#x2F;\epsilon))$, and truncate.
+This solves the each release needs new randomness.
+Of course without the constant noise across all nodes, the SVT privacy analysis is lost, so we need a new way to argue for privacy.
+Luckily, &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;arxiv.org&#x2F;pdf&#x2F;2010.00917&quot;&gt;Kaplan, Mansour and Stemmer&lt;&#x2F;a&gt; already did most of the work for us.
+In fact, they did too much, so we simplify their algorithm for our setting to get better params.
 The fixed proof is available in the full version.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;div&gt;
