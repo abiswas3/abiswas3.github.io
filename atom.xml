@@ -8,6 +8,191 @@
   
   
   <entry xml:lang="en">
+    <title>Jolt Soundness Bug -- Writing To Control Status Registers</title>
+    <published>2026-06-19T00:00:00+00:00</published>
+    <updated>2026-06-19T00:00:00+00:00</updated>
+    <author>
+      <name></name>
+    </author>
+    <link rel="alternate" type="text/html" href="/blog/csrrw-bug/"/>
+    <id>/blog/csrrw-bug/</id>
+    
+    <content type="html" xml:base="/blog/csrrw-bug/">&lt;h2 id=&quot;jolt-implementation-of-csrrw&quot;&gt;Jolt Implementation Of CSRRW&lt;&#x2F;h2&gt;
+&lt;p&gt;Jolt supports the writing of 6 control status registers, namely,
+&lt;code&gt;mstatus, mtvec, mepc, mtval, mscratch, mcause&lt;&#x2F;code&gt;; and it treats the writing to each of these registers uniformly.&lt;&#x2F;p&gt;
+&lt;p&gt;The assembly signature is &lt;code&gt;csrrw rd, csr, rs1&lt;&#x2F;code&gt; and the pseudocode of semantics in the Jolt expansion is roughly:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;if rd = x0 then &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    [vreg_csr] &amp;lt;- [rs1] + 0 -- implemented via ADDI&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;if rd = rs1 then &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    tmp &amp;lt;- [rs1] + 0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    [rd] &amp;lt;- [vreg_csr] + 0 &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    [v_reg_csr] &amp;lt;- tmp + 0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;else &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    [rd] &amp;lt;- [vreg_csr]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    [v_reg_csr] &amp;lt;- [rs1]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This can be verified against the Jolt &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;ef62afb010ebb78b8ddf9bacc963730890373611&#x2F;crates&#x2F;jolt-program&#x2F;src&#x2F;expand&#x2F;control_flow&#x2F;csrrw.rs#L10&quot;&gt;source code&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;div class=&quot;callout callout-remark&quot;&gt;
+  
+  &lt;div class=&quot;callout-title&quot;&gt;Problem&lt;&#x2F;div&gt;
+  
+  &lt;p&gt;The &lt;strong&gt;issue&lt;&#x2F;strong&gt; is that the RISC-V specification does not treat writes to control status registers uniformly.
+Depending on the status register being written to, the logic differs.&lt;&#x2F;p&gt;
+&lt;p&gt;For &lt;code&gt;mscratch, mcause, mtval&lt;&#x2F;code&gt;, the above logic agrees with the RISC-V specification.
+For the remaining three, the spec asks that we first legalize the value in &lt;code&gt;rs1&lt;&#x2F;code&gt; before writing it to the control status register.&lt;&#x2F;p&gt;
+&lt;p&gt;More details below.&lt;&#x2F;p&gt;
+
+&lt;&#x2F;div&gt;
+&lt;h2 id=&quot;mtvec&quot;&gt;mtvec&lt;&#x2F;h2&gt;
+&lt;p&gt;As per the Sail spec, which we checked to be correct&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#mtvec-docs&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;, the value written to the contents of &lt;code&gt;mtvec&lt;&#x2F;code&gt; control status register is given by&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;writeReg mtvec (← (legalize_tvec (← readReg mtvec) value))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;which in simple speak is saying first apply the &lt;code&gt;legalize_tvec&lt;&#x2F;code&gt; function with inputs the &lt;code&gt;old_mtvec&lt;&#x2F;code&gt; value and &lt;code&gt;rs1_value&lt;&#x2F;code&gt; and then write the control status register.
+The &lt;code&gt;legalize_tvec&lt;&#x2F;code&gt; function is given by&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; legalize_tvec&lt;&#x2F;span&gt;&lt;span&gt; (o : (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;)) (v : (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;)) : SailM (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; v := (Mk_Mtvec v) -- identity function.&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  match&lt;&#x2F;span&gt;&lt;span&gt; (trapVectorMode_of_bits (_get_Mtvec_Mode v)) &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | TV_Direct =&amp;gt; (pure v) -- we &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;have&lt;&#x2F;span&gt;&lt;span&gt; to prove that we are &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;in&lt;&#x2F;span&gt;&lt;span&gt; TV_Direct&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | TV_Vector =&amp;gt; (pure v) -- or TV_Vector &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | _ =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      match&lt;&#x2F;span&gt;&lt;span&gt; xtvec_mode_reserved_behavior &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;with&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | Xtvec_Fatal =&amp;gt;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        (reserved_behavior&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          (HAppend.hAppend &lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;Tried to write a reserved value (&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            (HAppend.hAppend (Int.repr (BitVec.toNatInt (_get_Mtvec_Mode v)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-string&quot;&gt;              &amp;quot;&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;) to the MODE field of xtvec.&lt;&#x2F;span&gt;&lt;span class=&quot;z-string&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | Xtvec_Ignore =&amp;gt; (pure (_update_Mtvec_Mode v (_get_Mtvec_Mode o))))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Given the functional-language nature of Lean, the above might seem hard to parse, but all that&#x27;s going on is the following:&lt;&#x2F;p&gt;
+&lt;p&gt;The match statement is saying: get the lowest two bits of &lt;code&gt;rs1_val&lt;&#x2F;code&gt;.
+If that value is &lt;code&gt;00&lt;&#x2F;code&gt; or &lt;code&gt;01&lt;&#x2F;code&gt;, then &lt;code&gt;[vreg_csr] &amp;lt;- [rs1_val]&lt;&#x2F;code&gt;, as in Jolt.
+Otherwise, grab the two least-significant bits of &lt;code&gt;mtvec&lt;&#x2F;code&gt;, overwrite &lt;code&gt;rs1_val&lt;&#x2F;code&gt;&#x27;s lowest two bits with them, and then write this updated value into &lt;code&gt;mtvec&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;blog&#x2F;csrrw-bug&#x2F;.&#x2F;mtvec.svg&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Now for the Jolt code to be correct, we must &lt;em&gt;prove&lt;&#x2F;em&gt; that the lowest two bits of &lt;code&gt;rs1_val&lt;&#x2F;code&gt; are always either &lt;code&gt;00&lt;&#x2F;code&gt; or &lt;code&gt;01&lt;&#x2F;code&gt;.
+But Jolt does &lt;strong&gt;not&lt;&#x2F;strong&gt; promise this.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;mepc&quot;&gt;mepc&lt;&#x2F;h2&gt;
+&lt;p&gt;The first step is to read the old &lt;code&gt;mepc&lt;&#x2F;code&gt; value.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;if&lt;&#x2F;span&gt;&lt;span&gt; ((bne access_type CSRWrite) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;            then&lt;&#x2F;span&gt;&lt;span&gt; (read_CSR csr) -- read csr (we take this branch)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;            else&lt;&#x2F;span&gt;&lt;span&gt; (pure (zeros (n := &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;))) ) : SailM xlenbits )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;which for &lt;code&gt;mepc&lt;&#x2F;code&gt; — whose 12-bit address is &lt;code&gt;0x341&lt;&#x2F;code&gt; — results in the call&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  | &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0x341&lt;&#x2F;span&gt;&lt;span&gt; =&amp;gt; (get_xepc Machine)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;which in turn returns&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;(align_pc (← readReg mepc))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;So in simple speak: we read the current value in the &lt;code&gt;mepc&lt;&#x2F;code&gt; register, and then align it first:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; align_pc&lt;&#x2F;span&gt;&lt;span&gt; (addr : (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;)) : SailM (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  if&lt;&#x2F;span&gt;&lt;span&gt; ((← (currentlyEnabled Ext_Zca)) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  then&lt;&#x2F;span&gt;&lt;span&gt; (pure (BitVec.update addr &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  else&lt;&#x2F;span&gt;&lt;span&gt; (pure (Sail.BitVec.updateSubrange addr &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt; (zeros (n := (&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt; -i (&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt; -i &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;))))))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;So the old value read from &lt;code&gt;mepc&lt;&#x2F;code&gt; is not the value before update (as Jolt assumes), but that value with its low bit cleared.
+Note that because this hart enables &lt;code&gt;Ext_Zca&lt;&#x2F;code&gt; (&lt;code&gt;hartSupports Ext_Zca =&amp;gt; true&lt;&#x2F;code&gt;), the &lt;em&gt;active&lt;&#x2F;em&gt; branch is &lt;code&gt;BitVec.update addr 0 0#1&lt;&#x2F;code&gt;, which clears &lt;strong&gt;bit 0 only&lt;&#x2F;strong&gt;; the &lt;code&gt;else&lt;&#x2F;code&gt; branch clearing bits &lt;code&gt;[1:0]&lt;&#x2F;code&gt; is reached only when &lt;code&gt;Zca&lt;&#x2F;code&gt; is disabled.&lt;sup class=&quot;footnote-reference&quot;&gt;&lt;a href=&quot;#zca&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Similarly, before writing to &lt;code&gt;mepc&lt;&#x2F;code&gt;, we compute:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;let&lt;&#x2F;span&gt;&lt;span&gt; target := (legalize_xepc rs1_value)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;where&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; legalize_xepc&lt;&#x2F;span&gt;&lt;span&gt; (v : (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;)) : (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  if&lt;&#x2F;span&gt;&lt;span&gt; ((hartSupports Ext_Zca) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  then&lt;&#x2F;span&gt;&lt;span&gt; (BitVec.update v &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  else&lt;&#x2F;span&gt;&lt;span&gt; (Sail.BitVec.updateSubrange v &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt; (zeros (n := (&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt; -i (&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt; -i &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)))))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;So both the read (&lt;code&gt;align_pc&lt;&#x2F;code&gt;) and the write (&lt;code&gt;legalize_xepc&lt;&#x2F;code&gt;) clear &lt;code&gt;mepc&lt;&#x2F;code&gt;&#x27;s low bits, whereas Jolt copies &lt;code&gt;rs1_val&lt;&#x2F;code&gt; into the virtual register verbatim (&lt;code&gt;[vreg_csr] &amp;lt;- [rs1] + 0&lt;&#x2F;code&gt;, via &lt;code&gt;ADDI&lt;&#x2F;code&gt;) and later reads it back verbatim.&lt;&#x2F;p&gt;
+&lt;p&gt;Now for the Jolt code to be correct, we must &lt;em&gt;prove&lt;&#x2F;em&gt; that every value written to &lt;code&gt;mepc&lt;&#x2F;code&gt; is already aligned — i.e. bit 0 of &lt;code&gt;rs1_val&lt;&#x2F;code&gt; is always &lt;code&gt;0&lt;&#x2F;code&gt; (or bits &lt;code&gt;[1:0]&lt;&#x2F;code&gt; are &lt;code&gt;00&lt;&#x2F;code&gt; when &lt;code&gt;Zca&lt;&#x2F;code&gt; is disabled).
+But this guard does not exist in Jolt.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;mstatus&quot;&gt;mstatus&lt;&#x2F;h2&gt;
+&lt;p&gt;This is also a bug, but the write is more complex, in that I have to parse the following Lean code to give you the clean algorithm.
+I&#x27;ll do this in a couple of days.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- v = [rs1]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- o = [mstatus]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;def&lt;&#x2F;span&gt;&lt;span class=&quot;z-entity z-name z-entity z-name z-function&quot;&gt; legalize_mstatus&lt;&#x2F;span&gt;&lt;span&gt; (o : (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;)) (v : (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;)) : SailM (BitVec &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;64&lt;&#x2F;span&gt;&lt;span&gt;) := &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; v := (Mk_Mstatus v) -- overwrite v &lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; o ← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (pure (_update_Mstatus_SIE&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        (_update_Mstatus_MIE&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          (_update_Mstatus_SPIE&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            (_update_Mstatus_MPIE&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;              (_update_Mstatus_VS&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                (_update_Mstatus_SPP&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                  (_update_Mstatus_MPP&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                    (_update_Mstatus_FS&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                      (_update_Mstatus_XS&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                        (_update_Mstatus_MPRV&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                          (_update_Mstatus_SUM&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                            (_update_Mstatus_MXR&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                              (_update_Mstatus_TVM&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                (_update_Mstatus_TW&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                  (_update_Mstatus_TSR&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                    (_update_Mstatus_SPELP&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                      (_update_Mstatus_MPELP o&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                        (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;if&lt;&#x2F;span&gt;&lt;span&gt; ((hartSupports Ext_Zicfilp) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                        then&lt;&#x2F;span&gt;&lt;span&gt; (_get_Mstatus_MPELP v)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                        else&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                      (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;if&lt;&#x2F;span&gt;&lt;span&gt; ((hartSupports Ext_Zicfilp) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                      then&lt;&#x2F;span&gt;&lt;span&gt; (_get_Mstatus_SPELP v)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                      else&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                    (← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                      if&lt;&#x2F;span&gt;&lt;span&gt; ((← (currentlyEnabled Ext_S)) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                      then&lt;&#x2F;span&gt;&lt;span&gt; (pure (_get_Mstatus_TSR v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                      else&lt;&#x2F;span&gt;&lt;span&gt; (pure &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                  (← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                    if&lt;&#x2F;span&gt;&lt;span&gt; ((← (currentlyEnabled Ext_U)) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                    then&lt;&#x2F;span&gt;&lt;span&gt; (pure (_get_Mstatus_TW v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                    else&lt;&#x2F;span&gt;&lt;span&gt; (pure &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                                (← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                  if&lt;&#x2F;span&gt;&lt;span&gt; ((← (currentlyEnabled Ext_S)) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                  then&lt;&#x2F;span&gt;&lt;span&gt; (pure (_get_Mstatus_TVM v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                  else&lt;&#x2F;span&gt;&lt;span&gt; (pure &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                              (← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                if&lt;&#x2F;span&gt;&lt;span&gt; ((← (currentlyEnabled Ext_S)) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                then&lt;&#x2F;span&gt;&lt;span&gt; (pure (_get_Mstatus_MXR v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                                else&lt;&#x2F;span&gt;&lt;span&gt; (pure &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                            (← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                              if&lt;&#x2F;span&gt;&lt;span&gt; ((← (virtual_memory_supported ())) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                              then&lt;&#x2F;span&gt;&lt;span&gt; (pure (_get_Mstatus_SUM v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                              else&lt;&#x2F;span&gt;&lt;span&gt; (pure &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                          (← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                            if&lt;&#x2F;span&gt;&lt;span&gt; ((← (currentlyEnabled Ext_U)) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                            then&lt;&#x2F;span&gt;&lt;span&gt; (pure (_get_Mstatus_MPRV v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                            else&lt;&#x2F;span&gt;&lt;span&gt; (pure &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;))) (extStatus_to_bits Off))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                      (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;if&lt;&#x2F;span&gt;&lt;span&gt; ((hartSupports Ext_Zfinx) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                      then&lt;&#x2F;span&gt;&lt;span&gt; (extStatus_to_bits Off)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                      else&lt;&#x2F;span&gt;&lt;span&gt; (_get_Mstatus_FS v)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                    (← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                      if&lt;&#x2F;span&gt;&lt;span&gt; ((← (have_nominal_privLevel (_get_Mstatus_MPP v))) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                      then&lt;&#x2F;span&gt;&lt;span&gt; (pure (_get_Mstatus_MPP v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                      else&lt;&#x2F;span&gt;&lt;span&gt; (pure (privLevel_to_bits (← (lowest_supported_privLevel ()))))))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                  (← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                    if&lt;&#x2F;span&gt;&lt;span&gt; ((← (currentlyEnabled Ext_S)) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                    then&lt;&#x2F;span&gt;&lt;span&gt; (pure (_get_Mstatus_SPP v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                    else&lt;&#x2F;span&gt;&lt;span&gt; (pure &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                (&lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;if&lt;&#x2F;span&gt;&lt;span&gt; ((hartSupports Ext_Zve32x) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                then&lt;&#x2F;span&gt;&lt;span&gt; (_get_Mstatus_VS v)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;                else&lt;&#x2F;span&gt;&lt;span&gt; 0b00#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;2&lt;&#x2F;span&gt;&lt;span&gt;)) (_get_Mstatus_MPIE v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            (← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;              if&lt;&#x2F;span&gt;&lt;span&gt; ((← (currentlyEnabled Ext_S)) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;              then&lt;&#x2F;span&gt;&lt;span&gt; (pure (_get_Mstatus_SPIE v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;              else&lt;&#x2F;span&gt;&lt;span&gt; (pure &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;))) (_get_Mstatus_MIE v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        (← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;          if&lt;&#x2F;span&gt;&lt;span&gt; ((← (currentlyEnabled Ext_S)) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;          then&lt;&#x2F;span&gt;&lt;span&gt; (pure (_get_Mstatus_SIE v))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;          else&lt;&#x2F;span&gt;&lt;span&gt; (pure &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;#&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;))))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;  let&lt;&#x2F;span&gt;&lt;span&gt; dirty :=&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (((extStatus_of_bits (_get_Mstatus_FS o)) == Dirty) || (((extStatus_of_bits (_get_Mstatus_XS o)) == Dirty) || ((extStatus_of_bits&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            (_get_Mstatus_VS o)) == Dirty)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  (pure (_update_Mstatus_SD o (bool_to_bit dirty)))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;mtvec-docs&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;1&lt;&#x2F;sup&gt;
+&lt;p&gt;Checked against the official RISC-V privileged ISA, which defines &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.riscv.org&#x2F;reference&#x2F;isa&#x2F;v20260120&#x2F;priv&#x2F;machine.html#3-1-1-7-machine-trap-vector-base-address-mtvec-register&quot;&gt;&lt;code&gt;mtvec&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; as a &lt;strong&gt;WARL&lt;&#x2F;strong&gt; register whose &lt;code&gt;MODE&lt;&#x2F;code&gt; field has only the &lt;code&gt;Direct&lt;&#x2F;code&gt; (&lt;code&gt;0b00&lt;&#x2F;code&gt;) and &lt;code&gt;Vectored&lt;&#x2F;code&gt; (&lt;code&gt;0b01&lt;&#x2F;code&gt;) encodings.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;div class=&quot;footnote-definition&quot; id=&quot;zca&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
+&lt;p&gt;&lt;code&gt;Zca&lt;&#x2F;code&gt; enables 16-bit (compressed) instructions. See the official &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.riscv.org&#x2F;reference&#x2F;isa&#x2F;v20240411&#x2F;unpriv&#x2F;zc.html&quot;&gt;Zc* specification&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;&#x2F;div&gt;
+&lt;h2 id=&quot;references&quot;&gt;References&lt;&#x2F;h2&gt;
+&lt;p&gt;All claims above can also be checked against the official RISC-V ISA docs&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.riscv.org&#x2F;reference&#x2F;isa&#x2F;v20260120&#x2F;priv&#x2F;machine.html#3-1-1-7-machine-trap-vector-base-address-mtvec-register&quot;&gt;mtvec&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.riscv.org&#x2F;reference&#x2F;isa&#x2F;v20260120&#x2F;priv&#x2F;machine.html#3-1-1-14-machine-exception-program-counter-mepc-register&quot;&gt;mepc&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+  </entry>
+  
+  
+  
+  <entry xml:lang="en">
     <title>Training Plan</title>
     <published>2026-05-27T00:00:00+00:00</published>
     <updated>2026-05-27T00:00:00+00:00</updated>
@@ -6412,6 +6597,8 @@ $$&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;strong&gt;Size Of A Refutation&lt;&#x2F;strong&gt;: The size of a refutation $\Size{\pi}$ is the number of clauses in the sequence ($L$ in this case).&lt;&#x2F;p&gt;
 
 &lt;&#x2F;div&gt;
+&lt;h3 id=&quot;worked-out-example&quot;&gt;Worked Out Example&lt;&#x2F;h3&gt;
+&lt;p&gt;I am pretty sure I had one, need to dig it up.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;the-pigeon-hole-principle&quot;&gt;The Pigeon Hole Principle&lt;&#x2F;h2&gt;
 &lt;p&gt;It is convenient to think of the principle in terms of a bipartite graph
 $G = (V_P \cup V_H, E)$ with pigeons $V_P = [m]$ and holes $V_H = [n]$ for $m \ge n+ 1$.
