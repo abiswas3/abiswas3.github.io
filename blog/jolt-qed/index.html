@@ -12,7 +12,7 @@
   </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Categories | onATangent</title>
+  <title>Jolt-Qed</title>
   <link rel="stylesheet" href="/style.css">
   <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
   <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
@@ -135,7 +135,13 @@
         
           
           <span>/</span>
-          <a href="/categories">categories</a>
+          <a href="/blog">blog</a>
+        
+      
+        
+          
+          <span>/</span>
+          <a href="/blog/jolt-qed">jolt-qed</a>
         
       
         
@@ -145,28 +151,98 @@
   
   <main class="content">
     
-<section class="section">
-  <h1>Categories</h1>
-  <div class="tag-cloud">
+<article class="post series-page">
+  <header class="post-header">
     
-    <a href="&#x2F;categories&#x2F;formalverification&#x2F;" class="tag">FormalVerification <span class="tag-count">3</span></a>
     
-    <a href="&#x2F;categories&#x2F;jolt&#x2F;" class="tag">jolt <span class="tag-count">2</span></a>
+    <a href="&#x2F;blog&#x2F;" class="back-link">&larr; Notes</a>
     
-    <a href="&#x2F;categories&#x2F;lean&#x2F;" class="tag">lean <span class="tag-count">2</span></a>
-    
-    <a href="&#x2F;categories&#x2F;life&#x2F;" class="tag">life <span class="tag-count">1</span></a>
-    
-    <a href="&#x2F;categories&#x2F;notes&#x2F;" class="tag">notes <span class="tag-count">3</span></a>
-    
-    <a href="&#x2F;categories&#x2F;snarks&#x2F;" class="tag">snarks <span class="tag-count">3</span></a>
-    
-    <a href="&#x2F;categories&#x2F;software&#x2F;" class="tag">Software <span class="tag-count">6</span></a>
-    
-    <a href="&#x2F;categories&#x2F;travel&#x2F;" class="tag">travel <span class="tag-count">1</span></a>
-    
-  </div>
-</section>
+    <h1>Jolt-Qed</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-04-11</time>
+    </div>
+  </header>
+
+  
+
+  
+  <div class="post-content"><div class="callout callout-box thm-box">
+  
+  <p>These working notes describe the process of formalising Jolt bytecode expansions in Lean.
+This is the expanded/detailed version of the A16z talk in August.</p>
+
+</div>
+<h2 id="rough-planned-outline">Rough Planned Outline<sup class="footnote-reference"><a href="#time">1</a></sup></h2>
+<div class="footnote-definition" id="time"><sup class="footnote-definition-label">1</sup>
+<p>The times are very aggressive -- this will certainly cross 45 minutes, to trim later.</p>
+</div>
+<ul>
+<li>What is Jolt and why do we need bytecode expansions <strong>5 minutes</strong></li>
+<li>How to Model a RISC-V CPU in Lean <strong>7 minutes | 12 minutes</strong>
+<ul>
+<li>Introduce the EstateM monad here</li>
+</ul>
+</li>
+<li>How to Model the Jolt CPU in lean. <strong>5 minutes | 17 minutes</strong>
+<ul>
+<li>State</li>
+<li>Opcodes - the instructions</li>
+<li>Semantics - How to step the CPU with an instruction</li>
+<li>How is this connected to the Jolt Rust implementation? And what are the gaps.</li>
+</ul>
+</li>
+<li>At this point we have two CPUS in modelled in Lean, we can step both. <strong>7 minutes | 24 minutes</strong>
+<ul>
+<li>What does equivalence mean?</li>
+<li>Assumptions. Two kinds, cos of Lean modelling. Cos of Jolt decisions.</li>
+<li>Example Equivalence statements: 1 ALU, 1 Advice, 1 Memory, 1 System</li>
+<li>Bugs found.</li>
+</ul>
+</li>
+<li>Some theorem proving machinery. <strong>10 minutes| 34 minutes</strong>
+<ul>
+<li>Maybe some warm up -- with a simple state.</li>
+<li>Same 4 we proved above.</li>
+</ul>
+</li>
+<li>How Did Ai help us? <strong>10 minutes| 44 minutes</strong></li>
+</ul>
+<h2 id="detailed-posts">Detailed Posts</h2>
+</div>
+  
+
+  
+  
+
+  
+  
+    <ol class="series-list">
+      
+      
+      <li>
+        <a href="&#x2F;blog&#x2F;jolt-qed&#x2F;jolt-why&#x2F;">Jolt: Introduction</a>
+        
+      </li>
+      
+      
+      
+      <li>
+        <a href="&#x2F;blog&#x2F;jolt-qed&#x2F;state&#x2F;">How to Model a CPU in Lean</a>
+        
+      </li>
+      
+      
+      
+      <li>
+        <a href="&#x2F;blog&#x2F;jolt-qed&#x2F;memory&#x2F;">The Sail Memory Pipeline (Reference)</a>
+        
+      </li>
+      
+      
+    </ol>
+  
+</article>
 
   </main>
   <!-- ====================================================================
