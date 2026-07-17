@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>
+    (function() {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
+      }
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Sail Memory Pipeline (Reference) | Random Walks</title>
+  <link rel="stylesheet" href="/style.css">
+  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
+  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  
+  
+  <script>
+  MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      tags: 'ams',
+      macros: {
+        field: ['{\\mathbb{#1}}', 1],
+        hei: ['{\\mathbb{F}(#1)}', 1],
+        Field: '{\\mathbb{F}}',
+        field: '{\\mathbb{F}}',
+        Mont: ['{\\widetilde{#1}}', 1],
+        samples: '{\\xleftarrow{\\$}}',
+        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+        TauConstraints: '{\\tau_y}',
+        TauTime: '{\\tau_{\\text{cycle}}}',
+        TauGroup: '{\\tau_b}',
+        MLE: ['{\\widetilde{#1}}', 1],
+        tf: ['{\\widetilde{#1}}', 1],
+        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+        Def: '{:=}',
+        ChallengeSet: '{\\mathsf{C}}',
+        Complement: ['{\\overline{#1}}', 1],
+        Size: ['{\\left|#1\\right|}', 1],
+        Exp: ['{2^{#1}}', 1],
+        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+        BigO: ['{O\\ \\left(#1\\right)}', 1],
+        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
+        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
+        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+        poly: '{\\operatorname{poly}}',
+        criticalAlpha: ['{\\alpha_{#1}}', 1],
+        bit: '{\\{0,1\\}}',
+        CStar: '{C^{\\star}}',
+        GraphNbrs: ['{N_G(#1)}', 1],
+        ClauseNbrs: ['{N_C(#1)}', 1],
+        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+        SmallO: ['{o\\!(#1)}', 1],
+        Naturals: '{\\mathbb{N}}',
+        Closure: ['{\\operatorname{Cl}(#1)}', 1],
+        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+        Dim: ['{\\dim(#1)}', 1],
+        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+        domain: ['{\\operatorname{dom}(#1)}', 1],
+        False: '{\\bot}',
+        opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+        // ── Complexity Theory & Turing Machines ──────────────────────────
+        // Complexity classes
+        NP: '{\\mathsf{NP}}',
+        coNP: '{\\mathsf{coNP}}',
+        Pclass: '{\\mathsf{P}}',
+        PSPACE: '{\\mathsf{PSPACE}}',
+        EXP: '{\\mathsf{EXP}}',
+        // Turing machine components
+        States: '{\\mathcal{Q}}',
+        TransFunc: '{\\delta}',
+        InitState: '{q_0}',
+        AcceptState: '{q_{\\text{acc}}}',
+        RejectState: '{q_{\\text{rej}}}',
+        InitConfig: '{C_0}',
+        AcceptConfig: '{C_{\\text{acc}}}',
+        Moves: '{\\{\\mathsf{L},\\, \\mathsf{R}\\}}',
+        // Languages & notation
+        Lang: ['{L(#1)}', 1],
+        RE: '{\\mathsf{RE}}',
+        // General math
+        NN: '{\\mathbb{N}}',
+        ZZ: '{\\mathbb{Z}}',
+        RR: '{\\mathbb{R}}'
+      }
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    }
+  };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="/">Home</a>
+      </div>
+
+      <div class="nav-right">
+        <a href="/publications/">Research</a>
+        <a href="/blog/">Notes</a>
+        <a href="/misc/">Random</a>
+        <select class="theme-select" id="theme-select" aria-label="Theme">
+          <option value="bw-light">Light</option>
+          <option value="gruvbox-dark">Gruvbox</option>
+          <option value="tokyo-night">Tokyo</option>
+          <option value="vitesse-dark">Vitesse</option>
+        </select>
+        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
+        </a>
+
+      </div>
+    </div>
+  </nav>
+  
+    <nav class="path-bar" aria-label="Path">
+      <a href="&#x2F;">~</a>
+      
+      
+        
+      
+        
+          
+          <span>/</span>
+          <a href="/blog">blog</a>
+        
+      
+        
+          
+          <span>/</span>
+          <a href="/blog/jolt-qed">jolt-qed</a>
+        
+      
+        
+          
+          <span>/</span>
+          <a href="/blog/jolt-qed/memory">memory</a>
+        
+      
+        
+      
+    </nav>
+  
+  
+
+
+  <main class="content">
+    
+
+
+
+
+
+
+  
+  
+
+
+<article class="post">
+  <header class="post-header">
+    <h1>The Sail Memory Pipeline (Reference)</h1>
+    <div class="post-meta">
+      <span class="post-author">AB</span>
+      <time>2026-05-22</time>
+      
+    </div>
+    
+    <div class="post-tags">
+      <a href="/tags/lean/" class="tag">lean</a><a href="/tags/jolt/" class="tag">jolt</a>
+    </div>
+    
+  </header>
+
+  
+  <nav class="toc toc-side">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#the-sail-memory-pipeline">The Sail Memory Pipeline</a><ol><li><a href="#address-translation">Address Translation</a></li><li><a href="#reading-from-physical-memory">Reading From Physical Memory</a></li><li><a href="#mmio-bit">MMIO Bit</a></li></ol></li><li><a href="#some-scratch-notes">Some Scratch notes</a><ol><li><a href="#examples">Examples</a></li><li><a href="#physical-access-check">Physical Access Check</a></li></ol></li><li><a href="#hardware-scratch-notes">Hardware Scratch Notes</a></li></ol>
+  </nav>
+  
+
+  
+
+  
+    
+      
+    
+    
+    
+  
+
+  <div class="post-content">
+    <div class="callout callout-box thm-box">
+  
+  <div class="callout-title">Background</div>
+  
+  <p>This is a continuation post.</p>
+
+</div>
+<div class="footnote-definition" id="sail-def"><sup class="footnote-definition-label">1</sup>
+<p>Throughout this post, Sail refers to the trusted Sail to Lean transpilation of the RISC-V CPU.</p>
+</div>
+<p>At its core both Jolt and Sail<sup class="footnote-reference"><a href="#sail-def">1</a></sup> model memory with a hash map as shown below.
+The keys are natural-number addresses, and the values read and written at the bottom of the memory stack are bytes.
+However, there still exists subtle differences between the two memory models.
+In Jolt, memory is divided into two regions based on address ranges - RAM and the Jolt device.
+The Jolt device region is memory-mapped I/O: loads are allowed from input, trusted advice, untrusted advice, output, panic, and termination pages, while stores are limited to output, panic, and termination pages.
+This is enforced by the tracer's <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/mmu.rs#L167">device-page access check</a>.</p>
+<p><img src="/blog/jolt-qed/memory/./memory-comparison.svg" alt="" /></p>
+<p>Sail on the other hand treats all addresses as the same by its definition of state.
+Regions of memory are instead tagged to be special via hypotheses.
+To make sense of the differences, we start with understanding the Sail memory pipeline.</p>
+<h2 id="the-sail-memory-pipeline">The Sail Memory Pipeline</h2>
+<p>To understand how the Sail code accesses memory, we start with the execution of the load instructions.
+These are the sequence of steps needed to go from method definition to actually accessing the hash map.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> execute_LOAD</span><span> (imm : (BitVec </span><span class="z-constant z-numeric z-constant">12</span><span>)) (rs1 : regidx) (rd : regidx) (is_unsigned : Bool) (width : Nat) : SailM ExecutionResult := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> offset : xlenbits := (sign_extend (m := </span><span class="z-constant z-numeric z-constant">64</span><span>) imm)</span></span>
+<span class="giallo-l"><span>  assert (width ≤b xlen_bytes) </span><span class="z-string">&quot;</span><span class="z-string">extensions/I/base_insts.sail:289.28-289.29</span><span class="z-string">&quot;</span></span>
+<span class="giallo-l"><span class="z-keyword">  match</span><span> (← (vmem_read rs1 offset width (Load Data) </span><span class="z-constant z-language z-constant">false</span><span class="z-constant z-language z-constant"> false</span><span class="z-constant z-language z-constant"> false</span><span>)) </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>  | .Ok data =&gt;</span></span>
+<span class="giallo-l"><span>    (</span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span>      (wX_bits rd (extend_value is_unsigned data))</span></span>
+<span class="giallo-l"><span>      (pure RETIRE_SUCCESS))</span></span>
+<span class="giallo-l"><span>  | .Err e =&gt; (pure e)</span></span></code></pre>
+<p>In what follows we will trace the call stack till we are actually able to retrieve a value from the hash map.
+We will quickly see, in stark contrast to how Jolt accesses memory, that a large number of cases need to be explicitly handled or assumed, to touch memory.
+Now going back to the code and scanning <code>execute_LOAD</code>, it is easy to see that the bulk of the work is being done by the <code>(vmem_read rs1 offset width (Load Data) false false false)</code> method.
+Putting off describing the arguments to the function in detail, we dive straight in.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> vmem_read</span><span> (rs : regidx) (offset : (BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>)) (width : Nat) (access : (MemoryAccessType mem_payload)) (aq : Bool) (rl : Bool) (res : Bool) : SailM (Result (BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) ExecutionResult) := SailME.run </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> vaddr ← (( </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">    match</span><span> (← (ext_data_get_addr rs offset access width)) </span><span class="z-keyword">with</span><span> -- (a)</span></span>
+<span class="giallo-l"><span>    | .Ext_DataAddr_OK vaddr =&gt; (pure vaddr)</span></span>
+<span class="giallo-l"><span>    | .Ext_DataAddr_Error e =&gt;</span></span>
+<span class="giallo-l"><span>      SailME.throw ((Err (Ext_DataAddr_Check_Failure e)) : (Result (BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) ExecutionResult))</span></span>
+<span class="giallo-l"><span>    ) : SailME (Result (BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) ExecutionResult) virtaddr )</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>  (vmem_read_addr vaddr offset width access aq rl res) -- (b)</span></span></code></pre>
+<p>The first method, marked (a) above is  <code>ext_data_get_addr</code> which simply computes the effective address as sign extension of the contents of <code>rs1</code> added to the immediate.
+The address is wrapped inside a Monadic computation but as we use <code>pure</code>, when we run things, everything is guaranteed to succeed.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> ext_data_get_addr</span><span> (base : regidx) (offset : (BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>)) (_access : (MemoryAccessType mem_payload)) (_width : Nat) : SailM (Ext_DataAddr_Check Unit) := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> addr ← </span><span class="z-keyword">do</span><span> (pure (Virtaddr ((← (rX_bits base)) + offset))) -- (the effective address)</span></span>
+<span class="giallo-l"><span>  (pure (Ext_DataAddr_OK addr))</span></span></code></pre>
+<p>The second method, marked (b) above, takes the effective address and continues the process of reading from the hash map.</p>
+<pre class="giallo z-code"><code data-lang="lean" data-name="LeanRV64D/VmemUtils.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">264</span><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> vmem_read_addr</span><span> (vaddr : virtaddr) (offset : (BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>)) (width : Nat) (access : (MemoryAccessType mem_payload)) (aq : Bool) (rl : Bool) (res : Bool) : SailM (Result (BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) ExecutionResult) := SailME.run </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">265</span><span class="z-keyword">  if</span><span> ((access_causes_misaligned_exception vaddr width res) : Bool)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">266</span><span class="z-keyword">  then</span><span> (pure (Err (Memory_Exception (vaddr, (E_Load_Addr_Align ())))))</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">267</span><span class="z-keyword">  else</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">268</span><span>    (</span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">269</span><span class="z-keyword">      let</span><span> (n, bytes) ← </span><span class="z-keyword">do</span><span> (split_misaligned vaddr width)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">270</span><span class="z-keyword">      let</span><span> data := (zeros (n := ((</span><span class="z-constant z-numeric z-constant">8</span><span> *i n) *i bytes)))</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">271</span><span class="z-keyword">      let</span><span> (first, last, step) := (misaligned_order n)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">272</span><span class="z-keyword">      let</span><span> i : Nat := first</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">273</span><span class="z-keyword">      let</span><span> finished : Bool := </span><span class="z-constant z-language z-constant">false</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">274</span><span class="z-keyword">      let</span><span> vaddr := (bits_of_virtaddr vaddr)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">275</span><span class="z-keyword">      let</span><span> (data, finished, i) ← (( </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">276</span><span class="z-keyword">        let</span><span> loop_vars ← untilFuelM (fuel :=n) (</span><span class="z-keyword">fun</span><span> (data, finished, i) =&gt; (pure finished)) (data, finished, i)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">277</span><span class="z-keyword">          fun</span><span> (data, finished, i) =&gt; </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">278</span><span>            assert </span><span class="z-constant z-language z-constant">true</span><span class="z-string"> &quot;</span><span class="z-string">loop dummy assert</span><span class="z-string">&quot;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">279</span><span class="z-keyword">            let</span><span> offset := i</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">280</span><span class="z-keyword">            let</span><span> vaddr := (BitVec.addInt vaddr (offset *i bytes))</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">281</span><span class="z-keyword">            let</span><span> data ← (( </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">282</span><span class="z-keyword">              match</span><span> (← (translateAddr (Virtaddr vaddr) access)) </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">283</span><span>              | .Err (e, _) =&gt;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">284</span><span>                SailME.throw ((Err (Memory_Exception ((Virtaddr vaddr), e))) : (Result (BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) ExecutionResult))</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">285</span><span>              | .Ok (paddr, _) =&gt;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">286</span><span>                (</span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">287</span><span class="z-keyword">                  match</span><span> (← (mem_read access paddr bytes aq rl res)) </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">288</span><span>                  | .Err e =&gt;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">289</span><span>                    SailME.throw ((Err (Memory_Exception ((Virtaddr vaddr), e))) : (Result (BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) ExecutionResult))</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">290</span><span>                  | .Ok v =&gt;</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">291</span><span>                    (</span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">292</span><span class="z-keyword">                      if</span><span> (res : Bool)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">293</span><span class="z-keyword">                      then</span><span> (load_reservation (bits_of_physaddr paddr) width)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">294</span><span class="z-keyword">                      else</span><span> (pure ())</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">295</span><span>                      (pure (Sail.BitVec.updateSubrange data (((</span><span class="z-constant z-numeric z-constant">8</span><span> *i (offset +i </span><span class="z-constant z-numeric z-constant">1</span><span>)) *i bytes) -i </span><span class="z-constant z-numeric z-constant">1</span><span>)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">296</span><span>                          ((</span><span class="z-constant z-numeric z-constant">8</span><span> *i offset) *i bytes) v)))) ) : SailME</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">297</span><span>              (Result (BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) ExecutionResult) (BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * n * bytes)) )</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">298</span><span class="z-keyword">            let</span><span> (finished, i) : (Bool × Nat) :=</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">299</span><span class="z-keyword">              if</span><span> ((offset == last) : Bool)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">300</span><span class="z-keyword">              then</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">301</span><span>                (</span><span class="z-keyword">let</span><span> finished : Bool := </span><span class="z-constant z-language z-constant">true</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">302</span><span>                (finished, i))</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">303</span><span class="z-keyword">              else</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">304</span><span>                (</span><span class="z-keyword">let</span><span> i : Nat := (offset +i step)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">305</span><span>                (finished, i))</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">306</span><span>            (pure (data, finished, i))</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">307</span><span>        (pure loop_vars) ) : SailME (Result (BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) ExecutionResult)</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">308</span><span>        ((BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * n * bytes)) × Bool × Nat) )</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">309</span><span>      (pure (Ok data)))</span></span></code></pre>
+<p>Now there is a lot going on in this method.
+Most of this complexity is to support misaligned addresses.
+But as Jolt does <strong>not</strong> allow misaligned halfword, word, or doubleword RAM loads, our life will quickly become easier.
+Focusing on <code>Line 269</code>, for the aligned case it will return <code>(1, width)</code>, where <code>width</code> is the number of bytes being loaded.
+<code>LW</code> has <code>width=4</code>, so the returned data type is <code>BitVec (8 * 4) = BitVec 32</code>.
+As <code>n=1</code> we will only go through the loop once and the only bits we really need to focus on are</p>
+<h3 id="address-translation">Address Translation</h3>
+<p><code>Line 282</code>: <code>translateAddr</code>: Here we need to go from our virtual address to a physical address.
+Now in Jolt, as discussed above, they are the same. In other words the translation is the identity function.
+Sail on the other hand leaves this decision open-ended based on the implementation.
+It gives us this extremely elaborate function for translating virtual to physical addresses.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> translateAddr</span><span> (vAddr : virtaddr) (access : (MemoryAccessType mem_payload)) : SailM (Result (physaddr × Unit) (ExceptionType × Unit)) := SailME.run </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> effPriv ← </span><span class="z-keyword">do</span><span> (effectivePrivilege access (← readReg mstatus) (← readReg cur_privilege))</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> mode ← </span><span class="z-keyword">do</span><span> (translationMode effPriv)</span></span>
+<span class="giallo-l"><span class="z-keyword">  if</span><span> ((← (is_shadow_stack_access access)) : Bool)</span></span>
+<span class="giallo-l"><span class="z-keyword">  then</span></span>
+<span class="giallo-l"><span>    (</span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">      if</span><span> ((((mode == Bare) &amp;&amp; (bne effPriv Machine)) || (effPriv == Machine)) : Bool)</span></span>
+<span class="giallo-l"><span class="z-keyword">      then</span></span>
+<span class="giallo-l"><span>        SailME.throw ((Err ((E_SAMO_Access_Fault ()), init_ext_ptw)) : (Result (physaddr × Unit) (ExceptionType × Unit)))</span></span>
+<span class="giallo-l"><span class="z-keyword">      else</span><span> (pure ()))</span></span>
+<span class="giallo-l"><span class="z-keyword">  else</span><span> (pure ())</span></span>
+<span class="giallo-l"><span class="z-keyword">  if</span><span> ((mode == Bare) : Bool)</span></span>
+<span class="giallo-l"><span class="z-keyword">  then</span><span> (pure (Ok ((Physaddr (zero_extend (m := </span><span class="z-constant z-numeric z-constant">64</span><span>) (bits_of_virtaddr vAddr))), init_ext_ptw)))</span></span>
+<span class="giallo-l"><span class="z-keyword">  else</span></span>
+<span class="giallo-l"><span>    (</span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">      let</span><span> sv_width ← </span><span class="z-keyword">do</span><span> (satp_mode_width_forwards mode)</span></span>
+<span class="giallo-l"><span class="z-keyword">      let</span><span> satp_sxlen ← </span><span class="z-keyword">do</span><span> (get_satp sv_width)</span></span>
+<span class="giallo-l"><span>      assert ((sv_width == </span><span class="z-constant z-numeric z-constant">32</span><span>) || (xlen == </span><span class="z-constant z-numeric z-constant">64</span><span>)) </span><span class="z-string">&quot;</span><span class="z-string">sys/vmem.sail:407.36-407.37</span><span class="z-string">&quot;</span></span>
+<span class="giallo-l"><span class="z-keyword">      let</span><span> svAddr := (Sail.BitVec.extractLsb (bits_of_virtaddr vAddr) (sv_width -i </span><span class="z-constant z-numeric z-constant">1</span><span>) </span><span class="z-constant z-numeric z-constant">0</span><span>)</span></span>
+<span class="giallo-l"><span class="z-keyword">      if</span><span> (((bits_of_virtaddr vAddr) != (sign_extend (m := </span><span class="z-constant z-numeric z-constant">64</span><span>) svAddr)) : Bool)</span></span>
+<span class="giallo-l"><span class="z-keyword">      then</span><span> (pure (Err ((← (translationException access (PTW_Invalid_Addr ()))), init_ext_ptw)))</span></span>
+<span class="giallo-l"><span class="z-keyword">      else</span></span>
+<span class="giallo-l"><span>        (</span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">          let</span><span> mxr ← </span><span class="z-keyword">do</span><span> (pure ((_get_Mstatus_MXR (← readReg mstatus)) == </span><span class="z-constant z-numeric z-constant">1</span><span>#</span><span class="z-constant z-numeric z-constant">1</span><span>))</span></span>
+<span class="giallo-l"><span class="z-keyword">          let</span><span> do_sum ← </span><span class="z-keyword">do</span><span> (pure ((_get_Mstatus_SUM (← readReg mstatus)) == </span><span class="z-constant z-numeric z-constant">1</span><span>#</span><span class="z-constant z-numeric z-constant">1</span><span>))</span></span>
+<span class="giallo-l"><span class="z-keyword">          let</span><span> asid := (satp_to_asid satp_sxlen)</span></span>
+<span class="giallo-l"><span class="z-keyword">          let</span><span> base_ppn := (satp_to_ppn satp_sxlen)</span></span>
+<span class="giallo-l"><span class="z-keyword">          let</span><span> res ← </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span>            (translate sv_width (zero_extend (m := </span><span class="z-constant z-numeric z-constant">16</span><span>) asid) base_ppn</span></span>
+<span class="giallo-l"><span>              (Sail.BitVec.extractLsb svAddr (sv_width -i </span><span class="z-constant z-numeric z-constant">1</span><span>) pagesize_bits) access effPriv mxr</span></span>
+<span class="giallo-l"><span>              do_sum init_ext_ptw)</span></span>
+<span class="giallo-l"><span class="z-keyword">          match</span><span> res </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>          | .Ok (ppn, ext_ptw) =&gt;</span></span>
+<span class="giallo-l"><span>            (</span><span class="z-keyword">let</span><span> paddr :=</span></span>
+<span class="giallo-l"><span>              (ppn +++ (Sail.BitVec.extractLsb (bits_of_virtaddr vAddr) (pagesize_bits -i </span><span class="z-constant z-numeric z-constant">1</span><span>) </span><span class="z-constant z-numeric z-constant">0</span><span>))</span></span>
+<span class="giallo-l"><span>            (pure (Ok ((Physaddr (zero_extend (m := </span><span class="z-constant z-numeric z-constant">64</span><span>) paddr)), ext_ptw))))</span></span>
+<span class="giallo-l"><span>          | .Err (f, ext_ptw) =&gt; (pure (Err ((← (translationException access f)), ext_ptw)))))</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span></code></pre>
+<p>We will show in the following subsections that for Jolt this method reduces to</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span>translateAddr (Virtaddr addr) (Load Data) s = </span></span>
+<span class="giallo-l"><span>                    .ok (Ok (physaddr.Physaddr addr, init_ext_ptw)) s </span></span></code></pre>
+<p>The short answer as to why is that the Jolt CPU always runs in Machine mode and has its MPRV bit equal to 0.
+This forces the above statement to be true.
+The proof is <a rel="external" href="https://github.com/abiswas3/jolt-qed/blob/1975367f30d252d31fac35f9a85b85fe4acbc986/JoltBytecode/JoltISA/Environment.lean#L90"><code>translateAddr_load_data_of_joltConfig</code></a>. More details are described later in the blog.
+So when it comes to walking the loop, we use that derived lemma instead of carrying a separate translation assumption.</p>
+<h3 id="reading-from-physical-memory">Reading From Physical Memory</h3>
+<p>So far the helpers were for reading from virtual memory.</p>
+<p>In <code>Line 287</code> with <code>mem_read</code> we read from physical memory.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mem_read</span><span> (access : (MemoryAccessType mem_payload)) (paddr : physaddr) (width : Nat) (aq : Bool) (rel : Bool) (res : Bool) : SailM (Result (BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) ExceptionType) := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span>  (mem_read_priv access</span></span>
+<span class="giallo-l"><span>    (← (effectivePrivilege access (← readReg mstatus) (← readReg cur_privilege))) paddr width</span></span>
+<span class="giallo-l"><span>    aq rel res)</span></span></code></pre>
+<p>which is a wrapper around <code>mem_read_priv</code>
+But before it can call  <code>mem_read_priv</code> it needs a term of type <code>Privilege</code> which is computed via
+<code>(← (effectivePrivilege access (← readReg mstatus) (← readReg cur_privilege)))</code></p>
+<p><code>Privilege</code> is just an inductive type that describes the privilege mode of the RISC-V CPU.</p>
+<pre class="giallo z-code"><code data-lang="lean" data-name="LeanRV64D/Defs.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln">245</span><span class="z-keyword">inductive</span><span class="z-entity z-name z-entity z-name z-function"> Privilege</span><span class="z-keyword"> where</span><span> | User | VirtualUser | Supervisor | VirtualSupervisor | Machine</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln">246</span><span class="z-keyword">  deriving</span><span> BEq, Inhabited, Repr</span></span></code></pre>
+<p>To get the current privilege of the CPU, we need to read the <code>mstatus</code> and <code>cur_privilege</code> registers which are fed into the following code as <code>m</code> and <code>priv</code></p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> effectivePrivilege</span><span> (access : (MemoryAccessType mem_payload)) (m : (BitVec </span><span class="z-constant z-numeric z-constant">64</span><span>)) (priv : Privilege) : SailM Privilege := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  if</span><span> (((bne access (InstructionFetch ())) &amp;&amp; ((_get_Mstatus_MPRV m) == </span><span class="z-constant z-numeric z-constant">1</span><span>#</span><span class="z-constant z-numeric z-constant">1</span><span>)) : Bool)</span></span>
+<span class="giallo-l"><span class="z-keyword">  then</span><span> (privLevel_bits_forwards ((_get_Mstatus_MPP m), </span><span class="z-constant z-numeric z-constant">0</span><span>#</span><span class="z-constant z-numeric z-constant">1</span><span>))</span></span>
+<span class="giallo-l"><span class="z-keyword">  else</span><span> (pure priv)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span></code></pre>
+<p>This function decides which privilege level to use for the memory access.
+The <code>if</code> branch says: if this is not an instruction fetch and the <code>MPRV</code> bit in <code>mstatus</code> is set, use the privilege stored in the <code>MPP</code> field of <code>mstatus</code>.
+The <code>else</code> branch says: otherwise, keep using the current privilege <code>priv</code>.
+Quoting the <a rel="external" href="https://docs.riscv.org/reference/isa/priv/machine.html">RISC-V ISA</a>
+<div class="callout callout-quote">
+  <p>The MPRV (Modify PRiVilege) bit modifies the effective privilege mode, i.e., the privilege level at which explicit memory accesses execute. When MPRV=0, explicit memory accesses behave as normal, using the translation and protection mechanisms of the current privilege mode. When MPRV=1, load and store memory addresses are translated and protected, and endianness is applied, as though the current privilege mode were set to MPP. Instruction address-translation and protection are unaffected by the setting of MPRV. MPRV is read-only 0 if U-mode is not supported.</p>
+
+  <cite>— RISC-V ISA: Section 3.1.1.6.4</cite>
+</div>
+</p>
+<p>So this brings us to two questions. First, what should the current privilege be?
+The answer in Jolt is simple: it is always <code>Machine</code>.
+The Rust tracer initializes both the <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/cpu.rs#L329">CPU</a> and <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/mmu.rs#L61">MMU</a> in <code>PrivilegeMode::Machine</code>.
+The trap instructions are consistent with this model: <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/instruction/ecall.rs#L8">ECALL</a> says Jolt has no S/U privilege levels, and <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/instruction/mret.rs#L7">MRET</a> says there is only one privilege level, <code>Machine</code>.</p>
+<p>Second, what should the <code>MPRV</code> bit be set to?
+It should be <code>0</code>.
+The MMU initializes <code>mstatus</code> to <code>0</code>, and <code>ECALL</code> writes <code>mstatus = 0x1800</code>, which sets <code>MPP = Machine</code> but leaves bit 17, <code>MPRV</code>, unset.
+See the <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/mmu.rs#L69">MMU initialization</a> and <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/instruction/ecall.rs#L9">ECALL's mstatus write</a>.</p>
+<p>This gives us our first set of memory assumptions.</p>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">Assumption Alert</div>
+  
+  <p>In Plain English: The current privilege always returns <code>Privilege.Machine</code> and the <code>MPRV</code> bit of the <code>mstatus</code> register is always 0.</p>
+<pre class="giallo z-code"><code data-lang="lean" data-name="JoltISA/Environment.lean"><span class="giallo-l"><span>  machine_mode : s.regs.get? Register.cur_privilege =</span></span>
+<span class="giallo-l"><span>    some (Privilege.Machine : RegisterType Register.cur_privilege)</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>  mstatus_ok : ∃ mval : RegisterType Register.mstatus,</span></span>
+<span class="giallo-l"><span>     s.regs.get? Register.mstatus = some mval ∧</span></span>
+<span class="giallo-l"><span>     _get_Mstatus_MPRV mval = </span><span class="z-constant z-numeric z-constant">0</span><span>#</span><span class="z-constant z-numeric z-constant">1</span></span></code></pre>
+</div>
+<p>From here we can conclude that <code>effectivePrivilege</code> will return <code>Privilege.Machine</code> wrapped in a Monad guaranteed to succeed.
+With privilege established, we now focus on</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mem_read_priv</span><span> (access : (MemoryAccessType mem_payload)) (priv : Privilege) (paddr : physaddr) (width : Nat) (aq : Bool) (rl : Bool) (res : Bool) : SailM (Result (BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) ExceptionType) := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span>  (pure (MemoryOpResult_drop_meta (← (mem_read_priv_meta access priv paddr width aq rl res </span><span class="z-constant z-language z-constant">false</span><span>))))</span></span></code></pre>
+<p>which is another wrapper around</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> mem_read_priv_meta</span><span> (access : (MemoryAccessType mem_payload)) (priv : Privilege) (paddr : physaddr) (width : Nat) (aq : Bool) (rl : Bool) (res : Bool) (</span><span class="z-storage z-modifier">meta</span><span>&#39; : Bool) : SailM (Result ((BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) × Unit) ExceptionType) := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> result ← (( </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">    if</span><span> (((aq || res) &amp;&amp; (not (is_aligned_paddr paddr width))) : Bool)</span></span>
+<span class="giallo-l"><span class="z-keyword">    then</span><span> (pure (Err (E_Load_Addr_Align ())))</span></span>
+<span class="giallo-l"><span class="z-keyword">    else</span></span>
+<span class="giallo-l"><span>      (</span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">        match</span><span> (aq, rl, res) </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>        | (</span><span class="z-constant z-language z-constant">false</span><span>, </span><span class="z-constant z-language z-constant">true</span><span>, </span><span class="z-constant z-language z-constant">false</span><span>) =&gt; sailThrow ((Error_not_implemented </span><span class="z-string">&quot;</span><span class="z-string">load.rl</span><span class="z-string">&quot;</span><span>))</span></span>
+<span class="giallo-l"><span>        | (</span><span class="z-constant z-language z-constant">false</span><span>, </span><span class="z-constant z-language z-constant">true</span><span>, </span><span class="z-constant z-language z-constant">true</span><span>) =&gt; sailThrow ((Error_not_implemented </span><span class="z-string">&quot;</span><span class="z-string">lr.rl</span><span class="z-string">&quot;</span><span>))</span></span>
+<span class="giallo-l"><span>        | (_, _, _) =&gt; (checked_mem_read access priv paddr width aq rl res </span><span class="z-storage z-modifier">meta</span><span>&#39;)) ) : SailM</span></span>
+<span class="giallo-l"><span>    (MemoryOpResult ((BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) × mem_meta)) )</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> _ : Unit :=</span></span>
+<span class="giallo-l"><span class="z-keyword">    match</span><span> result </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>    | .Ok (value, _) =&gt;</span></span>
+<span class="giallo-l"><span>      (mem_read_callback (accessType_to_str access) (bits_of_physaddr paddr) width value)</span></span>
+<span class="giallo-l"><span>    | .Err e =&gt; (mem_exception_callback (bits_of_physaddr paddr) (exceptionType_bits_forwards e))</span></span>
+<span class="giallo-l"><span>  (pure result)</span></span>
+<span class="giallo-l"></span></code></pre>
+<p>The <code>if</code> block is not true as we <code>aq</code> and <code>res</code> set to false when loading data.
+In the <code>else</code> block we will match the <code>checked_mem_read</code> function which returns a <code>MemoryOpResult</code> wrapped in a monad, where</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">abbrev</span><span class="z-entity z-name z-entity z-name z-function"> MemoryOpResult</span><span class="z-entity z-name z-entity z-name z-function"> k_a</span><span> := (Result k_a ExceptionType)</span></span></code></pre>
+<p>and <code>k_a</code> is set to <code>(BitVec (8 * width)) × mem_meta</code> and <code>mem_meta</code> is set to <code>()</code>.</p>
+<p>So we next focus on</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> checked_mem_read</span><span> (access : (MemoryAccessType mem_payload)) (priv : Privilege) (paddr : physaddr) (width : Nat) (aq : Bool) (rl : Bool) (res : Bool) (</span><span class="z-storage z-modifier">meta</span><span>&#39; : Bool) : SailM (Result ((BitVec (</span><span class="z-constant z-numeric z-constant">8</span><span> * width)) × Unit) ExceptionType) := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  match</span><span> (← (phys_access_check access priv paddr width res)) </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>  | .some e =&gt; (pure (Err e))</span></span>
+<span class="giallo-l"><span>  | none =&gt;</span></span>
+<span class="giallo-l"><span>    (</span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">      if</span><span> ((← (within_mmio_readable paddr width)) : Bool)</span></span>
+<span class="giallo-l"><span class="z-keyword">      then</span><span> (pure (MemoryOpResult_add_meta (← (mmio_read access paddr width)) default_meta))</span></span>
+<span class="giallo-l"><span class="z-keyword">      else</span></span>
+<span class="giallo-l"><span>        (</span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">          let</span><span> rk ← </span><span class="z-keyword">do</span><span> (read_kind_of_flags aq rl res)</span></span>
+<span class="giallo-l"><span>          (pure (Ok (← (read_ram rk paddr width </span><span class="z-storage z-modifier">meta</span><span>&#39;))))))</span></span></code></pre>
+<p>and we see that this calls <code>phys_access_check</code>, and if that does not return a <code>none</code> variant, we halt.
+We never get to the hash map.
+So digging into <code>phys_access_check</code> we see that both <code>pmpCheck</code> and <code>pmaCheck</code> must return <code>none</code> for the given physical address, width, privilege and access type of loading data.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> phys_access_check</span><span> (access : (MemoryAccessType mem_payload)) (priv : Privilege) (paddr : physaddr) (width : Nat) (res_or_con : Bool) : SailM (Option ExceptionType) := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> pmpError ← (( </span><span class="z-keyword">do</span><span> (pmpCheck paddr width access priv) ) : SailM (Option ExceptionType) )</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> pmaError ← (( </span><span class="z-keyword">do</span><span> (pmaCheck paddr width access res_or_con) ) : SailM (Option ExceptionType) )</span></span>
+<span class="giallo-l"><span class="z-keyword">  match</span><span> (pmpError, pmaError) </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>  | (none, none) =&gt; (pure none)</span></span>
+<span class="giallo-l"><span>  | (.some e, none) =&gt; (pure (some e))</span></span>
+<span class="giallo-l"><span>  | (none, .some e) =&gt; (pure (some e))</span></span>
+<span class="giallo-l"><span>  | (.some e0, .some e1) =&gt; (pure (some (← (highestPriorityAlignmentOrAccessFault e0 e1))))</span></span></code></pre><div class="callout callout-box thm-box">
+  
+  <div class="callout-title">AI note: PMP&#x2F;PMA checks</div>
+  
+  <p>Jolt does <strong>not</strong> implement RISC-V PMP/PMA as Sail does here.
+The tracer's MMU says that memory protection is not implemented yet in the <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/mmu.rs#L17">MMU struct comment</a>.</p>
+<p>What Jolt does have are its own concrete memory-layout checks: <code>assert_effective_address</code> checks RAM/device bounds and allowed device pages in the <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/mmu.rs#L139">Jolt MMU address check</a>, and multi-byte RAM loads assert natural alignment in <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/mmu.rs#L327">load_halfword/load_word/load_doubleword</a>.
+Those are not the same mechanism as Sail's PMP/PMA layer.</p>
+<p>Teaching picture:
+<code>pmpCheck</code> is a permission check: for <code>Load Data</code>, the matched PMP entry must allow reads, unless Machine mode bypasses an unlocked entry; see <a rel="external" href="https://github.com/abiswas3/jolt-qed/blob/1975367f30d252d31fac35f9a85b85fe4acbc986/LeanRV64D/PmpControl.lean#L206"><code>pmpCheckRWX</code></a> and <a rel="external" href="https://github.com/abiswas3/jolt-qed/blob/1975367f30d252d31fac35f9a85b85fe4acbc986/LeanRV64D/PmpControl.lean#L295"><code>pmpCheck</code></a>.
+<code>pmaCheck</code> is a physical-memory-attribute check: the physical address must fall in a PMA region, the region must be readable for <code>Load Data</code>, and the region's alignment policy decides whether misalignment is an access fault or an alignment fault; see <a rel="external" href="https://github.com/abiswas3/jolt-qed/blob/1975367f30d252d31fac35f9a85b85fe4acbc986/LeanRV64D/Mem.lean#L261"><code>pmaCheck</code></a>.</p>
+<p>For this part of the Sail pipeline, the exact proof obligation is therefore:
+show that Sail's general <code>phys_access_check</code> returns <code>none</code>, so execution reaches <code>read_ram</code>.
+The call site is <a rel="external" href="https://github.com/abiswas3/jolt-qed/blob/1975367f30d252d31fac35f9a85b85fe4acbc986/LeanRV64D/Mem.lean#L550"><code>phys_access_check</code></a>, and the successful RAM path is <a rel="external" href="https://github.com/abiswas3/jolt-qed/blob/1975367f30d252d31fac35f9a85b85fe4acbc986/LeanRV64D/PhysMemInterface.lean#L330"><code>read_ram</code></a>.</p>
+
+</div>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">AI note: Jolt regions</div>
+  
+  <p>Jolt's checks are region/address based.
+A <code>LW</code> is permitted if the effective address lies in an allowed load region: RAM, input, advice, output, panic, termination, or zero-padding.
+See the device-page allowlist in <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/mmu.rs#L139"><code>assert_effective_address</code></a>.</p>
+<p>The caveat is that RAM and device-region loads are not literally identical in the implementation.
+RAM loads go through <code>self.memory.read_byte</code>; device-region loads go through <code>jolt_device.load</code>.
+See <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/mmu.rs#L481"><code>load_raw</code></a>.</p>
+
+</div>
+<p>Once we pass the <code>phys_access_check</code> for that <code>paddr</code> we need to pass a <code>within_mmio_readable</code> for reading <code>width</code> bytes from <code>paddr</code>.
+If that passes we go to <code>read_kind_of_flags</code> and <strong>finally</strong> get to <code>read_ram</code></p>
+<p><code>read_kind_of_flags</code> tells us it is a plain read.
+It will invoke the following block</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">match</span><span> (aq, rl, res) </span><span class="z-keyword">with</span></span>
+<span class="giallo-l"><span>  | (</span><span class="z-constant z-language z-constant">false</span><span>, </span><span class="z-constant z-language z-constant">false</span><span>, </span><span class="z-constant z-language z-constant">false</span><span>) =&gt; (pure Read_plain)</span></span></code></pre>
+<p>Then <code>read_ram</code> will call <code>sail_mem_read</code></p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"><span>@[simp_sail]</span></span>
+<span class="giallo-l"><span>def sail_mem_read [Arch] (req : Mem_read_request n vasize (BitVec pa_size) ts arch) : PreSailM RegisterType c ue (Result ((BitVec (8 * n)) × (Option Bool)) Arch.abort) := do</span></span>
+<span class="giallo-l"><span> let addr := req.pa.toNat</span></span>
+<span class="giallo-l"><span> let value ← readBytes n addr</span></span>
+<span class="giallo-l"><span> pure (Ok value)</span></span></code></pre>
+<p>which will then call <code>readBytes</code> finally gets us to hashmap.</p>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-storage z-modifier">@</span><span class="z-storage z-modifier">[simp_sail]</span></span>
+<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> readByte</span><span> (addr : Nat) : PreSailM RegisterType c ue (BitVec </span><span class="z-constant z-numeric z-constant">8</span><span>) := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  let</span><span> .some s := (← get).mem.get? addr</span></span>
+<span class="giallo-l"><span>    | throw (.OutOfMemoryRange addr)</span></span>
+<span class="giallo-l"><span>  pure s</span></span></code></pre>
+<p>Thus, all that remains to get to memory is understanding what happens in the <code>within_mmio_readable</code> check</p>
+<h3 id="mmio-bit">MMIO Bit</h3>
+<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> within_mmio_readable</span><span> (addr : physaddr) (width : Nat) : SailM Bool := </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">  if</span><span> ((get_config_rvfi ()) : Bool)</span></span>
+<span class="giallo-l"><span class="z-keyword">  then</span><span> (pure </span><span class="z-constant z-language z-constant">false</span><span>)</span></span>
+<span class="giallo-l"><span class="z-keyword">  else</span></span>
+<span class="giallo-l"><span>    (pure ((← (within_clint addr width)) || ((← (within_htif_readable addr width)) &amp;&amp; (</span><span class="z-constant z-numeric z-constant">1</span><span> ≤b width))))</span></span></code></pre><div class="callout callout-box thm-box">
+  
+  <div class="callout-title">Assumption Alert</div>
+  
+  <p>In Plain English: the physical load is not handled by Sail's modeled MMIO devices.
+It follows the ordinary RAM path.</p>
+<pre class="giallo z-code"><code data-lang="lean" data-name="InstructionEquivalence/Memory/Utils.lean"><span class="giallo-l"><span>  mmio : within_mmio_readable (physaddr.Physaddr addr) width s =</span></span>
+<span class="giallo-l"><span>    .ok </span><span class="z-constant z-language z-constant">false</span><span> s</span></span></code></pre>
+</div>
+<div class="callout callout-box thm-box">
+  
+  <div class="callout-title">AI note: CLINT&#x2F;HTIF</div>
+  
+  <p>Sail's <code>within_mmio_readable</code> is checking two modeled MMIO devices.
+<code>within_clint</code> checks whether the whole physical read lies inside Sail's CLINT physical address range, whose base and size are fixed by <a rel="external" href="https://github.com/abiswas3/jolt-qed/blob/1975367f30d252d31fac35f9a85b85fe4acbc986/LeanRV64D/PlatformConfig.lean#L208"><code>plat_clint_base</code> and <code>plat_clint_size</code></a>.</p>
+<p><code>within_htif_readable</code> is Sail's Host-Target Interface check.
+HTIF is a simulator/test-harness convention for communication between a bare-metal RISC-V test program and the host simulator, commonly through a <code>tohost</code> word.
+In Sail, HTIF becomes readable MMIO only after <a rel="external" href="https://github.com/abiswas3/jolt-qed/blob/1975367f30d252d31fac35f9a85b85fe4acbc986/LeanRV64D/Platform.lean#L210"><code>enable_htif</code></a> writes <code>some base</code> into <code>htif_tohost_base</code>.
+Then <a rel="external" href="https://github.com/abiswas3/jolt-qed/blob/1975367f30d252d31fac35f9a85b85fe4acbc986/LeanRV64D/Platform.lean#L222"><code>within_htif_writable/readable</code></a> checks whether the requested physical range overlaps the 8-byte <code>tohost</code> slot <code>[base, base + 8)</code>.
+If that check succeeds, Sail follows the <code>mmio_read -&gt; htif_load</code> path instead of <code>read_ram</code>.</p>
+<p>Jolt does not implement CLINT as a readable memory device: CLINT loads panic as unsupported in <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/mmu.rs#L492"><code>load_raw</code></a>, and the time CSR path also panics with <code>CLINT is unsupported</code> in <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/cpu.rs#L842"><code>read_csr_raw</code></a>.
+Jolt has a narrow <code>tohost</code> compatibility hook for external <code>riscv-tests</code> style ELF binaries, but this is not Sail's HTIF MMIO mechanism and is not the normal Jolt proving path.
+Jolt detects such a test by looking for an ELF symbol named <code>tohost</code>; if present, it stores that address in <code>self.tohost_addr</code> and polls that address with <code>load_doubleword_raw</code>; see the <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/mod.rs#L260"><code>tohost</code> symbol setup</a> and <a rel="external" href="https://github.com/abiswas3/jolt/blob/d3eda05f76d11fd9a5be14b7adee07713c15b400/tracer/src/emulator/mod.rs#L171"><code>run_test</code> polling</a>.
+It decodes the loaded word using HTIF-style fields (<code>device</code>, <code>cmd</code>, <code>payload</code>), but the memory access itself is still just a load from the ELF's <code>tohost</code> address.
+It is not routed through Sail's <code>htif_tohost_base</code>, <code>within_htif_readable</code>, or <code>htif_load</code> MMIO path.
+Normal Jolt proofs should therefore not treat this compatibility hook as evidence that the Sail HTIF MMIO branch is part of the Jolt memory model.</p>
+<p>So the <code>within_mmio_readable = false</code> assumption is saying: this Sail proof is following the ordinary RAM path, not Sail's CLINT/HTIF MMIO path.
+That matches the normal Jolt memory path we are proving against.</p>
+
+</div>
+<h2 id="some-scratch-notes">Some Scratch notes</h2>
+<p>A CPU only knows one way to talk to the outside world: load and store to an address.
+There's no special "talk to the keyboard" instruction. So hardware designers play a
+trick: they wire certain devices to pretend to be memory addresses. That's Memory-Mapped
+I/O — I/O that's mapped onto the memory address space.</p>
+<p>So your 64-bit address space is mostly real RAM, but a few address ranges are "fake":
+instead of storing bytes, they're wired to a gadget.</p>
+<h3 id="examples">Examples</h3>
+<ul>
+<li>UART / serial port: store a byte to its address → that byte is sent out the serial line
+(your terminal prints it). That's literally how bare-metal printf works. This is the
+panic!("UART unsupported") in load_raw.</li>
+<li>Timer (CLINT): load its address → the current time. Nothing was "stored" there; it's a
+live counter.</li>
+<li>Keyboard controller: load → the last key pressed.</li>
+</ul>
+<h3 id="physical-access-check">Physical Access Check</h3>
+<p>Both must say none to proceed. They answer two genuinely different questions.</p>
+<p>PMA — "what is physically here?" (fixed by the hardware)</p>
+<p>pmaCheck looks up the address in a table of Physical Memory Attribute regions
+(matching_pma). These are hardwired by the platform — the chip designer decides
+"addresses 0x8000_0000… are DRAM, 0x1000_0000… is a UART, this range is ROM," and so on.
+Each matched region carries fixed attributes:</p>
+<ul>
+<li>readable, writable, executable</li>
+<li>alignment policy (misaligned_fault)</li>
+<li>atomicity/reservation/idempotency flags</li>
+</ul>
+<p>The check is then:</p>
+<ol>
+<li>No matching region → access fault. There's literally no physical thing at that
+address.</li>
+<li>Misaligned and the region's policy is AccessFault → fault.</li>
+<li>Permission by attribute: Load Data needs attributes.readable; Store Data needs
+attributes.writable; InstructionFetch needs attributes.executable. ROM, for instance, is
+readable+executable but not writable — a store there faults here.</li>
+</ol>
+<p>So PMA = "does a real memory region exist at this physical address, and does its
+intrinsic nature permit this kind of access?" It's a property of the silicon, not of
+software.</p>
+<p>PMP — "am I allowed by the configured policy?" (programmable, per-privilege)</p>
+<p>pmpCheck is Physical Memory Protection: a software-programmable firewall. Firmware/OS
+sets up to sys_pmp_count entries, each a pair — a pmpaddr register (encodes an address
+range, e.g. NAPOT/TOR) and a pmpcfg byte (R/W/X permission bits, the match mode, and a
+Lock bit). The loop, in priority order (entry 0 wins):</p>
+<ul>
+<li>PMP_NoMatch → try the next entry.</li>
+<li>PMP_PartialMatch → fault (an access may not straddle a protection boundary).</li>
+<li>PMP_Match → this entry governs it. Grant iff pmpCheckRWX cfg access (the entry's R/W/X
+bit for this access type is set) or the Machine-mode bypass fires: priv == Machine &amp;&amp; not
+locked. Otherwise access fault.</li>
+<li>Fell through with no match: Machine → allowed; S/U → fault (default-deny for lower
+privilege). And if sys_pmp_count == 0, the whole thing is none — no PMP configured,
+nothing fenced.</li>
+</ul>
+<p>So PMP = "given the protection regions firmware programmed and my current privilege
+level, may I touch this address?" It's the mechanism an OS uses to sandbox user code away
+from kernel memory.</p>
+<p>The one-line contrast</p>
+<ul>
+<li>PMA = fixed what-is-physically-here + intrinsic access nature (silicon).</li>
+<li>PMP = configurable who-is-allowed-here per privilege (software policy).</li>
+</ul>
+<p>Both can independently raise an ExceptionType; if both fault, phys_access_check picks the
+higher-priority one (highestPriorityAlignmentOrAccessFault).</p>
+<p>Specialized to a Jolt Load Data</p>
+<ul>
+<li>pmpCheck → none because Jolt runs in Machine mode and configures no PMP entries: e</li>
+</ul>
+<h2 id="hardware-scratch-notes">Hardware Scratch Notes</h2>
+<ol>
+<li>The CPU core (the hart). Just the RISC-V processor itself — a block that emits
+load/store requests onto a bus. It knows nothing about where things physically live.</li>
+<li>The SoC (System-on-Chip). The single physical chip that packages the core together
+with the address decoder, the memory controllers, and often some on-chip peripherals
+(UART, timer). This is the thing that actually routes "address 0x1000_0000" to the right
+place. Most of the memory-map decisions live here.</li>
+<li>The board (the motherboard / PCB). The physical circuit board the SoC is soldered
+onto. The DRAM is usually separate chips sitting next to the SoC, connected by copper
+traces ("wires") on the board. Connectors, the UART header pins, etc. are also here. How
+the board is populated and wired affects what's actually present at which address.</li>
+<li>Firmware + device tree. Software that boots first, configures registers, and hands the
+OS a device tree describing all of the above ("RAM: base 0x8000_0000, size 2 GB; UART
+here; …").</li>
+</ol>
+<p>When I say "the platform decides the memory map," I mean (2)+(3)+(4) together: the SoC's
+decoder, how the board is wired and populated, and what the firmware sets up. So your
+guess is right — motherboard + chip + DRAM + wires, plus the config layer that tells
+software about it.</p>
+<p>Concrete picture: think of a dev board like a SiFive HiFive (or a Raspberry-Pi-style
+board). There's a big SoC chip in the middle, DRAM chips beside it, a UART connector on
+the edge — all on one green PCB. That whole assembly, with its fixed wiring, is the
+platform, and it's what fixes "this address is RAM, that address is the UART."</p>
+<p>The twist for Sail/Jolt: there is no board. It's all software. So "the platform"
+collapses into a configuration inside the model — the pma_regions register, the
+platform-config constants (plat_clint_base, etc.). Those play exactly the role the real
+SoC + board + device tree would: they're the stand-in that says "here's where RAM is,
+here's where the (modeled) CLINT is." For Jolt, that configuration is set so RAM is a
+readable region and the MMIO devices effectively aren't there.</p>
+<p>So: platform = the physical target system (chip + DRAM + board + wiring) and its
+descriptive config — and in the proof world, just the config part survives as pma_regions
+/ platform constants.</p>
+
+  </div>
+
+  
+
+  
+</article>
+
+  </main>
+  <!-- ====================================================================
+       TUFTE SIDENOTES JS
+       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
+       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
+
+       WHAT IT DOES:
+         1. Finds every <sup class="footnote-reference"> in .post-content
+         2. Looks up the matching <div class="footnote-definition" id="...">
+            at the bottom of the page (Zola generates these from [^n] syntax)
+         3. Extracts the footnote body (skipping the <sup> label Zola adds)
+         4. Replaces the original <sup> reference with:
+              <label class="sidenote-number" for="sn-N">  (the superscript number)
+              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
+              <span class="sidenote">N. footnote body...</span>  (the actual note)
+         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
+            original footnote definitions and their <hr> separator
+         6. Also explicitly hides the <hr> before footnote defs via JS as a
+            belt-and-suspenders measure
+
+       IF YOU CHANGE --max-width in style.scss:
+         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
+         some padding. Recalculate if you widen the content column.
+
+       IF JS FAILS:
+         The original Zola footnotes remain untouched. The fallback CSS in
+         style.scss styles them with superscript links — nothing breaks.
+  ==================================================================== -->
+  <script>
+    (function() {
+      var content = document.querySelector('.post-content');
+      if (!content) return;
+
+      var refs = content.querySelectorAll('.footnote-reference');
+      if (!refs.length) return;
+
+      content.classList.add('footnotes-are-sidenotes');
+      var count = 0;
+
+      refs.forEach(function(ref) {
+        var link = ref.querySelector('a');
+        if (!link) return;
+
+        var href = link.getAttribute('href');
+        if (!href) return;
+        var id = href.replace('#', '');
+        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
+        if (!def) return;
+
+        count++;
+
+        // Get footnote body (skip the label <sup>)
+        var body = '';
+        var children = def.children;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].tagName !== 'SUP') {
+            body += children[i].outerHTML;
+          }
+        }
+
+        // Build sidenote elements:
+        //   label  -> displays the superscript number, acts as <label> for the checkbox
+        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
+        //   note   -> the sidenote content itself
+        var label = document.createElement('label');
+        label.className = 'sidenote-number';
+        label.setAttribute('for', 'sn-' + count);
+
+        var toggle = document.createElement('input');
+        toggle.type = 'checkbox';
+        toggle.className = 'sidenote-toggle';
+        toggle.id = 'sn-' + count;
+
+        var note = document.createElement('span');
+        note.className = 'sidenote';
+        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
+
+        // Replace the original footnote reference with our sidenote trio
+        ref.replaceWith(label);
+        label.after(note);
+        label.after(toggle);
+      });
+
+      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
+      var firstDef = content.querySelector('.footnote-definition');
+      if (firstDef) {
+        var prev = firstDef.previousElementSibling;
+        if (prev && prev.tagName === 'HR') {
+          prev.style.display = 'none';
+        }
+      }
+    })();
+  </script>
+  <script>
+    // Code copy button
+    document.querySelectorAll('.post-content pre').forEach(function(pre) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'code-block';
+      pre.parentNode.insertBefore(wrapper, pre);
+      wrapper.appendChild(pre);
+
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', function() {
+        var code = pre.querySelector('code');
+        var source = code || pre;
+        var clone = source.cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function(el) { el.remove(); });
+        var text = clone.textContent;
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+  </script>
+  <script>
+    (function() {
+      const select = document.getElementById('theme-select');
+      const html = document.documentElement;
+      const darkLink = document.getElementById('giallo-dark');
+      const lightLink = document.getElementById('giallo-light');
+
+      const lightThemes = ['rose-pine-dawn', 'bw-light'];
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (select) select.value = theme;
+        if (lightThemes.includes(theme)) {
+          lightLink.media = 'all';
+          darkLink.media = 'not all';
+        } else {
+          darkLink.media = 'all';
+          lightLink.media = 'not all';
+        }
+      }
+
+      // Apply current theme (already set by head script, but sync CSS)
+      const current = html.getAttribute('data-theme');
+      setTheme(current);
+
+      if (select) {
+        select.addEventListener('change', function() {
+          setTheme(select.value);
+        });
+      }
+    })();
+  </script>
+  <script>
+    // Smooth scroll + highlight for eqref and citation links.
+    // Citations get a ↩ back-link to return to reading position.
+    document.addEventListener('click', function(e) {
+      // Handle back-arrow clicks
+      var back = e.target.closest('.bib-back');
+      if (back) {
+        e.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Clean up previous highlights and back-links
+      document.querySelectorAll('.eq-highlight').forEach(function(el) {
+        el.classList.remove('eq-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function(el) {
+        el.remove();
+      });
+
+      var href = link.getAttribute('href');
+      var id = decodeURIComponent(href.slice(1));
+      var target = document.getElementById(id);
+      if (!target) return;
+
+      var highlight = target.closest('mjx-container[display="true"]') || target;
+      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      highlight.classList.add('eq-highlight');
+
+      // For citations, add a back-arrow to return to reading position
+      if (link.classList.contains('citation')) {
+        if (!link.id) link.id = 'cite-src-' + id;
+        var arrow = document.createElement('a');
+        arrow.className = 'bib-back';
+        arrow.setAttribute('data-source', link.id);
+        arrow.textContent = ' \u21A9';
+        arrow.title = 'Back to text';
+        highlight.appendChild(arrow);
+      }
+    });
+  </script>
+
+</body>
+</html>
