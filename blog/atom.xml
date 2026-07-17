@@ -8,7 +8,7 @@
   
   
   <entry xml:lang="en">
-    <title>Jolt Soundness Bug -- Writing To Control Status Registers</title>
+    <title>Jolt System Mismatch -- Writing To Control Status Registers</title>
     <published>2026-06-19T00:00:00+00:00</published>
     <updated>2026-06-19T00:00:00+00:00</updated>
     <author>
@@ -181,7 +181,62 @@ I&#x27;ll do this in a couple of days.&lt;&#x2F;p&gt;
 &lt;div class=&quot;footnote-definition&quot; id=&quot;zca&quot;&gt;&lt;sup class=&quot;footnote-definition-label&quot;&gt;2&lt;&#x2F;sup&gt;
 &lt;p&gt;&lt;code&gt;Zca&lt;&#x2F;code&gt; enables 16-bit (compressed) instructions. See the official &lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.riscv.org&#x2F;reference&#x2F;isa&#x2F;v20240411&#x2F;unpriv&#x2F;zc.html&quot;&gt;Zc* specification&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
 &lt;&#x2F;div&gt;
-&lt;h2 id=&quot;references&quot;&gt;References&lt;&#x2F;h2&gt;
+&lt;h2 id=&quot;mret-issue&quot;&gt;MRET Issue&lt;&#x2F;h2&gt;
+&lt;p&gt;Sail’s MRET handler does not merely produce a target PC. It first mutates mstatus and cur_privilege, then reads mepc through prepare_xret_target
+Machine, then execute_MRET writes nextPC..&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;Before MRET&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;Jolt:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  pc              = current pc&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  nextPC          = old nextPC&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  cur_privilege   = Machine&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mepc            = return target&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MPP     = Machine&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MIE     = old MIE&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MPIE    = old MPIE&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MPRV    = old MPRV&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;Sail:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  PC              = current pc&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  nextPC          = old nextPC&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  cur_privilege   = Machine&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mepc            = return target&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MPP     = Machine&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MIE     = old MIE&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MPIE    = old MPIE&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MPRV    = old MPRV&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;After MRET&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;Jolt:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  pc &#x2F; nextPC      = mepc&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  cur_privilege    = Machine&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mepc             = unchanged&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MPP      = Machine      &amp;lt;-- unchanged&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MIE      = old MIE      &amp;lt;-- unchanged&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MPIE     = old MPIE     &amp;lt;-- unchanged&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MPRV     = old MPRV     &amp;lt;-- unchanged&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;Sail:&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  nextPC           = mepc&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  cur_privilege    = Machine      &amp;lt;-- old mstatus.MPP&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mepc             = unchanged&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MPP      = User         &amp;lt;-- mismatch (No way to get this to align)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MIE      = old MPIE     &amp;lt;-- mismatch unless old MIE = old MPIE&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MPIE     = 1            &amp;lt;-- mismatch unless old MPIE = 1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mstatus.MPRV     = old MPRV     &amp;lt;-- unchanged because cur_privilege remains Machine&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The problem here is there is &lt;strong&gt;NO&lt;&#x2F;strong&gt; way to tell sail that that privilege level will not be lowered to user, as Jolt says by writing 1 to bit 20 of the misa that user mode is enabled.
+So if that is the case, the sail spec says we &lt;strong&gt;MUST&lt;&#x2F;strong&gt; reduce privilege when returning from a trap.
+Unfortunately, jolt is &lt;strong&gt;always&lt;&#x2F;strong&gt; in Machine mode.&lt;&#x2F;p&gt;
+&lt;pre class=&quot;giallo z-code&quot;&gt;&lt;code data-lang=&quot;lean&quot; data-name=&quot;&#x2F;jolt-qed&#x2F;LeanRV64D&#x2F;SysControl.lean:677&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;writeReg mstatus (Sail.BitVec.updateSubrange (← readReg mstatus) &lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt;12&lt;&#x2F;span&gt;&lt;span class=&quot;z-constant z-numeric z-constant&quot;&gt; 11&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  (privLevel_to_bits&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (← &lt;&#x2F;span&gt;&lt;span class=&quot;z-keyword&quot;&gt;do&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      if&lt;&#x2F;span&gt;&lt;span&gt; ((← (currentlyEnabled Ext_U)) : Bool)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      then&lt;&#x2F;span&gt;&lt;span&gt; (pure User)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span class=&quot;z-keyword&quot;&gt;      else&lt;&#x2F;span&gt;&lt;span&gt; (pure Machine))))&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;references&quot;&gt;References&lt;&#x2F;h2&gt;
 &lt;p&gt;All claims above can also be checked against the official RISC-V ISA docs&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a rel=&quot;external&quot; href=&quot;https:&#x2F;&#x2F;docs.riscv.org&#x2F;reference&#x2F;isa&#x2F;v20260120&#x2F;priv&#x2F;machine.html#3-1-1-7-machine-trap-vector-base-address-mtvec-register&quot;&gt;mtvec&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
@@ -204,8 +259,8 @@ I&#x27;ll do this in a couple of days.&lt;&#x2F;p&gt;
     
     <content type="html" xml:base="/blog/sail-to-lean/">&lt;div class=&quot;callout callout-caution&quot;&gt;
   
-  &lt;p&gt;These notes re-cap the steps required to transplile the RISC-V sail specification to Lean.
-NOTE: As confirmed from the original documentation, only the non-computable Lean code builds and compiles cleanly.
+  &lt;p&gt;These notes re-cap the steps required to transplile the RISC-V sail specification to Lean.&lt;&#x2F;p&gt;
+&lt;p&gt;NOTE: As confirmed from the original documentation, only the non-computable Lean code builds and compiles cleanly.
 Some work is still needed to get the executable CPU to work.
 I do not imagine a whole lot, but as of the date of writing this, the executable build is not clean.&lt;&#x2F;p&gt;
 

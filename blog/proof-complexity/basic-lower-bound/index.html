@@ -214,13 +214,27 @@ The original result is by <a href="#ref-haken1984intractability" class="citation
 </div>
 <h2 id="preliminary-material">Preliminary Material</h2>
 <p>Sometimes it is easier to deal with formulae with no negated variables.
-For PHP refutations, as is standard in the literature (see <a href="#ref-razborov2003resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle">[Razborov, 2003]</a>, <a href="#ref-beame1996simplified" class="citation" title="Simplified and Improved Resolution Lower Bounds">[Beame &amp; Pitassi, 1996]</a>) we will often do the following conversion to obtain clause $C^+$ from a clause $C$.</p>
+For PHP refutations, as is standard in the literature (see <a href="#ref-razborov2003resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle">[Razborov, 2003]</a>, <a href="#ref-beame1996simplified" class="citation" title="Simplified and Improved Resolution Lower Bounds">[Beame &amp; Pitassi, 1996]</a>) we will often do the following conversion to obtain clause $C^+$ from a clause $C$.
+Reminder that $[m]$ is the index set of the pigeons, and $[n]$ is the index set for holes.
+The intended meaning of $x_{ij}=1$ is that pigeon $i$ is assigned to hole $j$.</p>
 <div class="callout callout-definition thm-numbered">
   
   <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> (Positive Conversion)</span></div>
   
-  <p>Let $\pi$ denote a refutation for $\PHP{m}{n}$.
-For any clause $C \in \pi$, we denote with $C^+$ the clause obtained by replacing every negated variable $\Complement{x_{ij}} \in C$ with the subclause $X_{ij} = \underset{i'\neq i}{\lor} x_{i'j}$</p>
+  <p>Let $\pi$ denote a refutation for $\PHP{m}{n}$, whose variables are $x_{ij}$ for $i \in [m]$ and $j \in [n]$.
+For $i \in [m]$ and $j \in [n]$, define
+$$
+X_{ij} := \bigvee_{i' \in [m]\setminus{i}} x_{i'j}.
+$$</p>
+<p>For any clause $C \in \pi$, we denote by $C^+$ the positive clause obtained from $C$ by replacing every negated literal $\Complement{x_{ij}}$ with the disjunction $X_{ij}$, leaving every positive literal unchanged, and flattening the resulting disjunction.</p>
+
+</div>
+<p>$X_{ij}=1$ implies there is at least one pigeon that is not $i$ that is assigned to hole $j$.
+Observe that for any assignment $\vec{x}$ satisfying the hole axioms, $(x_{ij} = 1) \implies X_{ij} = 0$.</p>
+<div class="callout callout-remark">
+  
+  <p>The positive conversion is not an identity on all assignments.
+The replacement $X_{ij}$ agrees with $\Complement{x_{ij}}$ on assignments where hole $j$ is occupied by exactly one pigeon; in particular, this holds for critical assignments.</p>
 
 </div>
 <p>Finally we will call an assignment $\criticalAlpha{}$ which maps pigeons to holes, critical, if it matches every hole with a unique pigeon, and every pigeon but one to a unique hole.</p>

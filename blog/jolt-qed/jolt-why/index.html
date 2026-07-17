@@ -12,7 +12,7 @@
   </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>#Jolt | onATangent</title>
+  <title>Jolt: Introduction | Random Walks</title>
   <link rel="stylesheet" href="/style.css">
   <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
   <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
@@ -135,13 +135,19 @@
         
           
           <span>/</span>
-          <a href="/tags">tags</a>
+          <a href="/blog">blog</a>
         
       
         
           
           <span>/</span>
-          <a href="/tags/jolt">jolt</a>
+          <a href="/blog/jolt-qed">jolt-qed</a>
+        
+      
+        
+          
+          <span>/</span>
+          <a href="/blog/jolt-qed/jolt-why">jolt-why</a>
         
       
         
@@ -149,104 +155,69 @@
     </nav>
   
   
+
+
   <main class="content">
     
-<section class="section">
-  <h1>#Jolt</h1>
-  <ul class="post-list">
+
+
+
+
+
+
+  
+  
+
+
+<article class="post">
+  <header class="post-header">
+    <h1>Jolt: Introduction</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-05-22</time>
+      
+    </div>
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;jolt-qed&#x2F;assumptions&#x2F;">Equivalence Statements And Assumptions</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-05-22</time>
-      </div>
-    </li>
+    <div class="post-tags">
+      <a href="/tags/lean/" class="tag">lean</a><a href="/tags/jolt/" class="tag">Jolt</a>
+    </div>
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;jolt-qed&#x2F;jolt-why&#x2F;">Jolt: Introduction</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-05-22</time>
-      </div>
-    </li>
+  </header>
+
+  
+  <nav class="toc toc-side">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#jolt-a-birds-eye-view">Jolt - a Birds Eye View</a></li><li><a href="#trace-to-polynomials">Trace to Polynomials</a></li></ol>
+  </nav>
+  
+
+  
+
+  
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;jolt-qed&#x2F;state&#x2F;">How to Model a CPU in Lean</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-05-22</time>
-      </div>
-    </li>
+      
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;csrrw-bug&#x2F;">Jolt System Mismatch -- Writing To Control Status Registers</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-06-19</time>
-      </div>
-    </li>
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;sail-to-lean&#x2F;">Compiling RISCV-SAIL Into Lean4 Cpuu</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-03-22</time>
-      </div>
-    </li>
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;jolt-sumchecks&#x2F;">Sumchecks Bloody Sumchecks</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-02-20</time>
-      </div>
-    </li>
-    
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;streaming-sumchecks&#x2F;">Anatomy Of A Jolt Sumcheck</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2025-12-01</time>
-      </div>
-    </li>
-    
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;mont-mult&#x2F;">Algorithms For Montgomery Multiplication</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2025-05-16</time>
-      </div>
-    </li>
-    
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;dyn-instrument&#x2F;">Montgomery Multiplication: Theory Vs Practice</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari, Squirrel</span>
-        <time>2025-05-15</time>
-      </div>
-    </li>
-    
-  </ul>
-</section>
+  
+
+  <div class="post-content">
+    <h2 id="jolt-a-birds-eye-view">Jolt - a Birds Eye View</h2>
+<div class="footnote-definition" id="inlines"><sup class="footnote-definition-label">1</sup>
+<p>Technically this statement is not strictly true. The input also allows some custom instructions that are not native RISC-V instructions.</p>
+</div>
+<p>A user supplies a guest program<sup class="footnote-reference"><a href="#inlines">1</a></sup> (a RISC-V elf) to Jolt.
+Jolt runs this program, and writes any outputs on the output tape, along with a proof.
+A proof is simply another program that the user runs to get output 0 or 1.
+If the output of the proof is 1, then the user agrees</p>
+<h2 id="trace-to-polynomials">Trace to Polynomials</h2>
+
+  </div>
+
+  
+
+  
+</article>
 
   </main>
   <!-- ====================================================================

@@ -12,7 +12,7 @@
   </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Jolt Soundness Bug -- Writing To Control Status Registers | Random Walks</title>
+  <title>Jolt System Mismatch -- Writing To Control Status Registers | Random Walks</title>
   <link rel="stylesheet" href="/style.css">
   <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
   <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
@@ -165,7 +165,7 @@
 
 <article class="post">
   <header class="post-header">
-    <h1>Jolt Soundness Bug -- Writing To Control Status Registers</h1>
+    <h1>Jolt System Mismatch -- Writing To Control Status Registers</h1>
     <div class="post-meta">
       <span class="post-author">Ari</span>
       <time>2026-06-19</time>
@@ -181,7 +181,7 @@
   
   <nav class="toc toc-side">
     <div class="toc-title">Contents</div>
-    <ol><li><a href="#jolt-implementation-of-csrrw">Jolt Implementation Of CSRRW</a></li><li><a href="#mtvec">mtvec</a></li><li><a href="#mepc">mepc</a></li><li><a href="#mstatus">mstatus</a></li><li><a href="#references">References</a></li></ol>
+    <ol><li><a href="#jolt-implementation-of-csrrw">Jolt Implementation Of CSRRW</a></li><li><a href="#mtvec">mtvec</a></li><li><a href="#mepc">mepc</a></li><li><a href="#mstatus">mstatus</a></li><li><a href="#mret-issue">MRET Issue</a></li><li><a href="#references">References</a></li></ol>
   </nav>
   
 
@@ -360,7 +360,62 @@ I'll do this in a couple of days.</p>
 <div class="footnote-definition" id="zca"><sup class="footnote-definition-label">2</sup>
 <p><code>Zca</code> enables 16-bit (compressed) instructions. See the official <a rel="external" href="https://docs.riscv.org/reference/isa/v20240411/unpriv/zc.html">Zc* specification</a>.</p>
 </div>
-<h2 id="references">References</h2>
+<h2 id="mret-issue">MRET Issue</h2>
+<p>Sail’s MRET handler does not merely produce a target PC. It first mutates mstatus and cur_privilege, then reads mepc through prepare_xret_target
+Machine, then execute_MRET writes nextPC..</p>
+<pre class="giallo z-code"><code data-lang="plain"><span class="giallo-l"></span>
+<span class="giallo-l"><span>Before MRET</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Jolt:</span></span>
+<span class="giallo-l"><span>  pc              = current pc</span></span>
+<span class="giallo-l"><span>  nextPC          = old nextPC</span></span>
+<span class="giallo-l"><span>  cur_privilege   = Machine</span></span>
+<span class="giallo-l"><span>  mepc            = return target</span></span>
+<span class="giallo-l"><span>  mstatus.MPP     = Machine</span></span>
+<span class="giallo-l"><span>  mstatus.MIE     = old MIE</span></span>
+<span class="giallo-l"><span>  mstatus.MPIE    = old MPIE</span></span>
+<span class="giallo-l"><span>  mstatus.MPRV    = old MPRV</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Sail:</span></span>
+<span class="giallo-l"><span>  PC              = current pc</span></span>
+<span class="giallo-l"><span>  nextPC          = old nextPC</span></span>
+<span class="giallo-l"><span>  cur_privilege   = Machine</span></span>
+<span class="giallo-l"><span>  mepc            = return target</span></span>
+<span class="giallo-l"><span>  mstatus.MPP     = Machine</span></span>
+<span class="giallo-l"><span>  mstatus.MIE     = old MIE</span></span>
+<span class="giallo-l"><span>  mstatus.MPIE    = old MPIE</span></span>
+<span class="giallo-l"><span>  mstatus.MPRV    = old MPRV</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>After MRET</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Jolt:</span></span>
+<span class="giallo-l"><span>  pc / nextPC      = mepc</span></span>
+<span class="giallo-l"><span>  cur_privilege    = Machine</span></span>
+<span class="giallo-l"><span>  mepc             = unchanged</span></span>
+<span class="giallo-l"><span>  mstatus.MPP      = Machine      &lt;-- unchanged</span></span>
+<span class="giallo-l"><span>  mstatus.MIE      = old MIE      &lt;-- unchanged</span></span>
+<span class="giallo-l"><span>  mstatus.MPIE     = old MPIE     &lt;-- unchanged</span></span>
+<span class="giallo-l"><span>  mstatus.MPRV     = old MPRV     &lt;-- unchanged</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>Sail:</span></span>
+<span class="giallo-l"><span>  nextPC           = mepc</span></span>
+<span class="giallo-l"><span>  cur_privilege    = Machine      &lt;-- old mstatus.MPP</span></span>
+<span class="giallo-l"><span>  mepc             = unchanged</span></span>
+<span class="giallo-l"><span>  mstatus.MPP      = User         &lt;-- mismatch (No way to get this to align)</span></span>
+<span class="giallo-l"><span>  mstatus.MIE      = old MPIE     &lt;-- mismatch unless old MIE = old MPIE</span></span>
+<span class="giallo-l"><span>  mstatus.MPIE     = 1            &lt;-- mismatch unless old MPIE = 1</span></span>
+<span class="giallo-l"><span>  mstatus.MPRV     = old MPRV     &lt;-- unchanged because cur_privilege remains Machine</span></span>
+<span class="giallo-l"></span></code></pre>
+<p>The problem here is there is <strong>NO</strong> way to tell sail that that privilege level will not be lowered to user, as Jolt says by writing 1 to bit 20 of the misa that user mode is enabled.
+So if that is the case, the sail spec says we <strong>MUST</strong> reduce privilege when returning from a trap.
+Unfortunately, jolt is <strong>always</strong> in Machine mode.</p>
+<pre class="giallo z-code"><code data-lang="lean" data-name="/jolt-qed/LeanRV64D/SysControl.lean:677"><span class="giallo-l"></span>
+<span class="giallo-l"><span>writeReg mstatus (Sail.BitVec.updateSubrange (← readReg mstatus) </span><span class="z-constant z-numeric z-constant">12</span><span class="z-constant z-numeric z-constant"> 11</span></span>
+<span class="giallo-l"><span>  (privLevel_to_bits</span></span>
+<span class="giallo-l"><span>    (← </span><span class="z-keyword">do</span></span>
+<span class="giallo-l"><span class="z-keyword">      if</span><span> ((← (currentlyEnabled Ext_U)) : Bool)</span></span>
+<span class="giallo-l"><span class="z-keyword">      then</span><span> (pure User)</span></span>
+<span class="giallo-l"><span class="z-keyword">      else</span><span> (pure Machine))))</span></span></code></pre><h2 id="references">References</h2>
 <p>All claims above can also be checked against the official RISC-V ISA docs</p>
 <ul>
 <li><a rel="external" href="https://docs.riscv.org/reference/isa/v20260120/priv/machine.html#3-1-1-7-machine-trap-vector-base-address-mtvec-register">mtvec</a></li>
