@@ -1,0 +1,1 @@
+var e=``+new URL(`jolt-overview-B4BMQTPU.svg`,import.meta.url).href;export{e as t};
