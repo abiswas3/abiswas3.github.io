@@ -167,96 +167,11 @@
   
 
   
-  <div class="post-content"><h2 id="end-goal-prove-jolt-things-via-monads">End Goal: Prove Jolt Things (via Monads)</h2>
-<p>The end goal is to prove in Lean, that Jolt Bytecode expansions do not alter the RISCV guest program that the Jolt user submits.
-Part of this process involves defining what a RISCV-CPU is and does in Lean.
-Thankfully, people at Sail + Galois + Cambridge have done part of the work for us, and following the instructions described <a href="../sail-to-lean.md">here</a>, we get automatic transpilation of (non-executable) code from sail to lean.
-<sup class="footnote-reference"><a href="#formal">1</a></sup></p>
-<p>Jumping ahead, a little, we know that the Jolt CPU, does not have <code>ADDW</code> in its instruction set.
-Instead it replaces every occurrence of <code>ADDW</code> in the guest program with the following sequence defined below (sign extending by word a normal addition).</p>
-<p>"Proving equivalence" amounts to proving a theorem of this sort</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">theorem</span><span class="z-entity z-name z-entity z-name z-function"> jolt_addw_eq_riscv_addw</span><span> (rs2 rs1 rd : regidx) :</span></span>
-<span class="giallo-l"><span>    execute_RTYPEW rs2 rs1 rd ropw.ADDW = jolt_addw rs2 rs1 rd := </span><span class="z-keyword">by</span><span> </span></span>
-<span class="giallo-l"><span class="z-invalid z-invalid z-illegal">    sorry</span></span></code></pre>
-<p>The <code>sorry</code> is what we are meant to fill out as the proof.
-The part between <code>:</code> and <code>:=</code> is our theorem statement.
-The LHS of the theorem statement we get using the interface/API the sail to lean transpilation above offers us.
-Loosely, we are saying run the following code and match on branch <code>ADDW</code>.</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"></span>
-<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> execute_RTYPEW</span><span> (rs2 : regidx) (rs1 : regidx) (rd : regidx) (op : ropw) : SailM ExecutionResult := </span><span class="z-keyword">do</span></span>
-<span class="giallo-l"><span class="z-keyword">  let</span><span> rs1_val ← </span><span class="z-keyword">do</span><span> (pure (Sail.BitVec.extractLsb (← (rX_bits rs1)) </span><span class="z-constant z-numeric z-constant">31</span><span class="z-constant z-numeric z-constant"> 0</span><span>))</span></span>
-<span class="giallo-l"><span class="z-keyword">  let</span><span> rs2_val ← </span><span class="z-keyword">do</span><span> (pure (Sail.BitVec.extractLsb (← (rX_bits rs2)) </span><span class="z-constant z-numeric z-constant">31</span><span class="z-constant z-numeric z-constant"> 0</span><span>))</span></span>
-<span class="giallo-l"><span class="z-keyword">  let</span><span> result : (BitVec </span><span class="z-constant z-numeric z-constant">32</span><span>) :=</span></span>
-<span class="giallo-l"><span class="z-keyword">    match</span><span> op </span><span class="z-keyword">with</span></span>
-<span class="giallo-l"><span>    | ADDW =&gt; (rs1_val + rs2_val)</span></span>
-<span class="giallo-l"><span>    | SUBW =&gt; (rs1_val - rs2_val)</span></span>
-<span class="giallo-l"><span>    | SLLW =&gt; (shift_bits_left rs1_val (Sail.BitVec.extractLsb rs2_val </span><span class="z-constant z-numeric z-constant">4</span><span class="z-constant z-numeric z-constant"> 0</span><span>))</span></span>
-<span class="giallo-l"><span>    | SRLW =&gt; (shift_bits_right rs1_val (Sail.BitVec.extractLsb rs2_val </span><span class="z-constant z-numeric z-constant">4</span><span class="z-constant z-numeric z-constant"> 0</span><span>))</span></span>
-<span class="giallo-l"><span>    | SRAW =&gt; (shift_bits_right_arith rs1_val (Sail.BitVec.extractLsb rs2_val </span><span class="z-constant z-numeric z-constant">4</span><span class="z-constant z-numeric z-constant"> 0</span><span>))</span></span>
-<span class="giallo-l"><span>  (wX_bits rd (sign_extend (m := </span><span class="z-constant z-numeric z-constant">64</span><span>) result))</span></span>
-<span class="giallo-l"><span>  (pure RETIRE_SUCCESS)</span></span>
-<span class="giallo-l"></span></code></pre>
-<p>The RHS is something we wrote (but will also be transpiled from the Jolt rust source eventually)</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"></span>
-<span class="giallo-l"><span>-- WARNING: This definition only works when rd is a real RISC-V register (regidx).</span></span>
-<span class="giallo-l"><span>-- It will NOT work </span><span class="z-keyword">for</span><span> Jolt virtual registers (indices ≥ </span><span class="z-constant z-numeric z-constant">32</span><span>). For the general</span></span>
-<span class="giallo-l"><span>-- case we need the JoltSailState extension </span><span class="z-keyword">with</span><span> liftSail.</span></span>
-<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> virtual_sign_extend_word</span><span> (rd : regidx) : SailM Unit := </span><span class="z-keyword">do</span></span>
-<span class="giallo-l"><span class="z-keyword">  let</span><span> v ← rX_bits rd</span></span>
-<span class="giallo-l"><span>  wX_bits rd (sign_extend (m := </span><span class="z-constant z-numeric z-constant">64</span><span>) (Sail.BitVec.extractLsb v </span><span class="z-constant z-numeric z-constant">31</span><span class="z-constant z-numeric z-constant"> 0</span><span>))</span></span>
-<span class="giallo-l"></span>
-<span class="giallo-l"><span>-- Jolt&#39;s ADDW decomposition: ADD </span><span class="z-keyword">then</span><span> VirtualSignExtendWord</span></span>
-<span class="giallo-l"><span class="z-keyword">def</span><span class="z-entity z-name z-entity z-name z-function"> jolt_addw</span><span> (rs2 rs1 rd : regidx) : SailM ExecutionResult := </span><span class="z-keyword">do</span></span>
-<span class="giallo-l"><span class="z-keyword">  let</span><span> _ ← execute_RTYPE rs2 rs1 rd rop.ADD</span></span>
-<span class="giallo-l"><span>  virtual_sign_extend_word rd</span></span>
-<span class="giallo-l"><span>  pure RETIRE_SUCCESS</span></span></code></pre>
-<p>Both sides of the theorem have type <code>SailM ExecutionResult</code> as their output.</p>
-<p><code>ExecutionResult</code> itself is<sup class="footnote-reference"><a href="#inductive">2</a></sup>:</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">inductive</span><span class="z-entity z-name z-entity z-name z-function"> ExecutionResult</span><span class="z-keyword"> where</span></span>
-<span class="giallo-l"><span>  | Retire_Success (_ : Unit)</span></span>
-<span class="giallo-l"><span>  | ExecuteAs (_ : instruction)</span></span>
-<span class="giallo-l"><span>  | Enter_Wait (_ : WaitReason)</span></span>
-<span class="giallo-l"><span>  | Illegal_Instruction (_ : Unit)</span></span>
-<span class="giallo-l"><span>  | Virtual_Instruction (_ : Unit)</span></span>
-<span class="giallo-l"><span>  | Trap (_ : (Privilege × ctl_result × xlenbits))</span></span>
-<span class="giallo-l"><span>  | Memory_Exception (_ : (virtaddr × ExceptionType))</span></span>
-<span class="giallo-l"><span>  | Ext_CSR_Check_Failure (_ : Unit)</span></span>
-<span class="giallo-l"><span>  | Ext_ControlAddr_Check_Failure (_ : ext_control_addr_error)</span></span>
-<span class="giallo-l"><span>  | Ext_DataAddr_Check_Failure (_ : ext_data_addr_error)</span></span>
-<span class="giallo-l"><span>  | Ext_XRET_Priv_Failure (_ : Unit)</span></span></code></pre>
-<p>And <code>SailM</code> is not a plain value -- it is a <em>monadic computation</em>. Under the hood, <code>SailM</code> is defined as:</p>
-<pre class="giallo z-code"><code data-lang="lean"><span class="giallo-l"><span class="z-keyword">abbrev</span><span class="z-entity z-name z-entity z-name z-function"> SailM</span><span> := EStateM (Error exception) (SequentialState RegisterType trivialChoiceSource)</span></span></code></pre>
-<p>That is, <code>SailM</code> is Lean's built-in error-and-state monad.
-See the <a rel="external" href="https://github.com/leanprover/lean4/blob/master/src/Init/Control/EState.lean">Lean 4 source for EStateM</a>.
-A term of type <code>SailM ExecutionResult</code> is not an <code>ExecutionResult</code> -- but in Rust speak, and a slight deviation from the truth, you can imagine that its a very very complicated <code>Result&lt;ExecutionResult, Error&gt;</code> instead<sup class="footnote-reference"><a href="#sailm_simplification">3</a></sup>.</p>
-<div class="footnote-definition" id="inductive"><sup class="footnote-definition-label">2</sup>
-<p>This is an inductive type -- if you're not familiar with the term, a simplified way to read it is: it's an enum that lists everything that can happen when you step a CPU. The instruction either succeeds (<code>Retire_Success</code>), gets re-interpreted as another instruction (<code>ExecuteAs</code>), waits, traps, hits a memory exception, and so on.</p>
-</div>
-<div class="footnote-definition" id="sailm_simplification"><sup class="footnote-definition-label">3</sup>
-<p><code>Option</code> would also work as an analogy, but <code>Result</code>/<code>Except</code> is closer since <code>SailM</code> can fail <em>with error information</em>, not just <code>None</code>. In greater detail, <code>EStateM</code> also threads mutable CPU state (registers, memory) through every step -- so it's really <code>State -&gt; Result&lt;(ExecutionResult, State), Error&gt;</code>.</p>
-</div>
-<div class="callout callout-box thm-box">
-  
-  <p><strong>If the above sentences made absolutely no sense - then good, we are both starting at the same place</strong>.
-In functional programming, when we wrap real data in this <code>Result</code> business we often refer to the act of doing this as monadic programming.
-But the point is, if we want to prove the theorem we are after, we need to understand how to prove things with monads in Lean.
-And so the rest of this post, is about "what the feck is a monad"!!</p>
-
-</div>
-<div class="footnote-definition" id="formal"><sup class="footnote-definition-label">1</sup>
-<p>This translation appears to be the industry standard for proving things about the RISCV-CPU, and also has been adopted by other proof systems as shown <a rel="external" href="https://github.com/openvm-org/openvm/blob/main/audits/v1.5.0-nethermind-rv32im-fv-report.pdf">here</a> and <a rel="external" href="https://github.com/succinctlabs/sp1-lean">here</a>.</p>
-</div>
-<h2 id="what-these-notes-are-for">What These Notes Are For</h2>
-<p>The mini-goal of this series of notes is to somehow get to the bottom of how to use the <code>mvcgen</code> tactic in Lean, which is advertised as a way to reason about imperative code in Lean<sup class="footnote-reference"><a href="#himmel">4</a></sup>.
-Why? As this will let us prove things about functions that involve monads!
-So the hope is -- we understand Markus' post and its inner workings, upgrade his post the latest version of Lean, and then tackle our proof<sup class="footnote-reference"><a href="#problem">5</a></sup>.</p>
-<div class="footnote-definition" id="problem"><sup class="footnote-definition-label">5</sup>
-<p>We already tried proving things without <code>mvcgen</code> with the help of Claudius Caesar. After 1 hour of running the results were not good. In fact it took 50 minutes to prove that the RISCV add instruction is commutative i.e <code>a + b = b + a</code> in this CPU state framework. So we really do need to understand the nuts and bolts of what is going on.</p>
-</div>
+  <div class="post-content"><h2 id="what-these-notes-are-for">What These Notes Are For</h2>
 <p>Lean is a functional programming language, and although it lets the user type imperative looking code using <code>do</code> blocks, under the hood it transforms the same block of code into functional blocks using machinery called monads.
 But what the feck is a monad?
-I cannot for the life of me seem to find a clean definition<sup class="footnote-reference"><a href="#def">6</a></sup>.
-After about 48 hours of reading and scouring through different blogs and lecture notes<sup class="footnote-reference"><a href="#refs">7</a></sup>, here's my opinionated<sup class="footnote-reference"><a href="#risk">8</a></sup> take on what a monad is.
+I cannot for the life of me seem to find a clean definition<sup class="footnote-reference"><a href="#def">1</a></sup>.
+After about 48 hours of reading and scouring through different blogs and lecture notes<sup class="footnote-reference"><a href="#refs">2</a></sup>, here's my opinionated<sup class="footnote-reference"><a href="#risk">3</a></sup> take on what a monad is.
 When I say functions from here on -- I don't mean a method or a function in a programming language, but a function as introduced in an introductory textbook for mathematics.</p>
 <div class="callout callout-definition thm-numbered">
   
@@ -277,10 +192,10 @@ Why? Because <code>Option</code> comes with <code>and_then</code> (which we refe
 <code>pure</code> is <code>Some</code> — it wraps a plain <code>i32</code> into <code>Option&lt;i32&gt;</code>.</p>
 
 </div>
-<div class="footnote-definition" id="summary"><sup class="footnote-definition-label">9</sup>
+<div class="footnote-definition" id="summary"><sup class="footnote-definition-label">4</sup>
 <p>I've come to the conclusion that there is no easy 3 sentence definition.</p>
 </div>
-<p>Now chances are that this definition is even more confusing, and conveys about as much information as the definition I criticised<sup class="footnote-reference"><a href="#summary">9</a></sup>.
+<p>Now chances are that this definition is even more confusing, and conveys about as much information as the definition I criticised<sup class="footnote-reference"><a href="#summary">4</a></sup>.
 I apologise if this is the case, and refer the reader to this starter post <a href="/blog/monads/momonads-simplified/">Monads: What Is?</a>, which tells the story in longer form.
 We'll start with a simple computation that is composable, and then change it so it becomes non-composable.
 Then we will make it composable again -- and everything that we did to make it composable will be a monad.</p>
@@ -289,19 +204,19 @@ and <a href="/blog/monads/./monads/index.md">re-write</a> it in terms of the sam
 <p>At this point, we've either convinced ourselves that the above definition somewhat makes sense, or I still don't understand what the feck a monad is, and in that case you should stop reading.
 Were we to have understood monads, we go into some Lean4 specific machinery that makes writing monadic code easier <a href="/blog/monads/./monad-type-class/index.md">here</a> and <a href="/blog/monads/./monad-do-notation/index.md">here</a>.</p>
 <p>With this monad crash course done, hopefully we have the background to understand what is going on in <a rel="external" href="https://markushimmel.de/blog/my-first-verified-imperative-program/">Markus' post</a>.</p>
-<div class="footnote-definition" id="himmel"><sup class="footnote-definition-label">4</sup>
+<div class="footnote-definition" id="himmel"><sup class="footnote-definition-label">5</sup>
 <p>See <a rel="external" href="https://markushimmel.de/blog/my-first-verified-imperative-program/">Markus Himmel's blog post</a>.</p>
 </div>
-<div class="footnote-definition" id="refs"><sup class="footnote-definition-label">7</sup>
+<div class="footnote-definition" id="refs"><sup class="footnote-definition-label">2</sup>
 <p>Such as these: <a rel="external" href="http://blog.sigfpe.com/2006/08/you-could-have-invented-monads-and.html">You Could Have Invented Monads</a> (Dan Piponi), <a rel="external" href="https://homepages.inf.ed.ac.uk/wadler/papers/marktoberdorf/baastad.pdf">Monads for Functional Programming</a> (Philip Wadler), <a rel="external" href="https://bartoszmilewski.com/2016/11/21/monads-programmers-definition/">Monads: Programmer's Definition</a> (Bartosz Milewski), and <a rel="external" href="https://lean-lang.org/functional_programming_in_lean/monads.html">FP in Lean Ch. 4</a>.</p>
 </div>
-<div class="footnote-definition" id="func"><sup class="footnote-definition-label">10</sup>
+<div class="footnote-definition" id="func"><sup class="footnote-definition-label">6</sup>
 <p>Functions here are mathematical functions in that it's a list of tuples mapping a domain to a co-domain.</p>
 </div>
-<div class="footnote-definition" id="risk"><sup class="footnote-definition-label">8</sup>
+<div class="footnote-definition" id="risk"><sup class="footnote-definition-label">3</sup>
 <p>Possibly wrong opinion.</p>
 </div>
-<div class="footnote-definition" id="def"><sup class="footnote-definition-label">6</sup>
+<div class="footnote-definition" id="def"><sup class="footnote-definition-label">1</sup>
 <p>By clean definition, I mean how we have a nice definition say for an injective function.This excerpt in italics is from hovering over Monads in the Functional programming book. Perhaps, to functional programming experts, this is a much better definition, but I was no cleverer about what Monads do from this. <em>Monads are an abstraction of sequential control flow and side effects used in functional programming. Monads allow both sequencing of effects and data-dependent effects: the values that result from an early step may influence the effects carried out in a later step.</em></p>
 </div>
 </div>
@@ -316,14 +231,14 @@ Were we to have understood monads, we go into some Lean4 specific machinery that
       
       
       <li>
-        <a href="&#x2F;blog&#x2F;monads&#x2F;estatem&#x2F;">Leans Built In Monad System: EStateM Monad</a>
+        <a href="&#x2F;blog&#x2F;monads&#x2F;monads-simplified&#x2F;">Monads: What Is?</a>
         
       </li>
       
       
       
       <li>
-        <a href="&#x2F;blog&#x2F;monads&#x2F;monad-do-notation&#x2F;">do Notation for Monads</a>
+        <a href="&#x2F;blog&#x2F;monads&#x2F;monads&#x2F;">Monads definition in Functional Programming in Lean Textbook</a>
         
       </li>
       
@@ -337,14 +252,7 @@ Were we to have understood monads, we go into some Lean4 specific machinery that
       
       
       <li>
-        <a href="&#x2F;blog&#x2F;monads&#x2F;monads&#x2F;">Monads in FP in Lean</a>
-        
-      </li>
-      
-      
-      
-      <li>
-        <a href="&#x2F;blog&#x2F;monads&#x2F;monads-simplified&#x2F;">Monads: What Is?</a>
+        <a href="&#x2F;blog&#x2F;monads&#x2F;monad-do-notation&#x2F;">do Notation for Monads</a>
         
       </li>
       
