@@ -12,7 +12,7 @@
   </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>#Lean | onATangent</title>
+  <title>Jolt Constraints | Random Walks</title>
   <link rel="stylesheet" href="/style.css">
   <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
   <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
@@ -135,13 +135,19 @@
         
           
           <span>/</span>
-          <a href="/tags">tags</a>
+          <a href="/blog">blog</a>
         
       
         
           
           <span>/</span>
-          <a href="/tags/lean">lean</a>
+          <a href="/blog/jolt-qed">jolt-qed</a>
+        
+      
+        
+          
+          <span>/</span>
+          <a href="/blog/jolt-qed/jolt-contraints">jolt-contraints</a>
         
       
         
@@ -149,74 +155,82 @@
     </nav>
   
   
+
+
   <main class="content">
     
-<section class="section">
-  <h1>#Lean</h1>
-  <ul class="post-list">
+
+
+
+
+
+
+  
+  
+
+
+<article class="post">
+  <header class="post-header">
+    <h1>Jolt Constraints</h1>
+    <div class="post-meta">
+      <span class="post-author">Ari</span>
+      <time>2026-08-03</time>
+      
+    </div>
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;jolt-qed&#x2F;jolt-contraints&#x2F;">Jolt Constraints</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-08-03</time>
-      </div>
-    </li>
+    <div class="post-tags">
+      <a href="/tags/jolt/" class="tag">Jolt</a><a href="/tags/lean/" class="tag">Lean</a>
+    </div>
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;jolt-qed&#x2F;assumptions&#x2F;">Equivalence Statements And Assumptions</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-05-22</time>
-      </div>
-    </li>
+  </header>
+
+  
+
+  
+
+  
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;jolt-qed&#x2F;jolt-why&#x2F;">Jolt: Introduction</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-05-22</time>
-      </div>
-    </li>
+      
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;jolt-qed&#x2F;state&#x2F;">How to Model a CPU in Lean</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-05-22</time>
-      </div>
-    </li>
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;monads&#x2F;monads&#x2F;">Monads definition in Functional Programming in Lean Textbook</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-03-23</time>
-      </div>
-    </li>
     
-    <li>
-      <div class="post-list-main">
-        <a href="&#x2F;blog&#x2F;monads&#x2F;monads-simplified&#x2F;">Monads: What Is?</a>
-      </div>
-      <div class="post-list-side">
-        <span class="post-list-author">Ari</span>
-        <time>2026-03-22</time>
-      </div>
-    </li>
-    
-  </ul>
-</section>
+  
+
+  <div class="post-content">
+    <h2 id="basics">Basics</h2>
+
+  </div>
+
+  
+
+  
+  <button class="toc-btn" id="toc-toggle" aria-label="Table of contents">&#8801;</button>
+  <nav class="toc toc-panel" id="toc-panel">
+    <div class="toc-title">Contents</div>
+    <ol><li><a href="#basics">Basics</a></li></ol>
+  </nav>
+  <script>
+    (function() {
+      var btn = document.getElementById('toc-toggle');
+      var panel = document.getElementById('toc-panel');
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        panel.classList.toggle('open');
+      });
+      document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target)) {
+          panel.classList.remove('open');
+        }
+      });
+      panel.querySelectorAll('a').forEach(function(a) {
+        a.addEventListener('click', function() {
+          panel.classList.remove('open');
+        });
+      });
+    })();
+  </script>
+  
+</article>
 
   </main>
   <!-- ====================================================================
