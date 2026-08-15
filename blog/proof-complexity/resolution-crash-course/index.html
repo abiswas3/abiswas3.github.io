@@ -41,10 +41,10 @@
           BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
           BigO: ['{O\\ \\left(#1\\right)}', 1],
           boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
-          OntoPHP: ['{\\operatorname{OFPHP}^{#1}_{#2}}', 2],
+          OntoPHP: ['{\\operatorname{OFPHP}(#3^{#1}_{#2})}', 3],
           PHP: ['{\\operatorname{PHP}(#3^{#1}_{#2})}', 3],
           PHPBasic: ['\\PHP{n}{n-1}{K}'],
-          FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+          FPHP: ['{\\operatorname{FPHP}(#3^{#1}_{#2})}', 3], 
           poly: '{\\operatorname{poly}}',
           criticalAlpha: ['{\\alpha_{#1}}', 1],
           CPlus: '{\\textcolor{blue}{C^{+}}}',
@@ -263,12 +263,12 @@ When $m \in \omega(n^2)$ we refer to the formula as the <strong>weak</strong> PH
 <ul>
 <li>
 <p><a href="#ref-haken1984intractability" class="citation" title="The Intractability of Resolution" data-cite-key="haken1984intractability" data-cite-authors="Haken, A." data-cite-title="The Intractability of Resolution" data-cite-venue="Theoretical Computer Science" data-cite-year="1985">[Haken, 1985]</a>
-: Let $\Pi$ denote the set of <em>all</em> resolution proofs that refute $\OntoPHP{n+1}{n}$, the size $\Length{\OntoPHP{n+1}{n}} = \Exp{\BigOmega{n}}$</p>
+ shows that $\Length{\OntoPHP{n+1}{n}{K}} = \Exp{\BigOmega{n}}$. The proof for the above result was simplified by <a href="#ref-beame1996simplified" class="citation" title="Simplified and Improved Resolution Lower Bounds" data-cite-key="beame1996simplified" data-cite-authors="Beame, P. and Pitassi, T." data-cite-title="Simplified and Improved Resolution Lower Bounds" data-cite-venue="FOCS" data-cite-year="1996">[Beame &amp; Pitassi, 1996]</a>
+.</p>
 </li>
 <li>
-<p>The proof for the above result was simplified by <a href="#ref-beame1996simplified" class="citation" title="Simplified and Improved Resolution Lower Bounds" data-cite-key="beame1996simplified" data-cite-authors="Beame, P. and Pitassi, T." data-cite-title="Simplified and Improved Resolution Lower Bounds" data-cite-venue="FOCS" data-cite-year="1996">[Beame &amp; Pitassi, 1996]</a>
-, and then further generalised by <a href="#ref-buss1988resolution" class="citation" title="Resolution Proofs of Generalized Pigeonhole Principles" data-cite-key="buss1988resolution" data-cite-authors="Buss, S. and Turán, G." data-cite-title="Resolution Proofs of Generalized Pigeonhole Principles" data-cite-venue="Theoretical Computer Science" data-cite-year="1988">[Buss &amp; Turán, 1988]</a>
- to $\Length{\OntoPHP{n+1}{n}} = \Exp{\BigOmega{\frac{n^2}{n+1}}}$.</p>
+<p>The above result was  further generalised by <a href="#ref-buss1988resolution" class="citation" title="Resolution Proofs of Generalized Pigeonhole Principles" data-cite-key="buss1988resolution" data-cite-authors="Buss, S. and Turán, G." data-cite-title="Resolution Proofs of Generalized Pigeonhole Principles" data-cite-venue="Theoretical Computer Science" data-cite-year="1988">[Buss &amp; Turán, 1988]</a>
+ to $\Length{\OntoPHP{n+1}{n}{K}} = \Exp{\BigOmega{\frac{n^2}{n+1}}}$.</p>
 </li>
 </ul>
 
@@ -276,19 +276,20 @@ When $m \in \omega(n^2)$ we refer to the formula as the <strong>weak</strong> PH
   
   <div class="callout-title">Remark</div>
   
-  <p>The above lower bounds do not say anything meaningful when $m = \BigOmega{n^2}$.</p>
+  <p>The above lower bounds do not say anything meaningful when $m = \BigOmega{n^2}$.
+So they are in the <em>small</em> $m$ regime.</p>
 
 </aside>
 
 <ul>
 <li>
 <p>For large values of $m$, in a breakthrough result by <a href="#ref-raz2004resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="raz2004resolution" data-cite-authors="Raz, R." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="Journal of the ACM" data-cite-year="2004">[Raz, 2004]</a>
-, he showed that <strong>every</strong> proof $\pi$ that refutes the <strong>basic</strong> pigeonhole principle $\PHP{m}{n}$ has size $\Exp{\BigOmega{\frac{n}{\log^{10} m}}}$.</p>
+, he showed that <strong>every</strong> proof $\pi$ that refutes the <strong>basic</strong> pigeonhole principle $\PHPBasic$ has size $\Exp{\BigOmega{\frac{n}{\log^{10} m}}}$.</p>
 </li>
 <li>
 <p>In <a href="#ref-razborov2003resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">[Razborov, 2003]</a>
  and <a href="#ref-razborov2004resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2004resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="Theoretical Computer Science" data-cite-year="2004">[Razborov, 2004]</a>
-, the above result was strengthened and extended to saying every proof $\pi$ that refutes the onto pigeon hole principle $\OntoPHP{m}{n}$ has size $\Exp{\BigOmega{\frac{n}{\log^2 m}}}$.</p>
+, the above result was strengthened and extended to saying every proof $\pi$ that refutes the onto pigeon hole principle $\OntoPHP{m}{n}{K}$ has size $\Exp{\BigOmega{\frac{n}{\log^2 m}}}$.</p>
 </li>
 </ul>
 
@@ -322,33 +323,26 @@ $$ \boundary{S} = \{ v \in V_H : \Size{N_G(v) \cap S} = 1\}$$</p>
 <p>What do we know about refuting PHP in expanders? Not a whole lot, but there are 3 seminal results that consider the extremes:</p>
 <ul>
 <li>When $m$ is not too large i.e $n+ 1 &lt; m \ll n^2$, <a href="#ref-ben1999short" class="citation" title="Short Proofs Are Narrow — Resolution Made Simple" data-cite-key="ben1999short" data-cite-authors="Ben-Sasson, E. and Wigderson, A." data-cite-title="Short Proofs Are Narrow — Resolution Made Simple" data-cite-venue="Journal of the ACM" data-cite-year="2001">[Ben-Sasson &amp; Wigderson, 2001]</a>
- showed that for $r = \BigOmega{n/\log m}$, and $\Delta = \log m$, and $c= \frac{3\log m}{4}$ (this is saying each size of set at most $c\log m$ has $c’\log m$ unique neighbours, thus, each pigeon can go constantly many holes), the size of refuting $\FPHP{m}{n}$ is $\Exp{\BigOmega{\frac{n^2}{m\log m}}}$.</li>
+ showed that for $r = \BigOmega{n/\log m}$, and $\Delta = \log m$, and $c= \frac{3\log m}{4}$, the size of refuting $\FPHP{m}{n}{G}$ is $\Exp{\BigOmega{\frac{n^2}{m\log m}}}$.</li>
 </ul>
 
 <aside class="callout callout-remark">
   
   <div class="callout-title">Remark</div>
   
-  <p>Thus, for graph $\PHP{m}{n}$ formulas we have exponential lower bounds on the $m \ll n^2$ pigeons where each pigeon has a constant number of choices for holes that it can fly into.</p>
+  <p>Thus, for graph formulas we have exponential lower bounds on the $m \ll n^2$ pigeons where each pigeon has a constant number of choices for holes that it can fly into.
+So small $m$ is considered “done” in this sparse expansion regime.</p>
 
 </aside>
 
 <ul>
-<li>The other extreme, where $m$ can be arbitrary, but each pigeon also has a lot of holes to go into (high minimal degree) <a href="#ref-razborov2004resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2004resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="Theoretical Computer Science" data-cite-year="2004">[Razborov, 2004]</a>
+<li>The other extreme, where $m$ can be arbitrary, but each pigeon also has a lot of holes to go into (high minimal degree i.e graph is not very sparse) <a href="#ref-razborov2004resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2004resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="Theoretical Computer Science" data-cite-year="2004">[Razborov, 2004]</a>
  and <a href="#ref-razborov2003resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">[Razborov, 2003]</a>
- show that the size is $\Exp{\BigOmega{\frac{\delta_G}{\log^2 m}}}$, where $\delta_G$ is the minimum degree of the graph.</li>
+ show that the size is $\Exp{\BigOmega{\frac{\delta_G}{\log^2 m}}}$, where $\delta_G$ is the minimum degree of the graph.
+For any number of pigeons with a polynomial lower bound $\delta_G = n^{\BigOmega{1}}$ on the number holes each pigeon can fly into, we also have exponential size lower bounds.</li>
 </ul>
-
-<aside class="callout callout-remark">
-  
-  <div class="callout-title">Remark</div>
-  
-  <p>For any number of pigeons with a polynomial lower bound $\delta_G = n^{\BigOmega{1}}$ on the number holes each pigeon can fly into, we also have exponential size lower bounds.</p>
-
-</aside>
-
-<p>This leaves us asking what happens when $m \gg n^2$, but the minimal degree is small $\delta_G = \poly(\log(m))$?</p>
-<p><a href="#ref-rezende2020Exp" class="citation" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-key="rezende2020Exp" data-cite-authors="de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D." data-cite-title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-venue="CCC" data-cite-year="2020">[de Rezende et al., 2020]</a>
+<p>This leaves us asking what happens when $m \gg n^2$, but the minimal degree is small $\delta_G = \poly(\log(m))$?
+<a href="#ref-rezende2020Exp" class="citation" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-key="rezende2020Exp" data-cite-authors="de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D." data-cite-title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-venue="CCC" data-cite-year="2020">[de Rezende et al., 2020]</a>
  solves this problem, and is the focus of our work.
 They show for any $G$ that is $(r, \Delta, (1-\xi\cdot \frac{\log n}{\log m(n)})\Delta)$-boundary expander, then you need proofs of size $\Exp{\BigOmega{\frac{r}{n^{\xi}\log^2 m}}}$</p>
 <p>They need a very very strong expander i.e $\lim_{n \rightarrow \infty} c = \Delta$, but would like to show it for $c=(1- \xi)\Delta$ for constant $\xi \in (0,1)$ <strong>This is what we need to show, optimistically</strong>.</p>
