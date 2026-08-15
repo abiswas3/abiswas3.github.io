@@ -7,7 +7,7 @@
   <meta name="description" content="Written Word">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=4d66b1897c4e7fff0c8e">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=874f3f7a233d749c5768">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -85,10 +85,28 @@
       <a href="https://randomwalks.xyz/blog/">Notes</a>
       <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
       <a href="https://randomwalks.xyz/cv/">CV</a>
+      <button class="command-trigger" type="button" aria-haspopup="dialog" aria-controls="command-palette">
+        Search <kbd>⌘K</kbd>
+      </button>
       <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
       <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
   </header>
+
+  <div class="command-palette" id="command-palette" data-index-url="https://randomwalks.xyz/search_index.en.json" hidden>
+    <button class="command-backdrop" type="button" aria-label="Close search" data-command-close></button>
+    <section class="command-dialog" role="dialog" aria-modal="true" aria-labelledby="command-title">
+      <h2 class="visually-hidden" id="command-title">Search page titles</h2>
+      <div class="command-query">
+        <span aria-hidden="true">›</span>
+        <input id="command-input" type="search" placeholder="Search titles…" autocomplete="off" autocapitalize="none" spellcheck="false" aria-controls="command-results" aria-autocomplete="list">
+        <kbd>Esc</kbd>
+      </div>
+      <ol class="command-results" id="command-results" role="listbox"></ol>
+      <p class="command-status" role="status" aria-live="polite"></p>
+      <footer class="command-help"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span></footer>
+    </section>
+  </div>
 
   
 
@@ -188,6 +206,7 @@ Then</p>
 <p>Shown below is a worked out example using only the resolution rule (no weakening).
 The original clauses/axioms are shown in green, and the derivations are shown in brown.</p>
 <p><img src="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/./Derivation.svg" alt="" /></p>
+<p>We use $x’’$ to denote negations of variables in the figure above, and $L(\pi) = 15$.</p>
 <h2 id="the-pigeon-hole-principle">The Pigeon Hole Principle<a class="zola-anchor" href="#the-pigeon-hole-principle" aria-label="Link to this section">#</a>
 </h2>
 <p>It is convenient to think of the principle in terms of a bipartite graph
@@ -197,9 +216,9 @@ Similarly, for any hole $v\in V_H$, $N_G(v)$ denotes the set of pigeons allowed 
 If nothing is stated about $G$, it is safe to assume $G = K_{m,n}$ the complete bipartite graph.</p>
 <h3 id="encoding-php-as-a-cnf">Encoding PHP as a CNF<a class="zola-anchor" href="#encoding-php-as-a-cnf" aria-label="Link to this section">#</a>
 </h3>
-<p>To encode the idea that each hole can accommodate at most 1 pigeon, and as there are not enough holes, it is impossible to assign every pigeon a hole, we use variables $x_{ij} \in bit$ to denote the assignment of pigeon $i$ to hole $j$.
+<p>To encode the idea that each hole can accommodate at most 1 pigeon, and as there are not enough holes, it is impossible to assign every pigeon a hole, we use variables $x_{ij} \in \bit$ to denote the assignment of pigeon $i$ to hole $j$.
 That is if $x_{ij} = 1$ then pigeon $i$ is assigned to hole $j$.
-Now, saying that we cannot assign every pigeon a unique hole is equivalent to saying, that there is no assignment $X = \{x_{ij}\}_{(ij)\in E}$ that satisfies the conjunction of the following clauses.</p>
+Now, saying that we cannot assign every pigeon a unique hole is equivalent to saying, that there is no assignment $\vec{x} = (x_{e})_{e\in E}$ that satisfies the conjunction of the following clauses.</p>
 <div class="math-display">
 $$\begin{alignat}{2}
 P_i &:= \underset{j\in N_G(i)}{\lor}(x_{ij}) &\qquad& \forall i \in [m] \tag{a}\label{eq:pigeon} \\[12pt]
@@ -209,20 +228,11 @@ S_j &:= \underset{i\in N_G(j)}{\lor}(x_{ij}) &\qquad& \forall j \in [n] \tag{d}\
 \end{alignat}$$
 </div>
 <p>$\eqref{eq:pigeon}$ <strong>Pigeon Axioms</strong>: Each pigeon must get a hole.</p>
-<p>$\eqref{eq:hole}$ <strong>Hole Axioms</strong>: Every hole can take at most one pigeon</p>
+<p>$\eqref{eq:hole}$ <strong>Hole Axioms</strong>: Give two different pigeons $i \neq i’$, that can both go into hole $j$, at most only one of them maybe assigned to hole $j$. <strong>Note</strong> that this does not say <em>every</em> hole must get assigned a pigeon. Setting $x_{ij} = 0$ for all $i \in [m]$ satisfies this axiom.</p>
 <p>If these were the only axioms, then we refer to the formula as the <strong>basic PHP</strong>.</p>
 <p>$\eqref{eq:func}$ <strong>Functional Axioms</strong>: The map that assigns holes to a pigeon must be a function, i.e the same pigeon cannot get two different holes.</p>
 <p>If we require the functional axioms as well, then we refer to the formulae as the <strong>functional (F)PHP</strong>.</p>
-<p>$\eqref{eq:onto}$ <strong>Onto Axioms</strong>: The map that assigns holes to a pigeon must be an onto/surjective function, i.e every hole must get a pigeon.</p>
-
-<aside class="callout callout-remark">
-  
-  <div class="callout-title">Remark</div>
-  
-  <p>Satisfying all 4 axioms, implies that there exists a <strong>perfect matching</strong> in the graph $G$.</p>
-
-</aside>
-
+<p>$\eqref{eq:onto}$ <strong>Onto Axioms</strong>: The map that assigns holes to a pigeon must be an onto/surjective function, i.e every hole must get a pigeon. Now, setting all $x_{ij} = 0$ does <strong>NOT</strong> work any more.</p>
 <p>If we need the function to be an onto function, then we refer to the formula as the <strong>onto functional (OF)PHP</strong>.</p>
 <p>The final unsatisfiable formula</p>
 <div class="math-display">
@@ -233,6 +243,15 @@ F &= \underset{i \in [m]}{\land} P_i \\
 & \bigwedge\underset{j \in [m]}{\land} S_j
 \end{align}$$
 </div>
+
+<aside class="callout callout-remark">
+  
+  <div class="callout-title">Remark</div>
+  
+  <p>Satisfying all 4 axioms, implies that there exists a <strong>perfect matching</strong> in the graph $G$.</p>
+
+</aside>
+
 <p>Clearly any formula that includes constraints $\eqref{eq:pigeon}$-$\eqref{eq:onto}$ is the MOST<sup class="footnote-reference" id="fr-mental-1"><a href="#fn-mental">1</a></sup> constrained system.
 Therefore, it must be easier to refute the most constrained formula.
 Thus, lower bounds for <strong>more</strong> constrained systems subsume lower bounds<sup class="footnote-reference" id="fr-lower-bound-1"><a href="#fn-lower-bound">2</a></sup> for formulae that is constrained by a strict subset of the above conditions.</p>
@@ -288,7 +307,7 @@ Thus, there is no point of thinking $m$ any larger.</p>
 <p>Now when $G$ is sparse, it might be really easy to refute the PHP.
 For example, the presence of an isolated vertex leads to short proofs.
 So now we go into the business of for what kind of “sparse” graphs, is the problem still hard.</p>
-<p>The graph family we consider is the $(r, \Delta, c)$-boundary expander.</p>
+<p>The graph family we consider is the $(r, \Delta, c)$-boundary<sup class="footnote-reference" id="fr-boundary-1"><a href="#fn-boundary">3</a></sup> expander.</p>
 
 <aside class="callout callout-definition thm-numbered">
   
@@ -296,14 +315,14 @@ So now we go into the business of for what kind of “sparse” graphs, is the p
   
   <p>Given Bipartite graph $G = (V_P \cup V_H, E)$ is an $(r, \Delta, c)$ boundary expander, if $\forall u \in V_P$ we have $\deg_G(u) \le \Delta$, and for every set $S \subseteq V_P$ with size $\Size{S} \le r$ we have</p>
 <p>$$\Size{\boundary{S}} \ge c \Size{S}$$</p>
-<p>where the boundary of a set $S \subseteq V_P$, denoted by $\boundary{S}$ is the set of unique neighbours of every $u \in S$ i.e</p>
-<p>$$ \boundary{S} = \{ v \in V_H : \Size{N_G(v) \cap S} = 1\}$$</p>
+<p>where the boundary of a set $S \subseteq V_P$, denoted by $\boundary{S}$ is the set of vertices joined by an edge to at least one vertex in S.
+$$ \boundary{S} = \{ v \in V_H : \Size{N_G(v) \cap S} = 1\}$$</p>
 
 </aside>
 
 <p>What do we know about refuting PHP in expanders? Not a whole lot, but there are 3 seminal results that consider the extremes:</p>
 <ul>
-<li>When $m$ is not too large i.e $m \ll n^2$, <a href="#ref-ben1999short" class="citation" title="Short Proofs Are Narrow — Resolution Made Simple">[Ben-Sasson &amp; Wigderson, 2001]</a>
+<li>When $m$ is not too large i.e $n+ 1 &lt; m \ll n^2$, <a href="#ref-ben1999short" class="citation" title="Short Proofs Are Narrow — Resolution Made Simple">[Ben-Sasson &amp; Wigderson, 2001]</a>
  showed that for $r = \BigOmega{n/\log m}$, and $\Delta = \log m$, and $c= \frac{3\log m}{4}$ (this is saying each size of set at most $c\log m$ has $c’\log m$ unique neighbours, thus, each pigeon can go constantly many holes), the size of refuting $\FPHP{m}{n}$ is $\Exp{\BigOmega{\frac{n^2}{m\log m}}}$.</li>
 </ul>
 
@@ -332,8 +351,8 @@ So now we go into the business of for what kind of “sparse” graphs, is the p
 <p>This leaves us asking what happens when $m \gg n^2$, but the minimal degree is small $\delta_G = \poly(\log(m))$?</p>
 <p><a href="#ref-rezende2020Exp" class="citation" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs">[de Rezende et al., 2020]</a>
  solves this problem, and is the focus of our work.
-They show for any $G$ that is $(r, \Delta, (1-\xi\cdot \frac{\log n}{\log m})\Delta)$-boundary expander, then you need proofs of size $\Exp{\BigOmega{\frac{r}{n^{\xi}\log^2 m}}}$</p>
-<p>They need a very very strong expander i.e $\lim_{n\rightarrow \infty} c = \Delta$, but would like to show it for $c=(1- \xi)\Delta$ for constant $\xi \in (0,1)$ <strong>This is what we need to show, optimistically</strong>.</p>
+They show for any $G$ that is $(r, \Delta, (1-\xi\cdot \frac{\log n}{\log m(n)})\Delta)$-boundary expander, then you need proofs of size $\Exp{\BigOmega{\frac{r}{n^{\xi}\log^2 m}}}$</p>
+<p>They need a very very strong expander i.e $\lim_{n \rightarrow \infty} c = \Delta$, but would like to show it for $c=(1- \xi)\Delta$ for constant $\xi \in (0,1)$ <strong>This is what we need to show, optimistically</strong>.</p>
 <p><img src="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/./graph_php.svg" alt="" />
 
 
@@ -432,6 +451,9 @@ They show for any $G$ that is $(r, \Delta, (1-\xi\cdot \frac{\log n}{\log m})\De
 <li id="fn-lower-bound">
 <p>Here by lower bound is a proxy for hardness. We show lower bounds on the length of refutations. If the derivation tree is very long for the most constrained system which should be easy to refute, then the derivation tree will be at least as long (if not longer) to refute less constrained formulae. <a href="#fr-lower-bound-1">↩</a></p>
 </li>
+<li id="fn-boundary">
+<p>Boundary of a set $S$ <img src="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/./boundary_of_G.svg" alt="" /> <a href="#fr-boundary-1">↩</a></p>
+</li>
 </ol>
 </section>
 
@@ -513,6 +535,7 @@ They show for any $G$ that is $(r, \Delta, (1-\xi\cdot \frac{\log n}{\log m})\De
       target.appendChild(arrow);
     });
   </script>
+  <script defer src="https://randomwalks.xyz/search.js?h=f26ffaa0d4f3c695bcda"></script>
   
 
 

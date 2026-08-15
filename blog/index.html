@@ -7,7 +7,7 @@
   <meta name="description" content="Written Word">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=4d66b1897c4e7fff0c8e">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=874f3f7a233d749c5768">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -27,10 +27,28 @@
       <a href="https://randomwalks.xyz/blog/">Notes</a>
       <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
       <a href="https://randomwalks.xyz/cv/">CV</a>
+      <button class="command-trigger" type="button" aria-haspopup="dialog" aria-controls="command-palette">
+        Search <kbd>⌘K</kbd>
+      </button>
       <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
       <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
   </header>
+
+  <div class="command-palette" id="command-palette" data-index-url="https://randomwalks.xyz/search_index.en.json" hidden>
+    <button class="command-backdrop" type="button" aria-label="Close search" data-command-close></button>
+    <section class="command-dialog" role="dialog" aria-modal="true" aria-labelledby="command-title">
+      <h2 class="visually-hidden" id="command-title">Search page titles</h2>
+      <div class="command-query">
+        <span aria-hidden="true">›</span>
+        <input id="command-input" type="search" placeholder="Search titles…" autocomplete="off" autocapitalize="none" spellcheck="false" aria-controls="command-results" aria-autocomplete="list">
+        <kbd>Esc</kbd>
+      </div>
+      <ol class="command-results" id="command-results" role="listbox"></ol>
+      <p class="command-status" role="status" aria-live="polite"></p>
+      <footer class="command-help"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span></footer>
+    </section>
+  </div>
 
   
 
@@ -69,27 +87,6 @@
       
       
       
-      <a class="paper-tile paper-tile--series" href="https://randomwalks.xyz/blog/proof-complexity/">
-        <span class="paper-kicker">Series</span>
-        <h2>Proof Complexity Notes</h2>
-        <p>Working notes on the resolution proof system</p>
-        
-        
-          
-        
-        
-        <span class="paper-byline">
-          By Ari
-          
-          
-        </span>
-        
-      </a>
-      
-    
-      
-      
-      
       <a class="paper-tile paper-tile--series" href="https://randomwalks.xyz/blog/jolt-qed/">
         <span class="paper-kicker">Series</span>
         <h2>Jolt-Qed</h2>
@@ -103,6 +100,27 @@
           By Ari
            · 
           <time datetime="2026-08-14">14 August 2026</time>
+        </span>
+        
+      </a>
+      
+    
+      
+      
+      
+      <a class="paper-tile paper-tile--series" href="https://randomwalks.xyz/blog/proof-complexity/">
+        <span class="paper-kicker">Series</span>
+        <h2>Proof Complexity Notes</h2>
+        <p>Working notes on the resolution proof system</p>
+        
+        
+          
+        
+        
+        <span class="paper-byline">
+          By Ari
+          
+          
         </span>
         
       </a>
@@ -260,6 +278,7 @@
       target.appendChild(arrow);
     });
   </script>
+  <script defer src="https://randomwalks.xyz/search.js?h=f26ffaa0d4f3c695bcda"></script>
   
 </body>
 </html>
