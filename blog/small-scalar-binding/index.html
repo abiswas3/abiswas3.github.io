@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Small Scalar Binding — Random Walks</title>
+  <meta name="description" content="Written Word">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=65525d0aaffd80a77b25">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
+  
+  
+  
+  
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams',
+        macros: {
+          Field: '{\\mathbb{F}}',
+          field: '{\\mathbb{F}}',
+          Mont: ['{\\widetilde{#1}}', 1],
+          Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+          TauConstraints: '{\\tau_y}',
+          TauTime: '{\\tau_{\\text{cycle}}}',
+          TauGroup: '{\\tau_b}',
+          MLE: ['{\\widetilde{#1}}', 1],
+          tf: ['{\\widetilde{#1}}', 1],
+          eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+          Def: '{:=}',
+          ChallengeSet: '{\\mathsf{C}}',
+          Complement: ['{\\overline{#1}}', 1],
+          Size: ['{\\left|#1\\right|}', 1],
+          Length: ['{L\\left(#1\\right)}', 1],
+          Lenght: ['{L\\left(#1\\right)}', 1],
+          Exp: ['{2^{#1}}', 1],
+          BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+          BigO: ['{O\\ \\left(#1\\right)}', 1],
+          boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+          OntoPHP: ['{\\operatorname{OFPHP}^{#1}_{#2}}', 2],
+          PHP: ['{\\operatorname{PHP}(#3^{#1}_{#2})}', 3],
+          PHPBasic: ['\\PHP{n}{n-1}{K}'],
+          FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
+          poly: '{\\operatorname{poly}}',
+          criticalAlpha: ['{\\alpha_{#1}}', 1],
+          CPlus: '{\\textcolor{blue}{C^{+}}}',
+          CStar: ['C'],
+          GraphNbrs: ['{N_G(#1)}', 1],
+          ClauseNbrs: ['{N_C(#1)}', 1],
+          Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          SmallO: ['{o\\!(#1)}', 1],
+          Closure: ['{\\operatorname{Cl}(#1)}', 1],
+          ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+          Dim: ['{\\dim(#1)}', 1],
+          Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+          domain: ['{\\operatorname{dom}(#1)}', 1],
+          False: '{\\bot}',
+          opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+          NP: '{\\mathsf{NP}}',
+          Naturals: '{\\mathbb{N}}',
+          bit: '{\\{0,1\\}}',
+          samples: '{\\xleftarrow{\\$}}'
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="https://randomwalks.xyz" aria-label="Random Walks — home">
+      <span>Random</span><span>Walks</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="https://randomwalks.xyz/publications/">Publications</a>
+      <a href="https://randomwalks.xyz/blog/">Notes</a>
+      <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
+      <a href="https://randomwalks.xyz/cv/">CV</a>
+      <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
+      <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
+    </nav>
+  </header>
+
+  <div class="command-palette" id="command-palette" data-index-url="https://randomwalks.xyz/search_index.en.json" hidden>
+    <button class="command-backdrop" type="button" aria-label="Close search" data-command-close></button>
+    <section class="command-dialog" role="dialog" aria-modal="true" aria-labelledby="command-title">
+      <h2 class="visually-hidden" id="command-title">Search page titles</h2>
+      <div class="command-query">
+        <span aria-hidden="true">›</span>
+        <input id="command-input" type="search" placeholder="Search titles…" autocomplete="off" autocapitalize="none" spellcheck="false" aria-controls="command-results" aria-autocomplete="list">
+        <kbd>Esc</kbd>
+      </div>
+      <ol class="command-results" id="command-results" role="listbox"></ol>
+      <p class="command-status" role="status" aria-live="polite"></p>
+      <footer class="command-help"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span></footer>
+    </section>
+  </div>
+
+  
+
+  <main id="main-content">
+    
+
+
+
+
+
+<article class="note footnotes-right">
+  <header class="note-header">
+    <h1>Small Scalar Binding</h1>
+    
+    <div class="note-meta">
+      <span class="note-authors">By Ari</span>
+      <time datetime="2025-10-04">04 October 2025</time>
+      <span>Updated 08 January 2026</span>
+    </div>
+    
+    <ul class="tag-list" aria-label="Tags">
+      <li><a href="https://randomwalks.xyz/tags/sumcheck/">sumcheck</a></li><li><a href="https://randomwalks.xyz/tags/montgomery-mults/">montgomery-mults</a></li>
+    </ul>
+    
+  </header>
+
+  <div class="note-layout">
+    
+
+    <div class="prose">
+      <h2 id="tl-dr-just-tell-us-what-you-did">TL;DR - Just Tell Us What You Did<a class="zola-anchor" href="#tl-dr-just-tell-us-what-you-did" aria-label="Link to this section">#</a>
+</h2>
+
+<aside class="callout callout-box thm-box">
+  
+  <div class="callout-title">Faster Sumcheck In Jolt</div>
+  
+  <p>By sampling the verifiers random challenges from a set $S \subset \mathbb{F}$ of size roughly $\sqrt{|\mathbb{F}|}$, we speed up sum-check binding by <strong>1.6x</strong> from baseline (where challenges are sampled over the whole field $\mathbb{F}$ – the field over which polynomials are defined. )
+<strong>NOTE:</strong> This now reduces the soundness error from $1/2^{254}$ to $1/2^{125}$, but this is not a concern as currently Jolt usess the <code>bn256</code> curve to commit to polynomials, which offers 110 bits of security anyway.</p>
+
+</aside>
+
+<h2 id="sum-check-recap">Sum-Check Recap<a class="zola-anchor" href="#sum-check-recap" aria-label="Link to this section">#</a>
+</h2>
+<p>We briefly recap the sum-check protocol<sup class="footnote-reference" id="fr-a-1"><a href="#fn-a">1</a></sup>.</p>
+<p>Let $g \in \Field[X_1, \ldots, X_m]$ be a polynomial over $\Field$ with the following structure.
+$$ g(X_1, \ldots, X_m) = \prod_{j=1}^d q_j(X_1, \ldots, X_m)$$
+where all $q_j(X)$’s are multi-linear polynomials over $\Field$.
+We expand more below:</p>
+<ol>
+<li><strong>Polynomial evaluation</strong> The prover computes the following univariate polynomial, using the following steps $$p_i(X_i) = \sum_{b_{i+1} \in {0,1}}\ldots\sum_{b_{m} \in {0,1}^{}}g(r_1, \ldots, r_{i-1}, X_i, b_{i+1}, b_m)$$
+a. If $g$ has degree $d$, this requires computing $p_i(0), \ldots, p_i(d)$, then via standard lagrange interpolation, we’re able to fully define $p_i(X)$.
+$$p_i(Z) = \prod_{j=1}^d \Bigg( \sum_{b_{i+1} \in {0,1}}\ldots\sum_{b_{m}} q_j\Big(r_1, \ldots, r_{i-1}, Z, b_{i+1}, \ldots, b_m\Big)\Bigg)$$
+so to get $p_i(Z)$ we compute for all $j \in [d]$, $q_j(r_1, \ldots, r_{i-1}, Z, \vec{b})$ for $Z \in {0, \ldots, d}$ for all $\vec{b} \in {0, 1}^{m-i}$.
+As $q_j$ is multi-linear – this can be computed by linear-interpolation.</li>
+</ol>
+<div id="hello" style="overflow-x: auto; max-width: 100%;">
+<div class="math-display">
+$$
+	\begin{aligned}
+		q_j(r_1, \ldots, r_{i-1}, Z, \vec{b}) = & (1-Z) \,q_j(r_1, \ldots, r_{i-1}, 0, b_{i+1}, \ldots, b_m) \\[10pt]
+		                                        & + Z\, q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m)
+	\end{aligned}
+$$
+</div>
+</div>
+<p>As $d$ is a small constant number, computing the above value requires <strong>no multiplication operations</strong>. We can compute it via a running sum.
+See pseudocode below</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="rust"><span class="giallo-l"><span style="color: #6A737D;">/// Compute q_j(Z) = (1-Z) * q_j(0) + Z * q_j(1)</span></span>
+<span class="giallo-l"><span style="color: #6A737D;">/// using only additions</span></span>
+<span class="giallo-l"><span style="color: #6A737D;">/// when Z is a small integer.</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    fn</span><span style="color: #6F42C1;"> compute_q_j_running_sum</span><span>(z</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> usize</span><span>, q_at_0</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> JoltField</span><span>, q_at_1</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> JoltField</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #6F42C1;"> JoltField</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">        let</span><span> diff</span><span style="color: #D73A49;"> =</span><span> q_at_1</span><span style="color: #D73A49;"> -</span><span> q_at_0;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;">        // Compute Z * diff using repeated addition (running sum)</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">        let mut</span><span> z_times_diff</span><span style="color: #D73A49;"> =</span><span style="color: #6F42C1;"> JoltField</span><span style="color: #D73A49;">::</span><span style="color: #6F42C1;">zero</span><span>();</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">        for</span><span> _</span><span style="color: #D73A49;"> in</span><span style="color: #005CC5;"> 0</span><span style="color: #D73A49;">..</span><span>z {</span></span>
+<span class="giallo-l"><span>            z_times_diff</span><span style="color: #D73A49;"> +=</span><span> diff;</span></span>
+<span class="giallo-l"><span>        }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>        q_at_0</span><span style="color: #D73A49;"> +</span><span> z_times_diff</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"></span></code></pre>
+<ol start="2">
+<li><strong>Binding Phase</strong> Thee prover needs to binds the multi-linear polynomial $g$ to $r_i$, that is to say it computes a new multi-linear polynomial in $m-i$ variables $$g_i(X_{i+1}, \ldots, X_{m}) = g(r_1, \ldots, r_{i-1}, X_{i+1}, \ldots, X_{m})$$.
+This involves storing all evaluations of $g_i$ over the hyper cube ${0, 1}^{m-i}$, but unlike the above step $r_i$ is <strong>NOT</strong> guaranteed to be a small number.
+Therefore the running sum described in the pseudocode above is no good to use.
+We need to use actual multiplication here.</li>
+</ol>
+<div class="math-display">
+$$
+	\begin{align}
+		q_j(r_1, \ldots, r_{i-1}, \textcolor{orange}{r_i}, \vec{b}) = & (1-\textcolor{orange}{r_i}) \,q_j(r_1, \ldots, r_{i-1}, 0, b_{i+1}, \ldots, b_m) \\[10pt]
+		                                                              & + \textcolor{orange}{r_i}\, q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m)
+	\end{align}
+$$
+</div>
+<p>Now $q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m) \in \Field$, and traditionally the set $S$ from which we sample $r_i$ is also equal to $\Field$.
+Therefore this step requires $2^{m-i}$ $\Field \times \Field$ multiplications in round $i$ – a total of $2^m$ multiplications over $m$ rounds.
+It is well known that multiplication for $\Field$ elements is 1000x costlier than addition.
+So our hope is that we can choose $S$ cleverly such that this operation can be done faster.
+Note we cannot make $S$ too small, as this the soundness probability of any sumcheck protocol is given by $\frac{d}{|S|}$.</p>
+
+<aside class="callout callout-box thm-box">
+  
+  <h4 id="what-we-show">What we show</h4>
+<p>We show that there exists a set $S$ of size rouhgly $|\Field|^{1/2}$, which we call <code>MontU128Challenge</code>, in which $\Field \times r$ is 1.6x
+faster than $\Field \times \Field$.
+This in returns speeds up the <strong>binding</strong> phase of the sum-check protocol, which results in a 1.3x speedup per round of sum-check.</p>
+
+</aside>
+
+<h2 id="the-challenge-set-s">The Challenge Set $S$<a class="zola-anchor" href="#the-challenge-set-s" aria-label="Link to this section">#</a>
+</h2>
+<p>Define the set</p>
+<p>$$
+S \subset \Field  \text{where} S = { x \in \Field : \text{the least 2 significant digits of $x$ in Montgomery form are 0} }
+$$</p>
+<h4 id="worked-out-example">Worked Out Example:<a class="zola-anchor" href="#worked-out-example" aria-label="Link to this section">#</a>
+</h4>
+<p>Prime Field $\Field = \mathbb{Z}_{13}$ with Montgomery Form.
+Montgomery parameter: $R = 16 = 2⁴$.
+Montgomery form of $x$ is given by $xR \mod 13$</p>
+<table><thead><tr><th>x</th><th>Montgomery Form (decimal)</th><th>Binary</th><th>Last 2 bits</th></tr></thead><tbody>
+<tr><td>0</td><td>0</td><td>0000</td><td>00 ✓</td></tr>
+<tr><td>1</td><td>3</td><td>0011</td><td>11</td></tr>
+<tr><td>2</td><td>6</td><td>0110</td><td>10</td></tr>
+<tr><td>3</td><td>9</td><td>1001</td><td>01</td></tr>
+<tr><td>4</td><td>12</td><td>1100</td><td>00 ✓</td></tr>
+<tr><td>5</td><td>2</td><td>0010</td><td>10</td></tr>
+<tr><td>6</td><td>5</td><td>0101</td><td>01</td></tr>
+<tr><td>7</td><td>8</td><td>1000</td><td>00 ✓</td></tr>
+<tr><td>8</td><td>11</td><td>1011</td><td>11</td></tr>
+<tr><td>9</td><td>1</td><td>0001</td><td>01</td></tr>
+<tr><td>10</td><td>4</td><td>0100</td><td>00 ✓</td></tr>
+<tr><td>11</td><td>7</td><td>0111</td><td>11</td></tr>
+<tr><td>12</td><td>10</td><td>1010</td><td>10</td></tr>
+</tbody></table>
+<p>$$S = {0, 4, 7, 10}$$</p>
+<p><strong>Note:</strong> $|S| = 4 \approx \sqrt{p}$, which makes sense since we’re filtering by the last 2 bits.</p>
+<p>The short answer to why we this set $S$ is nice, is that it saves us 10 multiplication instructions per field multiplication.
+We first briefly review the <a href="https://randomwalks.xyz/blog/mont-mult/">CIOS</a> algorithm, which is currently used to multiply field elements.</p>
+<h3 id="cios-review">CIOS Review<a class="zola-anchor" href="#cios-review" aria-label="Link to this section">#</a>
+</h3>
+<p>Let $n$ be the number of limbs used to represent field elements. Currently in Jolt, $n=4$.
+The width $w$ of each limb is 64 bits.
+Given $a \in \Field$ and $b\in S$ , let $\Mont{a} = aR \mod p, \Mont{b} = bR \mod p$ be the respective Montgomery representations.</p>
+<p>Let $c = \Mont{a}\Mont{b}$ computed using textbook limb by limb multiplication.
+Now to get $\Mont{c}$ we <strong>need</strong> to compute $cR^{-1} = cr^{-n} = (ab)R \mod p$.</p>
+<p>$c$ can be written as the following sum and we compute $cR^{-1}$ limb by limb by multiplying $r^{-1}$ $n$ times</p>
+<div class="math-display">
+$$
+	\begin{align}
+		c       & \equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p                \\[10pt]
+		cr^{-1} & \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p \\[10pt]
+	\end{align}
+$$
+</div>
+<h3 id="important-sub-routine">Important Sub-Routine<a class="zola-anchor" href="#important-sub-routine" aria-label="Link to this section">#</a>
+</h3>
+<p>Observe that $c_0r^{-1} \equiv (c_0 + mp)r^{-1} \mod p$, where $m$ such that $c_0 + mp \equiv 0 \mod r$.
+Solving for $m = -p^{-1}c_0 \equiv \mu c_0 \mod r$.
+Also as we are working modulo $r$, it suffices to use $m = \mu_{0}c_0$ discarding any carries, where $\mu_{0}$ is the least significant word of $\mu$.</p>
+<p>Once we compute $mp$, and add this to $c$ to get $c^{(1)}$, this should clear the least significant digit based on how we picked $m$. See below</p>
+<div class="math-display">
+$$
+	\begin{align}
+		c       & \equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p                     \\[10pt]
+		cr^{-1} & \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p      \\[10pt]
+		        & \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + (c_0+ mp)r^{-1}   \mod p \\[10pt]
+		        & \equiv (c + mp)r^{-1} \mod p                                                                    \\[10pt]
+		        & \equiv ( c^{(1)}_{2n-1}r^{2n-1} + \ldots c^{(1)}_1r + 0)r^{-1} \mod p                           \\[10pt]
+		        & \equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1) \mod p                                      \\[10pt]
+	\end{align}
+$$
+</div>
+<h3 id="repeat-the-subroutine-n-times">Repeat The Subroutine $n$ times<a class="zola-anchor" href="#repeat-the-subroutine-n-times" aria-label="Link to this section">#</a>
+</h3>
+<p>Now we can play the subroutine again with $c^{(1)}_1$ replacing the role of $c_0$, and the updated value of $m = \mu_0c_1^{(1)}$ (<strong>NOTE</strong> the same $\mu_0$ is always used)</p>
+<div class="math-display">
+$$
+	\begin{align}
+		cr^{-1} & \equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1 ) \mod p                    \\
+		cr^{-2} & \equiv ( c^{(1)}_{2n-1}r^{2n-3} + \ldots + c_1^{(1)}+ c_1^{(1)}r^{-1}   \mod p \\
+		        & \equiv ( c^{(2)}_{2n-1}r^{2n-3} + \ldots + c_1^{(2)} ) \mod p
+	\end{align}
+$$
+</div>
+<p>In fact we play this game $n$ times</p>
+<p><div class="math-display">
+$$cR^{-1} \equiv cr^{-n} \equiv c^{(n)}_{2n-1}r^{n-1} + c^{(n)}_{n+1}r +c^{(n)}_{n} \mod p$$
+</div>
+
+To get the final answer<sup class="footnote-reference" id="fr-c-1"><a href="#fn-c">2</a></sup></p>
+<blockquote>
+<h4 id="total-multiplications">Total Multiplications<a class="zola-anchor" href="#total-multiplications" aria-label="Link to this section">#</a>
+</h4>
+<p>The total number of multiplications is $2n^2 + n$ which for $n=4$ is 36.</p>
+<ul>
+<li>$n^2$ multiplications to compute $c$.</li>
+<li>$n$ multiplications to compute to $m=\mu_i c_i^{(i)}$ in each round.</li>
+<li>$n$ multiplications to compute $mp$ per round which totals $n^2$ multiplications.</li>
+</ul>
+</blockquote>
+<p>Next we illustrate how sampling $\Mont{b} \samples S$ saves us multiplications.</p>
+<p>Firstly when 2 digits are 0 we we only need $n \times (n-2)$ multiplications, which allows us to save 8 multiplications when $n=4$.</p>
+<p><img src="https://randomwalks.xyz/blog/small-scalar-binding/diag.svg" alt="" /></p>
+<p>Remember the reduction phase is all about 0’ing out the least significant digit.
+If it’s already 0 we do not need to compute $m_0 p$ and $m_1p$ anymore.</p>
+<p><img src="https://randomwalks.xyz/blog/small-scalar-binding/diag2.svg" alt="" /></p>
+<blockquote>
+<p>This saves us $8 + 2 + 8= 20$ multiplications, which leaves with only $16$ multiplications</p>
+</blockquote>
+<p>If multiplications were the only thing that cost us CPU cycles we should see roughly <strong>2x</strong> speedup.
+However, additions and bit shifts – although significantly cheaper, are not <em>free</em>.
+Thus, a reasonable expectation would be to see <strong>1.6-1.8x</strong> speedup.</p>
+<p>So we compute $(a-b)\times c$, where $a,b\in\Field$ and $c\in S$, 100 times and measure how long it takes.</p>
+<ul>
+<li>$S = \Field$</li>
+<li>$S$ is 2 least significant digits 0’d out.</li>
+</ul>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> bench</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> jolt-core</span><span style="color: #005CC5;"> --bench</span><span style="color: #032F62;"> challenge_mult_performance</span></span></code></pre>
+<p><img src="https://randomwalks.xyz/blog/small-scalar-binding/mul-bench.png" alt="" /></p>
+<p>Next we show that this improved multiplication does indeed speed up polynomial binding</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> bench</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> jolt-core</span><span style="color: #005CC5;"> --bench</span><span style="color: #032F62;"> binding</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> bench</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> jolt-core</span><span style="color: #005CC5;"> --bench</span><span style="color: #032F62;"> binding</span><span style="color: #005CC5;"> --features</span><span style="color: #032F62;"> challenge-254-bit</span></span></code></pre>
+<p><img src="https://randomwalks.xyz/blog/small-scalar-binding/binding-fast.png" alt="" />
+Comparing it against the baseline</p>
+<p><img src="https://randomwalks.xyz/blog/small-scalar-binding/binding-slow.png" alt="" /></p>
+<p>Shown below is the diff from bench with the red pdf representing our fast multiplication.</p>
+<p><img src="https://randomwalks.xyz/blog/small-scalar-binding/binding-diff.svg" alt="" /></p>
+<h2 id="some-implementation-details">Some Implementation Details<a class="zola-anchor" href="#some-implementation-details" aria-label="Link to this section">#</a>
+</h2>
+<p>we use $256$ bits to represent big integers and our challenge and the modulus for <code>ark-bn256</code> uses $254$ bits. Thus, if sampled a 2 limbed $128$ bit integer $x$ and used that as the challenge as is <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that $x &lt; p$ which the CIOS algorithm assumes.
+we use $256$ bits to represent big integers and our challenge and the modulus for <code>ark-bn254</code> uses $254$ bits. Thus, if sampled a 2 limbed $128$ bit integer $x$ and used that as the challenge as is <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that $x &lt; p$ which the CIOS algorithm assumes.
+So we clear the first 3 bits of $x$ to ensure that $x$ is <strong>ALWAYS</strong> less than $p$.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">impl</span><span>&lt;</span><span style="color: #6F42C1;">F</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> JoltField</span><span>&gt;</span><span style="color: #6F42C1;"> MontU128Challenge</span><span>&lt;</span><span style="color: #6F42C1;">F</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">pub fn</span><span style="color: #6F42C1;"> new</span><span>(value</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> u128</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #005CC5;"> Self</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #6A737D;">    // MontU128 can always be represented by 125 bits.</span></span>
+<span class="giallo-l"><span style="color: #6A737D;">    // This guarantees that the big integer is never greater than the</span></span>
+<span class="giallo-l"><span style="color: #6A737D;">    // bn254 modulus</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    let</span><span> val_masked</span><span style="color: #D73A49;"> =</span><span> value</span><span style="color: #D73A49;"> &amp;</span><span> (</span><span style="color: #6F42C1;">u128</span><span style="color: #D73A49;">::</span><span style="color: #005CC5;">MAX</span><span style="color: #D73A49;"> &gt;&gt;</span><span style="color: #005CC5;"> 3</span><span>);</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    let</span><span> low</span><span style="color: #D73A49;"> =</span><span> val_masked</span><span style="color: #D73A49;"> as</span><span style="color: #6F42C1;"> u64</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    let</span><span> high</span><span style="color: #D73A49;"> =</span><span> (val_masked</span><span style="color: #D73A49;"> &gt;&gt;</span><span style="color: #005CC5;"> 64</span><span>)</span><span style="color: #D73A49;"> as</span><span style="color: #6F42C1;"> u64</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #005CC5;">    Self</span><span> {</span></span>
+<span class="giallo-l"><span>        value</span><span style="color: #D73A49;">:</span><span> [</span><span style="color: #005CC5;">0</span><span>,</span><span style="color: #005CC5;"> 0</span><span>, low, high],</span></span>
+<span class="giallo-l"><span>        _marker</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> PhantomData</span><span>,</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">pub fn</span><span style="color: #6F42C1;"> value</span><span>(</span><span style="color: #D73A49;">&amp;</span><span style="color: #005CC5;">self</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span> [</span><span style="color: #6F42C1;">u64</span><span>;</span><span style="color: #005CC5;"> 4</span><span>] {</span></span>
+<span class="giallo-l"><span style="color: #005CC5;">    self</span><span style="color: #D73A49;">.</span><span>value</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">pub fn</span><span style="color: #6F42C1;"> random</span><span>&lt;</span><span style="color: #6F42C1;">R</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Rng</span><span style="color: #D73A49;"> + ?</span><span style="color: #6F42C1;">Sized</span><span>&gt;(rng</span><span style="color: #D73A49;">: &amp;mut</span><span style="color: #6F42C1;"> R</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #005CC5;"> Self</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #005CC5;">		Self</span><span style="color: #D73A49;">::</span><span style="color: #6F42C1;">from</span><span>(rng</span><span style="color: #D73A49;">.gen::</span><span>&lt;</span><span style="color: #6F42C1;">u128</span><span>&gt;())</span></span>
+<span class="giallo-l"><span>	}</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"></span></code></pre><h2 id="footnotes-and-references">Footnotes and References<a class="zola-anchor" href="#footnotes-and-references" aria-label="Link to this section">#</a>
+</h2>
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn-a">
+<p>There are optimisations by [?] that improve on this, but the optimisations discussed in this note still apply, so for the sake of simplicity, we describe the Sum-check protocol in its simplest form. <a href="#fr-a-1">↩</a></p>
+</li>
+<li id="fn-c">
+<p>We have to conditionally subtract from $p$ to get the actual right answer, but this operation is common to both the baseline and our optimisation, so we do not focus on this. <a href="#fr-c-1">↩</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+  </div>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <!-- <div> -->
+    <!--   <h2>Working Notes</h2> -->
+    <!--   <p>Something to say</p> -->
+    <!-- </div> -->
+    
+    <!-- <div> -->
+    <!--   <h2>Elsewhere</h2> -->
+    <!--   <ul> -->
+    <!--     <li><a href="https://randomwalks.xyz/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/tags">Browse by tag</a></li> -->
+    <!--   </ul> -->
+    <!-- </div> -->
+    
+    <div class="footer-credit">
+      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('pre').forEach(function (pre) {
+      if (!pre.querySelector('code')) return;
+      var button = document.createElement('button');
+      button.className = 'copy-code';
+      button.type = 'button';
+      button.textContent = 'Copy';
+      button.addEventListener('click', function () {
+        var clone = pre.querySelector('code').cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function (line) { line.remove(); });
+        navigator.clipboard.writeText(clone.textContent).then(function () {
+          button.textContent = 'Copied';
+          window.setTimeout(function () { button.textContent = 'Copy'; }, 1400);
+        });
+      });
+      pre.appendChild(button);
+    });
+  </script>
+  <script>
+    window.addEventListener('load', function () {
+      function containShortcodeMath() {
+        var selector =
+          '.callout mjx-container[display="true"], ' +
+          '.comparison-dual mjx-container[display="true"], ' +
+          '.comparison-single mjx-container[display="true"]';
+
+        function wrap(equation) {
+          if (equation.parentElement.classList.contains('shortcode-math-scroll')) return;
+          var boundary = document.createElement('span');
+          boundary.className = 'shortcode-math-scroll';
+          equation.before(boundary);
+          boundary.appendChild(equation);
+        }
+
+        document.querySelectorAll(selector).forEach(wrap);
+
+        document.querySelectorAll(
+          '.callout mjx-container:not([display="true"]), ' +
+          '.comparison-dual mjx-container:not([display="true"]), ' +
+          '.comparison-single mjx-container:not([display="true"])'
+        ).forEach(function (equation) {
+          var line = equation.closest('li, p') || equation.parentElement;
+          if (equation.getBoundingClientRect().width > line.clientWidth) wrap(equation);
+        });
+      }
+
+      if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+        MathJax.startup.promise.then(containShortcodeMath);
+      } else {
+        containShortcodeMath();
+      }
+    });
+  </script>
+  <script>
+    (function () {
+      var prose = document.querySelector('.prose');
+      if (!prose || prose.querySelector('.bibliography')) return;
+
+      var citations = prose.querySelectorAll('a.citation[data-cite-key]');
+      if (!citations.length) return;
+
+      var bibliography = document.createElement('div');
+      var heading = document.createElement('h2');
+      var list = document.createElement('ol');
+      var seen = new Set();
+
+      bibliography.className = 'bibliography';
+      heading.textContent = 'References';
+      bibliography.append(heading, list);
+
+      citations.forEach(function (citation) {
+        var key = citation.dataset.citeKey;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+
+        var item = document.createElement('li');
+        var title = document.createElement('span');
+        var authors = citation.dataset.citeAuthors;
+        var venue = citation.dataset.citeVenue;
+        var year = citation.dataset.citeYear;
+
+        item.id = 'ref-' + key;
+        if (authors) item.append(document.createTextNode(authors + '. '));
+        title.className = 'bib-title';
+        title.textContent = citation.dataset.citeTitle;
+        item.append(title);
+        if (citation.dataset.citeTitle) item.append(document.createTextNode('.'));
+        if (venue) {
+          var venueElement = document.createElement('em');
+          venueElement.textContent = venue;
+          item.append(document.createTextNode(' '), venueElement);
+        }
+        if (year) item.append(document.createTextNode((venue ? ', ' : ' ') + year));
+        item.append(document.createTextNode('.'));
+        list.appendChild(item);
+      });
+
+      prose.appendChild(bibliography);
+    })();
+
+    document.addEventListener('click', function (event) {
+      var back = event.target.closest('.bib-back');
+      if (back) {
+        event.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = event.target.closest('a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      event.preventDefault();
+      document.querySelectorAll('.citation-highlight').forEach(function (item) {
+        item.classList.remove('citation-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function (item) { item.remove(); });
+
+      var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+      if (!target) return;
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('citation-highlight');
+
+      if (!link.id) link.id = 'cite-source-' + target.id;
+      var arrow = document.createElement('a');
+      arrow.className = 'bib-back';
+      arrow.setAttribute('data-source', link.id);
+      arrow.setAttribute('href', '#' + link.id);
+      arrow.setAttribute('aria-label', 'Back to citation');
+      arrow.textContent = ' ↩';
+      target.appendChild(arrow);
+    });
+  </script>
+  <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
+  
+
+
+<script>
+  (function () {
+    var prose = document.querySelector('.prose');
+    if (!prose) return;
+
+    var references = prose.querySelectorAll('.footnote-reference');
+    var footnotes = prose.querySelector('.footnotes');
+    if (!footnotes) return;
+
+    function removeRedundantFootnoteHeading() {
+      var heading = prose.querySelector('#footnotes-and-references');
+      if (!heading || heading.nextElementSibling !== footnotes) return;
+
+      heading.remove();
+      document.querySelectorAll('.contents a[href="#footnotes-and-references"]').forEach(function (link) {
+        var item = link.closest('li');
+        if (item) item.remove();
+      });
+    }
+
+    if (!references.length) {
+      if (!footnotes.querySelector('li')) {
+        removeRedundantFootnoteHeading();
+        footnotes.remove();
+      }
+      return;
+    }
+
+    var transformed = 0;
+    references.forEach(function (reference) {
+      var link = reference.querySelector('a');
+      if (!link) return;
+
+      var targetId = (link.getAttribute('href') || '').replace('#', '');
+      var definition = targetId ? document.getElementById(targetId) : null;
+      if (!definition) return;
+
+      transformed += 1;
+      var noteId = 'sidenote-' + transformed;
+      var clone = definition.cloneNode(true);
+      clone.querySelectorAll('a[href^="#fr-"]').forEach(function (backlink) { backlink.remove(); });
+
+      var noteBody = Array.from(clone.children).map(function (child) {
+        return child.tagName === 'P' ? child.innerHTML : child.outerHTML;
+      }).join(' ');
+
+      var number = document.createElement('button');
+      number.type = 'button';
+      number.className = 'sidenote-number';
+      number.textContent = link.textContent;
+      number.setAttribute('aria-expanded', 'false');
+      number.setAttribute('aria-controls', noteId);
+      number.setAttribute('aria-label', 'Show footnote ' + link.textContent);
+
+      var note = document.createElement('span');
+      note.className = 'sidenote';
+      note.id = noteId;
+      note.innerHTML = '<span class="sidenote-num">' + link.textContent + '.</span> ' + noteBody;
+
+      number.addEventListener('click', function () {
+        var open = note.classList.toggle('is-open');
+        number.setAttribute('aria-expanded', String(open));
+      });
+
+      reference.replaceWith(number, note);
+    });
+
+    if (transformed) {
+      prose.classList.add('footnotes-are-sidenotes');
+      removeRedundantFootnoteHeading();
+    }
+  })();
+</script>
+
+
+
+</body>
+</html>

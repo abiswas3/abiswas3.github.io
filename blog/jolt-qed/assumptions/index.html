@@ -42,11 +42,13 @@
           BigO: ['{O\\ \\left(#1\\right)}', 1],
           boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
           OntoPHP: ['{\\operatorname{OFPHP}^{#1}_{#2}}', 2],
-          PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
+          PHP: ['{\\operatorname{PHP}(#3^{#1}_{#2})}', 3],
+          PHPBasic: ['\\PHP{n}{n-1}{K}'],
           FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
           poly: '{\\operatorname{poly}}',
           criticalAlpha: ['{\\alpha_{#1}}', 1],
-          CStar: '{C^{\\star}}',
+          CPlus: '{\\textcolor{blue}{C^{+}}}',
+          CStar: ['C'],
           GraphNbrs: ['{N_G(#1)}', 1],
           ClauseNbrs: ['{N_C(#1)}', 1],
           Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
@@ -668,7 +670,26 @@ So we do this manually by enforcing that each field uses something from the <cod
 
     var references = prose.querySelectorAll('.footnote-reference');
     var footnotes = prose.querySelector('.footnotes');
-    if (!references.length || !footnotes) return;
+    if (!footnotes) return;
+
+    function removeRedundantFootnoteHeading() {
+      var heading = prose.querySelector('#footnotes-and-references');
+      if (!heading || heading.nextElementSibling !== footnotes) return;
+
+      heading.remove();
+      document.querySelectorAll('.contents a[href="#footnotes-and-references"]').forEach(function (link) {
+        var item = link.closest('li');
+        if (item) item.remove();
+      });
+    }
+
+    if (!references.length) {
+      if (!footnotes.querySelector('li')) {
+        removeRedundantFootnoteHeading();
+        footnotes.remove();
+      }
+      return;
+    }
 
     var transformed = 0;
     references.forEach(function (reference) {
@@ -709,7 +730,10 @@ So we do this manually by enforcing that each field uses something from the <cod
       reference.replaceWith(number, note);
     });
 
-    if (transformed) prose.classList.add('footnotes-are-sidenotes');
+    if (transformed) {
+      prose.classList.add('footnotes-are-sidenotes');
+      removeRedundantFootnoteHeading();
+    }
   })();
 </script>
 
