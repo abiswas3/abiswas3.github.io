@@ -7,7 +7,7 @@
   <meta name="description" content="Written Word">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=21e0e613823da9ce9bd3">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=047e87d3196fa61adbea">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -136,8 +136,6 @@
       <h2>Contents</h2>
       <ol>
   <li>
-    <a href="#razbarov-s-pseudowidth">Razbarov’s PseudoWidth</a><ol>
-  <li>
     <a href="#some-notation">Some Notation</a>
   </li>
   <li>
@@ -166,8 +164,6 @@
     <a href="#main-theorem">Main Theorem</a>
   </li>
 </ol>
-  </li>
-</ol>
     </nav>
     
 
@@ -182,11 +178,9 @@ I should clean it up over the weekend</p>
 
 </aside>
 
-<h1 id="razbarov-s-pseudowidth">Razbarov’s PseudoWidth<a class="zola-anchor" href="#razbarov-s-pseudowidth" aria-label="Link to this section">#</a>
-</h1>
 <p><a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/">Last time</a>, we saw an example of how short proofs imply that all clauses are narrow, but then we also showed that any valid resolution refutation needs a wide clause, so the proofs must be long.
 We showed this for the basic $\PHP{n}{n-1}$, though the same argument applies to $\FPHP{n}{n-1}$.</p>
-<p>Now we’ll do this again, but we will not use width directly, but a proxy for width - pseudowidth introduced by <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle">Razborov (2003)</a>
+<p>Now we’ll do this again, but we will not use width directly, but a proxy for width - pseudowidth introduced by <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a>
 .
 Then we will use this again, when working with sparse graphs, along with a new idea called graph closure.</p>
 <h2 id="some-notation">Some Notation<a class="zola-anchor" href="#some-notation" aria-label="Link to this section">#</a>
@@ -217,7 +211,7 @@ These pigeons are important because there are many ways to satisfy these pigeons
 <p>Finally, any clause that contains exactly $w_0$ super-heavy pigeons where super-heaviness is parameterised by $\vec{d}$ is called a $(w_0, \vec{d})$-axiom.</p>
 <h2 id="first-key-technical-tool-the-pigeon-filtering-lemma">First Key Technical Tool - The Pigeon Filtering Lemma<a class="zola-anchor" href="#first-key-technical-tool-the-pigeon-filtering-lemma" aria-label="Link to this section">#</a>
 </h2>
-<p>The above lemma is a generalisation of filtering lemma that was originally introduced in <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle">Razborov (2003)</a>
+<p>The above lemma is a generalisation of filtering lemma that was originally introduced in <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a>
 .
 In the lemma below, $m$ and $n$ in our context will refer to the number of pigeons and holes, and $L$ will be the size of the resolution refutation, but this is a general combinatorial lemma that has nothing to do with the PHP or expander graphs per se.</p>
 
@@ -247,8 +241,8 @@ Given any arbitrary set of integer vectors of length $m$, $\vec{r}(1), \ldots, \
 
 <h2 id="how-do-we-use-the-pigeon-filtering-lemma">How Do We Use The Pigeon Filtering Lemma<a class="zola-anchor" href="#how-do-we-use-the-pigeon-filtering-lemma" aria-label="Link to this section">#</a>
 </h2>
-<p>The way <a href="#ref-rezende2020Exp" class="citation citation-t" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs">de Rezende et al. (2020)</a>
- and <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle">Razborov (2003)</a>
+<p>The way <a href="#ref-rezende2020Exp" class="citation citation-t" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-key="rezende2020Exp" data-cite-authors="de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D." data-cite-title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-venue="CCC" data-cite-year="2020">de Rezende et al. (2020)</a>
+ and <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a>
  use this lemma is to show that short proofs imply short pseudo-width for all clauses in the proof.</p>
 <p>Then independently, they will show that valid refutations <strong>MUST</strong> contain a clause with large pseudowidth, therefore resolution refutations <strong>CANNOT</strong> be short.
 The proof is remarkably similar to the proof for showing lower bounds for PHP in the dense graph model.</p>
@@ -258,7 +252,7 @@ The proof is remarkably similar to the proof for showing lower bounds for PHP in
 <ul>
 <li>$m$ and $n$ mean the usual.</li>
 <li>$w_0$ is an upper bound on the proof size in $\log$ scale. We need this as we will later show that when proof sizes are smaller than $\Exp{w_0}$ we get a contradiction.</li>
-<li>$\alpha = 2$ in the original result by <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle">Razborov (2003)</a>
+<li>$\alpha = 2$ in the original result by <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a>
 , but here we will set it to $\SmallO{r/\log m}$ — and this will in some ways force us to have a very very strong expander.</li>
 </ul>
 
@@ -377,7 +371,7 @@ Therefore $\lambda(\bot) = \Span{\lambda{\psi_0}} = \Lambda$.</p>
 But if the pseudowidth of all clauses is small i.e smaller than $\frac{r}{2}$, then every resolvent spans a space entirely contained by the space spanned by its parents, thus we can actually never get to $\bot$, giving us our contradiction.
 This is formally shown in <strong>Lemma 4.10</strong>.</p>
 </aside>
-<p>More formally, Lemma 4.9 says that there exists $$\frac{C_0 \vee x \quad \Complement{x} \vee C_1}{C}$$ such that $\Span{\lambda(C)} \not\subseteq \Span{\lambda(C_0), \lambda(C_1)}$ (otherwise, how do we get to $\bot$). (Remember, in <a href="#ref-beame1996simplified" class="citation citation-t" title="Simplified and Improved Resolution Lower Bounds">Beame &amp; Pitassi (1996)</a>
+<p>More formally, Lemma 4.9 says that there exists $$\frac{C_0 \vee x \quad \Complement{x} \vee C_1}{C}$$ such that $\Span{\lambda(C)} \not\subseteq \Span{\lambda(C_0), \lambda(C_1)}$ (otherwise, how do we get to $\bot$). (Remember, in <a href="#ref-beame1996simplified" class="citation citation-t" title="Simplified and Improved Resolution Lower Bounds" data-cite-key="beame1996simplified" data-cite-authors="Beame, P. and Pitassi, T." data-cite-title="Simplified and Improved Resolution Lower Bounds" data-cite-venue="FOCS" data-cite-year="1996">Beame &amp; Pitassi (1996)</a>
 , <a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/">we did the same thing</a> with critical pigeons, now we’re playing the same game with subspaces, which is a generalisation.)</p>
 <p>But Lemma 4.10 prevents this from happening if $\max\{\Closure{C_0}, \Closure{C_1}, \Closure{C}\} \le \frac{r}{4}$.
 Thus, for the resolvent to span more space, we need some $C’ \in \{C, C_0, C_1\}$ such that $\Closure{C’} &gt; \frac{r}{4} = \frac{k\Delta}{c - \nu} = \frac{r}{4\xi}$.
@@ -392,7 +386,7 @@ Strong expansion implies many holes. Many holes means many vectors in $\mathcal{
   <div class="qed" aria-label="End of proof">□</div>
 </aside>
 
-<p>Now we prove the main lemmas the above proof relies on. Numbering is from <a href="#ref-rezende2020Exp" class="citation citation-t" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs">de Rezende et al. (2020)</a>
+<p>Now we prove the main lemmas the above proof relies on. Numbering is from <a href="#ref-rezende2020Exp" class="citation citation-t" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-key="rezende2020Exp" data-cite-authors="de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D." data-cite-title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-venue="CCC" data-cite-year="2020">de Rezende et al. (2020)</a>
 .</p>
 
 <aside class="callout callout-lemma thm-numbered">
@@ -480,44 +474,7 @@ $$ \max\Big\{\Closure{C_0}, \Closure{C_1}, \Closure{C}\Big\} \le \frac{r}{4} \im
 
 <h2 id="main-theorem">Main Theorem<a class="zola-anchor" href="#main-theorem" aria-label="Link to this section">#</a>
 </h2>
-
-
-<div class="bibliography">
-<h2>References</h2>
-<ol>
-
-  
-  
-  
-  <li id="ref-razborov2003resolution">
-    Razborov, A..
-    <span class="bib-title">Resolution Lower Bounds for the Weak Pigeonhole Principle</span>.
-    <em>ECCC</em>, 2003.
-  </li>
-  
-
-  
-  
-  
-  <li id="ref-rezende2020Exp">
-    de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D..
-    <span class="bib-title">Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs</span>.
-    <em>CCC</em>, 2020.
-  </li>
-  
-
-  
-  
-  
-  <li id="ref-beame1996simplified">
-    Beame, P. and Pitassi, T..
-    <span class="bib-title">Simplified and Improved Resolution Lower Bounds</span>.
-    <em>FOCS</em>, 1996.
-  </li>
-  
-
-</ol>
-</div>
+<p>TODO:</p>
 <section class="footnotes">
 <ol class="footnotes-list">
 </ol>
@@ -567,6 +524,52 @@ $$ \max\Big\{\Closure{C_0}, \Closure{C_1}, \Closure{C}\Big\} \le \frac{r}{4} \im
     });
   </script>
   <script>
+    (function () {
+      var prose = document.querySelector('.prose');
+      if (!prose || prose.querySelector('.bibliography')) return;
+
+      var citations = prose.querySelectorAll('a.citation[data-cite-key]');
+      if (!citations.length) return;
+
+      var bibliography = document.createElement('div');
+      var heading = document.createElement('h2');
+      var list = document.createElement('ol');
+      var seen = new Set();
+
+      bibliography.className = 'bibliography';
+      heading.textContent = 'References';
+      bibliography.append(heading, list);
+
+      citations.forEach(function (citation) {
+        var key = citation.dataset.citeKey;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+
+        var item = document.createElement('li');
+        var title = document.createElement('span');
+        var authors = citation.dataset.citeAuthors;
+        var venue = citation.dataset.citeVenue;
+        var year = citation.dataset.citeYear;
+
+        item.id = 'ref-' + key;
+        if (authors) item.append(document.createTextNode(authors + '. '));
+        title.className = 'bib-title';
+        title.textContent = citation.dataset.citeTitle;
+        item.append(title);
+        if (citation.dataset.citeTitle) item.append(document.createTextNode('.'));
+        if (venue) {
+          var venueElement = document.createElement('em');
+          venueElement.textContent = venue;
+          item.append(document.createTextNode(' '), venueElement);
+        }
+        if (year) item.append(document.createTextNode((venue ? ', ' : ' ') + year));
+        item.append(document.createTextNode('.'));
+        list.appendChild(item);
+      });
+
+      prose.appendChild(bibliography);
+    })();
+
     document.addEventListener('click', function (event) {
       var back = event.target.closest('.bib-back');
       if (back) {

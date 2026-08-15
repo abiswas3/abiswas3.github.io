@@ -7,7 +7,7 @@
   <meta name="description" content="Written Word">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=21e0e613823da9ce9bd3">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=047e87d3196fa61adbea">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -439,6 +439,52 @@ Unfortunately, jolt is <strong>always</strong> in Machine mode.</p>
     });
   </script>
   <script>
+    (function () {
+      var prose = document.querySelector('.prose');
+      if (!prose || prose.querySelector('.bibliography')) return;
+
+      var citations = prose.querySelectorAll('a.citation[data-cite-key]');
+      if (!citations.length) return;
+
+      var bibliography = document.createElement('div');
+      var heading = document.createElement('h2');
+      var list = document.createElement('ol');
+      var seen = new Set();
+
+      bibliography.className = 'bibliography';
+      heading.textContent = 'References';
+      bibliography.append(heading, list);
+
+      citations.forEach(function (citation) {
+        var key = citation.dataset.citeKey;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+
+        var item = document.createElement('li');
+        var title = document.createElement('span');
+        var authors = citation.dataset.citeAuthors;
+        var venue = citation.dataset.citeVenue;
+        var year = citation.dataset.citeYear;
+
+        item.id = 'ref-' + key;
+        if (authors) item.append(document.createTextNode(authors + '. '));
+        title.className = 'bib-title';
+        title.textContent = citation.dataset.citeTitle;
+        item.append(title);
+        if (citation.dataset.citeTitle) item.append(document.createTextNode('.'));
+        if (venue) {
+          var venueElement = document.createElement('em');
+          venueElement.textContent = venue;
+          item.append(document.createTextNode(' '), venueElement);
+        }
+        if (year) item.append(document.createTextNode((venue ? ', ' : ' ') + year));
+        item.append(document.createTextNode('.'));
+        list.appendChild(item);
+      });
+
+      prose.appendChild(bibliography);
+    })();
+
     document.addEventListener('click', function (event) {
       var back = event.target.closest('.bib-back');
       if (back) {
