@@ -7,7 +7,7 @@
   <meta name="description" content="Written Word">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=65525d0aaffd80a77b25">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=9f3f3f161e11a605fe54">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -141,7 +141,7 @@
     <a href="#preliminary-material">Preliminary Material</a>
   </li>
   <li>
-    <a href="#small-sized-proofs-must-have-small-width">Small Sized Proofs Must Have Small Width</a>
+    <a href="#valid-refutations-have-wide-positive-clauses">Valid Refutations Have Wide Positive Clauses</a>
   </li>
   <li>
     <a href="#small-sized-proofs-imply-small-width-proofs">Small Sized Proofs Imply Small Width Proofs</a>
@@ -253,22 +253,12 @@ Therefore, $X_{ij} = 1 = \Complement{x_{ij}}$ as $x_{i’j} = 1$.</p>
 
 </aside>
 
-<h2 id="small-sized-proofs-must-have-small-width">Small Sized Proofs Must Have Small Width<a class="zola-anchor" href="#small-sized-proofs-must-have-small-width" aria-label="Link to this section">#</a>
-</h2>
 <p>Before going into the details of the proof, we describe the general proof strategy:</p>
 <p>Show that for all valid refutations, a small proof length/size implies that the positive conversion of every clause in the proof has a small width (number of literals in clause).
 However, we show that a valid PHP refutation <strong>MUST</strong> have large width.
 Thus, we can conclude that the size of the proof must be large.</p>
-
-<aside class="callout callout-remark">
-  
-  <div class="callout-title">Remark</div>
-  
-  <p>This theme will continue when showing stronger lower bounds for the more constrained PHPs.
-Instead of width, we will use pseudowidth, which can be seen as the number of <strong>interesting</strong> literals in a clause. See the <a href="https://randomwalks.xyz/blog/proof-complexity/pseudowidth/">pseudowidth post</a> for details.</p>
-
-</aside>
-
+<h2 id="valid-refutations-have-wide-positive-clauses">Valid Refutations Have Wide Positive Clauses<a class="zola-anchor" href="#valid-refutations-have-wide-positive-clauses" aria-label="Link to this section">#</a>
+</h2>
 
 <aside class="callout callout-theorem thm-numbered">
   
@@ -285,11 +275,13 @@ $$\mathcal{P}(C’) := \{ i \in [n]: \exists \criticalAlpha{i} \in \bit^{n\times
 <p>Let $\mu(C) = \Size{\mathcal{P}(C)}$.
 Then for each pigeon axiom $P_i$, by definition $\mu(P_i) = 1$.<sup class="footnote-reference" id="fr-why-mu-1-1"><a href="#fn-why-mu-1">1</a></sup>
 On the other hand, $\mu(\emptyset) = [n]$ (as all assignments, and therefore all critical assignments falsify $\emptyset$ by definition).</p>
-<p>For any resolvent $C’$ that is derived from $A’$ and $B’$, we have $\mathcal{P}(C’) \subseteq \mathcal{P}(A’) \cup \mathcal{P}(B’)$, as $C’$ must have the exact same literals in $A’$ or $B’$.
+<p>For any resolvent $C’$ that is derived from $A’$ and $B’$, we have $\mathcal{P}(C’) \subseteq \mathcal{P}(A’) \cup \mathcal{P}(B’)$, as $C’$ must have the combined literals in $A’$ and $B’$.
 Therefore, $\mu(C’) \leq \mu(A’) + \mu(B’)$.</p>
 <p>Set $\epsilon:=1/3$.
-Going from $P_i$’s to $\emptyset$, there must be some clause in the proof, lets call it $\CStar$, such that<sup class="footnote-reference" id="fr-size-1"><a href="#fn-size">2</a></sup> its parents $A$ and $B$ have $\mu(A) &lt; \epsilon n$ and $\mu(B) &lt; \epsilon n$, but $C \geq \epsilon n$. Then we have</p>
-<p>$$\epsilon n \le \mu(\CStar) \le 2\epsilon n$$</p>
+Now walk the proof tree starting at the pigeon axioms $P_i$’s to the conclusion $\emptyset$, there must be some clause in the proof, lets call it $\CStar$, such that<sup class="footnote-reference" id="fr-size-1"><a href="#fn-size">2</a></sup> its parents $A$ and $B$ have $\mu(A) &lt; \epsilon n$ and $\mu(B) &lt; \epsilon n$, but $C \geq \epsilon n$.
+This has to happen for us to get $\mu(\emptyset) = n$ as the resolvents critical pigeon set is upper bounded by the sum of its parents, and the first set of parents start at 1.
+Then we have</p>
+<p>$$\epsilon n \le \mu(\CStar) &lt; 2\epsilon n \tag{a}$$</p>
 <p>Now pick arbitrary $i \in \mathcal{P}(\CStar)$ and arbitrary $j \notin \mathcal{P}(\CStar)$.
 There are $s:=\Size{\mu(\CStar)}$ choices for $i$ and $n-s$ choices for $j$.
 Let $\criticalAlpha{i}$ denote the critical assignment which causes $i$ to be in $P(\CStar)$.
@@ -299,15 +291,20 @@ We also have $\CStar(\criticalAlpha{i \leftrightarrow j}) = 1$.<sup class="footn
 Similarly, $\CPlus(\criticalAlpha{i \leftrightarrow j}) = 1$ by the same lemma.</p>
 <p>Say in $\criticalAlpha{i}$ pigeon $j$ was assigned hole $k$.
 Then in $\criticalAlpha{i \leftrightarrow j}$, pigeon $i$ is assigned $k$ and $j$ is unassigned.
-Setting any variable to false should never flip a positive clause $\CPlus$ to true.
-So the only way $\CPlus(\criticalAlpha{i \leftrightarrow j}) = 1$ is flipped to true is because pigeon $i$ got assigned a hole $k$ i.e. $x_{ik}$ must be in $\CPlus$.</p>
+Note, in $\criticalAlpha{i}$, we have $x_{ik}=0, x_{jk} =1$,  and $\criticalAlpha{i \leftrightarrow j}$ we have $x_{ik}=1, x_{jk}=0$.
+There is <em>no other</em> difference between the two critical assignments.</p>
+<p>Setting any variable to false should never flip a positive clause $\CPlus$ from false to true.
+Therefore setting $x_{jk}=0$  cannot make $\CPlus(\criticalAlpha{i \leftrightarrow j}) = 1$.
+So the only way $\CPlus(\criticalAlpha{i \leftrightarrow j})$ is flipped to true is because pigeon $i$ got assigned a hole $k$.
+As there are no negated variables in positive conversions we can conclude that $x_{ik}$ must be in $\CPlus$.</p>
 <p>Thus, for a fixed $i$ and $j$ we got a unique hole $k$ such that $x_{ik}$ is in $\CPlus$.
-If we picked a different pigeon $j’$ to swap with $i$ we’d get a different hole $k’$, giving us a new literal $x_{ik’}$.
-So we get a unique $x_{i, j(k)}$ literal in $\CPlus$ for each $i \in \mathcal{P}(C)$ and $j \notin \mathcal{P}(C)$.
+There are $s$ $i$‘s, and if we picked a different pigeon $j’$ to swap with $i$ we’d get a different hole $k’:= j’(k’)$, giving us a new literal $x_{ik’} \in \CPlus$.
+So we get a unique $x_{i, j(k)}$ literal in $\CPlus$ for each $j \notin \mathcal{P}(C)$.
 Therefore, we can conclude that $\CPlus$ has $s(n-s)$ literals.</p>
 <p>$$
 w(\CPlus) := s(n-s) \geq \epsilon n (n - 2\epsilon n) = n^2/9
 $$</p>
+<p>Where the last inequality comes from Equation $(a)$</p>
 <section class="footnotes">
 <ol class="footnotes-list">
 <li id="fn-why-mu-1">
@@ -344,19 +341,16 @@ Therefore by the averaging argument, there <em>must be one literal</em>, let’s
 <ul>
 <li>
 <p>We set $x_{ij} = 1$ and $x_{i’j} = 0$ for all $i’ \neq i$:
-<em>We have assigned pigeon $i$ the hole $j$, and <em>no other</em> pigeon $i’$ is assigned $j$.</em></p>
+<em>We have assigned pigeon $i$ the hole $j$, and <em>no other</em> pigeon $i’$ is assigned $j$. In other words, we have satisfied pigeon axiom $P_i$ and hole axiom $H_j^{i,i’}$ for all pairs $i\neq i’$.</em></p>
 </li>
 <li>
-<p>Set $x_{ij’} = 0$ for all $j’ \neq j$: <em>$i$ is <em>not</em> matched to any hole $j’$ that is not $j$.</em></p>
+<p>We also set $x_{ij’} = 0$ for all $j’ \neq j$: This ensures <em>$i$ is <em>not</em> matched to any hole $j’$ that is not $j$. As a result we can ignore pigeon $i$ and hole $j$, and consider them sorted.</em></p>
 </li>
 </ul>
-<blockquote>
-<p>In other words, we have satisfied pigeon axiom $P_i$ and hole axiom $H_j^{i,i’}$ for all pairs $i\neq i’$.</p>
-</blockquote>
-<p>Setting $x_{ij} = 1$ implies we satisfy at least $\epsilon s_0$ of the clauses in $S_0$ (as these clauses have no negations).
+<p>Setting $x_{ij} = 1$ implies we satisfy at least $\epsilon s_0$ of the clauses in $S_0$ (as these clauses have no negations, and $x_{ij}$ was the literal that was present in all these clauses from the averaging argument).
 Thus, the number of wide and unsatisfied clauses left in $S_0$ is at most $s_0(1 - \epsilon)$.</p>
-<p>Also the way we picked our labelling strategy<sup class="footnote-reference" id="fr-b-1"><a href="#fn-b">3</a></sup>, if $\CPlus \in \pi^+$ is satisfied, then so is the corresponding $C \in \pi$ if was created from.
-Define $\pi_1$ by applying the above labelling strategy to every clause $C \in \pi$, which gives us a valid refutation of $\PHP{n-1}{n-2}{K}$.</p>
+<p>Also the way we picked our labelling strategy<sup class="footnote-reference" id="fr-b-1"><a href="#fn-b">3</a></sup>, if $\CPlus \in \pi^+$ is satisfied, then so is the corresponding $C \in \pi$ it was created from.
+Define $\pi_1 \subseteq \pi$ by applying the above labelling strategy to every clause $C \in \pi$, and getting ride of the satisfied clauses, which gives us a valid refutation of $\PHP{n-1}{n-2}{K}$.</p>
 <p>Now we repeat the same process $k=\lceil\frac{\log S_0}{\epsilon}\rceil$ times.
 Each time we will find a new literal $x_{ij}$ that is present in $\epsilon$ fraction of the wide clauses remaining in $S_0$.
 Then we re-apply our labelling strategy, shrinking the size of $S_0$ to $s_0(1-\epsilon)^k$.
