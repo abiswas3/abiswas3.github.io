@@ -2,19 +2,15 @@
   'use strict';
 
   var palette = document.getElementById('command-palette');
-  var trigger = document.querySelector('.command-trigger');
-  if (!palette || !trigger) return;
+  if (!palette) return;
 
   var input = document.getElementById('command-input');
   var results = document.getElementById('command-results');
   var status = palette.querySelector('.command-status');
-  var shortcut = trigger.querySelector('kbd');
   var entries = null;
   var visible = [];
   var selected = 0;
   var lastFocus = null;
-
-  if (!/Mac|iPhone|iPad/.test(navigator.platform)) shortcut.textContent = 'Ctrl K';
 
   function normalise(value) {
     return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -180,7 +176,6 @@
     if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
   }
 
-  trigger.addEventListener('click', open);
   palette.querySelector('[data-command-close]').addEventListener('click', close);
   input.addEventListener('input', render);
 
