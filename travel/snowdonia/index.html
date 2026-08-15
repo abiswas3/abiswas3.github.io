@@ -7,7 +7,7 @@
   <meta name="description" content="Under-appreciated part of the world.">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=047e87d3196fa61adbea">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=28784b8cc17810d9e14d">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -375,6 +375,41 @@
         });
       });
       pre.appendChild(button);
+    });
+  </script>
+  <script>
+    window.addEventListener('load', function () {
+      function containShortcodeMath() {
+        var selector =
+          '.callout mjx-container[display="true"], ' +
+          '.comparison-dual mjx-container[display="true"], ' +
+          '.comparison-single mjx-container[display="true"]';
+
+        function wrap(equation) {
+          if (equation.parentElement.classList.contains('shortcode-math-scroll')) return;
+          var boundary = document.createElement('span');
+          boundary.className = 'shortcode-math-scroll';
+          equation.before(boundary);
+          boundary.appendChild(equation);
+        }
+
+        document.querySelectorAll(selector).forEach(wrap);
+
+        document.querySelectorAll(
+          '.callout mjx-container:not([display="true"]), ' +
+          '.comparison-dual mjx-container:not([display="true"]), ' +
+          '.comparison-single mjx-container:not([display="true"])'
+        ).forEach(function (equation) {
+          var line = equation.closest('li, p') || equation.parentElement;
+          if (equation.getBoundingClientRect().width > line.clientWidth) wrap(equation);
+        });
+      }
+
+      if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+        MathJax.startup.promise.then(containShortcodeMath);
+      } else {
+        containShortcodeMath();
+      }
     });
   </script>
   <script>
