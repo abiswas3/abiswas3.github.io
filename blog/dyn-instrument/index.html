@@ -7,8 +7,8 @@
   <meta name="description" content="Written Word">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="/style.css?h=4d66b1897c4e7fff0c8e">
-  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="/atom.xml">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=4d66b1897c4e7fff0c8e">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
   
@@ -77,16 +77,16 @@
   <a class="skip-link" href="#main-content">Skip to content</a>
 
   <header class="site-header">
-    <a class="wordmark" href="/" aria-label="Random Walks — home">
+    <a class="wordmark" href="https://randomwalks.xyz" aria-label="Random Walks — home">
       <span>Random</span><span>Walks</span>
     </a>
     <nav class="site-nav" aria-label="Main navigation">
-      <a href="/publications/">Publications</a>
-      <a href="/notes/">Notes</a>
-      <a href="/travel/">Miscellaneous</a>
-      <a href="/cv/">CV</a>
-      <!-- <a href="/tags">Tags</a> -->
-      <!-- <a href="/atom.xml">Feed</a> -->
+      <a href="https://randomwalks.xyz/publications/">Publications</a>
+      <a href="https://randomwalks.xyz/blog/">Notes</a>
+      <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
+      <a href="https://randomwalks.xyz/cv/">CV</a>
+      <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
+      <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
   </header>
 
@@ -110,7 +110,7 @@
     </div>
     
     <ul class="tag-list" aria-label="Tags">
-      <li><a href="/tags/instrumentation/">instrumentation</a></li><li><a href="/tags/jolt/">jolt</a></li>
+      <li><a href="https://randomwalks.xyz/tags/instrumentation/">instrumentation</a></li><li><a href="https://randomwalks.xyz/tags/jolt/">jolt</a></li>
     </ul>
     
   </header>
@@ -189,7 +189,7 @@ The remainder of this document tries to understand why?</p>
 <p>We were provided with an <a rel="noopener noreferrer external" target="_blank" href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">implementation</a> of the new multiplication algorithm<sup class="footnote-reference" id="fr-y-1"><a href="#fn-y">5</a></sup> by the folks at <a rel="noopener noreferrer external" target="_blank" href="https://www.ingonyama.com/">Ingoyama</a>, specifically targeting the <a rel="noopener noreferrer external" target="_blank" href="https://neuromancer.sk/std/bn/bn254">BN-254</a> curve (i.e $n=4$), which we refer to as Y-mult in this post.</p>
 <p>The algorithms used for comparison are the Separated Operand Scanning Algorithm (SOS) and the optimised Coarsely Integrated Operand Scanning Algorithm (CIOS).
 These were the state of the art Montgomery multiplication algorithms prior to Yuval’s post.
-The SOS algorithm is described in <a href="/notes/mont_mult/Acar.pdf">Acar’s thesis</a>, and we refer to it as C-mult in this post.
+The SOS algorithm is described in <a href="/blog/mont_mult/Acar.pdf">Acar’s thesis</a>, and we refer to it as C-mult in this post.
 We denote as G-mult, the optimised version of the CIOS<sup class="footnote-reference" id="fr-z3-1"><a href="#fn-z3">6</a></sup> algorithm by the <a rel="noopener noreferrer external" target="_blank" href="https://hackmd.io/@gnark/modular_multiplication">Gnark</a> team.
 <a rel="noopener noreferrer external" target="_blank" href="https://github.com/a16z/arkworks-algebra">Arkworks</a> already had an implementations of the CIOS algorithm, and it can be found <a href="htt:ps://github.com/a16z/arkworks-algebra/blob/7ad88c46e859a94ab8e0b19fd8a217c3dc472f1c/ff-macros/src/montgomery/mul.rs#L11">here</a>.
 An implementation of the SOS<sup class="footnote-reference" id="fr-g-1"><a href="#fn-g">7</a></sup> algorithm can be found <a rel="noopener noreferrer external" target="_blank" href="https://github.com/a16z/arkworks-algebra/blob/7ad88c46e859a94ab8e0b19fd8a217c3dc472f1c/ff-macros/src/montgomery/mul.rs#L77">here</a>.</p>
@@ -215,7 +215,7 @@ to Montgomery form is not included in benchmarking run times.</p>
 <span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> bench</span></span></code></pre>
 <blockquote>
 <p><strong>UPDATE: 2025-06-01</strong>: The barebones_profiling has been merged into main, and running <code>cargo bench</code> should give you time stamps for 4 algorithms: the arkworks, and implementation discussed above, plus additionally two different implementations, one of CIOS and one of the new algorithm – written to optimise use of registers.
-See <a href="/notes/mont-mult/">more details</a></p>
+See <a href="https://randomwalks.xyz/blog/mont-mult/">more details</a></p>
 </blockquote>
 <h3 id="computer-information">Computer Information<a class="zola-anchor" href="#computer-information" aria-label="Link to this section">#</a>
 </h3>
@@ -462,7 +462,7 @@ A more robust way to extract the assembly is to do the following:</p>
 <p>The terms word, digit, limbs are all interchangeable. For everything we discuss here, the word size is 64-bits. So a 2-limb integer is just an integer that takes 2$\times$ 64 bits to describe. <a href="#fr-z-1">↩</a></p>
 </li>
 <li id="fn-z2">
-<p>A description of this algorithm can be found in <a href="/notes/dyn-instrument/papers/Acard.pdf">Chapter 1 of Acar’s Phd thesis</a>. <a href="#fr-z2-1">↩</a></p>
+<p>A description of this algorithm can be found in <a href="https://randomwalks.xyz/blog/dyn-instrument/papers/Acard.pdf">Chapter 1 of Acar’s Phd thesis</a>. <a href="#fr-z2-1">↩</a></p>
 </li>
 <li id="fn-e">
 <p>This is usually because most CPU’s do not directly offer a modulo instruction natively. <a href="#fr-e-1">↩</a></p>
@@ -498,8 +498,8 @@ This only sped things up. <a href="#fr-y-1">↩</a></p>
     <!-- <div> -->
     <!--   <h2>Elsewhere</h2> -->
     <!--   <ul> -->
-    <!--     <li><a href="/atom.xml">Atom feed</a></li> -->
-    <!--     <li><a href="/tags">Browse by tag</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/tags">Browse by tag</a></li> -->
     <!--   </ul> -->
     <!-- </div> -->
     

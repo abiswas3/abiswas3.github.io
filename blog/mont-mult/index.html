@@ -7,8 +7,8 @@
   <meta name="description" content="Written Word">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="/style.css?h=4d66b1897c4e7fff0c8e">
-  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="/atom.xml">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=4d66b1897c4e7fff0c8e">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
   
@@ -77,16 +77,16 @@
   <a class="skip-link" href="#main-content">Skip to content</a>
 
   <header class="site-header">
-    <a class="wordmark" href="/" aria-label="Random Walks — home">
+    <a class="wordmark" href="https://randomwalks.xyz" aria-label="Random Walks — home">
       <span>Random</span><span>Walks</span>
     </a>
     <nav class="site-nav" aria-label="Main navigation">
-      <a href="/publications/">Publications</a>
-      <a href="/notes/">Notes</a>
-      <a href="/travel/">Miscellaneous</a>
-      <a href="/cv/">CV</a>
-      <!-- <a href="/tags">Tags</a> -->
-      <!-- <a href="/atom.xml">Feed</a> -->
+      <a href="https://randomwalks.xyz/publications/">Publications</a>
+      <a href="https://randomwalks.xyz/blog/">Notes</a>
+      <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
+      <a href="https://randomwalks.xyz/cv/">CV</a>
+      <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
+      <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
   </header>
 
@@ -110,7 +110,7 @@
     </div>
     
     <ul class="tag-list" aria-label="Tags">
-      <li><a href="/tags/jolt/">jolt</a></li><li><a href="/tags/algebra/">algebra</a></li><li><a href="/tags/montgomery-multiplication/">montgomery-multiplication</a></li>
+      <li><a href="https://randomwalks.xyz/tags/jolt/">jolt</a></li><li><a href="https://randomwalks.xyz/tags/algebra/">algebra</a></li><li><a href="https://randomwalks.xyz/tags/montgomery-multiplication/">montgomery-multiplication</a></li>
     </ul>
     
   </header>
@@ -185,7 +185,7 @@
     <div class="prose">
       <h2 id="background">Background<a class="zola-anchor" href="#background" aria-label="Link to this section">#</a>
 </h2>
-<p>In an earlier <a href="/notes/dyn-instrument/">post</a>, we analysed why <a rel="noopener noreferrer external" target="_blank" href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">this implementation</a> of the improved <a rel="noopener noreferrer external" target="_blank" href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication">Montgomery multiplication</a> algorithm by <a rel="noopener noreferrer external" target="_blank" href="https://hackmd.io/@Ingonyama/Barret-Montgomery">Yuval Domb</a> was not empirically faster out of the box.
+<p>In an earlier <a href="https://randomwalks.xyz/blog/dyn-instrument/">post</a>, we analysed why <a rel="noopener noreferrer external" target="_blank" href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">this implementation</a> of the improved <a rel="noopener noreferrer external" target="_blank" href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication">Montgomery multiplication</a> algorithm by <a rel="noopener noreferrer external" target="_blank" href="https://hackmd.io/@Ingonyama/Barret-Montgomery">Yuval Domb</a> was not empirically faster out of the box.
 After disassembling the code using the Intel Pin tool, we identified large memory reads and writes as the primary source of slower run times.
 Although the analysis was specific to x86 architectures, the empirical findings were consistent across MacBook M2 Laptops and Intel x86 Digital Ocean servers.
 This loss of performance, however, is an artefact of the implementation, not the algorithm itself<sup class="footnote-reference" id="fr-a-1"><a href="#fn-a">1</a></sup>.
@@ -253,7 +253,7 @@ In the process, we establish that there is not just 1 new algorithm for Montgome
 This gives all the background needed to figure out what is going on.</p>
 <p>Below, we actually describe the Separated Operand Scanning Algorithm (SOS), but deceptively refer to it as the Coarse Integrated Operand Scanning (CIOS) algorithm.
 This is done for ease of exposition only; the claims would hold regardless.
-See <a href="/notes/mont-mult/papers/Acard.pdf">Acar’s thesis Chapter 2</a> for more details.
+See <a href="https://randomwalks.xyz/blog/mont-mult/papers/Acard.pdf">Acar’s thesis Chapter 2</a> for more details.
 We also do not discuss the optimisations made by the <a rel="noopener noreferrer external" target="_blank" href="https://hackmd.io/@gnark/modular_multiplication">Gnark</a> team as they are not relevant in this context.</p>
 <p>Given a $n$ limb<sup class="footnote-reference" id="fr-f-1"><a href="#fn-f">3</a></sup> modulus $p$, integers $a$ and $b$ that are at most $p-1$, Montgomery multiplication computes</p>
 <p>$$ c \equiv abR^{-1} \mod p$$</p>
@@ -687,8 +687,8 @@ For anything in between, you’d want to use the mini-theorem above and figure o
     <!-- <div> -->
     <!--   <h2>Elsewhere</h2> -->
     <!--   <ul> -->
-    <!--     <li><a href="/atom.xml">Atom feed</a></li> -->
-    <!--     <li><a href="/tags">Browse by tag</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/tags">Browse by tag</a></li> -->
     <!--   </ul> -->
     <!-- </div> -->
     

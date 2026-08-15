@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
   <title>Random Walks</title>
-  <link rel="self" type="application/atom+xml" href="/notes/atom.xml"/>
-  <link rel="alternate" type="text/html" href="/"/>
+  <link rel="self" type="application/atom+xml" href="https://randomwalks.xyz/blog/atom.xml"/>
+  <link rel="alternate" type="text/html" href="https://randomwalks.xyz"/>
   <generator uri="https://www.getzola.org/">Zola</generator>
-  <id>/notes/atom.xml</id>
+  <id>https://randomwalks.xyz/blog/atom.xml</id>
   
   
   <entry xml:lang="en">
@@ -14,10 +14,10 @@
     
       <author><name>Ari</name></author>
     
-    <link rel="alternate" type="text/html" href="/notes/sail-to-lean/"/>
-    <id>/notes/sail-to-lean/</id>
+    <link rel="alternate" type="text/html" href="https://randomwalks.xyz/blog/sail-to-lean/"/>
+    <id>https://randomwalks.xyz/blog/sail-to-lean/</id>
     
-    <content type="html" xml:base="/notes/sail-to-lean/">
+    <content type="html" xml:base="https://randomwalks.xyz/blog/sail-to-lean/">
 &lt;aside class=&quot;callout callout-caution&quot;&gt;
   
   &lt;div class=&quot;callout-title&quot;&gt;Caution&lt;&#x2F;div&gt;
@@ -263,10 +263,10 @@ The executable version can simulate RISC-V binaries.&lt;&#x2F;p&gt;
     
       <author><name>Ari</name></author>
     
-    <link rel="alternate" type="text/html" href="/notes/streaming-sumchecks/"/>
-    <id>/notes/streaming-sumchecks/</id>
+    <link rel="alternate" type="text/html" href="https://randomwalks.xyz/blog/streaming-sumchecks/"/>
+    <id>https://randomwalks.xyz/blog/streaming-sumchecks/</id>
     
-    <content type="html" xml:base="/notes/streaming-sumchecks/">
+    <content type="html" xml:base="https://randomwalks.xyz/blog/streaming-sumchecks/">
 &lt;aside class=&quot;callout callout-remark&quot;&gt;
   
   &lt;div class=&quot;callout-title&quot;&gt;(Update) 2026-08-14&lt;&#x2F;div&gt;
@@ -408,7 +408,7 @@ For a given time step $t \in \lbrace 0,1\rbrace^{\log T}$, using information fro
 &lt;p&gt;That is satisfying constraint 1 for time step $t$ is equivalent to checking if $A(t, 0, -4) \times B(t, 0, -4) = 0$.
 The remaining 19 constraints give us evaluations $A(X_t, X_b, Y)$ and $B(X_t, X_b, Y)$ for $Y \in \lbrace -4, \ldots, 5\rbrace, X_b \in \lbrace 0,1\rbrace, X_t \in \lbrace 0,1\rbrace^{\log T}$.
 The picture you have in mind is the following
-&lt;img src=&quot;&#x2F;notes&#x2F;streaming-sumchecks&#x2F;trave_to_poly.svg&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;img src=&quot;https:&#x2F;&#x2F;randomwalks.xyz&#x2F;blog&#x2F;streaming-sumchecks&#x2F;trave_to_poly.svg&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;Satisfying all constraints is just saying the following:&lt;&#x2F;p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
 $$
@@ -502,7 +502,7 @@ $$t(\textcolor{pink}{X_b}) \Def \sum_{x_t \in \{0,1\}^{\log T}}\sum_{y \in \{-4,
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    .&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;gruen_poly_deg_3&lt;&#x2F;span&gt;&lt;span&gt;(t0, t_inf, previous_claim)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;the-remaining-rounds&quot;&gt;The Remaining Rounds&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-remaining-rounds&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h2&gt;
 &lt;p&gt;With $\widetilde{A}$ and $\widetilde{B}$ materialised, the remaining rounds are standard. The mental picture is the following:&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;img src=&quot;&#x2F;notes&#x2F;streaming-sumchecks&#x2F;Linear_sumcheck.svg&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;randomwalks.xyz&#x2F;blog&#x2F;streaming-sumchecks&#x2F;Linear_sumcheck.svg&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;At each bind the length of the representation of $\widetilde{A}$ and $\widetilde{B}$ shrinks by half.
 And the next prover message can be computed from the bound and materialised polynomials.
 The &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;c20fe3c0234ea3a328dbbd3d7f717f64599ff579&#x2F;jolt-core&#x2F;src&#x2F;zkvm&#x2F;spartan&#x2F;outer.rs#L387&quot;&gt;code&lt;&#x2F;a&gt; is described here.&lt;&#x2F;p&gt;
@@ -533,7 +533,7 @@ In what follows, we make a compromise of sometimes streaming instead of always s
 For example the sum-check involving 16 rounds of interaction below can be scheduled as shown below.
 Rounds 0, 3, 6, 9, 10, …, 15 are all window starts.&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
-&lt;p&gt;&lt;img src=&quot;&#x2F;notes&#x2F;streaming-sumchecks&#x2F;stream_schedule.svg&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;randomwalks.xyz&#x2F;blog&#x2F;streaming-sumchecks&#x2F;stream_schedule.svg&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;For every round, we have a notion of width or the number of unbound variables. This is given by the distance of current round from the next window start (or the end if there is no more window starts).

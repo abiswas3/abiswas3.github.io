@@ -7,8 +7,8 @@
   <meta name="description" content="Written Word">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="/style.css?h=4d66b1897c4e7fff0c8e">
-  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="/atom.xml">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=4d66b1897c4e7fff0c8e">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
   
@@ -77,16 +77,16 @@
   <a class="skip-link" href="#main-content">Skip to content</a>
 
   <header class="site-header">
-    <a class="wordmark" href="/" aria-label="Random Walks — home">
+    <a class="wordmark" href="https://randomwalks.xyz" aria-label="Random Walks — home">
       <span>Random</span><span>Walks</span>
     </a>
     <nav class="site-nav" aria-label="Main navigation">
-      <a href="/publications/">Publications</a>
-      <a href="/notes/">Notes</a>
-      <a href="/travel/">Miscellaneous</a>
-      <a href="/cv/">CV</a>
-      <!-- <a href="/tags">Tags</a> -->
-      <!-- <a href="/atom.xml">Feed</a> -->
+      <a href="https://randomwalks.xyz/publications/">Publications</a>
+      <a href="https://randomwalks.xyz/blog/">Notes</a>
+      <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
+      <a href="https://randomwalks.xyz/cv/">CV</a>
+      <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
+      <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
   </header>
 
@@ -110,7 +110,7 @@
     </div>
     
     <ul class="tag-list" aria-label="Tags">
-      <li><a href="/tags/lean/">lean</a></li><li><a href="/tags/jolt/">Jolt</a></li>
+      <li><a href="https://randomwalks.xyz/tags/lean/">lean</a></li><li><a href="https://randomwalks.xyz/tags/jolt/">Jolt</a></li>
     </ul>
     
   </header>
@@ -182,7 +182,7 @@
       <p>To prove equivalence with a RISC-V CPU, we first need a RISC-V CPU modeled in Lean.
 Luckily for us, the teams at <a rel="noopener noreferrer external" target="_blank" href="https://github.com/opencompl/sail-riscv-lean">Galois</a> and <a rel="noopener noreferrer external" target="_blank" href="https://github.com/opencompl/sail-riscv-lean">Cambridge University</a> have done the hard work for us.
 Given a Sail specification of a RISC-V CPU, they translated the Sail specification into non-executable Lean code suitable for theorem proving.
-The details of how to get this code can be found <a href="/notes/sail-to-lean/">here</a>.</p>
+The details of how to get this code can be found <a href="https://randomwalks.xyz/blog/sail-to-lean/">here</a>.</p>
 <p>Our starting point will be to understand this transpilation.
 At its core, a CPU is just a state machine whose state is described by the register file, memory, program counter, control/status registers, and so on<sup class="footnote-reference" id="fr-risc-v-isa-1"><a href="#fn-risc-v-isa">1</a></sup>.
 Instructions describe the ways the machine can transition between states.
@@ -250,7 +250,7 @@ The second parameter <code>c</code> has type <code>ChoiceSource</code>, a struct
 Next, we describe how one steps the CPU or performs a state transition.</p>
 <h2 id="the-sail-monad">The Sail Monad<a class="zola-anchor" href="#the-sail-monad" aria-label="Link to this section">#</a>
 </h2>
-<p>Step transitions are modeled using Lean’s built-in error-state monad (<code>EStateM ε σ α</code>), with the <a href="/notes/jolt-qed/state/#errors">error</a> and <a href="/notes/jolt-qed/state/#state">state</a> types.
+<p>Step transitions are modeled using Lean’s built-in error-state monad (<code>EStateM ε σ α</code>), with the <a href="https://randomwalks.xyz/blog/jolt-qed/state/#errors">error</a> and <a href="https://randomwalks.xyz/blog/jolt-qed/state/#state">state</a> types.
 Under the hood <code>EStateM ε σ α</code> is just a function <code>σ → Result ε σ α</code> that takes a state and returns either <code>.ok v newState</code> or <code>.error e newState</code>, where <code>v : α</code> and <code>e : ε</code>.
 See the <a rel="noopener noreferrer external" target="_blank" href="https://leanprover-community.github.io/mathlib4_docs/Init/Control/EState.html">official <code>EStateM</code> documentation</a> for further details.</p>
 <p>The Sail library defines a generic version called <code>PreSailM</code>, leaving the register types, choice source, and user-exception type as parameters:</p>
@@ -409,7 +409,7 @@ The next desugaring step is as follows:</p>
 </li>
 </ol>
 <p>Thus, <code>wX_bits ...</code> is the <em>only</em> monadic computation that changes state.
-We refer the reader to the <a href="/notes/jolt-qed/state/#read-and-write-chain">Read and Write Chain</a> appendix for the full code blocks.</p>
+We refer the reader to the <a href="https://randomwalks.xyz/blog/jolt-qed/state/#read-and-write-chain">Read and Write Chain</a> appendix for the full code blocks.</p>
 <h2 id="jolt-cpu">Jolt CPU<a class="zola-anchor" href="#jolt-cpu" aria-label="Link to this section">#</a>
 </h2>
 <p>The Jolt CPU as modeled in Rust is shown below.
@@ -468,7 +468,7 @@ To make proofs easier to manage, we directly use the Sail registers when writing
 </h3>
 <p>Not all virtual registers are the same.
 The figure below shows the classification of the different registers.</p>
-<p><img src="/notes/jolt-qed/state/./jolt-registers.svg" alt="" /></p>
+<p><img src="https://randomwalks.xyz/blog/jolt-qed/state/./jolt-registers.svg" alt="" /></p>
 <p>Virtual register allocation is modeled directly in the expansion.
 The logic used in Jolt is as follows:</p>
 <ul>
@@ -940,8 +940,8 @@ Of course, in a real physical CPU, the register file is not a hash map and we do
     <!-- <div> -->
     <!--   <h2>Elsewhere</h2> -->
     <!--   <ul> -->
-    <!--     <li><a href="/atom.xml">Atom feed</a></li> -->
-    <!--     <li><a href="/tags">Browse by tag</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/tags">Browse by tag</a></li> -->
     <!--   </ul> -->
     <!-- </div> -->
     

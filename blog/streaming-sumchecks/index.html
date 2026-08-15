@@ -7,8 +7,8 @@
   <meta name="description" content="Written Word">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="/style.css?h=4d66b1897c4e7fff0c8e">
-  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="/atom.xml">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=4d66b1897c4e7fff0c8e">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
   
@@ -77,16 +77,16 @@
   <a class="skip-link" href="#main-content">Skip to content</a>
 
   <header class="site-header">
-    <a class="wordmark" href="/" aria-label="Random Walks — home">
+    <a class="wordmark" href="https://randomwalks.xyz" aria-label="Random Walks — home">
       <span>Random</span><span>Walks</span>
     </a>
     <nav class="site-nav" aria-label="Main navigation">
-      <a href="/publications/">Publications</a>
-      <a href="/notes/">Notes</a>
-      <a href="/travel/">Miscellaneous</a>
-      <a href="/cv/">CV</a>
-      <!-- <a href="/tags">Tags</a> -->
-      <!-- <a href="/atom.xml">Feed</a> -->
+      <a href="https://randomwalks.xyz/publications/">Publications</a>
+      <a href="https://randomwalks.xyz/blog/">Notes</a>
+      <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
+      <a href="https://randomwalks.xyz/cv/">CV</a>
+      <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
+      <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
   </header>
 
@@ -110,7 +110,7 @@
     </div>
     
     <ul class="tag-list" aria-label="Tags">
-      <li><a href="/tags/sumcheck/">sumcheck</a></li><li><a href="/tags/streaming/">streaming</a></li><li><a href="/tags/jolt/">jolt</a></li>
+      <li><a href="https://randomwalks.xyz/tags/sumcheck/">sumcheck</a></li><li><a href="https://randomwalks.xyz/tags/streaming/">streaming</a></li><li><a href="https://randomwalks.xyz/tags/jolt/">jolt</a></li>
     </ul>
     
   </header>
@@ -306,7 +306,7 @@ For a given time step $t \in \lbrace 0,1\rbrace^{\log T}$, using information fro
 <p>That is satisfying constraint 1 for time step $t$ is equivalent to checking if $A(t, 0, -4) \times B(t, 0, -4) = 0$.
 The remaining 19 constraints give us evaluations $A(X_t, X_b, Y)$ and $B(X_t, X_b, Y)$ for $Y \in \lbrace -4, \ldots, 5\rbrace, X_b \in \lbrace 0,1\rbrace, X_t \in \lbrace 0,1\rbrace^{\log T}$.
 The picture you have in mind is the following
-<img src="/notes/streaming-sumchecks/trave_to_poly.svg" alt="" /></p>
+<img src="https://randomwalks.xyz/blog/streaming-sumchecks/trave_to_poly.svg" alt="" /></p>
 <p>Satisfying all constraints is just saying the following:</p>
 <div class="math-display">
 $$
@@ -400,7 +400,7 @@ $$t(\textcolor{pink}{X_b}) \Def \sum_{x_t \in \{0,1\}^{\log T}}\sum_{y \in \{-4,
 <span class="giallo-l"><span style="color: #D73A49;">    .</span><span style="color: #6F42C1;">gruen_poly_deg_3</span><span>(t0, t_inf, previous_claim)</span></span></code></pre><h2 id="the-remaining-rounds">The Remaining Rounds<a class="zola-anchor" href="#the-remaining-rounds" aria-label="Link to this section">#</a>
 </h2>
 <p>With $\widetilde{A}$ and $\widetilde{B}$ materialised, the remaining rounds are standard. The mental picture is the following:</p>
-<p><img src="/notes/streaming-sumchecks/Linear_sumcheck.svg" alt="" /></p>
+<p><img src="https://randomwalks.xyz/blog/streaming-sumchecks/Linear_sumcheck.svg" alt="" /></p>
 <p>At each bind the length of the representation of $\widetilde{A}$ and $\widetilde{B}$ shrinks by half.
 And the next prover message can be computed from the bound and materialised polynomials.
 The <a rel="noopener noreferrer external" target="_blank" href="https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L387">code</a> is described here.</p>
@@ -431,7 +431,7 @@ In what follows, we make a compromise of sometimes streaming instead of always s
 For example the sum-check involving 16 rounds of interaction below can be scheduled as shown below.
 Rounds 0, 3, 6, 9, 10, …, 15 are all window starts.</li>
 </ul>
-<p><img src="/notes/streaming-sumchecks/stream_schedule.svg" alt="" /></p>
+<p><img src="https://randomwalks.xyz/blog/streaming-sumchecks/stream_schedule.svg" alt="" /></p>
 <ul>
 <li>
 <p>For every round, we have a notion of width or the number of unbound variables. This is given by the distance of current round from the next window start (or the end if there is no more window starts).
@@ -667,8 +667,8 @@ The following snippet of code executes the logic described above, based on the r
     <!-- <div> -->
     <!--   <h2>Elsewhere</h2> -->
     <!--   <ul> -->
-    <!--     <li><a href="/atom.xml">Atom feed</a></li> -->
-    <!--     <li><a href="/tags">Browse by tag</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/tags">Browse by tag</a></li> -->
     <!--   </ul> -->
     <!-- </div> -->
     
