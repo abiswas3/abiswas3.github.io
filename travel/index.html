@@ -1,437 +1,401 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <script>
-    (function() {
-      var theme = localStorage.getItem('theme');
-      if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
-      }
-      document.documentElement.setAttribute('data-theme', theme);
-    })();
-  </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Travel</title>
-  <link rel="stylesheet" href="/style.css">
-  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
-  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  <title>Travel — Random Walks</title>
+  <meta name="description" content="Travel journals and photographs.">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="/style.css?h=4d66b1897c4e7fff0c8e">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="/atom.xml">
   
   
-  <script>
-  MathJax = {
-    tex: {
-      inlineMath: [['$', '$'], ['\\(', '\\)']],
-      displayMath: [['$$', '$$'], ['\\[', '\\]']],
-      tags: 'ams',
-      macros: {
-        field: ['{\\mathbb{#1}}', 1],
-        hei: ['{\\mathbb{F}(#1)}', 1],
-        Field: '{\\mathbb{F}}',
-        field: '{\\mathbb{F}}',
-        Mont: ['{\\widetilde{#1}}', 1],
-        samples: '{\\xleftarrow{\\$}}',
-        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
-        TauConstraints: '{\\tau_y}',
-        TauTime: '{\\tau_{\\text{cycle}}}',
-        TauGroup: '{\\tau_b}',
-        MLE: ['{\\widetilde{#1}}', 1],
-        tf: ['{\\widetilde{#1}}', 1],
-        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
-        Def: '{:=}',
-        ChallengeSet: '{\\mathsf{C}}',
-        Complement: ['{\\overline{#1}}', 1],
-        Size: ['{\\left|#1\\right|}', 1],
-        Exp: ['{2^{#1}}', 1],
-        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
-        BigO: ['{O\\ \\left(#1\\right)}', 1],
-        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
-        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
-        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
-        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
-        poly: '{\\operatorname{poly}}',
-        criticalAlpha: ['{\\alpha_{#1}}', 1],
-        bit: '{\\{0,1\\}}',
-        CStar: '{C^{\\star}}',
-        GraphNbrs: ['{N_G(#1)}', 1],
-        ClauseNbrs: ['{N_C(#1)}', 1],
-        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-        SmallO: ['{o\\!(#1)}', 1],
-        Naturals: '{\\mathbb{N}}',
-        Closure: ['{\\operatorname{Cl}(#1)}', 1],
-        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
-        Dim: ['{\\dim(#1)}', 1],
-        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
-        domain: ['{\\operatorname{dom}(#1)}', 1],
-        False: '{\\bot}',
-        opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
-        // ── Complexity Theory & Turing Machines ──────────────────────────
-        // Complexity classes
-        NP: '{\\mathsf{NP}}',
-        coNP: '{\\mathsf{coNP}}',
-        Pclass: '{\\mathsf{P}}',
-        PSPACE: '{\\mathsf{PSPACE}}',
-        EXP: '{\\mathsf{EXP}}',
-        // Turing machine components
-        States: '{\\mathcal{Q}}',
-        TransFunc: '{\\delta}',
-        InitState: '{q_0}',
-        AcceptState: '{q_{\\text{acc}}}',
-        RejectState: '{q_{\\text{rej}}}',
-        InitConfig: '{C_0}',
-        AcceptConfig: '{C_{\\text{acc}}}',
-        Moves: '{\\{\\mathsf{L},\\, \\mathsf{R}\\}}',
-        // Languages & notation
-        Lang: ['{L(#1)}', 1],
-        RE: '{\\mathsf{RE}}',
-        // General math
-        NN: '{\\mathbb{N}}',
-        ZZ: '{\\mathbb{Z}}',
-        RR: '{\\mathbb{R}}'
-      }
-    },
-    options: {
-      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-    }
-  };
-  </script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
   
   
   
 </head>
 <body>
-  <nav class="nav">
-    <div class="nav-inner">
-      <div class="nav-left">
-        <a href="/">Home</a>
-      </div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
-      <div class="nav-right">
-        <a href="/publications/">Research</a>
-        <a href="/blog/">Notes</a>
-        <a href="/misc/">Random</a>
-        <select class="theme-select" id="theme-select" aria-label="Theme">
-          <option value="bw-light">Light</option>
-          <option value="gruvbox-dark">Gruvbox</option>
-          <option value="tokyo-night">Tokyo</option>
-          <option value="vitesse-dark">Vitesse</option>
-        </select>
-        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
-        </a>
-
-      </div>
-    </div>
-  </nav>
-  
-    <nav class="path-bar" aria-label="Path">
-      <a href="&#x2F;">~</a>
-      
-      
-        
-      
-        
-          
-          <span>/</span>
-          <a href="/travel">travel</a>
-        
-      
-        
-      
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="Random Walks — home">
+      <span>Random</span><span>Walks</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/publications/">Publications</a>
+      <a href="/notes/">Notes</a>
+      <a href="/travel/">Miscellaneous</a>
+      <a href="/cv/">CV</a>
+      <!-- <a href="/tags">Tags</a> -->
+      <!-- <a href="/atom.xml">Feed</a> -->
     </nav>
+  </header>
+
   
-  
-  <main class="content">
+
+  <main id="main-content">
     
+<section class="travel-landing">
+  
+  <header class="travel-landing__intro">
+    
+    <h2 id="travel">Travel<a class="zola-anchor" href="#travel" aria-label="Link to this section">#</a>
+</h2>
+<p>I spent my childhood in Kurseong and Calcutta in India.
+My youth in Madison and Seattle, USA.
+On the first day of the COVID lockdown, I moved to Cambridge, UK, and then subsequently moved to London 9 months later.
+I now live permanently in <a href="#">Oxford</a>, where my wife Vicky, and I own a home.
+Below are a few pictures of places we’ve been lucky to see.
+I took the low-quality photos.
+The pretty ones were captured by Vicky.</p>
+<p>The images might take a little bit of time to load.
+They are pulled off from a server running on the cheapest digital ocean machine I could find.</p>
+<p>If someone would like any of their photos taken down, please email me.</p>
 
-
-
-
+  </header>
+  
 
   
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+
+  
+  <div class="travel-grid">
     
       
-    
-    
+      <a class="travel-card" href="/travel/canada/">
+        
+        <img src="https://images.randomwalks.xyz/canada/1f5d95fc-8e05-44aa-be1b-022d4dcab12a.jpg" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">Canada</span>
+          <strong>Canada</strong>
+          <span class="travel-card__description">First Time In Canada</span>
+          <span class="paper-byline">17–30 July 2026</span>
+        </span>
+      </a>
       
     
-  
-
-
-
-
-
-
-
-
-  
+      
+      <a class="travel-card" href="/travel/berkeley/">
+        
+        <img src="https://images.randomwalks.xyz/berkeley/0705d20d-ac40-4253-bb4d-a1b486667e65.jpg" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">Berkeley, California, USA</span>
+          <strong>Summer at the Simons Institute</strong>
+          <span class="travel-card__description">Met a lot of clever people at the institute, and a few rattlesnakes in the Berkeley Hills. Long days reading followed by outdoor sunny swims. Californians are living the dream and they don&#x27;t even know it. When I get time, I&#x27;d like to write down despite what I just said, I&#x27;d never want to live here.</span>
+          <span class="paper-byline">17 May–29 July 2024</span>
+        </span>
+      </a>
+      
     
-  
-
-
-<section class="section">
-  <div class="section-header">
+      
+      <a class="travel-card" href="/travel/snowdonia/">
+        
+        <img src="https://images.randomwalks.xyz/snowdonia/IMG_4415.png" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">Wales</span>
+          <strong>Snowdonia National Park</strong>
+          <span class="travel-card__description">Under-appreciated part of the world.</span>
+          <span class="paper-byline">26 August 2023–8 January 2025</span>
+        </span>
+      </a>
+      
     
-    <h1>Travel</h1>
+      
+      <a class="travel-card" href="/travel/lake-district/">
+        
+        <img src="https://images.randomwalks.xyz/lake-district/img-4356.png" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">England</span>
+          <strong>Lake District</strong>
+          <span class="travel-card__description">Prettiest Cricket Pitch I&#x27;ve seen.</span>
+          <span class="paper-byline">19 August 2023</span>
+        </span>
+      </a>
+      
+    
+      
+      <a class="travel-card" href="/travel/devon-cornwall-exmoor/">
+        
+        <img src="https://images.randomwalks.xyz/devon-cornwall-exmoor/_DSC0897.jpg" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">England</span>
+          <strong>Devon, Cornwall and Exmoor</strong>
+          <span class="travel-card__description">Some photos of our wedding.</span>
+          <span class="paper-byline">18 June–11 September 2023</span>
+        </span>
+      </a>
+      
+    
+      
+      <a class="travel-card" href="/travel/uk-triathlons/">
+        
+        <img src="https://images.randomwalks.xyz/uk-triathlons/820E72C4-4B93-4281-96CA-1177CF003B41.jpg" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">UK</span>
+          <strong>Small Triathlon Races</strong>
+          <span class="travel-card__description">Many good days suffering on the wheel of my good friend Alexander Miles</span>
+          <span class="paper-byline">19–29 May 2021</span>
+        </span>
+      </a>
+      
+    
+      
+      <a class="travel-card" href="/travel/alaska-road-trip/">
+        
+        <img src="https://images.randomwalks.xyz/alaska-road-trip/e2793f8e-fcc5-4b88-b6af-8adef7da6c6b.jpg" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">Alaska, USA</span>
+          <strong>Road Trip Across Alaska</strong>
+          <span class="travel-card__description">An Irish man and a Brit rent an RV, with no prior experiences with RVs, to drive across Alaska. What could go wrong? -- A fair amount, but we are still here, so it could not have been that bad.</span>
+          <span class="paper-byline">31 August–2 September 2019</span>
+        </span>
+      </a>
+      
+    
+      
+      <a class="travel-card" href="/travel/leavenworth/">
+        
+        <img src="https://images.randomwalks.xyz/leavenworth/IMG_5712.jpg" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">Washington, USA</span>
+          <strong>Leavenworth</strong>
+          <span class="travel-card__description">First attempt at climbing outdoors with a rope. Hated it -- turns out I do not like heights.</span>
+          <span class="paper-byline">6 October 2018</span>
+        </span>
+      </a>
+      
+    
+      
+      <a class="travel-card" href="/travel/edinburgh/">
+        
+        <img src="https://images.randomwalks.xyz/edinburgh/IMG_2626.jpg" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">Scotland</span>
+          <strong>Edinburgh</strong>
+          <span class="travel-card__description">I feel about this city how many people feel about Paris. It is MAGIC</span>
+          <span class="paper-byline">26 August 2018–14 August 2021</span>
+        </span>
+      </a>
+      
+    
+      
+      <a class="travel-card" href="/travel/ragnar-pacific-northwest/">
+        
+        <img src="https://images.randomwalks.xyz/ragnar-pacific-northwest/IMG_0083.PNG" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">Pacific Northwest, USA</span>
+          <strong>Ragnar Pacific Northwest Trail</strong>
+          <span class="travel-card__description">Found a good group of people to sit in a van and run across the North West in turns.</span>
+          <span class="paper-byline">13–14 July 2018</span>
+        </span>
+      </a>
+      
+    
+      
+      <a class="travel-card" href="/travel/flatirons-boulder/">
+        
+        <img src="https://images.randomwalks.xyz/flatirons-boulder/IMG_0066.JPG" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">Boulder, Colorado, USA</span>
+          <strong>Flatirons, Boulder</strong>
+          <span class="travel-card__description">Otherwise known as the unbound stupidity of youth</span>
+          <span class="paper-byline">7 July 2018</span>
+        </span>
+      </a>
+      
+    
+      
+      <a class="travel-card" href="/travel/mailbox-peak/">
+        
+        <img src="https://images.randomwalks.xyz/mailbox-peak/IMG_0124.JPG" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">Washington, USA</span>
+          <strong>Mailbox Peak</strong>
+          <span class="travel-card__description">Church. Cure to all modern ailments</span>
+          <span class="paper-byline">07 January 2018</span>
+        </span>
+      </a>
+      
+    
+      
+      <a class="travel-card" href="/travel/seattle-to-portland/">
+        
+        <img src="https://images.randomwalks.xyz/seattle-to-portland/690764_259538920_XLarge.jpg" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">Washington and Oregon, USA</span>
+          <strong>Seattle to Portland</strong>
+          <span class="travel-card__description">205 mile bike ride.</span>
+          <span class="paper-byline">27 May–18 July 2017</span>
+        </span>
+      </a>
+      
+    
+      
+      <a class="travel-card" href="/travel/glacier-national-park/">
+        
+        <img src="https://images.randomwalks.xyz/glacier-national-park/IMG_1946.JPG" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">Montana, USA</span>
+          <strong>Backpacking in Glacier National Park</strong>
+          <span class="travel-card__description">Underprepared and underfed.</span>
+          <span class="paper-byline">9–15 August 2016</span>
+        </span>
+      </a>
+      
+    
+      
+      <a class="travel-card" href="/travel/colorado/">
+        
+        <img src="https://images.randomwalks.xyz/colorado/IMG_3548.JPG" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">Colorado, USA</span>
+          <strong>Colorado National Park and the Rockies</strong>
+          <span class="travel-card__description">And some more peaks whose names I&#x27;ve forgotten. I&#x27;ve been to Colorado ALOT!</span>
+          <span class="paper-byline">29 May 2016–5 July 2017</span>
+        </span>
+      </a>
+      
+    
+      
+      <a class="travel-card" href="/travel/kurseong-darjeeling/">
+        
+        <img src="https://images.randomwalks.xyz/kurseong-darjeeling/general-view-from-gh.jpg" alt="" loading="lazy" decoding="async">
+        
+        <span class="travel-card__body">
+          <span class="paper-kicker">India</span>
+          <strong>Kurseong and Darjeeling</strong>
+          <span class="travel-card__description">Years spent in my youth in the Himalayan foothills.</span>
+          <span class="paper-byline">1 January 2003–9 January 2005</span>
+        </span>
+      </a>
+      
     
   </div>
   
-  <p class="section-desc">Road Not Taken.</p>
-  
-
-  
-
-  
-  <p class="stale-legend"><span class="stale-mark"></span> Not recently updated. Links may have broken since the website was moved.</p>
-  
-
-  
-
-  
-  <section class="section-index-group" aria-labelledby="posts-heading">
-    <h2 id="posts-heading">Posts</h2>
-    <ul class="post-list post-list-minimal section-index-list">
-    
-      
-      
-      
-        
-          
-        
-        
-          
-        
-      
-      <li data-date="2026-02-10" class="post-stale">
-        <a href="&#x2F;travel&#x2F;slovenia&#x2F;"><span class="stale-mark"></span>Dragi Slovenia</a>
-        <time>2026-02-10</time>
-      </li>
-      
-    
-    </ul>
-  </section>
-  
 </section>
 
-<script>
-(function() {
-  document.querySelectorAll('.section-index-list').forEach(function(list) {
-    var items = Array.from(list.children).filter(function(el) {
-      return el.getAttribute('data-date');
-    });
-    items.sort(function(a, b) {
-      return (b.getAttribute('data-date') || '').localeCompare(a.getAttribute('data-date') || '');
-    });
-    items.forEach(function(item) { list.appendChild(item); });
-  });
-})();
-</script>
-
   </main>
-  <!-- ====================================================================
-       TUFTE SIDENOTES JS
-       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
-       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
 
-       WHAT IT DOES:
-         1. Finds every <sup class="footnote-reference"> in .post-content
-         2. Looks up the matching <div class="footnote-definition" id="...">
-            at the bottom of the page (Zola generates these from [^n] syntax)
-         3. Extracts the footnote body (skipping the <sup> label Zola adds)
-         4. Replaces the original <sup> reference with:
-              <label class="sidenote-number" for="sn-N">  (the superscript number)
-              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
-              <span class="sidenote">N. footnote body...</span>  (the actual note)
-         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
-            original footnote definitions and their <hr> separator
-         6. Also explicitly hides the <hr> before footnote defs via JS as a
-            belt-and-suspenders measure
+  <footer class="site-footer">
+    <!-- <div> -->
+    <!--   <h2>Working Notes</h2> -->
+    <!--   <p>Something to say</p> -->
+    <!-- </div> -->
+    
+    <!-- <div> -->
+    <!--   <h2>Elsewhere</h2> -->
+    <!--   <ul> -->
+    <!--     <li><a href="/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="/tags">Browse by tag</a></li> -->
+    <!--   </ul> -->
+    <!-- </div> -->
+    
+    <div class="footer-credit">
+      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
+    </div>
+  </footer>
 
-       IF YOU CHANGE --max-width in style.scss:
-         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
-         some padding. Recalculate if you widen the content column.
-
-       IF JS FAILS:
-         The original Zola footnotes remain untouched. The fallback CSS in
-         style.scss styles them with superscript links — nothing breaks.
-  ==================================================================== -->
   <script>
-    (function() {
-      var content = document.querySelector('.post-content');
-      if (!content) return;
-
-      var refs = content.querySelectorAll('.footnote-reference');
-      if (!refs.length) return;
-
-      content.classList.add('footnotes-are-sidenotes');
-      var count = 0;
-
-      refs.forEach(function(ref) {
-        var link = ref.querySelector('a');
-        if (!link) return;
-
-        var href = link.getAttribute('href');
-        if (!href) return;
-        var id = href.replace('#', '');
-        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
-        if (!def) return;
-
-        count++;
-
-        // Get footnote body (skip the label <sup>)
-        var body = '';
-        var children = def.children;
-        for (var i = 0; i < children.length; i++) {
-          if (children[i].tagName !== 'SUP') {
-            body += children[i].outerHTML;
-          }
-        }
-
-        // Build sidenote elements:
-        //   label  -> displays the superscript number, acts as <label> for the checkbox
-        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
-        //   note   -> the sidenote content itself
-        var label = document.createElement('label');
-        label.className = 'sidenote-number';
-        label.setAttribute('for', 'sn-' + count);
-
-        var toggle = document.createElement('input');
-        toggle.type = 'checkbox';
-        toggle.className = 'sidenote-toggle';
-        toggle.id = 'sn-' + count;
-
-        var note = document.createElement('span');
-        note.className = 'sidenote';
-        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
-
-        // Replace the original footnote reference with our sidenote trio
-        ref.replaceWith(label);
-        label.after(note);
-        label.after(toggle);
-      });
-
-      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
-      var firstDef = content.querySelector('.footnote-definition');
-      if (firstDef) {
-        var prev = firstDef.previousElementSibling;
-        if (prev && prev.tagName === 'HR') {
-          prev.style.display = 'none';
-        }
-      }
-    })();
-  </script>
-  <script>
-    // Code copy button
-    document.querySelectorAll('.post-content pre').forEach(function(pre) {
-      var wrapper = document.createElement('div');
-      wrapper.className = 'code-block';
-      pre.parentNode.insertBefore(wrapper, pre);
-      wrapper.appendChild(pre);
-
-      var btn = document.createElement('button');
-      btn.className = 'copy-btn';
-      btn.textContent = 'Copy';
-      btn.addEventListener('click', function() {
-        var code = pre.querySelector('code');
-        var source = code || pre;
-        var clone = source.cloneNode(true);
-        clone.querySelectorAll('.giallo-ln').forEach(function(el) { el.remove(); });
-        var text = clone.textContent;
-        navigator.clipboard.writeText(text).then(function() {
-          btn.textContent = 'Copied!';
-          btn.classList.add('copied');
-          setTimeout(function() {
-            btn.textContent = 'Copy';
-            btn.classList.remove('copied');
-          }, 2000);
+    document.querySelectorAll('pre').forEach(function (pre) {
+      if (!pre.querySelector('code')) return;
+      var button = document.createElement('button');
+      button.className = 'copy-code';
+      button.type = 'button';
+      button.textContent = 'Copy';
+      button.addEventListener('click', function () {
+        var clone = pre.querySelector('code').cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function (line) { line.remove(); });
+        navigator.clipboard.writeText(clone.textContent).then(function () {
+          button.textContent = 'Copied';
+          window.setTimeout(function () { button.textContent = 'Copy'; }, 1400);
         });
       });
-      wrapper.appendChild(btn);
+      pre.appendChild(button);
     });
   </script>
   <script>
-    (function() {
-      const select = document.getElementById('theme-select');
-      const html = document.documentElement;
-      const darkLink = document.getElementById('giallo-dark');
-      const lightLink = document.getElementById('giallo-light');
-
-      const lightThemes = ['rose-pine-dawn', 'bw-light'];
-
-      function setTheme(theme) {
-        html.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-        if (select) select.value = theme;
-        if (lightThemes.includes(theme)) {
-          lightLink.media = 'all';
-          darkLink.media = 'not all';
-        } else {
-          darkLink.media = 'all';
-          lightLink.media = 'not all';
-        }
-      }
-
-      // Apply current theme (already set by head script, but sync CSS)
-      const current = html.getAttribute('data-theme');
-      setTheme(current);
-
-      if (select) {
-        select.addEventListener('change', function() {
-          setTheme(select.value);
-        });
-      }
-    })();
-  </script>
-  <script>
-    // Smooth scroll + highlight for eqref and citation links.
-    // Citations get a ↩ back-link to return to reading position.
-    document.addEventListener('click', function(e) {
-      // Handle back-arrow clicks
-      var back = e.target.closest('.bib-back');
+    document.addEventListener('click', function (event) {
+      var back = event.target.closest('.bib-back');
       if (back) {
-        e.preventDefault();
+        event.preventDefault();
         var source = document.getElementById(back.getAttribute('data-source'));
         if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
 
-      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      var link = event.target.closest('a.citation[href^="#ref-"]');
       if (!link) return;
 
-      e.preventDefault();
-      e.stopPropagation();
-
-      // Clean up previous highlights and back-links
-      document.querySelectorAll('.eq-highlight').forEach(function(el) {
-        el.classList.remove('eq-highlight');
+      event.preventDefault();
+      document.querySelectorAll('.citation-highlight').forEach(function (item) {
+        item.classList.remove('citation-highlight');
       });
-      document.querySelectorAll('.bib-back').forEach(function(el) {
-        el.remove();
-      });
+      document.querySelectorAll('.bib-back').forEach(function (item) { item.remove(); });
 
-      var href = link.getAttribute('href');
-      var id = decodeURIComponent(href.slice(1));
-      var target = document.getElementById(id);
+      var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
       if (!target) return;
 
-      var highlight = target.closest('mjx-container[display="true"]') || target;
-      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      highlight.classList.add('eq-highlight');
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('citation-highlight');
 
-      // For citations, add a back-arrow to return to reading position
-      if (link.classList.contains('citation')) {
-        if (!link.id) link.id = 'cite-src-' + id;
-        var arrow = document.createElement('a');
-        arrow.className = 'bib-back';
-        arrow.setAttribute('data-source', link.id);
-        arrow.textContent = ' \u21A9';
-        arrow.title = 'Back to text';
-        highlight.appendChild(arrow);
-      }
+      if (!link.id) link.id = 'cite-source-' + target.id;
+      var arrow = document.createElement('a');
+      arrow.className = 'bib-back';
+      arrow.setAttribute('data-source', link.id);
+      arrow.setAttribute('href', '#' + link.id);
+      arrow.setAttribute('aria-label', 'Back to citation');
+      arrow.textContent = ' ↩';
+      target.appendChild(arrow);
     });
   </script>
-
+  
 </body>
 </html>

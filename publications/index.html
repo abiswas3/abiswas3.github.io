@@ -1,639 +1,376 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <script>
-    (function() {
-      var theme = localStorage.getItem('theme');
-      if (!theme) {
-        theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'bw-light' : 'vitesse-dark';
-      }
-      document.documentElement.setAttribute('data-theme', theme);
-    })();
-  </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Publications | onATangent</title>
-  <link rel="stylesheet" href="/style.css">
-  <link id="giallo-dark" rel="stylesheet" type="text/css" href="/giallo-dark.css">
-  <link id="giallo-light" rel="stylesheet" type="text/css" href="/giallo-light.css">
+  <title>Publications — Random Walks</title>
+  <meta name="description" content="Written Word">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="/style.css?h=4d66b1897c4e7fff0c8e">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="/atom.xml">
   
   
-  <script>
-  MathJax = {
-    tex: {
-      inlineMath: [['$', '$'], ['\\(', '\\)']],
-      displayMath: [['$$', '$$'], ['\\[', '\\]']],
-      tags: 'ams',
-      macros: {
-        field: ['{\\mathbb{#1}}', 1],
-        hei: ['{\\mathbb{F}(#1)}', 1],
-        Field: '{\\mathbb{F}}',
-        field: '{\\mathbb{F}}',
-        Mont: ['{\\widetilde{#1}}', 1],
-        samples: '{\\xleftarrow{\\$}}',
-        Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
-        TauConstraints: '{\\tau_y}',
-        TauTime: '{\\tau_{\\text{cycle}}}',
-        TauGroup: '{\\tau_b}',
-        MLE: ['{\\widetilde{#1}}', 1],
-        tf: ['{\\widetilde{#1}}', 1],
-        eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
-        Def: '{:=}',
-        ChallengeSet: '{\\mathsf{C}}',
-        Complement: ['{\\overline{#1}}', 1],
-        Size: ['{\\left|#1\\right|}', 1],
-        Exp: ['{2^{#1}}', 1],
-        BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
-        BigO: ['{O\\ \\left(#1\\right)}', 1],
-        boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
-        OntoPHP: ['{\\operatorname{OPHP}^{#1}_{#2}}', 2],
-        PHP: ['{\\operatorname{PHP}^{#1}_{#2}}', 2],
-        FPHP: ['{\\operatorname{FPHP}^{#1}_{#2}}', 2],
-        poly: '{\\operatorname{poly}}',
-        criticalAlpha: ['{\\alpha_{#1}}', 1],
-        bit: '{\\{0,1\\}}',
-        CStar: '{C^{\\star}}',
-        GraphNbrs: ['{N_G(#1)}', 1],
-        ClauseNbrs: ['{N_C(#1)}', 1],
-        Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-        HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-        SmallO: ['{o\\!(#1)}', 1],
-        Naturals: '{\\mathbb{N}}',
-        Closure: ['{\\operatorname{Cl}(#1)}', 1],
-        ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
-        Dim: ['{\\dim(#1)}', 1],
-        Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
-        domain: ['{\\operatorname{dom}(#1)}', 1],
-        False: '{\\bot}',
-        opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
-        // ── Complexity Theory & Turing Machines ──────────────────────────
-        // Complexity classes
-        NP: '{\\mathsf{NP}}',
-        coNP: '{\\mathsf{coNP}}',
-        Pclass: '{\\mathsf{P}}',
-        PSPACE: '{\\mathsf{PSPACE}}',
-        EXP: '{\\mathsf{EXP}}',
-        // Turing machine components
-        States: '{\\mathcal{Q}}',
-        TransFunc: '{\\delta}',
-        InitState: '{q_0}',
-        AcceptState: '{q_{\\text{acc}}}',
-        RejectState: '{q_{\\text{rej}}}',
-        InitConfig: '{C_0}',
-        AcceptConfig: '{C_{\\text{acc}}}',
-        Moves: '{\\{\\mathsf{L},\\, \\mathsf{R}\\}}',
-        // Languages & notation
-        Lang: ['{L(#1)}', 1],
-        RE: '{\\mathsf{RE}}',
-        // General math
-        NN: '{\\mathbb{N}}',
-        ZZ: '{\\mathbb{Z}}',
-        RR: '{\\mathbb{R}}'
-      }
-    },
-    options: {
-      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-    }
-  };
-  </script>
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
   
   
   
 </head>
 <body>
-  <nav class="nav">
-    <div class="nav-inner">
-      <div class="nav-left">
-        <a href="/">Home</a>
-      </div>
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
-      <div class="nav-right">
-        <a href="/publications/">Research</a>
-        <a href="/blog/">Notes</a>
-        <a href="/misc/">Random</a>
-        <select class="theme-select" id="theme-select" aria-label="Theme">
-          <option value="bw-light">Light</option>
-          <option value="gruvbox-dark">Gruvbox</option>
-          <option value="tokyo-night">Tokyo</option>
-          <option value="vitesse-dark">Vitesse</option>
-        </select>
-        <a href="/blog/atom.xml" class="feed-link" title="RSS Feed">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="20" r="1"/></svg>
-        </a>
-
-      </div>
-    </div>
-  </nav>
-  
-    <nav class="path-bar" aria-label="Path">
-      <a href="&#x2F;">~</a>
-      
-      
-        
-      
-        
-          
-          <span>/</span>
-          <a href="/publications">publications</a>
-        
-      
-        
-      
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="Random Walks — home">
+      <span>Random</span><span>Walks</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/publications/">Publications</a>
+      <a href="/notes/">Notes</a>
+      <a href="/travel/">Miscellaneous</a>
+      <a href="/cv/">CV</a>
+      <!-- <a href="/tags">Tags</a> -->
+      <!-- <a href="/atom.xml">Feed</a> -->
     </nav>
-  
-  
-  <main class="content">
-    
-<section class="section">
-  <h1>Publications</h1>
+  </header>
 
-<div style="font-size: small; color: #6F8FAF">
-  Authors listed in alphabetic order of last name. Safe to assume 
+  
+
+  <main id="main-content">
+    
+
+<section class="publications-landing">
+  <header class="publications-masthead">
+    <h1>Publications</h1>
+    
+
+    <p class="publications-key">Authors listed in alphabetic order of last name. Safe to assume 
   equal contribution unless the primary author[s] is[are] 
-  <span class="primary">highlighted</span> explicitly.
-</div>
+  <span class="author-primary">highlighted</span> explicitly.
 
+</p>
+  </header>
 
-  <ul class="pub-list">
+  
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+    
+  
+
+  
+  <ol class="publication-list">
     
     
-    <li class="pub-item">
-      <div class="pub-top">
-        <a href="&#x2F;publications&#x2F;fv-bytecode&#x2F;" class="pub-title">Jolt QED: Formally Verifying Jolt Bytecode Expansion In Lean</a>
+    <li class="publication-item">
+      <div class="publication-summary">
+        <div class="publication-topline">
+          <h2><a href="/publications/fv-bytecode/">Jolt QED: Formally Verifying Jolt Bytecode Expansion In Lean</a></h2>
+          
+            
+            <span class="publication-venue">In-Preparation</span>
+            
+          
+        </div>
+
         
-        <a href="" class="pub-venue">In-Preparation</a>
+        <p class="publication-authors">
+          <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;" class="author-primary">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;quangvdao.github.io&#x2F;">Quang Dao</a>, <span>Daniel Ross</span>, <a href="https:&#x2F;&#x2F;people.cs.georgetown.edu&#x2F;jthaler&#x2F;">Justin Thaler</a>
+        </p>
+        
+
+        <a class="publication-details" href="/publications/fv-bytecode/">Details <span aria-hidden="true">→</span></a>
         
       </div>
-      
-      <div class="pub-authors">
-        <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;"
-           class="author-primary">
-          Ari Biswas
-        </a>, <a href="https:&#x2F;&#x2F;quangvdao.github.io&#x2F;"
-           >
-          Quang Dao
-        </a>, <span >
-          Daniel Ross
-        </span>, <a href="https:&#x2F;&#x2F;people.cs.georgetown.edu&#x2F;jthaler&#x2F;"
-           >
-          Justin Thaler
-        </a>
-      </div>
-      
-      <a href="&#x2F;publications&#x2F;fv-bytecode&#x2F;" class="pub-details">view details &rarr;</a>
-      
     </li>
     
     
     
-    <li class="pub-item">
-      <div class="pub-top">
-        <a href="&#x2F;publications&#x2F;projective-sumcheck&#x2F;" class="pub-title">The Sum-Check Protocol over the Monomial Basis, and other Optimizations</a>
+    <li class="publication-item">
+      <div class="publication-summary">
+        <div class="publication-topline">
+          <h2><a href="/publications/projective-sumcheck/">The Sum-Check Protocol over the Monomial Basis, and other Optimizations</a></h2>
+          
+            
+            <span class="publication-venue">Submitted.</span>
+            
+          
+        </div>
+
         
-        <a href="" class="pub-venue">Submitted.</a>
+        <p class="publication-authors">
+          <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;quangvdao.github.io&#x2F;" class="author-primary">Quang Dao</a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;liam-eagen-b9271786">Liam Eagen</a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;amilson">Andrew Milson</a>, <a href="https:&#x2F;&#x2F;il.linkedin.com&#x2F;in&#x2F;shahar-papini-a846b68">Shahar Papini</a>, <a href="https:&#x2F;&#x2F;people.cs.georgetown.edu&#x2F;jthaler&#x2F;">Justin Thaler</a>
+        </p>
+        
+
+        <a class="publication-details" href="/publications/projective-sumcheck/">Details <span aria-hidden="true">→</span></a>
         
       </div>
-      
-      <div class="pub-authors">
-        <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;"
-           >
-          Ari Biswas
-        </a>, <a href="https:&#x2F;&#x2F;quangvdao.github.io&#x2F;"
-           class="author-primary">
-          Quang Dao
-        </a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;liam-eagen-b9271786"
-           >
-          Liam Eagen
-        </a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;amilson"
-           >
-          Andrew Milson
-        </a>, <a href="https:&#x2F;&#x2F;il.linkedin.com&#x2F;in&#x2F;shahar-papini-a846b68"
-           >
-          Shahar Papini
-        </a>, <a href="https:&#x2F;&#x2F;people.cs.georgetown.edu&#x2F;jthaler&#x2F;"
-           >
-          Justin Thaler
-        </a>
-      </div>
-      
-      <a href="&#x2F;publications&#x2F;projective-sumcheck&#x2F;" class="pub-details">view details &rarr;</a>
-      
     </li>
     
     
     
     
     
-    <li class="pub-item">
-      <div class="pub-top">
-        <a href="&#x2F;publications&#x2F;pm-matchings&#x2F;" class="pub-title">Refutations of Perfect Matchings In Expanders Is Hard</a>
+    <li class="publication-item">
+      <div class="publication-summary">
+        <div class="publication-topline">
+          <h2><a href="/publications/pm-matchings/">Refutations of Perfect Matchings In Expanders Is Hard</a></h2>
+          
+            
+            <a class="publication-venue" href="https:&#x2F;&#x2F;www.siam.org&#x2F;publications&#x2F;siam-journals&#x2F;siam-journal-on-discrete-mathematics&#x2F;">SIAM Discrete Maths Journal (2026)</a>
+            
+          
+        </div>
+
         
-        <a href="https:&#x2F;&#x2F;www.siam.org&#x2F;publications&#x2F;siam-journals&#x2F;siam-journal-on-discrete-mathematics&#x2F;" class="pub-venue">SIAM Discrete Maths Journal (2026)</a>
+        <p class="publication-authors">
+          <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;sites.google.com&#x2F;view&#x2F;rajkon">Rajko Nenadov</a>
+        </p>
+        
+
+        <a class="publication-details" href="/publications/pm-matchings/">Details <span aria-hidden="true">→</span></a>
         
       </div>
-      
-      <div class="pub-authors">
-        <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;"
-           >
-          Ari Biswas
-        </a>, <a href="https:&#x2F;&#x2F;sites.google.com&#x2F;view&#x2F;rajkon"
-           >
-          Rajko Nenadov
-        </a>
-      </div>
-      
-      <a href="&#x2F;publications&#x2F;pm-matchings&#x2F;" class="pub-details">view details &rarr;</a>
-      
     </li>
     
     
     
-    <li class="pub-item">
-      <div class="pub-top">
-        <a href="&#x2F;publications&#x2F;ipdt&#x2F;" class="pub-title">Interactive Proofs For Distribution Testing With Conditional Oracles</a>
+    <li class="publication-item">
+      <div class="publication-summary">
+        <div class="publication-topline">
+          <h2><a href="/publications/ipdt/">Interactive Proofs For Distribution Testing With Conditional Oracles</a></h2>
+          
+            
+            <a class="publication-venue" href="http:&#x2F;&#x2F;itcs-conf.org&#x2F;">ITCS 2026</a>
+            
+          
+        </div>
+
         
-        <a href="http:&#x2F;&#x2F;itcs-conf.org&#x2F;" class="pub-venue">ITCS 2026</a>
+        <p class="publication-authors">
+          <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;cs-people.bu.edu&#x2F;mbun&#x2F;">Mark Bun</a>, <a href="https:&#x2F;&#x2F;ccanonne.github.io&#x2F;">Clément Cannone</a>, <a href="https:&#x2F;&#x2F;sites.google.com&#x2F;view&#x2F;satchit&#x2F;home">Satchit Sivakumar</a>
+        </p>
+        
+
+        <a class="publication-details" href="/publications/ipdt/">Details <span aria-hidden="true">→</span></a>
         
       </div>
-      
-      <div class="pub-authors">
-        <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;"
-           >
-          Ari Biswas
-        </a>, <a href="https:&#x2F;&#x2F;cs-people.bu.edu&#x2F;mbun&#x2F;"
-           >
-          Mark Bun
-        </a>, <a href="https:&#x2F;&#x2F;ccanonne.github.io&#x2F;"
-           >
-          Clément Cannone
-        </a>, <a href="https:&#x2F;&#x2F;sites.google.com&#x2F;view&#x2F;satchit&#x2F;home"
-           >
-          Satchit Sivakumar
-        </a>
-      </div>
-      
-      <a href="&#x2F;publications&#x2F;ipdt&#x2F;" class="pub-details">view details &rarr;</a>
-      
     </li>
     
     
     
-    <li class="pub-item">
-      <div class="pub-top">
-        <a href="&#x2F;publications&#x2F;dp-hhh&#x2F;" class="pub-title">Differentially Private Hierarchical Heavy Hitters</a>
+    <li class="publication-item">
+      <div class="publication-summary">
+        <div class="publication-topline">
+          <h2><a href="/publications/dp-hhh/">Differentially Private Hierarchical Heavy Hitters</a></h2>
+          
+            
+            <a class="publication-venue" href="https:&#x2F;&#x2F;2025.sigmod.org&#x2F;">PODS 2025</a>
+            
+          
+        </div>
+
         
-        <a href="https:&#x2F;&#x2F;2025.sigmod.org&#x2F;" class="pub-venue">PODS 2025</a>
+        <p class="publication-authors">
+          <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;" class="author-primary">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;warwick.ac.uk&#x2F;fac&#x2F;sci&#x2F;dcs&#x2F;people&#x2F;graham_cormode&#x2F;">Graham Cormode</a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;yaron-kanza-27897642&#x2F;">Yaron Kanza</a>, <a href="https:&#x2F;&#x2F;divesh.net&#x2F;">Divesh Srivastava</a>, <a href="https:&#x2F;&#x2F;dblp.org&#x2F;pid&#x2F;166&#x2F;5104.html">Zhengyi Zhou</a>
+        </p>
+        
+
+        <a class="publication-details" href="/publications/dp-hhh/">Details <span aria-hidden="true">→</span></a>
         
       </div>
-      
-      <div class="pub-authors">
-        <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;"
-           class="author-primary">
-          Ari Biswas
-        </a>, <a href="https:&#x2F;&#x2F;warwick.ac.uk&#x2F;fac&#x2F;sci&#x2F;dcs&#x2F;people&#x2F;graham_cormode&#x2F;"
-           >
-          Graham Cormode
-        </a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;yaron-kanza-27897642&#x2F;"
-           >
-          Yaron Kanza
-        </a>, <a href="https:&#x2F;&#x2F;divesh.net&#x2F;"
-           >
-          Divesh Srivastava
-        </a>, <a href="https:&#x2F;&#x2F;dblp.org&#x2F;pid&#x2F;166&#x2F;5104.html"
-           >
-          Zhengyi Zhou
-        </a>
-      </div>
-      
-      <a href="&#x2F;publications&#x2F;dp-hhh&#x2F;" class="pub-details">view details &rarr;</a>
-      
     </li>
     
     
     
-    <li class="pub-item">
-      <div class="pub-top">
-        <a href="&#x2F;publications&#x2F;ipdp&#x2F;" class="pub-title">Interactive Proofs For Differentially Private Counting</a>
+    <li class="publication-item">
+      <div class="publication-summary">
+        <div class="publication-topline">
+          <h2><a href="/publications/ipdp/">Interactive Proofs For Differentially Private Counting</a></h2>
+          
+            
+            <a class="publication-venue" href="https:&#x2F;&#x2F;www.sigsac.org&#x2F;ccs&#x2F;CCS2023&#x2F;">CCS 2023</a>
+            
+          
+        </div>
+
         
-        <a href="https:&#x2F;&#x2F;www.sigsac.org&#x2F;ccs&#x2F;CCS2023&#x2F;" class="pub-venue">CCS 2023</a>
+        <p class="publication-authors">
+          <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;" class="author-primary">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;warwick.ac.uk&#x2F;fac&#x2F;sci&#x2F;dcs&#x2F;people&#x2F;graham_cormode&#x2F;">Graham Cormode</a>
+        </p>
+        
+
+        <a class="publication-details" href="/publications/ipdp/">Details <span aria-hidden="true">→</span></a>
         
       </div>
-      
-      <div class="pub-authors">
-        <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;"
-           class="author-primary">
-          Ari Biswas
-        </a>, <a href="https:&#x2F;&#x2F;warwick.ac.uk&#x2F;fac&#x2F;sci&#x2F;dcs&#x2F;people&#x2F;graham_cormode&#x2F;"
-           >
-          Graham Cormode
-        </a>
-      </div>
-      
-      <a href="&#x2F;publications&#x2F;ipdp&#x2F;" class="pub-details">view details &rarr;</a>
-      
     </li>
     
     
     
-    <li class="pub-item">
-      <div class="pub-top">
-        <a href="&#x2F;publications&#x2F;seeker&#x2F;" class="pub-title">Seeker: Real-Time Interactive Search</a>
+    <li class="publication-item">
+      <div class="publication-summary">
+        <div class="publication-topline">
+          <h2><a href="/publications/seeker/">Seeker: Real-Time Interactive Search</a></h2>
+          
+            
+            <a class="publication-venue" href="https:&#x2F;&#x2F;www.kdd.org&#x2F;kdd2019&#x2F;">KDD 2019</a>
+            
+          
+        </div>
+
         
-        <a href="https:&#x2F;&#x2F;www.kdd.org&#x2F;kdd2019&#x2F;" class="pub-venue">KDD 2019</a>
+        <p class="publication-authors">
+          <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;" class="author-primary">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;pages.cs.wisc.edu&#x2F;~hous21&#x2F;">Houssam Nassif</a>, <a href="https:&#x2F;&#x2F;scholar.google.com&#x2F;citations?user=tJzykd0AAAAJ&amp;hl=en">Thai Pham</a>, <a href="https:&#x2F;&#x2F;www.google.com&#x2F;url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;ben-snyder-3b777b10&amp;ved=2ahUKEwjR-unUl8WRAxWnQEEAHS3zCbMQFnoECBkQAQ&amp;usg=AOvVaw02N1uPxPyS0WZ92VwRbTbq" class="author-primary">Benjamin Snyder</a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;michael-vogelsong-524b2080&#x2F;">Michael Vogelsong</a>
+        </p>
+        
+
+        <a class="publication-details" href="/publications/seeker/">Details <span aria-hidden="true">→</span></a>
         
       </div>
-      
-      <div class="pub-authors">
-        <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;"
-           class="author-primary">
-          Ari Biswas
-        </a>, <a href="https:&#x2F;&#x2F;pages.cs.wisc.edu&#x2F;~hous21&#x2F;"
-           >
-          Houssam Nassif
-        </a>, <a href="https:&#x2F;&#x2F;scholar.google.com&#x2F;citations?user=tJzykd0AAAAJ&amp;hl=en"
-           >
-          Thai Pham
-        </a>, <a href="https:&#x2F;&#x2F;www.google.com&#x2F;url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;ben-snyder-3b777b10&amp;ved=2ahUKEwjR-unUl8WRAxWnQEEAHS3zCbMQFnoECBkQAQ&amp;usg=AOvVaw02N1uPxPyS0WZ92VwRbTbq"
-           class="author-primary">
-          Benjamin Snyder
-        </a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;michael-vogelsong-524b2080&#x2F;"
-           >
-          Michael Vogelsong
-        </a>
-      </div>
-      
-      <a href="&#x2F;publications&#x2F;seeker&#x2F;" class="pub-details">view details &rarr;</a>
-      
     </li>
     
     
     
-    <li class="pub-item">
-      <div class="pub-top">
-        <a href="&#x2F;publications&#x2F;adversarial-pca&#x2F;" class="pub-title">Adversarial Principal Component Analysis</a>
+    <li class="publication-item">
+      <div class="publication-summary">
+        <div class="publication-topline">
+          <h2><a href="/publications/adversarial-pca/">Adversarial Principal Component Analysis</a></h2>
+          
+            
+            <a class="publication-venue" href="https:&#x2F;&#x2F;isit2017.org&#x2F;">ISIT 2017</a>
+            
+          
+        </div>
+
         
-        <a href="https:&#x2F;&#x2F;isit2017.org&#x2F;" class="pub-venue">ISIT 2017</a>
+        <p class="publication-authors">
+          <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;danielpimentel.github.io" class="author-primary">Daniel Pimentel-Alarcón</a>, <a href="https:&#x2F;&#x2F;solislemuslab.github.io&#x2F;">Claudia Solís-Lemus</a>
+        </p>
+        
+
+        <a class="publication-details" href="/publications/adversarial-pca/">Details <span aria-hidden="true">→</span></a>
         
       </div>
-      
-      <div class="pub-authors">
-        <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;"
-           >
-          Ari Biswas
-        </a>, <a href="https:&#x2F;&#x2F;danielpimentel.github.io"
-           class="author-primary">
-          Daniel Pimentel-Alarcón
-        </a>, <a href="https:&#x2F;&#x2F;solislemuslab.github.io&#x2F;"
-           >
-          Claudia Solís-Lemus
-        </a>
-      </div>
-      
-      <a href="&#x2F;publications&#x2F;adversarial-pca&#x2F;" class="pub-details">view details &rarr;</a>
-      
     </li>
     
     
     
-    <li class="pub-item">
-      <div class="pub-top">
-        <a href="&#x2F;publications&#x2F;education&#x2F;" class="pub-title">Hands-on Introduction To Computer Science At The Freshman Level</a>
+    <li class="publication-item">
+      <div class="publication-summary">
+        <div class="publication-topline">
+          <h2><a href="/publications/education/">Hands-on Introduction To Computer Science At The Freshman Level</a></h2>
+          
+            
+            <a class="publication-venue" href="https:&#x2F;&#x2F;dl.acm.org&#x2F;doi&#x2F;proceedings&#x2F;10.1145&#x2F;2538862">SIGCSE 2014</a>
+            
+          
+        </div>
+
         
-        <a href="https:&#x2F;&#x2F;dl.acm.org&#x2F;doi&#x2F;proceedings&#x2F;10.1145&#x2F;2538862" class="pub-venue">SIGCSE 2014</a>
+        <p class="publication-authors">
+          <a href="https:&#x2F;&#x2F;scholar.google.com&#x2F;citations?user=7PCO-DEAAAAJ&amp;hl=en">Raghuraman Balasubramanian</a>, <a href="https&#x2F;&#x2F;randomwalks.xyz">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;tgirgin">Timur Girgin</a>, <a href="https:&#x2F;&#x2F;karu.sites.cs.wisc.edu&#x2F;wiki&#x2F;">Karu Sankaralingam</a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;zach-york-9511a359">Zach York</a>
+        </p>
+        
+
+        <a class="publication-details" href="/publications/education/">Details <span aria-hidden="true">→</span></a>
         
       </div>
-      
-      <div class="pub-authors">
-        <a href="https:&#x2F;&#x2F;scholar.google.com&#x2F;citations?user=7PCO-DEAAAAJ&amp;hl=en"
-           >
-          Raghuraman Balasubramanian
-        </a>, <a href="https&#x2F;&#x2F;randomwalks.xyz"
-           >
-          Ari Biswas
-        </a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;tgirgin"
-           >
-          Timur Girgin
-        </a>, <a href="https:&#x2F;&#x2F;karu.sites.cs.wisc.edu&#x2F;wiki&#x2F;"
-           >
-          Karu Sankaralingam
-        </a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;zach-york-9511a359"
-           >
-          Zach York
-        </a>
-      </div>
-      
-      <a href="&#x2F;publications&#x2F;education&#x2F;" class="pub-details">view details &rarr;</a>
-      
     </li>
     
     
-  </ul>
+  </ol>
+  
 </section>
 
   </main>
-  <!-- ====================================================================
-       TUFTE SIDENOTES JS
-       Transforms Zola's standard footnote HTML into Tufte-style sidenotes.
-       Paired with the "TUFTE SIDENOTES" section in sass/style.scss.
 
-       WHAT IT DOES:
-         1. Finds every <sup class="footnote-reference"> in .post-content
-         2. Looks up the matching <div class="footnote-definition" id="...">
-            at the bottom of the page (Zola generates these from [^n] syntax)
-         3. Extracts the footnote body (skipping the <sup> label Zola adds)
-         4. Replaces the original <sup> reference with:
-              <label class="sidenote-number" for="sn-N">  (the superscript number)
-              <input type="checkbox" class="sidenote-toggle" id="sn-N">  (mobile toggle)
-              <span class="sidenote">N. footnote body...</span>  (the actual note)
-         5. Adds .footnotes-are-sidenotes to .post-content so CSS hides the
-            original footnote definitions and their <hr> separator
-         6. Also explicitly hides the <hr> before footnote defs via JS as a
-            belt-and-suspenders measure
+  <footer class="site-footer">
+    <!-- <div> -->
+    <!--   <h2>Working Notes</h2> -->
+    <!--   <p>Something to say</p> -->
+    <!-- </div> -->
+    
+    <!-- <div> -->
+    <!--   <h2>Elsewhere</h2> -->
+    <!--   <ul> -->
+    <!--     <li><a href="/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="/tags">Browse by tag</a></li> -->
+    <!--   </ul> -->
+    <!-- </div> -->
+    
+    <div class="footer-credit">
+      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
+    </div>
+  </footer>
 
-       IF YOU CHANGE --max-width in style.scss:
-         The 1020px breakpoint in the CSS assumes 680px content + 240px margin +
-         some padding. Recalculate if you widen the content column.
-
-       IF JS FAILS:
-         The original Zola footnotes remain untouched. The fallback CSS in
-         style.scss styles them with superscript links — nothing breaks.
-  ==================================================================== -->
   <script>
-    (function() {
-      var content = document.querySelector('.post-content');
-      if (!content) return;
-
-      var refs = content.querySelectorAll('.footnote-reference');
-      if (!refs.length) return;
-
-      content.classList.add('footnotes-are-sidenotes');
-      var count = 0;
-
-      refs.forEach(function(ref) {
-        var link = ref.querySelector('a');
-        if (!link) return;
-
-        var href = link.getAttribute('href');
-        if (!href) return;
-        var id = href.replace('#', '');
-        var def = content.querySelector('.footnote-definition#' + CSS.escape(id));
-        if (!def) return;
-
-        count++;
-
-        // Get footnote body (skip the label <sup>)
-        var body = '';
-        var children = def.children;
-        for (var i = 0; i < children.length; i++) {
-          if (children[i].tagName !== 'SUP') {
-            body += children[i].outerHTML;
-          }
-        }
-
-        // Build sidenote elements:
-        //   label  -> displays the superscript number, acts as <label> for the checkbox
-        //   toggle -> hidden checkbox, checked state controls sidenote visibility on mobile
-        //   note   -> the sidenote content itself
-        var label = document.createElement('label');
-        label.className = 'sidenote-number';
-        label.setAttribute('for', 'sn-' + count);
-
-        var toggle = document.createElement('input');
-        toggle.type = 'checkbox';
-        toggle.className = 'sidenote-toggle';
-        toggle.id = 'sn-' + count;
-
-        var note = document.createElement('span');
-        note.className = 'sidenote';
-        note.innerHTML = '<span class="sidenote-num">' + count + '</span> ' + body;
-
-        // Replace the original footnote reference with our sidenote trio
-        ref.replaceWith(label);
-        label.after(note);
-        label.after(toggle);
-      });
-
-      // Hide <hr> before footnote definitions (Zola inserts one as a separator)
-      var firstDef = content.querySelector('.footnote-definition');
-      if (firstDef) {
-        var prev = firstDef.previousElementSibling;
-        if (prev && prev.tagName === 'HR') {
-          prev.style.display = 'none';
-        }
-      }
-    })();
-  </script>
-  <script>
-    // Code copy button
-    document.querySelectorAll('.post-content pre').forEach(function(pre) {
-      var wrapper = document.createElement('div');
-      wrapper.className = 'code-block';
-      pre.parentNode.insertBefore(wrapper, pre);
-      wrapper.appendChild(pre);
-
-      var btn = document.createElement('button');
-      btn.className = 'copy-btn';
-      btn.textContent = 'Copy';
-      btn.addEventListener('click', function() {
-        var code = pre.querySelector('code');
-        var source = code || pre;
-        var clone = source.cloneNode(true);
-        clone.querySelectorAll('.giallo-ln').forEach(function(el) { el.remove(); });
-        var text = clone.textContent;
-        navigator.clipboard.writeText(text).then(function() {
-          btn.textContent = 'Copied!';
-          btn.classList.add('copied');
-          setTimeout(function() {
-            btn.textContent = 'Copy';
-            btn.classList.remove('copied');
-          }, 2000);
+    document.querySelectorAll('pre').forEach(function (pre) {
+      if (!pre.querySelector('code')) return;
+      var button = document.createElement('button');
+      button.className = 'copy-code';
+      button.type = 'button';
+      button.textContent = 'Copy';
+      button.addEventListener('click', function () {
+        var clone = pre.querySelector('code').cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function (line) { line.remove(); });
+        navigator.clipboard.writeText(clone.textContent).then(function () {
+          button.textContent = 'Copied';
+          window.setTimeout(function () { button.textContent = 'Copy'; }, 1400);
         });
       });
-      wrapper.appendChild(btn);
+      pre.appendChild(button);
     });
   </script>
   <script>
-    (function() {
-      const select = document.getElementById('theme-select');
-      const html = document.documentElement;
-      const darkLink = document.getElementById('giallo-dark');
-      const lightLink = document.getElementById('giallo-light');
-
-      const lightThemes = ['rose-pine-dawn', 'bw-light'];
-
-      function setTheme(theme) {
-        html.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-        if (select) select.value = theme;
-        if (lightThemes.includes(theme)) {
-          lightLink.media = 'all';
-          darkLink.media = 'not all';
-        } else {
-          darkLink.media = 'all';
-          lightLink.media = 'not all';
-        }
-      }
-
-      // Apply current theme (already set by head script, but sync CSS)
-      const current = html.getAttribute('data-theme');
-      setTheme(current);
-
-      if (select) {
-        select.addEventListener('change', function() {
-          setTheme(select.value);
-        });
-      }
-    })();
-  </script>
-  <script>
-    // Smooth scroll + highlight for eqref and citation links.
-    // Citations get a ↩ back-link to return to reading position.
-    document.addEventListener('click', function(e) {
-      // Handle back-arrow clicks
-      var back = e.target.closest('.bib-back');
+    document.addEventListener('click', function (event) {
+      var back = event.target.closest('.bib-back');
       if (back) {
-        e.preventDefault();
+        event.preventDefault();
         var source = document.getElementById(back.getAttribute('data-source'));
         if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
 
-      var link = e.target.closest('a[href^="#mjx-eqn"], a.citation[href^="#ref-"]');
+      var link = event.target.closest('a.citation[href^="#ref-"]');
       if (!link) return;
 
-      e.preventDefault();
-      e.stopPropagation();
-
-      // Clean up previous highlights and back-links
-      document.querySelectorAll('.eq-highlight').forEach(function(el) {
-        el.classList.remove('eq-highlight');
+      event.preventDefault();
+      document.querySelectorAll('.citation-highlight').forEach(function (item) {
+        item.classList.remove('citation-highlight');
       });
-      document.querySelectorAll('.bib-back').forEach(function(el) {
-        el.remove();
-      });
+      document.querySelectorAll('.bib-back').forEach(function (item) { item.remove(); });
 
-      var href = link.getAttribute('href');
-      var id = decodeURIComponent(href.slice(1));
-      var target = document.getElementById(id);
+      var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
       if (!target) return;
 
-      var highlight = target.closest('mjx-container[display="true"]') || target;
-      highlight.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      highlight.classList.add('eq-highlight');
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('citation-highlight');
 
-      // For citations, add a back-arrow to return to reading position
-      if (link.classList.contains('citation')) {
-        if (!link.id) link.id = 'cite-src-' + id;
-        var arrow = document.createElement('a');
-        arrow.className = 'bib-back';
-        arrow.setAttribute('data-source', link.id);
-        arrow.textContent = ' \u21A9';
-        arrow.title = 'Back to text';
-        highlight.appendChild(arrow);
-      }
+      if (!link.id) link.id = 'cite-source-' + target.id;
+      var arrow = document.createElement('a');
+      arrow.className = 'bib-back';
+      arrow.setAttribute('data-source', link.id);
+      arrow.setAttribute('href', '#' + link.id);
+      arrow.setAttribute('aria-label', 'Back to citation');
+      arrow.textContent = ' ↩';
+      target.appendChild(arrow);
     });
   </script>
-
+  
 </body>
 </html>

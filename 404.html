@@ -1,3 +1,117 @@
 <!doctype html>
-<title>404 Not Found</title>
-<h1>404 Not Found</h1>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Not found — Random Walks</title>
+  <meta name="description" content="Written Word">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="/style.css?h=4d66b1897c4e7fff0c8e">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="/atom.xml">
+  
+  
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="Random Walks — home">
+      <span>Random</span><span>Walks</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="/publications/">Publications</a>
+      <a href="/notes/">Notes</a>
+      <a href="/travel/">Miscellaneous</a>
+      <a href="/cv/">CV</a>
+      <!-- <a href="/tags">Tags</a> -->
+      <!-- <a href="/atom.xml">Feed</a> -->
+    </nav>
+  </header>
+
+  
+
+  <main id="main-content">
+    
+<section class="not-found"><p class="eyebrow">404</p><h1>This page is not here.</h1><p><a href="">Return to the notebook</a></p></section>
+
+  </main>
+
+  <footer class="site-footer">
+    <!-- <div> -->
+    <!--   <h2>Working Notes</h2> -->
+    <!--   <p>Something to say</p> -->
+    <!-- </div> -->
+    
+    <!-- <div> -->
+    <!--   <h2>Elsewhere</h2> -->
+    <!--   <ul> -->
+    <!--     <li><a href="/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="/tags">Browse by tag</a></li> -->
+    <!--   </ul> -->
+    <!-- </div> -->
+    
+    <div class="footer-credit">
+      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('pre').forEach(function (pre) {
+      if (!pre.querySelector('code')) return;
+      var button = document.createElement('button');
+      button.className = 'copy-code';
+      button.type = 'button';
+      button.textContent = 'Copy';
+      button.addEventListener('click', function () {
+        var clone = pre.querySelector('code').cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function (line) { line.remove(); });
+        navigator.clipboard.writeText(clone.textContent).then(function () {
+          button.textContent = 'Copied';
+          window.setTimeout(function () { button.textContent = 'Copy'; }, 1400);
+        });
+      });
+      pre.appendChild(button);
+    });
+  </script>
+  <script>
+    document.addEventListener('click', function (event) {
+      var back = event.target.closest('.bib-back');
+      if (back) {
+        event.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = event.target.closest('a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      event.preventDefault();
+      document.querySelectorAll('.citation-highlight').forEach(function (item) {
+        item.classList.remove('citation-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function (item) { item.remove(); });
+
+      var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+      if (!target) return;
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('citation-highlight');
+
+      if (!link.id) link.id = 'cite-source-' + target.id;
+      var arrow = document.createElement('a');
+      arrow.className = 'bib-back';
+      arrow.setAttribute('data-source', link.id);
+      arrow.setAttribute('href', '#' + link.id);
+      arrow.setAttribute('aria-label', 'Back to citation');
+      arrow.textContent = ' ↩';
+      target.appendChild(arrow);
+    });
+  </script>
+  
+</body>
+</html>
