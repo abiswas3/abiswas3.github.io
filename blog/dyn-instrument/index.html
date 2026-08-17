@@ -49,10 +49,11 @@
           criticalAlpha: ['{\\alpha_{#1}}', 1],
           CPlus: '{\\textcolor{blue}{C^{+}}}',
           CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
           GraphNbrs: ['{N_G(#1)}', 1],
           ClauseNbrs: ['{N_C(#1)}', 1],
-          Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-          HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
           SmallO: ['{o\\!(#1)}', 1],
           Closure: ['{\\operatorname{Cl}(#1)}', 1],
           ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
@@ -116,6 +117,7 @@
 
 
 
+
 <article class="note footnotes-right">
   <header class="note-header">
     <h1>Montgomery Multiplication: Theory Vs Practice</h1>
@@ -143,7 +145,6 @@
 More information about the exact details of Montgomery multiplication has been uncovered, and the discussion can be found <a href="why-jolt-breaks.html">here</a>, where we discuss in detail why we often draw different conclusions from benchmarking the same source of code.</p>
 
 </aside>
-
 <p>In a recent <a rel="noopener noreferrer external" target="_blank" href="https://hackmd.io/@Ingonyama/Barret-Montgomery">blog post</a>, Yuval Domb describes a subtle, but remarkably clever optimisation that allows us to compute the Montgomery product of two integers modulo a $n$-limb<sup class="footnote-reference" id="fr-z-1"><a href="#fn-z">1</a></sup> integer $p$, using $2n^2 + 1$ multiplication operations.
 Previously, the best known algorithm<sup class="footnote-reference" id="fr-z2-1"><a href="#fn-z2">2</a></sup> for Montgomery multiplication was known to use $2n^2 + n$ multiplication operations.
 Although the new algorithm theoretically requires fewer multiplications, empirical evaluations revealed no improvements in runtime. In fact, prior algorithms consistently outperformed the proposed method.
@@ -188,7 +189,6 @@ For example, on Skylake (mid-level x86 processor)</p>
 <p><a rel="noopener noreferrer external" target="_blank" href="https://www.agner.org/optimize/instruction_tables.pdf">See Page 278</a> for more details on what instructions take how long.</p>
 
 </aside>
-
 <p>Now given the above constraints, one would imagine that minimising the number of multiplication operations would be the answer to implementing faster algorithms.</p>
 
 <aside class="callout callout-box thm-box">
@@ -197,7 +197,6 @@ For example, on Skylake (mid-level x86 processor)</p>
 The remainder of this document tries to understand why?</p>
 
 </aside>
-
 <h2 id="benchmarking-details">Benchmarking Details<a class="zola-anchor" href="#benchmarking-details" aria-label="Link to this section">#</a>
 </h2>
 <p>We first describe our findings, and then describe how to recreate the analysis workflow.</p>
@@ -221,7 +220,6 @@ Similarly, the stripped down code needed to compute the Montgomery product with 
 It is entirely possible that for larger values of $n$, the miscellaneous overheads we are about to discuss below will be outdone by the gains from fewer multiplications.</p>
 
 </aside>
-
 <p>These are the instructions to empirically evaluate the running time of a single Montgomery multiplication.
 We assume that the inputs are already in Montgomery form,
 and the output will be stored in Montgomery form.
@@ -355,7 +353,6 @@ Note that this does not imply that the new algorithm could not be faster for eve
 It just means that the way the Rust compiler is building the current binary is not as efficient.</p>
 
 </aside>
-
 <p>At this point we have established why we think we do not see an improvement in runtime.
 One potential way to see the promised speedup is to write optimised assembly code directly.
 We defer investigating whether this is possible to future work.</p>
@@ -367,7 +364,6 @@ We defer investigating whether this is possible to future work.</p>
   <p><strong>Update: 2025-05-27</strong>: Since this blog was published we’ve cleaned up the benchmarking code. The names of functions are no longer called <code>scalar_mul</code>, but the analysis below will still work with if we replace <code>scalar_mul*</code> with the correct function names.</p>
 
 </aside>
-
 <p>The remainder of the post is written as a tutorial on how we were able to perform the above analysis.
 To extract assembly we use techniques inspired by the field of <a rel="noopener noreferrer external" target="_blank" href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-606.pdf">Dynamic Binary Instrumentation</a>.
 At a high level, when we run <code>cargo run</code>, just before an instruction in our code is physically executed on the CPU, the <a rel="noopener noreferrer external" target="_blank" href="https://software.intel.com/sites/landingpage/pintool/downloads/pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz">pin tool</a> provided by Intel interjects, and allows us to run pre and post instrumentation code.
@@ -381,7 +377,6 @@ Your CPU tries to predict branch outcomes as an optimisation. So in a way this l
 
 </aside>
 
-
 <aside class="callout callout-box thm-box">
   
   <p>Given that we use the above tool, our techniques only apply when executing programs on Intel CPU’s.
@@ -389,7 +384,6 @@ This dynamic technique for extracting assembly instructions by running the binar
 There could be static instrumentation techniques that one could use instead.</p>
 
 </aside>
-
 <p>Next, we describe how to download the pin tool and store it in a directory named <code>t</code>.
 (We assume that you are running Linux as the OS, though there are windows and Mac pin tools available on the website)</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">mkdir</span><span style="color: #032F62;"> t</span><span> &amp;&amp;</span><span style="color: #005CC5;"> cd</span><span style="color: #032F62;"> t</span></span>
@@ -461,7 +455,6 @@ Likewise, the opt::scalar_mul routine is contained at <code>0x5e4052170000</code
 A more robust way to extract the assembly is to do the following:</p>
 
 </aside>
-
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">$</span><span style="color: #032F62;"> objdump</span><span style="color: #005CC5;"> -d -Mintel</span><span style="color: #032F62;"> target/release-with-debug/minimal_mult</span><span style="color: #D73A49;">|</span><span style="color: #6F42C1;">sed</span><span style="color: #005CC5;"> -n</span><span style="color: #032F62;"> &#39;/^0.*scalar_mul/,/ret/{/scalar_mul\|ret/p}&#39;</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">000000000004a790</span><span style="color: #D73A49;"> &lt;</span><span style="color: #032F62;">_ZN12minimal_mult12vanilla_cios10scalar_mul17h8731c86ebf619ce7</span><span>E</span><span style="color: #D73A49;">&gt;</span><span style="color: #032F62;">:</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">   4ac47:</span><span style="color: #032F62;">       c3                      ret</span></span>
@@ -661,6 +654,7 @@ This only sped things up. <a href="#fr-y-1">↩</a></p>
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+
 
 
 <script>

@@ -49,10 +49,11 @@
           criticalAlpha: ['{\\alpha_{#1}}', 1],
           CPlus: '{\\textcolor{blue}{C^{+}}}',
           CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
           GraphNbrs: ['{N_G(#1)}', 1],
           ClauseNbrs: ['{N_C(#1)}', 1],
-          Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-          HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
           SmallO: ['{o\\!(#1)}', 1],
           Closure: ['{\\operatorname{Cl}(#1)}', 1],
           ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
@@ -111,6 +112,7 @@
 
   <main id="main-content">
     
+
 
 
 
@@ -305,7 +307,6 @@ Also as we are working modulo $r$, it suffices to use $m = \mu_{0}c_0$ discardin
 This $m$ is just to make $c_0 + mp$ divisible by $r$.</p>
 
 </aside>
-
 <p>Once we compute $mp$, and add this to $c$ to get $c^{(1)}$, this should clear the least significant digit based on how we picked $m$. See below</p>
 <div class="math-display">
 $$
@@ -367,7 +368,6 @@ $n$ digit multiplications, is by computing $\rho_1 = r^{-1}\mod p$.
 One way to understand this algorithm is that, in each round, the current sum is divided by $𝑟$, and the resulting fraction is converted into an $n+1$-digit number $c_i\text{ }\rho_1$, which is then added to the integer part of the division.</p>
 
 </aside>
-
 <p>In simple words, in CIOS we were adding and then dividing<sup class="footnote-reference" id="fr-2-1"><a href="#fn-2">4</a></sup>, now we first divide and then add things.
 See below:</p>
 <p>$$ c \equiv (c*{2n-1} r^{2n-1} + c*{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p$$</p>
@@ -395,7 +395,6 @@ This is the akin to playing the CIOS game for 1 round.</p>
   <p>We claim that $s &lt; n\cdot(rp)$.</p>
 
 </aside>
-
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
   <p>Dividing $c$ by $r^{n-1}$ we get</p>
@@ -451,7 +450,6 @@ The key difference between <code>h-mul</code> and <code>s-mul</code> is that in 
 So we lose some parallelism in <code>h-mul</code>, but as we will soon see, we minimise the amount of overflow.</p>
 
 </aside>
-
 <p>From here on with just do CIOS.</p>
 <p>For each division operation, we blow up the current sum by at most $rp$.
 See below $n=4$.</p>
@@ -485,15 +483,13 @@ Using the above analysis, one can easily show the following:</p>
 
 <aside class="callout callout-theorem thm-numbered">
   
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Number of multiplications vs parallelisation vs number of reductions
-</span></div>
+  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Number of multiplications vs parallelisation vs number of reductions</span></div>
   
   <p>Let $u$ be the number of multiplication operations the CIOS algorithm with inputs $a$ and $b$ that each at most $p$, and $v$ be the number of addition operations (including the reduction phase).
 Then, for any $0 \le k \le n-1$, if we divide $ab$ by $r^k$ before adding, we have $k$ fewer multiplication operations compared to CIOS.
 If we have $m$ rounds of division, then we have $m$ more addition operations than CIOS (due to the reduction step of making the answer less than $p$).</p>
 
 </aside>
-
 <h2 id="missing-factor-of-1p">Missing Factor Of $1p$<a class="zola-anchor" href="#missing-factor-of-1p" aria-label="Link to this section">#</a>
 </h2>
 <p>At this point, there is one question left. We proved that in theory</p>
@@ -519,7 +515,6 @@ Plugging in exact numbers</p>
 If $p$ were only a little smaller than $r^n$, then we’d have to put in one extra reduction for each of these algorithms.</p>
 
 </aside>
-
 <h2 id="the-need-for-speed">The Need For Speed<a class="zola-anchor" href="#the-need-for-speed" aria-label="Link to this section">#</a>
 </h2>
 <p>Remember, we began with the goal of speeding up Montgomery multiplication. So far, we have only understood correctness to make Jolt unit tests pass.
@@ -604,7 +599,6 @@ But we <em>need</em> the final answer to be less than $p$ for the rest of the Jo
 Does this mean that for Jolt, CIOS remains the best algorithm to use?</p>
 
 </aside>
-
 <p>We try a middle ground. We use our theory framework so far to come up with an alternate strategy:
 – We will save 2 multiplications (instead of 3) but also need to reduce one fewer time compared to <code>h-mul</code>
 By our analysis and the actual value of $p$ in <code>bn-254</code>, we will need at most one subtraction now as opposed to the two from <code>h-mul</code> (just like CIOS).
@@ -850,6 +844,7 @@ For anything in between, you’d want to use the mini-theorem above and figure o
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+
 
 
 <script>

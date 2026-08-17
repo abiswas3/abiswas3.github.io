@@ -49,10 +49,11 @@
           criticalAlpha: ['{\\alpha_{#1}}', 1],
           CPlus: '{\\textcolor{blue}{C^{+}}}',
           CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
           GraphNbrs: ['{N_G(#1)}', 1],
           ClauseNbrs: ['{N_C(#1)}', 1],
-          Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-          HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
           SmallO: ['{o\\!(#1)}', 1],
           Closure: ['{\\operatorname{Cl}(#1)}', 1],
           ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
@@ -111,6 +112,7 @@
 
   <main id="main-content">
     
+
 
 
 
@@ -186,7 +188,6 @@ $$</p>
 <p><strong>Size Of A Refutation</strong>: The size of a refutation $\Size{\pi}$ is the number of clauses in the sequence ($L$ in this case).</p>
 
 </aside>
-
 <p>The complexity of refuting a formula $F$ is given by the size of the smallest proof that refutes $F$.</p>
 
 <aside class="callout callout-definition thm-numbered">
@@ -199,7 +200,6 @@ Then</p>
 <p>denotes the complexity of refuting $F$ in the resolution proof system.</p>
 
 </aside>
-
 <h3 id="worked-out-example">Worked Out Example<a class="zola-anchor" href="#worked-out-example" aria-label="Link to this section">#</a>
 </h3>
 <p>Shown below is a worked out example using only the resolution rule (no weakening).
@@ -250,7 +250,6 @@ F &= \underset{i \in [m]}{\land} P_i \\
   <p>Satisfying all 4 axioms, implies that there exists a <strong>perfect matching</strong> in the graph $G$.</p>
 
 </aside>
-
 <p>Clearly any formula that includes constraints $\eqref{eq:pigeon}$-$\eqref{eq:onto}$ is the MOST<sup class="footnote-reference" id="fr-mental-1"><a href="#fn-mental">1</a></sup> constrained system.
 Therefore, it must be easier to refute the most constrained formula.
 Thus, lower bounds for <strong>more</strong> constrained systems subsume lower bounds<sup class="footnote-reference" id="fr-lower-bound-1"><a href="#fn-lower-bound">2</a></sup> for formulae that is constrained by a strict subset of the above conditions.</p>
@@ -280,7 +279,6 @@ When $m \in \omega(n^2)$ we refer to the formula as the <strong>weak</strong> PH
 So they are in the <em>small</em> $m$ regime.</p>
 
 </aside>
-
 <ul>
 <li>
 <p>For large values of $m$, in a breakthrough result by <a href="#ref-raz2004resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="raz2004resolution" data-cite-authors="Raz, R." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="Journal of the ACM" data-cite-year="2004">[Raz, 2004]</a>
@@ -303,7 +301,6 @@ Thus, there is no point of thinking $m$ any larger.</p>
 <p><strong>This problem is essentially closed for dense bipartite graphs $G=K_{m,n}$</strong> given Razbarovs strengthening.</p>
 
 </aside>
-
 <p>Now when $G$ is sparse, it might be really easy to refute the PHP.
 For example, the presence of an isolated vertex leads to short proofs.
 So now we go into the business of for what kind of “sparse” graphs, is the problem still hard.</p>
@@ -319,7 +316,6 @@ So now we go into the business of for what kind of “sparse” graphs, is the p
 $$ \boundary{S} = \{ v \in V_H : \Size{N_G(v) \cap S} = 1\}$$</p>
 
 </aside>
-
 <p>What do we know about refuting PHP in expanders? Not a whole lot, but there are 3 seminal results that consider the extremes:</p>
 <ul>
 <li>When $m$ is not too large i.e $n+ 1 &lt; m \ll n^2$, <a href="#ref-ben1999short" class="citation" title="Short Proofs Are Narrow — Resolution Made Simple" data-cite-key="ben1999short" data-cite-authors="Ben-Sasson, E. and Wigderson, A." data-cite-title="Short Proofs Are Narrow — Resolution Made Simple" data-cite-venue="Journal of the ACM" data-cite-year="2001">[Ben-Sasson &amp; Wigderson, 2001]</a>
@@ -334,7 +330,6 @@ $$ \boundary{S} = \{ v \in V_H : \Size{N_G(v) \cap S} = 1\}$$</p>
 So small $m$ is considered “done” in this sparse expansion regime.</p>
 
 </aside>
-
 <ul>
 <li>The other extreme, where $m$ can be arbitrary, but each pigeon also has a lot of holes to go into (high minimal degree i.e graph is not very sparse) <a href="#ref-razborov2004resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2004resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="Theoretical Computer Science" data-cite-year="2004">[Razborov, 2004]</a>
  and <a href="#ref-razborov2003resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">[Razborov, 2003]</a>
@@ -611,6 +606,7 @@ They show for any $G$ that is $(r, \Delta, (1-\xi\cdot \frac{\log n}{\log m(n)})
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+
 
 
 <script>

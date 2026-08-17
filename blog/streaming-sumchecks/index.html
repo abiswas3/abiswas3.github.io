@@ -49,10 +49,11 @@
           criticalAlpha: ['{\\alpha_{#1}}', 1],
           CPlus: '{\\textcolor{blue}{C^{+}}}',
           CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
           GraphNbrs: ['{N_G(#1)}', 1],
           ClauseNbrs: ['{N_C(#1)}', 1],
-          Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-          HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
           SmallO: ['{o\\!(#1)}', 1],
           Closure: ['{\\operatorname{Cl}(#1)}', 1],
           ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
@@ -111,6 +112,7 @@
 
   <main id="main-content">
     
+
 
 
 
@@ -190,7 +192,6 @@
 Still the post remains valid if one were to understand how to implement streaming sum-checks.</p>
 
 </aside>
-
 <p>This write-up talks about this <a rel="noopener noreferrer external" target="_blank" href="https://github.com/a16z/jolt/pull/1114">PR</a> which introduces a generalised sum-check API, adapted to accommodate an implementation of Jolt that uses $O(1)$ memory<sup class="footnote-reference" id="fr-d-1"><a href="#fn-d">1</a></sup>.</p>
 <h2 id="the-trace">The Trace<a class="zola-anchor" href="#the-trace" aria-label="Link to this section">#</a>
 </h2>
@@ -256,7 +257,6 @@ It is a giant vector of length $T$, and location $t \in [T]$ stores the machine 
 But for the purposes of this post, this assumption allows us to abstract away important implementation details that currently remain unimplemented, and prove that we can indeed implement any Jolt sumcheck with $O(1)$ memory.</p>
 
 </aside>
-
 <h2 id="correctness-as-constraint-satisfaction">Correctness As Constraint Satisfaction<a class="zola-anchor" href="#correctness-as-constraint-satisfaction" aria-label="Link to this section">#</a>
 </h2>
 <p>Now with the trace/emulation in hand, we ask - what does it mean for a program to be executed correctly?
@@ -343,7 +343,6 @@ $$
 </ul>
 
 </aside>
-
 <p>Now we do the thing we have done since the beginning of time.
 We want to make sure the LHS of the above system of equations equals the RHS as polynomials.
 So we sample $(\TauTime | \tau_{b} | \TauConstraints) \samples \ChallengeSet^{\log T+2}$ and check if the following sumcheck holds:</p>
@@ -382,7 +381,6 @@ Remember we assumed streaming the trace was free, and storing $O(1)$ field eleme
 We include this round in this post for completeness.</p>
 
 </aside>
-
 <p>After this round, the prover has received challenge $r_y$ to bind to variable $Y$.
 What we describe next refers to the <code>OuterRemainingSumcheck</code> in Jolt.
 The sumcheck is divided into 2 phases:</p>
@@ -439,7 +437,6 @@ Eventually, we will have to implement a memory efficient way to stream the trace
 In what follows, we make a compromise of sometimes streaming instead of always streaming, but this will allow us to store fewer things.</p>
 
 </aside>
-
 <h2 id="the-streaming-generalisation">The Streaming Generalisation<a class="zola-anchor" href="#the-streaming-generalisation" aria-label="Link to this section">#</a>
 </h2>
 <p>To describe the streaming sum-check we need to first describe what we mean by a sum-check schedule.</p>
@@ -514,7 +511,6 @@ $$
   <p>Throughout this post when we write $\eq{\tau}{x}$, we assume it’s implemented using the Dao-Thaler split-eq optimisation. Thus the memory representation of the $\eq{}{}$ polynomials is never an issue.</p>
 
 </aside>
-
 <p>Finally the prover’s message is given by
 $$
 s(\textcolor{pink}{X_b}) = t(\textcolor{pink}{X_b}),\text{eq}(\tau_b, \textcolor{pink}{X_b})
@@ -522,13 +518,12 @@ $$</p>
 
 <aside class="callout callout-remark">
   
-  <div class="callout-title">Prover Messages Are Always Computed From `t_grid`</div>
+  <div class="callout-title">Prover Messages Are Always Computed From <code>t_grid</code></div>
   
   <p>It is important to note that in every round of the sum-check the prover’s messages will be computed using the streaming data structure <code>t_grid</code>.
 We will shortly see that once the current <code>t_grid</code> gets exhausted we will re-compute it.</p>
 
 </aside>
-
 
 <aside class="callout callout-remark">
   
@@ -538,7 +533,6 @@ We will shortly see that once the current <code>t_grid</code> gets exhausted we 
 For example, if $p$ is linear i.e $p(X) = aX + b$, we have $p(\infty) = a$.</p>
 
 </aside>
-
 <p>This completes the first round message the prover sends.</p>
 <h4 id="binding-in-the-streaming-phase">Binding in the streaming phase<a class="zola-anchor" href="#binding-in-the-streaming-phase" aria-label="Link to this section">#</a>
 </h4>
@@ -565,7 +559,6 @@ The total amount of storage needed is $2^{\hat{t}}$ where $\hat{t} \in [n]$ is t
 If $\hat{t}$ is large, we can always use the split-eq technique for <code>r_grid</code> (this is not currently needed).</p>
 
 </aside>
-
 <p>The last line of <code>r_grid</code> helps us compute $\text{eq}(\textcolor{orange}{r_{w-1},…, r_b}, x_{w-1},…, x_{b})$ which is useful when we recompute <code>t_grid</code> in the first round of the next window.</p>
 <h3 id="next-window-start">Next Window Start<a class="zola-anchor" href="#next-window-start" aria-label="Link to this section">#</a>
 </h3>
@@ -830,6 +823,7 @@ The following snippet of code executes the logic described above, based on the r
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+
 
 
 <script>

@@ -49,10 +49,11 @@
           criticalAlpha: ['{\\alpha_{#1}}', 1],
           CPlus: '{\\textcolor{blue}{C^{+}}}',
           CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
           GraphNbrs: ['{N_G(#1)}', 1],
           ClauseNbrs: ['{N_C(#1)}', 1],
-          Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-          HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
           SmallO: ['{o\\!(#1)}', 1],
           Closure: ['{\\operatorname{Cl}(#1)}', 1],
           ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
@@ -116,6 +117,7 @@
 
 
 
+
 <article class="note footnotes-right">
   <header class="note-header">
     <h1>Small Scalar Binding</h1>
@@ -147,7 +149,6 @@
 <strong>NOTE:</strong> This now reduces the soundness error from $1/2^{254}$ to $1/2^{125}$, but this is not a concern as currently Jolt usess the <code>bn256</code> curve to commit to polynomials, which offers 110 bits of security anyway.</p>
 
 </aside>
-
 <h2 id="sum-check-recap">Sum-Check Recap<a class="zola-anchor" href="#sum-check-recap" aria-label="Link to this section">#</a>
 </h2>
 <p>We briefly recap the sum-check protocol<sup class="footnote-reference" id="fr-a-1"><a href="#fn-a">1</a></sup>.</p>
@@ -218,7 +219,6 @@ faster than $\Field \times \Field$.
 This in returns speeds up the <strong>binding</strong> phase of the sum-check protocol, which results in a 1.3x speedup per round of sum-check.</p>
 
 </aside>
-
 <h2 id="the-challenge-set-s">The Challenge Set $S$<a class="zola-anchor" href="#the-challenge-set-s" aria-label="Link to this section">#</a>
 </h2>
 <p>Define the set</p>
@@ -540,6 +540,7 @@ So we clear the first 3 bits of $x$ to ensure that $x$ is <strong>ALWAYS</strong
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+
 
 
 <script>

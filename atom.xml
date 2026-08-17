@@ -46,7 +46,6 @@ For the remaining three, the spec asks that we first legalize the value in &lt;c
 &lt;p&gt;More details below.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;h2 id=&quot;mtvec&quot;&gt;mtvec&lt;a class=&quot;zola-anchor&quot; href=&quot;#mtvec&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h2&gt;
 &lt;p&gt;As per the Sail spec, which we checked to be correct&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-mtvec-docs-1&quot;&gt;&lt;a href=&quot;#fn-mtvec-docs&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;, the value written to the contents of &lt;code&gt;mtvec&lt;&#x2F;code&gt; control status register is given by&lt;&#x2F;p&gt;
@@ -414,7 +413,6 @@ If a malicious program were to write a different value to Jolt &lt;code&gt;mtvec
 We will rely on the proof mechanism to catch this.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;h3 id=&quot;align-pc&quot;&gt;Align PC&lt;a class=&quot;zola-anchor&quot; href=&quot;#align-pc&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h3&gt;
 &lt;p&gt;Jolt supports compressed instructions (&lt;code&gt;+c&lt;&#x2F;code&gt; &#x2F; RV64IMAC), &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;LayerZero-Research&#x2F;jolt&#x2F;blob&#x2F;main&#x2F;jolt-sdk&#x2F;src&#x2F;runtime&#x2F;trap.rs#L18-L34&quot;&gt;as seen here&lt;&#x2F;a&gt;, so we can only guarantee that the least significant bit of PC is 0.
@@ -775,7 +773,6 @@ It might look simple, but under the hood a lot is going, and understanding it is
 Thus, it’s important to get used to mentally translating do notation into function composition.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;h4 id=&quot;function-signature&quot;&gt;Function Signature&lt;a class=&quot;zola-anchor&quot; href=&quot;#function-signature&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h4&gt;
 &lt;p&gt;The function signature says the inputs are a 12-bit immediate value &lt;code&gt;imm&lt;&#x2F;code&gt; and general-purpose source and destination registers &lt;code&gt;rs1&lt;&#x2F;code&gt; and &lt;code&gt;rd&lt;&#x2F;code&gt;, which are of type&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-gpr-1&quot;&gt;&lt;a href=&quot;#fn-gpr&quot;&gt;4&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; &lt;code&gt;regidx&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
@@ -929,7 +926,7 @@ The logic used in Jolt is as follows:&lt;&#x2F;p&gt;
 
 &lt;aside class=&quot;callout callout-remark&quot;&gt;
   
-  &lt;div class=&quot;callout-title&quot;&gt;Two sets of control&amp;#x2F;status registers&lt;&#x2F;div&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;Two sets of control&#x2F;status registers&lt;&#x2F;div&gt;
   
   &lt;p&gt;It might seem confusing that some virtual registers represent control&#x2F;status registers, while there is also a separate field for CSRs.
 This is because the Jolt CPU emulator is a fork of a RISC-V emulator.
@@ -938,7 +935,6 @@ However, when reading a Jolt CPU program, control&#x2F;status register reads and
 &lt;code&gt;ECALL&lt;&#x2F;code&gt;, &lt;code&gt;EBREAK&lt;&#x2F;code&gt;, &lt;code&gt;MRET&lt;&#x2F;code&gt;, &lt;code&gt;CSRRW&lt;&#x2F;code&gt;, &lt;code&gt;CSRRS&lt;&#x2F;code&gt;, and &lt;code&gt;CSRRC&lt;&#x2F;code&gt; are all expanded (as we show later).&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;h2 id=&quot;jolt-monad-stepping-the-cpu&quot;&gt;Jolt Monad (Stepping the CPU)&lt;a class=&quot;zola-anchor&quot; href=&quot;#jolt-monad-stepping-the-cpu&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h2&gt;
 &lt;p&gt;We step the Jolt CPU using the same &lt;code&gt;EStateM&lt;&#x2F;code&gt; infrastructure.
@@ -1023,7 +1019,6 @@ For each instruction, the process is as follows:&lt;&#x2F;p&gt;
   &lt;p&gt;This eyeballing of Rust and Lean code is prone to bugs. As a temporary solution, we always have an AI agent double-check the two code blocks. In the coming weeks, we will have an auto-translator from Rust to Lean for instruction execution semantics.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;rust&quot; data-name=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;main&#x2F;tracer&#x2F;src&#x2F;instruction&#x2F;addi.rs&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot; style=&quot;color: #1B1F234D;&quot;&gt;19&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    fn&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; exec&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;&amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span&gt;, cpu&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;: &amp;amp;mut&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; Cpu&lt;&#x2F;span&gt;&lt;span&gt;, _&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;: &amp;amp;mut&lt;&#x2F;span&gt;&lt;span&gt; &amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;ADDI&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; as&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; RISCVInstruction&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;RAMAccess&lt;&#x2F;span&gt;&lt;span&gt;) {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot; style=&quot;color: #1B1F234D;&quot;&gt;20&lt;&#x2F;span&gt;&lt;span&gt;        cpu&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;write_register&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot; style=&quot;color: #1B1F234D;&quot;&gt;21&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;            self&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;operands&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;rd &lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;as&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; usize&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -1054,7 +1049,6 @@ Continuing with the &lt;code&gt;ADDI&lt;&#x2F;code&gt; example, it looks like th
   &lt;p&gt;Given a 12-bit immediate value &lt;code&gt;imm&lt;&#x2F;code&gt;, a readable source register &lt;code&gt;rs1&lt;&#x2F;code&gt;, a writable destination register &lt;code&gt;rd&lt;&#x2F;code&gt;, assumptions &lt;code&gt;h&lt;&#x2F;code&gt;, and an initial Jolt state &lt;code&gt;js&lt;&#x2F;code&gt;, running Jolt’s &lt;code&gt;ADDI&lt;&#x2F;code&gt; and projecting down to the Sail state gives the same state as running the trusted Sail &lt;code&gt;ADDI&lt;&#x2F;code&gt; on the input state &lt;code&gt;js.sail&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;&#x2F;p&gt;
 &lt;p&gt;The exact assumption bundle used for &lt;code&gt;ADDI&lt;&#x2F;code&gt; is &lt;code&gt;UnarySourceReadWithLinkedCSRs rs1 js&lt;&#x2F;code&gt;, which bundles two sets of assumptions together.&lt;&#x2F;p&gt;
 &lt;p&gt;The structure &lt;code&gt;UnarySourceReadAssumptions&lt;&#x2F;code&gt; just says we can read &lt;code&gt;rs1&lt;&#x2F;code&gt;.
@@ -1199,7 +1193,6 @@ This is because Jolt does not support &lt;code&gt;SLLI&lt;&#x2F;code&gt; and &lt
 &lt;p&gt;With the block notation, we just write the programs cleanly.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;The Rust expansion is given below, and we can see that it lines up with the Lean &lt;code&gt;lwProgram&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;rust&quot; data-name=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;main&#x2F;crates&#x2F;jolt-program&#x2F;src&#x2F;expand&#x2F;memory&#x2F;lw.rs&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot; style=&quot;color: #1B1F234D;&quot;&gt; 7&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;pub&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;in crate::&lt;&#x2F;span&gt;&lt;span&gt;expand)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; fn&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; expand_lw&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot; style=&quot;color: #1B1F234D;&quot;&gt; 8&lt;&#x2F;span&gt;&lt;span&gt;    instruction&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;: &amp;amp;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;SourceInstructionRow&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -1280,7 +1273,6 @@ We will also prove that this program leaves the Sail state exactly as it would b
   &lt;p&gt;Given a 12-bit immediate value &lt;code&gt;imm&lt;&#x2F;code&gt;, a readable source register &lt;code&gt;rs1&lt;&#x2F;code&gt;, a writable destination register &lt;code&gt;rd&lt;&#x2F;code&gt;, assumptions &lt;code&gt;h&lt;&#x2F;code&gt;, and an initial Jolt state &lt;code&gt;js&lt;&#x2F;code&gt;, running Jolt’s expanded &lt;code&gt;LW&lt;&#x2F;code&gt; program and projecting down to the Sail state gives the same state as running the trusted Sail &lt;code&gt;LW&lt;&#x2F;code&gt; on the input state &lt;code&gt;js.sail&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;&#x2F;p&gt;
 &lt;p&gt;In upcoming posts, we will dive into the details of assumptions in theorem statements and how to go about proving these statements.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;appendices&quot;&gt;Appendices&lt;a class=&quot;zola-anchor&quot; href=&quot;#appendices&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
@@ -1400,7 +1392,6 @@ Some work is still needed to get the executable CPU to work.
 I do not imagine a whole lot, but as of the date of writing this, the executable build is not clean.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;Tested on:&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;macOS (Apple Silicon)&lt;&#x2F;li&gt;
@@ -1425,7 +1416,6 @@ These steps mostly follow the &lt;code&gt;README.md&lt;&#x2F;code&gt;’s in the
 Hopefully with time, I will be able to write a better version of what the hell is going on.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;h3 id=&quot;macos-homebrew&quot;&gt;macOS (Homebrew)&lt;a class=&quot;zola-anchor&quot; href=&quot;#macos-homebrew&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h3&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;xcode-select&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --install&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;    # if not already done&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -1471,7 +1461,6 @@ For example, loading &lt;code&gt;sail_plugin_lean.cmxs&lt;&#x2F;code&gt; adds th
 There is no separate “lean binary” – it’s all one &lt;code&gt;sail&lt;&#x2F;code&gt; binary with plugins extending its capabilities.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;&lt;strong&gt;dune&lt;&#x2F;strong&gt; is OCaml’s build system (like &lt;code&gt;make&lt;&#x2F;code&gt; or &lt;code&gt;cargo&lt;&#x2F;code&gt;).
 It reads build instructions from &lt;code&gt;dune&lt;&#x2F;code&gt; files in the source tree.
 Below, we use three commands. Each is explained with what it does and what it produces:&lt;&#x2F;p&gt;
@@ -1538,7 +1527,6 @@ type-checks the full model, calling Z3 to solve arithmetic constraints).&lt;&#x2
   &lt;p&gt;I also do not understand any of the Z3 stuff right now.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;h3 id=&quot;noncomputable-for-theorem-proving&quot;&gt;Noncomputable (for theorem proving)&lt;a class=&quot;zola-anchor&quot; href=&quot;#noncomputable-for-theorem-proving&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h3&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -1647,7 +1635,6 @@ The executable version can simulate RISC-V binaries.&lt;&#x2F;p&gt;
 Still the post remains valid if one were to understand how to implement streaming sum-checks.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;This write-up talks about this &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;a16z&#x2F;jolt&#x2F;pull&#x2F;1114&quot;&gt;PR&lt;&#x2F;a&gt; which introduces a generalised sum-check API, adapted to accommodate an implementation of Jolt that uses $O(1)$ memory&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-d-1&quot;&gt;&lt;a href=&quot;#fn-d&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;the-trace&quot;&gt;The Trace&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-trace&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h2&gt;
@@ -1713,7 +1700,6 @@ It is a giant vector of length $T$, and location $t \in [T]$ stores the machine 
 But for the purposes of this post, this assumption allows us to abstract away important implementation details that currently remain unimplemented, and prove that we can indeed implement any Jolt sumcheck with $O(1)$ memory.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;h2 id=&quot;correctness-as-constraint-satisfaction&quot;&gt;Correctness As Constraint Satisfaction&lt;a class=&quot;zola-anchor&quot; href=&quot;#correctness-as-constraint-satisfaction&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h2&gt;
 &lt;p&gt;Now with the trace&#x2F;emulation in hand, we ask - what does it mean for a program to be executed correctly?
@@ -1800,7 +1786,6 @@ $$
 &lt;&#x2F;ul&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;Now we do the thing we have done since the beginning of time.
 We want to make sure the LHS of the above system of equations equals the RHS as polynomials.
 So we sample $(\TauTime | \tau_{b} | \TauConstraints) \samples \ChallengeSet^{\log T+2}$ and check if the following sumcheck holds:&lt;&#x2F;p&gt;
@@ -1839,7 +1824,6 @@ Remember we assumed streaming the trace was free, and storing $O(1)$ field eleme
 We include this round in this post for completeness.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;After this round, the prover has received challenge $r_y$ to bind to variable $Y$.
 What we describe next refers to the &lt;code&gt;OuterRemainingSumcheck&lt;&#x2F;code&gt; in Jolt.
 The sumcheck is divided into 2 phases:&lt;&#x2F;p&gt;
@@ -1896,7 +1880,6 @@ Eventually, we will have to implement a memory efficient way to stream the trace
 In what follows, we make a compromise of sometimes streaming instead of always streaming, but this will allow us to store fewer things.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;h2 id=&quot;the-streaming-generalisation&quot;&gt;The Streaming Generalisation&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-streaming-generalisation&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h2&gt;
 &lt;p&gt;To describe the streaming sum-check we need to first describe what we mean by a sum-check schedule.&lt;&#x2F;p&gt;
@@ -1971,7 +1954,6 @@ $$
   &lt;p&gt;Throughout this post when we write $\eq{\tau}{x}$, we assume it’s implemented using the Dao-Thaler split-eq optimisation. Thus the memory representation of the $\eq{}{}$ polynomials is never an issue.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;Finally the prover’s message is given by
 $$
 s(\textcolor{pink}{X_b}) = t(\textcolor{pink}{X_b}),\text{eq}(\tau_b, \textcolor{pink}{X_b})
@@ -1979,13 +1961,12 @@ $$&lt;&#x2F;p&gt;
 
 &lt;aside class=&quot;callout callout-remark&quot;&gt;
   
-  &lt;div class=&quot;callout-title&quot;&gt;Prover Messages Are Always Computed From `t_grid`&lt;&#x2F;div&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;Prover Messages Are Always Computed From &lt;code&gt;t_grid&lt;&#x2F;code&gt;&lt;&#x2F;div&gt;
   
   &lt;p&gt;It is important to note that in every round of the sum-check the prover’s messages will be computed using the streaming data structure &lt;code&gt;t_grid&lt;&#x2F;code&gt;.
 We will shortly see that once the current &lt;code&gt;t_grid&lt;&#x2F;code&gt; gets exhausted we will re-compute it.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 
 &lt;aside class=&quot;callout callout-remark&quot;&gt;
   
@@ -1995,7 +1976,6 @@ We will shortly see that once the current &lt;code&gt;t_grid&lt;&#x2F;code&gt; g
 For example, if $p$ is linear i.e $p(X) = aX + b$, we have $p(\infty) = a$.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;This completes the first round message the prover sends.&lt;&#x2F;p&gt;
 &lt;h4 id=&quot;binding-in-the-streaming-phase&quot;&gt;Binding in the streaming phase&lt;a class=&quot;zola-anchor&quot; href=&quot;#binding-in-the-streaming-phase&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h4&gt;
@@ -2022,7 +2002,6 @@ The total amount of storage needed is $2^{\hat{t}}$ where $\hat{t} \in [n]$ is t
 If $\hat{t}$ is large, we can always use the split-eq technique for &lt;code&gt;r_grid&lt;&#x2F;code&gt; (this is not currently needed).&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;The last line of &lt;code&gt;r_grid&lt;&#x2F;code&gt; helps us compute $\text{eq}(\textcolor{orange}{r_{w-1},…, r_b}, x_{w-1},…, x_{b})$ which is useful when we recompute &lt;code&gt;t_grid&lt;&#x2F;code&gt; in the first round of the next window.&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;next-window-start&quot;&gt;Next Window Start&lt;a class=&quot;zola-anchor&quot; href=&quot;#next-window-start&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h3&gt;

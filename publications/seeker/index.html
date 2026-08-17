@@ -49,10 +49,11 @@
           criticalAlpha: ['{\\alpha_{#1}}', 1],
           CPlus: '{\\textcolor{blue}{C^{+}}}',
           CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
           GraphNbrs: ['{N_G(#1)}', 1],
           ClauseNbrs: ['{N_C(#1)}', 1],
-          Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-          HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
           SmallO: ['{o\\!(#1)}', 1],
           Closure: ['{\\operatorname{Cl}(#1)}', 1],
           ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
@@ -113,6 +114,7 @@
     
 
 
+
 <article class="publication-page footnotes-right note--side-toc">
   <header class="publication-header">
     <h1>Seeker: Real-Time Interactive Search</h1>
@@ -166,7 +168,6 @@ Here’s some media <a rel="noopener noreferrer external" target="_blank" href="
 I greatly benefited from the success of this algorithm personally, but I am forever indebted to Ben for identifying, and formulating this problem.</p>
 
 </aside>
-
 <h2 id="abstract">Abstract<a class="zola-anchor" href="#abstract" aria-label="Link to this section">#</a>
 </h2>
 <p>This paper introduces Seeker, a system that allows users to interactively refine search rankings in real time, through feedback in the form of likes and dislikes. When searching online, users may not know how to accurately describe their product of choice in words. An alternative approach is to search an embedding space, allowing the user to query using a representation of the item (like a tune for a song, or a picture for an object). However, this approach requires the user to possess an example representation of their desired item. Additionally, most current search systems do not allow the user to dynamically adapt the results with further feedback. On the other hand, users often have a mental picture of the desired item and are able to answer ordinal questions of the form: Is this item similar to what you have in mind? With this assumption, our algorithm allows for users to provide sequential feedback on search results to adapt the search feed. We show that our proposed approach works well both qualitatively and quantitatively. Unlike most previous representation-based search systems, we can quantify the quality of our algorithm by evaluating humans-in-the-loop experiments.</p>
@@ -332,6 +333,7 @@ I greatly benefited from the success of this algorithm personally, but I am fore
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+
 
 
 <script>

@@ -49,10 +49,11 @@
           criticalAlpha: ['{\\alpha_{#1}}', 1],
           CPlus: '{\\textcolor{blue}{C^{+}}}',
           CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
           GraphNbrs: ['{N_G(#1)}', 1],
           ClauseNbrs: ['{N_C(#1)}', 1],
-          Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-          HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
           SmallO: ['{o\\!(#1)}', 1],
           Closure: ['{\\operatorname{Cl}(#1)}', 1],
           ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
@@ -111,6 +112,7 @@
 
   <main id="main-content">
     
+
 
 
 
@@ -342,7 +344,6 @@ It might look simple, but under the hood a lot is going, and understanding it is
 Thus, it’s important to get used to mentally translating do notation into function composition.</p>
 
 </aside>
-
 <h4 id="function-signature">Function Signature<a class="zola-anchor" href="#function-signature" aria-label="Link to this section">#</a>
 </h4>
 <p>The function signature says the inputs are a 12-bit immediate value <code>imm</code> and general-purpose source and destination registers <code>rs1</code> and <code>rd</code>, which are of type<sup class="footnote-reference" id="fr-gpr-1"><a href="#fn-gpr">4</a></sup> <code>regidx</code>.</p>
@@ -496,7 +497,7 @@ The logic used in Jolt is as follows:</p>
 
 <aside class="callout callout-remark">
   
-  <div class="callout-title">Two sets of control&#x2F;status registers</div>
+  <div class="callout-title">Two sets of control/status registers</div>
   
   <p>It might seem confusing that some virtual registers represent control/status registers, while there is also a separate field for CSRs.
 This is because the Jolt CPU emulator is a fork of a RISC-V emulator.
@@ -505,7 +506,6 @@ However, when reading a Jolt CPU program, control/status register reads and writ
 <code>ECALL</code>, <code>EBREAK</code>, <code>MRET</code>, <code>CSRRW</code>, <code>CSRRS</code>, and <code>CSRRC</code> are all expanded (as we show later).</p>
 
 </aside>
-
 <h2 id="jolt-monad-stepping-the-cpu">Jolt Monad (Stepping the CPU)<a class="zola-anchor" href="#jolt-monad-stepping-the-cpu" aria-label="Link to this section">#</a>
 </h2>
 <p>We step the Jolt CPU using the same <code>EStateM</code> infrastructure.
@@ -590,7 +590,6 @@ For each instruction, the process is as follows:</p>
   <p>This eyeballing of Rust and Lean code is prone to bugs. As a temporary solution, we always have an AI agent double-check the two code blocks. In the coming weeks, we will have an auto-translator from Rust to Lean for instruction execution semantics.</p>
 
 </aside>
-
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="rust" data-name="https://github.com/abiswas3/jolt/blob/main/tracer/src/instruction/addi.rs"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">19</span><span style="color: #D73A49;">    fn</span><span style="color: #6F42C1;"> exec</span><span>(</span><span style="color: #D73A49;">&amp;</span><span style="color: #005CC5;">self</span><span>, cpu</span><span style="color: #D73A49;">: &amp;mut</span><span style="color: #6F42C1;"> Cpu</span><span>, _</span><span style="color: #D73A49;">: &amp;mut</span><span> &lt;</span><span style="color: #005CC5;">ADDI</span><span style="color: #D73A49;"> as</span><span style="color: #6F42C1;"> RISCVInstruction</span><span>&gt;</span><span style="color: #D73A49;">::</span><span style="color: #6F42C1;">RAMAccess</span><span>) {</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">20</span><span>        cpu</span><span style="color: #D73A49;">.</span><span style="color: #6F42C1;">write_register</span><span>(</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">21</span><span style="color: #005CC5;">            self</span><span style="color: #D73A49;">.</span><span>operands</span><span style="color: #D73A49;">.</span><span>rd </span><span style="color: #D73A49;">as</span><span style="color: #6F42C1;"> usize</span><span>,</span></span>
@@ -621,7 +620,6 @@ Continuing with the <code>ADDI</code> example, it looks like the following:</p>
   <p>Given a 12-bit immediate value <code>imm</code>, a readable source register <code>rs1</code>, a writable destination register <code>rd</code>, assumptions <code>h</code>, and an initial Jolt state <code>js</code>, running Jolt’s <code>ADDI</code> and projecting down to the Sail state gives the same state as running the trusted Sail <code>ADDI</code> on the input state <code>js.sail</code>.</p>
 
 </aside>
-
 </p>
 <p>The exact assumption bundle used for <code>ADDI</code> is <code>UnarySourceReadWithLinkedCSRs rs1 js</code>, which bundles two sets of assumptions together.</p>
 <p>The structure <code>UnarySourceReadAssumptions</code> just says we can read <code>rs1</code>.
@@ -766,7 +764,6 @@ This is because Jolt does not support <code>SLLI</code> and <code>SRL</code> nat
 <p>With the block notation, we just write the programs cleanly.</p>
 
 </aside>
-
 <p>The Rust expansion is given below, and we can see that it lines up with the Lean <code>lwProgram</code>.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="rust" data-name="https://github.com/abiswas3/jolt/blob/main/crates/jolt-program/src/expand/memory/lw.rs"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 7</span><span style="color: #D73A49;">pub</span><span>(</span><span style="color: #D73A49;">in crate::</span><span>expand)</span><span style="color: #D73A49;"> fn</span><span style="color: #6F42C1;"> expand_lw</span><span>(</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 8</span><span>    instruction</span><span style="color: #D73A49;">: &amp;</span><span style="color: #6F42C1;">SourceInstructionRow</span><span>,</span></span>
@@ -847,7 +844,6 @@ We will also prove that this program leaves the Sail state exactly as it would b
   <p>Given a 12-bit immediate value <code>imm</code>, a readable source register <code>rs1</code>, a writable destination register <code>rd</code>, assumptions <code>h</code>, and an initial Jolt state <code>js</code>, running Jolt’s expanded <code>LW</code> program and projecting down to the Sail state gives the same state as running the trusted Sail <code>LW</code> on the input state <code>js.sail</code>.</p>
 
 </aside>
-
 </p>
 <p>In upcoming posts, we will dive into the details of assumptions in theorem statements and how to go about proving these statements.</p>
 <h2 id="appendices">Appendices<a class="zola-anchor" href="#appendices" aria-label="Link to this section">#</a>
@@ -1103,6 +1099,7 @@ Of course, in a real physical CPU, the register file is not a hash map and we do
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+
 
 
 <script>

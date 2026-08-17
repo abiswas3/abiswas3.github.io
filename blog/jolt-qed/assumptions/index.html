@@ -49,10 +49,11 @@
           criticalAlpha: ['{\\alpha_{#1}}', 1],
           CPlus: '{\\textcolor{blue}{C^{+}}}',
           CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
           GraphNbrs: ['{N_G(#1)}', 1],
           ClauseNbrs: ['{N_C(#1)}', 1],
-          Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-          HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
           SmallO: ['{o\\!(#1)}', 1],
           Closure: ['{\\operatorname{Cl}(#1)}', 1],
           ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
@@ -111,6 +112,7 @@
 
   <main id="main-content">
     
+
 
 
 
@@ -329,7 +331,6 @@ If a malicious program were to write a different value to Jolt <code>mtvec</code
 We will rely on the proof mechanism to catch this.</p>
 
 </aside>
-
 <h3 id="align-pc">Align PC<a class="zola-anchor" href="#align-pc" aria-label="Link to this section">#</a>
 </h3>
 <p>Jolt supports compressed instructions (<code>+c</code> / RV64IMAC), <a rel="noopener noreferrer external" target="_blank" href="https://github.com/LayerZero-Research/jolt/blob/main/jolt-sdk/src/runtime/trap.rs#L18-L34">as seen here</a>, so we can only guarantee that the least significant bit of PC is 0.
@@ -661,6 +662,7 @@ So we do this manually by enforcing that each field uses something from the <cod
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+
 
 
 <script>

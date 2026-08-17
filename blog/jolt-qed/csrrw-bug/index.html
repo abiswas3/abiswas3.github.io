@@ -49,10 +49,11 @@
           criticalAlpha: ['{\\alpha_{#1}}', 1],
           CPlus: '{\\textcolor{blue}{C^{+}}}',
           CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
           GraphNbrs: ['{N_G(#1)}', 1],
           ClauseNbrs: ['{N_C(#1)}', 1],
-          Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-          HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
           SmallO: ['{o\\!(#1)}', 1],
           Closure: ['{\\operatorname{Cl}(#1)}', 1],
           ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
@@ -111,6 +112,7 @@
 
   <main id="main-content">
     
+
 
 
 
@@ -187,7 +189,6 @@ For the remaining three, the spec asks that we first legalize the value in <code
 <p>More details below.</p>
 
 </aside>
-
 <h2 id="mtvec">mtvec<a class="zola-anchor" href="#mtvec" aria-label="Link to this section">#</a>
 </h2>
 <p>As per the Sail spec, which we checked to be correct<sup class="footnote-reference" id="fr-mtvec-docs-1"><a href="#fn-mtvec-docs">1</a></sup>, the value written to the contents of <code>mtvec</code> control status register is given by</p>
@@ -558,6 +559,7 @@ Unfortunately, jolt is <strong>always</strong> in Machine mode.</p>
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+
 
 
 <script>

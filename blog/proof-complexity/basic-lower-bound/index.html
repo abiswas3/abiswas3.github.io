@@ -49,10 +49,11 @@
           criticalAlpha: ['{\\alpha_{#1}}', 1],
           CPlus: '{\\textcolor{blue}{C^{+}}}',
           CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
           GraphNbrs: ['{N_G(#1)}', 1],
           ClauseNbrs: ['{N_C(#1)}', 1],
-          Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-          HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
           SmallO: ['{o\\!(#1)}', 1],
           Closure: ['{\\operatorname{Cl}(#1)}', 1],
           ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
@@ -116,6 +117,7 @@
 
 
 
+
 <article class="note footnotes-right note--side-toc">
   <header class="note-header">
     <h1>Lower Bound</h1>
@@ -161,7 +163,6 @@ There maybe be typos (minor and major).
 But the main theorems hold.</p>
 
 </aside>
-
 <p>This post is about <strong>Refuting The Basic Pigeon Hole Principle (PHP) In The Resolution Proof System</strong>.
 For this post, the number of pigeons will be $m:=n$ and the number of holes will be $n-1$, and we only consider fomulae that fail to satisfy the Pigeon and Hole Axioms (so we are not considering the functional and onto axioms).
 See the <a href="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/">crash course</a> for a refresher on the resolution proof system, and the axioms of the PHP principle.</p>
@@ -178,7 +179,6 @@ Recall that the size of a resolution refutation is the number of clauses in the 
   <p>Any refutation $\pi$ for $\PHPBasic$ in the resolution proof system has size $\BigOmega{\exp{n}}$.</p>
 
 </aside>
-
 <h2 id="preliminary-material">Preliminary Material<a class="zola-anchor" href="#preliminary-material" aria-label="Link to this section">#</a>
 </h2>
 <p>Sometimes it is easier to deal with formulae with no negated variables.
@@ -200,7 +200,6 @@ $$</p>
 <p>For any clause $C \in \pi$, we denote by $\CPlus$ the positive clause obtained from $C$ by replacing every negated literal $\Complement{x_{ij}}$ with the disjunction $X_{ij}$, leaving every positive literal unchanged.</p>
 
 </aside>
-
 <p>$X_{ij}=1$ implies there is at least one pigeon that is not $i$ that is assigned to hole $j$.
 Observe that for any assignment $\vec{x}$ satisfying the hole axioms<sup class="footnote-reference" id="fr-hole-1"><a href="#fn-hole">1</a></sup>, $(x_{ij} = 1) \implies X_{ij} = 0$.</p>
 <p>Finally we will call an assignment $\criticalAlpha{}$ which maps pigeons to holes, critical, if it matches every hole with a unique pigeon, and every pigeon but one to a unique hole.</p>
@@ -212,7 +211,6 @@ Observe that for any assignment $\vec{x}$ satisfying the hole axioms<sup class="
   <p>An assignment $\criticalAlpha{i} \in \bit^{n\times(n-1)}$ is $i$-critical if every pigeon except $i$ gets assigned a unique hole and pigeon $i$ remains unassigned.</p>
 
 </aside>
-
 <p>The first thing to note is that <strong>any</strong> critical assignment satisfies all hole axioms.
 The above also implies every hole gets assigned a unique pigeon.
 In the figure below the pigeons are $\{1, 2, 3\}$ and the set of holes are $\{1, 2\}$.
@@ -229,7 +227,6 @@ For any clause $C \in \pi$, let $\CPlus$ denote its positive version.
 Then for <strong>any</strong> critical assignment $\criticalAlpha{} \in \bit^{n\times (n-1)}$, we have $C(\criticalAlpha{}) = \CPlus(\criticalAlpha{})$.</p>
 
 </aside>
-
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
   <p>Say $\criticalAlpha{}$ sets $x_{ij} = 1$ for arbitrary literal in clause $C$.
@@ -252,7 +249,6 @@ Therefore, $X_{ij} = 1 = \Complement{x_{ij}}$ as $x_{i’j} = 1$.</p>
   <p>The width of a clause $C$, denoted with $w(C)$, is the number of literals in the clause.</p>
 
 </aside>
-
 <p>Before going into the details of the proof, we describe the general proof strategy:</p>
 <p>Show that for all valid refutations, a small proof length/size implies that the positive conversion of every clause in the proof has a small width (number of literals in clause).
 However, we show that a valid PHP refutation <strong>MUST</strong> have large width.
@@ -267,7 +263,6 @@ Thus, we can conclude that the size of the proof must be large.</p>
   <p>Every refutation $\pi$ of $\PHPBasic$ must contain a clause $C \in \pi$ with $w(\CPlus) \geq \frac{n^2}{9}$</p>
 
 </aside>
-
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
   <p>For any clause $C’$ let
@@ -332,7 +327,6 @@ $$</p>
   <p>Given $\epsilon \in (0,1)$ and a refutation $\pi$ for $\PHPBasic$,  we say a clause $C \in \pi$ is $\epsilon$-wide if $w(\CPlus) \ge \epsilon n^2$</p>
 
 </aside>
-
 <p>Let $\pi$ be a refutation of $\PHPBasic$, and $\pi^{+} = (\CPlus)_{C \in \pi}$ be the refutation obtained by replacing every clause in $C \in \pi$ with its positive conversion.</p>
 <p>Let $S_0$ be the set of  $\epsilon$-wide clauses in $\pi^+$ and $s_0 := \Size{S_0}$.
 Wideness implies that each clauses $S \in S_0$ has at least $\epsilon$ fraction of the possible $n(n-1)$ literals (which can be upper bounded by $n(n+1) &lt; n^2)$.
@@ -581,6 +575,7 @@ And as $S_0 \le \Size{\pi}$, we get a lower bound on the size of any refutation.
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+
 
 
 <script>

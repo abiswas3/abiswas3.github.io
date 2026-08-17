@@ -28,7 +28,6 @@ Some work is still needed to get the executable CPU to work.
 I do not imagine a whole lot, but as of the date of writing this, the executable build is not clean.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;Tested on:&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;macOS (Apple Silicon)&lt;&#x2F;li&gt;
@@ -53,7 +52,6 @@ These steps mostly follow the &lt;code&gt;README.md&lt;&#x2F;code&gt;’s in the
 Hopefully with time, I will be able to write a better version of what the hell is going on.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;h3 id=&quot;macos-homebrew&quot;&gt;macOS (Homebrew)&lt;a class=&quot;zola-anchor&quot; href=&quot;#macos-homebrew&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h3&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;xcode-select&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --install&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;    # if not already done&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -99,7 +97,6 @@ For example, loading &lt;code&gt;sail_plugin_lean.cmxs&lt;&#x2F;code&gt; adds th
 There is no separate “lean binary” – it’s all one &lt;code&gt;sail&lt;&#x2F;code&gt; binary with plugins extending its capabilities.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;&lt;strong&gt;dune&lt;&#x2F;strong&gt; is OCaml’s build system (like &lt;code&gt;make&lt;&#x2F;code&gt; or &lt;code&gt;cargo&lt;&#x2F;code&gt;).
 It reads build instructions from &lt;code&gt;dune&lt;&#x2F;code&gt; files in the source tree.
 Below, we use three commands. Each is explained with what it does and what it produces:&lt;&#x2F;p&gt;
@@ -166,7 +163,6 @@ type-checks the full model, calling Z3 to solve arithmetic constraints).&lt;&#x2
   &lt;p&gt;I also do not understand any of the Z3 stuff right now.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;h3 id=&quot;noncomputable-for-theorem-proving&quot;&gt;Noncomputable (for theorem proving)&lt;a class=&quot;zola-anchor&quot; href=&quot;#noncomputable-for-theorem-proving&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h3&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
@@ -275,7 +271,6 @@ The executable version can simulate RISC-V binaries.&lt;&#x2F;p&gt;
 Still the post remains valid if one were to understand how to implement streaming sum-checks.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;This write-up talks about this &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;a16z&#x2F;jolt&#x2F;pull&#x2F;1114&quot;&gt;PR&lt;&#x2F;a&gt; which introduces a generalised sum-check API, adapted to accommodate an implementation of Jolt that uses $O(1)$ memory&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-d-1&quot;&gt;&lt;a href=&quot;#fn-d&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;the-trace&quot;&gt;The Trace&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-trace&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h2&gt;
@@ -341,7 +336,6 @@ It is a giant vector of length $T$, and location $t \in [T]$ stores the machine 
 But for the purposes of this post, this assumption allows us to abstract away important implementation details that currently remain unimplemented, and prove that we can indeed implement any Jolt sumcheck with $O(1)$ memory.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;h2 id=&quot;correctness-as-constraint-satisfaction&quot;&gt;Correctness As Constraint Satisfaction&lt;a class=&quot;zola-anchor&quot; href=&quot;#correctness-as-constraint-satisfaction&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h2&gt;
 &lt;p&gt;Now with the trace&#x2F;emulation in hand, we ask - what does it mean for a program to be executed correctly?
@@ -428,7 +422,6 @@ $$
 &lt;&#x2F;ul&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;Now we do the thing we have done since the beginning of time.
 We want to make sure the LHS of the above system of equations equals the RHS as polynomials.
 So we sample $(\TauTime | \tau_{b} | \TauConstraints) \samples \ChallengeSet^{\log T+2}$ and check if the following sumcheck holds:&lt;&#x2F;p&gt;
@@ -467,7 +460,6 @@ Remember we assumed streaming the trace was free, and storing $O(1)$ field eleme
 We include this round in this post for completeness.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;After this round, the prover has received challenge $r_y$ to bind to variable $Y$.
 What we describe next refers to the &lt;code&gt;OuterRemainingSumcheck&lt;&#x2F;code&gt; in Jolt.
 The sumcheck is divided into 2 phases:&lt;&#x2F;p&gt;
@@ -524,7 +516,6 @@ Eventually, we will have to implement a memory efficient way to stream the trace
 In what follows, we make a compromise of sometimes streaming instead of always streaming, but this will allow us to store fewer things.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;h2 id=&quot;the-streaming-generalisation&quot;&gt;The Streaming Generalisation&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-streaming-generalisation&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h2&gt;
 &lt;p&gt;To describe the streaming sum-check we need to first describe what we mean by a sum-check schedule.&lt;&#x2F;p&gt;
@@ -599,7 +590,6 @@ $$
   &lt;p&gt;Throughout this post when we write $\eq{\tau}{x}$, we assume it’s implemented using the Dao-Thaler split-eq optimisation. Thus the memory representation of the $\eq{}{}$ polynomials is never an issue.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;Finally the prover’s message is given by
 $$
 s(\textcolor{pink}{X_b}) = t(\textcolor{pink}{X_b}),\text{eq}(\tau_b, \textcolor{pink}{X_b})
@@ -607,13 +597,12 @@ $$&lt;&#x2F;p&gt;
 
 &lt;aside class=&quot;callout callout-remark&quot;&gt;
   
-  &lt;div class=&quot;callout-title&quot;&gt;Prover Messages Are Always Computed From `t_grid`&lt;&#x2F;div&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;Prover Messages Are Always Computed From &lt;code&gt;t_grid&lt;&#x2F;code&gt;&lt;&#x2F;div&gt;
   
   &lt;p&gt;It is important to note that in every round of the sum-check the prover’s messages will be computed using the streaming data structure &lt;code&gt;t_grid&lt;&#x2F;code&gt;.
 We will shortly see that once the current &lt;code&gt;t_grid&lt;&#x2F;code&gt; gets exhausted we will re-compute it.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 
 &lt;aside class=&quot;callout callout-remark&quot;&gt;
   
@@ -623,7 +612,6 @@ We will shortly see that once the current &lt;code&gt;t_grid&lt;&#x2F;code&gt; g
 For example, if $p$ is linear i.e $p(X) = aX + b$, we have $p(\infty) = a$.&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;This completes the first round message the prover sends.&lt;&#x2F;p&gt;
 &lt;h4 id=&quot;binding-in-the-streaming-phase&quot;&gt;Binding in the streaming phase&lt;a class=&quot;zola-anchor&quot; href=&quot;#binding-in-the-streaming-phase&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h4&gt;
@@ -650,7 +638,6 @@ The total amount of storage needed is $2^{\hat{t}}$ where $\hat{t} \in [n]$ is t
 If $\hat{t}$ is large, we can always use the split-eq technique for &lt;code&gt;r_grid&lt;&#x2F;code&gt; (this is not currently needed).&lt;&#x2F;p&gt;
 
 &lt;&#x2F;aside&gt;
-
 &lt;p&gt;The last line of &lt;code&gt;r_grid&lt;&#x2F;code&gt; helps us compute $\text{eq}(\textcolor{orange}{r_{w-1},…, r_b}, x_{w-1},…, x_{b})$ which is useful when we recompute &lt;code&gt;t_grid&lt;&#x2F;code&gt; in the first round of the next window.&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;next-window-start&quot;&gt;Next Window Start&lt;a class=&quot;zola-anchor&quot; href=&quot;#next-window-start&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
 &lt;&#x2F;h3&gt;

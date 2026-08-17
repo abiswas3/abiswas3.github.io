@@ -49,10 +49,11 @@
           criticalAlpha: ['{\\alpha_{#1}}', 1],
           CPlus: '{\\textcolor{blue}{C^{+}}}',
           CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
           GraphNbrs: ['{N_G(#1)}', 1],
           ClauseNbrs: ['{N_C(#1)}', 1],
-          Pseudowidth: ['{w_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
-          HeavyPigeons: ['{P_{\\vec{d},\\vec{\\delta}}(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
           SmallO: ['{o\\!(#1)}', 1],
           Closure: ['{\\operatorname{Cl}(#1)}', 1],
           ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
@@ -111,6 +112,7 @@
 
   <main id="main-content">
     
+
 
 
 
@@ -213,7 +215,6 @@ Some work is still needed to get the executable CPU to work.
 I do not imagine a whole lot, but as of the date of writing this, the executable build is not clean.</p>
 
 </aside>
-
 <p>Tested on:</p>
 <ul>
 <li>macOS (Apple Silicon)</li>
@@ -238,7 +239,6 @@ These steps mostly follow the <code>README.md</code>’s in the repo, a bit of g
 Hopefully with time, I will be able to write a better version of what the hell is going on.</p>
 
 </aside>
-
 <h3 id="macos-homebrew">macOS (Homebrew)<a class="zola-anchor" href="#macos-homebrew" aria-label="Link to this section">#</a>
 </h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">xcode-select</span><span style="color: #005CC5;"> --install</span><span style="color: #6A737D;">    # if not already done</span></span>
@@ -284,7 +284,6 @@ For example, loading <code>sail_plugin_lean.cmxs</code> adds the <code>--lean</c
 There is no separate “lean binary” – it’s all one <code>sail</code> binary with plugins extending its capabilities.</p>
 
 </aside>
-
 <p><strong>dune</strong> is OCaml’s build system (like <code>make</code> or <code>cargo</code>).
 It reads build instructions from <code>dune</code> files in the source tree.
 Below, we use three commands. Each is explained with what it does and what it produces:</p>
@@ -351,7 +350,6 @@ type-checks the full model, calling Z3 to solve arithmetic constraints).</p>
   <p>I also do not understand any of the Z3 stuff right now.</p>
 
 </aside>
-
 <h3 id="noncomputable-for-theorem-proving">Noncomputable (for theorem proving)<a class="zola-anchor" href="#noncomputable-for-theorem-proving" aria-label="Link to this section">#</a>
 </h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span>SAIL_DIR</span><span style="color: #D73A49;">=</span><span>$(</span><span style="color: #6F42C1;">realpath</span><span style="color: #032F62;"> ../sail/_local_install/share/sail</span><span>)</span><span style="color: #6F42C1;"> \</span></span>
@@ -598,6 +596,7 @@ The executable version can simulate RISC-V binaries.</p>
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+
 
 
 <script>
