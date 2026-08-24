@@ -469,58 +469,79 @@ $$</p>
 <p>The perfect-matching results follow the same architecture but technically invoke Theorem 5.4, the perfect-matching analogue of the master theorem. It has the same $r$–$\alpha$ trade-off and adds degree conditions on the right side of the graph.</p>
 <h2 id="what-is-open">What is open?<a class="zola-anchor" href="#what-is-open" aria-label="Link to this section">#</a>
 </h2>
-<p>Fix $m:=n^k$ and choose a constant expansion loss $\eta\in(0,1)$.
-The definition
+<p>Write the number of pigeons in the general form
 $$
-\eta:=\frac{\log\alpha}{2\log m}
+m_n:=2^{f(n)},
 $$
-forces
+where all logarithms are base two.
+Define the relative boundary-expansion loss by
 $$
-\alpha=m^{2\eta}=n^{2k\eta}.
+\gamma_n:=\frac{\log\alpha_n}{2\log m_n}.
+$$
+Since $\alpha_n\in[m_n]$, we have $0&lt;\gamma_n\leq1/2$.
+The definition of $\gamma_n$ gives
+$$
+\alpha_n=m_n^{2\gamma_n}=2^{2\gamma_n f(n)}.
 $$</p>
-<p>An artefact of their proof is that their result does not apply to every $\eta\in(0,1/2)$.
-More specifically, the side condition in the theorem is
+<p>The side condition in Theorem 4.4 is
 $$
 \frac{\alpha^3}{\log\alpha}=o\!\left(\frac{r}{\log m}\right).
+$$
+By the definition of little-$o$, for every $\varepsilon&gt;0$ there must exist $n_0\in\mathbb{N}$ such that, for every $n\geq n_0$,
+$$
+\frac{2^{6\gamma_n f(n)}}{2\gamma_n f(n)}\leq\varepsilon\frac{r_n}{f(n)}.
+$$
+Since $f(n)&gt;0$, cancelling it gives
+$$
+2^{6\gamma_n f(n)}\leq2\gamma_n\varepsilon r_n.
+$$
+Equivalently,
+$$
+\frac{2^{6\gamma_n f(n)}}{2\gamma_n}=o(r_n).
 $$</p>
-<p><strong>We show how this restricts the choice for $\eta$ values</strong>.</p>
-<p>By definition, this says that for every $\varepsilon&gt;0$ there exists $n_0\in\mathbb{N}$ such that, for every $n\geq n_0$,
+<p>The graph has only $n$ holes and the theorem assumes $r_n\leq m_n$.
+Choose a set of exactly $r_n$ pigeons.
+Its boundary contains at least $(1-\gamma_n)\Delta_n r_n$ holes but cannot contain more than $n$ holes.
+Therefore,
 $$
-\frac{\alpha(n)^3}{\log\alpha(n)}\leq\varepsilon\frac{r(n)}{\log m(n)}.
+(1-\gamma_n)\Delta_n r_n\leq n.
 $$
-Substituting $m=n^k$ and $\alpha=n^{2k\eta}$ gives
+Since $\Delta_n\geq1$ and $\gamma_n\leq1/2$,
 $$
-\frac{n^{6k\eta}}{2k\eta\log n}\leq\varepsilon\frac{r(n)}{k\log n}.
+r_n\leq\frac{n}{1-\gamma_n}\leq2n.
 $$
-Cancelling $k\log n$ gives
+Let $\delta&gt;0$ be arbitrary and choose $\varepsilon:=\delta/4$ in the definition of the side condition.
+There is then an $n_0\in\mathbb{N}$ such that, for every $n\geq n_0$,
 $$
-n^{6k\eta}\leq 2\eta\varepsilon r(n).
+2^{6\gamma_n f(n)}\leq2\gamma_n\varepsilon r_n\leq2\gamma_n\frac{\delta}{4}(2n)=\delta\gamma_n n.
+$$
+Since this holds for every $\delta&gt;0$, the definition of little-$o$ gives the necessary condition
+$$
+\boxed{2^{6\gamma_n f(n)}=o(\gamma_n n)}.
 $$</p>
-<p>The graph has only $n$ holes.
-Since its boundary-expansion coefficient is $(1-\eta)\Delta$, every admissible expansion radius satisfies
+<p>The polynomial regime is recovered by setting $f(n):=k\log_2 n$, since
 $$
-(1-\eta)\Delta r\leq n,
+m_n=2^{f(n)}=2^{k\log_2 n}=n^k.
 $$
-and hence, since $\Delta\geq 1$,
+For example, $f(n):=2\log_2 n$ gives $m_n=n^2$.
+If $\gamma_n:=\gamma$ is constant, the boxed condition becomes
 $$
-r(n)\leq\frac{n}{1-\eta}.
+n^{6k\gamma}=o(n),
 $$
-Suppose that $6k\eta\geq 1$.
-Then, for every $n\geq 1$,
+which holds exactly when
 $$
-n^{6k\eta}\geq n.
+\gamma&lt;\frac{1}{6k}.
 $$
-Choose $\varepsilon:=(1-\eta)/(4\eta)&gt;0$ in the definition of the side condition.
-For every sufficiently large $n$, that definition and the upper bound on $r(n)$ would imply
-$$
-n^{6k\eta}\leq 2\eta\varepsilon r(n)\leq\frac{n}{2}.
-$$
-This contradicts $n^{6k\eta}\geq n$.
-Therefore, the side condition can hold only if $6k\eta&lt;1$, or equivalently if $\eta&lt;1/(6k)$.
-Thus, no admissible value of $r$ can satisfy the side condition when $\eta\geq 1/(6k)$.</p>
+Thus, in the polynomial regime the theorem permits sufficiently small constant expansion loss but does not permit an arbitrary constant $\gamma\in(0,1/2)$.</p>
+<p>Now suppose that $m_n=2^{f(n)}$ is superpolynomial in $n$, meaning that for every constant $C&gt;0$ there exists $n_C\in\mathbb{N}$ such that $f(n)&gt;C\log n$ for every $n\geq n_C$.
+Then no fixed constant $\gamma&gt;0$ can satisfy the boxed condition.
+Consequently, in the superpolynomial regime Theorem 4.4 requires $\gamma_n=o(1)$.</p>
 <aside id="" class="callout callout-remark">
   <div class="callout-title">Remark</div>
-  <p>The open problem is whether an analogous resolution lower-bound theorem holds for $m=n^k$ in this excluded parameter regime, namely for constant expansion loss $\eta\geq 1/(6k)$.</p>
+  <p>The limitation of Theorem 4.4 is that its side condition prevents it from handling arbitrary relative expansion loss $\gamma$.
+For $m=n^k$, it excludes every constant $\gamma\geq1/(6k)$.
+For superpolynomial $m_n$, it forces $\gamma_n=o(1)$.
+The open problem is whether analogous resolution lower bounds can be proved in the parameter regimes excluded by this side condition.</p>
 </aside>
 <div class="bibliography">
 <h2>References</h2>
