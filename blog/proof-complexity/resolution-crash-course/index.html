@@ -178,6 +178,37 @@
     
   </li>
   
+  <li>
+    <a href="#their-main-result">Their Main Result</a>
+    
+      
+<ol>
+  
+  <li>
+    <a href="#regime-1-m-n-k-for-fixed-k">Regime 1: $m=n^k$ for fixed $k$</a>
+    
+  </li>
+  
+  <li>
+    <a href="#regime-2-m-leq-n-o-log-n">Regime 2: $m\leq n^{o(\log n)}$</a>
+    
+  </li>
+  
+  <li>
+    <a href="#regime-3-weakly-exponential-m">Regime 3: weakly exponential $m$</a>
+    
+  </li>
+  
+</ol>
+
+    
+  </li>
+  
+  <li>
+    <a href="#what-is-open">What is open?</a>
+    
+  </li>
+  
 </ol>
 
     </nav>
@@ -309,27 +340,188 @@ So now we go into the business of for what kind of “sparse” graphs, is the p
     <span class="thm-title"> : The Boundary Expander</span></div>
   <p>Given Bipartite graph $G = (V_P \cup V_H, E)$ is an $(r, \Delta, c)$ boundary expander, if $\forall u \in V_P$ we have $\deg_G(u) \le \Delta$, and for every set $S \subseteq V_P$ with size $\Size{S} \le r$ we have</p>
 <p>$$\Size{\boundary{S}} \ge c \Size{S}$$</p>
-<p>where the boundary of a set $S \subseteq V_P$, denoted by $\boundary{S}$ is the set of vertices joined by an edge to at least one vertex in S.
-$$ \boundary{S} = \{ v \in V_H : \Size{N_G(v) \cap S} = 1\}$$</p>
+<p>where the boundary of a set $S \subseteq V_P$, denoted by $\boundary{S}$, is the set of vertices joined by an edge to exactly one vertex in $S$.
+$$ \boundary{S} = { v \in V_H : \Size{N_G(v) \cap S} = 1}$$</p>
+<p>This is Definition 4.14 of Ben-Sasson and Wigderson with the two side sizes omitted from the tuple.</p>
 </aside>
 <p>What do we know about refuting PHP in expanders? Not a whole lot, but there are 3 seminal results that consider the extremes:</p>
 <ul>
-<li>When $m$ is not too large i.e $n+ 1 &lt; m \ll n^2$, <a href="#ref-ben1999short" class="citation">[Ben-Sasson &amp; Wigderson, 2001]</a> showed that for $r = \BigOmega{n/\log m}$, and $\Delta = \log m$, and $c= \frac{3\log m}{4}$, the size of refuting $\FPHP{m}{n}{G}$ is $\Exp{\BigOmega{\frac{n^2}{m\log m}}}$.</li>
+<li><a href="#ref-ben1999short" class="citation">[Ben-Sasson &amp; Wigderson, 2001]</a> prove a general width lower bound for graph PHP on boundary expanders. Their balanced application has $m=n+1$ and constant degree. Their displayed application for $m\gg n$ uses degree $\Delta=\log m$ and gives length $\Exp{\BigOmega{\frac{n^2}{m\log m}}}$. The latter is useful only below the quadratic barrier; the precise calculation is given below.</li>
 </ul>
 <aside id="" class="callout callout-remark">
   <div class="callout-title"></div>
-  <p>Thus, for graph formulas we have exponential lower bounds on the $m \ll n^2$ pigeons where each pigeon has a constant number of choices for holes that it can fly into.
-So small $m$ is considered “done” in this sparse expansion regime.</p>
+  <p>The phrase $m\gg n$ in Ben-Sasson and Wigderson does not mean $m\gg n^2$. The exponent $n^2/(m\log m)$ tends to infinity only when $m\log m=o(n^2)$.</p>
 </aside>
 <ul>
 <li>The other extreme, where $m$ can be arbitrary, but each pigeon also has a lot of holes to go into (high minimal degree i.e graph is not very sparse) <a href="#ref-razborov2004resolution" class="citation">[Razborov, 2004]</a> and <a href="#ref-razborov2003resolution" class="citation">[Razborov, 2003]</a> show that the size is $\Exp{\BigOmega{\frac{\delta_G}{\log^2 m}}}$, where $\delta_G$ is the minimum degree of the graph.
 For any number of pigeons with a polynomial lower bound $\delta_G = n^{\BigOmega{1}}$ on the number holes each pigeon can fly into, we also have exponential size lower bounds.</li>
 </ul>
-<p>This leaves us asking what happens when $m \gg n^2$, but the minimal degree is small $\delta_G = \poly(\log(m))$?
-<a href="#ref-rezende2020Exp" class="citation">[de Rezende et al., 2020]</a> solves this problem, and is the focus of our work.
-They show for any $G$ that is $(r, \Delta, (1-\xi\cdot \frac{\log n}{\log m(n)})\Delta)$-boundary expander, then you need proofs of size $\Exp{\BigOmega{\frac{r}{n^{\xi}\log^2 m}}}$</p>
-<p>They need a very very strong expander i.e $\lim_{n \rightarrow \infty} c = \Delta$, but would like to show it for $c=(1- \xi)\Delta$ for constant $\xi \in (0,1)$ <strong>This is what we need to show, optimistically</strong>.</p>
+<h2 id="their-main-result">Their Main Result<a class="zola-anchor" href="#their-main-result" aria-label="Link to this section">#</a>
+</h2>
+<p>This leaves us asking what happens when $m \gg n^2$, but the minimal degree is small $\delta_G = \poly(\log(m))$?</p>
+<p><a href="#ref-rezende2020Exp" class="citation">[de Rezende et al., 2020]</a> solves this problem, and is the focus of our work.
+They prove lower bounds via pseudo-width for highly unbalanced sparse graphs satisfying a strong relative boundary-expansion condition.
+The use of pseudowidth instead of width like Wigderson-Ben Sasson, allows them to use a much larger $m$.
+They make no assumptions on minimal degree of graph as well.</p>
 <p><img src="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/./graph_php.svg" alt="" /></p>
+<aside id="" class="callout callout-theorem thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Size Lower Bounds on FPHP For Sparse Graphs (Theorem 4.4)</span></div>
+  <p>God fixes $n\geq n_0$ for some $n_0\in\Naturals$, where $n$ is the number of holes. The adversary then chooses:</p>
+<ol>
+<li>A number of pigeons $m:=m(n)$.</li>
+<li>Parameters $r:=r(n)$ and $\Delta:=\Delta(n)$ satisfying $1\leq r\leq m$, where $\Delta$ is an upper bound on the degrees of the pigeons.</li>
+<li>A parameter $\alpha:=\alpha(n)\in[m]$ satisfying
+$$
+8\leq\frac{\alpha^3}{\log\alpha}
+\qquad\text{and}\qquad
+\frac{\alpha^3}{\log\alpha}
+=o\!\left(\frac{r}{\log m}\right).
+$$</li>
+<li>Any bipartite graph
+$$
+G=(V_P\mathbin{\dot\cup}V_H,E),
+\qquad |V_P|=m,
+\qquad |V_H|=n,
+$$
+which is an
+$$
+\!\left(r,\Delta,(1-2\xi)\Delta\right)
+$$
+boundary expander, where
+$$
+\xi:=\frac{\log\alpha}{4\log m}.
+$$</li>
+</ol>
+<p>Then I show that <em>every</em> resolution refutation $\pi$ of $\FPHP{m}{n}{G}$ has length
+$$
+L(\pi)\geq
+\exp\!\left(
+\Omega\!\left(
+\frac{r\log^2\alpha}{\alpha\log^2m}
+\right)
+\right).
+$$</p>
+</aside>
+<p>Note that $\Delta$ is a free parameter and can be constant. We require no lower bound on the maximal degree of the graph.</p>
+<p>All three FPHP lower bounds shown in the paper are applications of Theorem 4.4 above.</p>
+<h3 id="regime-1-m-n-k-for-fixed-k">Regime 1: $m=n^k$ for fixed $k$<a class="zola-anchor" href="#regime-1-m-n-k-for-fixed-k" aria-label="Link to this section">#</a>
+</h3>
+<p>Fix a constant $\varepsilon&gt;0$. Corollary 4.7 specializes the random-graph Corollary 4.5 with
+$$
+r=n^{1-\varepsilon/2},\qquad
+\alpha=n^{\varepsilon/4},\qquad
+\Delta=\!\left(\frac{16k}{\varepsilon}\right)^2.
+$$
+Since $\log m=k\log n$, substitution in the master lower bound gives
+$$
+\exp\!\left(\Omega\!\left(
+\frac{r\log^2\alpha}{\alpha\log^2m}
+\right)\right)=
+\exp\!\left(\Omega\!\left(n^{1-3\varepsilon/4}\right)\right).
+$$
+The paper states the slightly weaker and cleaner bound $\exp(\Omega(n^{1-\varepsilon}))$. Thus arbitrary fixed polynomial imbalance is obtained by changing the constant degree and invoking the same master theorem.</p>
+<h3 id="regime-2-m-leq-n-o-log-n">Regime 2: $m\leq n^{o(\log n)}$<a class="zola-anchor" href="#regime-2-m-leq-n-o-log-n" aria-label="Link to this section">#</a>
+</h3>
+<p>Write $m=n^{f(n)}$, where $f(n)=o(\log n)$, and set
+$$
+\varepsilon=16\sqrt{\frac{f(n)}{\log n}}=o(1).
+$$
+Corollary 4.6 again invokes Corollary 4.5, now with
+$$
+r=n^{1-\varepsilon/2},\qquad
+\alpha=n^{\varepsilon/4},\qquad
+\Delta=\log m.
+$$
+Here $r=n^{1-o(1)}$ and $\alpha=n^{o(1)}$. Substituting these parameters in Theorem 4.4 yields
+$$
+L(\FPHP{m}{n}{G})=\exp\!\left(\Omega\!\left(n^{1-o(1)}\right)\right)
+$$
+asymptotically almost surely. This regime optimizes the random-graph corollary for the strongest exponent, whereas Regime 1 optimizes it for small degree.</p>
+<h3 id="regime-3-weakly-exponential-m">Regime 3: weakly exponential $m$<a class="zola-anchor" href="#regime-3-weakly-exponential-m" aria-label="Link to this section">#</a>
+</h3>
+<p>Random graphs no longer provide the required relative boundary expansion, so Corollary 4.8 uses the explicit expander from Corollary 2.4. For any constant
+$$
+\kappa&lt;\frac{3}{2}-\sqrt{2},
+$$
+choose
+$$
+\nu=\frac{2\sqrt{\kappa}}{1-2\sqrt{\kappa}}.
+$$
+The construction has
+$$
+m=2^{\Omega(n^\kappa)},\qquad
+r=n^{(1-2\sqrt{\kappa})^2},\qquad
+\Delta=O\!\left(\log^{1/\sqrt{\kappa}}m\right),
+$$
+and its expansion-loss constant is chosen so that the corresponding $\alpha$ contributes only an arbitrarily small loss $n^\varepsilon$. Since $\log^2m$ contributes $n^{2\kappa}$, Theorem 4.4 gives
+$$
+L(\FPHP{m}{n}{G})=
+\exp\!\left(\Omega\!\left(
+n^{1-2\sqrt{\kappa}(2-\sqrt{\kappa})-\varepsilon}
+\right)\right).
+$$
+For the concrete choice $\kappa=1/16$, this becomes
+$$
+m=\exp(O(n^{1/16})),\qquad
+L(\FPHP{m}{n}{G})=\exp\!\left(\Omega\!\left(n^{1/8-\varepsilon}\right)\right).
+$$</p>
+<p>The perfect-matching results follow the same architecture but technically invoke Theorem 5.4, the perfect-matching analogue of the master theorem. It has the same $r$–$\alpha$ trade-off and adds degree conditions on the right side of the graph.</p>
+<h2 id="what-is-open">What is open?<a class="zola-anchor" href="#what-is-open" aria-label="Link to this section">#</a>
+</h2>
+<p>Fix $m:=n^k$ and choose a constant expansion loss $\eta\in(0,1)$.
+The definition
+$$
+\eta:=\frac{\log\alpha}{2\log m}
+$$
+forces
+$$
+\alpha=m^{2\eta}=n^{2k\eta}.
+$$</p>
+<p>An artefact of their proof is that their result does not apply to every $\eta\in(0,1/2)$.
+More specifically, the side condition in the theorem is
+$$
+\frac{\alpha^3}{\log\alpha}=o\!\left(\frac{r}{\log m}\right).
+$$</p>
+<p><strong>We show how this restricts the choice for $\eta$ values</strong>.</p>
+<p>By definition, this says that for every $\varepsilon&gt;0$ there exists $n_0\in\mathbb{N}$ such that, for every $n\geq n_0$,
+$$
+\frac{\alpha(n)^3}{\log\alpha(n)}\leq\varepsilon\frac{r(n)}{\log m(n)}.
+$$
+Substituting $m=n^k$ and $\alpha=n^{2k\eta}$ gives
+$$
+\frac{n^{6k\eta}}{2k\eta\log n}\leq\varepsilon\frac{r(n)}{k\log n}.
+$$
+Cancelling $k\log n$ gives
+$$
+n^{6k\eta}\leq 2\eta\varepsilon r(n).
+$$</p>
+<p>The graph has only $n$ holes.
+Since its boundary-expansion coefficient is $(1-\eta)\Delta$, every admissible expansion radius satisfies
+$$
+(1-\eta)\Delta r\leq n,
+$$
+and hence, since $\Delta\geq 1$,
+$$
+r(n)\leq\frac{n}{1-\eta}.
+$$
+Suppose that $6k\eta\geq 1$.
+Then, for every $n\geq 1$,
+$$
+n^{6k\eta}\geq n.
+$$
+Choose $\varepsilon:=(1-\eta)/(4\eta)&gt;0$ in the definition of the side condition.
+For every sufficiently large $n$, that definition and the upper bound on $r(n)$ would imply
+$$
+n^{6k\eta}\leq 2\eta\varepsilon r(n)\leq\frac{n}{2}.
+$$
+This contradicts $n^{6k\eta}\geq n$.
+Therefore, the side condition can hold only if $6k\eta&lt;1$, or equivalently if $\eta&lt;1/(6k)$.
+Thus, no admissible value of $r$ can satisfy the side condition when $\eta\geq 1/(6k)$.</p>
+<aside id="" class="callout callout-remark">
+  <div class="callout-title">Remark</div>
+  <p>The open problem is whether an analogous resolution lower-bound theorem holds for $m=n^k$ in this excluded parameter regime, namely for constant expansion loss $\eta\geq 1/(6k)$.</p>
+</aside>
 <div class="bibliography">
 <h2>References</h2>
 <ol>
