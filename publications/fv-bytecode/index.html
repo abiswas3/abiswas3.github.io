@@ -121,7 +121,7 @@
 
     
     <p class="publication-authors publication-authors--page">
-      <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;" class="author-primary">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;quangvdao.github.io&#x2F;">Quang Dao</a>, <span>Daniel Ross</span>, <a href="https:&#x2F;&#x2F;people.cs.georgetown.edu&#x2F;jthaler&#x2F;">Justin Thaler</a>
+      <a href="https://randomwalks.xyz/" class="author-primary">Ari Biswas</a>, <a href="https://quangvdao.github.io/">Quang Dao</a>, <span>Daniel Ross</span>, <a href="https://people.cs.georgetown.edu/jthaler/">Justin Thaler</a>
     </p>
     
 
@@ -354,14 +354,16 @@ A longer pre-recorded youtube talk will be available along with the eprint by th
       var link = reference.querySelector('a');
       if (!link) return;
 
-      var targetId = (link.getAttribute('href') || '').replace('#', '');
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
       var definition = targetId ? document.getElementById(targetId) : null;
       if (!definition) return;
 
       transformed += 1;
       var noteId = 'sidenote-' + transformed;
       var clone = definition.cloneNode(true);
-      clone.querySelectorAll('a[href^="#fr-"]').forEach(function (backlink) { backlink.remove(); });
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
 
       var noteBody = Array.from(clone.children).map(function (child) {
         return child.tagName === 'P' ? child.innerHTML : child.outerHTML;

@@ -121,7 +121,7 @@
 
     
     <p class="publication-authors publication-authors--page">
-      <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;quangvdao.github.io&#x2F;" class="author-primary">Quang Dao</a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;liam-eagen-b9271786">Liam Eagen</a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;amilson">Andrew Milson</a>, <a href="https:&#x2F;&#x2F;il.linkedin.com&#x2F;in&#x2F;shahar-papini-a846b68">Shahar Papini</a>, <a href="https:&#x2F;&#x2F;people.cs.georgetown.edu&#x2F;jthaler&#x2F;">Justin Thaler</a>
+      <a href="https://randomwalks.xyz/">Ari Biswas</a>, <a href="https://quangvdao.github.io/" class="author-primary">Quang Dao</a>, <a href="https://www.linkedin.com/in/liam-eagen-b9271786">Liam Eagen</a>, <a href="https://www.linkedin.com/in/amilson">Andrew Milson</a>, <a href="https://il.linkedin.com/in/shahar-papini-a846b68">Shahar Papini</a>, <a href="https://people.cs.georgetown.edu/jthaler/">Justin Thaler</a>
     </p>
     
 
@@ -137,7 +137,7 @@
     
     <nav class="publication-artefacts" aria-label="Publication resources">
       
-        <a href="https:&#x2F;&#x2F;eprint.iacr.org&#x2F;2026&#x2F;762">e-print</a>
+        <a href="https://eprint.iacr.org/2026/762">e-print</a>
       
     </nav>
     
@@ -148,14 +148,21 @@
     
     <nav class="contents contents-side" aria-label="Table of contents">
       <h2>Contents</h2>
-      <ol>
+      
+<ol>
+  
   <li>
     <a href="#abstract">Abstract</a>
+    
   </li>
+  
   <li>
     <a href="#comment">Comment</a>
+    
   </li>
+  
 </ol>
+
     </nav>
     
 
@@ -377,14 +384,16 @@ Quang Dao was responsible for all those optimisations.</p>
       var link = reference.querySelector('a');
       if (!link) return;
 
-      var targetId = (link.getAttribute('href') || '').replace('#', '');
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
       var definition = targetId ? document.getElementById(targetId) : null;
       if (!definition) return;
 
       transformed += 1;
       var noteId = 'sidenote-' + transformed;
       var clone = definition.cloneNode(true);
-      clone.querySelectorAll('a[href^="#fr-"]').forEach(function (backlink) { backlink.remove(); });
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
 
       var noteBody = Array.from(clone.children).map(function (child) {
         return child.tagName === 'P' ? child.innerHTML : child.outerHTML;

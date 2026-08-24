@@ -121,14 +121,14 @@
 
     
     <p class="publication-authors publication-authors--page">
-      <a href="https:&#x2F;&#x2F;scholar.google.com&#x2F;citations?user=7PCO-DEAAAAJ&amp;hl=en">Raghuraman Balasubramanian</a>, <a href="https&#x2F;&#x2F;randomwalks.xyz">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;tgirgin">Timur Girgin</a>, <a href="https:&#x2F;&#x2F;karu.sites.cs.wisc.edu&#x2F;wiki&#x2F;">Karu Sankaralingam</a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;zach-york-9511a359">Zach York</a>
+      <a href="https://scholar.google.com/citations?user=7PCO-DEAAAAJ&amp;hl=en">Raghuraman Balasubramanian</a>, <a href="https//randomwalks.xyz">Ari Biswas</a>, <a href="https://www.linkedin.com/in/tgirgin">Timur Girgin</a>, <a href="https://karu.sites.cs.wisc.edu/wiki/">Karu Sankaralingam</a>, <a href="https://www.linkedin.com/in/zach-york-9511a359">Zach York</a>
     </p>
     
 
     <div class="publication-meta">
       
         
-        <a class="publication-header__venue" href="https:&#x2F;&#x2F;dl.acm.org&#x2F;doi&#x2F;proceedings&#x2F;10.1145&#x2F;2538862">SIGCSE 2014</a>
+        <a class="publication-header__venue" href="https://dl.acm.org/doi/proceedings/10.1145/2538862">SIGCSE 2014</a>
         
       
       <time datetime="2015-05-01">Last updated 01 May 2015</time>
@@ -137,7 +137,7 @@
     
     <nav class="publication-artefacts" aria-label="Publication resources">
       
-        <a href="https:&#x2F;&#x2F;dl.acm.org&#x2F;doi&#x2F;10.1145&#x2F;2538862.2538889">Conference Paper</a>
+        <a href="https://dl.acm.org/doi/10.1145/2538862.2538889">Conference Paper</a>
       
     </nav>
     
@@ -148,11 +148,16 @@
     
     <nav class="contents contents-side" aria-label="Table of contents">
       <h2>Contents</h2>
-      <ol>
+      
+<ol>
+  
   <li>
     <a href="#abstract">Abstract</a>
+    
   </li>
+  
 </ol>
+
     </nav>
     
 
@@ -358,14 +363,16 @@
       var link = reference.querySelector('a');
       if (!link) return;
 
-      var targetId = (link.getAttribute('href') || '').replace('#', '');
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
       var definition = targetId ? document.getElementById(targetId) : null;
       if (!definition) return;
 
       transformed += 1;
       var noteId = 'sidenote-' + transformed;
       var clone = definition.cloneNode(true);
-      clone.querySelectorAll('a[href^="#fr-"]').forEach(function (backlink) { backlink.remove(); });
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
 
       var noteBody = Array.from(clone.children).map(function (child) {
         return child.tagName === 'P' ? child.innerHTML : child.outerHTML;

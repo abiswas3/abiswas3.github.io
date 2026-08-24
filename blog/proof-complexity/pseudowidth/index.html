@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Razbarovs Pseudowidth — Random Walks</title>
-  <meta name="description" content="Written Word">
+  <meta name="description" content="">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=9f3f3f161e11a605fe54">
@@ -138,60 +138,79 @@
     
     <nav class="contents contents-side" aria-label="Table of contents">
       <h2>Contents</h2>
-      <ol>
+      
+<ol>
+  
   <li>
     <a href="#the-main-theorem">The Main Theorem</a>
+    
   </li>
+  
   <li>
     <a href="#some-notation">Some Notation</a>
+    
   </li>
+  
   <li>
-    <a href="#what-is-pseudo-width">What Is Pseudo Width</a><ol>
+    <a href="#what-is-pseudo-width">What Is Pseudo Width</a>
+    
+      
+<ol>
+  
   <li>
     <a href="#heavy-pigeons">Heavy Pigeons</a>
+    
   </li>
+  
   <li>
     <a href="#super-heavy-pigeons">Super Heavy Pigeons</a>
+    
   </li>
+  
 </ol>
+
+    
   </li>
+  
   <li>
     <a href="#first-key-technical-tool-the-pigeon-filtering-lemma">First Key Technical Tool - The Pigeon Filtering Lemma</a>
+    
   </li>
+  
   <li>
     <a href="#how-do-we-use-the-pigeon-filtering-lemma">How Do We Use The Pigeon Filtering Lemma</a>
+    
   </li>
+  
   <li>
     <a href="#refutations-must-have-a-clause-with-high-pseudowidth">Refutations Must Have A Clause With High Pseudowidth</a>
+    
   </li>
+  
 </ol>
+
     </nav>
     
 
     <div class="prose">
-      
-<aside class="callout callout-remark">
-  
+      <aside id="" class="callout callout-remark">
   <div class="callout-title">Update: 2026-08-15</div>
-  
   <p>This post is still in draft mode, and I have not had the chance to sketch it out yet.
 I should clean it up over the weekend</p>
-
 </aside>
 <p><a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/">Last time</a>, we saw an example of how short proofs imply that all clauses are narrow, but then we also showed that any valid resolution refutation needs a wide clause, so the proofs must be long.
 We showed this for the basic $\PHPBasic$, though the same argument applies to $\FPHP{n}{n-1}{G}$.</p>
-<p>Now we’ll do this again, but we will not use width directly, but a proxy for width - pseudowidth introduced by <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a>
-.
+<p>Now we’ll do this again, but we will not use width directly, but a proxy for width - pseudowidth introduced by
+<a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a></p>
+<p>.
 Then we will use this again, when working with sparse graphs, along with a new idea called graph closure.
 Also remember last time we had this notion of critical pigeons $\mathcal{P}(C)$, its size $\mu(C)$.
 We will do that again, but this time instead of counting we’ll do this over subspaces using linear algebra.</p>
 <h2 id="the-main-theorem">The Main Theorem<a class="zola-anchor" href="#the-main-theorem" aria-label="Link to this section">#</a>
 </h2>
-
-<aside class="callout callout-theorem thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Size Lower Bounds on FPHP For Sparse Graphs</span></div>
-  
+<aside id="" class="callout callout-theorem thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Size Lower Bounds on FPHP For Sparse Graphs</span></div>
   <p>You give me</p>
 <ol>
 <li>Fix number of pigeons $m$.</li>
@@ -201,19 +220,15 @@ We will do that again, but this time instead of counting we’ll do this over su
 <li>A graph $G=([m] \cup [n], E)$ which is a $(r, \Delta, (1-2\xi)\Delta)$ boundary expander where $\xi:= \frac{\log \alpha}{4 \log m}$</li>
 </ol>
 <p>Then I show you, that <em>every</em> resolution proof that refutes $\FPHP{m}{n}{G}$ has size $\exp{\left(\frac{r\log^2 \alpha}{\alpha}\right)}$</p>
-
 </aside>
-
-<aside class="callout callout-proof">
-  
-  <div class="callout-title">Proof</div>
-  
+<aside id="" class="callout callout-proof">
+  <div class="callout-title"></div>
   <p>The proof proceeds by contradiction.
 Define $w_0:= \frac{\epsilon_0 r \xi}{\alpha}$ for some universal constant $\epsilon_0$ that we will set small enough to obtain our contradiction.</p>
-<p>First observe that based on constraints<sup class="footnote-reference" id="fr-low-1"><a href="#fn-low">1</a></sup> in assumption<sup class="footnote-reference" id="fr-upper-1"><a href="#fn-upper">2</a></sup> (3) we have $4 \leq \alpha^2 \leq  w_0$.
+<p>First observe that based on constraints<sup class="footnote-reference" id="fr-low-1"><a href="#fn-low">[1]</a></sup> in assumption<sup class="footnote-reference" id="fr-upper-1"><a href="#fn-upper">[2]</a></sup> (3) we have $4 \leq \alpha^2 \leq  w_0$.
 Also set $\delta_i := 4 N_G(i) \xi$.</p>
 <p><strong>Assumption</strong>: Let $\pi$ denote an valid arbitrary refutation of $\FPHP{m}{n}{G}$ such that $\Size{\pi} \le 2^{\epsilon’ w_0 \xi}$ for another small enough constant $\epsilon’$.</p>
-<p>We have all the conditions of <a href="#lemma-4-2">Lemma 4.2</a> satisfied<sup class="footnote-reference" id="fr-sat-1"><a href="#fn-sat">3</a></sup>, so we know the following exists</p>
+<p>We have all the conditions of <a href="#lemma-4-2">Lemma 4.2</a> satisfied<sup class="footnote-reference" id="fr-sat-1"><a href="#fn-sat">[3]</a></sup>, so we know the following exists</p>
 <ul>
 <li>
 <p>Some vector $\vec{d} := (d_1, \ldots, d_m)$ such that $\delta_i &lt; d_i \leq N_G(i)$ for all $i \in [m]$.</p>
@@ -233,15 +248,15 @@ $$</p>
 \PseudoWidth{C}{\vec{\delta}} \geq r\xi / 4
 $$</p>
 <div class="math-display">
-$$
+<p>$$
 \begin{align}
-\frac{r \xi}{4} &\leq K \alpha w_0 \\
-&= K \alpha \frac{\epsilon_0 r \xi}{\alpha} \\
+\frac{r \xi}{4} &amp;\leq K \alpha w_0 \
+&amp;= K \alpha \frac{\epsilon_0 r \xi}{\alpha} \
 \end{align}
-$$
+$$</p>
 </div>
 <p>This gives us the condition that we <em>need</em> $\epsilon_0 \geq \frac{1}{4K}$ to for everything to follow.
-But $\epsilon_0$ is a constant we set in the first line of the proof when defining $w_0$, so I can set it to be as small as I care<sup class="footnote-reference" id="fr-w-1"><a href="#fn-w">4</a></sup>.</p>
+But $\epsilon_0$ is a constant we set in the first line of the proof when defining $w_0$, so I can set it to be as small as I care<sup class="footnote-reference" id="fr-w-1"><a href="#fn-w">[4]</a></sup>.</p>
 <p>I’ll set it to $\epsilon &lt; 1/4K$, and this gives us a contradiction.
 So our assumption that on the length of $\pi$ is wrong.
 We must have $\Size{\pi} &gt; 2^{\epsilon’w_0\xi} = \exp{\left(\right)}$.</p>
@@ -270,7 +285,6 @@ $ where the penultimate equality uses $\xi=\log\alpha/(4\log m)$. <a href="#fr-u
 </li>
 </ol>
 </section>
-
 </aside>
 <h2 id="some-notation">Some Notation<a class="zola-anchor" href="#some-notation" aria-label="Link to this section">#</a>
 </h2>
@@ -284,40 +298,32 @@ $ where the penultimate equality uses $\xi=\log\alpha/(4\log m)$. <a href="#fr-u
 <p>Given an unsatisfiable formula $F = \FPHP{m}{n}{G}$, and integer vectors of length $m$,  $\vec{d} = (d_1, \dots, d_m), \vec{\delta} = (\delta_1, \dots, \delta_m)$, such that, $\delta_i &lt; d_i$ for all $i \in [m]$, the pseudowidth of a clause $C$, denoted $\Size{\PseudoWidth{C}{\vec{\delta}}}$</p>
 <p>$$\Size{\PseudoWidth{C}{\vec{\delta}}} := \Size{\{ i \in [m]: \ClauseNbrs{i} \geq d_i - \delta_i \}}$$</p>
 <p>The pigeons in $\PseudoWidth{C}{\vec{\delta}}$ are called <strong>heavy</strong> pigeons in clause $C$.</p>
-
-<aside class="callout callout-remark">
-  
+<aside id="" class="callout callout-remark">
   <div class="callout-title">How I Think Of PseudoWidth</div>
-  
   <p>If you think of the role of a resolution proof system as starting with all the axioms, and showing <em>every</em> pigeons cannot be assigned a hole, then the pseudowidth of a clause really measures how many “<em>important</em>” pigeons are there in the clause.
 These pigeons are important because there are many ways to satisfy these pigeons, therefore failure to assign these pigeons holes will immediately make it more likely that this clause is not satisfied.</p>
 <p>The counterpart of pseudowidth in the basic lower bound proof is not $w(C)$ which simply measures number of literals in clause, but rather $\mu(C)$, which measures some weird notion of “Critical” pigeons. Why are the critical, because you could satisfy every axiom but just leave this pigeon unassigned, and the clause is still not satisfied.
 Thus, this pigeon is <strong>critical</strong> to satisfiability of this clause.
 Or in other words removing this pigeon from clauses is <em>key</em> to showing unsatisfiability.</p>
-
 </aside>
 <h3 id="super-heavy-pigeons">Super Heavy Pigeons<a class="zola-anchor" href="#super-heavy-pigeons" aria-label="Link to this section">#</a>
 </h3>
 <p>We denote the <strong>super-heavy</strong> pigeons in clause $C$ with</p>
 <p>$$\SuperHeavy{C}{\vec{d}} := \{ i \in [m]: \ClauseNbrs{i} \geq d_i \}$$</p>
-
-<aside class="callout callout-definition thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — (w,d)-axioms</span></div>
-  
+<aside id="" class="callout callout-definition thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : (w,d)-axioms</span></div>
   <p>Any clause that contains exactly $w_0$ super-heavy pigeons where super-heaviness is parameterised by $\vec{d}$ is called a $(w_0, \vec{d})$-axiom.</p>
-
 </aside>
 <h2 id="first-key-technical-tool-the-pigeon-filtering-lemma">First Key Technical Tool - The Pigeon Filtering Lemma<a class="zola-anchor" href="#first-key-technical-tool-the-pigeon-filtering-lemma" aria-label="Link to this section">#</a>
 </h2>
-<p>The above lemma is a generalisation of filtering lemma that was originally introduced in <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a>
-.
+<p>The above lemma is a generalisation of filtering lemma that was originally introduced in
+<a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a></p>
+<p>.
 In the lemma below, $m$ and $n$ in our context will refer to the number of pigeons and holes, and $L$ will be the size of the resolution refutation, but this is a general combinatorial lemma that has nothing to do with the PHP or expander graphs per se.</p>
-
-<aside class="callout callout-lemma thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Pigeon Filtering Lemma</span></div>
-  
+<aside id="" class="callout callout-lemma thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Pigeon Filtering Lemma</span></div>
   <p>Fix $m, n, L \in \Naturals$. Let $\alpha \in [m]$ and $w_0$ be an arbitrary parameter such that $w_0 \ge \alpha^2 \ge 4$ and $w_0 \ge \log L$.
 Given any arbitrary set of integer vectors of length $m$, $\vec{r}(1), \ldots, \vec{r}(L)$, there <strong>exists</strong> a vector $\vec{r} = (r_1, \ldots, r_m)$ with $r_k \le t=\lfloor \frac{\log m}{\log \alpha}\rfloor -1$, such that for <strong>every</strong> $C \in [L]$ one of the following holds:</p>
 <ol>
@@ -328,7 +334,6 @@ Given any arbitrary set of integer vectors of length $m$, $\vec{r}(1), \ldots, \
 <p>$\Size{\{ i\in [m]: r_i(C) \le r_i + 1 \}}\le \BigO{\alpha w_0}$</p>
 </li>
 </ol>
-
 </aside>
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
@@ -339,16 +344,16 @@ W(\vec{s}) := \sum_{i\in[m]} \alpha^{-s_i}.
 $$</p>
 <p>It is enough to find absolute constants $\gamma,\gamma’$ and a vector $\vec r$ such that, for every $\ell\in[L]$,</p>
 <div class="math-display">
-$$
+<p>$$
 \begin{aligned}
-W(\vec r(\ell)) \geq \frac{\gamma'w_0}{\alpha}
-&\implies
-\Size{\{i\in[m]:r_i\geq r_i(\ell)\}}\geq w_0,\\
-W(\vec r(\ell)) \leq \frac{\gamma'w_0}{\alpha}
-&\implies
-\Size{\{i\in[m]:r_i\geq r_i(\ell)-1\}}\leq \gamma\alpha w_0.
+W(\vec r(\ell)) \geq \frac{\gamma’w_0}{\alpha}
+&amp;\implies
+\Size{{i\in[m]:r_i\geq r_i(\ell)}}\geq w_0,\
+W(\vec r(\ell)) \leq \frac{\gamma’w_0}{\alpha}
+&amp;\implies
+\Size{{i\in[m]:r_i\geq r_i(\ell)-1}}\leq \gamma\alpha w_0.
 \end{aligned}
-$$
+$$</p>
 </div>
 <p>Let $t=\lfloor\log m/\log\alpha\rfloor-1$. Choose the coordinates of $\vec r$ independently from $[t]$ according to</p>
 <p>$$
@@ -374,11 +379,11 @@ $$</p>
 <p>For every coordinate occurring in this set,
 $\Pr[r_i\geq r_i(\ell)]\geq\beta\alpha^{-r_i(\ell)}$. Hence</p>
 <div class="math-display">
-$$
+<p>$$
 \mathbb E\left[\Size{P_{\vec r}(\ell)}\right]
 \geq \beta\sum_{r_i(\ell)\leq t}\alpha^{-r_i(\ell)}
-\geq \frac{\gamma'-1}{2}w_0,
-$$
+\geq \frac{\gamma’-1}{2}w_0,
+$$</p>
 </div>
 <p>where $\beta/\alpha\geq1/2$. The relevant events are independent, so a multiplicative Chernoff bound gives, for $\gamma’\geq13$,</p>
 <p>$$
@@ -387,11 +392,11 @@ $$
 $$</p>
 <p>Now suppose instead that $W(\vec r(\ell))\leq\gamma’w_0/\alpha$. A geometric-sum calculation gives</p>
 <div class="math-display">
-$$
+<p>$$
 \Pr[r_i\geq r_i(\ell)-1]
 =\beta\sum_{x=r_i(\ell)-1}^{t}\alpha^{-x}
 \leq 2\alpha^{2-r_i(\ell)}.
-$$
+$$</p>
 </div>
 <p>For</p>
 <p>$$
@@ -409,15 +414,15 @@ $$</p>
 \leq \exp(-\alpha w_0)\leq L^{-2}.
 $$</p>
 <p>A union bound over all $\ell\in[L]$ and both cases now gives a choice of $\vec r$ for which the two implications hold simultaneously. The first implication is conclusion 1, and the second is conclusion 2 with the absolute constant hidden by $\BigO{\cdot}$.</p>
-
   <div class="qed" aria-label="End of proof">□</div>
 </aside>
-
 <h2 id="how-do-we-use-the-pigeon-filtering-lemma">How Do We Use The Pigeon Filtering Lemma<a class="zola-anchor" href="#how-do-we-use-the-pigeon-filtering-lemma" aria-label="Link to this section">#</a>
 </h2>
-<p>The way <a href="#ref-rezende2020Exp" class="citation citation-t" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-key="rezende2020Exp" data-cite-authors="de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D." data-cite-title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-venue="CCC" data-cite-year="2020">de Rezende et al. (2020)</a>
- and <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a>
- use this lemma is to show that short proofs imply short pseudo-width for all clauses in the proof.</p>
+<p>The way
+<a href="#ref-rezende2020Exp" class="citation citation-t" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-key="rezende2020Exp" data-cite-authors="de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D." data-cite-title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-venue="CCC" data-cite-year="2020">de Rezende et al. (2020)</a></p>
+<p>and
+<a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a></p>
+<p>use this lemma is to show that short proofs imply short pseudo-width for all clauses in the proof.</p>
 <p>Then independently, they will show that valid refutations <strong>MUST</strong> contain a clause with large pseudowidth, therefore resolution refutations <strong>CANNOT</strong> be short.
 The proof is remarkably similar to the proof for showing lower bounds for PHP in the dense graph model.</p>
 <aside class="callout callout-note">
@@ -426,17 +431,14 @@ The proof is remarkably similar to the proof for showing lower bounds for PHP in
 <ul>
 <li>$m$ and $n$ mean the usual.</li>
 <li>$w_0$ is an upper bound on the proof size in $\log$ scale. We need this as we will later show that when proof sizes are smaller than $\Exp{w_0}$ we get a contradiction.</li>
-<li>$\alpha = 2$ in the original result by <a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a>
-, but here we will set it to $\SmallO{r/\log m}$ — and this will in some ways force us to have a very very strong expander.</li>
+<li>$\alpha = 2$ in the original result by
+<a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a></li>
 </ul>
-
+<p>, but here we will set it to $\SmallO{r/\log m}$ — and this will in some ways force us to have a very very strong expander.</p>
 </aside>
-
-
 <aside id="lemma-4-2" class="callout callout-lemma thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Short Proofs Have Small Pseudowidth (Lemma 4.2)</span></div>
-  
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Short Proofs Have Small Pseudowidth (Lemma 4.2)</span></div>
   <p>Let $\pi$ be a resolution refutation for an unsatisfiable CNF formula $F = \FPHP{m}{n}{G}$.
 Let $w_0$ be an arbitrary parameter and $\alpha \in [m]$ such that $w_0 \geq \alpha^2 \ge 4$ and $\Size{\pi} &lt; 2^{w_0}$, and for each $i \in [m]$, define $\delta_i = \GraphNbrs{i}\lfloor\frac{\log \alpha}{\log m} \rfloor$.</p>
 <p>There exists</p>
@@ -452,18 +454,17 @@ Let $w_0$ be an arbitrary parameter and $\alpha \in [m]$ such that $w_0 \geq \al
 </li>
 </ul>
 <p>$$\max_{C \in \pi’}\Size{\PseudoWidth{C}{\vec{\delta}}} = \BigO{\alpha w_0}$$</p>
-
 </aside>
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
   <p>For any $C \in \pi$, for $i \in [m]$, set</p>
 <div class="math-display">
-$$r_i(C) = \lfloor \frac{\GraphNbrs{i} - \ClauseNbrs{i}}{\delta_i}\rfloor$$
+<p>$$r_i(C) = \lfloor \frac{\GraphNbrs{i} - \ClauseNbrs{i}}{\delta_i}\rfloor$$</p>
 </div>
 <p>All the parameters are specified to call pigeon filter lemma which says there exists vector $\vec{r} = (r_1, \dots, r_m)$ where $r_i \le \lfloor \frac{\log m}{\log \alpha}\rfloor  - 1$.
 Set</p>
 <div class="math-display">
-$$d_i = \GraphNbrs{i} - \lceil r_i \delta_i\rceil + \delta_i$$
+<p>$$d_i = \GraphNbrs{i} - \lceil r_i \delta_i\rceil + \delta_i$$</p>
 </div>
 <p>Using the above definition, it’s not too hard to see that $d_i = \text{arg}\min_{x \in \Naturals} \lfloor \frac{\GraphNbrs{i} - x}{\delta_i}\rfloor \le r_i$.</p>
 <p>This implies that for a given clause $C$, for any $i \in [m]$</p>
@@ -479,10 +480,8 @@ By definition $\Size{\Axioms} \le \Size{\pi}$.</p>
 <li>$\Size{\{ i\in [m]: r_i(C) \le r_i + 1 \}}\le \BigO{\alpha w_0} \implies \Size{\PseudoWidth{C}{\vec{\delta}}} \le \BigO{\alpha w_0}$</li>
 </ol>
 <p>This automatically gives us $\Size{\PseudoWidth{C}{\vec{\delta}}} = \BigO{\alpha w_0}$.</p>
-
   <div class="qed" aria-label="End of proof">□</div>
 </aside>
-
 <p>Note in the above proof system we are assuming $\Size{\pi} &lt; 2^{w_0}$ for some parameter $w_0$.
 Later we will set $w_0$ such that $2^{w_0} &lt; \Exp{\BigOmega{n}}$, and this will give us a contradiction.
 <strong>REVISIT THIS</strong></p>
@@ -491,11 +490,9 @@ Later we will set $w_0$ such that $2^{w_0} &lt; \Exp{\BigOmega{n}}$, and this wi
 <p>This is the main technical contribution, where we do counting via linear algebra.
 Before we formally state the lemma, let’s do some setup work.</p>
 <p><strong>Notation</strong> of matchings as vectors</p>
-
-<aside class="callout callout-lemma thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Valid Resolution Refutations MUST have a clause with high pseudowidth (Lemma 4.3)</span></div>
-  
+<aside id="" class="callout callout-lemma thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Valid Resolution Refutations MUST have a clause with high pseudowidth (Lemma 4.3)</span></div>
   <p><strong>Setup (What Is Given To Me)</strong>: I get</p>
 <ul>
 <li>A parameter $\xi \le 1/4$</li>
@@ -503,9 +500,9 @@ Before we formally state the lemma, let’s do some setup work.</p>
 <li>A slack vector $\vec{\delta} = (\delta_1, \ldots, \delta_m)$ where $\delta_i = 4\GraphNbrs{i}\xi$.</li>
 <li>A vector $\vec{d} = (d_1, \ldots, d_m)$ such that $\delta_i &lt; d_i \le \GraphNbrs{i}$ for all $i \in [m]$.</li>
 <li>An arbitrary parameter $w_0$ (represents the proof size in log scale).</li>
-<li>A small set<sup class="footnote-reference" id="fr-a-1"><a href="#fn-a">1</a></sup> of arbitrary $(w_0, \vec{d})$-axioms, $\Axioms$ such that $\Size{\Axioms} \le (1 + \xi)^{w_0}$.</li>
+<li>A small set<sup class="footnote-reference" id="fr-a-1"><a href="#fn-a">[1]</a></sup> of arbitrary $(w_0, \vec{d})$-axioms, $\Axioms$ such that $\Size{\Axioms} \le (1 + \xi)^{w_0}$.</li>
 </ul>
-<p><strong>What Do I show</strong><sup class="footnote-reference" id="fr-show-1"><a href="#fn-show">2</a></sup>:</p>
+<p><strong>What Do I show</strong><sup class="footnote-reference" id="fr-show-1"><a href="#fn-show">[2]</a></sup>:</p>
 <p>Every valid proof $\pi$ that refutes $\FPHP{m}{n}{G} \cup \Axioms$ must have at least one clause $C \in \pi$, such that $\Size{\PseudoWidth{C}{\vec{\delta}}} \ge \frac{r\xi}{4}$</p>
 <section class="footnotes">
 <ol class="footnotes-list">
@@ -517,7 +514,6 @@ Before we formally state the lemma, let’s do some setup work.</p>
 </li>
 </ol>
 </section>
-
 </aside>
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
@@ -540,7 +536,7 @@ Now for each $i$, define $\lambda_i: V_H \rightarrow \Lambda_i$, such that for a
 <p>Now for any partial matching $\psi: V_P \rightarrow V_H$, we can visualise $\psi$ with a vector of length $m$, where $\psi_i = j \in V_H$ represents the hole pigeon $i$ is sent to hole $j$, and $\psi_i = \bot$, means that $i \notin \domain{\psi}$.
 For any partial matching $\psi$, we define</p>
 <div class="math-display">
-$$\lambda(\psi) := \underset{i \in \domain{\psi}}{\otimes}\lambda_i(\psi_i) \bigotimes \underset{i \notin \domain{\psi}}{\otimes} \Lambda_i$$
+<p>$$\lambda(\psi) := \underset{i \in \domain{\psi}}{\otimes}\lambda_i(\psi_i) \bigotimes \underset{i \notin \domain{\psi}}{\otimes} \Lambda_i$$</p>
 </div>
 <p>where by $\domain{\psi}{\otimes} \Lambda_i$, we mean the vector space formed by taking the tensor product of every basis vector in  $\Lambda_i$.</p>
 <blockquote>
@@ -565,8 +561,9 @@ Therefore $\lambda(\bot) = \Span{\lambda{\psi_0}} = \Lambda$.</p>
 But if the pseudowidth of all clauses is small i.e smaller than $\frac{r}{2}$, then every resolvent spans a space entirely contained by the space spanned by its parents, thus we can actually never get to $\bot$, giving us our contradiction.
 This is formally shown in <strong>Lemma 4.10</strong>.</p>
 </aside>
-<p>More formally, Lemma 4.9 says that there exists $$\frac{C_0 \vee x \quad \Complement{x} \vee C_1}{C}$$ such that $\Span{\lambda(C)} \not\subseteq \Span{\lambda(C_0), \lambda(C_1)}$ (otherwise, how do we get to $\bot$). (Remember, in <a href="#ref-beame1996simplified" class="citation citation-t" title="Simplified and Improved Resolution Lower Bounds" data-cite-key="beame1996simplified" data-cite-authors="Beame, P. and Pitassi, T." data-cite-title="Simplified and Improved Resolution Lower Bounds" data-cite-venue="FOCS" data-cite-year="1996">Beame &amp; Pitassi (1996)</a>
-, <a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/">we did the same thing</a> with critical pigeons, now we’re playing the same game with subspaces, which is a generalisation.)</p>
+<p>More formally, Lemma 4.9 says that there exists $$\frac{C_0 \vee x \quad \Complement{x} \vee C_1}{C}$$ such that $\Span{\lambda(C)} \not\subseteq \Span{\lambda(C_0), \lambda(C_1)}$ (otherwise, how do we get to $\bot$). (Remember, in
+<a href="#ref-beame1996simplified" class="citation citation-t" title="Simplified and Improved Resolution Lower Bounds" data-cite-key="beame1996simplified" data-cite-authors="Beame, P. and Pitassi, T." data-cite-title="Simplified and Improved Resolution Lower Bounds" data-cite-venue="FOCS" data-cite-year="1996">Beame &amp; Pitassi (1996)</a></p>
+<p>, <a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/">we did the same thing</a> with critical pigeons, now we’re playing the same game with subspaces, which is a generalisation.)</p>
 <p>But Lemma 4.10 prevents this from happening if $\max\{\Closure{C_0}, \Closure{C_1}, \Closure{C}\} \le \frac{r}{4}$.
 Thus, for the resolvent to span more space, we need some $C’ \in \{C, C_0, C_1\}$ such that $\Closure{C’} &gt; \frac{r}{4} = \frac{k\Delta}{c - \nu} = \frac{r}{4\xi}$.
 Solving for $k = \frac{r\xi}{4}$.</p>
@@ -576,20 +573,16 @@ Strong expansion implies many holes. Many holes means many vectors in $\mathcal{
 </blockquote>
 <p>Now as $G$ is a $(r,\Delta, c)$ boundary expander, by <strong>Lemma 3.3</strong>  (contrapositive), we have that if $\Closure{C’} = \ClosureParam{\PseudoWidth{C’}{\vec{\delta}}} &gt; \frac{k\Delta}{c - \nu}$ then $\Size{\PseudoWidth{C’}{\vec{\delta}}} &gt; k = \frac{r\xi}{4}$.</p>
 <p>This completes the proof.</p>
-
   <div class="qed" aria-label="End of proof">□</div>
 </aside>
-
-<p>Now we prove the main lemmas the above proof relies on. Numbering is from <a href="#ref-rezende2020Exp" class="citation citation-t" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-key="rezende2020Exp" data-cite-authors="de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D." data-cite-title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-venue="CCC" data-cite-year="2020">de Rezende et al. (2020)</a>
-.</p>
-
-<aside class="callout callout-lemma thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Lemma 3.3</span></div>
-  
+<p>Now we prove the main lemmas the above proof relies on. Numbering is from
+<a href="#ref-rezende2020Exp" class="citation citation-t" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-key="rezende2020Exp" data-cite-authors="de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D." data-cite-title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-venue="CCC" data-cite-year="2020">de Rezende et al. (2020)</a></p>
+<p>.</p>
+<aside id="" class="callout callout-lemma thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Lemma 3.3</span></div>
   <p>Suppose that $G$ is an $(r,\Delta,c)$-boundary expander and that $T \subseteq V_{\text{exp}}(G)$ has size $|T|\le k \le r$. Then $\Size{\ClosureParam{T}} \le \frac{k\Delta}{c-\nu}$.</p>
 <p><strong>Contrapositive</strong>: If $\Size{\ClosureParam{T}} &gt; \frac{k\Delta}{c-\nu}$, then $\Size{T} &gt; k$</p>
-
 </aside>
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
@@ -600,13 +593,13 @@ Strong expansion implies many holes. Many holes means many vectors in $\mathcal{
 $$</p>
 <p>We also have $\Size{S}\leq r$, so boundary expansion applies to $S$. Since $\Size{T}\leq k$ and every expanding vertex has degree at most $\Delta$, we have $\Size{N(T)}\leq k\Delta$. Consequently,</p>
 <div class="math-display">
-$$
+<p>$$
 \begin{aligned}
 \Size{\partial(S)\setminus N(T)}
-&\geq \Size{\partial(S)}-\Size{N(T)}\\
-&\geq c\Size{S}-k\Delta.
+&amp;\geq \Size{\partial(S)}-\Size{N(T)}\
+&amp;\geq c\Size{S}-k\Delta.
 \end{aligned}
-$$
+$$</p>
 </div>
 <p>Combining the upper and lower bounds gives</p>
 <p>$$
@@ -617,19 +610,14 @@ $$</p>
 \Size{\ClosureParam{T}}=\Size{S}&lt;\frac{k\Delta}{c-\nu}.
 $$</p>
 <p>In particular, this implies the stated weak inequality.</p>
-
   <div class="qed" aria-label="End of proof">□</div>
 </aside>
-
-
-<aside class="callout callout-lemma thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Lemma 4.9</span></div>
-  
+<aside id="" class="callout callout-lemma thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Lemma 4.9</span></div>
   <p>Let $\xi \le 1/4$. Let $G$ be any graph with $m &gt; n$ and $\delta_i = 4\GraphNbrs{i}\xi$ for all $i\in [m]$.
 Given a set of $(w_0, \vec{d})$ axioms $\Axioms$ of size $\Size{\Axioms} \le (1 + \xi)^{w_0}$ for arbitrary $w_0$ and any vector $\vec{d}$ with $d_i \le \GraphNbrs{i}$ for all $i\in [m]$, we have</p>
 <p>$$\Span{\lambda(C) : C \in \FPHP{m}{n}{G} \cup \Axioms} \subsetneq \Lambda$$</p>
-
 </aside>
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
@@ -642,60 +630,51 @@ $$</p>
 <p>and likewise for $i’$, since $\delta_i=4\xi\GraphNbrs{i}\geq1$. No matching on these two pigeons can send both to the same hole, so again $Z(A)=\emptyset$ and $\lambda(A)$ is the zero subspace.</p>
 <p>It remains to bound the contribution of the $(w_0,\vec d)$-axioms. Fix $A\in\Axioms$. For every super-heavy pigeon $i\in\SuperHeavy{A}{\vec d}$, there are at most $\GraphNbrs{i}-d_i$ choices of a hole that do not satisfy $A$. All other tensor factors contribute their full spaces. Therefore</p>
 <div class="math-display">
-$$
+<p>$$
 \Dim{\lambda(A)}
 \leq
 \prod_{i\notin\SuperHeavy{A}{\vec d}}\Dim{\Lambda_i}
 \prod_{i\in\SuperHeavy{A}{\vec d}}\bigl(\GraphNbrs{i}-d_i\bigr).
-$$
+$$</p>
 </div>
 <p>Dividing by $\Dim{\Lambda}=\prod_i\Dim{\Lambda_i}$ and using $\Dim{\Lambda_i}=\GraphNbrs{i}-d_i+\delta_i/4$ gives</p>
 <div class="math-display">
-$$
+<p>$$
 \frac{\Dim{\lambda(A)}}{\Dim{\Lambda}}
 \leq
 \prod_{i\in\SuperHeavy{A}{\vec d}}
 \frac{\GraphNbrs{i}-d_i}
 {\GraphNbrs{i}-d_i+\delta_i/4}
 \leq (1-\xi)^{w_0}.
-$$
+$$</p>
 </div>
 <p>For the last inequality, note that $\delta_i/4=\xi\GraphNbrs{i}$ and $d_i&gt;\delta_i$, so each displayed ratio is at most $1-\xi$; by definition, $A$ has exactly $w_0$ super-heavy pigeons.</p>
 <p>Finally, subadditivity of dimension and $\Size{\Axioms}\leq(1+\xi)^{w_0}$ imply</p>
 <div class="math-display">
-$$
+<p>$$
 \begin{aligned}
 \frac{\Dim{\Span{\lambda(A):A\in\FPHP{m}{n}{G}\cup\Axioms}}}
 {\Dim{\Lambda}}
-&\leq \Size{\Axioms}(1-\xi)^{w_0}\\
-&\leq (1+\xi)^{w_0}(1-\xi)^{w_0}\\
-&=(1-\xi^2)^{w_0}<1.
+&amp;\leq \Size{\Axioms}(1-\xi)^{w_0}\
+&amp;\leq (1+\xi)^{w_0}(1-\xi)^{w_0}\
+&amp;=(1-\xi^2)^{w_0}&lt;1.
 \end{aligned}
-$$
+$$</p>
 </div>
 <p>Thus the axioms span a proper subspace of $\Lambda$.</p>
-
   <div class="qed" aria-label="End of proof">□</div>
 </aside>
-
-
-<aside class="callout callout-remark">
-  
+<aside id="" class="callout callout-remark">
   <div class="callout-title">Attention</div>
-  
   <p>This lemma will make use of this idea called closure, which looks remarkably similar to the non-blocking graph pebble game from Pippenger and Friedman.
 But I do not think the strong expansion issue is coming from here.</p>
-
 </aside>
 <p>Use STRONG expansion here</p>
-
-<aside class="callout callout-lemma thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Lemma 4.10</span></div>
-  
+<aside id="" class="callout callout-lemma thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Lemma 4.10</span></div>
   <p>Let $C$ be the resolvent from $C_0$ and $C_1$.
 $$ \max\Big\{\Closure{C_0}, \Closure{C_1}, \Closure{C}\Big\} \le \frac{r}{4} \implies \Span{\lambda(C)} \subseteq \Span{\lambda(C_0), \lambda(C_1)}$$</p>
-
 </aside>
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
@@ -718,12 +697,12 @@ $$</p>
 <p>It therefore suffices to prove the desired containment for $\lambda(\phi’)$.</p>
 <p>Let $\mathcal M_D$ be the set of partial matchings that extend $\phi’$ by assigning all pigeons in $D$, and that do not satisfy $C$. Every $\widetilde\phi\in\mathcal M_D$ fails to satisfy at least one of $C_0$ and $C_1$, by soundness of the resolution rule. Suppose, without loss of generality, that it fails to satisfy $C_0$, and restrict $\widetilde\phi$ to $\Closure{C_0}$. Call this restriction $\widetilde\phi_0$. Then $\widetilde\phi_0\in Z(C_0)$, and hence</p>
 <div class="math-display">
-$$
+<p>$$
 \lambda(\widetilde\phi)
 \subseteq\lambda(\widetilde\phi_0)
 \subseteq\lambda(C_0)
 \subseteq\Span{\lambda(C_0),\lambda(C_1)}.
-$$
+$$</p>
 </div>
 <p>The analogous conclusion holds when $\widetilde\phi$ fails to satisfy $C_1$. Thus, if</p>
 <p>$$
@@ -746,22 +725,22 @@ $$</p>
 $$</p>
 <p>Apply Lemma 3.4 to the graph obtained by deleting $S\cup N(S)$. Recalling that the closure parameter here is $\nu=(1-3\xi)\Delta$, we obtain</p>
 <div class="math-display">
-$$
+<p>$$
 \Size{\partial_{G\setminus(S\cup N(S))}(D)}
 \geq(1-3\xi)\Delta\Size{D}.
-$$
+$$</p>
 </div>
 <p>An averaging argument gives a pigeon in $D$ with at least $(1-3\xi)\Delta$ unique neighbours. Removing that pigeon and reserving these holes, and then repeating the argument, produces an ordering of $D$ together with disjoint sets of at least $(1-3\xi)\Delta$ available holes for every pigeon. Thus the pigeons can be assigned from these sets independently while remaining a matching.</p>
 <p>Every pigeon $i\in D$ is light in $C$, since all heavy pigeons of $C$ belong to $S$. Hence at most $d_i-\delta_i$ of its available holes satisfy $C$. The number of choices that do not satisfy $C$ is therefore at least</p>
 <div class="math-display">
-$$
+<p>$$
 \begin{aligned}
 (1-3\xi)\Delta-(d_i-\delta_i)
-&\geq(1-3\xi)\GraphNbrs{i}-d_i+4\xi\GraphNbrs{i}\\
-&\geq\GraphNbrs{i}-d_i+\frac{\delta_i}{4}\\
-&=\Dim{\Lambda_i}.
+&amp;\geq(1-3\xi)\GraphNbrs{i}-d_i+4\xi\GraphNbrs{i}\
+&amp;\geq\GraphNbrs{i}-d_i+\frac{\delta_i}{4}\
+&amp;=\Dim{\Lambda_i}.
 \end{aligned}
-$$
+$$</p>
 </div>
 <p>By the defining property of $\lambda_i$, these choices span all of $\Lambda_i$. Since the reserved choices are independent for different pigeons, their tensor products span</p>
 <p>$$
@@ -769,21 +748,19 @@ $$
 $$</p>
 <p>It follows that $\lambda(\mathcal M_D)=\lambda(\phi’)$, and consequently</p>
 <div class="math-display">
-$$
+<p>$$
 \lambda(\phi)
-\subseteq\lambda(\phi')
+\subseteq\lambda(\phi’)
 =\lambda(\mathcal M_D)
 \subseteq\Span{\lambda(C_0),\lambda(C_1)}.
-$$
+$$</p>
 </div>
 <p>As this holds for every $\phi\in Z(C)$, taking spans proves</p>
 <p>$$
 \lambda(C)\subseteq\Span{\lambda(C_0),\lambda(C_1)}.
 $$</p>
-
   <div class="qed" aria-label="End of proof">□</div>
 </aside>
-
 <p>TODO:</p>
 
     </div>
@@ -983,14 +960,16 @@ $$</p>
       var link = reference.querySelector('a');
       if (!link) return;
 
-      var targetId = (link.getAttribute('href') || '').replace('#', '');
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
       var definition = targetId ? document.getElementById(targetId) : null;
       if (!definition) return;
 
       transformed += 1;
       var noteId = 'sidenote-' + transformed;
       var clone = definition.cloneNode(true);
-      clone.querySelectorAll('a[href^="#fr-"]').forEach(function (backlink) { backlink.remove(); });
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
 
       var noteBody = Array.from(clone.children).map(function (child) {
         return child.tagName === 'P' ? child.innerHTML : child.outerHTML;

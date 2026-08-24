@@ -1,0 +1,1180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tactic Cheat Sheet — Random Walks</title>
+  <meta name="description" content="">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=9f3f3f161e11a605fe54">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
+  
+  
+  
+  
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams',
+        macros: {
+          Field: '{\\mathbb{F}}',
+          field: '{\\mathbb{F}}',
+          Mont: ['{\\widetilde{#1}}', 1],
+          Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+          TauConstraints: '{\\tau_y}',
+          TauTime: '{\\tau_{\\text{cycle}}}',
+          TauGroup: '{\\tau_b}',
+          MLE: ['{\\widetilde{#1}}', 1],
+          tf: ['{\\widetilde{#1}}', 1],
+          eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+          Def: '{:=}',
+          ChallengeSet: '{\\mathsf{C}}',
+          Complement: ['{\\overline{#1}}', 1],
+          Size: ['{\\left|#1\\right|}', 1],
+          Length: ['{L\\left(#1\\right)}', 1],
+          Lenght: ['{L\\left(#1\\right)}', 1],
+          Exp: ['{2^{#1}}', 1],
+          BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+          BigO: ['{O\\ \\left(#1\\right)}', 1],
+          boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+          OntoPHP: ['{\\operatorname{OFPHP}(#3^{#1}_{#2})}', 3],
+          PHP: ['{\\operatorname{PHP}(#3^{#1}_{#2})}', 3],
+          PHPBasic: ['\\PHP{n}{n-1}{K}'],
+          FPHP: ['{\\operatorname{FPHP}(#3^{#1}_{#2})}', 3], 
+          poly: '{\\operatorname{poly}}',
+          criticalAlpha: ['{\\alpha_{#1}}', 1],
+          CPlus: '{\\textcolor{blue}{C^{+}}}',
+          CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
+          GraphNbrs: ['{N_G(#1)}', 1],
+          ClauseNbrs: ['{N_C(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
+          SmallO: ['{o\\!(#1)}', 1],
+          Closure: ['{\\operatorname{Cl}(#1)}', 1],
+          ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+          Dim: ['{\\dim(#1)}', 1],
+          Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+          domain: ['{\\operatorname{dom}(#1)}', 1],
+          False: '{\\bot}',
+          opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+          NP: '{\\mathsf{NP}}',
+          Naturals: '{\\mathbb{N}}',
+          bit: '{\\{0,1\\}}',
+          samples: '{\\xleftarrow{\\$}}'
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="https://randomwalks.xyz" aria-label="Random Walks — home">
+      <span>Random</span><span>Walks</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="https://randomwalks.xyz/publications/">Publications</a>
+      <a href="https://randomwalks.xyz/blog/">Notes</a>
+      <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
+      <a href="https://randomwalks.xyz/cv/">CV</a>
+      <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
+      <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
+    </nav>
+  </header>
+
+  <div class="command-palette" id="command-palette" data-index-url="https://randomwalks.xyz/search_index.en.json" hidden>
+    <button class="command-backdrop" type="button" aria-label="Close search" data-command-close></button>
+    <section class="command-dialog" role="dialog" aria-modal="true" aria-labelledby="command-title">
+      <h2 class="visually-hidden" id="command-title">Search page titles</h2>
+      <div class="command-query">
+        <span aria-hidden="true">›</span>
+        <input id="command-input" type="search" placeholder="Search titles…" autocomplete="off" autocapitalize="none" spellcheck="false" aria-controls="command-results" aria-autocomplete="list">
+        <kbd>Esc</kbd>
+      </div>
+      <ol class="command-results" id="command-results" role="listbox"></ol>
+      <p class="command-status" role="status" aria-live="polite"></p>
+      <footer class="command-help"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span></footer>
+    </section>
+  </div>
+
+  
+
+  <main id="main-content">
+    
+
+
+
+
+
+
+<article class="note footnotes-right">
+  <header class="note-header">
+    <h1>Tactic Cheat Sheet</h1>
+    
+    <div class="note-meta">
+      <span class="note-authors">By Ari</span>
+      <time datetime="2026-02-07">07 February 2026</time>
+      
+    </div>
+    
+    <ul class="tag-list" aria-label="Tags">
+      <li><a href="https://randomwalks.xyz/tags/lean-notes/">lean-notes</a></li>
+    </ul>
+    
+  </header>
+
+  <div class="note-layout">
+    
+    <details class="contents contents-inline">
+      <summary>Contents</summary>
+      
+<ol>
+  
+  <li>
+    <a href="#rw">RW</a>
+    
+      
+<ol>
+  
+  <li>
+    <a href="#examples">Examples</a>
+    
+  </li>
+  
+</ol>
+
+    
+  </li>
+  
+  <li>
+    <a href="#ring">Ring</a>
+    
+  </li>
+  
+  <li>
+    <a href="#exact">Exact</a>
+    
+  </li>
+  
+  <li>
+    <a href="#refine">Refine</a>
+    
+  </li>
+  
+  <li>
+    <a href="#linarith">Linarith</a>
+    
+  </li>
+  
+  <li>
+    <a href="#apply">Apply</a>
+    
+      
+<ol>
+  
+  <li>
+    <a href="#example-backwards-reasoning">Example : Backwards Reasoning</a>
+    
+  </li>
+  
+  <li>
+    <a href="#example-forwards-reasoning">Example : Forwards Reasoning</a>
+    
+  </li>
+  
+  <li>
+    <a href="#other-examples">Other Examples</a>
+    
+  </li>
+  
+</ol>
+
+    
+  </li>
+  
+  <li>
+    <a href="#rfl">Rfl</a>
+    
+  </li>
+  
+  <li>
+    <a href="#sym">Sym</a>
+    
+  </li>
+  
+  <li>
+    <a href="#the-congr-calc-tactic">The Congr + Calc Tactic</a>
+    
+  </li>
+  
+  <li>
+    <a href="#using-id-to-specialise">Using id to specialise</a>
+    
+  </li>
+  
+  <li>
+    <a href="#assumption">Assumption</a>
+    
+  </li>
+  
+  <li>
+    <a href="#intro">Intro</a>
+    
+  </li>
+  
+  <li>
+    <a href="#exfalso">ExFalso</a>
+    
+      
+<ol>
+  
+  <li>
+    <a href="#examples-1">Examples</a>
+    
+  </li>
+  
+</ol>
+
+    
+  </li>
+  
+  <li>
+    <a href="#change">Change</a>
+    
+  </li>
+  
+  <li>
+    <a href="#by-contra">By_contra</a>
+    
+  </li>
+  
+  <li>
+    <a href="#cases">Cases</a>
+    
+  </li>
+  
+  <li>
+    <a href="#obtain">Obtain</a>
+    
+  </li>
+  
+  <li>
+    <a href="#r-cases">R Cases</a>
+    
+  </li>
+  
+  <li>
+    <a href="#rintro">Rintro</a>
+    
+  </li>
+  
+  <li>
+    <a href="#normal-indexing-of-conjunctions">Normal Indexing Of Conjunctions</a>
+    
+  </li>
+  
+  <li>
+    <a href="#constructor">Constructor</a>
+    
+  </li>
+  
+  <li>
+    <a href="#by-cases">By Cases</a>
+    
+  </li>
+  
+  <li>
+    <a href="#norm-num">Norm Num</a>
+    
+  </li>
+  
+  <li>
+    <a href="#use">Use</a>
+    
+  </li>
+  
+  <li>
+    <a href="#ite">Ite</a>
+    
+  </li>
+  
+  <li>
+    <a href="#dsimp">DSimp</a>
+    
+  </li>
+  
+  <li>
+    <a href="#specialize">Specialize</a>
+    
+  </li>
+  
+  <li>
+    <a href="#the-ext-tactic">The ext tactic</a>
+    
+  </li>
+  
+  <li>
+    <a href="#function-pulling-and-pushing">Function Pulling And Pushing</a>
+    
+  </li>
+  
+  <li>
+    <a href="#conv">conv</a>
+    
+  </li>
+  
+  <li>
+    <a href="#congrarg">congrArg</a>
+    
+  </li>
+  
+  <li>
+    <a href="#simpa">simpa</a>
+    
+  </li>
+  
+  <li>
+    <a href="#subst">subst</a>
+    
+  </li>
+  
+</ol>
+
+    </details>
+    
+
+    <div class="prose">
+      <p>These notes started as a fork of <a rel="noopener noreferrer external" target="_blank" href="https://b-mehta.github.io/formalising-mathematics-notes/">Bhavik Mehta’s</a> notes.
+I’ve changed them a bit to better serve as a reference for all the things I’ve seen and confused me.</p>
+<h2 id="rw">RW<a class="zola-anchor" href="#rw" aria-label="Link to this section">#</a>
+</h2>
+<p>The <code>rw</code> or <code>rewrite</code> tactic is a “substitute in” tactic.
+If <code>h : x = y</code> is a hypothesis then <code>rw [h]</code> changes all of the <code>x</code>’s in the goal to <code>y</code>’s.</p>
+<p><code>rw</code> also works with iff statements: if <code>h : P ↔ Q</code> then
+<code>rw [h]</code> will replace all the <code>P</code> s in the goal with <code>Q</code> s.</p>
+<p><code>rw [&lt;- h]</code> goes the other way replacing all <code>y</code>’s to <code>x</code>, and all <code>Q</code>’s to <code>P</code> respectively.</p>
+<p>The above commands will re-write in the goal, but one can also use the re-write tactic in assumptions or local context.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (a b c d : ℝ) (hyp : c = d * a + b) (hyp&#39; : b = a * d) : c = </span><span style="color: #005CC5;">2</span><span> * a * d := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  -- We start </span><span style="color: #D73A49;">with</span><span> hyp : c = d * a + b</span></span>
+<span class="giallo-l"><span>  rw [hyp&#39;] at hyp</span></span>
+<span class="giallo-l"><span>  -- will change hyp: c = d*a + a*d</span></span>
+<span class="giallo-l"><span>  rw [mul_comm d a] at hyp</span></span>
+<span class="giallo-l"><span>  -- will change hyp: c = a*d + a*d </span></span>
+<span class="giallo-l"><span>  rw [← two_mul (a * d)] at hyp</span></span>
+<span class="giallo-l"><span>  -- hyp: c = </span><span style="color: #005CC5;">2</span><span>*(a*d) </span></span>
+<span class="giallo-l"><span>  rw [← mul_assoc </span><span style="color: #005CC5;">2</span><span> a d] at hyp</span></span>
+<span class="giallo-l"><span>  -- hyp: c = (</span><span style="color: #005CC5;">2</span><span>*a)*d which is the same thing as </span><span style="color: #005CC5;">2</span><span>*a*a (left associativity </span><span style="color: #D73A49;">in</span><span> lean does not </span><span style="color: #D73A49;">show</span><span> brackets)</span></span>
+<span class="giallo-l"><span>  exact hyp</span></span></code></pre><h3 id="examples">Examples<a class="zola-anchor" href="#examples" aria-label="Link to this section">#</a>
+</h3>
+<h2 id="ring">Ring<a class="zola-anchor" href="#ring" aria-label="Link to this section">#</a>
+</h2>
+<p>The ring tactic proves identities in commutative rings such as <code>(x+y)^2=x^2+2*x*y+y^2</code>.
+It works on concrete rings such as <code>ℝ</code> and abstract rings, and will also prove some results in “semirings” such as <code>ℕ</code> (which isn’t a ring because it doesn’t have additive inverses).</p>
+<aside id="" class="callout callout-box thm-box">
+  <div class="callout-title"></div>
+  <p>Note that ring does not and cannot look at hypotheses.
+So say we have <code>h: x = y</code> and we want to prove <code>|- x^2 = y^2</code>, we can first <code>rw [h]</code> and then <code>ring</code>.</p>
+</aside>
+<p>Sometimes you are in a situation where you cannot rw the hypothesis you want to use. For example if the tactic state is</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>x y : ℝ</span></span>
+<span class="giallo-l"><span>h : x ^ </span><span style="color: #005CC5;">2</span><span> = y ^ </span><span style="color: #005CC5;">2</span></span>
+<span class="giallo-l"><span>⊢ x ^ </span><span style="color: #005CC5;">4</span><span> = y ^ </span><span style="color: #005CC5;">4</span></span></code></pre>
+<p>then <code>rw h</code> will fail as <code>rw</code> works up to syntactic equality and it cannot see an x^2 in the goal, even though we know from elementary algebra that x^4=(x^2)^2
+In this situation we can use ring to prove an intermediate result and then rewrite our way out of trouble.
+For example this goal can be solved in the following way.
+It can be solved in a verbose manner as</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (x y : ℝ) (h: x^</span><span style="color: #005CC5;">2</span><span> = y^</span><span style="color: #005CC5;">2</span><span>) : x^</span><span style="color: #005CC5;">4</span><span> = y^</span><span style="color: #005CC5;">4</span><span> := </span><span style="color: #D73A49;">by</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  have</span><span> h3: ∀x: ℝ, x ^ </span><span style="color: #005CC5;">4</span><span> = (x ^ </span><span style="color: #005CC5;">2</span><span>) ^ </span><span style="color: #005CC5;">2</span><span> := </span><span style="color: #D73A49;">by</span><span> {</span></span>
+<span class="giallo-l"><span>    intro x </span></span>
+<span class="giallo-l"><span>    ring</span></span>
+<span class="giallo-l"><span>  }</span></span>
+<span class="giallo-l"><span>  rw [h3 x, h3 y]</span></span>
+<span class="giallo-l"><span>  rw [h]</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>the <code>have</code> tactic introduces a sub-goal with the same context as the original goal.</p>
+<p>or more succintly as</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (x y : ℝ) (h : x ^ </span><span style="color: #005CC5;">2</span><span> = y ^ </span><span style="color: #005CC5;">2</span><span>) : x ^ </span><span style="color: #005CC5;">4</span><span> = y ^ </span><span style="color: #005CC5;">4</span><span> := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  rw [</span><span style="color: #D73A49;">show</span><span> x ^ </span><span style="color: #005CC5;">4</span><span> = (x ^ </span><span style="color: #005CC5;">2</span><span>) ^ </span><span style="color: #005CC5;">2</span><span style="color: #D73A49;"> by</span><span> ring] -- prove x^</span><span style="color: #005CC5;">4</span><span>=(x^</span><span style="color: #005CC5;">2</span><span>)^</span><span style="color: #005CC5;">2</span><span>, rewrite </span><span style="color: #D73A49;">with</span><span> it, forget it</span></span>
+<span class="giallo-l"><span>  -- goal now `⊢ (x ^ </span><span style="color: #005CC5;">2</span><span>) ^ </span><span style="color: #005CC5;">2</span><span> = y ^ </span><span style="color: #005CC5;">4</span><span>`</span></span>
+<span class="giallo-l"><span>  rw [h]</span></span>
+<span class="giallo-l"><span>  -- goal now `⊢ (y ^ </span><span style="color: #005CC5;">2</span><span>) ^ </span><span style="color: #005CC5;">2</span><span> = y ^ </span><span style="color: #005CC5;">4</span><span>`</span></span>
+<span class="giallo-l"><span>  ring</span></span></code></pre>
+<p>Here <code>show P</code> by <code>tac</code> is inline term-mode proof syntax — it constructs an anonymous proof of P using tactic tac, right at the point of use. It’s equivalent to:
+<code>rw [(by ring : x ^ 4 = (x ^ 2) ^ 2)]</code></p>
+<p><code>ring</code> is a “finishing tactic”; this means that it should only be used to close goals.
+If <code>ring</code> does not close a goal it will issue a warning that you should use the related tactic <code>ring_nf</code>.</p>
+<p>The above case could also be solved using <code>convert to</code></p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (x y : ℝ) (h : x ^ </span><span style="color: #005CC5;">2</span><span> = y ^ </span><span style="color: #005CC5;">2</span><span>) : x ^ </span><span style="color: #005CC5;">4</span><span> = y ^ </span><span style="color: #005CC5;">4</span><span> := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>-- i ask </span><span style="color: #D73A49;">for</span><span> the final goal to be convrted to the following statement</span></span>
+<span class="giallo-l"><span>convert_to (x ^ </span><span style="color: #005CC5;">2</span><span>) ^ </span><span style="color: #005CC5;">2</span><span> = y ^ </span><span style="color: #005CC5;">4</span></span>
+<span class="giallo-l"><span>-- creates new goal ⊢ x ^ </span><span style="color: #005CC5;">4</span><span> = (x ^ </span><span style="color: #005CC5;">2</span><span>) ^ </span><span style="color: #005CC5;">2</span><span> (only </span><span style="color: #D73A49;">then</span><span> will the convert be possible</span></span>
+<span class="giallo-l"><span>· ring -- solves this new goal</span></span>
+<span class="giallo-l"><span>-- goal now `⊢ (x ^ </span><span style="color: #005CC5;">2</span><span>) ^ </span><span style="color: #005CC5;">2</span><span> = y ^ </span><span style="color: #005CC5;">4</span><span>`</span></span>
+<span class="giallo-l"><span>rw [h]</span></span>
+<span class="giallo-l"><span>-- goal now `⊢ (y ^ </span><span style="color: #005CC5;">2</span><span>) ^ </span><span style="color: #005CC5;">2</span><span> = y ^ </span><span style="color: #005CC5;">4</span><span>`</span></span>
+<span class="giallo-l"><span>ring</span></span></code></pre><h2 id="exact">Exact<a class="zola-anchor" href="#exact" aria-label="Link to this section">#</a>
+</h2>
+<p>If we have <code>h: P</code> where <code>P</code> is some proposition type, and <code>h</code> is a term of this type i.e. a proof of this proposition; and the goal is <code>|- P</code>, then <code>exact h</code> will close the goal.</p>
+<p>Note that the <code>exact</code> tactic works up to definitional equality.
+So if <code>h: ¬P</code> and the goal <code>|- P -&gt; False</code>, <code>exact h</code> would still work.</p>
+<p>A common mistake amongst beginners is trying <code>exact P</code> to close a goal of type <code>P</code>.
+The goal is a type, but the exact tactic takes a term of that type, not the type itself.
+Remember <code>: P</code> is the statement of the problem.
+To solve the goal you need to supply the proof.</p>
+<p><strong>NOTE</strong>: I view <code>exact</code> as a very specic example of <code>apply</code> tactic where the goal is exactly matched.</p>
+<h2 id="refine">Refine<a class="zola-anchor" href="#refine" aria-label="Link to this section">#</a>
+</h2>
+<p>The <code>refine</code> tactic is “exact with holes”.
+You can use an incomplete term containing one or more underscores <code>?_</code> and Lean will give you these terms as new goals.</p>
+<p>The theorem goal has this shape:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>  ∃ (js&#39; : SailJoltState) (v1 v2 : BitVec 64),</span></span>
+<span class="giallo-l"><span>    read_rs1 ∧</span></span>
+<span class="giallo-l"><span>    read_rs2 ∧</span></span>
+<span class="giallo-l"><span>    program_succeeds ∧</span></span>
+<span class="giallo-l"><span>    final_sail_state</span></span></code></pre>
+<p>So</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>  refine ⟨js&#39;, v1, v2, hok1, hok2, h_program_succeeds, ?_⟩</span></span></code></pre>
+<p>means:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>  use js&#39;</span></span>
+<span class="giallo-l"><span>  use v1</span></span>
+<span class="giallo-l"><span>  use v2</span></span>
+<span class="giallo-l"><span>  exact hok1</span></span>
+<span class="giallo-l"><span>  exact hok2</span></span>
+<span class="giallo-l"><span>  exact h_program_succeeds</span></span>
+<span class="giallo-l"><span>  -- now prove the remaining final_sail_state goal</span></span></code></pre><h2 id="linarith">Linarith<a class="zola-anchor" href="#linarith" aria-label="Link to this section">#</a>
+</h2>
+<p>Solves linear equations, and linear inequalities:
+<code>omega</code> is the tactic to use for integers.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> {a b : ℝ} (h1 : a + </span><span style="color: #005CC5;">2</span><span> * b = </span><span style="color: #005CC5;">4</span><span>) (h2 : a - b = </span><span style="color: #005CC5;">1</span><span>) : a = </span><span style="color: #005CC5;">2</span><span> := </span><span style="color: #D73A49;">by</span><span> {</span></span>
+<span class="giallo-l"><span>  linarith</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>This is quite handy, as without it proving this is kind of annoying.
+Though I feel like one can make a shorter proof than, I have here.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> {a b : ℝ} (h1 : a + </span><span style="color: #005CC5;">2</span><span> * b = </span><span style="color: #005CC5;">4</span><span>) (h2 : a - b = </span><span style="color: #005CC5;">1</span><span>) : a = </span><span style="color: #005CC5;">2</span><span> := </span><span style="color: #D73A49;">by</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    have</span><span> h3 : a = </span><span style="color: #005CC5;">1</span><span> + b := sub_eq_iff_eq_add.mp h2</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    have</span><span> h4 : (</span><span style="color: #005CC5;">3</span><span> : ℝ) * b = </span><span style="color: #005CC5;">3</span><span> :=</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">      calc</span><span> (</span><span style="color: #005CC5;">3</span><span> : ℝ) * b = (a + </span><span style="color: #005CC5;">2</span><span> * b) - (a - b) := </span><span style="color: #D73A49;">by</span><span> ring</span></span>
+<span class="giallo-l"><span>                     _ = </span><span style="color: #005CC5;">4</span><span> - </span><span style="color: #005CC5;">1</span><span>                  := </span><span style="color: #D73A49;">by</span><span> rw [h1, h2]</span></span>
+<span class="giallo-l"><span>                     _ = </span><span style="color: #005CC5;">3</span><span>                      := </span><span style="color: #D73A49;">by</span><span> ring</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    have</span><span> h5 : b = </span><span style="color: #005CC5;">1</span><span> := </span><span style="color: #D73A49;">by</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">      have</span><span> hne : (</span><span style="color: #005CC5;">3</span><span> : ℝ) ≠ </span><span style="color: #005CC5;">0</span><span> := </span><span style="color: #D73A49;">by</span><span> norm_num</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">      have</span><span> h6 : (</span><span style="color: #005CC5;">3</span><span> : ℝ) * b = </span><span style="color: #005CC5;">3</span><span> * </span><span style="color: #005CC5;">1</span><span> := </span><span style="color: #D73A49;">by</span><span> {</span></span>
+<span class="giallo-l"><span>        -- the rw is matching the RHS not the LHS!!!!</span></span>
+<span class="giallo-l"><span>        rw [ mul_one] -- goal changes </span><span style="color: #D73A49;">from</span><span style="color: #005CC5;">  3</span><span> * b = </span><span style="color: #005CC5;">3</span><span> * </span><span style="color: #005CC5;">1</span><span> to </span><span style="color: #005CC5;">3</span><span>*b = </span><span style="color: #005CC5;">3</span></span>
+<span class="giallo-l"><span>        exact h4</span></span>
+<span class="giallo-l"><span>      }</span></span>
+<span class="giallo-l"><span>      exact mul_left_cancel₀ hne h6</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    calc</span><span> a = </span><span style="color: #005CC5;">1</span><span> + b := h3</span></span>
+<span class="giallo-l"><span>         _ = </span><span style="color: #005CC5;">1</span><span> + </span><span style="color: #005CC5;">1</span><span> := </span><span style="color: #D73A49;">by</span><span> rw [h5]</span></span>
+<span class="giallo-l"><span>         _ = </span><span style="color: #005CC5;">2</span><span>     := </span><span style="color: #D73A49;">by</span><span> ring</span></span>
+<span class="giallo-l"><span>  }</span></span></code></pre><h2 id="apply">Apply<a class="zola-anchor" href="#apply" aria-label="Link to this section">#</a>
+</h2>
+<p>Apply does two very specific things – Assume you have <code>h: P-&gt; Q</code>, and you say <code>apply h</code>, then we will match <code>Q</code> against the goal, if this match succeeds then the new goal becomes <code>P</code>.</p>
+<p>It is saying because of <code>h</code> it now suffices to prove the simpler thing, as proving it will imply the harder thing <code>Q</code>.</p>
+<p><strong>NOTE</strong>: <code>apply h</code> will <strong>NOT</strong> work unless the goal (or sub-goal) is <code>Q</code>.</p>
+<p>If apply is <strong>ONLY</strong> for when we have the implies operation, then why does the following work?</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (X Y : </span><span style="color: #D73A49;">Type</span><span>) (φ ψ : X → Y) (h : ∀ a, φ a = ψ a) (x : X) :</span></span>
+<span class="giallo-l"><span>   φ x = ψ x := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>apply h</span></span></code></pre>
+<p>The answer is we still have <code>h: P -&gt; Q</code>.</p>
+<p>In Lean, when we have something like <code>(h : ∀ a, φ a = ψ a)</code>, it is definitionally equal to</p>
+<p><code>h : (a : X) → (φ a = ψ a)</code>.</p>
+<p>So under the hood we still have an if-then condition.
+So <code>apply h</code> matches the goal, the new goal becomes showing <code>a: X</code></p>
+<h3 id="example-backwards-reasoning">Example : Backwards Reasoning<a class="zola-anchor" href="#example-backwards-reasoning" aria-label="Link to this section">#</a>
+</h3>
+<p>See a real life example of Chapter 2.2 of Mathematics In Lean Book.
+We have a theorem that says if <code>(a, b: R)</code> and <code>(a + b)=0</code> – this is my <code>P</code> in above notation, then <code>Q: a = -b</code> holds true.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- Given </span><span style="color: #D73A49;">theorem</span><span> </span></span>
+<span class="giallo-l"><span>-- </span><span style="color: #6F42C1;">theorem eq_neg_of_add_eq_zero</span><span> {a b : R} (h : a + b = </span><span style="color: #005CC5;">0</span><span>) : a = -b </span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">theorem</span><span style="color: #6F42C1;"> neg_neg</span><span> (a : R) : - -a = a := </span><span style="color: #D73A49;">by</span><span>{</span></span>
+<span class="giallo-l"><span>  symm  -- makes goal  a = - -a</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  have</span><span> h1 : a + -a = </span><span style="color: #005CC5;">0</span><span> := </span><span style="color: #D73A49;">by</span><span> rw [ add_comm, neg_add_cancel] </span></span>
+<span class="giallo-l"><span>  -- a will play the role of a, -a will be b so i&#39;ll get a = - -a</span></span>
+<span class="giallo-l"><span>  apply eq_neg_of_add_eq_zero</span></span>
+<span class="giallo-l"><span>  -- backward reasoning, </span><span style="color: #D73A49;">if</span><span> h1: P -&gt; Q </span><span style="color: #D73A49;">then</span><span> apply/exact h1 will </span><span style="color: #D73A49;">try</span><span> to </span><span style="color: #D73A49;">match</span><span> Q </span></span>
+<span class="giallo-l"><span>  -- which we </span><span style="color: #D73A49;">have</span><span> a = -b, </span><span style="color: #D73A49;">in</span><span> the form of a = - -a</span></span>
+<span class="giallo-l"><span>  -- Then the goal becomes proving  h: a + -a = </span><span style="color: #005CC5;">0</span></span>
+<span class="giallo-l"><span>  rw [h1] -- exact h1 also works </span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>When <code>apply</code> is used with at, it uses forward reasoning.
+For example, <code>h: P -&gt; Q</code> and <code>h2: P</code>, then <code>apply h at h2</code> will change <code>h2</code> from <code>P</code> to <code>h2: Q</code>.
+For this to work <code>h</code> <strong>MUST</strong> be of the form <code>P-&gt;Q</code> and we <strong>NEED</strong> <code>h2: P</code></p>
+<p>The reasoning is we have a proof that <code>P</code> is true (via <code>h2</code>), then by <code>h</code> we actually get a proof of <code>Q</code>.
+If the goal is an if and only iff statement, <code>apply</code> will <strong>NOT</strong> work.
+First use constructor to split into cases.</p>
+<h3 id="example-forwards-reasoning">Example : Forwards Reasoning<a class="zola-anchor" href="#example-forwards-reasoning" aria-label="Link to this section">#</a>
+</h3>
+<p><code>specialize h arg</code> and <code>apply h at arg</code> are interchangeable for forward reasoning. The difference is which hypothesis gets overwritten:</p>
+<ul>
+<li><code>specialize hq hp</code> — overwrites <code>hq</code> with the result</li>
+<li><code>apply hq at hp</code> — overwrites <code>hp</code> with the result</li>
+</ul>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (p q r : </span><span style="color: #D73A49;">Prop</span><span>) (hq : p → p → q) (hr : q → r) : p → r := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  intro hp</span></span>
+<span class="giallo-l"><span>  specialize hq hp hp  -- hq : p → p → q  becomes  hq : q</span></span>
+<span class="giallo-l"><span>  specialize hr hq     -- hr : q → r      becomes  hr : r</span></span>
+<span class="giallo-l"><span>  exact hr</span></span></code></pre>
+<p>For the simpler case <code>hq : p → q</code> the two tactics are equivalent:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>specialize hq hp   -- hq becomes q</span></span>
+<span class="giallo-l"><span>apply hq at hp     -- hp becomes q  (same result, different name)</span></span></code></pre>
+<p>To make my life simple – I will always use <code>apply</code> for backwards reasoning, and <code>specialize</code> for forward.</p>
+<h3 id="other-examples">Other Examples<a class="zola-anchor" href="#other-examples" aria-label="Link to this section">#</a>
+</h3>
+<p>To actually use <code>le_trans</code> in a proof you’d write:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">variable</span><span> (h : a ≤ b) (h&#39; : b ≤ c)</span></span>
+<span class="giallo-l"><span>-- Imagine this is the goal</span></span>
+<span class="giallo-l"><span>|- a &lt;= c </span></span></code></pre>
+<ul>
+<li>
+<p><code>exact le_trans h h'</code>   – closes the goal directly</p>
+</li>
+<li>
+<p><code>apply le_trans h</code>      – leaves <code>⊢ b ≤ c</code> as a new goal</p>
+</li>
+<li>
+<p><code>apply le_trans</code>        – leaves <code>⊢ a ≤ b</code> and <code>⊢ b ≤ c</code> as two new goals</p>
+</li>
+</ul>
+<p>These are example of using a theorem directly, and using <code>apply</code>.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (x y z : ℝ) (h₀ : x ≤ y) (h₁ : y ≤ z) : x ≤ z := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  apply le_trans -- creates two sub goals y ?b ≤ z and a ≤ ?b</span></span>
+<span class="giallo-l"><span>  · apply h₀</span></span>
+<span class="giallo-l"><span>  · apply h₁</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> (x y z : ℝ) (h₀ : x ≤ y) (h₁ : y ≤ z) : x ≤ z := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  apply le_trans </span></span>
+<span class="giallo-l"><span>  exact h₀</span></span>
+<span class="giallo-l"><span>  apply h₁</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> (x y z : ℝ) (h₀ : x ≤ y) (h₁ : y ≤ z) : x ≤ z :=</span></span>
+<span class="giallo-l"><span>  le_trans h₀ h₁</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> (x : ℝ) : x ≤ x := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  apply le_refl</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> (x : ℝ) : x ≤ x :=</span></span>
+<span class="giallo-l"><span>  le_refl x</span></span>
+<span class="giallo-l"></span></code></pre>
+<p>How to use lemmas when they are complicated.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">#check</span><span> (le_refl : ∀ a, a ≤ a)</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">#check</span><span> (le_trans : a ≤ b → b ≤ c → a ≤ c)</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">#check</span><span> (lt_of_le_of_lt : a ≤ b → b &lt; c → a &lt; c)</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">#check</span><span> (lt_of_lt_of_le : a &lt; b → b ≤ c → a &lt; c)</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">#check</span><span> (lt_trans : a &lt; b → b &lt; c → a &lt; c)</span></span></code></pre>
+<p>This is a relatively complicated application of the apply tactic with lemmas of the form <code>P -&gt; (Q -&gt; R)</code>.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (h₀ : a ≤ b) (h₁ : b &lt; c) (h₂ : c ≤ d) (h₃ : d &lt; e) : a &lt; e := </span><span style="color: #D73A49;">by</span><span>{ </span></span>
+<span class="giallo-l"><span> apply lt_of_le_of_lt -- this creates ? &lt; e and a &lt;= ? </span></span>
+<span class="giallo-l"><span> exact h₀ -- this makes ? = b and the new goal becomes b &lt; e</span></span>
+<span class="giallo-l"><span> apply lt_of_lt_of_le -- this creates ? &lt;= e and b &lt; ?</span></span>
+<span class="giallo-l"><span> exact h₁ -- this makes ? = c and the new goal c &lt;= e as b &lt; c</span></span>
+<span class="giallo-l"><span> apply le_trans -- this makes new goal ? &lt;= e and c &lt;= ?</span></span>
+<span class="giallo-l"><span> exact h₂ -- this makes ? = d; and the new goal is d &lt;= e </span></span>
+<span class="giallo-l"><span> exact le_of_lt h₃ -- d &lt;= e implies d &lt; e</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- alternatlively we can </span><span style="color: #D73A49;">do</span><span> this</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> (h₀ : a ≤ b) (h₁ : b &lt; c) (h₂ : c ≤ d) (h₃ : d &lt; e) : a &lt; e := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  linarith</span></span></code></pre><h2 id="rfl">Rfl<a class="zola-anchor" href="#rfl" aria-label="Link to this section">#</a>
+</h2>
+<p>The <code>rfl</code> tactic proves goals of the form <code>⊢ x = y</code> where <code>x</code> and <code>y</code> are definitionally equal.
+It also proves goals of the form <code>P ↔ Q</code> if <code>P</code> and <code>Q</code> are definitionally equal.</p>
+<h2 id="sym">Sym<a class="zola-anchor" href="#sym" aria-label="Link to this section">#</a>
+</h2>
+<p><code>symm</code> flips an equality goal from <code>a = b</code> to <code>b = a</code> (or a hypothesis if you write symm at h).</p>
+<h2 id="the-congr-calc-tactic">The Congr + Calc Tactic<a class="zola-anchor" href="#the-congr-calc-tactic" aria-label="Link to this section">#</a>
+</h2>
+<p>The <code>congr</code> tactic is an attempt to prove LHS = RHS, and if this fails, it changes the goal to a sub-goal of proving the bit that does.
+The way it works is best illustrated with an example:
+Say the goal is</p>
+<p><code>⊢ f (g (x + y)) = f (g (y + x))</code></p>
+<p>Writing <code>congr</code>, Lean sees that the LHS and RHS both have <code>f( ) = f( )</code>, so it first reduces the goal to proving <code>g(x+y) = g(y+x)</code>.
+Then it trying to prove equality again, and finds that both sides have <code>g( ) = g( )</code>, so the new goal is <code>x+y = y+x</code>.
+Then it tries to prove equality again, and sees that if we proved <code>x=y</code> and <code>y=x</code> we would be done.
+The command <code>congr x</code> applies the tactic <code>x</code> times.
+So when the goal is</p>
+<p><code>⊢ f (g (x + y)) = f (g (y + x))</code></p>
+<ol>
+<li><code>congr 1</code>: would make the goal <code>g(x+y) = g(y+x)</code></li>
+<li><code>congr 2</code>: would make the goal <code>(x + y) = (y+x)</code></li>
+<li><code>congr 3</code> or highher would result in two cases <code>x=y</code> and <code>y=x</code>.</li>
+</ol>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (a b : ℝ) (f g : ℝ → ℝ) : f (g (a + b) ) = f (g (b + a)) := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  congr </span><span style="color: #005CC5;">2</span><span> -- </span><span style="color: #D73A49;">try</span><span> increasing it to see the issue.</span></span>
+<span class="giallo-l"><span>  ring</span></span></code></pre>
+<p>The <code>calc</code> tactic allows us to string together many <code>congr</code> and <code>ring</code> tactics.
+As shown below:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (a b c d : ℝ) (h : c = b*a - d) (h&#39; : d = a*b) : c = </span><span style="color: #005CC5;">0</span><span> := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  calc</span></span>
+<span class="giallo-l"><span>    c = b*a - d   := </span><span style="color: #D73A49;">by</span><span> congr</span></span>
+<span class="giallo-l"><span>    _ = b*a - a*b := </span><span style="color: #D73A49;">by</span><span> congr</span></span>
+<span class="giallo-l"><span>    _ = </span><span style="color: #005CC5;">0</span><span>         := </span><span style="color: #D73A49;">by</span><span> ring</span></span></code></pre>
+<p><code>congr</code> is cleve about using the hypotheses to figure out the expansions for <code>c</code> and <code>d</code>.
+Alternatively we can also use the hypotheses directly:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- Alternate view</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> (a b c d : ℝ) (h : c = b*a - d) (h&#39; : d = a*b) : c = </span><span style="color: #005CC5;">0</span><span> := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  calc</span></span>
+<span class="giallo-l"><span>    c = b*a - d   := </span><span style="color: #D73A49;">by</span><span> exact h</span></span>
+<span class="giallo-l"><span>    _ = b*a - a*b := </span><span style="color: #D73A49;">by</span><span> rw [h&#39;]</span></span>
+<span class="giallo-l"><span>    _ = </span><span style="color: #005CC5;">0</span><span>         := </span><span style="color: #D73A49;">by</span><span> ring</span></span></code></pre>
+<p><code>exact</code> tells Lean to expand <code>c</code> using the <code>h</code> rule exactly.
+<code>rw [h]</code> replaces the LHS of <code>h</code> with the RHS.
+NOTE: <code>rw [&lt;- h']</code> will replace the RHS with LHS.</p>
+<p>The <code>gcongr</code> tactic generalises <code>congr</code> tactic to inequalities</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (a b : ℝ) (h : b ≤ a) : a + b ≤ </span><span style="color: #005CC5;">2</span><span>*a := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  calc</span></span>
+<span class="giallo-l"><span>    a + b ≤ a + a := </span><span style="color: #D73A49;">by</span><span> gcongr</span></span>
+<span class="giallo-l"><span>    _  = </span><span style="color: #005CC5;">2</span><span>*a := </span><span style="color: #D73A49;">by</span><span> ring</span></span></code></pre><h2 id="using-id-to-specialise">Using <code>id</code> to specialise<a class="zola-anchor" href="#using-id-to-specialise" aria-label="Link to this section">#</a>
+</h2>
+<p><code>id</code> is the identity function <code>fun x =&gt; x</code>, with type <code>P → P</code>. It is always available and can be used to feed any hypothesis that expects a <code>P → P</code> argument.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- h4 : (P → P) → Q</span></span>
+<span class="giallo-l"><span>-- h5 : P</span></span>
+<span class="giallo-l"><span>-- ⊢ P → Q</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> (h4 : (P → P) → Q) (h5 : P) : P → Q := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  specialize h4 id  -- feed id : P → P to h4, giving h4 : Q</span></span>
+<span class="giallo-l"><span>  intro _           -- introduce the P </span><span style="color: #D73A49;">in</span><span> the goal, ignore it</span></span>
+<span class="giallo-l"><span>  exact h4</span></span></code></pre>
+<p>Another example — the same pattern with a different proposition:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- h : (P → P) → P → Q</span></span>
+<span class="giallo-l"><span>-- hp : P</span></span>
+<span class="giallo-l"><span>-- ⊢ Q</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> (h : (P → P) → P → Q) (hp : P) : Q :=</span></span>
+<span class="giallo-l"><span>  h id hp  -- feed id : P → P and hp : P to get Q</span></span></code></pre><h2 id="assumption">Assumption<a class="zola-anchor" href="#assumption" aria-label="Link to this section">#</a>
+</h2>
+<p>Often we have <code>h: P</code> and the goal might be something like <code>|- P</code>.
+We say <code>exact h</code> to finish the proof.
+We could also say <code>assumption</code> and if one of the hypotheses in the local context close out the goal, we’ll be done.</p>
+<h2 id="intro">Intro<a class="zola-anchor" href="#intro" aria-label="Link to this section">#</a>
+</h2>
+<p>Note that we can <code>intro</code> multiple times in a proof when applicable.
+See this example</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> : (((P → Q) → Q) → Q) → P → Q := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  -- Assume we </span><span style="color: #D73A49;">have</span><span> </span></span>
+<span class="giallo-l"><span>  intro hpqq hp </span></span>
+<span class="giallo-l"><span>  -- hpqq : ((P → Q) → Q) → Q</span></span>
+<span class="giallo-l"><span>  --hp : P</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>  apply hpqq </span></span>
+<span class="giallo-l"><span>  -- New goal is (P-&gt;Q) -&gt; Q</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>  -- Now we can assume that we </span><span style="color: #D73A49;">have</span><span> P-&gt;Q</span></span>
+<span class="giallo-l"><span>  intro hpq </span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>  -- Forward resoning we feed hpq a proof of P to make it now a proof of Q</span></span>
+<span class="giallo-l"><span>  specialize hpq hp </span></span>
+<span class="giallo-l"><span>  assumption </span></span>
+<span class="giallo-l"></span></code></pre><h2 id="exfalso">ExFalso<a class="zola-anchor" href="#exfalso" aria-label="Link to this section">#</a>
+</h2>
+<p>The <code>exfalso</code> tactic changes your goal to False.
+Why might you want to do that?
+Usually because at this point you can deduce a contradiction from your hypotheses (for example because you are in the middle of a proof by contradiction).</p>
+<h3 id="examples-1">Examples<a class="zola-anchor" href="#examples-1" aria-label="Link to this section">#</a>
+</h3>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>hP : P</span></span>
+<span class="giallo-l"><span>h : P → False</span></span>
+<span class="giallo-l"><span>⊢ Q </span></span></code></pre>
+<p>then this might initially look problematic, because we don’t have any facts about <code>Q</code> to hand but <code>False -&gt; Q</code>, regardless of whether <code>Q</code> is <code>False</code> or <code>True</code>.
+So and <code>hP</code> and <code>h</code> between them are enough to prove <code>False</code></p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>exfalso -- goal now `False`</span></span>
+<span class="giallo-l"><span>apply h -- goal now `P`</span></span>
+<span class="giallo-l"><span>exact hP -- goal solved</span></span></code></pre>
+<p><code>exfalso</code> can always change any goal to <code>False</code>, because <code>False → P</code> holds for any proposition <code>P</code> (the principle of explosion: from a contradiction, anything follows). However, it is only <em>useful</em> when you can actually derive <code>False</code> from your hypotheses. Changing the goal to <code>False</code> when you have no contradiction available just makes your life harder.</p>
+<p><code>False</code> is defined as a proposition with no proof (see Bhavik Mehta’s lean tips – he goes over this).
+So if you find yourself holding a proof of <code>False</code>, something has gone catastrophically wrong — you have a contradiction. A proof of <code>False → P</code> is a function that takes a proof of <code>False</code> and returns a proof of <code>P</code>, but since <code>False</code> has no proof, this function never gets called — it vacuously satisfies the contract.</p>
+<p>Think of it like: <em>“If pigs can fly, I’ll eat my hat.”</em> This is a safe promise because pigs can’t fly, so you’ll never be held to it. Similarly, <code>False → P</code> is safe because <code>False</code> can never be established. In Lean this is <code>False.elim : False → P</code> — sometimes called <strong>ex falso quodlibet</strong> (“from falsity, anything”).</p>
+<h2 id="change">Change<a class="zola-anchor" href="#change" aria-label="Link to this section">#</a>
+</h2>
+<p>Change allows us to either replace the goal with a new expression or change the expersion of a hypothesis.
+It only works if the expression is definitionally equal to the goal or the hypothesis.</p>
+<p>If your goal is <code>⊢ ¬P</code> then change <code>P → False</code> will change it the goal to <code>⊢ P → False</code>.
+<code>change</code> also works on hypotheses: if you have a hypothesis <code>h : ¬P</code> then <code>change P → False at</code> h will change h to <code>h : P → False</code>.</p>
+<h2 id="by-contra">By_contra<a class="zola-anchor" href="#by-contra" aria-label="Link to this section">#</a>
+</h2>
+<p>A side note: in Lean, <code>¬P</code> is defined as <code>P → False</code>.
+And <code>¬¬P</code> is <code>¬(¬P) = ¬(P → False) = (P → False) → False</code>.</p>
+<p>The <code>by_contra</code> tactic is strictly stronger than the exfalso tactic in that not only does it change the goal to <code>False</code> but it also throws in an extra hypothesis.</p>
+<p>The <code>by_contra</code> tactic is a “proof by contradiction” tactic.
+If your goal is <code>⊢ P</code> then by_contra <code>h</code> introduces a hypothesis <code>h : ¬P</code> and changes the goal to <code>False</code></p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (P : </span><span style="color: #D73A49;">Prop</span><span>) : ¬ ¬ P → P := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  intro hnnP -- assume ¬ ¬ P</span></span>
+<span class="giallo-l"><span>  by_contra hnP -- goal is now `False`</span></span>
+<span class="giallo-l"><span>  apply hnnP -- goal is now ¬ P</span></span>
+<span class="giallo-l"><span>  exact hnP</span></span></code></pre><h2 id="cases">Cases<a class="zola-anchor" href="#cases" aria-label="Link to this section">#</a>
+</h2>
+<h2 id="obtain">Obtain<a class="zola-anchor" href="#obtain" aria-label="Link to this section">#</a>
+</h2>
+<p>Sometimes a hypothesis or goal will have many parts.
+For example, here we see the hypothesis <code>h</code> has two parts a proof of <code>P</code> and a proof of <code>Q</code>.
+To get each part we use the <code>obtain</code> tactic.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- You can use `obtain`</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> : P ∧ Q → P := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  intro h</span></span>
+<span class="giallo-l"><span>  obtain ⟨left, right⟩ := h</span></span>
+<span class="giallo-l"><span>  exact left</span></span></code></pre><h2 id="r-cases">R Cases<a class="zola-anchor" href="#r-cases" aria-label="Link to this section">#</a>
+</h2>
+<p>One also might use the <code>rcases</code> tactic which does the same thing with different syntax.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- or `rcases` (which is just `obtain` but </span><span style="color: #D73A49;">with</span><span> a slightly different </span><span style="color: #D73A49;">syntax</span><span>)</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> : P ∧ Q → P := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  intro h</span></span>
+<span class="giallo-l"><span>  rcases h </span><span style="color: #D73A49;">with</span><span> ⟨left, right⟩</span></span>
+<span class="giallo-l"><span>  exact left</span></span></code></pre>
+<p>There are other uses of <code>rcases</code> to for getting existential quantifiers out.
+Let’s say we have are given the following assumption:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>ha : ∃ B, ∀ (n : ℕ), B ≤ n → |a n - t| &lt; ε</span></span></code></pre>
+<p>Then to extract the <code>B</code> promised to exist, and use it we use <code>rcases</code>.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>rcases ha </span><span style="color: #D73A49;">with</span><span> ⟨B, hB⟩</span></span>
+<span class="giallo-l"><span>-- B is the special B that is promised to exist </span><span style="color: #D73A49;">by</span><span> ha </span></span>
+<span class="giallo-l"><span>-- hB : ∀ (n : ℕ), B ≤ n → |a n - t| &lt; ε</span></span>
+<span class="giallo-l"></span></code></pre>
+<p>For disjunctions</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"></span>
+<span class="giallo-l"><span>-- bc : ∀ x ∈ B, x ∈ A ( or x </span><span style="color: #D73A49;">in</span><span> B ==&gt; x </span><span style="color: #D73A49;">in</span><span> A)</span></span>
+<span class="giallo-l"><span>-- ab : ∀ x ∈ C, x ∈ A ( or x </span><span style="color: #D73A49;">in</span><span> C ==&gt; x ic C)</span></span>
+<span class="giallo-l"><span>-- hb : x ∈ B ∨ x ∈ C</span></span>
+<span class="giallo-l"><span>-- x : X </span></span>
+<span class="giallo-l"><span>  rcases hb </span><span style="color: #D73A49;">with</span><span> h | h </span></span>
+<span class="giallo-l"><span>  . specialize bc x h --  here h: x ∈ B </span></span>
+<span class="giallo-l"><span>    assumption</span></span>
+<span class="giallo-l"><span>  . specialize ab x h -- here h: x ∈ C</span></span>
+<span class="giallo-l"><span>    assumption</span></span></code></pre><h2 id="rintro">Rintro<a class="zola-anchor" href="#rintro" aria-label="Link to this section">#</a>
+</h2>
+<p>The tactic <code>rintro</code> is like <code>rcases</code> with <code>intro</code></p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> : P ∧ Q → P := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  rintro ⟨left, right⟩</span></span>
+<span class="giallo-l"><span>  exact left</span></span>
+<span class="giallo-l"></span></code></pre><h2 id="normal-indexing-of-conjunctions">Normal Indexing Of Conjunctions<a class="zola-anchor" href="#normal-indexing-of-conjunctions" aria-label="Link to this section">#</a>
+</h2>
+<p>One could also not use any of these tactics and just use indexing</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"></span>
+<span class="giallo-l"><span>-- or you can get the relevant part out directly </span><span style="color: #D73A49;">using</span><span> `.left`</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> : P ∧ Q → P := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  intro h</span></span>
+<span class="giallo-l"><span>  exact h.left</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- or </span><span style="color: #D73A49;">by using</span><span> `.</span><span style="color: #005CC5;">1</span><span>` (the first part)</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> : P ∧ Q → P := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  intro h</span></span>
+<span class="giallo-l"><span>  exact h.</span><span style="color: #005CC5;">1</span></span>
+<span class="giallo-l"></span></code></pre><h2 id="constructor">Constructor<a class="zola-anchor" href="#constructor" aria-label="Link to this section">#</a>
+</h2>
+<p>Constructor does what <code>obtain</code> and <code>rcases</code> does but to the goal.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> : P → Q → P ∧ Q := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  intro hP hQ</span></span>
+<span class="giallo-l"><span>  constructor</span></span>
+<span class="giallo-l"><span>  -- After the `constructor` tactic, we </span><span style="color: #D73A49;">have</span><span> *</span><span style="color: #005CC5;">2</span><span> goals* </span><span style="color: #D73A49;">for</span><span> the first time!</span></span>
+<span class="giallo-l"><span>  -- We use centre-dots, typed as `\.` to help Lean (and the reader) figure out when we&#39;re done</span></span>
+<span class="giallo-l"><span>  · assumption</span></span>
+<span class="giallo-l"><span>  · assumption</span></span></code></pre><h2 id="by-cases">By Cases<a class="zola-anchor" href="#by-cases" aria-label="Link to this section">#</a>
+</h2>
+<p>The <code>by_cases h</code> splits into all possible truth table values of type of <code>h</code>.
+In the example below, <code>hP</code> is term of a proposition.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> : ¬(P ∧ Q) ↔ ¬P ∨ ¬Q := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  constructor</span></span>
+<span class="giallo-l"><span>  · intro h -- h: ¬ (P ∧ Q) and |- ¬ P ∨ Q </span></span>
+<span class="giallo-l"><span>    by_cases hP : P -- assume P is </span><span style="color: #005CC5;">true</span><span> </span></span>
+<span class="giallo-l"><span>    · right</span></span>
+<span class="giallo-l"><span>      intro hQ</span></span>
+<span class="giallo-l"><span>      apply h</span></span>
+<span class="giallo-l"><span>      exact ⟨hP, hQ⟩</span></span>
+<span class="giallo-l"><span>    · left -- assume Not ¬ P </span></span>
+<span class="giallo-l"><span>      exact hP</span></span>
+<span class="giallo-l"><span>  · rintro (hnP | hnQ) ⟨hP, hQ⟩</span></span>
+<span class="giallo-l"><span>    · contradiction</span></span>
+<span class="giallo-l"><span>    · apply hnQ; exact hQ</span></span></code></pre><h2 id="norm-num">Norm Num<a class="zola-anchor" href="#norm-num" aria-label="Link to this section">#</a>
+</h2>
+<ul>
+<li><code>norm_num</code> (proves equalities and inequalities involving numerical expressions)</li>
+</ul>
+<h2 id="use">Use<a class="zola-anchor" href="#use" aria-label="Link to this section">#</a>
+</h2>
+<p><code>use</code> (if the goal is <code>∃ x, x + 37 = 42</code> then <code>use 8</code> will change the goal
+to <code>8 + 37 = 42</code>, and <code>use 10</code> will change it to <code>10 + 37 = 42</code>.</p>
+<h2 id="ite">Ite<a class="zola-anchor" href="#ite" aria-label="Link to this section">#</a>
+</h2>
+<p><code>ite</code> is just the function behind if-then-else.
+Writing:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>ite h a b</span></span></code></pre>
+<p>where <code>ite : Prop → α → α → α</code> (with a Decidable instance).</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (x y : Nat) : (</span><span style="color: #D73A49;">if</span><span style="color: #005CC5;"> 1</span><span> &lt; </span><span style="color: #005CC5;">2</span><span style="color: #D73A49;"> then</span><span> x </span><span style="color: #D73A49;">else</span><span> y) = x := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  simp only [↓reduceIte]</span></span></code></pre>
+<p>Lean sees <code>ite (1 &lt; 2) x y</code>, the <code>↓reduceIte</code> lemma fires top-down, evaluates <code>1 &lt; 2</code> to <code>True</code>, and reduces the whole thing to <code>x</code>.
+Goal closed.</p>
+<h2 id="dsimp">DSimp<a class="zola-anchor" href="#dsimp" aria-label="Link to this section">#</a>
+</h2>
+<p>Sometimes you might see something like
+<code>(fun n =&gt; n^2 + 3) 37</code>, which means “take the function sending <code>n</code> to <code>n^2+3</code> and then evaluate it at 37”.
+You can use the <code>dsimp</code> (or <code>dsimp only</code>) tactic to simplify this to <code>37^2+3</code>.</p>
+<p><code>simp</code>: Applies rewrite rules — both definitional reductions and lemmas tagged @[simp] (or ones you pass explicitly).
+It can close goals or transform them using propositional equalities.</p>
+<p><code>dsimp</code>:  <strong>Definitional</strong> simp.
+Only applies reductions that hold by definition — things the kernel considers definitionally equal without any proof.
+No lemmas, no propositional rewrites.</p>
+<h2 id="specialize">Specialize<a class="zola-anchor" href="#specialize" aria-label="Link to this section">#</a>
+</h2>
+<p>We have already seen how <code>specialize</code> allows us to forward reason with logical implications.
+For example if <code>h:P</code> and <code>h1: P-&gt;Q</code>, then <code>specialize h1 h</code> makes <code>h1: Q</code> by feeding it a proof that <code>P</code> is true, which implies that we get a proof that <code>Q</code> is true.</p>
+<p>When dealing with a hypothesis that includes universal quantifiers as <code>h</code> shown below does,
+<code>specialize</code> allows us to feed <code>h</code> a specific instance that satisfies the for all condition.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #6A737D;">/-- If `a(n)` tends to `t` then `a(n) + c` tends to `t + c` -/</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">theorem</span><span style="color: #6F42C1;"> tendsTo_add_const</span><span> {a : ℕ → ℝ} {t : ℝ} (c : ℝ) (h : TendsTo a t) :</span></span>
+<span class="giallo-l"><span>    TendsTo (</span><span style="color: #D73A49;">fun</span><span> n =&gt; a n + c) (t + c) := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  intro ε hε -- here hε: ε &gt; </span><span style="color: #005CC5;">0</span><span> </span></span>
+<span class="giallo-l"><span>  rw [tendsTo_def] at h -- this will just epand h to the </span><span style="color: #D73A49;">for</span><span> all definition</span></span>
+<span class="giallo-l"><span>  -- h : ∀ (ε : ℝ), </span><span style="color: #005CC5;">0</span><span> &lt; ε → ∃ B, ∀ (n : ℕ), B ≤ n → |a n - t| &lt; ε</span></span>
+<span class="giallo-l"><span>  </span></span>
+<span class="giallo-l"><span>  -- this is saying use this epsilon as the </span><span style="color: #D73A49;">forall</span><span> epsilon, </span></span>
+<span class="giallo-l"><span>  -- and it&#39;s valid because he: ε &gt; </span><span style="color: #005CC5;">0</span></span>
+<span class="giallo-l"><span>  specialize h ε hε</span></span></code></pre><h2 id="the-ext-tactic">The <code>ext</code> tactic<a class="zola-anchor" href="#the-ext-tactic" aria-label="Link to this section">#</a>
+</h2>
+<p>If the goal is <code>⊢ A = B</code> where <code>A</code> and <code>B</code> are subsets of <code>X</code>, then
+the tactic <code>ext x,</code> will create a hypothesis <code>x : X</code> and change
+the goal to <code>x ∈ A ↔ x ∈ B</code>.</p>
+<h2 id="function-pulling-and-pushing">Function Pulling And Pushing<a class="zola-anchor" href="#function-pulling-and-pushing" aria-label="Link to this section">#</a>
+</h2>
+<p>This horrible notation is because <code>f</code> takes terms of type <code>X</code>
+and <code>S</code> is of type <code>Set X</code>.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>f &#39;&#39; S &lt;-&gt; {y : Y | ∃ x : X, x ∈ S ∧ f x = y}</span></span></code></pre>
+<p>Similarly, <code>f⁻¹(T)</code> doesn’t make sense in Lean either, because
+<code>⁻¹</code> is notation for <code>Inv.inv</code>, whose type in Lean
+is <code>α → α</code>.
+In other words, if <code>x</code> has a certain type, then
+<code>x⁻¹</code> <em>must</em> have the same type: <strong>the notation was basically designed
+for group theory.</strong>
+So we write</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>f ⁻¹&#39; T &lt;-&gt; {x : X | f x ∈ T}</span></span></code></pre>
+<p>TODO: Draw picture</p>
+<h2 id="conv">conv<a class="zola-anchor" href="#conv" aria-label="Link to this section">#</a>
+</h2>
+<p><code>conv</code> lets you navigate into a specific subexpression of your goal and rewrite only there.</p>
+<p>Why not just use <code>rw</code> with explicit arguments?
+Usually you can. For <code>a * (b * c) = a * (c * b)</code>, just do <code>rw [Nat.mul_comm b c]</code>.</p>
+<p>When <code>conv</code> is actually needed: rewriting under binders
+<code>rw</code> cannot see inside fun, <code>∑, ∫, ∀, ∃</code>, etc.
+The bound variable doesn’t exist at the tactic level, so you can’t pass it as an explicit argument.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- rw [add_zero] fails here: it can&#39;t find `? + </span><span style="color: #005CC5;">0</span><span>` under the binder</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">example</span><span> (s : Finset ℕ) (f : ℕ → ℕ) : ∑ i </span><span style="color: #D73A49;">in</span><span> s, (f i + </span><span style="color: #005CC5;">0</span><span>) = ∑ i </span><span style="color: #D73A49;">in</span><span> s, f i := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  conv =&gt; lhs; intro i; rw [add_zero]</span></span></code></pre>
+<p>What’s happening step by step:</p>
+<p><code>conv</code> =&gt; — enter conversion mode, focus on entire goal
+<code>lhs</code> — focus on <code>∑ i in s, (f i + 0)</code>
+<code>intro i</code> — enter the binder, focus on <code>f i + 0</code>
+<code>rw [add_zero]</code> — rewrite to <code>f i</code>, done</p>
+<h2 id="congrarg">congrArg<a class="zola-anchor" href="#congrarg" aria-label="Link to this section">#</a>
+</h2>
+<p>This not necessarily a tactic but a helpful theorem to use.
+In simple words, if you wish to show <code>f(x) = f(y)</code>, and then you have <code>x=y</code>,
+then you can just invoke <code>congrArg</code> by explicitly passing it <code>f</code> and a proof that <code>x=y</code></p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">theorem</span><span style="color: #6F42C1;"> congrArg</span><span> {α : </span><span style="color: #D73A49;">Sort</span><span> u} {β : </span><span style="color: #D73A49;">Sort</span><span> v} {a₁ a₂ : α}</span></span>
+<span class="giallo-l"><span>    (f : α → β) (h : a₁ = a₂) : f a₁ = f a₂</span></span></code></pre>
+<p>As a minimal working example</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (a b : Nat) (h : a = b) : a + </span><span style="color: #005CC5;">1</span><span> = b + </span><span style="color: #005CC5;">1</span><span> :=</span></span>
+<span class="giallo-l"><span>   congrArg (· + </span><span style="color: #005CC5;">1</span><span>) h</span></span></code></pre>
+<p>What <code>congrArg</code> really lets us do is explicitly specify which argument of the function is equal.
+Normally with <code>congr</code> and <code>congr 2</code> etc. we need to guess the number of unfoldings.</p>
+<p>TODO: Move this to a newly created syntax section later, which accumulates all the Lean4 syntax updates.</p>
+<p><code>(· + 1)</code> is Lean 4’s anonymous function shorthand using <code>\cdot</code>.
+Each <code>·</code> inside parentheses becomes a parameter of an anonymous function.
+It’s equivalent to writing a fun lambda.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>(· + </span><span style="color: #005CC5;">1</span><span>)         -- </span><span style="color: #D73A49;">fun</span><span> x =&gt; x + </span><span style="color: #005CC5;">1</span></span>
+<span class="giallo-l"><span>(· * </span><span style="color: #005CC5;">2</span><span>)         -- </span><span style="color: #D73A49;">fun</span><span> x =&gt; x * </span><span style="color: #005CC5;">2</span></span>
+<span class="giallo-l"><span>(· + ·)         -- </span><span style="color: #D73A49;">fun</span><span> x y =&gt; x + y     -- two dots = two params</span></span>
+<span class="giallo-l"><span>(f · </span><span style="color: #005CC5;">3</span><span>)         -- </span><span style="color: #D73A49;">fun</span><span> x =&gt; f x </span><span style="color: #005CC5;">3</span></span>
+<span class="giallo-l"><span>(· :: [])       -- </span><span style="color: #D73A49;">fun</span><span> x =&gt; [x]</span></span></code></pre>
+<p>If you had two arguments, then we would just use <code>congrArg</code> twice.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (f : Nat → Nat → Nat) (a b c d : Nat)</span></span>
+<span class="giallo-l"><span>    (h1 : a = c) (h2 : b = d) : f a b = f c d := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  -- f · b is </span><span style="color: #D73A49;">syntax for fun</span><span> x b =&gt; f x b </span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  have</span><span> step1 : f a b = f c b := congrArg (f · b) h1</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  have</span><span> step2 : f c b = f c d := congrArg (f c) h2</span></span>
+<span class="giallo-l"><span>  -- Using the fact that equality is transitive</span></span>
+<span class="giallo-l"><span>  exact step1.trans step2</span></span></code></pre>
+<p>What <code>congrArg</code> lets us do is explicitly specify the function through which equality is being pushed.
+For multi-argument functions, we control which argument varies by partially applying or using <code>·</code>-syntax:</p>
+<p><code>congrArg (f a) h</code> pushes equality through the second argument,
+<code>congrArg (f · b) h</code> through the first.</p>
+<h2 id="simpa">simpa<a class="zola-anchor" href="#simpa" aria-label="Link to this section">#</a>
+</h2>
+<p><code>simpa using h</code> simplifies both the goal and <code>h</code>, then tries to close the goal with the simplified <code>h</code>.
+It does not treat <code>h</code> as a simp lemma</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>simp at the goal</span></span>
+<span class="giallo-l"><span>simp at h        -- a fresh copy of h, h itself is not modified </span><span style="color: #D73A49;">in</span><span> the context</span></span>
+<span class="giallo-l"><span>exact h          -- (up to defeq / closing)</span></span></code></pre>
+<p>This can be reduced to</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>simpa [lemmas] </span><span style="color: #D73A49;">using</span><span> h</span></span></code></pre><h2 id="subst">subst<a class="zola-anchor" href="#subst" aria-label="Link to this section">#</a>
+</h2>
+<p><code>subst x</code> looks in the local context for an equality involving the variable <code>x</code> i.e it looks for some hypthesis <code>h : x = t</code> or <code>h : t = x</code>.</p>
+<p>It then:</p>
+<ol>
+<li>Replaces every occurrence of <code>x</code> with <code>t</code> in the target and hypotheses.</li>
+<li>Removes <code>x</code> from the context when possible.</li>
+<li>Removes the equality <code>h</code>, because it is no longer needed.</li>
+</ol>
+<p>For example:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>x y : Nat</span></span>
+<span class="giallo-l"><span>h : x = y</span></span>
+<span class="giallo-l"><span>p : x &gt; </span><span style="color: #005CC5;">3</span></span>
+<span class="giallo-l"><span>⊢ x + </span><span style="color: #005CC5;">1</span><span> = y + </span><span style="color: #005CC5;">1</span></span></code></pre>
+<p>After: <code>subst x</code> the state becomes essentially:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>y : Nat</span></span>
+<span class="giallo-l"><span>p : y &gt; </span><span style="color: #005CC5;">3</span></span>
+<span class="giallo-l"><span>⊢ y + </span><span style="color: #005CC5;">1</span><span> = y + </span><span style="color: #005CC5;">1</span></span></code></pre>
+<p>If there is no suitable equality involving x, the tactic fails.</p>
+
+    </div>
+  </div>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <!-- <div> -->
+    <!--   <h2>Working Notes</h2> -->
+    <!--   <p>Something to say</p> -->
+    <!-- </div> -->
+    
+    <!-- <div> -->
+    <!--   <h2>Elsewhere</h2> -->
+    <!--   <ul> -->
+    <!--     <li><a href="https://randomwalks.xyz/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/tags">Browse by tag</a></li> -->
+    <!--   </ul> -->
+    <!-- </div> -->
+    
+    <div class="footer-credit">
+      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('pre').forEach(function (pre) {
+      if (!pre.querySelector('code')) return;
+      var button = document.createElement('button');
+      button.className = 'copy-code';
+      button.type = 'button';
+      button.textContent = 'Copy';
+      button.addEventListener('click', function () {
+        var clone = pre.querySelector('code').cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function (line) { line.remove(); });
+        navigator.clipboard.writeText(clone.textContent).then(function () {
+          button.textContent = 'Copied';
+          window.setTimeout(function () { button.textContent = 'Copy'; }, 1400);
+        });
+      });
+      pre.appendChild(button);
+    });
+  </script>
+  <script>
+    window.addEventListener('load', function () {
+      function containShortcodeMath() {
+        var selector =
+          '.callout mjx-container[display="true"], ' +
+          '.comparison-dual mjx-container[display="true"], ' +
+          '.comparison-single mjx-container[display="true"]';
+
+        function wrap(equation) {
+          if (equation.parentElement.classList.contains('shortcode-math-scroll')) return;
+          var boundary = document.createElement('span');
+          boundary.className = 'shortcode-math-scroll';
+          equation.before(boundary);
+          boundary.appendChild(equation);
+        }
+
+        document.querySelectorAll(selector).forEach(wrap);
+
+        document.querySelectorAll(
+          '.callout mjx-container:not([display="true"]), ' +
+          '.comparison-dual mjx-container:not([display="true"]), ' +
+          '.comparison-single mjx-container:not([display="true"])'
+        ).forEach(function (equation) {
+          var line = equation.closest('li, p') || equation.parentElement;
+          if (equation.getBoundingClientRect().width > line.clientWidth) wrap(equation);
+        });
+      }
+
+      if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+        MathJax.startup.promise.then(containShortcodeMath);
+      } else {
+        containShortcodeMath();
+      }
+    });
+  </script>
+  <script>
+    (function () {
+      var prose = document.querySelector('.prose');
+      if (!prose || prose.querySelector('.bibliography')) return;
+
+      var citations = prose.querySelectorAll('a.citation[data-cite-key]');
+      if (!citations.length) return;
+
+      var bibliography = document.createElement('div');
+      var heading = document.createElement('h2');
+      var list = document.createElement('ol');
+      var seen = new Set();
+
+      bibliography.className = 'bibliography';
+      heading.textContent = 'References';
+      bibliography.append(heading, list);
+
+      citations.forEach(function (citation) {
+        var key = citation.dataset.citeKey;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+
+        var item = document.createElement('li');
+        var title = document.createElement('span');
+        var authors = citation.dataset.citeAuthors;
+        var venue = citation.dataset.citeVenue;
+        var year = citation.dataset.citeYear;
+
+        item.id = 'ref-' + key;
+        if (authors) item.append(document.createTextNode(authors + '. '));
+        title.className = 'bib-title';
+        title.textContent = citation.dataset.citeTitle;
+        item.append(title);
+        if (citation.dataset.citeTitle) item.append(document.createTextNode('.'));
+        if (venue) {
+          var venueElement = document.createElement('em');
+          venueElement.textContent = venue;
+          item.append(document.createTextNode(' '), venueElement);
+        }
+        if (year) item.append(document.createTextNode((venue ? ', ' : ' ') + year));
+        item.append(document.createTextNode('.'));
+        list.appendChild(item);
+      });
+
+      prose.appendChild(bibliography);
+    })();
+
+    document.addEventListener('click', function (event) {
+      var back = event.target.closest('.bib-back');
+      if (back) {
+        event.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = event.target.closest('a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      event.preventDefault();
+      document.querySelectorAll('.citation-highlight').forEach(function (item) {
+        item.classList.remove('citation-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function (item) { item.remove(); });
+
+      var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+      if (!target) return;
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('citation-highlight');
+
+      if (!link.id) link.id = 'cite-source-' + target.id;
+      var arrow = document.createElement('a');
+      arrow.className = 'bib-back';
+      arrow.setAttribute('data-source', link.id);
+      arrow.setAttribute('href', '#' + link.id);
+      arrow.setAttribute('aria-label', 'Back to citation');
+      arrow.textContent = ' ↩';
+      target.appendChild(arrow);
+    });
+  </script>
+  <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
+  
+
+
+
+<script>
+  (function () {
+    var prose = document.querySelector('.prose');
+    if (!prose) return;
+
+    var references = prose.querySelectorAll('.footnote-reference');
+    var footnotes = prose.querySelector('.footnotes');
+    if (!footnotes) return;
+
+    function removeRedundantFootnoteHeading() {
+      var heading = prose.querySelector('#footnotes-and-references');
+      if (!heading || heading.nextElementSibling !== footnotes) return;
+
+      heading.remove();
+      document.querySelectorAll('.contents a[href="#footnotes-and-references"]').forEach(function (link) {
+        var item = link.closest('li');
+        if (item) item.remove();
+      });
+    }
+
+    if (!references.length) {
+      if (!footnotes.querySelector('li')) {
+        removeRedundantFootnoteHeading();
+        footnotes.remove();
+      }
+      return;
+    }
+
+    var transformed = 0;
+    references.forEach(function (reference) {
+      var link = reference.querySelector('a');
+      if (!link) return;
+
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
+      var definition = targetId ? document.getElementById(targetId) : null;
+      if (!definition) return;
+
+      transformed += 1;
+      var noteId = 'sidenote-' + transformed;
+      var clone = definition.cloneNode(true);
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
+
+      var noteBody = Array.from(clone.children).map(function (child) {
+        return child.tagName === 'P' ? child.innerHTML : child.outerHTML;
+      }).join(' ');
+
+      var number = document.createElement('button');
+      number.type = 'button';
+      number.className = 'sidenote-number';
+      number.textContent = link.textContent;
+      number.setAttribute('aria-expanded', 'false');
+      number.setAttribute('aria-controls', noteId);
+      number.setAttribute('aria-label', 'Show footnote ' + link.textContent);
+
+      var note = document.createElement('span');
+      note.className = 'sidenote';
+      note.id = noteId;
+      note.innerHTML = '<span class="sidenote-num">' + link.textContent + '.</span> ' + noteBody;
+
+      number.addEventListener('click', function () {
+        var open = note.classList.toggle('is-open');
+        number.setAttribute('aria-expanded', String(open));
+      });
+
+      reference.replaceWith(number, note);
+    });
+
+    if (transformed) {
+      prose.classList.add('footnotes-are-sidenotes');
+      removeRedundantFootnoteHeading();
+    }
+  })();
+</script>
+
+
+
+</body>
+</html>

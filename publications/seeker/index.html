@@ -121,14 +121,14 @@
 
     
     <p class="publication-authors publication-authors--page">
-      <a href="https:&#x2F;&#x2F;randomwalks.xyz&#x2F;" class="author-primary">Ari Biswas</a>, <a href="https:&#x2F;&#x2F;pages.cs.wisc.edu&#x2F;~hous21&#x2F;">Houssam Nassif</a>, <a href="https:&#x2F;&#x2F;scholar.google.com&#x2F;citations?user=tJzykd0AAAAJ&amp;hl=en">Thai Pham</a>, <a href="https:&#x2F;&#x2F;www.google.com&#x2F;url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;ben-snyder-3b777b10&amp;ved=2ahUKEwjR-unUl8WRAxWnQEEAHS3zCbMQFnoECBkQAQ&amp;usg=AOvVaw02N1uPxPyS0WZ92VwRbTbq" class="author-primary">Benjamin Snyder</a>, <a href="https:&#x2F;&#x2F;www.linkedin.com&#x2F;in&#x2F;michael-vogelsong-524b2080&#x2F;">Michael Vogelsong</a>
+      <a href="https://randomwalks.xyz/" class="author-primary">Ari Biswas</a>, <a href="https://pages.cs.wisc.edu/~hous21/">Houssam Nassif</a>, <a href="https://scholar.google.com/citations?user=tJzykd0AAAAJ&amp;hl=en">Thai Pham</a>, <a href="https://www.google.com/url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=https://www.linkedin.com/in/ben-snyder-3b777b10&amp;ved=2ahUKEwjR-unUl8WRAxWnQEEAHS3zCbMQFnoECBkQAQ&amp;usg=AOvVaw02N1uPxPyS0WZ92VwRbTbq" class="author-primary">Benjamin Snyder</a>, <a href="https://www.linkedin.com/in/michael-vogelsong-524b2080/">Michael Vogelsong</a>
     </p>
     
 
     <div class="publication-meta">
       
         
-        <a class="publication-header__venue" href="https:&#x2F;&#x2F;www.kdd.org&#x2F;kdd2019&#x2F;">KDD 2019</a>
+        <a class="publication-header__venue" href="https://www.kdd.org/kdd2019/">KDD 2019</a>
         
       
       <time datetime="2019-08-01">Last updated 01 August 2019</time>
@@ -137,7 +137,7 @@
     
     <nav class="publication-artefacts" aria-label="Publication resources">
       
-        <a href="https:&#x2F;&#x2F;dl.acm.org&#x2F;doi&#x2F;10.1145&#x2F;3292500.3330733">Conference Paper</a>
+        <a href="https://dl.acm.org/doi/10.1145/3292500.3330733">Conference Paper</a>
       
     </nav>
     
@@ -148,25 +148,28 @@
     
     <nav class="contents contents-side" aria-label="Table of contents">
       <h2>Contents</h2>
-      <ol>
+      
+<ol>
+  
   <li>
     <a href="#abstract">Abstract</a>
+    
   </li>
+  
 </ol>
+
     </nav>
     
 
     <div class="prose publication-prose">
-      
-<aside class="callout callout-box thm-box">
-  
+      <aside id="" class="callout callout-box thm-box">
+  <div class="callout-title"></div>
   <p>Long back when machine learning or AI was not as pervasive in our lives, Ben Snyder came up with the idea of real-time adaptive UX’s.
 The premise was simple – people are often not able to describe in words what they are looking for, but if they were to be shown something that looked similar or dissimilar to their item of choice; then that decision was cognitively much simpler.
 In the summer of 2017, while interning at Amazon, we worked on this simple idea of implementing real time thompson sampling for large datasets.
 The algorithm subsequently made itself into production, under the name <a rel="noopener noreferrer external" target="_blank" href="https://www.amazon.com/discover">Shop By Look</a>.
 Here’s some media <a rel="noopener noreferrer external" target="_blank" href="https://www.bizjournals.com/boston/news/2018/09/19/wayfair-stock-drops-after-amazon-unveils-furniture.html">coverage</a>.
 I greatly benefited from the success of this algorithm personally, but I am forever indebted to Ben for identifying, and formulating this problem.</p>
-
 </aside>
 <h2 id="abstract">Abstract<a class="zola-anchor" href="#abstract" aria-label="Link to this section">#</a>
 </h2>
@@ -369,14 +372,16 @@ I greatly benefited from the success of this algorithm personally, but I am fore
       var link = reference.querySelector('a');
       if (!link) return;
 
-      var targetId = (link.getAttribute('href') || '').replace('#', '');
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
       var definition = targetId ? document.getElementById(targetId) : null;
       if (!definition) return;
 
       transformed += 1;
       var noteId = 'sidenote-' + transformed;
       var clone = definition.cloneNode(true);
-      clone.querySelectorAll('a[href^="#fr-"]').forEach(function (backlink) { backlink.remove(); });
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
 
       var noteBody = Array.from(clone.children).map(function (child) {
         return child.tagName === 'P' ? child.innerHTML : child.outerHTML;

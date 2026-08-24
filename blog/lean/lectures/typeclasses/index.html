@@ -1,0 +1,872 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Type classes In Lean — Random Walks</title>
+  <meta name="description" content="">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=9f3f3f161e11a605fe54">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
+  
+  
+  
+  
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams',
+        macros: {
+          Field: '{\\mathbb{F}}',
+          field: '{\\mathbb{F}}',
+          Mont: ['{\\widetilde{#1}}', 1],
+          Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+          TauConstraints: '{\\tau_y}',
+          TauTime: '{\\tau_{\\text{cycle}}}',
+          TauGroup: '{\\tau_b}',
+          MLE: ['{\\widetilde{#1}}', 1],
+          tf: ['{\\widetilde{#1}}', 1],
+          eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+          Def: '{:=}',
+          ChallengeSet: '{\\mathsf{C}}',
+          Complement: ['{\\overline{#1}}', 1],
+          Size: ['{\\left|#1\\right|}', 1],
+          Length: ['{L\\left(#1\\right)}', 1],
+          Lenght: ['{L\\left(#1\\right)}', 1],
+          Exp: ['{2^{#1}}', 1],
+          BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+          BigO: ['{O\\ \\left(#1\\right)}', 1],
+          boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+          OntoPHP: ['{\\operatorname{OFPHP}(#3^{#1}_{#2})}', 3],
+          PHP: ['{\\operatorname{PHP}(#3^{#1}_{#2})}', 3],
+          PHPBasic: ['\\PHP{n}{n-1}{K}'],
+          FPHP: ['{\\operatorname{FPHP}(#3^{#1}_{#2})}', 3], 
+          poly: '{\\operatorname{poly}}',
+          criticalAlpha: ['{\\alpha_{#1}}', 1],
+          CPlus: '{\\textcolor{blue}{C^{+}}}',
+          CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
+          GraphNbrs: ['{N_G(#1)}', 1],
+          ClauseNbrs: ['{N_C(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
+          SmallO: ['{o\\!(#1)}', 1],
+          Closure: ['{\\operatorname{Cl}(#1)}', 1],
+          ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+          Dim: ['{\\dim(#1)}', 1],
+          Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+          domain: ['{\\operatorname{dom}(#1)}', 1],
+          False: '{\\bot}',
+          opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+          NP: '{\\mathsf{NP}}',
+          Naturals: '{\\mathbb{N}}',
+          bit: '{\\{0,1\\}}',
+          samples: '{\\xleftarrow{\\$}}'
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="https://randomwalks.xyz" aria-label="Random Walks — home">
+      <span>Random</span><span>Walks</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="https://randomwalks.xyz/publications/">Publications</a>
+      <a href="https://randomwalks.xyz/blog/">Notes</a>
+      <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
+      <a href="https://randomwalks.xyz/cv/">CV</a>
+      <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
+      <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
+    </nav>
+  </header>
+
+  <div class="command-palette" id="command-palette" data-index-url="https://randomwalks.xyz/search_index.en.json" hidden>
+    <button class="command-backdrop" type="button" aria-label="Close search" data-command-close></button>
+    <section class="command-dialog" role="dialog" aria-modal="true" aria-labelledby="command-title">
+      <h2 class="visually-hidden" id="command-title">Search page titles</h2>
+      <div class="command-query">
+        <span aria-hidden="true">›</span>
+        <input id="command-input" type="search" placeholder="Search titles…" autocomplete="off" autocapitalize="none" spellcheck="false" aria-controls="command-results" aria-autocomplete="list">
+        <kbd>Esc</kbd>
+      </div>
+      <ol class="command-results" id="command-results" role="listbox"></ol>
+      <p class="command-status" role="status" aria-live="polite"></p>
+      <footer class="command-help"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span></footer>
+    </section>
+  </div>
+
+  
+
+  <main id="main-content">
+    
+
+
+
+
+
+
+<article class="note footnotes-right">
+  <header class="note-header">
+    <h1>Type classes In Lean</h1>
+    
+    <div class="note-meta">
+      <span class="note-authors">By Ari</span>
+      <time datetime="2026-02-26">26 February 2026</time>
+      
+    </div>
+    
+    <ul class="tag-list" aria-label="Tags">
+      <li><a href="https://randomwalks.xyz/tags/lean-notes/">lean-notes</a></li>
+    </ul>
+    
+  </header>
+
+  <div class="note-layout">
+    
+    <details class="contents contents-inline">
+      <summary>Contents</summary>
+      
+<ol>
+  
+  <li>
+    <a href="#the-problem">The Problem</a>
+    
+  </li>
+  
+  <li>
+    <a href="#classes-traits-in-lean">Classes — Traits In Lean</a>
+    
+  </li>
+  
+  <li>
+    <a href="#instance-implicit-arguments-trait-bounds">Instance Implicit Arguments [ ] — Trait Bounds</a>
+    
+      
+<ol>
+  
+  <li>
+    <a href="#accessing-fields">Accessing Fields</a>
+    
+  </li>
+  
+</ol>
+
+    
+  </li>
+  
+  <li>
+    <a href="#extends-trait-inheritance">extends — Trait Inheritance</a>
+    
+  </li>
+  
+  <li>
+    <a href="#associated-types-extra-parameters-instead">Associated Types — Extra Parameters Instead</a>
+    
+  </li>
+  
+  <li>
+    <a href="#what-ring-a-means-in-a-theorem">What [Ring α] Means In A Theorem</a>
+    
+  </li>
+  
+  <li>
+    <a href="#instance-chaining">Instance Chaining</a>
+    
+  </li>
+  
+  <li>
+    <a href="#reading-the-infoview-what-is-inst">Reading The Infoview: What Is inst✝?</a>
+    
+  </li>
+  
+  <li>
+    <a href="#full-code">Full Code</a>
+    
+      
+<ol>
+  
+  <li>
+    <a href="#file-1-typeclasses-lean-structures-classes-instances-chaining">File 1: Typeclasses.lean — structures, classes, instances, chaining</a>
+    
+  </li>
+  
+  <li>
+    <a href="#file-2-typeclasseschaining-lean-chaining-in-action">File 2: TypeclassesChaining.lean — chaining in action</a>
+    
+  </li>
+  
+</ol>
+
+    
+  </li>
+  
+</ol>
+
+    </details>
+    
+
+    <div class="prose">
+      <p>Explaining Leans type system using my knowledge of Rust.
+Say you a circle or a square.
+They are not the same thing but they are  both geometric shapes.
+They have common properties like they both have area.
+In rust we want to define a <code>trait Shape</code>, and in Lean we have a <code>class Shape</code>.
+Then we have both <code>circle</code> and <code>square</code> implement <code>Shape</code>, and in Lean we say <code>circle</code> and <code>square</code> are instances of class <code>Shape</code>.</p>
+<p>Here the concrete object is <code>Point</code> and the general trait it satisfies is that is a thing that is an instance of the <code>MyAdd</code> class i.e. it is a thing that can be added to itself.</p>
+<table><thead><tr><th>Plain English</th><th>Lean</th><th>Rust</th></tr></thead><tbody>
+<tr><td>Define an interface</td><td><code>class</code></td><td><code>trait</code></td></tr>
+<tr><td>Implement it for Point</td><td><code>instance : MyAdd Point</code></td><td><code>impl MyAdd for Point</code></td></tr>
+<tr><td>“α/T must support addition”</td><td><code>[MyAdd α]</code> binder</td><td><code>&lt;T: MyAdd&gt;</code> bound</td></tr>
+<tr><td>Find the right implementation</td><td>Instance database</td><td>Trait impl resolution</td></tr>
+</tbody></table>
+<p>The rest of these notes fill in the details and differences.</p>
+<h2 id="the-problem">The Problem<a class="zola-anchor" href="#the-problem" aria-label="Link to this section">#</a>
+</h2>
+<p>Let’s define a <code>Point</code> and <code>Point3D</code> and try to double it:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">structure</span><span style="color: #6F42C1;"> Point</span><span style="color: #D73A49;"> where</span></span>
+<span class="giallo-l"><span>  x : Float</span></span>
+<span class="giallo-l"><span>  y : Float</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">structure</span><span style="color: #6F42C1;"> Point3D</span><span style="color: #D73A49;"> where</span></span>
+<span class="giallo-l"><span>  x : Float</span></span>
+<span class="giallo-l"><span>  y : Float</span></span>
+<span class="giallo-l"><span>  z : Float</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> double</span><span> (x : Point) : Point := x + x   -- error: no + on Point</span></span></code></pre>
+<p>This fails. What does <code>+</code> mean for a <code>Point</code>?
+Lean has no idea.
+We need to tell Lean what it means for a term of type <code>Point</code> to be added itself.</p>
+<p>So we define an explicit function that adds two points.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> addPoints</span><span> (p1 : Point) (p2 : Point) : Point :=</span></span>
+<span class="giallo-l"><span>  { x := p1.x + p2.x, y := p1.y + p2.y }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> double</span><span> (x : Point) : Point := addPoints x x  -- works</span></span></code></pre>
+<p>But what happens if we wanted to define doubling for <code>Point3D</code>.
+We can’t use double as its hard coded to use <code>addPoints</code> which is hard coded to use arguments with terms of type <code>Point</code>.
+In Rust we use traits for this.
+We will soon see that Lean offers similar functionality - via classes.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">trait</span><span style="color: #6F42C1;"> MyAdd</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    fn</span><span style="color: #6F42C1;"> add</span><span>(</span><span style="color: #005CC5;">self</span><span>, other</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> Self</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #005CC5;"> Self</span><span>;</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">impl</span><span style="color: #6F42C1;"> MyAdd</span><span style="color: #D73A49;"> for</span><span style="color: #6F42C1;"> Point</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    fn</span><span style="color: #6F42C1;"> add</span><span>(</span><span style="color: #005CC5;">self</span><span>, other</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Point</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #6F42C1;"> Point</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">        Point</span><span> { x</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> self</span><span style="color: #D73A49;">.</span><span>x </span><span style="color: #D73A49;">+</span><span> other</span><span style="color: #D73A49;">.</span><span>x, y</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> self</span><span style="color: #D73A49;">.</span><span>y </span><span style="color: #D73A49;">+</span><span> other</span><span style="color: #D73A49;">.</span><span>y }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">impl</span><span style="color: #6F42C1;"> MyAdd</span><span style="color: #D73A49;"> for</span><span style="color: #6F42C1;"> Point3D</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    fn</span><span style="color: #6F42C1;"> add</span><span>(</span><span style="color: #005CC5;">self</span><span>, other</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Point3D</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #6F42C1;"> Point3D</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">        Point3D</span><span> { x</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> self</span><span style="color: #D73A49;">.</span><span>x </span><span style="color: #D73A49;">+</span><span> other</span><span style="color: #D73A49;">.</span><span>x, y</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> self</span><span style="color: #D73A49;">.</span><span>y </span><span style="color: #D73A49;">+</span><span> other</span><span style="color: #D73A49;">.</span><span>y, z</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> self</span><span style="color: #D73A49;">.</span><span>z </span><span style="color: #D73A49;">+</span><span> other</span><span style="color: #D73A49;">.</span><span>z }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">fn</span><span style="color: #6F42C1;"> double</span><span>&lt;</span><span style="color: #6F42C1;">T</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> MyAdd</span><span style="color: #D73A49;"> +</span><span style="color: #6F42C1;"> Copy</span><span>&gt;(x</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> T</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #6F42C1;"> T</span><span> { x</span><span style="color: #D73A49;">.</span><span style="color: #6F42C1;">add</span><span>(x) }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6F42C1;">double</span><span>(point);</span><span style="color: #6A737D;">     // compiler finds impl MyAdd for Point</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">double</span><span>(point3d);</span><span style="color: #6A737D;">   // compiler finds impl MyAdd for Point3D</span></span></code></pre><h2 id="classes-traits-in-lean">Classes — Traits In Lean<a class="zola-anchor" href="#classes-traits-in-lean" aria-label="Link to this section">#</a>
+</h2>
+<p>A Lean <code>class</code> looks identical to a <code>structure</code>:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">class</span><span style="color: #6F42C1;"> MyAdd</span><span> (α : </span><span style="color: #D73A49;">Type</span><span>) </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add : α → α → α</span></span></code></pre>
+<p>We already saw the Rust <code>impl</code> blocks above. In Lean the equivalent is <code>instance</code>.
+In Rust we say this type implements this trait.
+In Lean we say this type is an instance of this class.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> addPoints</span><span> (p1 : Point) (p2 : Point) : Point :=</span></span>
+<span class="giallo-l"><span>  { x := p1.x + p2.x, y := p1.y + p2.y }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> addPoints3D</span><span> (p1 : Point3D) (p2 : Point3D) : Point3D :=</span></span>
+<span class="giallo-l"><span>  { x := p1.x + p2.x, y := p1.y + p2.y, z := p1.z + p2.z }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : MyAdd Point </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := addPoints</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : MyAdd Point3D </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := addPoints3D</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : MyAdd ℕ </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := Nat.add</span></span></code></pre>
+<p><code>MyAdd</code> has one field (<code>add</code>), so each instance provides one function — just like the Rust <code>trait MyAdd</code> had one method. If a class has multiple fields, you provide all of them:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">class</span><span style="color: #6F42C1;"> MyArith</span><span> (α : </span><span style="color: #D73A49;">Type</span><span>) </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add : α → α → α</span></span>
+<span class="giallo-l"><span>  mul : α → α → α</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : MyArith ℕ </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := Nat.add</span></span>
+<span class="giallo-l"><span>  mul := Nat.mul</span></span></code></pre>
+<p>Lean stores these in an <strong>instance database</strong> — a lookup table that maps <code>(class, type)</code> pairs to their implementations. When Lean needs <code>MyAdd Point</code>, it searches this database and finds the instance we defined. Same idea as how the Rust compiler resolves which <code>impl</code> to use for a given type.</p>
+<h2 id="instance-implicit-arguments-trait-bounds">Instance Implicit Arguments <code>[ ]</code> — Trait Bounds<a class="zola-anchor" href="#instance-implicit-arguments-trait-bounds" aria-label="Link to this section">#</a>
+</h2>
+<p>Now that instances are registered in the database, we write</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> double</span><span> [MyAdd α] (x : α) : α := MyAdd.add x x</span></span></code></pre>
+<p>Without <code>[MyAdd α]</code>, <code>α</code> could be any type — and <code>MyAdd.add</code> wouldn’t be defined for an arbitrary <code>α</code>.
+The <code>[MyAdd α]</code> restricts <code>α</code> to only terms of types that have a <code>MyAdd</code> instance registered.
+When <code>double</code> is called with <code>x : Point</code> or <code>x : Point3D</code>, the elaborator checks the instance database for a matching <code>MyAdd</code> entry for that type.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>double { x := </span><span style="color: #005CC5;">1</span><span>.</span><span style="color: #005CC5;">0</span><span>, y := </span><span style="color: #005CC5;">2</span><span>.</span><span style="color: #005CC5;">0</span><span> }                  -- Lean finds MyAdd Point automatically</span></span>
+<span class="giallo-l"><span>double { x := </span><span style="color: #005CC5;">1</span><span>.</span><span style="color: #005CC5;">0</span><span>, y := </span><span style="color: #005CC5;">2</span><span>.</span><span style="color: #005CC5;">0</span><span>, z := </span><span style="color: #005CC5;">3</span><span>.</span><span style="color: #005CC5;">0</span><span> }        -- Lean finds MyAdd Point3D automatically</span></span>
+<span class="giallo-l"><span>double (</span><span style="color: #005CC5;">5</span><span> : ℕ)                                  -- Lean finds MyAdd ℕ automatically</span></span></code></pre>
+<p>Same idea works for <code>MyArith</code> with multiple fields:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> mulPoints</span><span> (p1 : Point) (p2 : Point) : Point :=</span></span>
+<span class="giallo-l"><span>  { x := p1.x * p2.x, y := p1.y * p2.y }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : MyArith Point </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := addPoints</span></span>
+<span class="giallo-l"><span>  mul := mulPoints</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- unnamed: access fields via the </span><span style="color: #D73A49;">class</span><span style="color: #6F42C1;"> name</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">def squareAndAdd</span><span> [MyArith α] (x : α) : α := MyArith.add (MyArith.mul x x) x</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- named: h is a </span><span style="color: #D73A49;">variable</span><span> bound to the concrete impl of MyArith </span><span style="color: #D73A49;">for</span><span> α. Access its fields via h.</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> squareAndAdd</span><span> [h : MyArith α] (x : α) : α := h.add (h.mul x x) x</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>squareAndAdd { x := </span><span style="color: #005CC5;">2</span><span>.</span><span style="color: #005CC5;">0</span><span>, y := </span><span style="color: #005CC5;">3</span><span>.</span><span style="color: #005CC5;">0</span><span> }   -- Lean finds MyArith Point</span></span>
+<span class="giallo-l"><span>squareAndAdd (</span><span style="color: #005CC5;">5</span><span> : ℕ)                   -- Lean finds MyArith ℕ</span></span></code></pre>
+<p>When you write <code>double { x := 1.0, y := 2.0 }</code>, Lean:</p>
+<ol>
+<li>Sees the argument is a <code>Point</code></li>
+<li>Sees it needs <code>[MyAdd Point]</code></li>
+<li>Searches the instance database</li>
+<li>Finds <code>instance : MyAdd Point</code></li>
+<li>Inserts it silently</li>
+</ol>
+<h3 id="accessing-fields">Accessing Fields<a class="zola-anchor" href="#accessing-fields" aria-label="Link to this section">#</a>
+</h3>
+<p>In Rust you call trait methods on the value: <code>x.add(y)</code>.
+In Lean you call them via the class name: <code>MyAdd.add x y</code>.
+In practice, Mathlib registers operator notation so you just write <code>x + y</code> directly, same as Rust’s operator overloading via <code>impl Add</code>.</p>
+<h2 id="extends-trait-inheritance"><code>extends</code> — Trait Inheritance<a class="zola-anchor" href="#extends-trait-inheritance" aria-label="Link to this section">#</a>
+</h2>
+<p>In Rust, trait inheritance looks like:
+This is saying any type that implements <code>AddMonoid</code> must also implement the traits <code>Add</code> and <code>Zero</code>.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">trait</span><span style="color: #6F42C1;"> AddMonoid</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Add</span><span style="color: #D73A49;"> +</span><span style="color: #6F42C1;"> Zero</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    fn</span><span style="color: #6F42C1;"> add_assoc</span><span>(a</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> Self</span><span>, b</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> Self</span><span>, c</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> Self</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #6F42C1;"> bool</span><span>;</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>In Lean, <code>extends</code> does the same.
+Note that <code>α</code> plays the role of <code>Self</code> in Rust — it’s the type the class is being implemented for:</p>
+<p><code>α</code> is a term of type <code>Type</code> that is an instance of class <code>AddMonoid</code>.
+<code>α</code> is <strong>ALSO</strong> an instance of class <code>Add</code> and <code>Zero</code>.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">class</span><span style="color: #6F42C1;"> AddMonoid</span><span> (α : </span><span style="color: #D73A49;">Type</span><span>) </span><span style="color: #D73A49;">extends</span><span> Add α, Zero α </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add_assoc : ∀ (a b c : α), a + b + c = a + (b + c)  -- term of </span><span style="color: #D73A49;">Prop</span><span> (a proof)</span></span>
+<span class="giallo-l"><span>  zero_add  : ∀ (a : α), </span><span style="color: #005CC5;">0</span><span> + a = a                    -- term of </span><span style="color: #D73A49;">Prop</span><span> (a proof)</span></span>
+<span class="giallo-l"><span>  add_zero  : ∀ (a : α), a + </span><span style="color: #005CC5;">0</span><span> = a                    -- term of </span><span style="color: #D73A49;">Prop</span><span> (a proof)</span></span>
+<span class="giallo-l"><span>-- α here is like Self. When you write </span><span style="color: #D73A49;">instance</span><span> : AddMonoid ℕ, α = ℕ.</span></span>
+<span class="giallo-l"><span>-- </span><span style="color: #D73A49;">extends</span><span> Add α gives us: add : α → α → α             -- term of </span><span style="color: #D73A49;">Type</span><span> (a function)</span></span>
+<span class="giallo-l"><span>-- </span><span style="color: #D73A49;">extends</span><span> Zero α gives us: zero : α                    -- term of </span><span style="color: #D73A49;">Type</span><span> (a value)</span></span>
+<span class="giallo-l"><span>--</span></span>
+<span class="giallo-l"><span>-- To verify, type these into Lean:</span></span>
+<span class="giallo-l"><span>-- </span><span style="color: #D73A49;">#check</span><span> @AddMonoid.add_assoc   -- ∀ ... → </span><span style="color: #D73A49;">Prop</span></span>
+<span class="giallo-l"><span>-- </span><span style="color: #D73A49;">#check</span><span> @Add.add               -- α → α → α</span></span></code></pre>
+<p><code>AddMonoid α</code> gives you <code>Add α</code> and <code>Zero α</code> automatically, plus the axioms.</p>
+<p>The critical difference from Rust: the <strong>fields can be proofs</strong>. <code>add_assoc</code> is not a function returning <code>bool</code> — it is a term of a <code>Prop</code> type (recall: <code>Prop</code> is <code>Sort 0</code>, the universe of propositions). Providing this field means constructing a term that proves associativity holds. This is something Rust traits fundamentally cannot express.</p>
+<p>A <code>Ring</code> extends further with multiplication, negation, and all ring axioms. By the time you write <code>[Ring α]</code>, Lean has <code>+</code>, <code>*</code>, <code>-</code>, <code>0</code>, <code>1</code>, and proofs of all the ring laws — bundled into one instance.</p>
+<h2 id="associated-types-extra-parameters-instead">Associated Types — Extra Parameters Instead<a class="zola-anchor" href="#associated-types-extra-parameters-instead" aria-label="Link to this section">#</a>
+</h2>
+<p>Rust uses associated types when a trait’s output type depends on the input:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">struct</span><span style="color: #6F42C1;"> Point</span><span> { x</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> f64</span><span>, y</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> f64</span><span> }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">trait</span><span style="color: #6F42C1;"> Add</span><span>&lt;</span><span style="color: #6F42C1;">Rhs</span><span style="color: #D73A49;"> =</span><span style="color: #005CC5;"> Self</span><span>&gt; {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    type</span><span style="color: #6F42C1;"> Output</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    fn</span><span style="color: #6F42C1;"> add</span><span>(</span><span style="color: #005CC5;">self</span><span>, rhs</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Rhs</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #005CC5;"> Self</span><span style="color: #D73A49;">::</span><span style="color: #6F42C1;">Output</span><span>;</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;">// Point + Point → Point</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">impl</span><span style="color: #6F42C1;"> Add</span><span style="color: #D73A49;"> for</span><span style="color: #6F42C1;"> Point</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    type</span><span style="color: #6F42C1;"> Output</span><span style="color: #D73A49;"> =</span><span style="color: #6F42C1;"> Point</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    fn</span><span style="color: #6F42C1;"> add</span><span>(</span><span style="color: #005CC5;">self</span><span>, rhs</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Point</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #6F42C1;"> Point</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">        Point</span><span> { x</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> self</span><span style="color: #D73A49;">.</span><span>x </span><span style="color: #D73A49;">+</span><span> rhs</span><span style="color: #D73A49;">.</span><span>x, y</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> self</span><span style="color: #D73A49;">.</span><span>y </span><span style="color: #D73A49;">+</span><span> rhs</span><span style="color: #D73A49;">.</span><span>y }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;">// Point + f64 → Point (shift both fields by a scalar)</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">impl</span><span style="color: #6F42C1;"> Add</span><span>&lt;</span><span style="color: #6F42C1;">f64</span><span>&gt;</span><span style="color: #D73A49;"> for</span><span style="color: #6F42C1;"> Point</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    type</span><span style="color: #6F42C1;"> Output</span><span style="color: #D73A49;"> =</span><span style="color: #6F42C1;"> Point</span><span>;</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    fn</span><span style="color: #6F42C1;"> add</span><span>(</span><span style="color: #005CC5;">self</span><span>, rhs</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> f64</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #6F42C1;"> Point</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">        Point</span><span> { x</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> self</span><span style="color: #D73A49;">.</span><span>x </span><span style="color: #D73A49;">+</span><span> rhs, y</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> self</span><span style="color: #D73A49;">.</span><span>y </span><span style="color: #D73A49;">+</span><span> rhs }</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>Lean doesn’t have associated types. Instead, it uses extra type parameters:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">class</span><span style="color: #6F42C1;"> HAdd</span><span> (α : </span><span style="color: #D73A49;">Type</span><span>) (β : </span><span style="color: #D73A49;">Type</span><span>) (γ : </span><span style="color: #D73A49;">Type</span><span>) </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  hAdd : α → β → γ</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- adding two Points gives a Point</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : HAdd Point Point Point </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  hAdd := addPoints</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- adding a Point and a Float scales both fields</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : HAdd Point Float Point </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  hAdd := </span><span style="color: #D73A49;">fun</span><span> p s =&gt; { x := p.x + s, y := p.y + s }</span></span></code></pre>
+<p>Same result, different encoding. Rust bakes the output type into the trait with <code>type Output</code>. Lean just adds more type parameters.</p>
+<h2 id="what-ring-a-means-in-a-theorem">What <code>[Ring α]</code> Means In A Theorem<a class="zola-anchor" href="#what-ring-a-means-in-a-theorem" aria-label="Link to this section">#</a>
+</h2>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">theorem</span><span style="color: #6F42C1;"> foo</span><span> [Ring α] (x y : α) : (x + y) * (x - y) = x ^ </span><span style="color: #005CC5;">2</span><span> - y ^ </span><span style="color: #005CC5;">2</span><span> := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span>  ring</span></span></code></pre>
+<p>This is like a Rust generic function with a <code>Ring</code> bound — it works for any type <code>α</code> that implements <code>Ring</code>. Lean finds the <code>Ring ℝ</code> instance when you use it with <code>ℝ</code>, silently.</p>
+<p>If you tried <code>ℕ</code>, Lean fails — there is no <code>Ring ℕ</code> instance because <code>ℕ</code> has no additive inverses (it does have <code>CommSemiring</code>, just not a full ring). Same as how Rust would reject <code>double::&lt;u32&gt;()</code> if <code>u32</code> didn’t implement your trait.</p>
+<h2 id="instance-chaining">Instance Chaining<a class="zola-anchor" href="#instance-chaining" aria-label="Link to this section">#</a>
+</h2>
+<p>We defined <code>MyArith</code> with both <code>add</code> and <code>mul</code>. We also defined <code>MyAdd</code> with just <code>add</code>. Any type that has <code>MyArith</code> clearly also has <code>MyAdd</code> — it already has an <code>add</code> function. We can tell Lean this:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">instance</span><span> [MyArith α] : MyAdd α </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := MyArith.add</span></span>
+<span class="giallo-l"><span>-- </span><span style="color: #032F62;">&quot;if α implements MyArith, it automatically implements MyAdd&quot;</span></span>
+<span class="giallo-l"><span>-- You must register this rule explicitly. Without it, having MyArith Point</span></span>
+<span class="giallo-l"><span>-- tells Lean nothing about MyAdd Point — the chaining doesn&#39;t happen </span><span style="color: #D73A49;">by</span><span> magic.</span></span></code></pre>
+<p>This is like a Rust blanket impl:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">impl</span><span>&lt;</span><span style="color: #6F42C1;">T</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> MyArith</span><span>&gt;</span><span style="color: #6F42C1;"> MyAdd</span><span style="color: #D73A49;"> for</span><span style="color: #6F42C1;"> T</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    fn</span><span style="color: #6F42C1;"> add</span><span>(</span><span style="color: #005CC5;">self</span><span>, other</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> T</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #6F42C1;"> T</span><span> {</span><span style="color: #6F42C1;"> MyArith</span><span style="color: #D73A49;">::</span><span style="color: #6F42C1;">add</span><span>(</span><span style="color: #005CC5;">self</span><span>, other) }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>Now say we have <code>MyArith Point</code> registered but no direct <code>MyAdd Point</code>:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : MyArith Point </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := addPoints</span></span>
+<span class="giallo-l"><span>  mul := mulPoints</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- We </span><span style="color: #D73A49;">do</span><span> NOT register MyAdd </span><span style="color: #D73A49;">for</span><span> Point:</span></span>
+<span class="giallo-l"><span>-- </span><span style="color: #D73A49;">instance</span><span> : MyAdd Point </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>--   add := addPoints</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- But double still works! It needs [MyAdd Point], which it gets</span></span>
+<span class="giallo-l"><span>-- </span><span style="color: #D73A49;">from</span><span> the chaining rule we registered above.</span></span>
+<span class="giallo-l"><span>double { x := </span><span style="color: #005CC5;">1</span><span>.</span><span style="color: #005CC5;">0</span><span>, y := </span><span style="color: #005CC5;">2</span><span>.</span><span style="color: #005CC5;">0</span><span> }   -- ✓</span></span></code></pre>
+<p>Lean chains the instances:</p>
+<ol>
+<li>Needs <code>[MyAdd Point]</code> — not found directly</li>
+<li>Finds the rule: <code>[MyArith α] → MyAdd α</code></li>
+<li>Searches for <code>[MyArith Point]</code> — found</li>
+<li>Chains them: <code>MyArith Point</code> → <code>MyAdd Point</code></li>
+</ol>
+<p>We never wrote <code>instance : MyAdd Point</code> — Lean derived it from <code>MyArith Point</code>. In Mathlib this chaining goes dozens of layers deep (e.g. <code>Field</code> → <code>Ring</code> → <code>AddGroup</code> → <code>Add</code>).</p>
+<h2 id="reading-the-infoview-what-is-inst">Reading The Infoview: What Is <code>inst✝</code>?<a class="zola-anchor" href="#reading-the-infoview-what-is-inst" aria-label="Link to this section">#</a>
+</h2>
+<p>Paste this into Lean and place your cursor on <code>sorry</code>:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- Example </span><span style="color: #005CC5;">1</span><span>: </span><span style="color: #D73A49;">using</span><span> our MyAdd </span><span style="color: #D73A49;">class</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">def double</span><span> [MyAdd α] (x : α) : α := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span style="color: #B31D28;font-style: italic;">  sorry</span></span>
+<span class="giallo-l"><span>-- Infoview shows:</span></span>
+<span class="giallo-l"><span>-- α : </span><span style="color: #D73A49;">Type</span></span>
+<span class="giallo-l"><span>-- inst✝ : MyAdd α</span></span>
+<span class="giallo-l"><span>-- x : α</span></span>
+<span class="giallo-l"><span>-- ⊢ α</span></span></code></pre><pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- Example </span><span style="color: #005CC5;">2</span><span>: </span><span style="color: #D73A49;">using</span><span> MyArith </span><span style="color: #D73A49;">with</span><span> two fields</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> squareAndAdd</span><span> [MyArith α] (x : α) : α := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span style="color: #B31D28;font-style: italic;">  sorry</span></span>
+<span class="giallo-l"><span>-- Infoview shows:</span></span>
+<span class="giallo-l"><span>-- α : </span><span style="color: #D73A49;">Type</span></span>
+<span class="giallo-l"><span>-- inst✝ : MyArith α</span></span>
+<span class="giallo-l"><span>-- x : α</span></span>
+<span class="giallo-l"><span>-- ⊢ α</span></span></code></pre><pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- Example </span><span style="color: #005CC5;">3</span><span>: naming the </span><span style="color: #D73A49;">instance</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">def double</span><span> [h : MyAdd α] (x : α) : α := </span><span style="color: #D73A49;">by</span></span>
+<span class="giallo-l"><span style="color: #B31D28;font-style: italic;">  sorry</span></span>
+<span class="giallo-l"><span>-- Infoview shows:</span></span>
+<span class="giallo-l"><span>-- α : </span><span style="color: #D73A49;">Type</span></span>
+<span class="giallo-l"><span>-- h : MyAdd α      ← named, no ✝</span></span>
+<span class="giallo-l"><span>-- x : α</span></span>
+<span class="giallo-l"><span>-- ⊢ α</span></span></code></pre>
+<p><code>inst✝</code> is the auto-generated name for the resolved impl. The <code>✝</code> dagger means Lean named it because you didn’t — you wrote <code>[MyAdd α]</code> (anonymous). If you write <code>[h : MyAdd α]</code>, it shows as <code>h</code> instead.</p>
+<p>The impl is a real value in your context. <code>inst✝ : MyAdd α</code> means you have access to <code>inst✝.add</code> (or equivalently <code>MyAdd.add</code>). In Rust terms, it’s as if the compiler showed you the resolved <code>impl</code> block as a local variable.</p>
+<h2 id="full-code">Full Code<a class="zola-anchor" href="#full-code" aria-label="Link to this section">#</a>
+</h2>
+<p>Two files you can paste into a Lean project and run.</p>
+<h3 id="file-1-typeclasses-lean-structures-classes-instances-chaining">File 1: <code>Typeclasses.lean</code> — structures, classes, instances, chaining<a class="zola-anchor" href="#file-1-typeclasses-lean-structures-classes-instances-chaining" aria-label="Link to this section">#</a>
+</h3>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"><span>-- Structures (data types)</span></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">structure</span><span style="color: #6F42C1;"> Point</span><span style="color: #D73A49;"> where</span></span>
+<span class="giallo-l"><span>  x : Float</span></span>
+<span class="giallo-l"><span>  y : Float</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  deriving</span><span> Repr</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">structure</span><span style="color: #6F42C1;"> Point3D</span><span style="color: #D73A49;"> where</span></span>
+<span class="giallo-l"><span>  x : Float</span></span>
+<span class="giallo-l"><span>  y : Float</span></span>
+<span class="giallo-l"><span>  z : Float</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  deriving</span><span> Repr</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"><span>-- Addition functions (one per type — the logic differs)</span></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> addPoints</span><span> (p1 : Point) (p2 : Point) : Point :=</span></span>
+<span class="giallo-l"><span>  { x := p1.x + p2.x, y := p1.y + p2.y }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> addPoints3D</span><span> (p1 : Point3D) (p2 : Point3D) : Point3D :=</span></span>
+<span class="giallo-l"><span>  { x := p1.x + p2.x, y := p1.y + p2.y, z := p1.z + p2.z }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> mulPoints</span><span> (p1 : Point) (p2 : Point) : Point :=</span></span>
+<span class="giallo-l"><span>  { x := p1.x * p2.x, y := p1.y * p2.y }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"><span>-- Class definitions (like Rust traits)</span></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">class</span><span style="color: #6F42C1;"> MyAdd</span><span> (α : </span><span style="color: #D73A49;">Type</span><span>) </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add : α → α → α</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">class</span><span style="color: #6F42C1;"> MyArith</span><span> (α : </span><span style="color: #D73A49;">Type</span><span>) </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add : α → α → α</span></span>
+<span class="giallo-l"><span>  mul : α → α → α</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"><span>-- Instances (like Rust impl blocks)</span></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : MyAdd Point </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := addPoints</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : MyAdd Point3D </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := addPoints3D</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : MyAdd Nat </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := Nat.add</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : MyArith Nat </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := Nat.add</span></span>
+<span class="giallo-l"><span>  mul := Nat.mul</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : MyArith Point </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := addPoints</span></span>
+<span class="giallo-l"><span>  mul := mulPoints</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"><span>-- Instance chaining: MyArith → MyAdd</span></span>
+<span class="giallo-l"><span>-- Must be registered explicitly. Without this line,</span></span>
+<span class="giallo-l"><span>-- having MyArith α tells Lean nothing about MyAdd α.</span></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> [MyArith α] : MyAdd α </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := MyArith.add</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"><span>-- Functions </span><span style="color: #D73A49;">using</span><span> [ ] (</span><span style="color: #D73A49;">instance</span><span style="color: #6F42C1;"> implicit</span><span> / </span><span style="color: #6F42C1;">trait bounds</span><span>)</span></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6F42C1;">def double</span><span> [MyAdd α] (x : α) : α := MyAdd.add x x</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> squareAndAdd</span><span> [MyArith α] (x : α) : α := MyArith.add (MyArith.mul x x) x</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"><span>-- Usage — Lean looks up the </span><span style="color: #D73A49;">instance</span><span style="color: #6F42C1;"> automatically</span></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>#</span><span style="color: #6F42C1;">eval double</span><span> { x := </span><span style="color: #005CC5;">1</span><span>.</span><span style="color: #005CC5;">0</span><span>, y := </span><span style="color: #005CC5;">2</span><span>.</span><span style="color: #005CC5;">0</span><span> : Point }</span></span>
+<span class="giallo-l"><span>-- { x := </span><span style="color: #005CC5;">2</span><span>.</span><span style="color: #005CC5;">000000</span><span>, y := </span><span style="color: #005CC5;">4</span><span>.</span><span style="color: #005CC5;">000000</span><span> }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">#eval</span><span> double { x := </span><span style="color: #005CC5;">1</span><span>.</span><span style="color: #005CC5;">0</span><span>, y := </span><span style="color: #005CC5;">2</span><span>.</span><span style="color: #005CC5;">0</span><span>, z := </span><span style="color: #005CC5;">3</span><span>.</span><span style="color: #005CC5;">0</span><span> : Point3D }</span></span>
+<span class="giallo-l"><span>-- { x := </span><span style="color: #005CC5;">2</span><span>.</span><span style="color: #005CC5;">000000</span><span>, y := </span><span style="color: #005CC5;">4</span><span>.</span><span style="color: #005CC5;">000000</span><span>, z := </span><span style="color: #005CC5;">6</span><span>.</span><span style="color: #005CC5;">000000</span><span> }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">#eval</span><span> double (</span><span style="color: #005CC5;">5</span><span> : Nat)</span></span>
+<span class="giallo-l"><span>-- </span><span style="color: #005CC5;">10</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">#eval</span><span> squareAndAdd (</span><span style="color: #005CC5;">3</span><span> : Nat)</span></span>
+<span class="giallo-l"><span>-- </span><span style="color: #005CC5;">12</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">#eval</span><span> squareAndAdd { x := </span><span style="color: #005CC5;">2</span><span>.</span><span style="color: #005CC5;">0</span><span>, y := </span><span style="color: #005CC5;">3</span><span>.</span><span style="color: #005CC5;">0</span><span> : Point }</span></span>
+<span class="giallo-l"><span>-- { x := </span><span style="color: #005CC5;">6</span><span>.</span><span style="color: #005CC5;">000000</span><span>, y := </span><span style="color: #005CC5;">12</span><span>.</span><span style="color: #005CC5;">000000</span><span> }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"><span>-- Instance search failure examples</span></span>
+<span class="giallo-l"><span>-- ============================================================</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- This would fail: no MyAdd </span><span style="color: #D73A49;">instance</span><span style="color: #6F42C1;"> for String</span></span>
+<span class="giallo-l"><span>-- #</span><span style="color: #6F42C1;">eval double</span><span> &quot;</span><span style="color: #6F42C1;">hello&quot;</span></span>
+<span class="giallo-l"><span>-- </span><span style="color: #6F42C1;">Error</span><span>: failed to synthesize MyAdd String</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- This would fail: no MyArith </span><span style="color: #D73A49;">instance</span><span style="color: #6F42C1;"> for Point3D</span></span>
+<span class="giallo-l"><span>-- #</span><span style="color: #6F42C1;">eval squareAndAdd</span><span> { x := </span><span style="color: #005CC5;">1</span><span>.</span><span style="color: #005CC5;">0</span><span>, y := </span><span style="color: #005CC5;">2</span><span>.</span><span style="color: #005CC5;">0</span><span>, z := </span><span style="color: #005CC5;">3</span><span>.</span><span style="color: #005CC5;">0</span><span> : Point3D }</span></span>
+<span class="giallo-l"><span>-- Error: failed to synthesize MyArith Point3D</span></span>
+<span class="giallo-l"><span>-- Fix: register </span><span style="color: #D73A49;">instance</span><span> : MyArith Point3D</span></span></code></pre><h3 id="file-2-typeclasseschaining-lean-chaining-in-action">File 2: <code>TypeclassesChaining.lean</code> — chaining in action<a class="zola-anchor" href="#file-2-typeclasseschaining-lean-chaining-in-action" aria-label="Link to this section">#</a>
+</h3>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- This file demonstrates that chaining lets you skip</span></span>
+<span class="giallo-l"><span>-- writing MyAdd instances when MyArith is already registered.</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">structure</span><span style="color: #6F42C1;"> Vec2</span><span style="color: #D73A49;"> where</span></span>
+<span class="giallo-l"><span>  x : Float</span></span>
+<span class="giallo-l"><span>  y : Float</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  deriving</span><span> Repr</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> addVec2</span><span> (a b : Vec2) : Vec2 := { x := a.x + b.x, y := a.y + b.y }</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> mulVec2</span><span> (a b : Vec2) : Vec2 := { x := a.x * b.x, y := a.y * b.y }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">class</span><span style="color: #6F42C1;"> MyAdd</span><span> (α : </span><span style="color: #D73A49;">Type</span><span>) </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add : α → α → α</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">class</span><span style="color: #6F42C1;"> MyArith</span><span> (α : </span><span style="color: #D73A49;">Type</span><span>) </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add : α → α → α</span></span>
+<span class="giallo-l"><span>  mul : α → α → α</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- Register the chaining rule: MyArith implies MyAdd</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> [MyArith α] : MyAdd α </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := MyArith.add</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- Only register MyArith </span><span style="color: #D73A49;">for</span><span> Vec2 — NOT MyAdd</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">instance</span><span> : MyArith Vec2 </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  add := addVec2</span></span>
+<span class="giallo-l"><span>  mul := mulVec2</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- We never wrote: </span><span style="color: #D73A49;">instance</span><span> : MyAdd Vec2</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> double</span><span> [MyAdd α] (x : α) : α := MyAdd.add x x</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- This works! Lean chains MyArith Vec2 → MyAdd Vec2</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">#eval</span><span> double { x := </span><span style="color: #005CC5;">3</span><span>.</span><span style="color: #005CC5;">0</span><span>, y := </span><span style="color: #005CC5;">4</span><span>.</span><span style="color: #005CC5;">0</span><span> : Vec2 }</span></span>
+<span class="giallo-l"><span>-- { x := </span><span style="color: #005CC5;">6</span><span>.</span><span style="color: #005CC5;">000000</span><span>, y := </span><span style="color: #005CC5;">8</span><span>.</span><span style="color: #005CC5;">000000</span><span> }</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>-- Now comment out the chaining rule above and this line fails:</span></span>
+<span class="giallo-l"><span>-- Error: failed to synthesize MyAdd Vec2</span></span>
+<span class="giallo-l"><span>-- Because without the rule, Lean has no way to get MyAdd </span><span style="color: #D73A49;">from</span><span> MyArith.</span></span></code></pre>
+    </div>
+  </div>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <!-- <div> -->
+    <!--   <h2>Working Notes</h2> -->
+    <!--   <p>Something to say</p> -->
+    <!-- </div> -->
+    
+    <!-- <div> -->
+    <!--   <h2>Elsewhere</h2> -->
+    <!--   <ul> -->
+    <!--     <li><a href="https://randomwalks.xyz/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/tags">Browse by tag</a></li> -->
+    <!--   </ul> -->
+    <!-- </div> -->
+    
+    <div class="footer-credit">
+      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('pre').forEach(function (pre) {
+      if (!pre.querySelector('code')) return;
+      var button = document.createElement('button');
+      button.className = 'copy-code';
+      button.type = 'button';
+      button.textContent = 'Copy';
+      button.addEventListener('click', function () {
+        var clone = pre.querySelector('code').cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function (line) { line.remove(); });
+        navigator.clipboard.writeText(clone.textContent).then(function () {
+          button.textContent = 'Copied';
+          window.setTimeout(function () { button.textContent = 'Copy'; }, 1400);
+        });
+      });
+      pre.appendChild(button);
+    });
+  </script>
+  <script>
+    window.addEventListener('load', function () {
+      function containShortcodeMath() {
+        var selector =
+          '.callout mjx-container[display="true"], ' +
+          '.comparison-dual mjx-container[display="true"], ' +
+          '.comparison-single mjx-container[display="true"]';
+
+        function wrap(equation) {
+          if (equation.parentElement.classList.contains('shortcode-math-scroll')) return;
+          var boundary = document.createElement('span');
+          boundary.className = 'shortcode-math-scroll';
+          equation.before(boundary);
+          boundary.appendChild(equation);
+        }
+
+        document.querySelectorAll(selector).forEach(wrap);
+
+        document.querySelectorAll(
+          '.callout mjx-container:not([display="true"]), ' +
+          '.comparison-dual mjx-container:not([display="true"]), ' +
+          '.comparison-single mjx-container:not([display="true"])'
+        ).forEach(function (equation) {
+          var line = equation.closest('li, p') || equation.parentElement;
+          if (equation.getBoundingClientRect().width > line.clientWidth) wrap(equation);
+        });
+      }
+
+      if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+        MathJax.startup.promise.then(containShortcodeMath);
+      } else {
+        containShortcodeMath();
+      }
+    });
+  </script>
+  <script>
+    (function () {
+      var prose = document.querySelector('.prose');
+      if (!prose || prose.querySelector('.bibliography')) return;
+
+      var citations = prose.querySelectorAll('a.citation[data-cite-key]');
+      if (!citations.length) return;
+
+      var bibliography = document.createElement('div');
+      var heading = document.createElement('h2');
+      var list = document.createElement('ol');
+      var seen = new Set();
+
+      bibliography.className = 'bibliography';
+      heading.textContent = 'References';
+      bibliography.append(heading, list);
+
+      citations.forEach(function (citation) {
+        var key = citation.dataset.citeKey;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+
+        var item = document.createElement('li');
+        var title = document.createElement('span');
+        var authors = citation.dataset.citeAuthors;
+        var venue = citation.dataset.citeVenue;
+        var year = citation.dataset.citeYear;
+
+        item.id = 'ref-' + key;
+        if (authors) item.append(document.createTextNode(authors + '. '));
+        title.className = 'bib-title';
+        title.textContent = citation.dataset.citeTitle;
+        item.append(title);
+        if (citation.dataset.citeTitle) item.append(document.createTextNode('.'));
+        if (venue) {
+          var venueElement = document.createElement('em');
+          venueElement.textContent = venue;
+          item.append(document.createTextNode(' '), venueElement);
+        }
+        if (year) item.append(document.createTextNode((venue ? ', ' : ' ') + year));
+        item.append(document.createTextNode('.'));
+        list.appendChild(item);
+      });
+
+      prose.appendChild(bibliography);
+    })();
+
+    document.addEventListener('click', function (event) {
+      var back = event.target.closest('.bib-back');
+      if (back) {
+        event.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = event.target.closest('a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      event.preventDefault();
+      document.querySelectorAll('.citation-highlight').forEach(function (item) {
+        item.classList.remove('citation-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function (item) { item.remove(); });
+
+      var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+      if (!target) return;
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('citation-highlight');
+
+      if (!link.id) link.id = 'cite-source-' + target.id;
+      var arrow = document.createElement('a');
+      arrow.className = 'bib-back';
+      arrow.setAttribute('data-source', link.id);
+      arrow.setAttribute('href', '#' + link.id);
+      arrow.setAttribute('aria-label', 'Back to citation');
+      arrow.textContent = ' ↩';
+      target.appendChild(arrow);
+    });
+  </script>
+  <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
+  
+
+
+
+<script>
+  (function () {
+    var prose = document.querySelector('.prose');
+    if (!prose) return;
+
+    var references = prose.querySelectorAll('.footnote-reference');
+    var footnotes = prose.querySelector('.footnotes');
+    if (!footnotes) return;
+
+    function removeRedundantFootnoteHeading() {
+      var heading = prose.querySelector('#footnotes-and-references');
+      if (!heading || heading.nextElementSibling !== footnotes) return;
+
+      heading.remove();
+      document.querySelectorAll('.contents a[href="#footnotes-and-references"]').forEach(function (link) {
+        var item = link.closest('li');
+        if (item) item.remove();
+      });
+    }
+
+    if (!references.length) {
+      if (!footnotes.querySelector('li')) {
+        removeRedundantFootnoteHeading();
+        footnotes.remove();
+      }
+      return;
+    }
+
+    var transformed = 0;
+    references.forEach(function (reference) {
+      var link = reference.querySelector('a');
+      if (!link) return;
+
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
+      var definition = targetId ? document.getElementById(targetId) : null;
+      if (!definition) return;
+
+      transformed += 1;
+      var noteId = 'sidenote-' + transformed;
+      var clone = definition.cloneNode(true);
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
+
+      var noteBody = Array.from(clone.children).map(function (child) {
+        return child.tagName === 'P' ? child.innerHTML : child.outerHTML;
+      }).join(' ');
+
+      var number = document.createElement('button');
+      number.type = 'button';
+      number.className = 'sidenote-number';
+      number.textContent = link.textContent;
+      number.setAttribute('aria-expanded', 'false');
+      number.setAttribute('aria-controls', noteId);
+      number.setAttribute('aria-label', 'Show footnote ' + link.textContent);
+
+      var note = document.createElement('span');
+      note.className = 'sidenote';
+      note.id = noteId;
+      note.innerHTML = '<span class="sidenote-num">' + link.textContent + '.</span> ' + noteBody;
+
+      number.addEventListener('click', function () {
+        var open = note.classList.toggle('is-open');
+        number.setAttribute('aria-expanded', String(open));
+      });
+
+      reference.replaceWith(number, note);
+    });
+
+    if (transformed) {
+      prose.classList.add('footnotes-are-sidenotes');
+      removeRedundantFootnoteHeading();
+    }
+  })();
+</script>
+
+
+
+</body>
+</html>

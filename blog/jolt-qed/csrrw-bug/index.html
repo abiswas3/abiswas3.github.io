@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Jolt System Mismatch — Random Walks</title>
-  <meta name="description" content="Written Word">
+  <meta name="description" content="">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=9f3f3f161e11a605fe54">
@@ -138,26 +138,41 @@
     
     <nav class="contents contents-side" aria-label="Table of contents">
       <h2>Contents</h2>
-      <ol>
+      
+<ol>
+  
   <li>
     <a href="#jolt-implementation-of-csrrw">Jolt Implementation Of CSRRW</a>
+    
   </li>
+  
   <li>
     <a href="#mtvec">mtvec</a>
+    
   </li>
+  
   <li>
     <a href="#mepc">mepc</a>
+    
   </li>
+  
   <li>
     <a href="#mstatus">mstatus</a>
+    
   </li>
+  
   <li>
     <a href="#mret-issue">MRET Issue</a>
+    
   </li>
+  
   <li>
     <a href="#references">References</a>
+    
   </li>
+  
 </ol>
+
     </nav>
     
 
@@ -167,7 +182,7 @@
 <p>Jolt supports the writing of 6 control status registers, namely,
 <code>mstatus, mtvec, mepc, mtval, mscratch, mcause</code>; and it treats the writing to each of these registers uniformly.</p>
 <p>The assembly signature is <code>csrrw rd, csr, rs1</code> and the pseudocode of semantics in the Jolt expansion is roughly:</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="plain"><span class="giallo-l"><span>if rd = x0 then </span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>if rd = x0 then </span></span>
 <span class="giallo-l"><span>    [vreg_csr] &lt;- [rs1] + 0 -- implemented via ADDI</span></span>
 <span class="giallo-l"><span>if rd = rs1 then </span></span>
 <span class="giallo-l"><span>    tmp &lt;- [rs1] + 0</span></span>
@@ -177,25 +192,21 @@
 <span class="giallo-l"><span>    [rd] &lt;- [vreg_csr]</span></span>
 <span class="giallo-l"><span>    [v_reg_csr] &lt;- [rs1]</span></span></code></pre>
 <p>This can be verified against the Jolt <a rel="noopener noreferrer external" target="_blank" href="https://github.com/abiswas3/jolt/blob/ef62afb010ebb78b8ddf9bacc963730890373611/crates/jolt-program/src/expand/control_flow/csrrw.rs#L10">source code</a>.</p>
-
-<aside class="callout callout-remark">
-  
+<aside id="" class="callout callout-remark">
   <div class="callout-title">Problem</div>
-  
   <p>The <strong>issue</strong> is that the RISC-V specification does not treat writes to control status registers uniformly.
 Depending on the status register being written to, the logic differs.</p>
 <p>For <code>mscratch, mcause, mtval</code>, the above logic agrees with the RISC-V specification.
 For the remaining three, the spec asks that we first legalize the value in <code>rs1</code> before writing it to the control status register.</p>
 <p>More details below.</p>
-
 </aside>
 <h2 id="mtvec">mtvec<a class="zola-anchor" href="#mtvec" aria-label="Link to this section">#</a>
 </h2>
-<p>As per the Sail spec, which we checked to be correct<sup class="footnote-reference" id="fr-mtvec-docs-1"><a href="#fn-mtvec-docs">1</a></sup>, the value written to the contents of <code>mtvec</code> control status register is given by</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="lean"><span class="giallo-l"><span>writeReg mtvec (← (legalize_tvec (← readReg mtvec) value))</span></span></code></pre>
+<p>As per the Sail spec, which we checked to be correct<sup class="footnote-reference" id="fr-mtvec-docs-1"><a href="https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/#fn-mtvec-docs">[1]</a></sup>, the value written to the contents of <code>mtvec</code> control status register is given by</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>writeReg mtvec (← (legalize_tvec (← readReg mtvec) value))</span></span></code></pre>
 <p>which in simple speak is saying first apply the <code>legalize_tvec</code> function with inputs the <code>old_mtvec</code> value and <code>rs1_value</code> and then write the control status register.
 The <code>legalize_tvec</code> function is given by</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> legalize_tvec</span><span> (o : (BitVec </span><span style="color: #005CC5;">64</span><span>)) (v : (BitVec </span><span style="color: #005CC5;">64</span><span>)) : SailM (BitVec </span><span style="color: #005CC5;">64</span><span>) := </span><span style="color: #D73A49;">do</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> legalize_tvec</span><span> (o : (BitVec </span><span style="color: #005CC5;">64</span><span>)) (v : (BitVec </span><span style="color: #005CC5;">64</span><span>)) : SailM (BitVec </span><span style="color: #005CC5;">64</span><span>) := </span><span style="color: #D73A49;">do</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">  let</span><span> v := (Mk_Mtvec v) -- identity function.</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">  match</span><span> (trapVectorMode_of_bits (_get_Mtvec_Mode v)) </span><span style="color: #D73A49;">with</span></span>
 <span class="giallo-l"><span>  | TV_Direct =&gt; (pure v) -- we </span><span style="color: #D73A49;">have</span><span> to prove that we are </span><span style="color: #D73A49;">in</span><span> TV_Direct</span></span>
@@ -219,24 +230,24 @@ But Jolt does <strong>not</strong> promise this.</p>
 <h2 id="mepc">mepc<a class="zola-anchor" href="#mepc" aria-label="Link to this section">#</a>
 </h2>
 <p>The first step is to read the old <code>mepc</code> value.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">if</span><span> ((bne access_type CSRWrite) : Bool)</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">if</span><span> ((bne access_type CSRWrite) : Bool)</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">            then</span><span> (read_CSR csr) -- read csr (we take this branch)</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">            else</span><span> (pure (zeros (n := </span><span style="color: #005CC5;">64</span><span>))) ) : SailM xlenbits )</span></span></code></pre>
 <p>which for <code>mepc</code> — whose 12-bit address is <code>0x341</code> — results in the call</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="lean"><span class="giallo-l"><span>  | </span><span style="color: #005CC5;">0x341</span><span> =&gt; (get_xepc Machine)</span></span></code></pre>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>  | </span><span style="color: #005CC5;">0x341</span><span> =&gt; (get_xepc Machine)</span></span></code></pre>
 <p>which in turn returns</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="lean"><span class="giallo-l"><span>(align_pc (← readReg mepc))</span></span></code></pre>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>(align_pc (← readReg mepc))</span></span></code></pre>
 <p>So in simple speak: we read the current value in the <code>mepc</code> register, and then align it first:</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> align_pc</span><span> (addr : (BitVec </span><span style="color: #005CC5;">64</span><span>)) : SailM (BitVec </span><span style="color: #005CC5;">64</span><span>) := </span><span style="color: #D73A49;">do</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> align_pc</span><span> (addr : (BitVec </span><span style="color: #005CC5;">64</span><span>)) : SailM (BitVec </span><span style="color: #005CC5;">64</span><span>) := </span><span style="color: #D73A49;">do</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">  if</span><span> ((← (currentlyEnabled Ext_Zca)) : Bool)</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">  then</span><span> (pure (BitVec.update addr </span><span style="color: #005CC5;">0 0</span><span>#</span><span style="color: #005CC5;">1</span><span>))</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">  else</span><span> (pure (Sail.BitVec.updateSubrange addr </span><span style="color: #005CC5;">1 0</span><span> (zeros (n := (</span><span style="color: #005CC5;">1</span><span> -i (</span><span style="color: #005CC5;">0</span><span> -i </span><span style="color: #005CC5;">1</span><span>))))))</span></span></code></pre>
 <p>So the old value read from <code>mepc</code> is not the value before update (as Jolt assumes), but that value with its low bit cleared.
-Note that because this hart enables <code>Ext_Zca</code> (<code>hartSupports Ext_Zca =&gt; true</code>), the <em>active</em> branch is <code>BitVec.update addr 0 0#1</code>, which clears <strong>bit 0 only</strong>; the <code>else</code> branch clearing bits <code>[1:0]</code> is reached only when <code>Zca</code> is disabled.<sup class="footnote-reference" id="fr-zca-1"><a href="#fn-zca">2</a></sup></p>
+Note that because this hart enables <code>Ext_Zca</code> (<code>hartSupports Ext_Zca =&gt; true</code>), the <em>active</em> branch is <code>BitVec.update addr 0 0#1</code>, which clears <strong>bit 0 only</strong>; the <code>else</code> branch clearing bits <code>[1:0]</code> is reached only when <code>Zca</code> is disabled.<sup class="footnote-reference" id="fr-zca-1"><a href="https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/#fn-zca">[2]</a></sup></p>
 <p>Similarly, before writing to <code>mepc</code>, we compute:</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">let</span><span> target := (legalize_xepc rs1_value)</span></span></code></pre>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">let</span><span> target := (legalize_xepc rs1_value)</span></span></code></pre>
 <p>where</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> legalize_xepc</span><span> (v : (BitVec </span><span style="color: #005CC5;">64</span><span>)) : (BitVec </span><span style="color: #005CC5;">64</span><span>) :=</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> legalize_xepc</span><span> (v : (BitVec </span><span style="color: #005CC5;">64</span><span>)) : (BitVec </span><span style="color: #005CC5;">64</span><span>) :=</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">  if</span><span> ((hartSupports Ext_Zca) : Bool)</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">  then</span><span> (BitVec.update v </span><span style="color: #005CC5;">0 0</span><span>#</span><span style="color: #005CC5;">1</span><span>)</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">  else</span><span> (Sail.BitVec.updateSubrange v </span><span style="color: #005CC5;">1 0</span><span> (zeros (n := (</span><span style="color: #005CC5;">1</span><span> -i (</span><span style="color: #005CC5;">0</span><span> -i </span><span style="color: #005CC5;">1</span><span>)))))</span></span></code></pre>
@@ -247,7 +258,7 @@ But this guard does not exist in Jolt.</p>
 </h2>
 <p>This is also a bug, but the write is more complex, in that I have to parse the following Lean code to give you the clean algorithm.
 I’ll do this in a couple of days.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="lean"><span class="giallo-l"><span>-- v = [rs1]</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- v = [rs1]</span></span>
 <span class="giallo-l"><span>-- o = [mstatus]</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> legalize_mstatus</span><span> (o : (BitVec </span><span style="color: #005CC5;">64</span><span>)) (v : (BitVec </span><span style="color: #005CC5;">64</span><span>)) : SailM (BitVec </span><span style="color: #005CC5;">64</span><span>) := </span><span style="color: #D73A49;">do</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">  let</span><span> v := (Mk_Mstatus v) -- overwrite v </span></span>
@@ -328,7 +339,7 @@ I’ll do this in a couple of days.</p>
 </h2>
 <p>Sail’s MRET handler does not merely produce a target PC. It first mutates mstatus and cur_privilege, then reads mepc through prepare_xret_target
 Machine, then execute_MRET writes nextPC..</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="plain"><span class="giallo-l"></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"></span>
 <span class="giallo-l"><span>Before MRET</span></span>
 <span class="giallo-l"></span>
 <span class="giallo-l"><span>Jolt:</span></span>
@@ -374,7 +385,7 @@ Machine, then execute_MRET writes nextPC..</p>
 <p>The problem here is there is <strong>NO</strong> way to tell sail that that privilege level will not be lowered to user, as Jolt says by writing 1 to bit 20 of the misa that user mode is enabled.
 So if that is the case, the sail spec says we <strong>MUST</strong> reduce privilege when returning from a trap.
 Unfortunately, jolt is <strong>always</strong> in Machine mode.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="lean" data-name="/jolt-qed/LeanRV64D/SysControl.lean:677"><span class="giallo-l"></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="/jolt-qed/LeanRV64D/SysControl.lean:677"><span class="giallo-l"></span>
 <span class="giallo-l"><span>writeReg mstatus (Sail.BitVec.updateSubrange (← readReg mstatus) </span><span style="color: #005CC5;">12 11</span></span>
 <span class="giallo-l"><span>  (privLevel_to_bits</span></span>
 <span class="giallo-l"><span>    (← </span><span style="color: #D73A49;">do</span></span>
@@ -390,10 +401,10 @@ Unfortunately, jolt is <strong>always</strong> in Machine mode.</p>
 <section class="footnotes">
 <ol class="footnotes-list">
 <li id="fn-mtvec-docs">
-<p>Checked against the official RISC-V privileged ISA, which defines <a rel="noopener noreferrer external" target="_blank" href="https://docs.riscv.org/reference/isa/v20260120/priv/machine.html#3-1-1-7-machine-trap-vector-base-address-mtvec-register"><code>mtvec</code></a> as a <strong>WARL</strong> register whose <code>MODE</code> field has only the <code>Direct</code> (<code>0b00</code>) and <code>Vectored</code> (<code>0b01</code>) encodings. <a href="#fr-mtvec-docs-1">↩</a></p>
+<p>Checked against the official RISC-V privileged ISA, which defines <a rel="noopener noreferrer external" target="_blank" href="https://docs.riscv.org/reference/isa/v20260120/priv/machine.html#3-1-1-7-machine-trap-vector-base-address-mtvec-register"><code>mtvec</code></a> as a <strong>WARL</strong> register whose <code>MODE</code> field has only the <code>Direct</code> (<code>0b00</code>) and <code>Vectored</code> (<code>0b01</code>) encodings. <a href="https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/#fr-mtvec-docs-1">↩</a></p>
 </li>
 <li id="fn-zca">
-<p><code>Zca</code> enables 16-bit (compressed) instructions. See the official <a rel="noopener noreferrer external" target="_blank" href="https://docs.riscv.org/reference/isa/v20240411/unpriv/zc.html">Zc* specification</a>. <a href="#fr-zca-1">↩</a></p>
+<p><code>Zca</code> enables 16-bit (compressed) instructions. See the official <a rel="noopener noreferrer external" target="_blank" href="https://docs.riscv.org/reference/isa/v20240411/unpriv/zc.html">Zc* specification</a>. <a href="https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/#fr-zca-1">↩</a></p>
 </li>
 </ol>
 </section>
@@ -595,14 +606,16 @@ Unfortunately, jolt is <strong>always</strong> in Machine mode.</p>
       var link = reference.querySelector('a');
       if (!link) return;
 
-      var targetId = (link.getAttribute('href') || '').replace('#', '');
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
       var definition = targetId ? document.getElementById(targetId) : null;
       if (!definition) return;
 
       transformed += 1;
       var noteId = 'sidenote-' + transformed;
       var clone = definition.cloneNode(true);
-      clone.querySelectorAll('a[href^="#fr-"]').forEach(function (backlink) { backlink.remove(); });
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
 
       var noteBody = Array.from(clone.children).map(function (child) {
         return child.tagName === 'P' ? child.innerHTML : child.outerHTML;

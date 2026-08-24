@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Resolution Crash Course — Random Walks</title>
-  <meta name="description" content="Written Word">
+  <meta name="description" content="">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=9f3f3f161e11a605fe54">
@@ -138,25 +138,48 @@
     
     <nav class="contents contents-side" aria-label="Table of contents">
       <h2>Contents</h2>
-      <ol>
+      
+<ol>
+  
   <li>
-    <a href="#resolution-proof-system">Resolution Proof System</a><ol>
+    <a href="#resolution-proof-system">Resolution Proof System</a>
+    
+      
+<ol>
+  
   <li>
     <a href="#worked-out-example">Worked Out Example</a>
+    
   </li>
+  
 </ol>
+
+    
   </li>
+  
   <li>
-    <a href="#the-pigeon-hole-principle">The Pigeon Hole Principle</a><ol>
+    <a href="#the-pigeon-hole-principle">The Pigeon Hole Principle</a>
+    
+      
+<ol>
+  
   <li>
     <a href="#encoding-php-as-a-cnf">Encoding PHP as a CNF</a>
+    
   </li>
+  
 </ol>
+
+    
   </li>
+  
   <li>
     <a href="#what-is-known-lower-bounds-for-resolution">What Is Known: Lower Bounds For Resolution</a>
+    
   </li>
+  
 </ol>
+
     </nav>
     
 
@@ -174,11 +197,9 @@ Sometimes we also allow for the weakening rule, where given a clause $C$, we can
 <p>$$
 \frac{C}{D} [C\subseteq D]
 $$</p>
-
-<aside class="callout callout-definition thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Resolution Proof System</span></div>
-  
+<aside id="" class="callout callout-definition thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Resolution Proof System</span></div>
   <p>Given an unsatisfiable CNF formula $F = \bigwedge_{i \in [m]}C_i$ over $n$ variables, a resolution refutation $\pi$ is a sequence of clauses $D_1, \dots, D_L$ where</p>
 <ol>
 <li>$D_i = C_i$ for $1 \le i \le m$.</li>
@@ -186,19 +207,15 @@ $$</p>
 <li>$D_L = \emptyset$ is the empty clause which is always false.</li>
 </ol>
 <p><strong>Size Of A Refutation</strong>: The size of a refutation $\Size{\pi}$ is the number of clauses in the sequence ($L$ in this case).</p>
-
 </aside>
 <p>The complexity of refuting a formula $F$ is given by the size of the smallest proof that refutes $F$.</p>
-
-<aside class="callout callout-definition thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Proof Complexity</span></div>
-  
+<aside id="" class="callout callout-definition thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Proof Complexity</span></div>
   <p>Let $F$ be some un-satisfiable CNF and $\Pi_F$ be the set of resolution proofs that refute $F$.
 Then</p>
 <p>$$L(F) := \min_{\pi \in \Pi_F}\Size{\pi} $$</p>
 <p>denotes the complexity of refuting $F$ in the resolution proof system.</p>
-
 </aside>
 <h3 id="worked-out-example">Worked Out Example<a class="zola-anchor" href="#worked-out-example" aria-label="Link to this section">#</a>
 </h3>
@@ -219,12 +236,12 @@ If nothing is stated about $G$, it is safe to assume $G = K_{m,n}$ the complete 
 That is if $x_{ij} = 1$ then pigeon $i$ is assigned to hole $j$.
 Now, saying that we cannot assign every pigeon a unique hole is equivalent to saying, that there is no assignment $\vec{x} = (x_{e})_{e\in E}$ that satisfies the conjunction of the following clauses.</p>
 <div class="math-display">
-$$\begin{alignat}{2}
+\begin{align}
 P_i &:= \underset{j\in N_G(i)}{\lor}(x_{ij}) &\qquad& \forall i \in [m] \tag{a}\label{eq:pigeon} \\[12pt]
 H_j^{i,i'} &:= \Complement{x_{ij}} \lor \Complement{x_{i'j}} &\qquad& \forall i \neq i' \in [m],\; j \in N_G(i) \cap N_G(i') \tag{b}\label{eq:hole} \\[12pt]
 F_i^{j,j'} &:= \Complement{x_{ij'}} \lor \Complement{x_{ij}} &\qquad& \forall i \in [m],\; j \neq j' \in N_G(i) \tag{c}\label{eq:func} \\[12pt]
 S_j &:= \underset{i\in N_G(j)}{\lor}(x_{ij}) &\qquad& \forall j \in [n] \tag{d}\label{eq:onto}
-\end{alignat}$$
+\end{align}
 </div>
 <p>$\eqref{eq:pigeon}$ <strong>Pigeon Axioms</strong>: Each pigeon must get a hole.</p>
 <p>$\eqref{eq:hole}$ <strong>Hole Axioms</strong>: Give two different pigeons $i \neq i’$, that can both go into hole $j$, at most only one of them maybe assigned to hole $j$. <strong>Note</strong> that this does not say <em>every</em> hole must get assigned a pigeon. Setting $x_{ij} = 0$ for all $i \in [m]$ satisfies this axiom.</p>
@@ -235,24 +252,20 @@ S_j &:= \underset{i\in N_G(j)}{\lor}(x_{ij}) &\qquad& \forall j \in [n] \tag{d}\
 <p>If we need the function to be an onto function, then we refer to the formula as the <strong>onto functional (OF)PHP</strong>.</p>
 <p>The final unsatisfiable formula</p>
 <div class="math-display">
-$$\begin{align}
-F &= \underset{i \in [m]}{\land} P_i \\
-& \bigwedge  \underset{i\neq i'}{\land} \underset{j \in N_G(i) \cap N_G(i')}{\land} H_j^{i, i'} \\
-&\bigwedge \underset{i \in [m]}{\land} \underset{j\neq j' \in N_G(i)}{\land}  F_i^{j, j'}\\
-& \bigwedge\underset{j \in [m]}{\land} S_j
-\end{align}$$
+<p>$$\begin{align}
+F &amp;= \underset{i \in [m]}{\land} P_i \
+&amp; \bigwedge  \underset{i\neq i’}{\land} \underset{j \in N_G(i) \cap N_G(i’)}{\land} H_j^{i, i’} \
+&amp;\bigwedge \underset{i \in [m]}{\land} \underset{j\neq j’ \in N_G(i)}{\land}  F_i^{j, j’}\
+&amp; \bigwedge\underset{j \in [m]}{\land} S_j
+\end{align}$$</p>
 </div>
-
-<aside class="callout callout-remark">
-  
-  <div class="callout-title">Remark</div>
-  
+<aside id="" class="callout callout-remark">
+  <div class="callout-title"></div>
   <p>Satisfying all 4 axioms, implies that there exists a <strong>perfect matching</strong> in the graph $G$.</p>
-
 </aside>
-<p>Clearly any formula that includes constraints $\eqref{eq:pigeon}$-$\eqref{eq:onto}$ is the MOST<sup class="footnote-reference" id="fr-mental-1"><a href="#fn-mental">1</a></sup> constrained system.
+<p>Clearly any formula that includes constraints $\eqref{eq:pigeon}$–$\eqref{eq:onto}$ is the MOST<sup class="footnote-reference" id="fr-mental-1"><a href="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/#fn-mental">[1]</a></sup> constrained system.
 Therefore, it must be easier to refute the most constrained formula.
-Thus, lower bounds for <strong>more</strong> constrained systems subsume lower bounds<sup class="footnote-reference" id="fr-lower-bound-1"><a href="#fn-lower-bound">2</a></sup> for formulae that is constrained by a strict subset of the above conditions.</p>
+Thus, lower bounds for <strong>more</strong> constrained systems subsume lower bounds<sup class="footnote-reference" id="fr-lower-bound-1"><a href="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/#fn-lower-bound">[2]</a></sup> for formulae that is constrained by a strict subset of the above conditions.</p>
 <p>Similarly, if we make $m$ very very large, it should be really easy to refute the axioms, when compared to the case when $m=n+1$.
 Thus, showing lower bounds on the length of the refutation for $m \gg n$ subsume the lower bounds for the case when $m$ is slightly larger than $n$.
 When $m \in \omega(n^2)$ we refer to the formula as the <strong>weak</strong> PHP.</p>
@@ -261,186 +274,117 @@ When $m \in \omega(n^2)$ we refer to the formula as the <strong>weak</strong> PH
 <p>The following results are for $G= K_{m,n}$ where every pigeon is allowed to fly into every hole.</p>
 <ul>
 <li>
-<p><a href="#ref-haken1984intractability" class="citation" title="The Intractability of Resolution" data-cite-key="haken1984intractability" data-cite-authors="Haken, A." data-cite-title="The Intractability of Resolution" data-cite-venue="Theoretical Computer Science" data-cite-year="1985">[Haken, 1985]</a>
- shows that $\Length{\OntoPHP{n+1}{n}{K}} = \Exp{\BigOmega{n}}$. The proof for the above result was simplified by <a href="#ref-beame1996simplified" class="citation" title="Simplified and Improved Resolution Lower Bounds" data-cite-key="beame1996simplified" data-cite-authors="Beame, P. and Pitassi, T." data-cite-title="Simplified and Improved Resolution Lower Bounds" data-cite-venue="FOCS" data-cite-year="1996">[Beame &amp; Pitassi, 1996]</a>
-.</p>
+<p><a href="#ref-haken1984intractability" class="citation">[Haken, 1985]</a> shows that $\Length{\OntoPHP{n+1}{n}{K}} = \Exp{\BigOmega{n}}$. The proof for the above result was simplified by <a href="#ref-beame1996simplified" class="citation">[Beame &amp; Pitassi, 1996]</a>.</p>
 </li>
 <li>
-<p>The above result was  further generalised by <a href="#ref-buss1988resolution" class="citation" title="Resolution Proofs of Generalized Pigeonhole Principles" data-cite-key="buss1988resolution" data-cite-authors="Buss, S. and Turán, G." data-cite-title="Resolution Proofs of Generalized Pigeonhole Principles" data-cite-venue="Theoretical Computer Science" data-cite-year="1988">[Buss &amp; Turán, 1988]</a>
- to $\Length{\OntoPHP{n+1}{n}{K}} = \Exp{\BigOmega{\frac{n^2}{n+1}}}$.</p>
+<p>The above result was  further generalised by <a href="#ref-buss1988resolution" class="citation">[Buss &amp; Turán, 1988]</a> to $\Length{\OntoPHP{n+1}{n}{K}} = \Exp{\BigOmega{\frac{n^2}{n+1}}}$.</p>
 </li>
 </ul>
-
-<aside class="callout callout-remark">
-  
-  <div class="callout-title">Remark</div>
-  
+<aside id="" class="callout callout-remark">
+  <div class="callout-title"></div>
   <p>The above lower bounds do not say anything meaningful when $m = \BigOmega{n^2}$.
 So they are in the <em>small</em> $m$ regime.</p>
-
 </aside>
 <ul>
 <li>
-<p>For large values of $m$, in a breakthrough result by <a href="#ref-raz2004resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="raz2004resolution" data-cite-authors="Raz, R." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="Journal of the ACM" data-cite-year="2004">[Raz, 2004]</a>
-, he showed that <strong>every</strong> proof $\pi$ that refutes the <strong>basic</strong> pigeonhole principle $\PHPBasic$ has size $\Exp{\BigOmega{\frac{n}{\log^{10} m}}}$.</p>
+<p>For large values of $m$, in a breakthrough result by <a href="#ref-raz2004resolution" class="citation">[Raz, 2004]</a>, he showed that <strong>every</strong> proof $\pi$ that refutes the <strong>basic</strong> pigeonhole principle $\PHPBasic$ has size $\Exp{\BigOmega{\frac{n}{\log^{10} m}}}$.</p>
 </li>
 <li>
-<p>In <a href="#ref-razborov2003resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">[Razborov, 2003]</a>
- and <a href="#ref-razborov2004resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2004resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="Theoretical Computer Science" data-cite-year="2004">[Razborov, 2004]</a>
-, the above result was strengthened and extended to saying every proof $\pi$ that refutes the onto pigeon hole principle $\OntoPHP{m}{n}{K}$ has size $\Exp{\BigOmega{\frac{n}{\log^2 m}}}$.</p>
+<p>In <a href="#ref-razborov2003resolution" class="citation">[Razborov, 2003]</a> and <a href="#ref-razborov2004resolution" class="citation">[Razborov, 2004]</a>, the above result was strengthened and extended to saying every proof $\pi$ that refutes the onto pigeon hole principle $\OntoPHP{m}{n}{K}$ has size $\Exp{\BigOmega{\frac{n}{\log^2 m}}}$.</p>
 </li>
 </ul>
-
-<aside class="callout callout-remark">
-  
-  <div class="callout-title">Remark</div>
-  
+<aside id="" class="callout callout-remark">
+  <div class="callout-title"></div>
   <p>Now for even $m$ as large as $m=\exp(\BigO{n^{1/3}})$, we have all proofs have size that is $\exp(\BigOmega{n^{1/3}})$.
 Note if we have $m$ as large as $\exp(\BigO{n^{1/3}})$, even writing down all the pigeon, hole, function and onto axioms take $\exp(\BigOmega{n^{1/3}})$ clauses worth of space.
 Thus, there is no point of thinking $m$ any larger.</p>
 <p><strong>This problem is essentially closed for dense bipartite graphs $G=K_{m,n}$</strong> given Razbarovs strengthening.</p>
-
 </aside>
 <p>Now when $G$ is sparse, it might be really easy to refute the PHP.
 For example, the presence of an isolated vertex leads to short proofs.
 So now we go into the business of for what kind of “sparse” graphs, is the problem still hard.</p>
-<p>The graph family we consider is the $(r, \Delta, c)$-boundary<sup class="footnote-reference" id="fr-boundary-1"><a href="#fn-boundary">3</a></sup> expander.</p>
-
-<aside class="callout callout-definition thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — The Boundary Expander</span></div>
-  
+<p>The graph family we consider is the $(r, \Delta, c)$-boundary<sup class="footnote-reference" id="fr-boundary-1"><a href="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/#fn-boundary">[3]</a></sup> expander.</p>
+<aside id="" class="callout callout-definition thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : The Boundary Expander</span></div>
   <p>Given Bipartite graph $G = (V_P \cup V_H, E)$ is an $(r, \Delta, c)$ boundary expander, if $\forall u \in V_P$ we have $\deg_G(u) \le \Delta$, and for every set $S \subseteq V_P$ with size $\Size{S} \le r$ we have</p>
 <p>$$\Size{\boundary{S}} \ge c \Size{S}$$</p>
 <p>where the boundary of a set $S \subseteq V_P$, denoted by $\boundary{S}$ is the set of vertices joined by an edge to at least one vertex in S.
 $$ \boundary{S} = \{ v \in V_H : \Size{N_G(v) \cap S} = 1\}$$</p>
-
 </aside>
 <p>What do we know about refuting PHP in expanders? Not a whole lot, but there are 3 seminal results that consider the extremes:</p>
 <ul>
-<li>When $m$ is not too large i.e $n+ 1 &lt; m \ll n^2$, <a href="#ref-ben1999short" class="citation" title="Short Proofs Are Narrow — Resolution Made Simple" data-cite-key="ben1999short" data-cite-authors="Ben-Sasson, E. and Wigderson, A." data-cite-title="Short Proofs Are Narrow — Resolution Made Simple" data-cite-venue="Journal of the ACM" data-cite-year="2001">[Ben-Sasson &amp; Wigderson, 2001]</a>
- showed that for $r = \BigOmega{n/\log m}$, and $\Delta = \log m$, and $c= \frac{3\log m}{4}$, the size of refuting $\FPHP{m}{n}{G}$ is $\Exp{\BigOmega{\frac{n^2}{m\log m}}}$.</li>
+<li>When $m$ is not too large i.e $n+ 1 &lt; m \ll n^2$, <a href="#ref-ben1999short" class="citation">[Ben-Sasson &amp; Wigderson, 2001]</a> showed that for $r = \BigOmega{n/\log m}$, and $\Delta = \log m$, and $c= \frac{3\log m}{4}$, the size of refuting $\FPHP{m}{n}{G}$ is $\Exp{\BigOmega{\frac{n^2}{m\log m}}}$.</li>
 </ul>
-
-<aside class="callout callout-remark">
-  
-  <div class="callout-title">Remark</div>
-  
+<aside id="" class="callout callout-remark">
+  <div class="callout-title"></div>
   <p>Thus, for graph formulas we have exponential lower bounds on the $m \ll n^2$ pigeons where each pigeon has a constant number of choices for holes that it can fly into.
 So small $m$ is considered “done” in this sparse expansion regime.</p>
-
 </aside>
 <ul>
-<li>The other extreme, where $m$ can be arbitrary, but each pigeon also has a lot of holes to go into (high minimal degree i.e graph is not very sparse) <a href="#ref-razborov2004resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2004resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="Theoretical Computer Science" data-cite-year="2004">[Razborov, 2004]</a>
- and <a href="#ref-razborov2003resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">[Razborov, 2003]</a>
- show that the size is $\Exp{\BigOmega{\frac{\delta_G}{\log^2 m}}}$, where $\delta_G$ is the minimum degree of the graph.
+<li>The other extreme, where $m$ can be arbitrary, but each pigeon also has a lot of holes to go into (high minimal degree i.e graph is not very sparse) <a href="#ref-razborov2004resolution" class="citation">[Razborov, 2004]</a> and <a href="#ref-razborov2003resolution" class="citation">[Razborov, 2003]</a> show that the size is $\Exp{\BigOmega{\frac{\delta_G}{\log^2 m}}}$, where $\delta_G$ is the minimum degree of the graph.
 For any number of pigeons with a polynomial lower bound $\delta_G = n^{\BigOmega{1}}$ on the number holes each pigeon can fly into, we also have exponential size lower bounds.</li>
 </ul>
 <p>This leaves us asking what happens when $m \gg n^2$, but the minimal degree is small $\delta_G = \poly(\log(m))$?
-<a href="#ref-rezende2020Exp" class="citation" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-key="rezende2020Exp" data-cite-authors="de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D." data-cite-title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-venue="CCC" data-cite-year="2020">[de Rezende et al., 2020]</a>
- solves this problem, and is the focus of our work.
+<a href="#ref-rezende2020Exp" class="citation">[de Rezende et al., 2020]</a> solves this problem, and is the focus of our work.
 They show for any $G$ that is $(r, \Delta, (1-\xi\cdot \frac{\log n}{\log m(n)})\Delta)$-boundary expander, then you need proofs of size $\Exp{\BigOmega{\frac{r}{n^{\xi}\log^2 m}}}$</p>
 <p>They need a very very strong expander i.e $\lim_{n \rightarrow \infty} c = \Delta$, but would like to show it for $c=(1- \xi)\Delta$ for constant $\xi \in (0,1)$ <strong>This is what we need to show, optimistically</strong>.</p>
-<p><img src="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/./graph_php.svg" alt="" />
-
-
+<p><img src="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/./graph_php.svg" alt="" /></p>
 <div class="bibliography">
 <h2>References</h2>
 <ol>
-
-  
-  
-  
   <li id="ref-haken1984intractability">
     Haken, A..
     <span class="bib-title">The Intractability of Resolution</span>.
     <em>Theoretical Computer Science</em>, 1985.
   </li>
-  
-
-  
-  
-  
   <li id="ref-beame1996simplified">
     Beame, P. and Pitassi, T..
     <span class="bib-title">Simplified and Improved Resolution Lower Bounds</span>.
     <em>FOCS</em>, 1996.
   </li>
-  
-
-  
-  
-  
   <li id="ref-buss1988resolution">
     Buss, S. and Turán, G..
     <span class="bib-title">Resolution Proofs of Generalized Pigeonhole Principles</span>.
     <em>Theoretical Computer Science</em>, 1988.
   </li>
-  
-
-  
-  
-  
   <li id="ref-raz2004resolution">
     Raz, R..
     <span class="bib-title">Resolution Lower Bounds for the Weak Pigeonhole Principle</span>.
     <em>Journal of the ACM</em>, 2004.
   </li>
-  
-
-  
-  
-  
   <li id="ref-razborov2003resolution">
     Razborov, A..
     <span class="bib-title">Resolution Lower Bounds for the Weak Pigeonhole Principle</span>.
     <em>ECCC</em>, 2003.
   </li>
-  
-
-  
-  
-  
   <li id="ref-razborov2004resolution">
     Razborov, A..
     <span class="bib-title">Resolution Lower Bounds for the Weak Pigeonhole Principle</span>.
     <em>Theoretical Computer Science</em>, 2004.
   </li>
-  
-
-  
-  
-  
   <li id="ref-ben1999short">
     Ben-Sasson, E. and Wigderson, A..
     <span class="bib-title">Short Proofs Are Narrow — Resolution Made Simple</span>.
     <em>Journal of the ACM</em>, 2001.
   </li>
-  
-
-  
-  
-  
   <li id="ref-rezende2020Exp">
     de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D..
     <span class="bib-title">Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs</span>.
     <em>CCC</em>, 2020.
   </li>
-  
-
 </ol>
 </div>
-</p>
 <section class="footnotes">
 <ol class="footnotes-list">
 <li id="fn-mental">
-<p>The more constraints a formula has, the more difficult it is for us to find a satisfying assignment. Therefore, a proof that can this formula cannot be satisfied should be easy to find i.e. in our proof system it must be <em>short</em>. <a href="#fr-mental-1">↩</a></p>
+<p>The more constraints a formula has, the more difficult it is for us to find a satisfying assignment. Therefore, a proof that can this formula cannot be satisfied should be easy to find i.e. in our proof system it must be <em>short</em>. <a href="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/#fr-mental-1">↩</a></p>
 </li>
 <li id="fn-lower-bound">
-<p>Here by lower bound is a proxy for hardness. We show lower bounds on the length of refutations. If the derivation tree is very long for the most constrained system which should be easy to refute, then the derivation tree will be at least as long (if not longer) to refute less constrained formulae. <a href="#fr-lower-bound-1">↩</a></p>
+<p>Here by lower bound is a proxy for hardness. We show lower bounds on the length of refutations. If the derivation tree is very long for the most constrained system which should be easy to refute, then the derivation tree will be at least as long (if not longer) to refute less constrained formulae. <a href="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/#fr-lower-bound-1">↩</a></p>
 </li>
 <li id="fn-boundary">
-<p>Boundary of a set $S$ <img src="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/./boundary_of_G.svg" alt="" /> <a href="#fr-boundary-1">↩</a></p>
+<p>Boundary of a set $S$ <img src="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/./boundary_of_G.svg" alt="" /> <a href="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/#fr-boundary-1">↩</a></p>
 </li>
 </ol>
 </section>
@@ -642,14 +586,16 @@ They show for any $G$ that is $(r, \Delta, (1-\xi\cdot \frac{\log n}{\log m(n)})
       var link = reference.querySelector('a');
       if (!link) return;
 
-      var targetId = (link.getAttribute('href') || '').replace('#', '');
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
       var definition = targetId ? document.getElementById(targetId) : null;
       if (!definition) return;
 
       transformed += 1;
       var noteId = 'sidenote-' + transformed;
       var clone = definition.cloneNode(true);
-      clone.querySelectorAll('a[href^="#fr-"]').forEach(function (backlink) { backlink.remove(); });
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
 
       var noteBody = Array.from(clone.children).map(function (child) {
         return child.tagName === 'P' ? child.innerHTML : child.outerHTML;

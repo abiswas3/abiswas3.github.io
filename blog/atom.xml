@@ -9,244 +9,228 @@
   
   <entry xml:lang="en">
     <title>Sail RISC-V Into Lean</title>
-    <published>2026-03-22T00:00:00+00:00</published>
-    <updated>2026-03-22T00:00:00+00:00</updated>
+    <published>2026-03-22T00:00:00Z</published>
+    <updated>2026-03-22T00:00:00Z</updated>
     
       <author><name>Ari</name></author>
     
     <link rel="alternate" type="text/html" href="https://randomwalks.xyz/blog/sail-to-lean/"/>
     <id>https://randomwalks.xyz/blog/sail-to-lean/</id>
     
-    <content type="html" xml:base="https://randomwalks.xyz/blog/sail-to-lean/">
-&lt;aside class=&quot;callout callout-caution&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;Caution&lt;&#x2F;div&gt;
-  
-  &lt;p&gt;These notes re-cap the steps required to transplile the RISC-V sail specification to Lean.&lt;&#x2F;p&gt;
+    <content type="html" xml:base="https://randomwalks.xyz/blog/sail-to-lean/">&lt;aside id=&quot;&quot; class=&quot;callout callout-caution&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;&lt;/div&gt;
+  &lt;p&gt;These notes re-cap the steps required to transplile the RISC-V sail specification to Lean.&lt;/p&gt;
 &lt;p&gt;NOTE: As confirmed from the original documentation, only the non-computable Lean code builds and compiles cleanly.
 Some work is still needed to get the executable CPU to work.
-I do not imagine a whole lot, but as of the date of writing this, the executable build is not clean.&lt;&#x2F;p&gt;
-
-&lt;&#x2F;aside&gt;
-&lt;p&gt;Tested on:&lt;&#x2F;p&gt;
+I do not imagine a whole lot, but as of the date of writing this, the executable build is not clean.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;p&gt;Tested on:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;macOS (Apple Silicon)&lt;&#x2F;li&gt;
-&lt;li&gt;Intel CPU Arch Linux (TODO:)&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;h2 id=&quot;step-0-clone-both-repos&quot;&gt;Step 0: Clone Both Repos&lt;a class=&quot;zola-anchor&quot; href=&quot;#step-0-clone-both-repos&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
+&lt;li&gt;macOS (Apple Silicon)&lt;/li&gt;
+&lt;li&gt;Intel CPU Arch Linux (TODO:)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;step-0-clone-both-repos&quot;&gt;Step 0: Clone Both Repos&lt;a class=&quot;zola-anchor&quot; href=&quot;#step-0-clone-both-repos&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
 &lt;p&gt;Here I’ve forked the two repositories with the hope of eventually fixing the executable issue.
-But there’s nothing special about my fork right now. Cloning the original repos will also work.&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;git&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; clone git@github.com:abiswas3&#x2F;sail-riscv.git&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;git&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; clone git@github.com:abiswas3&#x2F;sail.git&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;parent&#x2F;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;├── sail&#x2F;                  # Sail compiler (transpiler) -- clone from github.com&#x2F;rems-project&#x2F;sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;└── sail-riscv&#x2F;            # This repo -- RISC-V ISA model written in Sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;step-1-install-system-dependencies&quot;&gt;Step 1: Install System Dependencies&lt;a class=&quot;zola-anchor&quot; href=&quot;#step-1-install-system-dependencies&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
-
-&lt;aside class=&quot;callout callout-warning&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;Note To Reader&lt;&#x2F;div&gt;
-  
+But there’s nothing special about my fork right now. Cloning the original repos will also work.&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;git&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; clone git@github.com:abiswas3/sail-riscv.git&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;git&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; clone git@github.com:abiswas3/sail.git&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;parent/&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;├── sail/                  # Sail compiler (transpiler) -- clone from github.com/rems-project/sail&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;└── sail-riscv/            # This repo -- RISC-V ISA model written in Sail&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&quot;step-1-install-system-dependencies&quot;&gt;Step 1: Install System Dependencies&lt;a class=&quot;zola-anchor&quot; href=&quot;#step-1-install-system-dependencies&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-warning&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;Note To Reader&lt;/div&gt;
   &lt;p&gt;I do not particularly understand the Sail DSL, nor am I an expert ocaml programmer.
-These steps mostly follow the &lt;code&gt;README.md&lt;&#x2F;code&gt;’s in the repo, a bit of googling and some Claude code help.
-Hopefully with time, I will be able to write a better version of what the hell is going on.&lt;&#x2F;p&gt;
-
-&lt;&#x2F;aside&gt;
-&lt;h3 id=&quot;macos-homebrew&quot;&gt;macOS (Homebrew)&lt;a class=&quot;zola-anchor&quot; href=&quot;#macos-homebrew&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;xcode-select&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --install&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;    # if not already done&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;brew&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; install opam gmp z3 pkgconf cmake&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;arch-linux&quot;&gt;Arch Linux&lt;a class=&quot;zola-anchor&quot; href=&quot;#arch-linux&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pacman&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; opam&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;        # OCaml package manager -- needed to fetch and install Sail&amp;#39;s OCaml dependencies&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pacman&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; gmp&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;         # GNU Multiple Precision arithmetic library -- Sail uses it internally for big integer arithmetic&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pacman&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; z3&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;          # SMT solver from Microsoft Research -- Sail calls Z3 during type-checking to prove&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;                           #   arithmetic constraints on dependent types (e.g. that bitvector widths are correct)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pacman&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; cmake&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;       # build system generator -- sail-riscv uses CMake to orchestrate the Sail-to-Lean code generation&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pacman&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; base-devel&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;  # C compiler, make, binutils, etc. -- OCaml&amp;#39;s runtime is written in C and some opam&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;                           #   packages have C bindings (e.g. GMP). Also provides C++ compiler which sail-riscv&amp;#39;s&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;                           #   CMake build needs for the emulator harness, even if you only want Lean output.&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;sudo&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pacman&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pkgconf&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;     # pkg-config implementation -- CMake uses it to locate system libraries like GMP&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;both-platforms-initialize-opam-one-time&quot;&gt;Both Platforms: Initialize opam (one-time)&lt;a class=&quot;zola-anchor&quot; href=&quot;#both-platforms-initialize-opam-one-time&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
-&lt;p&gt;Run the following code from anywhere – opam stores its state in &lt;code&gt;~&#x2F;.opam&#x2F;&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;strong&gt;TODO:&lt;&#x2F;strong&gt; ocaml crash course&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;opam&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; init&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;                 # follow prompts, say yes to shell setup&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;eval&lt;&#x2F;span&gt;&lt;span&gt; $(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;opam&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; env&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;          # or restart your shell&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;&lt;code&gt;opam init&lt;&#x2F;code&gt; creates the &lt;code&gt;~&#x2F;.opam&#x2F;&lt;&#x2F;code&gt; directory, downloads the OCaml package registry, and
+These steps mostly follow the &lt;code&gt;README.md&lt;/code&gt;’s in the repo, a bit of googling and some Claude code help.
+Hopefully with time, I will be able to write a better version of what the hell is going on.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;h3 id=&quot;macos-homebrew&quot;&gt;macOS (Homebrew)&lt;a class=&quot;zola-anchor&quot; href=&quot;#macos-homebrew&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;xcode-select&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --install&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;    # if not already done&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;brew&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; install opam gmp z3 pkgconf cmake&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&quot;arch-linux&quot;&gt;Arch Linux&lt;a class=&quot;zola-anchor&quot; href=&quot;#arch-linux&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;sudo&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pacman&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; opam&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;        # OCaml package manager -- needed to fetch and install Sail&amp;#39;s OCaml dependencies&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;sudo&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pacman&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; gmp&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;         # GNU Multiple Precision arithmetic library -- Sail uses it internally for big integer arithmetic&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;sudo&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pacman&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; z3&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;          # SMT solver from Microsoft Research -- Sail calls Z3 during type-checking to prove&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;                           #   arithmetic constraints on dependent types (e.g. that bitvector widths are correct)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;sudo&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pacman&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; cmake&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;       # build system generator -- sail-riscv uses CMake to orchestrate the Sail-to-Lean code generation&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;sudo&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pacman&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; base-devel&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;  # C compiler, make, binutils, etc. -- OCaml&amp;#39;s runtime is written in C and some opam&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;                           #   packages have C bindings (e.g. GMP). Also provides C++ compiler which sail-riscv&amp;#39;s&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;                           #   CMake build needs for the emulator harness, even if you only want Lean output.&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;sudo&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pacman&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; pkgconf&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;     # pkg-config implementation -- CMake uses it to locate system libraries like GMP&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&quot;both-platforms-initialize-opam-one-time&quot;&gt;Both Platforms: Initialize opam (one-time)&lt;a class=&quot;zola-anchor&quot; href=&quot;#both-platforms-initialize-opam-one-time&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;p&gt;Run the following code from anywhere – opam stores its state in &lt;code&gt;~/.opam/&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;TODO:&lt;/strong&gt; ocaml crash course&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;opam&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; init&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;                 # follow prompts, say yes to shell setup&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;eval&lt;/span&gt;&lt;span&gt; $(&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;opam&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; env&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;          # or restart your shell&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;opam init&lt;/code&gt; creates the &lt;code&gt;~/.opam/&lt;/code&gt; directory, downloads the OCaml package registry, and
 installs a default OCaml compiler.
-&lt;code&gt;eval $(opam env)&lt;&#x2F;code&gt; sets shell environment variables (&lt;code&gt;PATH&lt;&#x2F;code&gt;, &lt;code&gt;OCAML_TOPLEVEL_PATH&lt;&#x2F;code&gt;, etc.) so that your shell can find the OCaml tools and
+&lt;code&gt;eval $(opam env)&lt;/code&gt; sets shell environment variables (&lt;code&gt;PATH&lt;/code&gt;, &lt;code&gt;OCAML_TOPLEVEL_PATH&lt;/code&gt;, etc.) so that your shell can find the OCaml tools and
 libraries that opam installed.
-You need to run &lt;code&gt;eval $(opam env)&lt;&#x2F;code&gt; in each new shell session, or let opam’s shell hook do it automatically (it offers to set this up during
-&lt;code&gt;opam init&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;step-2-build-and-install-the-sail-compiler-locally&quot;&gt;Step 2: Build and Install the Sail Compiler Locally&lt;a class=&quot;zola-anchor&quot; href=&quot;#step-2-build-and-install-the-sail-compiler-locally&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
-&lt;p&gt;You should be in the &lt;code&gt;parent&#x2F;&lt;&#x2F;code&gt; directory (the one containing both &lt;code&gt;sail&#x2F;&lt;&#x2F;code&gt; and &lt;code&gt;sail-riscv&#x2F;&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
-&lt;p&gt;The Sail compiler is a single binary called &lt;code&gt;sail&lt;&#x2F;code&gt;.
+You need to run &lt;code&gt;eval $(opam env)&lt;/code&gt; in each new shell session, or let opam’s shell hook do it automatically (it offers to set this up during
+&lt;code&gt;opam init&lt;/code&gt;).&lt;/p&gt;
+&lt;h2 id=&quot;step-2-build-and-install-the-sail-compiler-locally&quot;&gt;Step 2: Build and Install the Sail Compiler Locally&lt;a class=&quot;zola-anchor&quot; href=&quot;#step-2-build-and-install-the-sail-compiler-locally&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;You should be in the &lt;code&gt;parent/&lt;/code&gt; directory (the one containing both &lt;code&gt;sail/&lt;/code&gt; and &lt;code&gt;sail-riscv/&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;The Sail compiler is a single binary called &lt;code&gt;sail&lt;/code&gt;.
 On its own, it can only parse and type-check Sail code.
-To actually generate output for a specific language (Lean, C++, Coq, etc.), it needs a &lt;strong&gt;backend plugin&lt;&#x2F;strong&gt; loaded at startup.&lt;&#x2F;p&gt;
-
-&lt;aside class=&quot;callout callout-box thm-box&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;What The Hell Is A Plugin&lt;&#x2F;div&gt;
-  
+To actually generate output for a specific language (Lean, C++, Coq, etc.), it needs a &lt;strong&gt;backend plugin&lt;/strong&gt; loaded at startup.&lt;/p&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-box thm-box&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;What The Hell Is A Plugin&lt;/div&gt;
   &lt;p&gt;Note that I do not understand ocaml’s plugin infrastructure properly.
-I had to ask Calude and this is what it gave me:&lt;&#x2F;p&gt;
-&lt;p&gt;A plugin is a &lt;code&gt;.cmxs&lt;&#x2F;code&gt; file – an OCaml shared library (see &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;manual&#x2F;5.2&#x2F;native.html#s:native:dynlink&quot;&gt;OCaml manual on native plugins&lt;&#x2F;a&gt;).
-When &lt;code&gt;sail&lt;&#x2F;code&gt; starts, it scans a known directory for &lt;code&gt;.cmxs&lt;&#x2F;code&gt; files and loads them.
+I had to ask Calude and this is what it gave me:&lt;/p&gt;
+&lt;p&gt;A plugin is a &lt;code&gt;.cmxs&lt;/code&gt; file – an OCaml shared library (see &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://ocaml.org/manual/5.2/native.html#s:native:dynlink&quot;&gt;OCaml manual on native plugins&lt;/a&gt;).
+When &lt;code&gt;sail&lt;/code&gt; starts, it scans a known directory for &lt;code&gt;.cmxs&lt;/code&gt; files and loads them.
 Each plugin registers new command-line flags.
-For example, loading &lt;code&gt;sail_plugin_lean.cmxs&lt;&#x2F;code&gt; adds the &lt;code&gt;--lean&lt;&#x2F;code&gt; flag to the &lt;code&gt;sail&lt;&#x2F;code&gt; binary.
-There is no separate “lean binary” – it’s all one &lt;code&gt;sail&lt;&#x2F;code&gt; binary with plugins extending its capabilities.&lt;&#x2F;p&gt;
-
-&lt;&#x2F;aside&gt;
-&lt;p&gt;&lt;strong&gt;dune&lt;&#x2F;strong&gt; is OCaml’s build system (like &lt;code&gt;make&lt;&#x2F;code&gt; or &lt;code&gt;cargo&lt;&#x2F;code&gt;).
-It reads build instructions from &lt;code&gt;dune&lt;&#x2F;code&gt; files in the source tree.
-Below, we use three commands. Each is explained with what it does and what it produces:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;2a-install-ocaml-dependencies&quot;&gt;2a. Install OCaml dependencies&lt;a class=&quot;zola-anchor&quot; href=&quot;#2a-install-ocaml-dependencies&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;opam&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; install .&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --deps-only&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Reads the &lt;code&gt;.opam&lt;&#x2F;code&gt; files in the sail repo and installs all required OCaml libraries
-into the current opam switch. Does not build sail itself.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;2b-build-the-compiler-and-plugins&quot;&gt;2b. Build the compiler and plugins&lt;a class=&quot;zola-anchor&quot; href=&quot;#2b-build-the-compiler-and-plugins&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;dune&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --release&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Compiles everything in the sail repo. Produces build artifacts under &lt;code&gt;_build&#x2F;&lt;&#x2F;code&gt;, including:&lt;&#x2F;p&gt;
+For example, loading &lt;code&gt;sail_plugin_lean.cmxs&lt;/code&gt; adds the &lt;code&gt;--lean&lt;/code&gt; flag to the &lt;code&gt;sail&lt;/code&gt; binary.
+There is no separate “lean binary” – it’s all one &lt;code&gt;sail&lt;/code&gt; binary with plugins extending its capabilities.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;p&gt;&lt;strong&gt;dune&lt;/strong&gt; is OCaml’s build system (like &lt;code&gt;make&lt;/code&gt; or &lt;code&gt;cargo&lt;/code&gt;).
+It reads build instructions from &lt;code&gt;dune&lt;/code&gt; files in the source tree.
+Below, we use three commands. Each is explained with what it does and what it produces:&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;cd&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; sail&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&quot;2a-install-ocaml-dependencies&quot;&gt;2a. Install OCaml dependencies&lt;a class=&quot;zola-anchor&quot; href=&quot;#2a-install-ocaml-dependencies&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;opam&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; install .&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --deps-only&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Reads the &lt;code&gt;.opam&lt;/code&gt; files in the sail repo and installs all required OCaml libraries
+into the current opam switch. Does not build sail itself.&lt;/p&gt;
+&lt;h3 id=&quot;2b-build-the-compiler-and-plugins&quot;&gt;2b. Build the compiler and plugins&lt;a class=&quot;zola-anchor&quot; href=&quot;#2b-build-the-compiler-and-plugins&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;dune&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --release&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Compiles everything in the sail repo. Produces build artifacts under &lt;code&gt;_build/&lt;/code&gt;, including:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;_build&#x2F;default&#x2F;src&#x2F;bin&#x2F;sail.exe&lt;&#x2F;code&gt; – the core sail binary&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;code&gt;_build&#x2F;default&#x2F;src&#x2F;sail_lean_backend&#x2F;sail_plugin_lean.cmxs&lt;&#x2F;code&gt; – the Lean plugin&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;p&gt;At this point the binary exists but doesn’t know where to find its plugins.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;2c-install-into-a-local-prefix&quot;&gt;2c. Install into a local prefix&lt;a class=&quot;zola-anchor&quot; href=&quot;#2c-install-into-a-local-prefix&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;dune&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; install&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --prefix&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; _local_install&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Copies the binary, plugins, and standard library files into a structured directory:&lt;&#x2F;p&gt;
+&lt;li&gt;&lt;code&gt;_build/default/src/bin/sail.exe&lt;/code&gt; – the core sail binary&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;_build/default/src/sail_lean_backend/sail_plugin_lean.cmxs&lt;/code&gt; – the Lean plugin&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;At this point the binary exists but doesn’t know where to find its plugins.&lt;/p&gt;
+&lt;h3 id=&quot;2c-install-into-a-local-prefix&quot;&gt;2c. Install into a local prefix&lt;a class=&quot;zola-anchor&quot; href=&quot;#2c-install-into-a-local-prefix&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;dune&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; install&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --prefix&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; _local_install&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Copies the binary, plugins, and standard library files into a structured directory:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;_local_install&#x2F;bin&#x2F;sail&lt;&#x2F;code&gt; – the sail binary&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;code&gt;_local_install&#x2F;share&#x2F;libsail&#x2F;plugins&#x2F;sail_plugin_lean.cmxs&lt;&#x2F;code&gt; – the Lean plugin&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;code&gt;_local_install&#x2F;share&#x2F;sail&#x2F;lib&#x2F;&lt;&#x2F;code&gt; – Sail’s standard library (prelude, etc.)&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;p&gt;This is what “installing a plugin” means concretely: copying the &lt;code&gt;.cmxs&lt;&#x2F;code&gt; file into the
-&lt;code&gt;share&#x2F;libsail&#x2F;plugins&#x2F;&lt;&#x2F;code&gt; directory where the &lt;code&gt;sail&lt;&#x2F;code&gt; binary knows to look for it.&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ..&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h3 id=&quot;verify-the-lean-backend-is-loaded&quot;&gt;Verify the Lean backend is loaded&lt;a class=&quot;zola-anchor&quot; href=&quot;#verify-the-lean-backend-is-loaded&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; sail&#x2F;_local_install&#x2F;bin&#x2F;sail&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --help&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; |&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; grep&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; lean&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;&lt;code&gt;SAIL_DIR&lt;&#x2F;code&gt; tells the sail binary where to find its standard library and plugins.
-You should see &lt;code&gt;--lean&lt;&#x2F;code&gt; and related flags listed. If you don’t, the plugin file is
-not in the expected &lt;code&gt;share&#x2F;libsail&#x2F;plugins&#x2F;&lt;&#x2F;code&gt; directory – re-run &lt;code&gt;dune install&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;step-3-configure-the-sail-riscv-build&quot;&gt;Step 3: Configure the sail-riscv Build&lt;a class=&quot;zola-anchor&quot; href=&quot;#step-3-configure-the-sail-riscv-build&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
-&lt;p&gt;From the parent directory (or from &lt;code&gt;sail-riscv&#x2F;&lt;&#x2F;code&gt;):&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; sail-riscv&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;cmake&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; .&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -B&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;  -DCMAKE_BUILD_TYPE=RelWithDebInfo \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;  -DSAIL_BIN=$(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;bin&#x2F;sail&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Key variables:&lt;&#x2F;p&gt;
+&lt;li&gt;&lt;code&gt;_local_install/bin/sail&lt;/code&gt; – the sail binary&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;_local_install/share/libsail/plugins/sail_plugin_lean.cmxs&lt;/code&gt; – the Lean plugin&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;_local_install/share/sail/lib/&lt;/code&gt; – Sail’s standard library (prelude, etc.)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This is what “installing a plugin” means concretely: copying the &lt;code&gt;.cmxs&lt;/code&gt; file into the
+&lt;code&gt;share/libsail/plugins/&lt;/code&gt; directory where the &lt;code&gt;sail&lt;/code&gt; binary knows to look for it.&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;cd&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ..&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&quot;verify-the-lean-backend-is-loaded&quot;&gt;Verify the Lean backend is loaded&lt;a class=&quot;zola-anchor&quot; href=&quot;#verify-the-lean-backend-is-loaded&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt;sail/_local_install/share/sail&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; sail/_local_install/bin/sail&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --help&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; |&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; grep&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; lean&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;code&gt;SAIL_DIR&lt;/code&gt; tells the sail binary where to find its standard library and plugins.
+You should see &lt;code&gt;--lean&lt;/code&gt; and related flags listed. If you don’t, the plugin file is
+not in the expected &lt;code&gt;share/libsail/plugins/&lt;/code&gt; directory – re-run &lt;code&gt;dune install&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&quot;step-3-configure-the-sail-riscv-build&quot;&gt;Step 3: Configure the sail-riscv Build&lt;a class=&quot;zola-anchor&quot; href=&quot;#step-3-configure-the-sail-riscv-build&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;From the parent directory (or from &lt;code&gt;sail-riscv/&lt;/code&gt;):&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;cd&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; sail-riscv&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;/span&gt;&lt;span&gt;$(&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ../sail/_local_install/share/sail&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; \&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;cmake&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -S&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; .&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -B&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; \&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;  -DCMAKE_BUILD_TYPE=RelWithDebInfo \&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;  -DSAIL_BIN=$(&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ../sail/_local_install/bin/sail&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;)&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Key variables:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;SAIL_DIR&lt;&#x2F;code&gt; – points to the installed Sail share directory. This is where the
-compiler finds its standard library, include files, and plugins.&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;code&gt;SAIL_BIN&lt;&#x2F;code&gt; – path to the locally-installed sail binary.&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;p&gt;&lt;strong&gt;Important:&lt;&#x2F;strong&gt; Both paths must be &lt;strong&gt;absolute&lt;&#x2F;strong&gt;. CMake runs &lt;code&gt;sail --dir&lt;&#x2F;code&gt; internally
+&lt;li&gt;&lt;code&gt;SAIL_DIR&lt;/code&gt; – points to the installed Sail share directory. This is where the
+compiler finds its standard library, include files, and plugins.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;SAIL_BIN&lt;/code&gt; – path to the locally-installed sail binary.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Important:&lt;/strong&gt; Both paths must be &lt;strong&gt;absolute&lt;/strong&gt;. CMake runs &lt;code&gt;sail --dir&lt;/code&gt; internally
 to locate the Sail library directory, and the sail binary echoes back whatever
-&lt;code&gt;SAIL_DIR&lt;&#x2F;code&gt; was set to. If that’s a relative path like &lt;code&gt;..&#x2F;sail&#x2F;...&lt;&#x2F;code&gt;, CMake
-resolves it relative to the build directory (&lt;code&gt;build&#x2F;&lt;&#x2F;code&gt;), not the source directory,
-causing “Cannot find source file” errors for the C runtime files.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;step-4-generate-lean-code&quot;&gt;Step 4: Generate Lean Code&lt;a class=&quot;zola-anchor&quot; href=&quot;#step-4-generate-lean-code&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
+&lt;code&gt;SAIL_DIR&lt;/code&gt; was set to. If that’s a relative path like &lt;code&gt;../sail/...&lt;/code&gt;, CMake
+resolves it relative to the build directory (&lt;code&gt;build/&lt;/code&gt;), not the source directory,
+causing “Cannot find source file” errors for the C runtime files.&lt;/p&gt;
+&lt;h2 id=&quot;step-4-generate-lean-code&quot;&gt;Step 4: Generate Lean Code&lt;a class=&quot;zola-anchor&quot; href=&quot;#step-4-generate-lean-code&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
 &lt;p&gt;Two variants can be generated. Both take a few minutes (the Sail compiler
-type-checks the full model, calling Z3 to solve arithmetic constraints).&lt;&#x2F;p&gt;
-
-&lt;aside class=&quot;callout callout-warning&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;Warning&lt;&#x2F;div&gt;
-  
-  &lt;p&gt;I also do not understand any of the Z3 stuff right now.&lt;&#x2F;p&gt;
-
-&lt;&#x2F;aside&gt;
-&lt;h3 id=&quot;noncomputable-for-theorem-proving&quot;&gt;Noncomputable (for theorem proving)&lt;a class=&quot;zola-anchor&quot; href=&quot;#noncomputable-for-theorem-proving&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #032F62;&quot;&gt;  cmake&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --build&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --target&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; generated_lean_rv64d&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Output: &lt;code&gt;build&#x2F;model&#x2F;Lean_RV64D&#x2F;&lt;&#x2F;code&gt; (~155 &lt;code&gt;.lean&lt;&#x2F;code&gt; files)&lt;&#x2F;p&gt;
-&lt;p&gt;This version uses &lt;code&gt;noncomputable&lt;&#x2F;code&gt; sections, suitable for interactive proof in Lean.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;executable-for-running-theorem-provin-theorem-provingg&quot;&gt;Executable (for running + theorem provin + theorem provingg)&lt;a class=&quot;zola-anchor&quot; href=&quot;#executable-for-running-theorem-provin-theorem-provingg&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #032F62;&quot;&gt;  cmake&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --build&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --target&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; generated_lean_executable_rv64d&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;Output: &lt;code&gt;build&#x2F;model&#x2F;Lean_RV64D_executable&#x2F;&lt;&#x2F;code&gt; (~155 &lt;code&gt;.lean&lt;&#x2F;code&gt; files)&lt;&#x2F;p&gt;
-&lt;p&gt;This version generates computable code that can be built and executed with &lt;code&gt;lake build&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;rv32-variants&quot;&gt;RV32 Variants&lt;a class=&quot;zola-anchor&quot; href=&quot;#rv32-variants&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
-&lt;p&gt;Replace &lt;code&gt;rv64d&lt;&#x2F;code&gt; with &lt;code&gt;rv32d&lt;&#x2F;code&gt; in the target names for 32-bit:&lt;&#x2F;p&gt;
+type-checks the full model, calling Z3 to solve arithmetic constraints).&lt;/p&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-warning&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;&lt;/div&gt;
+  &lt;p&gt;I also do not understand any of the Z3 stuff right now.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;h3 id=&quot;noncomputable-for-theorem-proving&quot;&gt;Noncomputable (for theorem proving)&lt;a class=&quot;zola-anchor&quot; href=&quot;#noncomputable-for-theorem-proving&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;/span&gt;&lt;span&gt;$(&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ../sail/_local_install/share/sail&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; \&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #032F62;&quot;&gt;  cmake&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --build&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --target&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; generated_lean_rv64d&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Output: &lt;code&gt;build/model/Lean_RV64D/&lt;/code&gt; (~155 &lt;code&gt;.lean&lt;/code&gt; files)&lt;/p&gt;
+&lt;p&gt;This version uses &lt;code&gt;noncomputable&lt;/code&gt; sections, suitable for interactive proof in Lean.&lt;/p&gt;
+&lt;h3 id=&quot;executable-for-running-theorem-provin-theorem-provingg&quot;&gt;Executable (for running + theorem provin + theorem provingg)&lt;a class=&quot;zola-anchor&quot; href=&quot;#executable-for-running-theorem-provin-theorem-provingg&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;/span&gt;&lt;span&gt;$(&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ../sail/_local_install/share/sail&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; \&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #032F62;&quot;&gt;  cmake&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --build&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --target&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; generated_lean_executable_rv64d&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Output: &lt;code&gt;build/model/Lean_RV64D_executable/&lt;/code&gt; (~155 &lt;code&gt;.lean&lt;/code&gt; files)&lt;/p&gt;
+&lt;p&gt;This version generates computable code that can be built and executed with &lt;code&gt;lake build&lt;/code&gt;.&lt;/p&gt;
+&lt;h3 id=&quot;rv32-variants&quot;&gt;RV32 Variants&lt;a class=&quot;zola-anchor&quot; href=&quot;#rv32-variants&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;p&gt;Replace &lt;code&gt;rv64d&lt;/code&gt; with &lt;code&gt;rv32d&lt;/code&gt; in the target names for 32-bit:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;generated_lean_rv32d&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
-&lt;li&gt;&lt;code&gt;generated_lean_executable_rv32d&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;h2 id=&quot;step-5-build-the-generated-lean-code-optional&quot;&gt;Step 5: Build the Generated Lean Code (Optional)&lt;a class=&quot;zola-anchor&quot; href=&quot;#step-5-build-the-generated-lean-code-optional&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
-&lt;p&gt;Each output directory contains a &lt;code&gt;lakefile.toml&lt;&#x2F;code&gt; and &lt;code&gt;lean-toolchain&lt;&#x2F;code&gt;. To compile:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&#x2F;model&#x2F;Lean_RV64D&#x2F;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;          # or Lean_RV64D_executable&#x2F;&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;lake&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; update&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;lake&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;li&gt;&lt;code&gt;generated_lean_rv32d&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;generated_lean_executable_rv32d&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;step-5-build-the-generated-lean-code-optional&quot;&gt;Step 5: Build the Generated Lean Code (Optional)&lt;a class=&quot;zola-anchor&quot; href=&quot;#step-5-build-the-generated-lean-code-optional&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Each output directory contains a &lt;code&gt;lakefile.toml&lt;/code&gt; and &lt;code&gt;lean-toolchain&lt;/code&gt;. To compile:&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;cd&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build/model/Lean_RV64D/&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;          # or Lean_RV64D_executable/&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;lake&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; update&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;lake&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The generated Lean requires a specific Lean toolchain version (specified in
-&lt;code&gt;lean-toolchain&lt;&#x2F;code&gt;) and the &lt;code&gt;lean-sail&lt;&#x2F;code&gt; support library (fetched automatically by &lt;code&gt;lake&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;rebuilding-after-sail-compiler-changes&quot;&gt;Rebuilding After Sail Compiler Changes&lt;a class=&quot;zola-anchor&quot; href=&quot;#rebuilding-after-sail-compiler-changes&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
-&lt;p&gt;Since you’re running from source, after modifying the Sail compiler:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;# 1. Rebuild and reinstall the compiler&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ..&#x2F;sail&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;dune&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --release&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;dune&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; install&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --prefix&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; _local_install&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;# 2. Clean stale outputs and re-generate Lean (from sail-riscv)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;cd&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ..&#x2F;sail-riscv&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;rm&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -rf&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&#x2F;model&#x2F;Lean_RV64D build&#x2F;model&#x2F;Lean_RV64D_executable&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #032F62;&quot;&gt;  cmake&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --build&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --target&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; generated_lean_rv64d&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt;$(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; \&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #032F62;&quot;&gt;  cmake&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --build&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --target&lt;&#x2F;span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; generated_lean_executable_rv64d&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;troubleshooting&quot;&gt;Troubleshooting&lt;a class=&quot;zola-anchor&quot; href=&quot;#troubleshooting&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
+&lt;code&gt;lean-toolchain&lt;/code&gt;) and the &lt;code&gt;lean-sail&lt;/code&gt; support library (fetched automatically by &lt;code&gt;lake&lt;/code&gt;).&lt;/p&gt;
+&lt;h2 id=&quot;rebuilding-after-sail-compiler-changes&quot;&gt;Rebuilding After Sail Compiler Changes&lt;a class=&quot;zola-anchor&quot; href=&quot;#rebuilding-after-sail-compiler-changes&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Since you’re running from source, after modifying the Sail compiler:&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;shellscript&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;# 1. Rebuild and reinstall the compiler&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;cd&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ../sail&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;dune&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --release&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;dune&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; install&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --prefix&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; _local_install&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;# 2. Clean stale outputs and re-generate Lean (from sail-riscv)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;cd&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ../sail-riscv&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;rm&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; -rf&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build/model/Lean_RV64D build/model/Lean_RV64D_executable&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;/span&gt;&lt;span&gt;$(&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ../sail/_local_install/share/sail&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; \&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #032F62;&quot;&gt;  cmake&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --build&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --target&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; generated_lean_rv64d&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;SAIL_DIR&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;=&lt;/span&gt;&lt;span&gt;$(&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;realpath&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; ../sail/_local_install/share/sail&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; \&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #032F62;&quot;&gt;  cmake&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --build&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; build&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; --target&lt;/span&gt;&lt;span style=&quot;color: #032F62;&quot;&gt; generated_lean_executable_rv64d&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&quot;troubleshooting&quot;&gt;Troubleshooting&lt;a class=&quot;zola-anchor&quot; href=&quot;#troubleshooting&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;code&gt;Cannot find source file: ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail&#x2F;lib&#x2F;elf.c&lt;&#x2F;code&gt;&lt;&#x2F;strong&gt;: You used
-relative paths for &lt;code&gt;SAIL_DIR&lt;&#x2F;code&gt;. CMake resolves paths relative to the build directory,
-not where you ran the command. Use &lt;code&gt;$(realpath ..&#x2F;sail&#x2F;_local_install&#x2F;share&#x2F;sail)&lt;&#x2F;code&gt; to
-get an absolute path.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;Cannot find source file: ../sail/_local_install/share/sail/lib/elf.c&lt;/code&gt;&lt;/strong&gt;: You used
+relative paths for &lt;code&gt;SAIL_DIR&lt;/code&gt;. CMake resolves paths relative to the build directory,
+not where you ran the command. Use &lt;code&gt;$(realpath ../sail/_local_install/share/sail)&lt;/code&gt; to
+get an absolute path.&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;code&gt;--lean&lt;&#x2F;code&gt; flag not found&lt;&#x2F;strong&gt;: The plugin wasn’t installed. Make sure you ran
-&lt;code&gt;dune install --prefix _local_install&lt;&#x2F;code&gt; and that &lt;code&gt;SAIL_DIR&lt;&#x2F;code&gt; points to the
-&lt;code&gt;_local_install&#x2F;share&#x2F;sail&lt;&#x2F;code&gt; directory (not the repo root or &lt;code&gt;lib&#x2F;&lt;&#x2F;code&gt;).&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;--lean&lt;/code&gt; flag not found&lt;/strong&gt;: The plugin wasn’t installed. Make sure you ran
+&lt;code&gt;dune install --prefix _local_install&lt;/code&gt; and that &lt;code&gt;SAIL_DIR&lt;/code&gt; points to the
+&lt;code&gt;_local_install/share/sail&lt;/code&gt; directory (not the repo root or &lt;code&gt;lib/&lt;/code&gt;).&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;&lt;code&gt;sail: command not found&lt;&#x2F;code&gt; during cmake&lt;&#x2F;strong&gt;: You need to pass &lt;code&gt;-DSAIL_BIN=&lt;&#x2F;code&gt; pointing
-to your local install, and set &lt;code&gt;SAIL_DIR&lt;&#x2F;code&gt; as an environment variable.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;sail: command not found&lt;/code&gt; during cmake&lt;/strong&gt;: You need to pass &lt;code&gt;-DSAIL_BIN=&lt;/code&gt; pointing
+to your local install, and set &lt;code&gt;SAIL_DIR&lt;/code&gt; as an environment variable.&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Plugin load error (&lt;code&gt;symbol not found&lt;&#x2F;code&gt;)&lt;&#x2F;strong&gt;: Version mismatch between the sail binary
-and the plugin. Run &lt;code&gt;dune build --release &amp;amp;&amp;amp; dune install --prefix _local_install&lt;&#x2F;code&gt;
-again to rebuild both from the same source.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;&lt;strong&gt;Plugin load error (&lt;code&gt;symbol not found&lt;/code&gt;)&lt;/strong&gt;: Version mismatch between the sail binary
+and the plugin. Run &lt;code&gt;dune build --release &amp;amp;&amp;amp; dune install --prefix _local_install&lt;/code&gt;
+again to rebuild both from the same source.&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;CMake cache error about mismatched source directory&lt;&#x2F;strong&gt;: Delete &lt;code&gt;build&#x2F;&lt;&#x2F;code&gt; and
-reconfigure: &lt;code&gt;rm -rf build &amp;amp;&amp;amp; cmake -S . -B build ...&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;h2 id=&quot;what-gets-generated&quot;&gt;What Gets Generated&lt;a class=&quot;zola-anchor&quot; href=&quot;#what-gets-generated&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
-&lt;p&gt;The Sail compiler translates the entire RISC-V ISA model into Lean definitions:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;strong&gt;CMake cache error about mismatched source directory&lt;/strong&gt;: Delete &lt;code&gt;build/&lt;/code&gt; and
+reconfigure: &lt;code&gt;rm -rf build &amp;amp;&amp;amp; cmake -S . -B build ...&lt;/code&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&quot;what-gets-generated&quot;&gt;What Gets Generated&lt;a class=&quot;zola-anchor&quot; href=&quot;#what-gets-generated&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;The Sail compiler translates the entire RISC-V ISA model into Lean definitions:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Instruction encodings&#x2F;decodings&lt;&#x2F;li&gt;
-&lt;li&gt;Instruction semantics&lt;&#x2F;li&gt;
-&lt;li&gt;CSR definitions&lt;&#x2F;li&gt;
-&lt;li&gt;Memory model&lt;&#x2F;li&gt;
-&lt;li&gt;Exception handling&lt;&#x2F;li&gt;
-&lt;li&gt;Extension support (M, A, F, D, C, V, etc.)&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
+&lt;li&gt;Instruction encodings/decodings&lt;/li&gt;
+&lt;li&gt;Instruction semantics&lt;/li&gt;
+&lt;li&gt;CSR definitions&lt;/li&gt;
+&lt;li&gt;Memory model&lt;/li&gt;
+&lt;li&gt;Exception handling&lt;/li&gt;
+&lt;li&gt;Extension support (M, A, F, D, C, V, etc.)&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;The noncomputable version is for reasoning about the spec in Lean’s type theory.
-The executable version can simulate RISC-V binaries.&lt;&#x2F;p&gt;
+The executable version can simulate RISC-V binaries.&lt;/p&gt;
 </content>
   </entry>
   
@@ -254,30 +238,26 @@ The executable version can simulate RISC-V binaries.&lt;&#x2F;p&gt;
   
   <entry xml:lang="en">
     <title>Anatomy Of A Jolt Sumcheck</title>
-    <published>2025-12-01T00:00:00+00:00</published>
-    <updated>2026-02-17T00:00:00+00:00</updated>
+    <published>2025-12-01T00:00:00Z</published>
+    <updated>2026-02-17T00:00:00Z</updated>
     
       <author><name>Ari</name></author>
     
     <link rel="alternate" type="text/html" href="https://randomwalks.xyz/blog/streaming-sumchecks/"/>
     <id>https://randomwalks.xyz/blog/streaming-sumchecks/</id>
     
-    <content type="html" xml:base="https://randomwalks.xyz/blog/streaming-sumchecks/">
-&lt;aside class=&quot;callout callout-remark&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;(Update) 2026-08-14&lt;&#x2F;div&gt;
-  
+    <content type="html" xml:base="https://randomwalks.xyz/blog/streaming-sumchecks/">&lt;aside id=&quot;&quot; class=&quot;callout callout-remark&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;(Update) 2026-08-14&lt;/div&gt;
   &lt;p&gt;Jolt has changed so much since writing this post was written, the code is no longer in main.
-Still the post remains valid if one were to understand how to implement streaming sum-checks.&lt;&#x2F;p&gt;
-
-&lt;&#x2F;aside&gt;
-&lt;p&gt;This write-up talks about this &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;a16z&#x2F;jolt&#x2F;pull&#x2F;1114&quot;&gt;PR&lt;&#x2F;a&gt; which introduces a generalised sum-check API, adapted to accommodate an implementation of Jolt that uses $O(1)$ memory&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-d-1&quot;&gt;&lt;a href=&quot;#fn-d&quot;&gt;1&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;the-trace&quot;&gt;The Trace&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-trace&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
+Still the post remains valid if one were to understand how to implement streaming sum-checks.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;p&gt;This write-up talks about this &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/pull/1114&quot;&gt;PR&lt;/a&gt; which introduces a generalised sum-check API, adapted to accommodate an implementation of Jolt that uses $O(1)$ memory&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-d-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/streaming-sumchecks/#fn-d&quot;&gt;[1]&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+&lt;h2 id=&quot;the-trace&quot;&gt;The Trace&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-trace&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
 &lt;p&gt;Before we describe the API, it will be useful to briefly re-cap how Jolt works.
 At the heart of the Jolt prover is the sumcheck algorithm.
-Given some polynomial $g$ and a set $S$ with sufficient structure&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-e-1&quot;&gt;&lt;a href=&quot;#fn-e&quot;&gt;2&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt;, the sum-check algorithm enables a prover to convince a verifier that it computed $\sum_{x \in S} g(x)$ honestly.
-The end goal of the Jolt prover is to convince an honest verifier that it ran some guest program&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-c-1&quot;&gt;&lt;a href=&quot;#fn-c&quot;&gt;3&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; correctly.
+Given some polynomial $g$ and a set $S$ with sufficient structure&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-e-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/streaming-sumchecks/#fn-e&quot;&gt;[2]&lt;/a&gt;&lt;/sup&gt;, the sum-check algorithm enables a prover to convince a verifier that it computed $\sum_{x \in S} g(x)$ honestly.
+The end goal of the Jolt prover is to convince an honest verifier that it ran some guest program&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-c-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/streaming-sumchecks/#fn-c&quot;&gt;[3]&lt;/a&gt;&lt;/sup&gt; correctly.
 It does so via many sum-check algorithms.
 Therefore for the whole setup to work, the polynomials involved in these sumchecks must be in some way related to the execution of said program.
 As such honest proving begins with emulation of the given RISC-V program – which we refer to as the trace.
@@ -285,461 +265,429 @@ This is a fancy way of saying that the prover runs the program, and stores succi
 This list is what we refer to as the trace.
 And it is this trace from which we will construct the sum-check polynomials in Jolt.
 See the emulation post for a fully worked out description of the emulation from an actual albeit useless program written in Rust.
-For example, consider the following program with just two instructions.&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;asm&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;00001117&lt;&#x2F;span&gt;&lt;span&gt;    auipc  &lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;sp&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;0x1&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # sp = PC + (0x1 &amp;lt;&amp;lt; 12) = 0x80000000 + 0x1000 = 0x80001000&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;12010113&lt;&#x2F;span&gt;&lt;span&gt;    addi   &lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;sp&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;sp&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;288&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # sp = 0x80001000 + 288 = 0x80001120&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;After doing some initial setup of all the values of registers and memory, the emulation looks like the following:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;Cycle&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 0&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; AUIPC&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    address&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2147483648&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;  &#x2F;&#x2F; = 0x80000000&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    operands&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; FormatU&lt;&#x2F;span&gt;&lt;span&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        rd&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;            &#x2F;&#x2F; x2 = sp (stack pointer)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        imm&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 4096&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;        &#x2F;&#x2F; = 0x1000&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    },&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    register_state&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        rd&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt; (&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2147487744&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;  &#x2F;&#x2F; sp: 0 → 0x80001000&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;Cycle&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 1&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; ADDI&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;    RISCVCycle&lt;&#x2F;span&gt;&lt;span&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        instruction&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; ADDI&lt;&#x2F;span&gt;&lt;span&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            address&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2147483652&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;  &#x2F;&#x2F; = 0x80000004 (Program counter)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            operands&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; FormatI&lt;&#x2F;span&gt;&lt;span&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                rd&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;            &#x2F;&#x2F; sp (based on mapping above)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                rs1&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;           &#x2F;&#x2F; sp&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                imm&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 288&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;         &#x2F;&#x2F; = 0x120&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            },&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            virtual_sequence_remaining&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; None&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            is_first_in_sequence&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; false&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            is_compressed&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; false&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        },&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        register_state&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; RegisterStateFormatI&lt;&#x2F;span&gt;&lt;span&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            rd&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt; (&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;                2147487744&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; &#x2F;&#x2F; new value in rd&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;                2147488032&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; &#x2F;&#x2F; old value in rd&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            ),&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            rs1&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2147487744&lt;&#x2F;span&gt;&lt;span&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; &#x2F;&#x2F; value in rs1&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        },&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ram_access&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span&gt; (),&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; &#x2F;&#x2F; no ram access&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    },&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+For example, consider the following program with just two instructions.&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;asm&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;00001117&lt;/span&gt;&lt;span&gt;    auipc  &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;sp&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;0x1&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # sp = PC + (0x1 &amp;lt;&amp;lt; 12) = 0x80000000 + 0x1000 = 0x80001000&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;12010113&lt;/span&gt;&lt;span&gt;    addi   &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;sp&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;sp&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;288&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # sp = 0x80001000 + 288 = 0x80001120&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After doing some initial setup of all the values of registers and memory, the emulation looks like the following:&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;Cycle&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 0&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; AUIPC&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    address&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2147483648&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;  // = 0x80000000&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    operands&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; FormatU&lt;/span&gt;&lt;span&gt; {&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        rd&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;            // x2 = sp (stack pointer)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        imm&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 4096&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;        // = 0x1000&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    },&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    register_state&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span&gt; {&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        rd&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span&gt; (&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;0&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2147487744&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;  // sp: 0 → 0x80001000&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    }&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;Cycle&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 1&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; ADDI&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;    RISCVCycle&lt;/span&gt;&lt;span&gt; {&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        instruction&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; ADDI&lt;/span&gt;&lt;span&gt; {&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            address&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2147483652&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;  // = 0x80000004 (Program counter)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            operands&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; FormatI&lt;/span&gt;&lt;span&gt; {&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                rd&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;            // sp (based on mapping above)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                rs1&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;           // sp&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;                imm&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 288&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;         // = 0x120&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            },&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            virtual_sequence_remaining&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; None&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            is_first_in_sequence&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; false&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            is_compressed&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; false&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        },&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        register_state&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; RegisterStateFormatI&lt;/span&gt;&lt;span&gt; {&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            rd&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span&gt; (&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;                2147487744&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; // new value in rd&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;                2147488032&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; // old value in rd&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            ),&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            rs1&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2147487744&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; // value in rs1&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        },&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ram_access&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span&gt; (),&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; // no ram access&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    },&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;For the purposes of this post, this is the mental model we will have when referring to the trace.
-It is a giant vector of length $T$, and location $t \in [T]$ stores the machine state before and after the $t$’th instruction.&lt;&#x2F;p&gt;
-
-&lt;aside class=&quot;callout callout-remark&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;A Lie In Service Of The Truth&lt;&#x2F;div&gt;
-  
+It is a giant vector of length $T$, and location $t \in [T]$ stores the machine state before and after the $t$’th instruction.&lt;/p&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-remark&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;A Lie In Service Of The Truth&lt;/div&gt;
   &lt;p&gt;Throughout this post we will assume that we can store the entire trace in memory, and iterating through the trace is free. This is clearly not true, and we will fix this at a later date.
-But for the purposes of this post, this assumption allows us to abstract away important implementation details that currently remain unimplemented, and prove that we can indeed implement any Jolt sumcheck with $O(1)$ memory.&lt;&#x2F;p&gt;
-
-&lt;&#x2F;aside&gt;
-&lt;h2 id=&quot;correctness-as-constraint-satisfaction&quot;&gt;Correctness As Constraint Satisfaction&lt;a class=&quot;zola-anchor&quot; href=&quot;#correctness-as-constraint-satisfaction&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
-&lt;p&gt;Now with the trace&#x2F;emulation in hand, we ask - what does it mean for a program to be executed correctly?
+But for the purposes of this post, this assumption allows us to abstract away important implementation details that currently remain unimplemented, and prove that we can indeed implement any Jolt sumcheck with $O(1)$ memory.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;h2 id=&quot;correctness-as-constraint-satisfaction&quot;&gt;Correctness As Constraint Satisfaction&lt;a class=&quot;zola-anchor&quot; href=&quot;#correctness-as-constraint-satisfaction&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Now with the trace/emulation in hand, we ask - what does it mean for a program to be executed correctly?
 One way to define correctness would be to say at every cycle, the machine state is consistent with the program specification.
 As a concrete example, consider loading and storing to memory.
-In RISC-V assembly loads&#x2F;store instructions look like the following:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;asm&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;lb   rd, offset(rs1)   &lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load byte (sign-extended)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;lh   rd, offset(rs1)   &lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load halfword (sign-extended)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;lw   rd, offset(rs1)   &lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load word (sign-extended)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;ld   rd, offset(rs1)   &lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load doubleword (RV64)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;lbu  rd, offset(rs1)   &lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load byte unsigned&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;lhu  rd, offset(rs1)   &lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load halfword unsigned&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;lwu  rd, offset(rs1)   &lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load word unsigned (RV64)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;sb   rs2, offset(rs1)  &lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Store byte&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;sh   rs2, offset(rs1)  &lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Store halfword&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;sw   rs2, offset(rs1)  &lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Store word&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;sd   rs2, offset(rs1)  &lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Store doubleword (RV64)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;So if the instruction has the &lt;code&gt;Load&lt;&#x2F;code&gt; flag set to 1 or &lt;code&gt;Store&lt;&#x2F;code&gt; flag set to 1, then the address from which we read&#x2F;write must be equal to value in &lt;code&gt;rs1 + offset&lt;&#x2F;code&gt;.
-Using propositional logic we write:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;if { Instruct has Load OR Store } then ( RamAddress ) == ( Rs1Value + Imm )&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;p&gt;The same thing expressed as algebraic constraints:&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;(Load + Store) * (RamAddress - (Rs1Value + Imm)) = 0&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+In RISC-V assembly loads/store instructions look like the following:&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;asm&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;lb   rd, offset(rs1)   &lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load byte (sign-extended)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;lh   rd, offset(rs1)   &lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load halfword (sign-extended)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;lw   rd, offset(rs1)   &lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load word (sign-extended)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;ld   rd, offset(rs1)   &lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load doubleword (RV64)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;lbu  rd, offset(rs1)   &lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load byte unsigned&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;lhu  rd, offset(rs1)   &lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load halfword unsigned&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;lwu  rd, offset(rs1)   &lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Load word unsigned (RV64)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;sb   rs2, offset(rs1)  &lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Store byte&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;sh   rs2, offset(rs1)  &lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Store halfword&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;sw   rs2, offset(rs1)  &lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Store word&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;sd   rs2, offset(rs1)  &lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; # Store doubleword (RV64)&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;So if the instruction has the &lt;code&gt;Load&lt;/code&gt; flag set to 1 or &lt;code&gt;Store&lt;/code&gt; flag set to 1, then the address from which we read/write must be equal to value in &lt;code&gt;rs1 + offset&lt;/code&gt;.
+Using propositional logic we write:&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;if { Instruct has Load OR Store } then ( RamAddress ) == ( Rs1Value + Imm )&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The same thing expressed as algebraic constraints:&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;(Load + Store) * (RamAddress - (Rs1Value + Imm)) = 0&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;For a program to be correctly executed, for every time step $t \in \lbrace 0,1 \rbrace^{\log T}$, the above constraint must be satisfied.
 Of course for a program to be correct, it is not sufficient to just satisfy the above constraint.
 There are many more constraints.
-In the &lt;code&gt;OuterSpartan&lt;&#x2F;code&gt; sumcheck we write down 20 such constraints, express these constraints as the evaluations of two polynomials $\widetilde{A}$ and $\widetilde{B}$, and represent constraint satisfaction as a sumcheck.
-More details follow.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;the-outer-spartan-polynomials&quot;&gt;The Outer Spartan Polynomials&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-outer-spartan-polynomials&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
+In the &lt;code&gt;OuterSpartan&lt;/code&gt; sumcheck we write down 20 such constraints, express these constraints as the evaluations of two polynomials $\widetilde{A}$ and $\widetilde{B}$, and represent constraint satisfaction as a sumcheck.
+More details follow.&lt;/p&gt;
+&lt;h2 id=&quot;the-outer-spartan-polynomials&quot;&gt;The Outer Spartan Polynomials&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-outer-spartan-polynomials&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
 &lt;p&gt;There are 20 constraints for each time step $t \in \lbrace 0,1\rbrace^{\log T}$.
-Each constraint will be of form&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;code&gt;Term 1 * Term 2 = 0&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;Here &lt;code&gt;Term 1&lt;&#x2F;code&gt; will be represented by $A$ and &lt;code&gt;Term 2&lt;&#x2F;code&gt; will be represented by $B$.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;strong&gt;Indexing&lt;&#x2F;strong&gt;: We divide the 20 constraints into 2 groups.
-We refer to each constraint using two digits&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-a-1&quot;&gt;&lt;a href=&quot;#fn-a&quot;&gt;4&lt;&#x2F;a&gt;&lt;&#x2F;sup&gt; $(b,y)$ where $b \in \lbrace 0,1\rbrace$ is the selector index, and $y\in \lbrace -4, \ldots, 5\rbrace$ refers to one of the 10 constraints in group $b$.
-For example,&lt;&#x2F;p&gt;
+Each constraint will be of form&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Term 1 * Term 2 = 0&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Here &lt;code&gt;Term 1&lt;/code&gt; will be represented by $A$ and &lt;code&gt;Term 2&lt;/code&gt; will be represented by $B$.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Indexing&lt;/strong&gt;: We divide the 20 constraints into 2 groups.
+We refer to each constraint using two digits&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-a-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/streaming-sumchecks/#fn-a&quot;&gt;[4]&lt;/a&gt;&lt;/sup&gt; $(b,y)$ where $b \in \lbrace 0,1\rbrace$ is the selector index, and $y\in \lbrace -4, \ldots, 5\rbrace$ refers to one of the 10 constraints in group $b$.
+For example,&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;$(0,-4)$ refers to constraint 1,&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;$(0,-4)$ refers to constraint 1,&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;$(0, -3)$ refers to constraint 2,&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;$(0, -3)$ refers to constraint 2,&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;…&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;…&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;$(1, 5)$ refers to the 20th constraint and so on.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;h3 id=&quot;example-constraint-1&quot;&gt;Example : Constraint 1&lt;a class=&quot;zola-anchor&quot; href=&quot;#example-constraint-1&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
+&lt;p&gt;$(1, 5)$ refers to the 20th constraint and so on.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&quot;example-constraint-1&quot;&gt;Example : Constraint 1&lt;a class=&quot;zola-anchor&quot; href=&quot;#example-constraint-1&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
 &lt;p&gt;Let $z_t[\text{LOAD}], z_t[\text{STORE}] \in \lbrace 0,1\rbrace$ denote boolean flags that denote whether the $t$’th instruction contains a LOAD or a STORE instruction.
-For a given time step $t \in \lbrace 0,1\rbrace^{\log T}$, using information from the trace, we write a table of evaluations with the following indexing logic:&lt;&#x2F;p&gt;
+For a given time step $t \in \lbrace 0,1\rbrace^{\log T}$, using information from the trace, we write a table of evaluations with the following indexing logic:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;$A(t, 0 , -4) = z_t[\text{LOAD}] + z_t[\text{STORE}]$&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;$A(t, 0 , -4) = z_t[\text{LOAD}] + z_t[\text{STORE}]$&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;$B(t, 0, -4) = (\text{RamAddress} - (\text{Rs1Value} + \text{Imm}))$&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
+&lt;p&gt;$B(t, 0, -4) = (\text{RamAddress} - (\text{Rs1Value} + \text{Imm}))$&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;That is satisfying constraint 1 for time step $t$ is equivalent to checking if $A(t, 0, -4) \times B(t, 0, -4) = 0$.
 The remaining 19 constraints give us evaluations $A(X_t, X_b, Y)$ and $B(X_t, X_b, Y)$ for $Y \in \lbrace -4, \ldots, 5\rbrace, X_b \in \lbrace 0,1\rbrace, X_t \in \lbrace 0,1\rbrace^{\log T}$.
 The picture you have in mind is the following
-&lt;img src=&quot;https:&#x2F;&#x2F;randomwalks.xyz&#x2F;blog&#x2F;streaming-sumchecks&#x2F;trave_to_poly.svg&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
-&lt;p&gt;Satisfying all constraints is just saying the following:&lt;&#x2F;p&gt;
+&lt;img src=&quot;https://randomwalks.xyz/blog/streaming-sumchecks/trave_to_poly.svg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;Satisfying all constraints is just saying the following:&lt;/p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$
-\widetilde{A}(x_t, x_b, y) \times \widetilde{B}(x_t, x_b,  y) = \vec{0} \quad \forall x_t \in \{0,1\}^{\log T}, \forall x_b \in \{0,1\}, \forall y \in \{-4, ..., 5\}
-$$
-&lt;&#x2F;div&gt;
-&lt;p&gt;where $\widetilde{U}$ denotes the multilinear extension of a vector $U$.&lt;&#x2F;p&gt;
-
-&lt;aside class=&quot;callout callout-definition thm-numbered&quot;&gt;
-  
-  &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;&#x2F;span&gt;&lt;span class=&quot;thm-title&quot;&gt; — Notation&lt;&#x2F;span&gt;&lt;&#x2F;div&gt;
-  
+&lt;p&gt;$$
+\widetilde{A}(x_t, x_b, y) \times \widetilde{B}(x_t, x_b,  y) = \vec{0} \quad \forall x_t \in {0,1}^{\log T}, \forall x_b \in {0,1}, \forall y \in {-4, …, 5}
+$$&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;where $\widetilde{U}$ denotes the multilinear extension of a vector $U$.&lt;/p&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-definition thm-numbered&quot;&gt;
+  &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;/span&gt;
+    &lt;span class=&quot;thm-title&quot;&gt; : Notation&lt;/span&gt;&lt;/div&gt;
   &lt;ul&gt;
-&lt;li&gt;$\widetilde{U}$ denotes the &lt;strong&gt;multilinear extension&lt;&#x2F;strong&gt; (MLE) of $U$: the unique multilinear polynomial agreeing with $U$ on all Boolean inputs.&lt;&#x2F;li&gt;
-&lt;li&gt;$\eq{\tau}{x}$ is the &lt;strong&gt;equality polynomial&lt;&#x2F;strong&gt;, evaluating to 1 when $\tau = x$ on the Boolean hypercube and 0 otherwise.&lt;&#x2F;li&gt;
-&lt;li&gt;$\mathcal{L}_a(X)$ is the &lt;strong&gt;Lagrange basis polynomial&lt;&#x2F;strong&gt; for point $a$ in a domain $D$: the unique polynomial of degree $|D|-1$ satisfying $\mathcal{L}_a(a) = 1$ and $\mathcal{L}_a(d) = 0$ for all other $d \in D$.&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-
-&lt;&#x2F;aside&gt;
+&lt;li&gt;$\widetilde{U}$ denotes the &lt;strong&gt;multilinear extension&lt;/strong&gt; (MLE) of $U$: the unique multilinear polynomial agreeing with $U$ on all Boolean inputs.&lt;/li&gt;
+&lt;li&gt;$\eq{\tau}{x}$ is the &lt;strong&gt;equality polynomial&lt;/strong&gt;, evaluating to 1 when $\tau = x$ on the Boolean hypercube and 0 otherwise.&lt;/li&gt;
+&lt;li&gt;$\mathcal{L}_a(X)$ is the &lt;strong&gt;Lagrange basis polynomial&lt;/strong&gt; for point $a$ in a domain $D$: the unique polynomial of degree $|D|-1$ satisfying $\mathcal{L}_a(a) = 1$ and $\mathcal{L}_a(d) = 0$ for all other $d \in D$.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/aside&gt;
 &lt;p&gt;Now we do the thing we have done since the beginning of time.
 We want to make sure the LHS of the above system of equations equals the RHS as polynomials.
-So we sample $(\TauTime | \tau_{b} | \TauConstraints) \samples \ChallengeSet^{\log T+2}$ and check if the following sumcheck holds:&lt;&#x2F;p&gt;
+So we sample $(\TauTime | \tau_{b} | \TauConstraints) \samples \ChallengeSet^{\log T+2}$ and check if the following sumcheck holds:&lt;/p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$\sum_{x_t \in \{0,1\}^{\log T}} \sum_{x_b \in \{0,1\}} \sum_{y \in \{-4,...,5\}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{y}{\TauConstraints} \cdot \widetilde{A}(x_t, x_b, y) \, \widetilde{B}(x_t, x_b, y) = 0 $$
-&lt;&#x2F;div&gt;
-&lt;p&gt;By Schwartz-Zippel, with high probability if the above test passes, then the verifier can be happy that the prover was honest.&lt;&#x2F;p&gt;
-&lt;h2 id=&quot;review-of-the-linear-sumcheck-implementation&quot;&gt;Review Of The Linear Sumcheck Implementation&lt;a class=&quot;zola-anchor&quot; href=&quot;#review-of-the-linear-sumcheck-implementation&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
+&lt;p&gt;$$\sum_{x_t \in {0,1}^{\log T}} \sum_{x_b \in {0,1}} \sum_{y \in {-4,…,5}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{y}{\TauConstraints} \cdot \widetilde{A}(x_t, x_b, y) , \widetilde{B}(x_t, x_b, y) = 0 $$&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;By Schwartz-Zippel, with high probability if the above test passes, then the verifier can be happy that the prover was honest.&lt;/p&gt;
+&lt;h2 id=&quot;review-of-the-linear-sumcheck-implementation&quot;&gt;Review Of The Linear Sumcheck Implementation&lt;a class=&quot;zola-anchor&quot; href=&quot;#review-of-the-linear-sumcheck-implementation&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
 &lt;p&gt;As described above in the picture, in order to get $\widetilde{A}(x_t, x_b, y)$ and $\widetilde{B}(x_t, x_b, y)$ we need to process the $t$’th location of the trace.
 As soon as we process every location of the trace once, we can store $\widetilde{A}$ and $\widetilde{B}$ in memory.
 This requires $T \times 2 \times 20$ field elements worth of memory.
 If we could afford this, we can bin the trace once and for all.
 We have every bit of information needed to complete the sum-check algorithm.
-This is almost how the current implementation of the linear &lt;code&gt;OuterSpartan&lt;&#x2F;code&gt; sumcheck looks.
-Except there’s a special first round, which we describe below.&lt;&#x2F;p&gt;
+This is almost how the current implementation of the linear &lt;code&gt;OuterSpartan&lt;/code&gt; sumcheck looks.
+Except there’s a special first round, which we describe below.&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;A special handling of round involving variable $Y$ involving 10 constraints per time step and group index.&lt;&#x2F;li&gt;
-&lt;&#x2F;ol&gt;
+&lt;li&gt;A special handling of round involving variable $Y$ involving 10 constraints per time step and group index.&lt;/li&gt;
+&lt;/ol&gt;
 &lt;p&gt;Remember in each round of the sum-check the prover sends to the verifier a univariate polynomial, and the verifier responds with a challenge $r \samples \ChallengeSet$ sampled from the challenge set.
-We iterate through the entire trace, &lt;strong&gt;but&lt;&#x2F;strong&gt; we do &lt;strong&gt;NOT&lt;&#x2F;strong&gt; compute and store $\widetilde{A}$ and $\widetilde{B}$ in memory.
-Instead we store in memory the following univariate polynomial, which is the prover’s first round message.&lt;&#x2F;p&gt;
+We iterate through the entire trace, &lt;strong&gt;but&lt;/strong&gt; we do &lt;strong&gt;NOT&lt;/strong&gt; compute and store $\widetilde{A}$ and $\widetilde{B}$ in memory.
+Instead we store in memory the following univariate polynomial, which is the prover’s first round message.&lt;/p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$s(\textcolor{pink}{Y}) \Def \sum_{x_t \in \{0,1\}^{\log T}} \sum_{x_b \in \{0,1\}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{\TauConstraints}{\textcolor{pink}{Y}} \cdot A(x_t, x_b, \textcolor{pink}{Y}) \, B(x_t, x_b , \textcolor{pink}{Y})$$
-&lt;&#x2F;div&gt;
+&lt;p&gt;$$s(\textcolor{pink}{Y}) \Def \sum_{x_t \in {0,1}^{\log T}} \sum_{x_b \in {0,1}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{\TauConstraints}{\textcolor{pink}{Y}} \cdot A(x_t, x_b, \textcolor{pink}{Y}) , B(x_t, x_b , \textcolor{pink}{Y})$$&lt;/p&gt;
+&lt;/div&gt;
 &lt;p&gt;This takes $O(1)$ field elements worth of storage as there are only $10$ constraints per group.
-&lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;c20fe3c0234ea3a328dbbd3d7f717f64599ff579&#x2F;jolt-core&#x2F;src&#x2F;zkvm&#x2F;spartan&#x2F;outer.rs#L117&quot;&gt;See&lt;&#x2F;a&gt; for the evaluation points that represent the above polynomial.
-We refer to these evaluations as the &lt;code&gt;skip_window&lt;&#x2F;code&gt; in the code.&lt;&#x2F;p&gt;
-
-&lt;aside class=&quot;callout callout-remark&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;Remark&lt;&#x2F;div&gt;
-  
-  &lt;p&gt;&lt;strong&gt;NOTE:&lt;&#x2F;strong&gt; This phase will remain exactly the same in the current “streaming” implementation as well.
+&lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L117&quot;&gt;See&lt;/a&gt; for the evaluation points that represent the above polynomial.
+We refer to these evaluations as the &lt;code&gt;skip_window&lt;/code&gt; in the code.&lt;/p&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-remark&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;&lt;/div&gt;
+  &lt;p&gt;&lt;strong&gt;NOTE:&lt;/strong&gt; This phase will remain exactly the same in the current “streaming” implementation as well.
 Remember we assumed streaming the trace was free, and storing $O(1)$ field elements for a univariate polynomial does not break anyone’s memory bank.
-We include this round in this post for completeness.&lt;&#x2F;p&gt;
-
-&lt;&#x2F;aside&gt;
+We include this round in this post for completeness.&lt;/p&gt;
+&lt;/aside&gt;
 &lt;p&gt;After this round, the prover has received challenge $r_y$ to bind to variable $Y$.
-What we describe next refers to the &lt;code&gt;OuterRemainingSumcheck&lt;&#x2F;code&gt; in Jolt.
-The sumcheck is divided into 2 phases:&lt;&#x2F;p&gt;
+What we describe next refers to the &lt;code&gt;OuterRemainingSumcheck&lt;/code&gt; in Jolt.
+The sumcheck is divided into 2 phases:&lt;/p&gt;
 &lt;ol start=&quot;2&quot;&gt;
-&lt;li&gt;A setup phase which materialises the polynomials – this is the &lt;code&gt;gen&lt;&#x2F;code&gt; constructor.&lt;&#x2F;li&gt;
-&lt;li&gt;The remaining communication rounds (which are standard).&lt;&#x2F;li&gt;
-&lt;&#x2F;ol&gt;
-&lt;h3 id=&quot;setup-phase&quot;&gt;Setup Phase&lt;a class=&quot;zola-anchor&quot; href=&quot;#setup-phase&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
+&lt;li&gt;A setup phase which materialises the polynomials – this is the &lt;code&gt;gen&lt;/code&gt; constructor.&lt;/li&gt;
+&lt;li&gt;The remaining communication rounds (which are standard).&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&quot;setup-phase&quot;&gt;Setup Phase&lt;a class=&quot;zola-anchor&quot; href=&quot;#setup-phase&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
 &lt;p&gt;We iterate over the entire trace one more time, and now materialise polynomials $\widetilde{A}, \widetilde{B}$ with $r_y$ bound to variable $Y$.
-This takes $2T$ field elements worth of space.&lt;&#x2F;p&gt;
-&lt;p&gt;More specifically for every $(x_{\log T}, \dots, x_{1}, x_b) \in \lbrace 0,1\rbrace^{\log T + 1}$, we store&lt;&#x2F;p&gt;
+This takes $2T$ field elements worth of space.&lt;/p&gt;
+&lt;p&gt;More specifically for every $(x_{\log T}, \dots, x_{1}, x_b) \in \lbrace 0,1\rbrace^{\log T + 1}$, we store&lt;/p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$\widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, r_y) = \sum_{y \in \{-4, \dots, 5\}} \Lagrange{\tau_y}{y}\, \widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, y)$$
-&lt;&#x2F;div&gt;
-&lt;p&gt;and&lt;&#x2F;p&gt;
+&lt;p&gt;$$\widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, r_y) = \sum_{y \in {-4, \dots, 5}} \Lagrange{\tau_y}{y}, \widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, y)$$&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;and&lt;/p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$\widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, r_y)= \sum_{y \in \{-4, \dots, 5\}} \Lagrange{\tau_y}{y}\, \widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, y)$$
-&lt;&#x2F;div&gt;
-&lt;p&gt;This storing of partially bound sumcheck polynomials in memory is what we refer to as materialising.&lt;&#x2F;p&gt;
+&lt;p&gt;$$\widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, r_y)= \sum_{y \in {-4, \dots, 5}} \Lagrange{\tau_y}{y}, \widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, y)$$&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;This storing of partially bound sumcheck polynomials in memory is what we refer to as materialising.&lt;/p&gt;
 &lt;p&gt;While we’re materialising $\widetilde{A}$ and $\widetilde{B}$, we might as well prepare ourselves to also compute the prover’s messages for the first round of the sum-check algorithm.
-This process where we materialise the polynomials of the sum-check &lt;strong&gt;and&lt;&#x2F;strong&gt; also compute the messages for the next round is referred to as &lt;code&gt;fused&lt;&#x2F;code&gt; materialisation in the code.
-This is exactly what &lt;code&gt;compute_first_quadratic_evals_and_bound_polys&lt;&#x2F;code&gt; (&lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;c20fe3c0234ea3a328dbbd3d7f717f64599ff579&#x2F;jolt-core&#x2F;src&#x2F;zkvm&#x2F;spartan&#x2F;outer.rs#L297&quot;&gt;described here&lt;&#x2F;a&gt;) does.&lt;&#x2F;p&gt;
-&lt;p&gt;Here &lt;code&gt;t0&lt;&#x2F;code&gt; and &lt;code&gt;t_inf&lt;&#x2F;code&gt; refer to evaluations of the following quadratic polynomial.&lt;&#x2F;p&gt;
+This process where we materialise the polynomials of the sum-check &lt;strong&gt;and&lt;/strong&gt; also compute the messages for the next round is referred to as &lt;code&gt;fused&lt;/code&gt; materialisation in the code.
+This is exactly what &lt;code&gt;compute_first_quadratic_evals_and_bound_polys&lt;/code&gt; (&lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L297&quot;&gt;described here&lt;/a&gt;) does.&lt;/p&gt;
+&lt;p&gt;Here &lt;code&gt;t0&lt;/code&gt; and &lt;code&gt;t_inf&lt;/code&gt; refer to evaluations of the following quadratic polynomial.&lt;/p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$t(\textcolor{pink}{X_b}) \Def \sum_{x_t \in \{0,1\}^{\log T}}\sum_{y \in \{-4, \dots, 5\}}  \eq{\tau_t}{x_t} \cdot \Lagrange{r_y}{y} \cdot \widetilde{A}(x_t ,\textcolor{pink}{X_b}, y) \, \widetilde{B}(x_t, \textcolor{pink}{X_b}, y) $$
-&lt;&#x2F;div&gt;
-&lt;p&gt;The final polynomial that the prover must send is the following:&lt;&#x2F;p&gt;
-&lt;p&gt;$s(X_b) \Def \Lagrange{\tau_y}{r_0} \cdot t(\textcolor{pink}{X_b}) \cdot  \eq{\tau_{b}}{\textcolor{pink}{X_b}}$&lt;&#x2F;p&gt;
-&lt;p&gt;which is exactly what the following snippet of code on Line 1430 of &lt;code&gt;jolt-core&#x2F;src&#x2F;zkvm&#x2F;spartan&#x2F;outer.rs&lt;&#x2F;code&gt; computes.&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;self&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;split_eq_poly&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    .&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;gruen_poly_deg_3&lt;&#x2F;span&gt;&lt;span&gt;(t0, t_inf, previous_claim)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;h2 id=&quot;the-remaining-rounds&quot;&gt;The Remaining Rounds&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-remaining-rounds&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
-&lt;p&gt;With $\widetilde{A}$ and $\widetilde{B}$ materialised, the remaining rounds are standard. The mental picture is the following:&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;randomwalks.xyz&#x2F;blog&#x2F;streaming-sumchecks&#x2F;Linear_sumcheck.svg&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;$$t(\textcolor{pink}{X_b}) \Def \sum_{x_t \in {0,1}^{\log T}}\sum_{y \in {-4, \dots, 5}}  \eq{\tau_t}{x_t} \cdot \Lagrange{r_y}{y} \cdot \widetilde{A}(x_t ,\textcolor{pink}{X_b}, y) , \widetilde{B}(x_t, \textcolor{pink}{X_b}, y) $$&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;The final polynomial that the prover must send is the following:&lt;/p&gt;
+&lt;p&gt;$s(X_b) \Def \Lagrange{\tau_y}{r_0} \cdot t(\textcolor{pink}{X_b}) \cdot  \eq{\tau_{b}}{\textcolor{pink}{X_b}}$&lt;/p&gt;
+&lt;p&gt;which is exactly what the following snippet of code on Line 1430 of &lt;code&gt;jolt-core/src/zkvm/spartan/outer.rs&lt;/code&gt; computes.&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span&gt;split_eq_poly&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    .&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;gruen_poly_deg_3&lt;/span&gt;&lt;span&gt;(t0, t_inf, previous_claim)&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&quot;the-remaining-rounds&quot;&gt;The Remaining Rounds&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-remaining-rounds&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;With $\widetilde{A}$ and $\widetilde{B}$ materialised, the remaining rounds are standard. The mental picture is the following:&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://randomwalks.xyz/blog/streaming-sumchecks/Linear_sumcheck.svg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;At each bind the length of the representation of $\widetilde{A}$ and $\widetilde{B}$ shrinks by half.
 And the next prover message can be computed from the bound and materialised polynomials.
-The &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;c20fe3c0234ea3a328dbbd3d7f717f64599ff579&#x2F;jolt-core&#x2F;src&#x2F;zkvm&#x2F;spartan&#x2F;outer.rs#L387&quot;&gt;code&lt;&#x2F;a&gt; is described here.&lt;&#x2F;p&gt;
+The &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L387&quot;&gt;code&lt;/a&gt; is described here.&lt;/p&gt;
 &lt;p&gt;In conclusion, the linear sum-check with a special first round required that we stream the trace twice.
 The second time of doing so – we materialised the polynomials with only $r_0$ bound to $Y$.
 Once we materialise, we never have to look at the trace ever again – for at least this sum-check.
 But this came at the cost of storing $2T$ field elements in memory per polynomial.
-If $T$ is large, on the order of billions, then this is too expensive.&lt;&#x2F;p&gt;
-
-&lt;aside class=&quot;callout callout-remark&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;Remark&lt;&#x2F;div&gt;
-  
-  &lt;p&gt;In this world where iterating through the trace is free, we could &lt;strong&gt;never&lt;&#x2F;strong&gt; materialise any polynomial and always just stream the trace every round (like we did in the first round).
+If $T$ is large, on the order of billions, then this is too expensive.&lt;/p&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-remark&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;&lt;/div&gt;
+  &lt;p&gt;In this world where iterating through the trace is free, we could &lt;strong&gt;never&lt;/strong&gt; materialise any polynomial and always just stream the trace every round (like we did in the first round).
 That would take close to no memory at all.
 While this is true, streaming the trace is actually not free, and we want to avoid it as many times as possible.
 We only assume it’s free to make the memory accounting work for this post.
 Eventually, we will have to implement a memory efficient way to stream the trace – but that is not terribly hard, and will soon be implemented.
-In what follows, we make a compromise of sometimes streaming instead of always streaming, but this will allow us to store fewer things.&lt;&#x2F;p&gt;
-
-&lt;&#x2F;aside&gt;
-&lt;h2 id=&quot;the-streaming-generalisation&quot;&gt;The Streaming Generalisation&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-streaming-generalisation&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h2&gt;
-&lt;p&gt;To describe the streaming sum-check we need to first describe what we mean by a sum-check schedule.&lt;&#x2F;p&gt;
+In what follows, we make a compromise of sometimes streaming instead of always streaming, but this will allow us to store fewer things.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;h2 id=&quot;the-streaming-generalisation&quot;&gt;The Streaming Generalisation&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-streaming-generalisation&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;To describe the streaming sum-check we need to first describe what we mean by a sum-check schedule.&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;A schedule classifies every round of the sum-check as being a &lt;code&gt;window_start&lt;&#x2F;code&gt; round or not.
+&lt;li&gt;A schedule classifies every round of the sum-check as being a &lt;code&gt;window_start&lt;/code&gt; round or not.
 For example the sum-check involving 16 rounds of interaction below can be scheduled as shown below.
-Rounds 0, 3, 6, 9, 10, …, 15 are all window starts.&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
-&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;randomwalks.xyz&#x2F;blog&#x2F;streaming-sumchecks&#x2F;stream_schedule.svg&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+Rounds 0, 3, 6, 9, 10, …, 15 are all window starts.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&quot;https://randomwalks.xyz/blog/streaming-sumchecks/stream_schedule.svg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;For every round, we have a notion of width or the number of unbound variables. This is given by the distance of current round from the next window start (or the end if there is no more window starts).
-So in the above example, round 0 has window width 3, round 1 has width 2, round 2 has width 1, and round 3 has width 3 again, round 4 has width 2 and so on.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+So in the above example, round 0 has window width 3, round 1 has width 2, round 2 has width 1, and round 3 has width 3 again, round 4 has width 2 and so on.&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Out of all the rounds that are marked as &lt;code&gt;window_start&lt;&#x2F;code&gt; rounds, exactly &lt;strong&gt;one&lt;&#x2F;strong&gt; round is marked as special, and we call it the switchover point. This switchover point will mark the round at which we &lt;strong&gt;materialise&lt;&#x2F;strong&gt; the polynomials from the trace and store it in memory. In the example above, the switch over round is the 10th round given by round index 9. The width of this round is one in the above example (but it doesn’t have to be such).&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
-&lt;&#x2F;ul&gt;
+&lt;p&gt;Out of all the rounds that are marked as &lt;code&gt;window_start&lt;/code&gt; rounds, exactly &lt;strong&gt;one&lt;/strong&gt; round is marked as special, and we call it the switchover point. This switchover point will mark the round at which we &lt;strong&gt;materialise&lt;/strong&gt; the polynomials from the trace and store it in memory. In the example above, the switch over round is the 10th round given by round index 9. The width of this round is one in the above example (but it doesn’t have to be such).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
 &lt;p&gt;At this point it should be somewhat clear that the later we materialise, the more variables would be bound by verifier challenges, hence the memory representation of the materialised polynomial will be smaller.
 However, the later we materialise, it means we would have to stream the entire trace to compute prover messages more times.
 There is an inherent tradeoff here that cannot be avoided.
-The rough sketch of the algorithm is as follows:&lt;&#x2F;p&gt;
+The rough sketch of the algorithm is as follows:&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
-&lt;p&gt;If a round $i \in \lbrace 0, \ldots, n-1\rbrace$ is the start of a window with width $w$ – we need to stream over the entire trace to generate and store a multivariate polynomial $t$ with $w$ variables. This requires storing $W:=(d+1)^w$ evaluations of $t$ in memory, where $d$ is the degree of $t$.  This degree $d$, $w$-variate polynomial is what is referred to as &lt;code&gt;t_grid&lt;&#x2F;code&gt; or the streaming data structure. As $d$ and $w$ will be small constants, storing &lt;code&gt;t_grid&lt;&#x2F;code&gt; in memory is essentially free.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;If a round $i \in \lbrace 0, \ldots, n-1\rbrace$ is the start of a window with width $w$ – we need to stream over the entire trace to generate and store a multivariate polynomial $t$ with $w$ variables. This requires storing $W:=(d+1)^w$ evaluations of $t$ in memory, where $d$ is the degree of $t$.  This degree $d$, $w$-variate polynomial is what is referred to as &lt;code&gt;t_grid&lt;/code&gt; or the streaming data structure. As $d$ and $w$ will be small constants, storing &lt;code&gt;t_grid&lt;/code&gt; in memory is essentially free.&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Once we store $t$ in memory, we can compute all prover messages needed for the next $w$ rounds of sum-check, without streaming the trace again. If this is not immediately clear, we work out an example below.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;Once we store $t$ in memory, we can compute all prover messages needed for the next $w$ rounds of sum-check, without streaming the trace again. If this is not immediately clear, we work out an example below.&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;On receiving a verifier challenge $r$ for the current round, we shrink the size of $t$ by a factor of $d+1$ (just as in the case of the linear-sum-check) where $d$ is the degree of $t$. The factor is 2 if $t$ is multilinear.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;On receiving a verifier challenge $r$ for the current round, we shrink the size of $t$ by a factor of $d+1$ (just as in the case of the linear-sum-check) where $d$ is the degree of $t$. The factor is 2 if $t$ is multilinear.&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;In the last round of the given window the size of $t$ should reduce to 1.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;In the last round of the given window the size of $t$ should reduce to 1.&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;The next round is either the start of a new window or it’s the switchover point. If it’s the former, we repeat the process described above. That is, we stream the trace again, and compute $t$ from the trace.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;The next round is either the start of a new window or it’s the switchover point. If it’s the former, we repeat the process described above. That is, we stream the trace again, and compute $t$ from the trace.&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;If the round $\hat{t} \in [n]$ is the switch-over point, we stream over the trace and store multilinear polynomials $\widetilde{A}(\textcolor{orange}{r_y, r_b, r_1, \ldots, r_{\hat{t}-1}}, X_{\hat{t}}, \ldots, X_{\log T})$ and $\widetilde{B}(\textcolor{orange}{r_y, r_b, r_1, \ldots, r_{\hat{t}-1}}, X_{\hat{t}}, \ldots, X_{\log T})$. Note that as we are materialising later, the size of these polynomials is much smaller than if we materialised in the first or second round.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;If the round $\hat{t} \in [n]$ is the switch-over point, we stream over the trace and store multilinear polynomials $\widetilde{A}(\textcolor{orange}{r_y, r_b, r_1, \ldots, r_{\hat{t}-1}}, X_{\hat{t}}, \ldots, X_{\log T})$ and $\widetilde{B}(\textcolor{orange}{r_y, r_b, r_1, \ldots, r_{\hat{t}-1}}, X_{\hat{t}}, \ldots, X_{\log T})$. Note that as we are materialising later, the size of these polynomials is much smaller than if we materialised in the first or second round.&lt;/p&gt;
+&lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Once again we compute $t$ to answer the prover’s messages. But crucially, this time we do it from the materialised polynomials above. We no longer need to stream the trace.&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
-&lt;&#x2F;ol&gt;
+&lt;p&gt;Once again we compute $t$ to answer the prover’s messages. But crucially, this time we do it from the materialised polynomials above. We no longer need to stream the trace.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
 &lt;p&gt;If the above description is all too abstract, let’s work through an actual example, and then finally look at the code snippets.
 For this sum-check the degree of $t$ will be $d=2$ always.
 In the example schedule above, the window width is $w=3$ for round 0.
-The streaming data structure to compute is the following:&lt;&#x2F;p&gt;
+The streaming data structure to compute is the following:&lt;/p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$\begin{align*}
-t&#x27;(\textcolor{pink}{X_2, X_1, X_b}) = \sum_{y \in \{-4, \dots, 5\}}\sum_{x_{15}..x_{3} \in \{0,1\}^{13}} &amp;A(x_{15}...x_3 , \textcolor{pink}{X_2, X_1, X_b},\, y) \\
-&amp;\cdot B(x_{15}...x_3,\textcolor{pink}{X_2, X_1, X_b},\, y)\, \Lagrange{y}{r_y} \\[10pt] &amp;\cdot\text{eq}(\tau_{15}..\tau_3; x_{15}...x_3)
+&lt;p&gt;$$\begin{align*}
+t’(\textcolor{pink}{X_2, X_1, X_b}) = \sum_{y \in {-4, \dots, 5}}\sum_{x_{15}..x_{3} \in {0,1}^{13}} &amp;amp;A(x_{15}…x_3 , \textcolor{pink}{X_2, X_1, X_b},, y) \
+&amp;amp;\cdot B(x_{15}…x_3,\textcolor{pink}{X_2, X_1, X_b},, y), \Lagrange{y}{r_y} \[10pt] &amp;amp;\cdot\text{eq}(\tau_{15}..\tau_3; x_{15}…x_3)
 \end{align*}
-$$
-&lt;&#x2F;div&gt;
+$$&lt;/p&gt;
+&lt;/div&gt;
 &lt;p&gt;Thus, we need $(d+1)^w = 3^3 = 27$ evaluations to represent $t$.
-In Jolt we evaluate $t$ at $\lbrace 0,1, \infty\rbrace^{w}$ and the data structure that stores these evaluations is called &lt;code&gt;t_grid&lt;&#x2F;code&gt;, which is what we describe as the streaming data structure.
-This is exactly what &lt;code&gt;compute_evaluation_grid_from_trace&lt;&#x2F;code&gt; computes.
-The next stage is to compute $t(0)$ and $t(\infty)$ where&lt;&#x2F;p&gt;
+In Jolt we evaluate $t$ at $\lbrace 0,1, \infty\rbrace^{w}$ and the data structure that stores these evaluations is called &lt;code&gt;t_grid&lt;/code&gt;, which is what we describe as the streaming data structure.
+This is exactly what &lt;code&gt;compute_evaluation_grid_from_trace&lt;/code&gt; computes.
+The next stage is to compute $t(0)$ and $t(\infty)$ where&lt;/p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$
-t(\textcolor{pink}{X_b}) = \sum_{x_2, x_1 \in \{0,1\}^2 } t&#x27;(x_2, x_1, \textcolor{pink}{X_b})\,\,\text{eq}(\tau_2, \tau_1; x_2, x_1)
-$$
-&lt;&#x2F;div&gt;
-&lt;p&gt;This is what &lt;code&gt;compute_t_evals&lt;&#x2F;code&gt; computes.&lt;&#x2F;p&gt;
-
-&lt;aside class=&quot;callout callout-remark&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;Remark&lt;&#x2F;div&gt;
-  
-  &lt;p&gt;Throughout this post when we write $\eq{\tau}{x}$, we assume it’s implemented using the Dao-Thaler split-eq optimisation. Thus the memory representation of the $\eq{}{}$ polynomials is never an issue.&lt;&#x2F;p&gt;
-
-&lt;&#x2F;aside&gt;
+&lt;p&gt;$$
+t(\textcolor{pink}{X_b}) = \sum_{x_2, x_1 \in {0,1}^2 } t’(x_2, x_1, \textcolor{pink}{X_b}),,\text{eq}(\tau_2, \tau_1; x_2, x_1)
+$$&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;This is what &lt;code&gt;compute_t_evals&lt;/code&gt; computes.&lt;/p&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-remark&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;&lt;/div&gt;
+  &lt;p&gt;Throughout this post when we write $\eq{\tau}{x}$, we assume it’s implemented using the Dao-Thaler split-eq optimisation. Thus the memory representation of the $\eq{}{}$ polynomials is never an issue.&lt;/p&gt;
+&lt;/aside&gt;
 &lt;p&gt;Finally the prover’s message is given by
 $$
 s(\textcolor{pink}{X_b}) = t(\textcolor{pink}{X_b}),\text{eq}(\tau_b, \textcolor{pink}{X_b})
-$$&lt;&#x2F;p&gt;
-
-&lt;aside class=&quot;callout callout-remark&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;Prover Messages Are Always Computed From &lt;code&gt;t_grid&lt;&#x2F;code&gt;&lt;&#x2F;div&gt;
-  
-  &lt;p&gt;It is important to note that in every round of the sum-check the prover’s messages will be computed using the streaming data structure &lt;code&gt;t_grid&lt;&#x2F;code&gt;.
-We will shortly see that once the current &lt;code&gt;t_grid&lt;&#x2F;code&gt; gets exhausted we will re-compute it.&lt;&#x2F;p&gt;
-
-&lt;&#x2F;aside&gt;
-
-&lt;aside class=&quot;callout callout-remark&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;A Note About Evaluating At Infinity&lt;&#x2F;div&gt;
-  
+$$&lt;/p&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-remark&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;Prover Messages Are Always Computed From &lt;code&gt;t_grid&lt;/code&gt;&lt;/div&gt;
+  &lt;p&gt;It is important to note that in every round of the sum-check the prover’s messages will be computed using the streaming data structure &lt;code&gt;t_grid&lt;/code&gt;.
+We will shortly see that once the current &lt;code&gt;t_grid&lt;/code&gt; gets exhausted we will re-compute it.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-remark&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;A Note About Evaluating At Infinity&lt;/div&gt;
   &lt;p&gt;For a univariate polynomial $p$, $p(\infty)$ is equal to the coefficient associated with the highest degree term of the polynomial.
-For example, if $p$ is linear i.e $p(X) = aX + b$, we have $p(\infty) = a$.&lt;&#x2F;p&gt;
-
-&lt;&#x2F;aside&gt;
-&lt;p&gt;This completes the first round message the prover sends.&lt;&#x2F;p&gt;
-&lt;h4 id=&quot;binding-in-the-streaming-phase&quot;&gt;Binding in the streaming phase&lt;a class=&quot;zola-anchor&quot; href=&quot;#binding-in-the-streaming-phase&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h4&gt;
+For example, if $p$ is linear i.e $p(X) = aX + b$, we have $p(\infty) = a$.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;p&gt;This completes the first round message the prover sends.&lt;/p&gt;
+&lt;h4 id=&quot;binding-in-the-streaming-phase&quot;&gt;Binding in the streaming phase&lt;a class=&quot;zola-anchor&quot; href=&quot;#binding-in-the-streaming-phase&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h4&gt;
 &lt;p&gt;Note as $t’$ is multivariate, we are sorted for the next $w$ rounds, till we bind all $w$ of its variables.
-In the example above, we can answer 3 rounds of prover messages using &lt;code&gt;t_grid&lt;&#x2F;code&gt; only.
-Binding is exactly the same as the linear version but we do it for the multi-quadratic polynomial and is done by &lt;code&gt;t_prime_poly.bind(r_j, BindingOrder::LowToHigh)&lt;&#x2F;code&gt;
-(&lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https:&#x2F;&#x2F;github.com&#x2F;abiswas3&#x2F;jolt&#x2F;blob&#x2F;feat&#x2F;streaming-prover-merged&#x2F;jolt-core&#x2F;src&#x2F;poly&#x2F;multiquadratic_poly.rs&quot;&gt;method&lt;&#x2F;a&gt;).&lt;&#x2F;p&gt;
+In the example above, we can answer 3 rounds of prover messages using &lt;code&gt;t_grid&lt;/code&gt; only.
+Binding is exactly the same as the linear version but we do it for the multi-quadratic polynomial and is done by &lt;code&gt;t_prime_poly.bind(r_j, BindingOrder::LowToHigh)&lt;/code&gt;
+(&lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/abiswas3/jolt/blob/feat/streaming-prover-merged/jolt-core/src/poly/multiquadratic_poly.rs&quot;&gt;method&lt;/a&gt;).&lt;/p&gt;
 &lt;p&gt;After binding in round 0 we go from  $t’(X_2, X_1, X_b)$ to $t’(X_2, X_1, \textcolor{orange}{r_b})$.
 Then at the end of round 1 we are left with $t’(X_2, \textcolor{orange}{r_1, r_b})$ and after round 2 i.e 3 rounds of sum-check we are left with $t’( \textcolor{orange}{r_2, r_1, r_b})$.
-Hereafter, we must stream the trace again – and we will as round 3 is a window start.&lt;&#x2F;p&gt;
-&lt;p&gt;Additionally as the challenges come in, we also build a data structure called &lt;code&gt;r_grid&lt;&#x2F;code&gt; which looks like the following&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	[1]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	[(1-rb), rb] &#x2F;&#x2F; eq(r_b, x_b)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	[(1-rb)(1-r1), rb(1-r1), (1-rb)r1, rbr1] &#x2F;&#x2F; eq(r_1, r_b, x_1, x_b)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	...&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;]&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-&lt;aside class=&quot;callout callout-remark&quot;&gt;
-  
-  &lt;div class=&quot;callout-title&quot;&gt;Remark&lt;&#x2F;div&gt;
-  
-  &lt;p&gt;We will see shortly that we only need to store &lt;code&gt;r_grid&lt;&#x2F;code&gt; up to the switch-over point.
+Hereafter, we must stream the trace again – and we will as round 3 is a window start.&lt;/p&gt;
+&lt;p&gt;Additionally as the challenges come in, we also build a data structure called &lt;code&gt;r_grid&lt;/code&gt; which looks like the following&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;[&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	[1]&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	[(1-rb), rb] // eq(r_b, x_b)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	[(1-rb)(1-r1), rb(1-r1), (1-rb)r1, rbr1] // eq(r_1, r_b, x_1, x_b)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;	...&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;]&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;aside id=&quot;&quot; class=&quot;callout callout-remark&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;&lt;/div&gt;
+  &lt;p&gt;We will see shortly that we only need to store &lt;code&gt;r_grid&lt;/code&gt; up to the switch-over point.
 The total amount of storage needed is $2^{\hat{t}}$ where $\hat{t} \in [n]$ is the switchover point of the sum-check and $n$ is the number of rounds of the sum-check.
-If $\hat{t}$ is large, we can always use the split-eq technique for &lt;code&gt;r_grid&lt;&#x2F;code&gt; (this is not currently needed).&lt;&#x2F;p&gt;
-
-&lt;&#x2F;aside&gt;
-&lt;p&gt;The last line of &lt;code&gt;r_grid&lt;&#x2F;code&gt; helps us compute $\text{eq}(\textcolor{orange}{r_{w-1},…, r_b}, x_{w-1},…, x_{b})$ which is useful when we recompute &lt;code&gt;t_grid&lt;&#x2F;code&gt; in the first round of the next window.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;next-window-start&quot;&gt;Next Window Start&lt;a class=&quot;zola-anchor&quot; href=&quot;#next-window-start&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
+If $\hat{t}$ is large, we can always use the split-eq technique for &lt;code&gt;r_grid&lt;/code&gt; (this is not currently needed).&lt;/p&gt;
+&lt;/aside&gt;
+&lt;p&gt;The last line of &lt;code&gt;r_grid&lt;/code&gt; helps us compute $\text{eq}(\textcolor{orange}{r_{w-1},…, r_b}, x_{w-1},…, x_{b})$ which is useful when we recompute &lt;code&gt;t_grid&lt;/code&gt; in the first round of the next window.&lt;/p&gt;
+&lt;h3 id=&quot;next-window-start&quot;&gt;Next Window Start&lt;a class=&quot;zola-anchor&quot; href=&quot;#next-window-start&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
 &lt;p&gt;Now we still have not hit a switchover point, so nothing is materialised yet, so we once again compute the grid from the trace.
-Additionally, as we are not in the first round anymore, we have to deal with the verifier challenges – so the equations for computing the grid are the following.&lt;&#x2F;p&gt;
+Additionally, as we are not in the first round anymore, we have to deal with the verifier challenges – so the equations for computing the grid are the following.&lt;/p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$\begin{align*}
-t(\textcolor{pink}{X_5, X_4, X_3}) &amp;= \sum_{x_{15}..x_{6}, x_{2}, x_{1}, x_{b} \in \{0,1\}^{13}}\sum_{y \in \{-4, \dots, 5\}}  \widetilde{A}(x_{15}...x_6,  \textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \\
-&amp;\qquad \cdot \widetilde{B}(x_{15}\dots x_6 ,\textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \\[10pt]
-&amp;\qquad \cdot\text{eq}(\tau_{15}\dots\tau_6;\, x_{15}\dots x_6) \, \\[10pt]
-&amp;\qquad \cdot \text{eq}(\textcolor{orange}{r_2, r_1, r_b}, x_{2}, x_{1}, x_{b})
+&lt;p&gt;$$\begin{align*}
+t(\textcolor{pink}{X_5, X_4, X_3}) &amp;amp;= \sum_{x_{15}..x_{6}, x_{2}, x_{1}, x_{b} \in {0,1}^{13}}\sum_{y \in {-4, \dots, 5}}  \widetilde{A}(x_{15}…x_6,  \textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \
+&amp;amp;\qquad \cdot \widetilde{B}(x_{15}\dots x_6 ,\textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \[10pt]
+&amp;amp;\qquad \cdot\text{eq}(\tau_{15}\dots\tau_6;, x_{15}\dots x_6) , \[10pt]
+&amp;amp;\qquad \cdot \text{eq}(\textcolor{orange}{r_2, r_1, r_b}, x_{2}, x_{1}, x_{b})
 \end{align*}
-$$
-&lt;&#x2F;div&gt;
-&lt;p&gt;Notice how &lt;code&gt;r_grid&lt;&#x2F;code&gt; becomes useful in the last line.
+$$&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Notice how &lt;code&gt;r_grid&lt;/code&gt; becomes useful in the last line.
 This process continues till we hit the switch over point.
 Also observe that the RHS of the above equations actually visits every cell of the trace exactly once.
-Hence we keep banging on about streaming the trace.&lt;&#x2F;p&gt;
+Hence we keep banging on about streaming the trace.&lt;/p&gt;
 &lt;p&gt;At this point we have only used $\max\lbrace(d+1)^{\hat{w}}, 2^{\hat{t}}\rbrace$ field elements worth of memory, where $\hat{t}$ is the switch-over point and $\hat{w}$ is the maximum window width for a round.
-$d=2$ for this sumcheck.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;switch-over-point&quot;&gt;Switch Over Point&lt;a class=&quot;zola-anchor&quot; href=&quot;#switch-over-point&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
+$d=2$ for this sumcheck.&lt;/p&gt;
+&lt;h3 id=&quot;switch-over-point&quot;&gt;Switch Over Point&lt;a class=&quot;zola-anchor&quot; href=&quot;#switch-over-point&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
 &lt;p&gt;Finally we get to the switchover point.
-&lt;code&gt;t_grid&lt;&#x2F;code&gt; is exhausted once again.
-We stream through the trace one last time to materialise the bound polynomials.&lt;&#x2F;p&gt;
-&lt;p&gt;We now store for each $X_{15}…X_9 \in \lbrace 0,1\rbrace^{7}$&lt;&#x2F;p&gt;
+&lt;code&gt;t_grid&lt;/code&gt; is exhausted once again.
+We stream through the trace one last time to materialise the bound polynomials.&lt;/p&gt;
+&lt;p&gt;We now store for each $X_{15}…X_9 \in \lbrace 0,1\rbrace^{7}$&lt;/p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$\begin{align*}
-&amp; \widetilde{A}(\textcolor{pink}{X_{15}...X_9}, \textcolor{orange}{r_8, ..., r_b, r_y}) \\[10pt]
-&amp;= \sum_{x_8...x_b \in \{0,1\}^9}\sum_{y \in \{-4, \dots, 5\}} \widetilde{A}(\textcolor{pink}{X_{15}, ..., X_9}, x_8...x_b, y)\,\text{eq}(\textcolor{orange}{r_8..r_b}, x_8...x_b)\, \Lagrange{r_y}{y}
+&lt;p&gt;$$\begin{align*}
+&amp;amp; \widetilde{A}(\textcolor{pink}{X_{15}…X_9}, \textcolor{orange}{r_8, …, r_b, r_y}) \[10pt]
+&amp;amp;= \sum_{x_8…x_b \in {0,1}^9}\sum_{y \in {-4, \dots, 5}} \widetilde{A}(\textcolor{pink}{X_{15}, …, X_9}, x_8…x_b, y),\text{eq}(\textcolor{orange}{r_8..r_b}, x_8…x_b), \Lagrange{r_y}{y}
 \end{align*}
-$$
-
-$$\begin{align*}
-&amp; \widetilde{B}(\textcolor{pink}{X_{15}...X_9}, \textcolor{orange}{r_8, ..., r_b, r_y}) \\[10pt]
-&amp;= \sum_{x_8...x_b \in \{0,1\}^9}\sum_{y \in \{-4, \dots, 5\}} \widetilde{B}(\textcolor{pink}{X_{15}, ..., X_9}, x_8...x_b, y)\,\text{eq}(\textcolor{orange}{r_8..r_b}, x_8...x_b)\, \Lagrange{r_y}{y}
+$$&lt;/p&gt;
+&lt;p&gt;$$\begin{align*}
+&amp;amp; \widetilde{B}(\textcolor{pink}{X_{15}…X_9}, \textcolor{orange}{r_8, …, r_b, r_y}) \[10pt]
+&amp;amp;= \sum_{x_8…x_b \in {0,1}^9}\sum_{y \in {-4, \dots, 5}} \widetilde{B}(\textcolor{pink}{X_{15}, …, X_9}, x_8…x_b, y),\text{eq}(\textcolor{orange}{r_8..r_b}, x_8…x_b), \Lagrange{r_y}{y}
 \end{align*}
-$$
-&lt;&#x2F;div&gt;
-&lt;p&gt;&lt;strong&gt;NOTE&lt;&#x2F;strong&gt;: This stores only $2^7$ field elements worth of storage (much fewer than the linear sumcheck setup).
-The method &lt;code&gt;fused_materialise_polynomials_general_with_multiquadratic&lt;&#x2F;code&gt; computes the above polynomials and stores them in memory.
+$$&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt;NOTE&lt;/strong&gt;: This stores only $2^7$ field elements worth of storage (much fewer than the linear sumcheck setup).
+The method &lt;code&gt;fused_materialise_polynomials_general_with_multiquadratic&lt;/code&gt; computes the above polynomials and stores them in memory.
 Note that as we have the polynomials at hand already, we also compute the grid now.
-In the schedule given above, the grid size is just 1, thus we only need to store&lt;&#x2F;p&gt;
+In the schedule given above, the grid size is just 1, thus we only need to store&lt;/p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$
+&lt;p&gt;$$
 \begin{align*}
-t(\textcolor{pink}{X_9}) =  \sum_{x_{15},\dots,x_{10} \in \{0,1\}^{6}} &amp; \widetilde{A}(x_{15}, \dots, x_{10}, \textcolor{pink}{X_9}, \textcolor{orange}{r_8, \dots, r_1, r_b, r_y})\\[10pt]
-&amp;\cdot \widetilde{B}(x_{15}, \dots, x_{10}, \textcolor{pink}{X_9}, \textcolor{orange}{r_8, \dots, r_1, r_b, r_y}) \\[10pt]
-&amp;  \cdot \eq{\tau_{15}, \dots, \tau_{10}}{ x_{15}, \dots, x_{10}} \\[10pt]
+t(\textcolor{pink}{X_9}) =  \sum_{x_{15},\dots,x_{10} \in {0,1}^{6}} &amp;amp; \widetilde{A}(x_{15}, \dots, x_{10}, \textcolor{pink}{X_9}, \textcolor{orange}{r_8, \dots, r_1, r_b, r_y})\[10pt]
+&amp;amp;\cdot \widetilde{B}(x_{15}, \dots, x_{10}, \textcolor{pink}{X_9}, \textcolor{orange}{r_8, \dots, r_1, r_b, r_y}) \[10pt]
+&amp;amp;  \cdot \eq{\tau_{15}, \dots, \tau_{10}}{ x_{15}, \dots, x_{10}} \[10pt]
 \end{align*}
-$$
-&lt;&#x2F;div&gt;
-&lt;p&gt;Finally the prover message is&lt;&#x2F;p&gt;
+$$&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Finally the prover message is&lt;/p&gt;
 &lt;div class=&quot;math-display&quot;&gt;
-$$s(\textcolor{pink}{X_9}) = t(\textcolor{pink}{X_9})\,\, \eq{\tau_9}{\textcolor{pink}{X_9}}\,\,\eq{\tau_8, \dots, \tau_b}{\textcolor{orange}{r_{8}, \dots, r_{b}}}\,\,\Lagrange{\tau_y}{\textcolor{orange}{r_y}}
-$$
-&lt;&#x2F;div&gt;
+&lt;p&gt;$$s(\textcolor{pink}{X_9}) = t(\textcolor{pink}{X_9}),, \eq{\tau_9}{\textcolor{pink}{X_9}},,\eq{\tau_8, \dots, \tau_b}{\textcolor{orange}{r_{8}, \dots, r_{b}}},,\Lagrange{\tau_y}{\textcolor{orange}{r_y}}
+$$&lt;/p&gt;
+&lt;/div&gt;
 &lt;p&gt;From here onwards, whenever we need to compute the grid, we never look at the trace.
 We can directly do it from the materialised polynomials $\widetilde{A}$ and $\widetilde{B}$.
-This is what &lt;code&gt;compute_evaluation_grid_from_polynomials_parallel&lt;&#x2F;code&gt; computes.&lt;&#x2F;p&gt;
-&lt;p&gt;From here on after the switchover point we &lt;strong&gt;NEVER&lt;&#x2F;strong&gt; touch the trace again.&lt;&#x2F;p&gt;
-&lt;h3 id=&quot;actual-code&quot;&gt;Actual Code&lt;a class=&quot;zola-anchor&quot; href=&quot;#actual-code&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;&#x2F;a&gt;
-&lt;&#x2F;h3&gt;
-&lt;p&gt;Below we describe what the &lt;code&gt;compute_message&lt;&#x2F;code&gt; method of the generalised sumcheck looks like.
-The following snippet of code executes the logic described above, based on the round classification.&lt;&#x2F;p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot;&gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; compute_message&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;&amp;amp;mut&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;&#x2F;span&gt;&lt;span&gt;, round&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; usize&lt;&#x2F;span&gt;&lt;span&gt;, previous_claim&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; F&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; -&amp;gt;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; UniPoly&lt;&#x2F;span&gt;&lt;span&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;F&lt;&#x2F;span&gt;&lt;span&gt;&amp;gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    let&lt;&#x2F;span&gt;&lt;span&gt; num_unbound_vars&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;schedule&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;num_unbound_vars&lt;&#x2F;span&gt;&lt;span&gt;(round);&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; &#x2F;&#x2F; The size of the streaming data structure&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    if&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;schedule&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;is_switch_over_point&lt;&#x2F;span&gt;&lt;span&gt;(round) {&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; &#x2F;&#x2F; Check if it&amp;#39;s time materialise the sum-check polynomials&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;        self&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;materialise_polynomials_from_trace&lt;&#x2F;span&gt;&lt;span&gt;(num_unbound_vars);&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; &#x2F;&#x2F; Materialise bound polynomials A and B&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    else if&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;schedule&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;is_window_start&lt;&#x2F;span&gt;&lt;span&gt;(round) {&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; &#x2F;&#x2F; Window start&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;        if&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;schedule&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;before_switch_over_point&lt;&#x2F;span&gt;&lt;span&gt;(round) {&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; &#x2F;&#x2F; Need to compute streaming data structure from trace&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;            self&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;compute_evaluation_grid_from_trace&lt;&#x2F;span&gt;&lt;span&gt;(num_unbound_vars);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        }&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; else&lt;&#x2F;span&gt;&lt;span&gt; {&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;            &#x2F;&#x2F; Have materialised polynomials, no need to stream the trace anymore&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;            self&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;compute_evaluation_grid_from_polynomials_parallel&lt;&#x2F;span&gt;&lt;span&gt;(num_unbound_vars);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    }&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;    &#x2F;&#x2F; This part remains unchanged -- from the linear sum-check&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    let&lt;&#x2F;span&gt;&lt;span&gt; (t_prime_0, t_prime_inf)&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; =&lt;&#x2F;span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;compute_t_evals&lt;&#x2F;span&gt;&lt;span&gt;(num_unbound_vars);&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;    self&lt;&#x2F;span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;split_eq_poly&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;        .&lt;&#x2F;span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;gruen_poly_deg_3&lt;&#x2F;span&gt;&lt;span&gt;(t_prime_0, t_prime_inf, previous_claim)&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;&#x2F;span&gt;&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;&lt;section class=&quot;footnotes&quot;&gt;
+This is what &lt;code&gt;compute_evaluation_grid_from_polynomials_parallel&lt;/code&gt; computes.&lt;/p&gt;
+&lt;p&gt;From here on after the switchover point we &lt;strong&gt;NEVER&lt;/strong&gt; touch the trace again.&lt;/p&gt;
+&lt;h3 id=&quot;actual-code&quot;&gt;Actual Code&lt;a class=&quot;zola-anchor&quot; href=&quot;#actual-code&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;p&gt;Below we describe what the &lt;code&gt;compute_message&lt;/code&gt; method of the generalised sumcheck looks like.
+The following snippet of code executes the logic described above, based on the round classification.&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;fn&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; compute_message&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;&amp;amp;mut&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;/span&gt;&lt;span&gt;, round&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; usize&lt;/span&gt;&lt;span&gt;, previous_claim&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; F&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; -&amp;gt;&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; UniPoly&lt;/span&gt;&lt;span&gt;&amp;lt;&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;F&lt;/span&gt;&lt;span&gt;&amp;gt; {&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    let&lt;/span&gt;&lt;span&gt; num_unbound_vars&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; =&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span&gt;schedule&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;num_unbound_vars&lt;/span&gt;&lt;span&gt;(round);&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; // The size of the streaming data structure&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    if&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span&gt;schedule&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;is_switch_over_point&lt;/span&gt;&lt;span&gt;(round) {&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; // Check if it&amp;#39;s time materialise the sum-check polynomials&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;        self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;materialise_polynomials_from_trace&lt;/span&gt;&lt;span&gt;(num_unbound_vars);&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; // Materialise bound polynomials A and B&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    }&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    else if&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span&gt;schedule&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;is_window_start&lt;/span&gt;&lt;span&gt;(round) {&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; // Window start&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;        if&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span&gt;schedule&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;before_switch_over_point&lt;/span&gt;&lt;span&gt;(round) {&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt; // Need to compute streaming data structure from trace&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;            self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;compute_evaluation_grid_from_trace&lt;/span&gt;&lt;span&gt;(num_unbound_vars);&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        }&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; else&lt;/span&gt;&lt;span&gt; {&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;            // Have materialised polynomials, no need to stream the trace anymore&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;            self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;compute_evaluation_grid_from_polynomials_parallel&lt;/span&gt;&lt;span&gt;(num_unbound_vars);&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        }&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    }&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;    // This part remains unchanged -- from the linear sum-check&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    let&lt;/span&gt;&lt;span&gt; (t_prime_0, t_prime_inf)&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; =&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;compute_t_evals&lt;/span&gt;&lt;span&gt;(num_unbound_vars);&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;    self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span&gt;split_eq_poly&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;        .&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;gruen_poly_deg_3&lt;/span&gt;&lt;span&gt;(t_prime_0, t_prime_inf, previous_claim)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;section class=&quot;footnotes&quot;&gt;
 &lt;ol class=&quot;footnotes-list&quot;&gt;
 &lt;li id=&quot;fn-d&quot;&gt;
-&lt;p&gt;This statement is strictly not true. In the current implementation, as a consequence of the process by which we construct the polynomials, we still need $O(T)$ memory, where $T$ is the number of instructions in the guest program (both virtual and real). But in this post we make a few simplifying assumptions, by which the statement does ring true. &lt;a href=&quot;#fr-d-1&quot;&gt;↩&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;This statement is strictly not true. In the current implementation, as a consequence of the process by which we construct the polynomials, we still need $O(T)$ memory, where $T$ is the number of instructions in the guest program (both virtual and real). But in this post we make a few simplifying assumptions, by which the statement does ring true. &lt;a href=&quot;https://randomwalks.xyz/blog/streaming-sumchecks/#fr-d-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
 &lt;li id=&quot;fn-e&quot;&gt;
-&lt;p&gt;It is not so important to be formal about what we mean by sufficient structure here. If $g \in \Field[x_1, \dots, x_n]$, then we can just pretend $H = \lbrace 0,1\rbrace^n$. &lt;a href=&quot;#fr-e-1&quot;&gt;↩&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;It is not so important to be formal about what we mean by sufficient structure here. If $g \in \Field[x_1, \dots, x_n]$, then we can just pretend $H = \lbrace 0,1\rbrace^n$. &lt;a href=&quot;https://randomwalks.xyz/blog/streaming-sumchecks/#fr-e-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
 &lt;li id=&quot;fn-c&quot;&gt;
-&lt;p&gt;A program is just a sequence of RISC-V instructions. &lt;a href=&quot;#fr-c-1&quot;&gt;↩&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
+&lt;p&gt;A program is just a sequence of RISC-V instructions. &lt;a href=&quot;https://randomwalks.xyz/blog/streaming-sumchecks/#fr-c-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
 &lt;li id=&quot;fn-a&quot;&gt;
-&lt;p&gt;We choose those indices for $y$ instead of bit string or the set $\lbrace 0, \ldots, 9\rbrace$ for computational reasons, the details of which we don’t discuss here (maybe for a separate post). &lt;a href=&quot;#fr-a-1&quot;&gt;↩&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
-&lt;&#x2F;li&gt;
-&lt;&#x2F;ol&gt;
-&lt;&#x2F;section&gt;
+&lt;p&gt;We choose those indices for $y$ instead of bit string or the set $\lbrace 0, \ldots, 9\rbrace$ for computational reasons, the details of which we don’t discuss here (maybe for a separate post). &lt;a href=&quot;https://randomwalks.xyz/blog/streaming-sumchecks/#fr-a-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
 </content>
   </entry>
   

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Algorithms For Montgomery Multiplication — Random Walks</title>
-  <meta name="description" content="Written Word">
+  <meta name="description" content="">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=9f3f3f161e11a605fe54">
@@ -138,66 +138,125 @@
     
     <details class="contents contents-inline">
       <summary>Contents</summary>
-      <ol>
+      
+<ol>
+  
   <li>
-    <a href="#background">Background</a><ol>
+    <a href="#background">Background</a>
+    
+      
+<ol>
+  
   <li>
     <a href="#putting-this-faster-code-into-jolt">Putting this faster code into Jolt</a>
+    
   </li>
+  
   <li>
     <a href="#why-does-this-happen">Why does this happen?</a>
+    
   </li>
+  
 </ol>
+
+    
   </li>
+  
   <li>
     <a href="#montgomery-multiplication-maths">Montgomery Multiplication Maths</a>
+    
   </li>
+  
   <li>
-    <a href="#the-cios-algorithm">The CIOS algorithm</a><ol>
+    <a href="#the-cios-algorithm">The CIOS algorithm</a>
+    
+      
+<ol>
+  
   <li>
     <a href="#important-sub-routine">Important Sub-Routine</a>
+    
   </li>
+  
   <li>
     <a href="#repeat-the-subroutine-n-times">Repeat The Subroutine $n$ times</a>
+    
   </li>
+  
   <li>
     <a href="#why-can-t-this-answer-be-greater-than-2p">Why Can’t This Answer Be Greater Than $2p$ ?</a>
+    
   </li>
+  
 </ol>
+
+    
   </li>
+  
   <li>
     <a href="#yuval-s-new-multiplication-algorithm">Yuval’s New Multiplication Algorithm</a>
+    
   </li>
+  
   <li>
-    <a href="#why-does-h-mult-pass">Why Does h-mult Pass?</a><ol>
+    <a href="#why-does-h-mult-pass">Why Does h-mult Pass?</a>
+    
+      
+<ol>
+  
   <li>
     <a href="#a-hybrid-algorithm">A hybrid algorithm</a>
+    
   </li>
+  
 </ol>
+
+    
   </li>
+  
   <li>
     <a href="#missing-factor-of-1p">Missing Factor Of $1p$</a>
+    
   </li>
+  
   <li>
-    <a href="#the-need-for-speed">The Need For Speed</a><ol>
+    <a href="#the-need-for-speed">The Need For Speed</a>
+    
+      
+<ol>
+  
   <li>
     <a href="#without-subtractions">Without Subtractions</a>
+    
   </li>
+  
   <li>
     <a href="#putting-in-the-subtractions">Putting In The Subtractions</a>
+    
   </li>
+  
   <li>
     <a href="#aside-same-code-two-conclusions">Aside: Same Code Two Conclusions</a>
+    
   </li>
+  
 </ol>
+
+    
   </li>
+  
   <li>
     <a href="#so-where-do-we-go-now">So Where Do We Go Now?</a>
+    
   </li>
+  
   <li>
     <a href="#instructions-for-running-benchmarks-discussed-above">Instructions For Running Benchmarks Discussed Above</a>
+    
   </li>
+  
 </ol>
+
     </details>
     
 
@@ -207,7 +266,7 @@
 <p>In an earlier <a href="https://randomwalks.xyz/blog/dyn-instrument/">post</a>, we analysed why <a rel="noopener noreferrer external" target="_blank" href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">this implementation</a> of the improved <a rel="noopener noreferrer external" target="_blank" href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication">Montgomery multiplication</a> algorithm by <a rel="noopener noreferrer external" target="_blank" href="https://hackmd.io/@Ingonyama/Barret-Montgomery">Yuval Domb</a> was not empirically faster out of the box.
 After disassembling the code using the Intel Pin tool, we identified large memory reads and writes as the primary source of slower run times.
 Although the analysis was specific to x86 architectures, the empirical findings were consistent across MacBook M2 Laptops and Intel x86 Digital Ocean servers.
-This loss of performance, however, is an artefact of the implementation, not the algorithm itself<sup class="footnote-reference" id="fr-a-1"><a href="#fn-a">1</a></sup>.
+This loss of performance, however, is an artefact of the implementation, not the algorithm itself<sup class="footnote-reference" id="fr-a-1"><a href="https://randomwalks.xyz/blog/mont-mult/#fn-a">[1]</a></sup>.
 The new algorithm uses fewer multiplication operations than the <a rel="noopener noreferrer external" target="_blank" href="https://ieeexplore.ieee.org/document/1393267">CIOS algorithm</a>, and therefore, there should exist a faster implementation (at least in theory).</p>
 <p>The large chunk reads and writes were likely due to the high-level Rust code storing intermediate $2n$ limbed values in contiguous regions of memory (<a rel="noopener noreferrer external" target="_blank" href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L61">see</a>)
 This likely led the compiler to demand the same of the generated assembly code as well.
@@ -223,9 +282,9 @@ c stands for CIOS, s stands for single step, and h stands for hybrid.
 The naming convention will soon become clear.</p>
 <h3 id="putting-this-faster-code-into-jolt">Putting this faster code into Jolt<a class="zola-anchor" href="#putting-this-faster-code-into-jolt" aria-label="Link to this section">#</a>
 </h3>
-<p>Ignoring speed for a minute, we plugged in the <code>c-mul</code> and <code>smul</code> multiplication algorithms in their native form<sup class="footnote-reference" id="fr-b-1"><a href="#fn-b">2</a></sup> into Jolt.
+<p>Ignoring speed for a minute, we plugged in the <code>c-mul</code> and <code>smul</code> multiplication algorithms in their native form<sup class="footnote-reference" id="fr-b-1"><a href="https://randomwalks.xyz/blog/mont-mult/#fn-b">[2]</a></sup> into Jolt.
 Then we ran <code>cargo test -p jolt-core -- sha3_e2e_hyperkzg</code>, and the unit tests <strong>fail</strong> for <strong>both</strong> <code>s-mult</code> and <code>h-mult</code>.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">thread</span><span style="color: #032F62;"> &#39;&lt;unnamed&gt;&#39; panicked at /Users/aribiswas3/Work-With-A16z/arkworks-algebra/ff/src/fields/models/fp/montgomery_backend.rs:1360:9:</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">thread</span><span style="color: #032F62;"> &#39;&lt;unnamed&gt;&#39; panicked at /Users/aribiswas3/Work-With-A16z/arkworks-algebra/ff/src/fields/models/fp/montgomery_backend.rs:1360:9:</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">High</span><span style="color: #032F62;"> limb expected to be</span><span style="color: #005CC5;"> 0</span><span style="color: #032F62;"> if S</span><span style="color: #D73A49;"> &gt;</span><span style="color: #032F62;">=</span><span style="color: #005CC5;"> 1</span><span style="color: #032F62;"> before 2p comparison</span></span>
 <span class="giallo-l"></span>
 <span class="giallo-l"></span>
@@ -274,7 +333,7 @@ This gives all the background needed to figure out what is going on.</p>
 This is done for ease of exposition only; the claims would hold regardless.
 See <a href="https://randomwalks.xyz/blog/mont-mult/papers/Acard.pdf">Acar’s thesis Chapter 2</a> for more details.
 We also do not discuss the optimisations made by the <a rel="noopener noreferrer external" target="_blank" href="https://hackmd.io/@gnark/modular_multiplication">Gnark</a> team as they are not relevant in this context.</p>
-<p>Given a $n$ limb<sup class="footnote-reference" id="fr-f-1"><a href="#fn-f">3</a></sup> modulus $p$, integers $a$ and $b$ that are at most $p-1$, Montgomery multiplication computes</p>
+<p>Given a $n$ limb<sup class="footnote-reference" id="fr-f-1"><a href="https://randomwalks.xyz/blog/mont-mult/#fn-f">[3]</a></sup> modulus $p$, integers $a$ and $b$ that are at most $p-1$, Montgomery multiplication computes</p>
 <p>$$ c \equiv abR^{-1} \mod p$$</p>
 <p>where $R=r^n$ and $r = 2^w$, where $w$ is the word size (typically 64-bits).
 To avoid explicitly computing modulo $p$ by long division, we instead compute $(c + mp)/R \equiv cR^{-1}\mod p$ where $m$ is an integer such that $m+cp \equiv 0 \mod R$.
@@ -300,41 +359,39 @@ $$</p>
 <p>Observe that $c_0r^{-1} \equiv (c_0 + mp)r^{-1} \mod p$, where $m$ such that $c_0 + mp \equiv 0 \mod r$.
 Solving for $m = -p^{-1}c_0 \equiv \mu c_0 \mod r$.
 Also as we are working modulo $r$, it suffices to use $m = \mu_{0}c_0$ discarding any carries, where $\mu_{0}$ is the least significant word of $\mu$.</p>
-
-<aside class="callout callout-box thm-box">
-  
+<aside id="" class="callout callout-box thm-box">
+  <div class="callout-title"></div>
   <p>We overload $m$ a little in notation. This $m$ is NOT the same $m$ as the one defined in the pseudocode description on top.
 This $m$ is just to make $c_0 + mp$ divisible by $r$.</p>
-
 </aside>
 <p>Once we compute $mp$, and add this to $c$ to get $c^{(1)}$, this should clear the least significant digit based on how we picked $m$. See below</p>
 <div class="math-display">
-$$
+<p>$$
 \begin{align}
-c &\equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p \\
-cr^{-1} &\equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p \\
-&\equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + (c_0+ mp)r^{-1}   \mod p \\
-&\equiv (c + mp)r^{-1} \mod p \\
-&\equiv ( c^{(1)}_{2n-1}r^{2n-1} + \ldots c^{(1)}_1r + 0)r^{-1} \mod p \\
-&\equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1) \mod p \\
+c &amp;\equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p \
+cr^{-1} &amp;\equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p \
+&amp;\equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + (c_0+ mp)r^{-1}   \mod p \
+&amp;\equiv (c + mp)r^{-1} \mod p \
+&amp;\equiv ( c^{(1)}_{2n-1}r^{2n-1} + \ldots c^{(1)}<em>1r + 0)r^{-1} \mod p \
+&amp;\equiv ( c^{(1)}</em>{2n-1}r^{2n-2} + \ldots c^{(1)}_1) \mod p \
 \end{align}
-$$
+$$</p>
 </div>
 <h3 id="repeat-the-subroutine-n-times">Repeat The Subroutine $n$ times<a class="zola-anchor" href="#repeat-the-subroutine-n-times" aria-label="Link to this section">#</a>
 </h3>
 <p>Now we can play the subroutine again with $c^{(1)}_1$ replacing the role of $c_0$, and the updated value of $m = \mu_0c_1^{(1)}$ (<strong>NOTE</strong> the same $\mu_0$ is always used)</p>
 <div class="math-display">
-$$
+<p>$$
 \begin{align}
-cr^{-1} &\equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1 ) \mod p \\
-cr^{-2} &\equiv ( c^{(1)}_{2n-1}r^{2n-3} + \ldots + c_1^{(1)}+ c_1^{(1)}r^{-1}   \mod p \\
-&\equiv ( c^{(2)}_{2n-1}r^{2n-3} + \ldots + c_1^{(2)} ) \mod p
+cr^{-1} &amp;\equiv ( c^{(1)}<em>{2n-1}r^{2n-2} + \ldots c^{(1)}<em>1 ) \mod p \
+cr^{-2} &amp;\equiv ( c^{(1)}</em>{2n-1}r^{2n-3} + \ldots + c_1^{(1)}+ c_1^{(1)}r^{-1}   \mod p \
+&amp;\equiv ( c^{(2)}</em>{2n-1}r^{2n-3} + \ldots + c_1^{(2)} ) \mod p
 \end{align}
-$$
+$$</p>
 </div>
 <p>In fact we play this game $n$ times</p>
 <div class="math-display">
-$$cR^{-1} \equiv cr^{-n} \equiv c^{(n)}_{2n-1}r^{n-1} + c^{(n)}_{n+1}r +c^{(n)}_{n} \mod p$$
+<p>$$cR^{-1} \equiv cr^{-n} \equiv c^{(n)}<em>{2n-1}r^{n-1} + c^{(n)}</em>{n+1}r +c^{(n)}_{n} \mod p$$</p>
 </div>
 <p>To get the final answer.</p>
 <h3 id="why-can-t-this-answer-be-greater-than-2p">Why Can’t This Answer Be Greater Than $2p$ ?<a class="zola-anchor" href="#why-can-t-this-answer-be-greater-than-2p" aria-label="Link to this section">#</a>
@@ -344,15 +401,15 @@ Over $n$ iterations, in each iteration, we computed $m$, added $mp$ to $c$ and d
 We denote the $m$ in iteration $i$ with $m_i$ here.
 More explicitly,</p>
 <div class="math-display">
-$$
+<p>$$
 \begin{align}
-cR^{-1} &\equiv (\ldots((c + m_0p)r^{-1} + m_1p)r^{-1} + \dots + m_{n-1}p)r^{-1} \\[10pt]
-&=  \frac{c + p\sum_{i=0}^{n-1} m_ir^{i}}{r^n} \\
-&=  \frac{c + m'p }{R} \\
-&< \frac{Rp + pR}{R}\\
-&= 2p
+cR^{-1} &amp;\equiv (\ldots((c + m_0p)r^{-1} + m_1p)r^{-1} + \dots + m_{n-1}p)r^{-1} \[10pt]
+&amp;=  \frac{c + p\sum_{i=0}^{n-1} m_ir^{i}}{r^n} \
+&amp;=  \frac{c + m’p }{R} \
+&amp;&lt; \frac{Rp + pR}{R}\
+&amp;= 2p
 \end{align}
-$$
+$$</p>
 </div>
 <p>Here $m’$ is some integer expressed using $n$ limbs, therefore strictly less than $R$.
 This is exactly why, if the answer is greater than $p$, <strong>one</strong> subtraction suffices for <code>c-mul</code>.
@@ -360,15 +417,13 @@ We <strong>NEVER</strong> need more than one subtraction!</p>
 <h2 id="yuval-s-new-multiplication-algorithm">Yuval’s New Multiplication Algorithm<a class="zola-anchor" href="#yuval-s-new-multiplication-algorithm" aria-label="Link to this section">#</a>
 </h2>
 <p>The new algorithm is based on a subtle observation. Quoting the original <a rel="noopener noreferrer external" target="_blank" href="https://hackmd.io/@Ingonyama/Barret-Montgomery">blog</a>:</p>
-
-<aside class="callout callout-box thm-box">
-  
+<aside id="" class="callout callout-box thm-box">
+  <div class="callout-title"></div>
   <p>Per round of the Montgomery reduction, we previously computed $c_i\text{ }r^{-1} \mod p$ using $n+1$ digit multiplications. An alternative method to achieve this, using only
 $n$ digit multiplications, is by computing $\rho_1 = r^{-1}\mod p$.
 One way to understand this algorithm is that, in each round, the current sum is divided by $𝑟$, and the resulting fraction is converted into an $n+1$-digit number $c_i\text{ }\rho_1$, which is then added to the integer part of the division.</p>
-
 </aside>
-<p>In simple words, in CIOS we were adding and then dividing<sup class="footnote-reference" id="fr-2-1"><a href="#fn-2">4</a></sup>, now we first divide and then add things.
+<p>In simple words, in CIOS we were adding and then dividing<sup class="footnote-reference" id="fr-2-1"><a href="https://randomwalks.xyz/blog/mont-mult/#fn-2">[4]</a></sup>, now we first divide and then add things.
 See below:</p>
 <p>$$ c \equiv (c*{2n-1} r^{2n-1} + c*{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p$$</p>
 <p>Dividing $c$ with $r^{-1}$, $n-1$ times</p>
@@ -377,7 +432,7 @@ See below:</p>
 cr^{-(n-1)} &amp;\equiv c_{2n-1}r^{n} + \ldots + c_{n-1} + c_{n-2}r^{-1} \ldots + c_1r^{-(n-2)}+ c_0r^{-(n-1)} \mod p
 \end{align}
 $$</p>
-<p>If we pre-computed<sup class="footnote-reference" id="fr-d-1"><a href="#fn-d">5</a></sup> $\rho_i \equiv r^{-i} \mod p$ for all $i \in [n-1]$, we can re-write the above equation as</p>
+<p>If we pre-computed<sup class="footnote-reference" id="fr-d-1"><a href="https://randomwalks.xyz/blog/mont-mult/#fn-d">[5]</a></sup> $\rho_i \equiv r^{-i} \mod p$ for all $i \in [n-1]$, we can re-write the above equation as</p>
 <p>$$cr^{-(n-1)} \equiv \Big(c_{2n-1}r^{n} + \ldots +c_{n-1} \Big) + \Big(c_{n-2}\rho_1\Big) \ldots + \Big(c_1\rho_{n-2}\Big)+ \Big(c_0\rho_{n-1}\Big) \mod p$$</p>
 <p>Barring the left most bracketed term, the remaining bracketed terms are $n+1$ limbed numbers referred to as the fractional part of the division in the quoted text and $\Big(c_{2n-1}r^{n} + \ldots +c_{n-1} \Big)$ is the integer part of the division.
 More simply, the remainder and quotient.</p>
@@ -387,13 +442,10 @@ More simply, the remainder and quotient.</p>
 This is the akin to playing the CIOS game for 1 round.</p>
 <p>$$ cR^{-1} \mod p \equiv (s+ mp)/r$$</p>
 <p>What the code described in the <code>s-mul</code> algorithm does is – it implements the above algorithm <strong>exactly</strong> as described above.</p>
-
-<aside class="callout callout-theorem thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Upper Bound</span></div>
-  
+<aside id="" class="callout callout-theorem thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Upper Bound</span></div>
   <p>We claim that $s &lt; n\cdot(rp)$.</p>
-
 </aside>
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
@@ -407,10 +459,8 @@ $$</p>
 <p>Now $R &lt; (n-1)rp$ as each bracketed term is at most $rp$.</p>
 <p>Also $Q \le \lfloor \frac{c}{r^{n-1}}\rfloor &lt; \frac{p^2}{r^{n-1}} &lt; \frac{r^np}{r^{n-1}} = rp$</p>
 <p>Therefore, $Q+R &lt; n\cdot rp$</p>
-
   <div class="qed" aria-label="End of proof">□</div>
 </aside>
-
 <p>From this, we can conclude that</p>
 <p>$$ cR^{-1} \mod p \equiv (s+ mp)/r &lt; (nrp + rp)/r &lt; (n+1)p$$</p>
 <p>Therefore, <strong>it is often not sufficient to subtract $2p$ from the answer, you might have to go as high as subtracting $4p$</strong>.</p>
@@ -442,25 +492,23 @@ cr^{-3} &amp;\equiv \Big(c_{7}r^{4} + \ldots +c_{3} \Big)  + \rho_1(c_2 + \rho_2
 &amp;\equiv Q + \text{Remainder}
 \end{align}
 $$</p>
-
-<aside class="callout callout-box thm-box">
-  
+<aside id="" class="callout callout-box thm-box">
+  <div class="callout-title"></div>
   <p>Note that the total effect is the same as in <code>h-mul</code> where we also divide by $r^{-3}$ before adding things.
 The key difference between <code>h-mul</code> and <code>s-mul</code> is that in <code>s-mul</code> we call do all 3 divisions in parallel, whereas here we first divide by $r^{-2}$, and only then can we divide by $r^{-1}$.
 So we lose some parallelism in <code>h-mul</code>, but as we will soon see, we minimise the amount of overflow.</p>
-
 </aside>
 <p>From here on with just do CIOS.</p>
 <p>For each division operation, we blow up the current sum by at most $rp$.
 See below $n=4$.</p>
 <div class="math-display">
-$$
+<p>$$
 \begin{align}
-cr^{-2} &< \frac{p^2}{r^2}  + \rho_2(c_1r + c_0) \\[10pt]
-&< \frac{p^2}{r^2} + \rho_2(r^2) \\[10pt]
-cr^{-3} &< \frac{p^2}{r^3} + \rho_1r + \rho_2r
+cr^{-2} &amp;&lt; \frac{p^2}{r^2}  + \rho_2(c_1r + c_0) \[10pt]
+&amp;&lt; \frac{p^2}{r^2} + \rho_2(r^2) \[10pt]
+cr^{-3} &amp;&lt; \frac{p^2}{r^3} + \rho_1r + \rho_2r
 \end{align}
-$$
+$$</p>
 </div>
 <p>In <code>h-mul</code> we only divide twice to get $Q$, whereas in <code>s-mul</code> we divide three times before adding.
 <strong>This is why the number of subtractions in <code>h-mul</code> will always be 1 less than the one needed for <code>s-mul</code>.</strong></p>
@@ -470,25 +518,22 @@ These are the $\rho$’s.</p>
 <p>Note that this strategy gives rise to a family of algorithms – we can employ another division strategy.
 We just divide once by $r^{-2}$, and then play CIOS.</p>
 <div class="math-display">
-$$
+<p>$$
 \begin{align}
-cr^{-2} &\equiv \Big(c_{7}r^{5} + \ldots +c_{3}r + c_2 \Big)  + \rho_2(c_1r + c_0) \\[10pt]
-&\equiv Q +R
+cr^{-2} &amp;\equiv \Big(c_{7}r^{5} + \ldots +c_{3}r + c_2 \Big)  + \rho_2(c_1r + c_0) \[10pt]
+&amp;\equiv Q +R
 \end{align}
-$$
+$$</p>
 </div>
 <p>In this case, the number of subtractions is always 1 less than that of <code>h-mul</code> but one more than <code>c-mul</code>.
 Thus, <code>s-mul</code> can be thought of as maximising parallel division operations before adding, and <code>c-mul</code> can be thought of as minimising division operations before an add. They are the two extremes of this family of algorithms.
 Using the above analysis, one can easily show the following:</p>
-
-<aside class="callout callout-theorem thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Number of multiplications vs parallelisation vs number of reductions</span></div>
-  
+<aside id="" class="callout callout-theorem thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Number of multiplications vs parallelisation vs number of reductions</span></div>
   <p>Let $u$ be the number of multiplication operations the CIOS algorithm with inputs $a$ and $b$ that each at most $p$, and $v$ be the number of addition operations (including the reduction phase).
 Then, for any $0 \le k \le n-1$, if we divide $ab$ by $r^k$ before adding, we have $k$ fewer multiplication operations compared to CIOS.
 If we have $m$ rounds of division, then we have $m$ more addition operations than CIOS (due to the reduction step of making the answer less than $p$).</p>
-
 </aside>
 <h2 id="missing-factor-of-1p">Missing Factor Of $1p$<a class="zola-anchor" href="#missing-factor-of-1p" aria-label="Link to this section">#</a>
 </h2>
@@ -508,12 +553,10 @@ If we tighten our analysis, $\rho_1$ and $\rho_2$ are fixed. The largest value f
 Plugging in exact numbers</p>
 <p>$$cr^{-4} &lt; \frac{p^2}{r^4} + (\rho_1 + \rho_2) + p &lt; 2.25p$$</p>
 <p>It turns out to be less than $3.25p$ for <code>s-mul</code></p>
-
-<aside class="callout callout-box thm-box">
-  
+<aside id="" class="callout callout-box thm-box">
+  <div class="callout-title"></div>
   <p>It’s the <code>bn-254</code> prime modulus $p$ that allows us to do one subtraction less for <code>h-mul</code> and <code>s-mul</code> than what theory would suggest for any general prime $p$.
 If $p$ were only a little smaller than $r^n$, then we’d have to put in one extra reduction for each of these algorithms.</p>
-
 </aside>
 <h2 id="the-need-for-speed">The Need For Speed<a class="zola-anchor" href="#the-need-for-speed" aria-label="Link to this section">#</a>
 </h2>
@@ -522,7 +565,7 @@ We had to add extra instructions to handle overflow. Do the speedups previously 
 <h3 id="without-subtractions">Without Subtractions<a class="zola-anchor" href="#without-subtractions" aria-label="Link to this section">#</a>
 </h3>
 <p>The first step is to remove all subtractions from all algorithms and observe how fast things are.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">warning:</span><span style="color: #032F62;"> `</span><span style="color: #6F42C1;">minimal_mult</span><span style="color: #032F62;">`</span><span> (</span><span style="color: #6F42C1;">example</span><span style="color: #032F62;"> &quot;ark-multiplication&quot;</span><span>)</span><span style="color: #6F42C1;"> generated</span><span style="color: #005CC5;"> 1</span><span style="color: #032F62;"> warning</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">warning:</span><span style="color: #032F62;"> `</span><span style="color: #6F42C1;">minimal_mult</span><span style="color: #032F62;">`</span><span> (</span><span style="color: #6F42C1;">example</span><span style="color: #032F62;"> &quot;ark-multiplication&quot;</span><span>)</span><span style="color: #6F42C1;"> generated</span><span style="color: #005CC5;"> 1</span><span style="color: #032F62;"> warning</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">    Finished</span><span style="color: #032F62;"> `</span><span style="color: #6F42C1;">release</span><span style="color: #032F62;">`</span><span style="color: #6F42C1;"> profile</span><span> [optimized] target(</span><span style="color: #6F42C1;">s</span><span>) in 3.76s</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">     Running</span><span style="color: #032F62;"> `</span><span style="color: #6F42C1;">target/release/examples/ark-multiplication</span><span style="color: #032F62;">`</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">100000</span><span style="color: #032F62;"> Trials of</span><span style="color: #005CC5;"> 100</span><span style="color: #032F62;"> chained multiplications</span></span>
@@ -537,7 +580,7 @@ Although fast, this code will not pass – we need the answer to be reduced $\mo
 </h3>
 <p>Now, for starters, ignoring the fact that <code>h-mul</code> actually needs <strong>two</strong> conditional subtractions, we stick one conditional subtraction for both <code>c-mul</code> and <code>h-mul</code>.
 We should still have a speed advantage, right? After all, we had one algorithm faster than the second algorithm, and we added the same line of code to both.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">    Finished</span><span style="color: #032F62;"> `</span><span style="color: #6F42C1;">release</span><span style="color: #032F62;">`</span><span style="color: #6F42C1;"> profile</span><span> [optimized] target(</span><span style="color: #6F42C1;">s</span><span>) in 0.80s</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">    Finished</span><span style="color: #032F62;"> `</span><span style="color: #6F42C1;">release</span><span style="color: #032F62;">`</span><span style="color: #6F42C1;"> profile</span><span> [optimized] target(</span><span style="color: #6F42C1;">s</span><span>) in 0.80s</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">     Running</span><span style="color: #032F62;"> `</span><span style="color: #6F42C1;">target/release/examples/ark-multiplication</span><span style="color: #032F62;">`</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">100000</span><span style="color: #032F62;"> Trials of</span><span style="color: #005CC5;"> 100</span><span style="color: #032F62;"> chained multiplications</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">Benchmarking</span><span style="color: #032F62;"> done</span></span>
@@ -548,15 +591,15 @@ We should still have a speed advantage, right? After all, we had one algorithm f
 <p>We are 5% slower. With a little thought and <a rel="noopener noreferrer external" target="_blank" href="https://www.youtube.com/watch?v=-HNpim5x-IE">listening Matt Godbolt</a>, this observation is not surprising.
 As we are writing CPU code, the answer is branch prediction.
 The CPU gets it wrong a lot for <code>h-mul</code>. Why? It’s because the line of code we added was</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">if</span><span> a</span><span style="color: #D73A49;"> &gt;=</span><span> p{</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">if</span><span> a</span><span style="color: #D73A49;"> &gt;=</span><span> p{</span></span>
 <span class="giallo-l"><span>	a</span><span style="color: #D73A49;"> =</span><span> p</span><span style="color: #D73A49;"> -</span><span> a</span></span>
 <span class="giallo-l"><span>}</span></span></code></pre>
 <p>Based on our theory so far, we know that <code>c-mul</code> overflows much less frequently than <code>h-mul</code> – With random inputs $\mod p$, we see that CIOS only overflows above $p$ 5% of the time, whereas <code>h-mul</code> overflows 68% of the time.
-If things were distributed uniformly<sup class="footnote-reference" id="fr-p-1"><a href="#fn-p">6</a></sup>, it would imply that 95% of the time, the if statement evaluates to false for <code>c-mul</code>. So the CPU can pretty much always get rid of this line of code, and be wrong only 5% of the time.</p>
+If things were distributed uniformly<sup class="footnote-reference" id="fr-p-1"><a href="https://randomwalks.xyz/blog/mont-mult/#fn-p">[6]</a></sup>, it would imply that 95% of the time, the if statement evaluates to false for <code>c-mul</code>. So the CPU can pretty much always get rid of this line of code, and be wrong only 5% of the time.</p>
 <p>If we wish to double down on this theory. We just put the <code>if</code> check, but remove the actual subtraction from the reduction (this will break correctness, but we’re only checking if our theory is correct).
 All our speed is recovered.
 The branch prediction is the same for both code bases, as the compiler will just get rid of the check in the first place.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">100000</span><span style="color: #032F62;"> Trials of</span><span style="color: #005CC5;"> 100</span><span style="color: #032F62;"> chained multiplications</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">100000</span><span style="color: #032F62;"> Trials of</span><span style="color: #005CC5;"> 100</span><span style="color: #032F62;"> chained multiplications</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">Benchmarking</span><span style="color: #032F62;"> done</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">Average</span><span style="color: #032F62;"> Advantage:</span><span style="color: #005CC5;"> 11.633622123165752</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">C-mult</span><span style="color: #005CC5;">         1804.97929</span></span>
@@ -566,10 +609,10 @@ The branch prediction is the same for both code bases, as the compiler will just
 <span class="giallo-l"><span style="color: #6F42C1;">dtype:</span><span style="color: #032F62;"> float64</span></span></code></pre><h3 id="aside-same-code-two-conclusions">Aside: Same Code Two Conclusions<a class="zola-anchor" href="#aside-same-code-two-conclusions" aria-label="Link to this section">#</a>
 </h3>
 <p>As a brief distraction, in this section, we give an example of how finicky performance benchmarking can be.</p>
-<p>One of the reasons we embarked on this journey was that preliminary experimentation showed 10-15% speedups<sup class="footnote-reference" id="fr-bench-1"><a href="#fn-bench">7</a></sup>.
+<p>One of the reasons we embarked on this journey was that preliminary experimentation showed 10-15% speedups<sup class="footnote-reference" id="fr-bench-1"><a href="https://randomwalks.xyz/blog/mont-mult/#fn-bench">[7]</a></sup>.
 Without the subtractions, we have a clear understanding of why this was the case (fewer multiplications and no big read/write chunks).
 However, even if we add the requisite subtractions to the <a rel="noopener noreferrer external" target="_blank" href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/cc9dcfb0ed0c36fe1d368d630f1cce1e72361506/src/y_mult_opt.rs#L114">Ingo skyscraper code</a> code and run <code>cargo bench</code> based on <a rel="noopener noreferrer external" target="_blank" href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/0cc267afa60c87deb632164ff692d783ef6f2109/benches/bench.rs#L6">Ingo skyscraper beches</a>, we see something different from what’s discussed above.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #005CC5;">test</span><span style="color: #032F62;"> result: ok.</span><span style="color: #005CC5;"> 0</span><span style="color: #032F62;"> passed</span><span>;</span><span style="color: #6F42C1;"> 0</span><span style="color: #032F62;"> failed</span><span>;</span><span style="color: #6F42C1;"> 0</span><span style="color: #032F62;"> ignored</span><span>;</span><span style="color: #6F42C1;"> 0</span><span style="color: #032F62;"> measured</span><span>;</span><span style="color: #6F42C1;"> 0</span><span style="color: #032F62;"> filtered out</span><span>;</span><span style="color: #6F42C1;"> finished</span><span style="color: #032F62;"> in 0.00s</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #005CC5;">test</span><span style="color: #032F62;"> result: ok.</span><span style="color: #005CC5;"> 0</span><span style="color: #032F62;"> passed</span><span>;</span><span style="color: #6F42C1;"> 0</span><span style="color: #032F62;"> failed</span><span>;</span><span style="color: #6F42C1;"> 0</span><span style="color: #032F62;"> ignored</span><span>;</span><span style="color: #6F42C1;"> 0</span><span style="color: #032F62;"> measured</span><span>;</span><span style="color: #6F42C1;"> 0</span><span style="color: #032F62;"> filtered out</span><span>;</span><span style="color: #6F42C1;"> finished</span><span style="color: #032F62;"> in 0.00s</span></span>
 <span class="giallo-l"></span>
 <span class="giallo-l"><span style="color: #6F42C1;">     Running</span><span style="color: #032F62;"> benches/my_benchmark.rs</span><span> (target/release/deps/my_benchmark-8968c072d5fb1ae5)</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">Arkworks</span><span style="color: #032F62;"> CIOS</span><span> (10</span><span style="color: #032F62;"> chained c-mul, looped</span><span>)</span></span>
@@ -591,13 +634,11 @@ Of course, we still lose a bit as <code>h-mul</code> needs 2 subtractions and 2 
 <p>In conclusion, something as innocuous as random inputs can lead to completely different conclusions about the real-world performance of code.</p>
 <h2 id="so-where-do-we-go-now">So Where Do We Go Now?<a class="zola-anchor" href="#so-where-do-we-go-now" aria-label="Link to this section">#</a>
 </h2>
-
-<aside class="callout callout-box thm-box">
-  
+<aside id="" class="callout callout-box thm-box">
+  <div class="callout-title"></div>
   <p>At this point, where do we stand? We have a family of algorithms for Montgomery multiplication. If we are not bothered about reducing $\mod p$, then <code>s-mul</code> should be the fastest algorithm, owing to its maximal parallelism (allows maximal for out-of-order execution on the CPU).
 But we <em>need</em> the final answer to be less than $p$ for the rest of the Jolt setup to work.
 Does this mean that for Jolt, CIOS remains the best algorithm to use?</p>
-
 </aside>
 <p>We try a middle ground. We use our theory framework so far to come up with an alternate strategy:
 – We will save 2 multiplications (instead of 3) but also need to reduce one fewer time compared to <code>h-mul</code>
@@ -610,7 +651,7 @@ Our implementation can be found <a rel="noopener noreferrer external" target="_b
 Let’s call this code <code>a-mul</code>.</p>
 <p>Without subtractions, <code>a-mul</code> is 9% faster. As expected, we are a little slower than <code>h-mul</code>
 But as the percentage of times we overflow is much smaller - 27% as opposed to 68% with random inputs $\mod p$.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">100000</span><span style="color: #032F62;"> Trials of</span><span style="color: #005CC5;"> 100</span><span style="color: #032F62;"> chained multiplications</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">100000</span><span style="color: #032F62;"> Trials of</span><span style="color: #005CC5;"> 100</span><span style="color: #032F62;"> chained multiplications</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">Benchmarking</span><span style="color: #032F62;"> done</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">Average</span><span style="color: #032F62;"> Advantage:</span><span style="color: #005CC5;"> 9.704649409540085</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">C-mult</span><span style="color: #005CC5;">         1778.47723</span></span>
@@ -619,7 +660,7 @@ But as the percentage of times we overflow is much smaller - 27% as opposed to 6
 <span class="giallo-l"><span style="color: #6F42C1;"> H-overflow</span><span style="color: #005CC5;">       0.27255</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">dtype:</span><span style="color: #032F62;"> float64</span></span></code></pre>
 <p>Putting the subtractions back in. We are marginally faster than <code>c-mul</code> in the worst case with fully random inputs.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"></span>
 <span class="giallo-l"><span style="color: #6F42C1;">300000</span><span style="color: #032F62;"> Trials of</span><span style="color: #005CC5;"> 100</span><span style="color: #032F62;"> chained multiplications of random values</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">300000</span><span style="color: #032F62;"> Trials of</span><span style="color: #005CC5;"> 1</span><span style="color: #032F62;"> chained multiplications of small values</span></span>
 <span class="giallo-l"></span>
@@ -633,7 +674,7 @@ But as the percentage of times we overflow is much smaller - 27% as opposed to 6
 <span class="giallo-l"></span></code></pre>
 <p>Now, what would happen if we could control the inputs to be small? This will prevent overflows.
 We should recover speed, right?</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"></span>
 <span class="giallo-l"><span style="color: #6F42C1;">Scanning</span><span style="color: #032F62;"> file: arkworks_multiplication_small.csv</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">Average</span><span style="color: #032F62;"> Advantage</span><span> (%): 16.30465277384584</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">C-mult</span><span style="color: #005CC5;">         28.788490</span></span>
@@ -651,34 +692,34 @@ For anything in between, you’d want to use the mini-theorem above and figure o
 <h2 id="instructions-for-running-benchmarks-discussed-above">Instructions For Running Benchmarks Discussed Above<a class="zola-anchor" href="#instructions-for-running-benchmarks-discussed-above" aria-label="Link to this section">#</a>
 </h2>
 <p>To get individual times on chained multiplications</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">git</span><span style="color: #032F62;"> clone https://github.com/abiswas3/Montgomery-Benchmarks.git</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">git</span><span style="color: #032F62;"> clone https://github.com/abiswas3/Montgomery-Benchmarks.git</span></span>
 <span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> Montgomery-Benchmarks</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> bench</span></span></code></pre>
 <p>To get time comparisons inside of arkworks run the following command</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> run</span><span style="color: #005CC5;"> --example</span><span style="color: #032F62;"> ark-multiplication</span><span style="color: #005CC5;"> --release</span><span> &amp;&amp;</span><span style="color: #6F42C1;"> python3</span><span style="color: #032F62;"> plotting.py arkworks_multiplication.csv</span></span></code></pre>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> run</span><span style="color: #005CC5;"> --example</span><span style="color: #032F62;"> ark-multiplication</span><span style="color: #005CC5;"> --release</span><span> &amp;&amp;</span><span style="color: #6F42C1;"> python3</span><span style="color: #032F62;"> plotting.py arkworks_multiplication.csv</span></span></code></pre>
 <p>For squaring run (we have not yet optimised the squaring library to use <code>a-mul</code>)</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> run</span><span style="color: #005CC5;"> --example</span><span style="color: #032F62;"> ark-squaring</span><span style="color: #005CC5;"> --release</span><span> &amp;&amp;</span><span style="color: #6F42C1;"> python3</span><span style="color: #032F62;"> plotting.py arkworks_squaring.csv</span></span></code></pre><section class="footnotes">
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> run</span><span style="color: #005CC5;"> --example</span><span style="color: #032F62;"> ark-squaring</span><span style="color: #005CC5;"> --release</span><span> &amp;&amp;</span><span style="color: #6F42C1;"> python3</span><span style="color: #032F62;"> plotting.py arkworks_squaring.csv</span></span></code></pre><section class="footnotes">
 <ol class="footnotes-list">
 <li id="fn-a">
-<p>This specific implementation is optimised for parallelism instead, looking at all the SIMD code, that’s what it seems at least. <a href="#fr-a-1">↩</a></p>
+<p>This specific implementation is optimised for parallelism instead, looking at all the SIMD code, that’s what it seems at least. <a href="https://randomwalks.xyz/blog/mont-mult/#fr-a-1">↩</a></p>
 </li>
 <li id="fn-b">
-<p>unchanged from how we found them in the wild <a href="#fr-b-1">↩</a></p>
+<p>unchanged from how we found them in the wild <a href="https://randomwalks.xyz/blog/mont-mult/#fr-b-1">↩</a></p>
 </li>
 <li id="fn-f">
-<p>Limbs here just mean digits. A 4 limb number is a 4-digit number where each digit is $w$ bits large, i.e each digit is between 0 and $2^w -1$. <a href="#fr-f-1">↩</a></p>
+<p>Limbs here just mean digits. A 4 limb number is a 4-digit number where each digit is $w$ bits large, i.e each digit is between 0 and $2^w -1$. <a href="https://randomwalks.xyz/blog/mont-mult/#fr-f-1">↩</a></p>
 </li>
 <li id="fn-2">
-<p>First add $mp$ to $c$, then divide $(c+mp)/r$. <a href="#fr-2-1">↩</a></p>
+<p>First add $mp$ to $c$, then divide $(c+mp)/r$. <a href="https://randomwalks.xyz/blog/mont-mult/#fr-2-1">↩</a></p>
 </li>
 <li id="fn-d">
-<p>We guarantee that $\rho_i &lt; p$ <a href="#fr-d-1">↩</a></p>
+<p>We guarantee that $\rho_i &lt; p$ <a href="https://randomwalks.xyz/blog/mont-mult/#fr-d-1">↩</a></p>
 </li>
 <li id="fn-p">
-<p>Which they are not. <a href="#fr-p-1">↩</a></p>
+<p>Which they are not. <a href="https://randomwalks.xyz/blog/mont-mult/#fr-p-1">↩</a></p>
 </li>
 <li id="fn-bench">
-<p>Remember the bench code in the alternate implementation? <a href="#fr-bench-1">↩</a></p>
+<p>Remember the bench code in the alternate implementation? <a href="https://randomwalks.xyz/blog/mont-mult/#fr-bench-1">↩</a></p>
 </li>
 </ol>
 </section>
@@ -880,14 +921,16 @@ For anything in between, you’d want to use the mini-theorem above and figure o
       var link = reference.querySelector('a');
       if (!link) return;
 
-      var targetId = (link.getAttribute('href') || '').replace('#', '');
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
       var definition = targetId ? document.getElementById(targetId) : null;
       if (!definition) return;
 
       transformed += 1;
       var noteId = 'sidenote-' + transformed;
       var clone = definition.cloneNode(true);
-      clone.querySelectorAll('a[href^="#fr-"]').forEach(function (backlink) { backlink.remove(); });
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
 
       var noteBody = Array.from(clone.children).map(function (child) {
         return child.tagName === 'P' ? child.innerHTML : child.outerHTML;

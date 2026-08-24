@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Anatomy Of A Jolt Sumcheck — Random Walks</title>
-  <meta name="description" content="Written Word">
+  <meta name="description" content="">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=9f3f3f161e11a605fe54">
@@ -138,67 +138,105 @@
     
     <nav class="contents contents-side" aria-label="Table of contents">
       <h2>Contents</h2>
-      <ol>
+      
+<ol>
+  
   <li>
     <a href="#the-trace">The Trace</a>
+    
   </li>
+  
   <li>
     <a href="#correctness-as-constraint-satisfaction">Correctness As Constraint Satisfaction</a>
+    
   </li>
+  
   <li>
-    <a href="#the-outer-spartan-polynomials">The Outer Spartan Polynomials</a><ol>
+    <a href="#the-outer-spartan-polynomials">The Outer Spartan Polynomials</a>
+    
+      
+<ol>
+  
   <li>
     <a href="#example-constraint-1">Example : Constraint 1</a>
+    
   </li>
+  
 </ol>
+
+    
   </li>
+  
   <li>
-    <a href="#review-of-the-linear-sumcheck-implementation">Review Of The Linear Sumcheck Implementation</a><ol>
+    <a href="#review-of-the-linear-sumcheck-implementation">Review Of The Linear Sumcheck Implementation</a>
+    
+      
+<ol>
+  
   <li>
     <a href="#setup-phase">Setup Phase</a>
+    
   </li>
+  
 </ol>
+
+    
   </li>
+  
   <li>
     <a href="#the-remaining-rounds">The Remaining Rounds</a>
+    
   </li>
+  
   <li>
-    <a href="#the-streaming-generalisation">The Streaming Generalisation</a><ol>
+    <a href="#the-streaming-generalisation">The Streaming Generalisation</a>
+    
+      
+<ol>
+  
   <li>
     <a href="#binding-in-the-streaming-phase">Binding in the streaming phase</a>
+    
   </li>
+  
   <li>
     <a href="#next-window-start">Next Window Start</a>
+    
   </li>
+  
   <li>
     <a href="#switch-over-point">Switch Over Point</a>
+    
   </li>
+  
   <li>
     <a href="#actual-code">Actual Code</a>
+    
   </li>
+  
 </ol>
+
+    
   </li>
+  
 </ol>
+
     </nav>
     
 
     <div class="prose">
-      
-<aside class="callout callout-remark">
-  
+      <aside id="" class="callout callout-remark">
   <div class="callout-title">(Update) 2026-08-14</div>
-  
   <p>Jolt has changed so much since writing this post was written, the code is no longer in main.
 Still the post remains valid if one were to understand how to implement streaming sum-checks.</p>
-
 </aside>
-<p>This write-up talks about this <a rel="noopener noreferrer external" target="_blank" href="https://github.com/a16z/jolt/pull/1114">PR</a> which introduces a generalised sum-check API, adapted to accommodate an implementation of Jolt that uses $O(1)$ memory<sup class="footnote-reference" id="fr-d-1"><a href="#fn-d">1</a></sup>.</p>
+<p>This write-up talks about this <a rel="noopener noreferrer external" target="_blank" href="https://github.com/a16z/jolt/pull/1114">PR</a> which introduces a generalised sum-check API, adapted to accommodate an implementation of Jolt that uses $O(1)$ memory<sup class="footnote-reference" id="fr-d-1"><a href="https://randomwalks.xyz/blog/streaming-sumchecks/#fn-d">[1]</a></sup>.</p>
 <h2 id="the-trace">The Trace<a class="zola-anchor" href="#the-trace" aria-label="Link to this section">#</a>
 </h2>
 <p>Before we describe the API, it will be useful to briefly re-cap how Jolt works.
 At the heart of the Jolt prover is the sumcheck algorithm.
-Given some polynomial $g$ and a set $S$ with sufficient structure<sup class="footnote-reference" id="fr-e-1"><a href="#fn-e">2</a></sup>, the sum-check algorithm enables a prover to convince a verifier that it computed $\sum_{x \in S} g(x)$ honestly.
-The end goal of the Jolt prover is to convince an honest verifier that it ran some guest program<sup class="footnote-reference" id="fr-c-1"><a href="#fn-c">3</a></sup> correctly.
+Given some polynomial $g$ and a set $S$ with sufficient structure<sup class="footnote-reference" id="fr-e-1"><a href="https://randomwalks.xyz/blog/streaming-sumchecks/#fn-e">[2]</a></sup>, the sum-check algorithm enables a prover to convince a verifier that it computed $\sum_{x \in S} g(x)$ honestly.
+The end goal of the Jolt prover is to convince an honest verifier that it ran some guest program<sup class="footnote-reference" id="fr-c-1"><a href="https://randomwalks.xyz/blog/streaming-sumchecks/#fn-c">[3]</a></sup> correctly.
 It does so via many sum-check algorithms.
 Therefore for the whole setup to work, the polynomials involved in these sumchecks must be in some way related to the execution of said program.
 As such honest proving begins with emulation of the given RISC-V program – which we refer to as the trace.
@@ -207,10 +245,10 @@ This list is what we refer to as the trace.
 And it is this trace from which we will construct the sum-check polynomials in Jolt.
 See the emulation post for a fully worked out description of the emulation from an actual albeit useless program written in Rust.
 For example, consider the following program with just two instructions.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="asm"><span class="giallo-l"><span style="color: #005CC5;">00001117</span><span>    auipc  </span><span style="color: #005CC5;">sp</span><span>,</span><span style="color: #005CC5;">0x1</span><span style="color: #6A737D;"> # sp = PC + (0x1 &lt;&lt; 12) = 0x80000000 + 0x1000 = 0x80001000</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="asm"><span class="giallo-l"><span style="color: #005CC5;">00001117</span><span>    auipc  </span><span style="color: #005CC5;">sp</span><span>,</span><span style="color: #005CC5;">0x1</span><span style="color: #6A737D;"> # sp = PC + (0x1 &lt;&lt; 12) = 0x80000000 + 0x1000 = 0x80001000</span></span>
 <span class="giallo-l"><span style="color: #005CC5;">12010113</span><span>    addi   </span><span style="color: #005CC5;">sp</span><span>,</span><span style="color: #005CC5;">sp</span><span>,</span><span style="color: #005CC5;">288</span><span style="color: #6A737D;"> # sp = 0x80001000 + 288 = 0x80001120</span></span></code></pre>
 <p>After doing some initial setup of all the values of registers and memory, the emulation looks like the following:</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="rust"><span class="giallo-l"><span style="color: #6F42C1;">Cycle</span><span style="color: #005CC5;"> 0</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> AUIPC</span><span>(</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #6F42C1;">Cycle</span><span style="color: #005CC5;"> 0</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> AUIPC</span><span>(</span></span>
 <span class="giallo-l"><span>    address</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> 2147483648</span><span>,</span><span style="color: #6A737D;">  // = 0x80000000</span></span>
 <span class="giallo-l"><span>    operands</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> FormatU</span><span> {</span></span>
 <span class="giallo-l"><span>        rd</span><span style="color: #D73A49;">:</span><span style="color: #005CC5;"> 2</span><span>,</span><span style="color: #6A737D;">            // x2 = sp (stack pointer)</span></span>
@@ -248,14 +286,10 @@ For example, consider the following program with just two instructions.</p>
 <span class="giallo-l"></span></code></pre>
 <p>For the purposes of this post, this is the mental model we will have when referring to the trace.
 It is a giant vector of length $T$, and location $t \in [T]$ stores the machine state before and after the $t$’th instruction.</p>
-
-<aside class="callout callout-remark">
-  
+<aside id="" class="callout callout-remark">
   <div class="callout-title">A Lie In Service Of The Truth</div>
-  
   <p>Throughout this post we will assume that we can store the entire trace in memory, and iterating through the trace is free. This is clearly not true, and we will fix this at a later date.
 But for the purposes of this post, this assumption allows us to abstract away important implementation details that currently remain unimplemented, and prove that we can indeed implement any Jolt sumcheck with $O(1)$ memory.</p>
-
 </aside>
 <h2 id="correctness-as-constraint-satisfaction">Correctness As Constraint Satisfaction<a class="zola-anchor" href="#correctness-as-constraint-satisfaction" aria-label="Link to this section">#</a>
 </h2>
@@ -263,7 +297,7 @@ But for the purposes of this post, this assumption allows us to abstract away im
 One way to define correctness would be to say at every cycle, the machine state is consistent with the program specification.
 As a concrete example, consider loading and storing to memory.
 In RISC-V assembly loads/store instructions look like the following:</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="asm"><span class="giallo-l"><span>lb   rd, offset(rs1)   </span><span style="color: #6A737D;"> # Load byte (sign-extended)</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="asm"><span class="giallo-l"><span>lb   rd, offset(rs1)   </span><span style="color: #6A737D;"> # Load byte (sign-extended)</span></span>
 <span class="giallo-l"><span>lh   rd, offset(rs1)   </span><span style="color: #6A737D;"> # Load halfword (sign-extended)</span></span>
 <span class="giallo-l"><span>lw   rd, offset(rs1)   </span><span style="color: #6A737D;"> # Load word (sign-extended)</span></span>
 <span class="giallo-l"><span>ld   rd, offset(rs1)   </span><span style="color: #6A737D;"> # Load doubleword (RV64)</span></span>
@@ -277,9 +311,9 @@ In RISC-V assembly loads/store instructions look like the following:</p>
 <span class="giallo-l"><span>sd   rs2, offset(rs1)  </span><span style="color: #6A737D;"> # Store doubleword (RV64)</span></span></code></pre>
 <p>So if the instruction has the <code>Load</code> flag set to 1 or <code>Store</code> flag set to 1, then the address from which we read/write must be equal to value in <code>rs1 + offset</code>.
 Using propositional logic we write:</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="plain"><span class="giallo-l"><span>if { Instruct has Load OR Store } then ( RamAddress ) == ( Rs1Value + Imm )</span></span></code></pre>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>if { Instruct has Load OR Store } then ( RamAddress ) == ( Rs1Value + Imm )</span></span></code></pre>
 <p>The same thing expressed as algebraic constraints:</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="plain"><span class="giallo-l"><span>(Load + Store) * (RamAddress - (Rs1Value + Imm)) = 0</span></span></code></pre>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>(Load + Store) * (RamAddress - (Rs1Value + Imm)) = 0</span></span></code></pre>
 <p>For a program to be correctly executed, for every time step $t \in \lbrace 0,1 \rbrace^{\log T}$, the above constraint must be satisfied.
 Of course for a program to be correct, it is not sufficient to just satisfy the above constraint.
 There are many more constraints.
@@ -292,7 +326,7 @@ Each constraint will be of form</p>
 <p><code>Term 1 * Term 2 = 0</code>.</p>
 <p>Here <code>Term 1</code> will be represented by $A$ and <code>Term 2</code> will be represented by $B$.</p>
 <p><strong>Indexing</strong>: We divide the 20 constraints into 2 groups.
-We refer to each constraint using two digits<sup class="footnote-reference" id="fr-a-1"><a href="#fn-a">4</a></sup> $(b,y)$ where $b \in \lbrace 0,1\rbrace$ is the selector index, and $y\in \lbrace -4, \ldots, 5\rbrace$ refers to one of the 10 constraints in group $b$.
+We refer to each constraint using two digits<sup class="footnote-reference" id="fr-a-1"><a href="https://randomwalks.xyz/blog/streaming-sumchecks/#fn-a">[4]</a></sup> $(b,y)$ where $b \in \lbrace 0,1\rbrace$ is the selector index, and $y\in \lbrace -4, \ldots, 5\rbrace$ refers to one of the 10 constraints in group $b$.
 For example,</p>
 <ul>
 <li>
@@ -326,28 +360,25 @@ The picture you have in mind is the following
 <img src="https://randomwalks.xyz/blog/streaming-sumchecks/trave_to_poly.svg" alt="" /></p>
 <p>Satisfying all constraints is just saying the following:</p>
 <div class="math-display">
-$$
-\widetilde{A}(x_t, x_b, y) \times \widetilde{B}(x_t, x_b,  y) = \vec{0} \quad \forall x_t \in \{0,1\}^{\log T}, \forall x_b \in \{0,1\}, \forall y \in \{-4, ..., 5\}
-$$
+<p>$$
+\widetilde{A}(x_t, x_b, y) \times \widetilde{B}(x_t, x_b,  y) = \vec{0} \quad \forall x_t \in {0,1}^{\log T}, \forall x_b \in {0,1}, \forall y \in {-4, …, 5}
+$$</p>
 </div>
 <p>where $\widetilde{U}$ denotes the multilinear extension of a vector $U$.</p>
-
-<aside class="callout callout-definition thm-numbered">
-  
-  <div class="thm-header"><span class="thm-label"></span><span class="thm-title"> — Notation</span></div>
-  
+<aside id="" class="callout callout-definition thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Notation</span></div>
   <ul>
 <li>$\widetilde{U}$ denotes the <strong>multilinear extension</strong> (MLE) of $U$: the unique multilinear polynomial agreeing with $U$ on all Boolean inputs.</li>
 <li>$\eq{\tau}{x}$ is the <strong>equality polynomial</strong>, evaluating to 1 when $\tau = x$ on the Boolean hypercube and 0 otherwise.</li>
 <li>$\mathcal{L}_a(X)$ is the <strong>Lagrange basis polynomial</strong> for point $a$ in a domain $D$: the unique polynomial of degree $|D|-1$ satisfying $\mathcal{L}_a(a) = 1$ and $\mathcal{L}_a(d) = 0$ for all other $d \in D$.</li>
 </ul>
-
 </aside>
 <p>Now we do the thing we have done since the beginning of time.
 We want to make sure the LHS of the above system of equations equals the RHS as polynomials.
 So we sample $(\TauTime | \tau_{b} | \TauConstraints) \samples \ChallengeSet^{\log T+2}$ and check if the following sumcheck holds:</p>
 <div class="math-display">
-$$\sum_{x_t \in \{0,1\}^{\log T}} \sum_{x_b \in \{0,1\}} \sum_{y \in \{-4,...,5\}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{y}{\TauConstraints} \cdot \widetilde{A}(x_t, x_b, y) \, \widetilde{B}(x_t, x_b, y) = 0 $$
+<p>$$\sum_{x_t \in {0,1}^{\log T}} \sum_{x_b \in {0,1}} \sum_{y \in {-4,…,5}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{y}{\TauConstraints} \cdot \widetilde{A}(x_t, x_b, y) , \widetilde{B}(x_t, x_b, y) = 0 $$</p>
 </div>
 <p>By Schwartz-Zippel, with high probability if the above test passes, then the verifier can be happy that the prover was honest.</p>
 <h2 id="review-of-the-linear-sumcheck-implementation">Review Of The Linear Sumcheck Implementation<a class="zola-anchor" href="#review-of-the-linear-sumcheck-implementation" aria-label="Link to this section">#</a>
@@ -366,20 +397,16 @@ Except there’s a special first round, which we describe below.</p>
 We iterate through the entire trace, <strong>but</strong> we do <strong>NOT</strong> compute and store $\widetilde{A}$ and $\widetilde{B}$ in memory.
 Instead we store in memory the following univariate polynomial, which is the prover’s first round message.</p>
 <div class="math-display">
-$$s(\textcolor{pink}{Y}) \Def \sum_{x_t \in \{0,1\}^{\log T}} \sum_{x_b \in \{0,1\}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{\TauConstraints}{\textcolor{pink}{Y}} \cdot A(x_t, x_b, \textcolor{pink}{Y}) \, B(x_t, x_b , \textcolor{pink}{Y})$$
+<p>$$s(\textcolor{pink}{Y}) \Def \sum_{x_t \in {0,1}^{\log T}} \sum_{x_b \in {0,1}} \eq{\tau_t}{x_t} \cdot \eq{\tau_{b}}{x_b} \cdot \Lagrange{\TauConstraints}{\textcolor{pink}{Y}} \cdot A(x_t, x_b, \textcolor{pink}{Y}) , B(x_t, x_b , \textcolor{pink}{Y})$$</p>
 </div>
 <p>This takes $O(1)$ field elements worth of storage as there are only $10$ constraints per group.
 <a rel="noopener noreferrer external" target="_blank" href="https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L117">See</a> for the evaluation points that represent the above polynomial.
 We refer to these evaluations as the <code>skip_window</code> in the code.</p>
-
-<aside class="callout callout-remark">
-  
-  <div class="callout-title">Remark</div>
-  
+<aside id="" class="callout callout-remark">
+  <div class="callout-title"></div>
   <p><strong>NOTE:</strong> This phase will remain exactly the same in the current “streaming” implementation as well.
 Remember we assumed streaming the trace was free, and storing $O(1)$ field elements for a univariate polynomial does not break anyone’s memory bank.
 We include this round in this post for completeness.</p>
-
 </aside>
 <p>After this round, the prover has received challenge $r_y$ to bind to variable $Y$.
 What we describe next refers to the <code>OuterRemainingSumcheck</code> in Jolt.
@@ -394,11 +421,11 @@ The sumcheck is divided into 2 phases:</p>
 This takes $2T$ field elements worth of space.</p>
 <p>More specifically for every $(x_{\log T}, \dots, x_{1}, x_b) \in \lbrace 0,1\rbrace^{\log T + 1}$, we store</p>
 <div class="math-display">
-$$\widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, r_y) = \sum_{y \in \{-4, \dots, 5\}} \Lagrange{\tau_y}{y}\, \widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, y)$$
+<p>$$\widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, r_y) = \sum_{y \in {-4, \dots, 5}} \Lagrange{\tau_y}{y}, \widetilde{A}(x_{\log T}, \dots, x_{1}, x_b, y)$$</p>
 </div>
 <p>and</p>
 <div class="math-display">
-$$\widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, r_y)= \sum_{y \in \{-4, \dots, 5\}} \Lagrange{\tau_y}{y}\, \widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, y)$$
+<p>$$\widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, r_y)= \sum_{y \in {-4, \dots, 5}} \Lagrange{\tau_y}{y}, \widetilde{B}(x_{\log T}, \dots, x_{1}, x_b, y)$$</p>
 </div>
 <p>This storing of partially bound sumcheck polynomials in memory is what we refer to as materialising.</p>
 <p>While we’re materialising $\widetilde{A}$ and $\widetilde{B}$, we might as well prepare ourselves to also compute the prover’s messages for the first round of the sum-check algorithm.
@@ -406,12 +433,12 @@ This process where we materialise the polynomials of the sum-check <strong>and</
 This is exactly what <code>compute_first_quadratic_evals_and_bound_polys</code> (<a rel="noopener noreferrer external" target="_blank" href="https://github.com/abiswas3/jolt/blob/c20fe3c0234ea3a328dbbd3d7f717f64599ff579/jolt-core/src/zkvm/spartan/outer.rs#L297">described here</a>) does.</p>
 <p>Here <code>t0</code> and <code>t_inf</code> refer to evaluations of the following quadratic polynomial.</p>
 <div class="math-display">
-$$t(\textcolor{pink}{X_b}) \Def \sum_{x_t \in \{0,1\}^{\log T}}\sum_{y \in \{-4, \dots, 5\}}  \eq{\tau_t}{x_t} \cdot \Lagrange{r_y}{y} \cdot \widetilde{A}(x_t ,\textcolor{pink}{X_b}, y) \, \widetilde{B}(x_t, \textcolor{pink}{X_b}, y) $$
+<p>$$t(\textcolor{pink}{X_b}) \Def \sum_{x_t \in {0,1}^{\log T}}\sum_{y \in {-4, \dots, 5}}  \eq{\tau_t}{x_t} \cdot \Lagrange{r_y}{y} \cdot \widetilde{A}(x_t ,\textcolor{pink}{X_b}, y) , \widetilde{B}(x_t, \textcolor{pink}{X_b}, y) $$</p>
 </div>
 <p>The final polynomial that the prover must send is the following:</p>
 <p>$s(X_b) \Def \Lagrange{\tau_y}{r_0} \cdot t(\textcolor{pink}{X_b}) \cdot  \eq{\tau_{b}}{\textcolor{pink}{X_b}}$</p>
 <p>which is exactly what the following snippet of code on Line 1430 of <code>jolt-core/src/zkvm/spartan/outer.rs</code> computes.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="rust"><span class="giallo-l"><span style="color: #005CC5;">self</span><span style="color: #D73A49;">.</span><span>split_eq_poly</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #005CC5;">self</span><span style="color: #D73A49;">.</span><span>split_eq_poly</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">    .</span><span style="color: #6F42C1;">gruen_poly_deg_3</span><span>(t0, t_inf, previous_claim)</span></span></code></pre><h2 id="the-remaining-rounds">The Remaining Rounds<a class="zola-anchor" href="#the-remaining-rounds" aria-label="Link to this section">#</a>
 </h2>
 <p>With $\widetilde{A}$ and $\widetilde{B}$ materialised, the remaining rounds are standard. The mental picture is the following:</p>
@@ -424,18 +451,14 @@ The second time of doing so – we materialised the polynomials with only $r_0$ 
 Once we materialise, we never have to look at the trace ever again – for at least this sum-check.
 But this came at the cost of storing $2T$ field elements in memory per polynomial.
 If $T$ is large, on the order of billions, then this is too expensive.</p>
-
-<aside class="callout callout-remark">
-  
-  <div class="callout-title">Remark</div>
-  
+<aside id="" class="callout callout-remark">
+  <div class="callout-title"></div>
   <p>In this world where iterating through the trace is free, we could <strong>never</strong> materialise any polynomial and always just stream the trace every round (like we did in the first round).
 That would take close to no memory at all.
 While this is true, streaming the trace is actually not free, and we want to avoid it as many times as possible.
 We only assume it’s free to make the memory accounting work for this post.
 Eventually, we will have to implement a memory efficient way to stream the trace – but that is not terribly hard, and will soon be implemented.
 In what follows, we make a compromise of sometimes streaming instead of always streaming, but this will allow us to store fewer things.</p>
-
 </aside>
 <h2 id="the-streaming-generalisation">The Streaming Generalisation<a class="zola-anchor" href="#the-streaming-generalisation" aria-label="Link to this section">#</a>
 </h2>
@@ -487,51 +510,39 @@ For this sum-check the degree of $t$ will be $d=2$ always.
 In the example schedule above, the window width is $w=3$ for round 0.
 The streaming data structure to compute is the following:</p>
 <div class="math-display">
-$$\begin{align*}
-t'(\textcolor{pink}{X_2, X_1, X_b}) = \sum_{y \in \{-4, \dots, 5\}}\sum_{x_{15}..x_{3} \in \{0,1\}^{13}} &A(x_{15}...x_3 , \textcolor{pink}{X_2, X_1, X_b},\, y) \\
-&\cdot B(x_{15}...x_3,\textcolor{pink}{X_2, X_1, X_b},\, y)\, \Lagrange{y}{r_y} \\[10pt] &\cdot\text{eq}(\tau_{15}..\tau_3; x_{15}...x_3)
+<p>$$\begin{align*}
+t’(\textcolor{pink}{X_2, X_1, X_b}) = \sum_{y \in {-4, \dots, 5}}\sum_{x_{15}..x_{3} \in {0,1}^{13}} &amp;A(x_{15}…x_3 , \textcolor{pink}{X_2, X_1, X_b},, y) \
+&amp;\cdot B(x_{15}…x_3,\textcolor{pink}{X_2, X_1, X_b},, y), \Lagrange{y}{r_y} \[10pt] &amp;\cdot\text{eq}(\tau_{15}..\tau_3; x_{15}…x_3)
 \end{align*}
-$$
+$$</p>
 </div>
 <p>Thus, we need $(d+1)^w = 3^3 = 27$ evaluations to represent $t$.
 In Jolt we evaluate $t$ at $\lbrace 0,1, \infty\rbrace^{w}$ and the data structure that stores these evaluations is called <code>t_grid</code>, which is what we describe as the streaming data structure.
 This is exactly what <code>compute_evaluation_grid_from_trace</code> computes.
 The next stage is to compute $t(0)$ and $t(\infty)$ where</p>
 <div class="math-display">
-$$
-t(\textcolor{pink}{X_b}) = \sum_{x_2, x_1 \in \{0,1\}^2 } t'(x_2, x_1, \textcolor{pink}{X_b})\,\,\text{eq}(\tau_2, \tau_1; x_2, x_1)
-$$
+<p>$$
+t(\textcolor{pink}{X_b}) = \sum_{x_2, x_1 \in {0,1}^2 } t’(x_2, x_1, \textcolor{pink}{X_b}),,\text{eq}(\tau_2, \tau_1; x_2, x_1)
+$$</p>
 </div>
 <p>This is what <code>compute_t_evals</code> computes.</p>
-
-<aside class="callout callout-remark">
-  
-  <div class="callout-title">Remark</div>
-  
+<aside id="" class="callout callout-remark">
+  <div class="callout-title"></div>
   <p>Throughout this post when we write $\eq{\tau}{x}$, we assume it’s implemented using the Dao-Thaler split-eq optimisation. Thus the memory representation of the $\eq{}{}$ polynomials is never an issue.</p>
-
 </aside>
 <p>Finally the prover’s message is given by
 $$
 s(\textcolor{pink}{X_b}) = t(\textcolor{pink}{X_b}),\text{eq}(\tau_b, \textcolor{pink}{X_b})
 $$</p>
-
-<aside class="callout callout-remark">
-  
+<aside id="" class="callout callout-remark">
   <div class="callout-title">Prover Messages Are Always Computed From <code>t_grid</code></div>
-  
   <p>It is important to note that in every round of the sum-check the prover’s messages will be computed using the streaming data structure <code>t_grid</code>.
 We will shortly see that once the current <code>t_grid</code> gets exhausted we will re-compute it.</p>
-
 </aside>
-
-<aside class="callout callout-remark">
-  
+<aside id="" class="callout callout-remark">
   <div class="callout-title">A Note About Evaluating At Infinity</div>
-  
   <p>For a univariate polynomial $p$, $p(\infty)$ is equal to the coefficient associated with the highest degree term of the polynomial.
 For example, if $p$ is linear i.e $p(X) = aX + b$, we have $p(\infty) = a$.</p>
-
 </aside>
 <p>This completes the first round message the prover sends.</p>
 <h4 id="binding-in-the-streaming-phase">Binding in the streaming phase<a class="zola-anchor" href="#binding-in-the-streaming-phase" aria-label="Link to this section">#</a>
@@ -544,20 +555,16 @@ Binding is exactly the same as the linear version but we do it for the multi-qua
 Then at the end of round 1 we are left with $t’(X_2, \textcolor{orange}{r_1, r_b})$ and after round 2 i.e 3 rounds of sum-check we are left with $t’( \textcolor{orange}{r_2, r_1, r_b})$.
 Hereafter, we must stream the trace again – and we will as round 3 is a window start.</p>
 <p>Additionally as the challenges come in, we also build a data structure called <code>r_grid</code> which looks like the following</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="plain"><span class="giallo-l"><span>[</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>[</span></span>
 <span class="giallo-l"><span>	[1]</span></span>
 <span class="giallo-l"><span>	[(1-rb), rb] // eq(r_b, x_b)</span></span>
 <span class="giallo-l"><span>	[(1-rb)(1-r1), rb(1-r1), (1-rb)r1, rbr1] // eq(r_1, r_b, x_1, x_b)</span></span>
 <span class="giallo-l"><span>	...</span></span>
-<span class="giallo-l"><span>]</span></span></code></pre>
-<aside class="callout callout-remark">
-  
-  <div class="callout-title">Remark</div>
-  
+<span class="giallo-l"><span>]</span></span></code></pre><aside id="" class="callout callout-remark">
+  <div class="callout-title"></div>
   <p>We will see shortly that we only need to store <code>r_grid</code> up to the switch-over point.
 The total amount of storage needed is $2^{\hat{t}}$ where $\hat{t} \in [n]$ is the switchover point of the sum-check and $n$ is the number of rounds of the sum-check.
 If $\hat{t}$ is large, we can always use the split-eq technique for <code>r_grid</code> (this is not currently needed).</p>
-
 </aside>
 <p>The last line of <code>r_grid</code> helps us compute $\text{eq}(\textcolor{orange}{r_{w-1},…, r_b}, x_{w-1},…, x_{b})$ which is useful when we recompute <code>t_grid</code> in the first round of the next window.</p>
 <h3 id="next-window-start">Next Window Start<a class="zola-anchor" href="#next-window-start" aria-label="Link to this section">#</a>
@@ -565,13 +572,13 @@ If $\hat{t}$ is large, we can always use the split-eq technique for <code>r_grid
 <p>Now we still have not hit a switchover point, so nothing is materialised yet, so we once again compute the grid from the trace.
 Additionally, as we are not in the first round anymore, we have to deal with the verifier challenges – so the equations for computing the grid are the following.</p>
 <div class="math-display">
-$$\begin{align*}
-t(\textcolor{pink}{X_5, X_4, X_3}) &= \sum_{x_{15}..x_{6}, x_{2}, x_{1}, x_{b} \in \{0,1\}^{13}}\sum_{y \in \{-4, \dots, 5\}}  \widetilde{A}(x_{15}...x_6,  \textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \\
-&\qquad \cdot \widetilde{B}(x_{15}\dots x_6 ,\textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \\[10pt]
-&\qquad \cdot\text{eq}(\tau_{15}\dots\tau_6;\, x_{15}\dots x_6) \, \\[10pt]
-&\qquad \cdot \text{eq}(\textcolor{orange}{r_2, r_1, r_b}, x_{2}, x_{1}, x_{b})
+<p>$$\begin{align*}
+t(\textcolor{pink}{X_5, X_4, X_3}) &amp;= \sum_{x_{15}..x_{6}, x_{2}, x_{1}, x_{b} \in {0,1}^{13}}\sum_{y \in {-4, \dots, 5}}  \widetilde{A}(x_{15}…x_6,  \textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \
+&amp;\qquad \cdot \widetilde{B}(x_{15}\dots x_6 ,\textcolor{pink}{X_5, X_4, X_3}, x_2, x_1, x_b, y) \[10pt]
+&amp;\qquad \cdot\text{eq}(\tau_{15}\dots\tau_6;, x_{15}\dots x_6) , \[10pt]
+&amp;\qquad \cdot \text{eq}(\textcolor{orange}{r_2, r_1, r_b}, x_{2}, x_{1}, x_{b})
 \end{align*}
-$$
+$$</p>
 </div>
 <p>Notice how <code>r_grid</code> becomes useful in the last line.
 This process continues till we hit the switch over point.
@@ -586,35 +593,34 @@ $d=2$ for this sumcheck.</p>
 We stream through the trace one last time to materialise the bound polynomials.</p>
 <p>We now store for each $X_{15}…X_9 \in \lbrace 0,1\rbrace^{7}$</p>
 <div class="math-display">
-$$\begin{align*}
-& \widetilde{A}(\textcolor{pink}{X_{15}...X_9}, \textcolor{orange}{r_8, ..., r_b, r_y}) \\[10pt]
-&= \sum_{x_8...x_b \in \{0,1\}^9}\sum_{y \in \{-4, \dots, 5\}} \widetilde{A}(\textcolor{pink}{X_{15}, ..., X_9}, x_8...x_b, y)\,\text{eq}(\textcolor{orange}{r_8..r_b}, x_8...x_b)\, \Lagrange{r_y}{y}
+<p>$$\begin{align*}
+&amp; \widetilde{A}(\textcolor{pink}{X_{15}…X_9}, \textcolor{orange}{r_8, …, r_b, r_y}) \[10pt]
+&amp;= \sum_{x_8…x_b \in {0,1}^9}\sum_{y \in {-4, \dots, 5}} \widetilde{A}(\textcolor{pink}{X_{15}, …, X_9}, x_8…x_b, y),\text{eq}(\textcolor{orange}{r_8..r_b}, x_8…x_b), \Lagrange{r_y}{y}
 \end{align*}
-$$
-
-$$\begin{align*}
-& \widetilde{B}(\textcolor{pink}{X_{15}...X_9}, \textcolor{orange}{r_8, ..., r_b, r_y}) \\[10pt]
-&= \sum_{x_8...x_b \in \{0,1\}^9}\sum_{y \in \{-4, \dots, 5\}} \widetilde{B}(\textcolor{pink}{X_{15}, ..., X_9}, x_8...x_b, y)\,\text{eq}(\textcolor{orange}{r_8..r_b}, x_8...x_b)\, \Lagrange{r_y}{y}
+$$</p>
+<p>$$\begin{align*}
+&amp; \widetilde{B}(\textcolor{pink}{X_{15}…X_9}, \textcolor{orange}{r_8, …, r_b, r_y}) \[10pt]
+&amp;= \sum_{x_8…x_b \in {0,1}^9}\sum_{y \in {-4, \dots, 5}} \widetilde{B}(\textcolor{pink}{X_{15}, …, X_9}, x_8…x_b, y),\text{eq}(\textcolor{orange}{r_8..r_b}, x_8…x_b), \Lagrange{r_y}{y}
 \end{align*}
-$$
+$$</p>
 </div>
 <p><strong>NOTE</strong>: This stores only $2^7$ field elements worth of storage (much fewer than the linear sumcheck setup).
 The method <code>fused_materialise_polynomials_general_with_multiquadratic</code> computes the above polynomials and stores them in memory.
 Note that as we have the polynomials at hand already, we also compute the grid now.
 In the schedule given above, the grid size is just 1, thus we only need to store</p>
 <div class="math-display">
-$$
+<p>$$
 \begin{align*}
-t(\textcolor{pink}{X_9}) =  \sum_{x_{15},\dots,x_{10} \in \{0,1\}^{6}} & \widetilde{A}(x_{15}, \dots, x_{10}, \textcolor{pink}{X_9}, \textcolor{orange}{r_8, \dots, r_1, r_b, r_y})\\[10pt]
-&\cdot \widetilde{B}(x_{15}, \dots, x_{10}, \textcolor{pink}{X_9}, \textcolor{orange}{r_8, \dots, r_1, r_b, r_y}) \\[10pt]
-&  \cdot \eq{\tau_{15}, \dots, \tau_{10}}{ x_{15}, \dots, x_{10}} \\[10pt]
+t(\textcolor{pink}{X_9}) =  \sum_{x_{15},\dots,x_{10} \in {0,1}^{6}} &amp; \widetilde{A}(x_{15}, \dots, x_{10}, \textcolor{pink}{X_9}, \textcolor{orange}{r_8, \dots, r_1, r_b, r_y})\[10pt]
+&amp;\cdot \widetilde{B}(x_{15}, \dots, x_{10}, \textcolor{pink}{X_9}, \textcolor{orange}{r_8, \dots, r_1, r_b, r_y}) \[10pt]
+&amp;  \cdot \eq{\tau_{15}, \dots, \tau_{10}}{ x_{15}, \dots, x_{10}} \[10pt]
 \end{align*}
-$$
+$$</p>
 </div>
 <p>Finally the prover message is</p>
 <div class="math-display">
-$$s(\textcolor{pink}{X_9}) = t(\textcolor{pink}{X_9})\,\, \eq{\tau_9}{\textcolor{pink}{X_9}}\,\,\eq{\tau_8, \dots, \tau_b}{\textcolor{orange}{r_{8}, \dots, r_{b}}}\,\,\Lagrange{\tau_y}{\textcolor{orange}{r_y}}
-$$
+<p>$$s(\textcolor{pink}{X_9}) = t(\textcolor{pink}{X_9}),, \eq{\tau_9}{\textcolor{pink}{X_9}},,\eq{\tau_8, \dots, \tau_b}{\textcolor{orange}{r_{8}, \dots, r_{b}}},,\Lagrange{\tau_y}{\textcolor{orange}{r_y}}
+$$</p>
 </div>
 <p>From here onwards, whenever we need to compute the grid, we never look at the trace.
 We can directly do it from the materialised polynomials $\widetilde{A}$ and $\widetilde{B}$.
@@ -624,7 +630,7 @@ This is what <code>compute_evaluation_grid_from_polynomials_parallel</code> comp
 </h3>
 <p>Below we describe what the <code>compute_message</code> method of the generalised sumcheck looks like.
 The following snippet of code executes the logic described above, based on the round classification.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">fn</span><span style="color: #6F42C1;"> compute_message</span><span>(</span><span style="color: #D73A49;">&amp;mut</span><span style="color: #005CC5;"> self</span><span>, round</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> usize</span><span>, previous_claim</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> F</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #6F42C1;"> UniPoly</span><span>&lt;</span><span style="color: #6F42C1;">F</span><span>&gt; {</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">fn</span><span style="color: #6F42C1;"> compute_message</span><span>(</span><span style="color: #D73A49;">&amp;mut</span><span style="color: #005CC5;"> self</span><span>, round</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> usize</span><span>, previous_claim</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> F</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #6F42C1;"> UniPoly</span><span>&lt;</span><span style="color: #6F42C1;">F</span><span>&gt; {</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">    let</span><span> num_unbound_vars</span><span style="color: #D73A49;"> =</span><span style="color: #005CC5;"> self</span><span style="color: #D73A49;">.</span><span>schedule</span><span style="color: #D73A49;">.</span><span style="color: #6F42C1;">num_unbound_vars</span><span>(round);</span><span style="color: #6A737D;"> // The size of the streaming data structure</span></span>
 <span class="giallo-l"></span>
 <span class="giallo-l"><span style="color: #D73A49;">    if</span><span style="color: #005CC5;"> self</span><span style="color: #D73A49;">.</span><span>schedule</span><span style="color: #D73A49;">.</span><span style="color: #6F42C1;">is_switch_over_point</span><span>(round) {</span><span style="color: #6A737D;"> // Check if it&#39;s time materialise the sum-check polynomials</span></span>
@@ -648,16 +654,16 @@ The following snippet of code executes the logic described above, based on the r
 <span class="giallo-l"><span>}</span></span></code></pre><section class="footnotes">
 <ol class="footnotes-list">
 <li id="fn-d">
-<p>This statement is strictly not true. In the current implementation, as a consequence of the process by which we construct the polynomials, we still need $O(T)$ memory, where $T$ is the number of instructions in the guest program (both virtual and real). But in this post we make a few simplifying assumptions, by which the statement does ring true. <a href="#fr-d-1">↩</a></p>
+<p>This statement is strictly not true. In the current implementation, as a consequence of the process by which we construct the polynomials, we still need $O(T)$ memory, where $T$ is the number of instructions in the guest program (both virtual and real). But in this post we make a few simplifying assumptions, by which the statement does ring true. <a href="https://randomwalks.xyz/blog/streaming-sumchecks/#fr-d-1">↩</a></p>
 </li>
 <li id="fn-e">
-<p>It is not so important to be formal about what we mean by sufficient structure here. If $g \in \Field[x_1, \dots, x_n]$, then we can just pretend $H = \lbrace 0,1\rbrace^n$. <a href="#fr-e-1">↩</a></p>
+<p>It is not so important to be formal about what we mean by sufficient structure here. If $g \in \Field[x_1, \dots, x_n]$, then we can just pretend $H = \lbrace 0,1\rbrace^n$. <a href="https://randomwalks.xyz/blog/streaming-sumchecks/#fr-e-1">↩</a></p>
 </li>
 <li id="fn-c">
-<p>A program is just a sequence of RISC-V instructions. <a href="#fr-c-1">↩</a></p>
+<p>A program is just a sequence of RISC-V instructions. <a href="https://randomwalks.xyz/blog/streaming-sumchecks/#fr-c-1">↩</a></p>
 </li>
 <li id="fn-a">
-<p>We choose those indices for $y$ instead of bit string or the set $\lbrace 0, \ldots, 9\rbrace$ for computational reasons, the details of which we don’t discuss here (maybe for a separate post). <a href="#fr-a-1">↩</a></p>
+<p>We choose those indices for $y$ instead of bit string or the set $\lbrace 0, \ldots, 9\rbrace$ for computational reasons, the details of which we don’t discuss here (maybe for a separate post). <a href="https://randomwalks.xyz/blog/streaming-sumchecks/#fr-a-1">↩</a></p>
 </li>
 </ol>
 </section>
@@ -859,14 +865,16 @@ The following snippet of code executes the logic described above, based on the r
       var link = reference.querySelector('a');
       if (!link) return;
 
-      var targetId = (link.getAttribute('href') || '').replace('#', '');
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
       var definition = targetId ? document.getElementById(targetId) : null;
       if (!definition) return;
 
       transformed += 1;
       var noteId = 'sidenote-' + transformed;
       var clone = definition.cloneNode(true);
-      clone.querySelectorAll('a[href^="#fr-"]').forEach(function (backlink) { backlink.remove(); });
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
 
       var noteBody = Array.from(clone.children).map(function (child) {
         return child.tagName === 'P' ? child.innerHTML : child.outerHTML;

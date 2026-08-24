@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Montgomery Multiplication Revisited — Random Walks</title>
-  <meta name="description" content="Written Word">
+  <title>Inductive Types — Random Walks</title>
+  <meta name="description" content="">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=9f3f3f161e11a605fe54">
@@ -115,40 +115,73 @@
 
 
 
-<article class="publication-page footnotes-right">
-  <header class="publication-header">
-    <h1>Montgomery Multiplication Revisited</h1>
 
-    
-    <p class="publication-authors publication-authors--page">
-      <a href="https://randomwalks.xyz/">Ari Biswas</a>
-    </p>
-    
 
-    <div class="publication-meta">
-      
-        
-        <span class="publication-header__venue">In-Progress</span>
-        
-      
-      <time datetime="2026-03-02">Last updated 02 March 2026</time>
+
+<article class="note footnotes-right">
+  <header class="note-header">
+    <h1>Inductive Types</h1>
+    
+    <div class="note-meta">
+      <span class="note-authors">By Ari</span>
+      <time datetime="2026-03-17">17 March 2026</time>
+      <span>Updated 26 February 2026</span>
     </div>
-
     
-    <nav class="publication-artefacts" aria-label="Publication resources">
-      
-        <span>e-print</span>
-      
-    </nav>
+    <ul class="tag-list" aria-label="Tags">
+      <li><a href="https://randomwalks.xyz/tags/lean-notes/">lean-notes</a></li>
+    </ul>
     
-
   </header>
 
-  <div class="publication-layout">
+  <div class="note-layout">
+    
+    <details class="contents contents-inline">
+      <summary>Contents</summary>
+      
+<ol>
+  
+  <li>
+    <a href="#what-happens-when-we-define-an-inductive-type">What happens when we define an inductive type?</a>
+    
+  </li>
+  
+</ol>
+
+    </details>
     
 
-    <div class="prose publication-prose">
-      <p>This paper is currently in preparation, but I’d be happy to answer questions in the meantime.</p>
+    <div class="prose">
+      <p>These notes are based on <a rel="noopener noreferrer external" target="_blank" href="https://xenaproject.wordpress.com/2021/04/03/induction-and-inductive-types/">Kevin Buzzard’s</a> excellent notes and <a rel="noopener noreferrer external" target="_blank" href="https://leanprover.github.io/theorem_proving_in_lean4/Inductive-Types/#inductive-types">Chapter 7</a> of the theorem proving book.</p>
+<h2 id="what-happens-when-we-define-an-inductive-type">What happens when we define an inductive type?<a class="zola-anchor" href="#what-happens-when-we-define-an-inductive-type" aria-label="Link to this section">#</a>
+</h2>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">inductive</span><span style="color: #6F42C1;"> X</span><span>: </span><span style="color: #D73A49;">Type</span></span>
+<span class="giallo-l"><span>| p : X </span></span></code></pre>
+<p>When proving theorems from a set theory perspective, the above code is can be (most of the time I’m told) interpreted as: we have defined a set $X = \{p\}$ with one element.
+In the language of type theory, I think the proper phrasing is we created a new type <code>X</code> with one term <code>X.p</code>.</p>
+<p>Another thing that happens when we write above code excerpt is that Lean automatically under the hood defines something like called the recursor.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>@X.rec : {motive : X → </span><span style="color: #D73A49;">Sort</span><span> u_1} → motive X.p → (t : X) → motive t</span></span></code></pre>
+<p>The goal of this post is to somewhat demystify this recursor.
+Kevin Buzzard’s post already does this, but I often find it helpful to re-write things in my own words to enhance my own understanding.
+So there’s a high probability that this post just poorly re-expresses what the linked articles already do.</p>
+<p>I believe in earlier versions of Lean <code>motive</code> was called <code>C</code>.
+We will use <code>C</code> from henceforth as it is shorter to write.
+Quoting Kevins post, what <code>X.rec</code> is saying is that</p>
+<figure class="callout callout-quote">
+  <blockquote><p>Let’s say that for every element $x$ of $X$ we have a set $C(x)$, and let’s say we have an element of $C(p)$.
+Then we have a method of constructing an element of $C(x)$ for all $x \in X$.</p>
+</blockquote>
+  <figcaption><cite>— Kevin Buzzard</cite></figcaption>
+</figure>
+<p>In my words, as Lean is based on “dependent” type theory, the co-domain of a function from $X$ to some other set could depend on the input value $x \in X$.
+This is why we have this set $C$ parameterised by $x$, but for the purpose of intuition let’s bin this and say, we want to define a function $f: X \to S$ i.e. no matter what the input $x : X$ is the co-domain is always the set $S$.</p>
+<p>So we are given</p>
+<ul>
+<li>a set $S$</li>
+<li>some element $a \in S$ and</li>
+<li>any $t \in X$.</li>
+</ul>
+<p>and because we possess the recursor, <code>X.rec</code>, we can use it to get an element of $C(p)$</p>
 
     </div>
   </div>
@@ -316,7 +349,7 @@
 
 <script>
   (function () {
-    var prose = document.querySelector('.publication-prose');
+    var prose = document.querySelector('.prose');
     if (!prose) return;
 
     var references = prose.querySelectorAll('.footnote-reference');

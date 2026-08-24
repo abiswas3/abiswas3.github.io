@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Small Scalar Binding — Random Walks</title>
-  <meta name="description" content="Written Word">
+  <meta name="description" content="">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=9f3f3f161e11a605fe54">
@@ -140,18 +140,14 @@
     <div class="prose">
       <h2 id="tl-dr-just-tell-us-what-you-did">TL;DR - Just Tell Us What You Did<a class="zola-anchor" href="#tl-dr-just-tell-us-what-you-did" aria-label="Link to this section">#</a>
 </h2>
-
-<aside class="callout callout-box thm-box">
-  
+<aside id="" class="callout callout-box thm-box">
   <div class="callout-title">Faster Sumcheck In Jolt</div>
-  
   <p>By sampling the verifiers random challenges from a set $S \subset \mathbb{F}$ of size roughly $\sqrt{|\mathbb{F}|}$, we speed up sum-check binding by <strong>1.6x</strong> from baseline (where challenges are sampled over the whole field $\mathbb{F}$ – the field over which polynomials are defined. )
 <strong>NOTE:</strong> This now reduces the soundness error from $1/2^{254}$ to $1/2^{125}$, but this is not a concern as currently Jolt usess the <code>bn256</code> curve to commit to polynomials, which offers 110 bits of security anyway.</p>
-
 </aside>
 <h2 id="sum-check-recap">Sum-Check Recap<a class="zola-anchor" href="#sum-check-recap" aria-label="Link to this section">#</a>
 </h2>
-<p>We briefly recap the sum-check protocol<sup class="footnote-reference" id="fr-a-1"><a href="#fn-a">1</a></sup>.</p>
+<p>We briefly recap the sum-check protocol<sup class="footnote-reference" id="fr-a-1"><a href="https://randomwalks.xyz/blog/small-scalar-binding/#fn-a">[1]</a></sup>.</p>
 <p>Let $g \in \Field[X_1, \ldots, X_m]$ be a polynomial over $\Field$ with the following structure.
 $$ g(X_1, \ldots, X_m) = \prod_{j=1}^d q_j(X_1, \ldots, X_m)$$
 where all $q_j(X)$’s are multi-linear polynomials over $\Field$.
@@ -165,17 +161,17 @@ As $q_j$ is multi-linear – this can be computed by linear-interpolation.</li>
 </ol>
 <div id="hello" style="overflow-x: auto; max-width: 100%;">
 <div class="math-display">
-$$
-	\begin{aligned}
-		q_j(r_1, \ldots, r_{i-1}, Z, \vec{b}) = & (1-Z) \,q_j(r_1, \ldots, r_{i-1}, 0, b_{i+1}, \ldots, b_m) \\[10pt]
-		                                        & + Z\, q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m)
-	\end{aligned}
-$$
+<p>$$
+\begin{aligned}
+q_j(r_1, \ldots, r_{i-1}, Z, \vec{b}) = &amp; (1-Z) ,q_j(r_1, \ldots, r_{i-1}, 0, b_{i+1}, \ldots, b_m) \[10pt]
+&amp; + Z, q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m)
+\end{aligned}
+$$</p>
 </div>
 </div>
 <p>As $d$ is a small constant number, computing the above value requires <strong>no multiplication operations</strong>. We can compute it via a running sum.
 See pseudocode below</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="rust"><span class="giallo-l"><span style="color: #6A737D;">/// Compute q_j(Z) = (1-Z) * q_j(0) + Z * q_j(1)</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #6A737D;">/// Compute q_j(Z) = (1-Z) * q_j(0) + Z * q_j(1)</span></span>
 <span class="giallo-l"><span style="color: #6A737D;">/// using only additions</span></span>
 <span class="giallo-l"><span style="color: #6A737D;">/// when Z is a small integer.</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">    fn</span><span style="color: #6F42C1;"> compute_q_j_running_sum</span><span>(z</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> usize</span><span>, q_at_0</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> JoltField</span><span>, q_at_1</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> JoltField</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #6F42C1;"> JoltField</span><span> {</span></span>
@@ -198,26 +194,24 @@ Therefore the running sum described in the pseudocode above is no good to use.
 We need to use actual multiplication here.</li>
 </ol>
 <div class="math-display">
-$$
-	\begin{align}
-		q_j(r_1, \ldots, r_{i-1}, \textcolor{orange}{r_i}, \vec{b}) = & (1-\textcolor{orange}{r_i}) \,q_j(r_1, \ldots, r_{i-1}, 0, b_{i+1}, \ldots, b_m) \\[10pt]
-		                                                              & + \textcolor{orange}{r_i}\, q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m)
-	\end{align}
-$$
+<p>$$
+\begin{align}
+q_j(r_1, \ldots, r_{i-1}, \textcolor{orange}{r_i}, \vec{b}) = &amp; (1-\textcolor{orange}{r_i}) ,q_j(r_1, \ldots, r_{i-1}, 0, b_{i+1}, \ldots, b_m) \[10pt]
+&amp; + \textcolor{orange}{r_i}, q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m)
+\end{align}
+$$</p>
 </div>
 <p>Now $q_j(r_1, \ldots, r_{i-1}, 1, b_{i+1}, \ldots, b_m) \in \Field$, and traditionally the set $S$ from which we sample $r_i$ is also equal to $\Field$.
 Therefore this step requires $2^{m-i}$ $\Field \times \Field$ multiplications in round $i$ – a total of $2^m$ multiplications over $m$ rounds.
 It is well known that multiplication for $\Field$ elements is 1000x costlier than addition.
 So our hope is that we can choose $S$ cleverly such that this operation can be done faster.
 Note we cannot make $S$ too small, as this the soundness probability of any sumcheck protocol is given by $\frac{d}{|S|}$.</p>
-
-<aside class="callout callout-box thm-box">
-  
+<aside id="" class="callout callout-box thm-box">
+  <div class="callout-title"></div>
   <h4 id="what-we-show">What we show</h4>
 <p>We show that there exists a set $S$ of size rouhgly $|\Field|^{1/2}$, which we call <code>MontU128Challenge</code>, in which $\Field \times r$ is 1.6x
 faster than $\Field \times \Field$.
 This in returns speeds up the <strong>binding</strong> phase of the sum-check protocol, which results in a 1.3x speedup per round of sum-check.</p>
-
 </aside>
 <h2 id="the-challenge-set-s">The Challenge Set $S$<a class="zola-anchor" href="#the-challenge-set-s" aria-label="Link to this section">#</a>
 </h2>
@@ -258,12 +252,12 @@ Given $a \in \Field$ and $b\in S$ , let $\Mont{a} = aR \mod p, \Mont{b} = bR \mo
 Now to get $\Mont{c}$ we <strong>need</strong> to compute $cR^{-1} = cr^{-n} = (ab)R \mod p$.</p>
 <p>$c$ can be written as the following sum and we compute $cR^{-1}$ limb by limb by multiplying $r^{-1}$ $n$ times</p>
 <div class="math-display">
-$$
-	\begin{align}
-		c       & \equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p                \\[10pt]
-		cr^{-1} & \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p \\[10pt]
-	\end{align}
-$$
+<p>$$
+\begin{align}
+c       &amp; \equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p                \[10pt]
+cr^{-1} &amp; \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p \[10pt]
+\end{align}
+$$</p>
 </div>
 <h3 id="important-sub-routine">Important Sub-Routine<a class="zola-anchor" href="#important-sub-routine" aria-label="Link to this section">#</a>
 </h3>
@@ -272,35 +266,34 @@ Solving for $m = -p^{-1}c_0 \equiv \mu c_0 \mod r$.
 Also as we are working modulo $r$, it suffices to use $m = \mu_{0}c_0$ discarding any carries, where $\mu_{0}$ is the least significant word of $\mu$.</p>
 <p>Once we compute $mp$, and add this to $c$ to get $c^{(1)}$, this should clear the least significant digit based on how we picked $m$. See below</p>
 <div class="math-display">
-$$
-	\begin{align}
-		c       & \equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p                     \\[10pt]
-		cr^{-1} & \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p      \\[10pt]
-		        & \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + (c_0+ mp)r^{-1}   \mod p \\[10pt]
-		        & \equiv (c + mp)r^{-1} \mod p                                                                    \\[10pt]
-		        & \equiv ( c^{(1)}_{2n-1}r^{2n-1} + \ldots c^{(1)}_1r + 0)r^{-1} \mod p                           \\[10pt]
-		        & \equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1) \mod p                                      \\[10pt]
-	\end{align}
-$$
+<p>$$
+\begin{align}
+c       &amp; \equiv (c_{2n-1} r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r + c_0) \mod p                     \[10pt]
+cr^{-1} &amp; \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p      \[10pt]
+&amp; \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + (c_0+ mp)r^{-1}   \mod p \[10pt]
+&amp; \equiv (c + mp)r^{-1} \mod p                                                                    \[10pt]
+&amp; \equiv ( c^{(1)}_{2n-1}r^{2n-1} + \ldots c^{(1)}<em>1r + 0)r^{-1} \mod p                           \[10pt]
+&amp; \equiv ( c^{(1)}</em>{2n-1}r^{2n-2} + \ldots c^{(1)}_1) \mod p                                      \[10pt]
+\end{align}
+$$</p>
 </div>
 <h3 id="repeat-the-subroutine-n-times">Repeat The Subroutine $n$ times<a class="zola-anchor" href="#repeat-the-subroutine-n-times" aria-label="Link to this section">#</a>
 </h3>
 <p>Now we can play the subroutine again with $c^{(1)}_1$ replacing the role of $c_0$, and the updated value of $m = \mu_0c_1^{(1)}$ (<strong>NOTE</strong> the same $\mu_0$ is always used)</p>
 <div class="math-display">
-$$
-	\begin{align}
-		cr^{-1} & \equiv ( c^{(1)}_{2n-1}r^{2n-2} + \ldots c^{(1)}_1 ) \mod p                    \\
-		cr^{-2} & \equiv ( c^{(1)}_{2n-1}r^{2n-3} + \ldots + c_1^{(1)}+ c_1^{(1)}r^{-1}   \mod p \\
-		        & \equiv ( c^{(2)}_{2n-1}r^{2n-3} + \ldots + c_1^{(2)} ) \mod p
-	\end{align}
-$$
+<p>$$
+\begin{align}
+cr^{-1} &amp; \equiv ( c^{(1)}<em>{2n-1}r^{2n-2} + \ldots c^{(1)}<em>1 ) \mod p                    \
+cr^{-2} &amp; \equiv ( c^{(1)}</em>{2n-1}r^{2n-3} + \ldots + c_1^{(1)}+ c_1^{(1)}r^{-1}   \mod p \
+&amp; \equiv ( c^{(2)}</em>{2n-1}r^{2n-3} + \ldots + c_1^{(2)} ) \mod p
+\end{align}
+$$</p>
 </div>
 <p>In fact we play this game $n$ times</p>
-<p><div class="math-display">
-$$cR^{-1} \equiv cr^{-n} \equiv c^{(n)}_{2n-1}r^{n-1} + c^{(n)}_{n+1}r +c^{(n)}_{n} \mod p$$
+<div class="math-display">
+<p>$$cR^{-1} \equiv cr^{-n} \equiv c^{(n)}<em>{2n-1}r^{n-1} + c^{(n)}</em>{n+1}r +c^{(n)}_{n} \mod p$$</p>
 </div>
-
-To get the final answer<sup class="footnote-reference" id="fr-c-1"><a href="#fn-c">2</a></sup></p>
+<p>To get the final answer<sup class="footnote-reference" id="fr-c-1"><a href="https://randomwalks.xyz/blog/small-scalar-binding/#fn-c">[2]</a></sup></p>
 <blockquote>
 <h4 id="total-multiplications">Total Multiplications<a class="zola-anchor" href="#total-multiplications" aria-label="Link to this section">#</a>
 </h4>
@@ -328,10 +321,10 @@ Thus, a reasonable expectation would be to see <strong>1.6-1.8x</strong> speedup
 <li>$S = \Field$</li>
 <li>$S$ is 2 least significant digits 0’d out.</li>
 </ul>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> bench</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> jolt-core</span><span style="color: #005CC5;"> --bench</span><span style="color: #032F62;"> challenge_mult_performance</span></span></code></pre>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> bench</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> jolt-core</span><span style="color: #005CC5;"> --bench</span><span style="color: #032F62;"> challenge_mult_performance</span></span></code></pre>
 <p><img src="https://randomwalks.xyz/blog/small-scalar-binding/mul-bench.png" alt="" /></p>
 <p>Next we show that this improved multiplication does indeed speed up polynomial binding</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> bench</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> jolt-core</span><span style="color: #005CC5;"> --bench</span><span style="color: #032F62;"> binding</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> bench</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> jolt-core</span><span style="color: #005CC5;"> --bench</span><span style="color: #032F62;"> binding</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">cargo</span><span style="color: #032F62;"> bench</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> jolt-core</span><span style="color: #005CC5;"> --bench</span><span style="color: #032F62;"> binding</span><span style="color: #005CC5;"> --features</span><span style="color: #032F62;"> challenge-254-bit</span></span></code></pre>
 <p><img src="https://randomwalks.xyz/blog/small-scalar-binding/binding-fast.png" alt="" />
 Comparing it against the baseline</p>
@@ -343,7 +336,7 @@ Comparing it against the baseline</p>
 <p>we use $256$ bits to represent big integers and our challenge and the modulus for <code>ark-bn256</code> uses $254$ bits. Thus, if sampled a 2 limbed $128$ bit integer $x$ and used that as the challenge as is <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that $x &lt; p$ which the CIOS algorithm assumes.
 we use $256$ bits to represent big integers and our challenge and the modulus for <code>ark-bn254</code> uses $254$ bits. Thus, if sampled a 2 limbed $128$ bit integer $x$ and used that as the challenge as is <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that $x &lt; p$ which the CIOS algorithm assumes.
 So we clear the first 3 bits of $x$ to ensure that $x$ is <strong>ALWAYS</strong> less than $p$.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;"><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">impl</span><span>&lt;</span><span style="color: #6F42C1;">F</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> JoltField</span><span>&gt;</span><span style="color: #6F42C1;"> MontU128Challenge</span><span>&lt;</span><span style="color: #6F42C1;">F</span><span>&gt; {</span></span>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">impl</span><span>&lt;</span><span style="color: #6F42C1;">F</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> JoltField</span><span>&gt;</span><span style="color: #6F42C1;"> MontU128Challenge</span><span>&lt;</span><span style="color: #6F42C1;">F</span><span>&gt; {</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">pub fn</span><span style="color: #6F42C1;"> new</span><span>(value</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> u128</span><span>)</span><span style="color: #D73A49;"> -&gt;</span><span style="color: #005CC5;"> Self</span><span> {</span></span>
 <span class="giallo-l"><span style="color: #6A737D;">    // MontU128 can always be represented by 125 bits.</span></span>
 <span class="giallo-l"><span style="color: #6A737D;">    // This guarantees that the big integer is never greater than the</span></span>
@@ -371,10 +364,10 @@ So we clear the first 3 bits of $x$ to ensure that $x$ is <strong>ALWAYS</strong
 <section class="footnotes">
 <ol class="footnotes-list">
 <li id="fn-a">
-<p>There are optimisations by [?] that improve on this, but the optimisations discussed in this note still apply, so for the sake of simplicity, we describe the Sum-check protocol in its simplest form. <a href="#fr-a-1">↩</a></p>
+<p>There are optimisations by [?] that improve on this, but the optimisations discussed in this note still apply, so for the sake of simplicity, we describe the Sum-check protocol in its simplest form. <a href="https://randomwalks.xyz/blog/small-scalar-binding/#fr-a-1">↩</a></p>
 </li>
 <li id="fn-c">
-<p>We have to conditionally subtract from $p$ to get the actual right answer, but this operation is common to both the baseline and our optimisation, so we do not focus on this. <a href="#fr-c-1">↩</a></p>
+<p>We have to conditionally subtract from $p$ to get the actual right answer, but this operation is common to both the baseline and our optimisation, so we do not focus on this. <a href="https://randomwalks.xyz/blog/small-scalar-binding/#fr-c-1">↩</a></p>
 </li>
 </ol>
 </section>
@@ -576,14 +569,16 @@ So we clear the first 3 bits of $x$ to ensure that $x$ is <strong>ALWAYS</strong
       var link = reference.querySelector('a');
       if (!link) return;
 
-      var targetId = (link.getAttribute('href') || '').replace('#', '');
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
       var definition = targetId ? document.getElementById(targetId) : null;
       if (!definition) return;
 
       transformed += 1;
       var noteId = 'sidenote-' + transformed;
       var clone = definition.cloneNode(true);
-      clone.querySelectorAll('a[href^="#fr-"]').forEach(function (backlink) { backlink.remove(); });
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
 
       var noteBody = Array.from(clone.children).map(function (child) {
         return child.tagName === 'P' ? child.innerHTML : child.outerHTML;
