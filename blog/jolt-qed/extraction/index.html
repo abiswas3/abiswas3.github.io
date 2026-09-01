@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Adversarial Principal Component Analysis — Random Walks</title>
-  <meta name="description" content="Written Word">
+  <title>Automatic Bytecode Expansion Extraction — Random Walks</title>
+  <meta name="description" content="">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=a144499e2d762afe3346">
@@ -115,62 +115,119 @@
 
 
 
-<article class="publication-page footnotes-right note--side-toc">
-  <header class="publication-header">
-    <h1>Adversarial Principal Component Analysis</h1>
 
-    
-    <p class="publication-authors publication-authors--page">
-      <a href="https://randomwalks.xyz/">Ari Biswas</a>, <a href="https://danielpimentel.github.io" class="author-primary">Daniel Pimentel-Alarcón</a>, <a href="https://solislemuslab.github.io/">Claudia Solís-Lemus</a>
-    </p>
-    
 
-    <div class="publication-meta">
+
+<article class="note footnotes-right note--side-toc">
+  <header class="note-header">
+    <h1>Automatic Bytecode Expansion Extraction</h1>
+    
+    <div class="note-meta">
+      <span class="note-authors">By Ari</span>
+      <time datetime="2026-09-01">01 September 2026</time>
       
-        
-        <a class="publication-header__venue" href="https://isit2017.org/">ISIT 2017</a>
-        
-      
-      <time datetime="2017-07-01">Last updated 01 July 2017</time>
     </div>
-
     
-    <nav class="publication-artefacts" aria-label="Publication resources">
-      
-        <a href="https://ieeexplore.ieee.org/document/8006952">Conference Paper</a>
-      
-    </nav>
+    <ul class="tag-list" aria-label="Tags">
+      <li><a href="https://randomwalks.xyz/tags/lean/">lean</a></li><li><a href="https://randomwalks.xyz/tags/jolt/">Jolt</a></li>
+    </ul>
     
-
   </header>
 
-  <div class="publication-layout note-layout--side">
+  <div class="note-layout note-layout--side">
     
-    <nav class="contents contents-side" aria-label="Table of contents">
-      <h2>Contents</h2>
-      
-<ol>
-  
-  <li>
-    <a href="#abstract">Abstract</a>
-    
-  </li>
-  
+
+    <div class="prose">
+      <p>In this post we go over how we extracted bytecode expansion from Jolt written in Rust into Lean.
+The goal was to re-use as much as the rust jolt production codebase as possible, and write a thin easily checkable wrapper around it.
+All code can be found <a rel="noopener noreferrer external" target="_blank" href="https://github.com/abiswas3/jolt/tree/rust-to-lean/crates/jolt-lean-gen">here</a></p>
+<p>The figure summarises the pipeline.
+<img src="https://randomwalks.xyz/blog/jolt-qed/extraction/./rust-to-lean.svg" alt="" /></p>
+<p>We first describe the Jolt expansion pipeline written in rust.
+The Jolt tracer takes as input some elf file with RISC-V instructions, and the tracer translates each source instruction into an intermediate data structure, <code>SourceInstruction</code>, stored in memory of the host machine running Jolt.
+This data structure is passed into the Jolt expansion pipeline which returns a vector of Jolt instructions, another intermediate data structure stored in memory.
+Now this intermediate data structure of Jolt instructions described below contains “nearly” all the information needed to translate into Lean.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #6A737D;">// Jolt Instructions </span></span>
+<span class="giallo-l"><span style="color: #D73A49;">pub struct</span><span style="color: #6F42C1;"> JoltInstructionRow</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> instruction_kind</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> JoltInstructionKind</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> address</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> usize</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> operands</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> NormalizedOperands</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> virtual_sequence_remaining</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Option</span><span>&lt;</span><span style="color: #6F42C1;">u16</span><span>&gt;,</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> is_first_in_sequence</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> bool</span><span>,</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> is_compressed</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> bool</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #D73A49;">pub struct</span><span style="color: #6F42C1;"> NormalizedOperands</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> rs1</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Option</span><span>&lt;</span><span style="color: #6F42C1;">u8</span><span>&gt;,</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> rs2</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Option</span><span>&lt;</span><span style="color: #6F42C1;">u8</span><span>&gt;,</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> rd</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Option</span><span>&lt;</span><span style="color: #6F42C1;">u8</span><span>&gt;,</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> imm</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> i128</span><span>,</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>Indeed, observe that the <code>LD</code> RISC-V Instruction, for example the <code>kind</code> field stores the name of the instruction.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">LD</span><span style="color: #032F62;">                 v41, v41,</span><span style="color: #005CC5;"> 0</span></span></code></pre>
+<p>The operands contain input values.
+These values tells us whether the registers are virtual or real.
+The other fields are not even used to get valid Lean translation</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>.instr</span></span>
+<span class="giallo-l"><span>    (.LD</span></span>
+<span class="giallo-l"><span>      .normal</span></span>
+<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 41</span><span>))</span></span>
+<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 41</span><span>))</span></span>
+<span class="giallo-l"><span>      (</span><span style="color: #005CC5;">0</span><span> : BitVec </span><span style="color: #005CC5;">12</span><span>)) &lt;|</span></span></code></pre>
+<p>Thus, if someone were to hand our translator this intermediate representation, we could write a minimal printer that just translates this data into Lean code.</p>
+<p>So the game now is to obtain this intermediate vector of Jolt instructions for every expandable RISC-V instruction.
+Towards this, we fix a dummy value for <code>rd, rs1, rs2</code> and, <code>imm</code> for each expandable RISC-V instruction<sup class="footnote-reference" id="fr-a-1"><a href="https://randomwalks.xyz/blog/jolt-qed/extraction/#fn-a">[1]</a></sup>.
+Then, we invoke the production Jolt expander for every expandable instruction with the dummy instruction we just created.
+The jolt expander treats this instruction as it would for any instruction in the guest program, and therefore expands it into a vector of Jolt Instructions.
+The translator just takes this intermediate data structure of Jolt instructions, and prints strings that pass the Lean typechecker.
+The only artefact that is brand new is this printer, which if it passes typechecking is likely fine.
+We argue that this extraction process hardly changes the trust surface in any meaningful way.
+Thus, the <code>LB</code> instruction which expands to</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">VirtualAlignAddr</span><span style="color: #032F62;">   v41, x2,</span><span style="color: #005CC5;"> 37</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">LD</span><span style="color: #032F62;">                 v41, v41,</span><span style="color: #005CC5;"> 0</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">VirtualWindowMaskB</span><span style="color: #032F62;"> v40, x2,</span><span style="color: #005CC5;"> 37</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">VirtualPextSigned</span><span style="color: #032F62;">  x1, v41, v40</span></span></code></pre>
+<p>is simply translated into strings that Lean understands.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>  .instr</span></span>
+<span class="giallo-l"><span>    (.VirtualAlignAddr</span></span>
+<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 41</span><span>))</span></span>
+<span class="giallo-l"><span>      (.xreg rs1)</span></span>
+<span class="giallo-l"><span>      imm) &lt;|</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>  .instr</span></span>
+<span class="giallo-l"><span>    (.LD</span></span>
+<span class="giallo-l"><span>      .normal</span></span>
+<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 41</span><span>))</span></span>
+<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 41</span><span>))</span></span>
+<span class="giallo-l"><span>      (</span><span style="color: #005CC5;">0</span><span> : BitVec </span><span style="color: #005CC5;">12</span><span>)) &lt;|</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>  .instr</span></span>
+<span class="giallo-l"><span>    (.VirtualWindowMaskB</span></span>
+<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 40</span><span>))</span></span>
+<span class="giallo-l"><span>      (.xreg rs1)</span></span>
+<span class="giallo-l"><span>      imm) &lt;|</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>  .instr</span></span>
+<span class="giallo-l"><span>    (.VirtualPextSigned</span></span>
+<span class="giallo-l"><span>      (.xreg rd)</span></span>
+<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 41</span><span>))</span></span>
+<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 40</span><span>))) &lt;|</span></span>
+<span class="giallo-l"><span>  .done RETIRE_SUCCESS</span></span></code></pre>
+<p>Observe that in excerpt above we said that the translator “nearly” has all information needed to perform translation.
+A small issue is that the vector of Jolt instructions stores all immediate operands as raw values.
+Thus, looking at the just the instruction, one cannot tell if value <code>37</code> is a hard-coded offset in the expansion algorithm or it was an intermediate value passed by the guest program.
+The two cases affect how the translator prints the expansion.
+To resolve this ambiguity, we create two dummy instructions with different immediate operands, say <code>imm:= 13</code>  and <code>imm:=5</code>.
+For the immediate operands that are hard-coded by the expansions, they should remain the same in both runs.
+In contrast the user specified immediate values should change.
+We track this information across two runs, and this lets the translator know for which constants to use the string <code>imm</code>, and for which constants to translate raw integer values into strings.</p>
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn-a">
+<p>An instruction just ignores any operands value it does not need. <a href="https://randomwalks.xyz/blog/jolt-qed/extraction/#fr-a-1">↩</a></p>
+</li>
 </ol>
-
-    </nav>
-    
-
-    <div class="prose publication-prose">
-      <aside id="" class="callout callout-comment">
-  <div class="callout-title"></div>
-  <p>This was my first real technical contribution to mathematics or theoretical computer science.
-I spent months on the proof of the base case, it never made it to the final version of the paper.
-Daniel wrote a significantly cleaner and simpler base case proof – giving me my first lesson on how to write a proper technical document.</p>
-</aside>
-<h2 id="abstract">Abstract<a class="zola-anchor" href="#abstract" aria-label="Link to this section">#</a>
-</h2>
-<p>This paper studies the following question: where should an adversary place an outlier of a given magnitude in order to maximize the error of the subspace estimated by PCA? We give the exact location of this worst possible outlier, and the exact expression of the maximum possible error. Equivalently, we determine the information-theoretic bounds on how much an outlier can tilt a subspace in its direction. This in turn provides universal (worst-case) error bounds for PCA under arbitrary noisy settings. Our results also have several implications on adaptive PCA, online PCA, and rank-one updates. We illustrate our results with a subspace tracking experiment</p>
+</section>
 
     </div>
   </div>
@@ -338,7 +395,7 @@ Daniel wrote a significantly cleaner and simpler base case proof – giving me m
 
 <script>
   (function () {
-    var prose = document.querySelector('.publication-prose');
+    var prose = document.querySelector('.prose');
     if (!prose) return;
 
     var references = prose.querySelectorAll('.footnote-reference');
