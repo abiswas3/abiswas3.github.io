@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Automatic Bytecode Expansion Extraction — Random Walks</title>
-  <meta name="description" content="">
+  <title>Bug Report: DIVW Inline Sequence Incompleteness — Random Walks</title>
+  <meta name="description" content="Incompleteness in Jolt&#39;s DIVW inline sequence.">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=a144499e2d762afe3346">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=f2007d7740b474d658a5">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -120,114 +120,97 @@
 
 <article class="note footnotes-right note--side-toc">
   <header class="note-header">
-    <h1>Automatic Bytecode Expansion Extraction</h1>
-    
+    <h1>Bug Report: DIVW Inline Sequence Incompleteness</h1>
+    <p class="note-deck">Incompleteness in Jolt&#39;s DIVW inline sequence.</p>
     <div class="note-meta">
       <span class="note-authors">By Ari</span>
-      <time datetime="2026-09-01">01 September 2026</time>
+      <time datetime="2026-04-28">28 April 2026</time>
       
     </div>
     
     <ul class="tag-list" aria-label="Tags">
-      <li><a href="https://randomwalks.xyz/tags/lean/">lean</a></li><li><a href="https://randomwalks.xyz/tags/jolt/">Jolt</a></li>
+      <li><a href="https://randomwalks.xyz/tags/jolt/">jolt</a></li><li><a href="https://randomwalks.xyz/tags/lean/">lean</a></li>
     </ul>
     
   </header>
 
   <div class="note-layout note-layout--side">
     
+    <nav class="contents contents-side" aria-label="Table of contents">
+      <h2>Contents</h2>
+      
+<ol>
+  
+  <li>
+    <a href="#triggering-input">Triggering Input</a>
+    
+  </li>
+  
+  <li>
+    <a href="#honest-advice-from-jolt-tracer">Honest Advice (from Jolt Tracer)</a>
+    
+  </li>
+  
+  <li>
+    <a href="#inline-sequence-trace">Inline Sequence Trace</a>
+    
+  </li>
+  
+</ol>
+
+    </nav>
+    
 
     <div class="prose">
-      <p>In this post we go over how we extracted bytecode expansion from Jolt written in Rust into Lean.
-The goal was to re-use as much as the rust jolt production codebase as possible, and write a thin easily checkable wrapper around it.
-All code can be found <a rel="noopener noreferrer external" target="_blank" href="https://github.com/abiswas3/jolt/tree/rust-to-lean/crates/jolt-lean-gen">here</a></p>
-<p>The figure summarises the pipeline.
-<img src="https://randomwalks.xyz/blog/jolt-qed/extraction/./rust-to-lean.svg" alt="" /></p>
-<p>We first describe the Jolt expansion pipeline written in rust.
-The Jolt tracer takes as input some elf file with RISC-V instructions, and the tracer translates each source instruction into an intermediate data structure, <code>SourceInstruction</code>, stored in memory of the host machine running Jolt.
-This data structure is passed into the Jolt expansion pipeline which returns a vector of Jolt instructions, another intermediate data structure stored in memory.
-Now this intermediate data structure of Jolt instructions described below contains “nearly” all the information needed to translate into Lean.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #6A737D;">// Jolt Instructions </span></span>
-<span class="giallo-l"><span style="color: #D73A49;">pub struct</span><span style="color: #6F42C1;"> JoltInstructionRow</span><span> {</span></span>
-<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> instruction_kind</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> JoltInstructionKind</span><span>,</span></span>
-<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> address</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> usize</span><span>,</span></span>
-<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> operands</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> NormalizedOperands</span><span>,</span></span>
-<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> virtual_sequence_remaining</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Option</span><span>&lt;</span><span style="color: #6F42C1;">u16</span><span>&gt;,</span></span>
-<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> is_first_in_sequence</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> bool</span><span>,</span></span>
-<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> is_compressed</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> bool</span><span>,</span></span>
-<span class="giallo-l"><span>}</span></span>
-<span class="giallo-l"></span>
-<span class="giallo-l"><span style="color: #D73A49;">pub struct</span><span style="color: #6F42C1;"> NormalizedOperands</span><span> {</span></span>
-<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> rs1</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Option</span><span>&lt;</span><span style="color: #6F42C1;">u8</span><span>&gt;,</span></span>
-<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> rs2</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Option</span><span>&lt;</span><span style="color: #6F42C1;">u8</span><span>&gt;,</span></span>
-<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> rd</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> Option</span><span>&lt;</span><span style="color: #6F42C1;">u8</span><span>&gt;,</span></span>
-<span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> imm</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> i128</span><span>,</span></span>
+      <h2 id="triggering-input">Triggering Input<a class="zola-anchor" href="#triggering-input" aria-label="Link to this section">#</a>
+</h2>
+<ul>
+<li><code>rs1_low = i32::MIN = -2147483648</code></li>
+<li><code>rs2_low = 0</code></li>
+</ul>
+<h2 id="honest-advice-from-jolt-tracer">Honest Advice (from Jolt Tracer)<a class="zola-anchor" href="#honest-advice-from-jolt-tracer" aria-label="Link to this section">#</a>
+</h2>
+<p>From <a rel="noopener noreferrer external" target="_blank" href="https://github.com/a16z/jolt/blob/a907f5457a8d1cb18cd17ba5873383887e1042ec/tracer/src/instruction/divw.rs#L66"><code>tracer/src/instruction/divw.rs#L66</code></a>:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">if</span><span> y</span><span style="color: #D73A49;"> ==</span><span style="color: #005CC5;"> 0</span><span> {</span></span>
+<span class="giallo-l"><span>    (</span><span style="color: #D73A49;">-</span><span style="color: #005CC5;">1</span><span style="color: #6F42C1;">i32</span><span>, x</span><span style="color: #D73A49;">.</span><span style="color: #6F42C1;">unsigned_abs</span><span>())</span></span></code></pre>
+<p>For <code>y = 0</code> and <code>x = i32::MIN</code>, the tracer declares:</p>
+<ul>
+<li><strong>quotient</strong> <code>a2 = -1</code></li>
+<li><strong>remainder</strong> <code>a3 = x.unsigned_abs() = 2^31 = 2147483648</code></li>
+</ul>
+<h2 id="inline-sequence-trace">Inline Sequence Trace<a class="zola-anchor" href="#inline-sequence-trace" aria-label="Link to this section">#</a>
+</h2>
+<p>Initial register state:</p>
+<ul>
+<li><code>a0 = rs1</code>, <code>[a0] = rs1_value</code> where <code>rs1_value as i32 = i32::MIN = -2147483648</code></li>
+<li><code>a1 = rs2</code>, <code>[a1] = 0</code></li>
+</ul>
+<table><thead><tr><th>Line</th><th>Rust</th><th>Instruction</th><th>Result</th><th>Status</th></tr></thead><tbody>
+<tr><td>1</td><td><code>emit_j::&lt;VirtualAdvice&gt;(*a2, 0)</code></td><td><code>a2 := quotient</code></td><td><code>a2 = -1</code></td><td></td></tr>
+<tr><td>2</td><td><code>emit_j::&lt;VirtualAdvice&gt;(*a3, 0)</code></td><td><code>a3 := remainder</code></td><td><code>a3 = 2^31</code></td><td></td></tr>
+<tr><td>3</td><td><code>emit_i::&lt;VirtualSignExtendWord&gt;(*t4, a0, 0)</code></td><td><code>t4 := sext([a0])</code></td><td><code>t4 = 0xFFFFFFFF80000000</code></td><td></td></tr>
+<tr><td>4</td><td><code>emit_i::&lt;VirtualSignExtendWord&gt;(*t3, a1, 0)</code></td><td><code>t3 := sext([a1])</code></td><td><code>t3 = 0</code></td><td></td></tr>
+<tr><td>5</td><td><code>emit_b::&lt;VirtualAssertValidDiv0&gt;(*t3, *a2, 0)</code></td><td><code>if t3 = 0 then assert a2 = -1</code></td><td><code>t3 = 0</code> and <code>a2 = -1</code></td><td>OK</td></tr>
+<tr><td>6</td><td><code>emit_r::&lt;VirtualChangeDivisorW&gt;(*t0, *t4, *t3)</code></td><td><code>t0 := if (t4 as i32 = i32::MIN ∧ t3 as i32 = -1) then 1 else t3</code></td><td><code>t0 = 0</code> (t4 as i32 = i32::MIN but t3 as i32 = 0 ≠ -1)</td><td></td></tr>
+<tr><td>7</td><td><code>emit_i::&lt;VirtualSignExtendWord&gt;(*t1, *a2, 0)</code></td><td><code>t1 := sext(a2)</code></td><td><code>t1 = -1</code></td><td></td></tr>
+<tr><td>8</td><td><code>emit_b::&lt;VirtualAssertEQ&gt;(*t1, *a2, 0)</code></td><td><code>assert t1 = a2</code></td><td><code>t1 = -1 = a2</code></td><td>OK</td></tr>
+<tr><td>9</td><td><code>emit_i::&lt;SRAI&gt;(*t2, *a3, 31)</code></td><td><code>t2 := SRAI(a3, 31)</code></td><td><code>t2 = SRAI(2^31, 31) = 1</code></td><td></td></tr>
+<tr><td>10</td><td><code>emit_b::&lt;VirtualAssertEQ&gt;(*t2, 0, 0)</code></td><td><code>assert t2 = x0</code></td><td><code>t2 = 1 ≠ x0 = 0</code></td><td><strong>PANIC</strong></td></tr>
+</tbody></table>
+<p>The check at line 10 (<code>SRAI(rem, 31) == 0</code>) requires <code>rem &lt; 2^31</code>.
+But the honest remainder advice for <code>rs1_low = i32::MIN, rs2_low = 0</code> is <code>|i32::MIN| = 2^31</code>,
+which fails this check.</p>
+<p>The tracer has three cases for the (quotient, remainder) advice, as shown below.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust"><span class="giallo-l"><span style="color: #D73A49;">if</span><span> y</span><span style="color: #D73A49;"> ==</span><span style="color: #005CC5;"> 0</span><span> {</span></span>
+<span class="giallo-l"><span>    (</span><span style="color: #D73A49;">-</span><span style="color: #005CC5;">1</span><span style="color: #6F42C1;">i32</span><span>, x</span><span style="color: #D73A49;">.</span><span style="color: #6F42C1;">unsigned_abs</span><span>())</span><span style="color: #6A737D;">            // div-by-zero: rem = |x|</span></span>
+<span class="giallo-l"><span>}</span><span style="color: #D73A49;"> else if</span><span> y</span><span style="color: #D73A49;"> == -</span><span style="color: #005CC5;">1</span><span style="color: #D73A49;"> &amp;&amp;</span><span> x</span><span style="color: #D73A49;"> ==</span><span style="color: #6F42C1;"> i32</span><span style="color: #D73A49;">::</span><span style="color: #005CC5;">MIN</span><span> {</span></span>
+<span class="giallo-l"><span>    (</span><span style="color: #6F42C1;">i32</span><span style="color: #D73A49;">::</span><span style="color: #005CC5;">MIN</span><span>,</span><span style="color: #005CC5;"> 0</span><span>)</span><span style="color: #6A737D;">                        // overflow: rem = 0</span></span>
+<span class="giallo-l"><span>}</span><span style="color: #D73A49;"> else</span><span> {</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    let</span><span> remainder</span><span style="color: #D73A49;"> =</span><span> x</span><span style="color: #D73A49;"> %</span><span> y;</span></span>
+<span class="giallo-l"><span>    (quotient, remainder</span><span style="color: #D73A49;">.</span><span style="color: #6F42C1;">unsigned_abs</span><span>())</span><span style="color: #6A737D;"> // normal: rem = |x % y|</span></span>
 <span class="giallo-l"><span>}</span></span></code></pre>
-<p>Indeed, observe that the <code>LD</code> RISC-V Instruction, for example the <code>kind</code> field stores the name of the instruction.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">LD</span><span style="color: #032F62;">                 v41, v41,</span><span style="color: #005CC5;"> 0</span></span></code></pre>
-<p>The operands contain input values.
-These values tells us whether the registers are virtual or real.
-The other fields are not even used to get valid Lean translation</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>.instr</span></span>
-<span class="giallo-l"><span>    (.LD</span></span>
-<span class="giallo-l"><span>      .normal</span></span>
-<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 41</span><span>))</span></span>
-<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 41</span><span>))</span></span>
-<span class="giallo-l"><span>      (</span><span style="color: #005CC5;">0</span><span> : BitVec </span><span style="color: #005CC5;">12</span><span>)) &lt;|</span></span></code></pre>
-<p>Thus, if someone were to hand our translator this intermediate representation, we could write a minimal printer that just translates this data into Lean code.</p>
-<p>So the game now is to obtain this intermediate vector of Jolt instructions for every expandable RISC-V instruction.
-Towards this, we fix a dummy value for <code>rd, rs1, rs2</code> and, <code>imm</code> for each expandable RISC-V instruction<sup class="footnote-reference" id="fr-a-1"><a href="https://randomwalks.xyz/blog/jolt-qed/extraction/#fn-a">[1]</a></sup>.
-Then, we invoke the production Jolt expander for every expandable instruction with the dummy instruction we just created.
-The jolt expander treats this instruction as it would for any instruction in the guest program, and therefore expands it into a vector of Jolt Instructions.
-The translator just takes this intermediate data structure of Jolt instructions, and prints strings that pass the Lean typechecker.
-The only artefact that is brand new is this printer, which if it passes typechecking is likely fine.
-We argue that this extraction process hardly changes the trust surface in any meaningful way.
-Thus, the <code>LB</code> instruction which expands to</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">VirtualAlignAddr</span><span style="color: #032F62;">   v41, x2,</span><span style="color: #005CC5;"> 37</span></span>
-<span class="giallo-l"><span style="color: #6F42C1;">LD</span><span style="color: #032F62;">                 v41, v41,</span><span style="color: #005CC5;"> 0</span></span>
-<span class="giallo-l"><span style="color: #6F42C1;">VirtualWindowMaskB</span><span style="color: #032F62;"> v40, x2,</span><span style="color: #005CC5;"> 37</span></span>
-<span class="giallo-l"><span style="color: #6F42C1;">VirtualPextSigned</span><span style="color: #032F62;">  x1, v41, v40</span></span></code></pre>
-<p>is simply translated into strings that Lean understands.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>  .instr</span></span>
-<span class="giallo-l"><span>    (.VirtualAlignAddr</span></span>
-<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 41</span><span>))</span></span>
-<span class="giallo-l"><span>      (.xreg rs1)</span></span>
-<span class="giallo-l"><span>      imm) &lt;|</span></span>
-<span class="giallo-l"></span>
-<span class="giallo-l"><span>  .instr</span></span>
-<span class="giallo-l"><span>    (.LD</span></span>
-<span class="giallo-l"><span>      .normal</span></span>
-<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 41</span><span>))</span></span>
-<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 41</span><span>))</span></span>
-<span class="giallo-l"><span>      (</span><span style="color: #005CC5;">0</span><span> : BitVec </span><span style="color: #005CC5;">12</span><span>)) &lt;|</span></span>
-<span class="giallo-l"></span>
-<span class="giallo-l"><span>  .instr</span></span>
-<span class="giallo-l"><span>    (.VirtualWindowMaskB</span></span>
-<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 40</span><span>))</span></span>
-<span class="giallo-l"><span>      (.xreg rs1)</span></span>
-<span class="giallo-l"><span>      imm) &lt;|</span></span>
-<span class="giallo-l"></span>
-<span class="giallo-l"><span>  .instr</span></span>
-<span class="giallo-l"><span>    (.VirtualPextSigned</span></span>
-<span class="giallo-l"><span>      (.xreg rd)</span></span>
-<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 41</span><span>))</span></span>
-<span class="giallo-l"><span>      (.vreg (BitVec.ofNat </span><span style="color: #005CC5;">7 40</span><span>))) &lt;|</span></span>
-<span class="giallo-l"><span>  .done RETIRE_SUCCESS</span></span></code></pre>
-<p>Observe that in excerpt above we said that the translator “nearly” has all information needed to perform translation.
-A small issue is that the vector of Jolt instructions stores all immediate operands as raw values.
-Thus, looking at the just the instruction, one cannot tell if value <code>37</code> is a hard-coded offset in the expansion algorithm or it was an intermediate value passed by the guest program.
-The two cases affect how the translator prints the expansion.
-To resolve this ambiguity, we create two dummy instructions with different immediate operands, say <code>imm:= 13</code>  and <code>imm:=5</code>.
-For the immediate operands that are hard-coded by the expansions, they should remain the same in both runs.
-In contrast the user specified immediate values should change.
-We track this information across two runs, and this lets the translator know for which constants to use the string <code>imm</code>, and for which constants to translate raw integer values into strings.</p>
-<section class="footnotes">
-<ol class="footnotes-list">
-<li id="fn-a">
-<p>An instruction just ignores any operands value it does not need. <a href="https://randomwalks.xyz/blog/jolt-qed/extraction/#fr-a-1">↩</a></p>
-</li>
-</ol>
-</section>
+<p>The only case the honest pair fails Line 10 is when <code>y=0</code>.
+Note: Other future tests may fail for the rest, we have not gotten there.</p>
 
     </div>
   </div>
