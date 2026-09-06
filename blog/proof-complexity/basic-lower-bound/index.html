@@ -7,7 +7,7 @@
   <meta name="description" content="">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=c886b160374893469fe8">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=daf5369c054787c9c3f9">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -162,22 +162,20 @@
     
 
     <div class="prose">
-      <aside id="" class="callout callout-remark">
-  <div class="callout-title"></div>
-  <p>These notes are not thoroughly reviewed.
-There maybe be typos (minor and major).
-But the main theorems hold.</p>
-</aside>
+      <blockquote>
+<p>These notes are not thoroughly reviewed.
+There maybe be typos (minor and major).</p>
+</blockquote>
 <p>This post is about <strong>Refuting The Basic Pigeon Hole Principle (PHP) In The Resolution Proof System</strong>.
-For this post, the number of pigeons will be $m:=n$ and the number of holes will be $n-1$, and we only consider fomulae that fail to satisfy the Pigeon and Hole Axioms (so we are not considering the functional and onto axioms).
+The initial result is by <a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/./haken.pdf">Armin Haken (1985)</a>
+The proof discussed here, is by <a rel="noopener noreferrer external" target="_blank" href="https://homes.cs.washington.edu/~beame/papers/focsclause.pdf">Paul Beame and Toni Pitassi (FOCS 1996)</a>.
+The reason for writing the Beame and Pitassi proof is it follows an almost identical pattern to the result I care about.
+The only difference is here we will use exact counting, and their, we will use lossy counting.
+But for now, there’s no use getting distracted by this.</p>
+<p>The number of pigeons will be $m(n) := n$ and the number of holes will be $n-1$, and we only consider formulae that fail to satisfy the Pigeon and Hole Axioms (so we are not considering the functional and onto axioms).
 See the <a href="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/">crash course</a> for a refresher on the resolution proof system, and the axioms of the PHP principle.</p>
-<p>$\PHPBasic$ refers to the CNF formulae that tries $n$ pigeons fit into $n-1$ holes, when the underlying graph is the complete bipartite graph, and we will show that all resolution proofs that show that this formula is unsatisfiable are long.
+<p>$\PHPBasic$ refers to the CNF formulae that tries $n$ pigeons fit into $n-1$ holes, when the underlying graph is the complete bipartite graph with $n$ left vertices and $n-1$ right vertices, and we will show that all resolution proofs that show that this formula is unsatisfiable are long.
 Recall that the size of a resolution refutation is the number of clauses in the refutation.</p>
-<p>The original result is by
-<a href="#ref-haken1984intractability" class="citation citation-t" title="The Intractability of Resolution" data-cite-key="haken1984intractability" data-cite-authors="Haken, A." data-cite-title="The Intractability of Resolution" data-cite-venue="Theoretical Computer Science" data-cite-year="1985">Haken (1985)</a></p>
-<p>but we go over the proof by
-<a href="#ref-beame1996simplified" class="citation citation-t" title="Simplified and Improved Resolution Lower Bounds" data-cite-key="beame1996simplified" data-cite-authors="Beame, P. and Pitassi, T." data-cite-title="Simplified and Improved Resolution Lower Bounds" data-cite-venue="FOCS" data-cite-year="1996">Beame &amp; Pitassi (1996)</a></p>
-<p>which is a simplification of the original proof.</p>
 <aside id="" class="callout callout-theorem thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
     <span class="thm-title"> : Proof Size Lower Bound</span></div>
@@ -186,12 +184,7 @@ Recall that the size of a resolution refutation is the number of clauses in the 
 <h2 id="preliminary-material">Preliminary Material<a class="zola-anchor" href="#preliminary-material" aria-label="Link to this section">#</a>
 </h2>
 <p>Sometimes it is easier to deal with formulae with no negated variables.
-For PHP refutations, as is standard in the literature (see
-<a href="#ref-razborov2003resolution" class="citation" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">[Razborov, 2003]</a></p>
-<p>,
-<a href="#ref-beame1996simplified" class="citation" title="Simplified and Improved Resolution Lower Bounds" data-cite-key="beame1996simplified" data-cite-authors="Beame, P. and Pitassi, T." data-cite-title="Simplified and Improved Resolution Lower Bounds" data-cite-venue="FOCS" data-cite-year="1996">[Beame &amp; Pitassi, 1996]</a></p>
-<p>) we will often do the following conversion to obtain clause $\CPlus$ from a clause $C$.
-Reminder that $[n]$ is the index set of the pigeons, and $[n-1]$ is the index set for holes.
+We will often do the following conversion to obtain clause $\CPlus$ from a clause $C$.
 The intended meaning of $x_{ij}=1$ is that pigeon $i$ is assigned to hole $j$ in the PHP formula.</p>
 <aside id="" class="callout callout-definition thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
@@ -205,7 +198,9 @@ $$</p>
 </aside>
 <p>$X_{ij}=1$ implies there is at least one pigeon that is not $i$ that is assigned to hole $j$.
 Observe that for any assignment $\vec{x}$ satisfying the hole axioms<sup class="footnote-reference" id="fr-hole-1"><a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/#fn-hole">[1]</a></sup>, $(x_{ij} = 1) \implies X_{ij} = 0$.</p>
-<p>Finally we will call an assignment $\criticalAlpha{}$ which maps pigeons to holes, critical, if it matches every hole with a unique pigeon, and every pigeon but one to a unique hole.</p>
+<p>Finally we will call an assignment $\criticalAlpha{}$ which maps pigeons to holes, critical, if it matches every hole with a unique pigeon, and every pigeon but one to a unique hole.
+Note that a critical assignment is a partial function $\alpha : [n] \rightarrow [n-1]$, or in graph theoretic language it’s a matching<sup class="footnote-reference" id="fr-matching-1"><a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/#fn-matching">[2]</a></sup>.
+Critical assignments are “nearly” perfect matchings except they miss out on a single pigeon vertex.</p>
 <aside id="" class="callout callout-definition thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
     <span class="thm-title"> : Critical Assignments</span></div>
@@ -242,9 +237,21 @@ Therefore, $X_{ij} = 1 = \Complement{x_{ij}}$ as $x_{i’j} = 1$.</p>
   <p>The width of a clause $C$, denoted with $w(C)$, is the number of literals in the clause.</p>
 </aside>
 <p>Before going into the details of the proof, we describe the general proof strategy:</p>
-<p>Show that for all valid refutations, a small proof length/size implies that the positive conversion of every clause in the proof has a small width (number of literals in clause).
-However, we show that a valid PHP refutation <strong>MUST</strong> have large width.
-Thus, we can conclude that the size of the proof must be large.</p>
+<p>Show that for all valid refutations, a small proof length/size implies that the positive conversion of every clause in the proof has a large width (number of literals in clause).</p>
+<p>Then we show that short proofs do not have wide clauses.
+But above we show that valid proofs must have wide clauses.
+Thus, we get the contrapositive, that wide clauses imply long proofs.</p>
+<aside id="" class="callout callout-remark">
+  <div class="callout-title">General Idea</div>
+  <p>This strategy will be useful later on.
+To show valid proofs $\pi$ must have a wide clause, we first come up with a scoring function $\mu$.
+For every clause $C \in \pi$, $\mu(C)$ is a score of how close we are to refuting the formulae.
+$\mu(\emptyset)$ will get the highest score and the $\mu(A)$ gets low scores where $A$ are the starter axioms.
+Then, we say, well at some point in the resolution proof graph, we will come across a clause which is larger than axioms in score but also not too large.
+This, will happen because the scoring function is somewhat “smooth” or Lipschitz.
+For a clause $C$ derived from parents $C_1$ and $C_2$, the score can’t change too much compared to parents.
+Then we will show that this $C$ must be <strong>fat</strong>.</p>
+</aside>
 <h2 id="valid-refutations-have-wide-positive-clauses">Valid Refutations Have Wide Positive Clauses<a class="zola-anchor" href="#valid-refutations-have-wide-positive-clauses" aria-label="Link to this section">#</a>
 </h2>
 <aside id="" class="callout callout-theorem thm-numbered">
@@ -266,27 +273,28 @@ Now walk the proof tree starting at the pigeon axioms $P_i$’s to the conclusio
 This has to happen for us to get $\mu(\emptyset) = n$ as the resolvents critical pigeon set is upper bounded by the sum of its parents, and the first set of parents start at 1.
 Then we have</p>
 <p>$$\epsilon n \le \mu(\CStar) &lt; 2\epsilon n \tag{a}$$</p>
-<p>Now pick arbitrary $i \in \mathcal{P}(\CStar)$ and arbitrary $j \notin \mathcal{P}(\CStar)$.
-There are $s:=\Size{\mu(\CStar)}$ choices for $i$ and $n-s$ choices for $j$.
-Let $\criticalAlpha{i}$ denote the critical assignment which causes $i$ to be in $P(\CStar)$.
-We construct $\criticalAlpha{i \leftrightarrow j}$ by swapping row $i$ and $j$ in $\criticalAlpha{i} \in \bit^{n \times (n-1)}$.</p>
+<p>Now pick arbitrary $i \in \mathcal{P}(\CStar)$ and arbitrary $i’ \notin \mathcal{P}(\CStar)$.
+There are $s:=\Size{\mu(\CStar)}$ choices for $i$ and $n-s$ choices for $i’$.
+For each $i$, fix a critical assignment $\criticalAlpha{i}$ which causes $i$ to be in $P(\CStar)$.
+We construct $\criticalAlpha{i \leftrightarrow i’}$ by swapping row $i$ and $i’$ in $\criticalAlpha{i} \in \bit^{n \times (n-1)}$.</p>
 <p>$\CStar(\criticalAlpha{i}) = 0$, and as $\criticalAlpha{i}$ is critical, by the lemma above we have $\CPlus(\criticalAlpha{i}) = 0$.
-We also have $\CStar(\criticalAlpha{i \leftrightarrow j}) = 1$.<sup class="footnote-reference" id="fr-why-cstar-true-1"><a href="#fn-why-cstar-true">[3]</a></sup>
-Similarly, $\CPlus(\criticalAlpha{i \leftrightarrow j}) = 1$ by the same lemma.</p>
-<p>Say in $\criticalAlpha{i}$ pigeon $j$ was assigned hole $k$.
-Then in $\criticalAlpha{i \leftrightarrow j}$, pigeon $i$ is assigned $k$ and $j$ is unassigned.
-Note, in $\criticalAlpha{i}$, we have $x_{ik}=0, x_{jk} =1$,  and $\criticalAlpha{i \leftrightarrow j}$ we have $x_{ik}=1, x_{jk}=0$.
+We also have $\CStar(\criticalAlpha{i \leftrightarrow i’}) = 1$.<sup class="footnote-reference" id="fr-why-cstar-true-1"><a href="#fn-why-cstar-true">[3]</a></sup>
+Similarly, $\CPlus(\criticalAlpha{i \leftrightarrow i’}) = 1$ by the same lemma.</p>
+<p>Say in $\criticalAlpha{i}$ pigeon $i’$ was assigned hole $j$.
+Then in $\criticalAlpha{i \leftrightarrow i’}$, pigeon $i$ is assigned $j$ and $i’$ is unassigned.
+Note, in $\criticalAlpha{i}$, we have $x_{ij}=0, x_{i’j}=1$, and in $\criticalAlpha{i \leftrightarrow i’}$ we have $x_{ij}=1, x_{i’j}=0$.
 There is <em>no other</em> difference between the two critical assignments.</p>
 <p>Setting any variable to false should never flip a positive clause $\CPlus$ from false to true.
-Therefore setting $x_{jk}=0$  cannot make $\CPlus(\criticalAlpha{i \leftrightarrow j}) = 1$.
-So the only way $\CPlus(\criticalAlpha{i \leftrightarrow j})$ is flipped to true is because pigeon $i$ got assigned a hole $k$.
-As there are no negated variables in positive conversions we can conclude that $x_{ik}$ must be in $\CPlus$.</p>
-<p>Thus, for a fixed $i$ and $j$ we got a unique hole $k$ such that $x_{ik}$ is in $\CPlus$.
-There are $s$ $i$‘s, and if we picked a different pigeon $j’$ to swap with $i$ we’d get a different hole $k’:= j’(k’)$, giving us a new literal $x_{ik’} \in \CPlus$.
-So we get a unique $x_{i, j(k)}$ literal in $\CPlus$ for each $j \notin \mathcal{P}(C)$.
-Therefore, we can conclude that $\CPlus$ has $s(n-s)$ literals.</p>
+Therefore setting $x_{i’j}=0$ cannot make $\CPlus(\criticalAlpha{i \leftrightarrow i’}) = 1$.
+So the only way $\CPlus(\criticalAlpha{i \leftrightarrow i’})$ is flipped to true is because pigeon $i$ got assigned hole $j$.
+As there are no negated variables in positive conversions we can conclude that $x_{ij}$ must be in $\CPlus$.</p>
+<p>Thus, for fixed $i$ and $i’$ we get a hole $j$ such that $x_{ij}$ is in $\CPlus$.
+If we pick a different pigeon $i^{*}$ to swap with $i$, then $i^{*}$ is assigned a different hole $j’$ in the matching $\criticalAlpha{i}$.
+From that we can conclude that the variable $x_{ij’} \in \CPlus$.
+So, for every $i$ (there are $s$ many $i$‘s), we get a distinct literal in $\CPlus$ for each $i’ \notin \mathcal{P}(\CStar)$ (there are $(n-s)$ of these).
+Therefore, $\CPlus$ has at least $s(n-s)$ literals.</p>
 <p>$$
-w(\CPlus) := s(n-s) \geq \epsilon n (n - 2\epsilon n) = n^2/9
+w(\CPlus) := s(n-s) = \mu(C)(n-\mu(C)) \geq \epsilon n (n - 2\epsilon n) = n^2/9
 $$</p>
 <p>Where the last inequality comes from Equation $(a)$</p>
 <section class="footnotes">
@@ -298,7 +306,7 @@ $$</p>
 <p>Safe to assume $n$ is large enough such that $\epsilon n &gt; 1$. <a href="#fr-size-1">↩</a></p>
 </li>
 <li id="fn-why-cstar-true">
-<p>Assume not, then this implies $j \in P(\CStar)$ as $\criticalAlpha{i \leftrightarrow j}$ is critical, which contradicts our assumption that $j \notin \mathcal{P}(\CStar)$. <a href="#fr-why-cstar-true-1">↩</a></p>
+<p>Assume not, then this implies $i’ \in P(\CStar)$ as $\criticalAlpha{i \leftrightarrow i’}$ is critical, which contradicts our assumption that $i’ \notin \mathcal{P}(\CStar)$. <a href="#fr-why-cstar-true-1">↩</a></p>
 </li>
 </ol>
 </section>
@@ -314,7 +322,7 @@ $$</p>
 <p>Let $\pi$ be a refutation of $\PHPBasic$, and $\pi^{+} = (\CPlus)_{C \in \pi}$ be the refutation obtained by replacing every clause in $C \in \pi$ with its positive conversion.</p>
 <p>Let $S_0$ be the set of  $\epsilon$-wide clauses in $\pi^+$ and $s_0 := \Size{S_0}$.
 Wideness implies that each clauses $S \in S_0$ has at least $\epsilon$ fraction of the possible $n(n-1)$ literals (which can be upper bounded by $n(n+1) &lt; n^2)$.
-Therefore by the averaging argument, there <em>must be one literal</em>, let’s call it $x_{ij}$, that is present<sup class="footnote-reference" id="fr-a-1"><a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/#fn-a">[2]</a></sup> in at least $\epsilon s_0$ of all the clauses in $S_0$</p>
+Therefore by the averaging argument, there <em>must be one literal</em>, let’s call it $x_{ij}$, that is present<sup class="footnote-reference" id="fr-a-1"><a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/#fn-a">[3]</a></sup> in at least $\epsilon s_0$ of all the clauses in $S_0$</p>
 <p><strong>Labelling Strategy</strong>:</p>
 <ul>
 <li>
@@ -327,7 +335,7 @@ Therefore by the averaging argument, there <em>must be one literal</em>, let’s
 </ul>
 <p>Setting $x_{ij} = 1$ implies we satisfy at least $\epsilon s_0$ of the clauses in $S_0$ (as these clauses have no negations, and $x_{ij}$ was the literal that was present in all these clauses from the averaging argument).
 Thus, the number of wide and unsatisfied clauses left in $S_0$ is at most $s_0(1 - \epsilon)$.</p>
-<p>Also the way we picked our labelling strategy<sup class="footnote-reference" id="fr-b-1"><a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/#fn-b">[3]</a></sup>, if $\CPlus \in \pi^+$ is satisfied, then so is the corresponding $C \in \pi$ it was created from.
+<p>Also the way we picked our labelling strategy<sup class="footnote-reference" id="fr-b-1"><a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/#fn-b">[4]</a></sup>, if $\CPlus \in \pi^+$ is satisfied, then so is the corresponding $C \in \pi$ it was created from.
 Define $\pi_1 \subseteq \pi$ by applying the above labelling strategy to every clause $C \in \pi$, and getting ride of the satisfied clauses, which gives us a valid refutation of $\PHP{n-1}{n-2}{K}$.</p>
 <p>Now we repeat the same process $k=\lceil\frac{\log S_0}{\epsilon}\rceil$ times.
 Each time we will find a new literal $x_{ij}$ that is present in $\epsilon$ fraction of the wide clauses remaining in $S_0$.
@@ -370,6 +378,9 @@ And as $S_0 \le \Size{\pi}$, we get a lower bound on the size of any refutation.
 <ol class="footnotes-list">
 <li id="fn-hole">
 <p>The hole axioms say for any hole $j$ we cannot have two or more pigeon go into that hole. <a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/#fr-hole-1">↩</a></p>
+</li>
+<li id="fn-matching">
+<p>Later when we see another proof using pseudo-width, it will be useful to remember that these critical assignments are just matchings. <a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/#fr-matching-1">↩</a></p>
 </li>
 <li id="fn-a">
 <p>We do not have to worry about this literal being a negated literal as everything has been positive converted. <a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/#fr-a-1">↩</a></p>
