@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Graham And Pollock (1971) — Random Walks</title>
+  <meta name="description" content="">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=c886b160374893469fe8">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
+  
+  
+  
+  
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams',
+        macros: {
+          Field: '{\\mathbb{F}}',
+          field: '{\\mathbb{F}}',
+          Mont: ['{\\widetilde{#1}}', 1],
+          Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+          TauConstraints: '{\\tau_y}',
+          TauTime: '{\\tau_{\\text{cycle}}}',
+          TauGroup: '{\\tau_b}',
+          MLE: ['{\\widetilde{#1}}', 1],
+          tf: ['{\\widetilde{#1}}', 1],
+          eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+          Def: '{:=}',
+          ChallengeSet: '{\\mathsf{C}}',
+          Complement: ['{\\neg{#1}}', 1],
+          Size: ['{\\left|#1\\right|}', 1],
+          Length: ['{L\\left(#1\\right)}', 1],
+          Lenght: ['{L\\left(#1\\right)}', 1],
+          Exp: ['{2^{#1}}', 1],
+          BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+          BigO: ['{O\\ \\left(#1\\right)}', 1],
+          boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+          OntoPHP: ['{\\operatorname{OFPHP}(#3^{#1}_{#2})}', 3],
+          PHP: ['{\\operatorname{PHP}(#3^{#1}_{#2})}', 3],
+          PHPBasic: ['\\PHP{n}{n-1}{K}'],
+          FPHP: ['{\\operatorname{FPHP}(#3^{#1}_{#2})}', 3], 
+          poly: '{\\operatorname{poly}}',
+          criticalAlpha: ['{\\alpha_{#1}}', 1],
+          CPlus: '{\\textcolor{blue}{C^{+}}}',
+          CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
+          GraphNbrs: ['{N_G(#1)}', 1],
+          ClauseNbrs: ['{N_C(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
+          SmallO: ['{o\\!(#1)}', 1],
+          Closure: ['{\\operatorname{Cl}(#1)}', 1],
+          ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+          Dim: ['{\\dim(#1)}', 1],
+          Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+          domain: ['{\\operatorname{dom}(#1)}', 1],
+          False: '{\\bot}',
+          opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+          NP: '{\\mathsf{NP}}',
+          Naturals: '{\\mathbb{N}}',
+          bit: '{\\{0,1\\}}',
+          samples: '{\\xleftarrow{\\$}}'
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+  
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="https://randomwalks.xyz" aria-label="Random Walks — home">
+      <span>Random Walks</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="https://randomwalks.xyz/publications/">Publications</a>
+      <a href="https://randomwalks.xyz/blog/">Notes</a>
+      <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
+      <a href="https://randomwalks.xyz/cv/">CV</a>
+      <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
+      <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
+    </nav>
+  </header>
+
+  <div class="command-palette" id="command-palette" data-index-url="https://randomwalks.xyz/search_index.en.json" hidden>
+    <button class="command-backdrop" type="button" aria-label="Close search" data-command-close></button>
+    <section class="command-dialog" role="dialog" aria-modal="true" aria-labelledby="command-title">
+      <h2 class="visually-hidden" id="command-title">Search page titles</h2>
+      <div class="command-query">
+        <span aria-hidden="true">›</span>
+        <input id="command-input" type="search" placeholder="Search titles…" autocomplete="off" autocapitalize="none" spellcheck="false" aria-controls="command-results" aria-autocomplete="list">
+        <kbd>Esc</kbd>
+      </div>
+      <ol class="command-results" id="command-results" role="listbox"></ol>
+      <p class="command-status" role="status" aria-live="polite"></p>
+      <footer class="command-help"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span></footer>
+    </section>
+  </div>
+
+  
+
+  <main id="main-content">
+    
+
+
+
+
+
+
+<article class="note footnotes-right note--side-toc">
+  <header class="note-header">
+    <h1>Graham And Pollock (1971)</h1>
+    
+    <div class="note-meta">
+      <span class="note-authors">By Ari</span>
+      <time datetime="2026-08-30">30 August 2026</time>
+      
+    </div>
+    
+    <ul class="tag-list" aria-label="Tags">
+      <li><a href="https://randomwalks.xyz/tags/extremal-combinatorics/">extremal-combinatorics</a></li><li><a href="https://randomwalks.xyz/tags/linear-algebra/">linear-algebra</a></li>
+    </ul>
+    
+  </header>
+
+  <div class="note-layout note-layout--side">
+    
+    <nav class="contents contents-side" aria-label="Table of contents">
+      <h2>Contents</h2>
+      
+<ol>
+  
+  <li>
+    <a href="#main-result">Main Result</a>
+    
+  </li>
+  
+</ol>
+
+    </nav>
+    
+
+    <div class="prose">
+      <p><strong>Notation</strong>: $[n] = \{1, 2, \ldots, n \}$</p>
+<h2 id="main-result">Main Result<a class="zola-anchor" href="#main-result" aria-label="Link to this section">#</a>
+</h2>
+<p>The result is due to <a rel="noopener noreferrer external" target="_blank" href="https://web.vu.lt/mif/s.jukna/Knizka/Graham-Pollak1971.pdf">R. L. Graham and H. O. Pollak, “On the Addressing Problem for Loop Switching” (1971)</a>.</p>
+<aside id="" class="callout callout-box thm-box">
+  <div class="callout-title"></div>
+  <p><strong>Question:</strong> How many edge-disjoint bipartite cliques can we decompose $K_n$ into?
+<strong>Answer:</strong> At least $n-1$.</p>
+</aside>
+<p>For $n = 4$, we get this picture.
+Note that each sub-graph is bi-partite, and complete.
+No edge is re-used.
+So we have decomposed $K_4$ into edge-disjoint bi-partite cliques.
+<img src="https://randomwalks.xyz/blog/general-tcs/graham-pollock/./example.svg" alt="" /></p>
+<p>The general algorithm is the following, for all $i \in [n]$,</p>
+<p>$$A_i = \{i\} \qquad B_i = \{i+1, \ldots, n\}$$
+Starting at $i=1$, incrementally remove all edges incident on vertices in $A_i$ from $K_n$ and add them to $A_i \cup B_i$.
+Then continue the process from what is left in the edge set.</p>
+<aside id="" class="callout callout-proof">
+  <div class="callout-title"></div>
+  <p><strong>Proof</strong>:  Let $t \in \Naturals$ denote the minimum number of cliques.
+Let $\vec{x}:= (x_1, \dots, x_n)$ denote variables corresponding to each vertex of $K_n$.
+Define equations</p>
+<p>$$
+\begin{align*}
+S(\vec{x}) &amp;:= \sum_{1 \leq i &lt; j \leq n} x_i x_j \\[10pt]
+T(\vec{x}) &amp;:= \sum_{i \in [n]} x_i^2 \\
+\end{align*}
+$$</p>
+<p>It is algebraic fact that for all $\vec{x} \in \mathbb{R}^n$
+$$
+\begin{align}
+T(x) = \Big(\sum_{i \in [n]} x_i\Big)^2 - 2S(\vec{x})  \tag{a}\label{eq:main} \\[10pt]
+\end{align}
+$$</p>
+<p>Now if we assume $t = n-2$ we will show there exits an $\vec{z} \in \mathbb{R}^n$ such that the above equation does not hold, but that is impossible, so $t &gt; n-2$.</p>
+<p>Assume $t = n-2$.
+For each $i \in [n-2]$, let $A_i$ and $B_i$ denote the left and right vertices of the $i$’th bipartite clique.
+As the cliques are edge-disjoint, we have</p>
+<p>$$
+S(x) := \sum_{k=1}^t \left(\sum_{i \in A_k}x_i\right)\left(\sum_{j \in B_k}x_j\right) := \sum_{k=1}^t R_k(\vec{x}) L_k(\vec{x})
+$$</p>
+<p>Define constraints
+$$
+\begin{align*}
+L_0(\vec{x} &amp;:= \sum_{i \in [n]} x_i = 0 \\[10pt]
+L_k(\vec{x})&amp;:= \left(\sum_{i \in [n]}\mathbb{1}\left[x_i \in A_k\right]\right) = 0 \quad \forall k \in [n-2]\<br />
+\end{align*}
+$$</p>
+<p>This is actually giving us a system of $n-1$ equations in $n$ variables (an under determined system).
+<img src="./system.svg" alt="" /></p>
+<p>Let $M$ denote the above matrix.
+As we have an under-determined system, we has a solution $\vec{z} \neq \vec{0}$ such that $M\vec{z} = 0$ (coz the kernel of $M$ cannot be empty).</p>
+<p>Now use $\vec{z}$ in Equation $\eqref{eq:main}$.
+The RHS is zero.
+The LHS cannot be zero.
+Impossible.
+So $t = n -2$ not possible.</p>
+</aside>
+
+    </div>
+  </div>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <!-- <div> -->
+    <!--   <h2>Working Notes</h2> -->
+    <!--   <p>Something to say</p> -->
+    <!-- </div> -->
+    
+    <!-- <div> -->
+    <!--   <h2>Elsewhere</h2> -->
+    <!--   <ul> -->
+    <!--     <li><a href="https://randomwalks.xyz/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/tags">Browse by tag</a></li> -->
+    <!--   </ul> -->
+    <!-- </div> -->
+    
+    <div class="footer-credit">
+      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('pre').forEach(function (pre) {
+      if (!pre.querySelector('code')) return;
+      var button = document.createElement('button');
+      button.className = 'copy-code';
+      button.type = 'button';
+      button.textContent = 'Copy';
+      button.addEventListener('click', function () {
+        var clone = pre.querySelector('code').cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function (line) { line.remove(); });
+        navigator.clipboard.writeText(clone.textContent).then(function () {
+          button.textContent = 'Copied';
+          window.setTimeout(function () { button.textContent = 'Copy'; }, 1400);
+        });
+      });
+      pre.appendChild(button);
+    });
+  </script>
+  <script>
+    window.addEventListener('load', function () {
+      function containShortcodeMath() {
+        var selector =
+          '.callout mjx-container[display="true"], ' +
+          '.comparison-dual mjx-container[display="true"], ' +
+          '.comparison-single mjx-container[display="true"]';
+
+        function wrap(equation) {
+          if (equation.parentElement.classList.contains('shortcode-math-scroll')) return;
+          var boundary = document.createElement('span');
+          boundary.className = 'shortcode-math-scroll';
+          equation.before(boundary);
+          boundary.appendChild(equation);
+        }
+
+        document.querySelectorAll(selector).forEach(wrap);
+
+        document.querySelectorAll(
+          '.callout mjx-container:not([display="true"]), ' +
+          '.comparison-dual mjx-container:not([display="true"]), ' +
+          '.comparison-single mjx-container:not([display="true"])'
+        ).forEach(function (equation) {
+          var line = equation.closest('li, p') || equation.parentElement;
+          if (equation.getBoundingClientRect().width > line.clientWidth) wrap(equation);
+        });
+      }
+
+      if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+        MathJax.startup.promise.then(containShortcodeMath);
+      } else {
+        containShortcodeMath();
+      }
+    });
+  </script>
+  <script>
+    (function () {
+      var prose = document.querySelector('.prose');
+      if (!prose || prose.querySelector('.bibliography')) return;
+
+      var citations = prose.querySelectorAll('a.citation[data-cite-key]');
+      if (!citations.length) return;
+
+      var bibliography = document.createElement('div');
+      var heading = document.createElement('h2');
+      var list = document.createElement('ol');
+      var seen = new Set();
+
+      bibliography.className = 'bibliography';
+      heading.textContent = 'References';
+      bibliography.append(heading, list);
+
+      citations.forEach(function (citation) {
+        var key = citation.dataset.citeKey;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+
+        var item = document.createElement('li');
+        var title = document.createElement('span');
+        var authors = citation.dataset.citeAuthors;
+        var venue = citation.dataset.citeVenue;
+        var year = citation.dataset.citeYear;
+
+        item.id = 'ref-' + key;
+        if (authors) item.append(document.createTextNode(authors + '. '));
+        title.className = 'bib-title';
+        title.textContent = citation.dataset.citeTitle;
+        item.append(title);
+        if (citation.dataset.citeTitle) item.append(document.createTextNode('.'));
+        if (venue) {
+          var venueElement = document.createElement('em');
+          venueElement.textContent = venue;
+          item.append(document.createTextNode(' '), venueElement);
+        }
+        if (year) item.append(document.createTextNode((venue ? ', ' : ' ') + year));
+        item.append(document.createTextNode('.'));
+        list.appendChild(item);
+      });
+
+      prose.appendChild(bibliography);
+    })();
+
+    document.addEventListener('click', function (event) {
+      var back = event.target.closest('.bib-back');
+      if (back) {
+        event.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = event.target.closest('a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      event.preventDefault();
+      document.querySelectorAll('.citation-highlight').forEach(function (item) {
+        item.classList.remove('citation-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function (item) { item.remove(); });
+
+      var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+      if (!target) return;
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('citation-highlight');
+
+      if (!link.id) link.id = 'cite-source-' + target.id;
+      var arrow = document.createElement('a');
+      arrow.className = 'bib-back';
+      arrow.setAttribute('data-source', link.id);
+      arrow.setAttribute('href', '#' + link.id);
+      arrow.setAttribute('aria-label', 'Back to citation');
+      arrow.textContent = ' ↩';
+      target.appendChild(arrow);
+    });
+  </script>
+  <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
+  
+
+
+
+<script>
+  (function () {
+    var prose = document.querySelector('.prose');
+    if (!prose) return;
+
+    var references = prose.querySelectorAll('.footnote-reference');
+    var footnotes = prose.querySelector('.footnotes');
+    if (!footnotes) return;
+
+    function removeRedundantFootnoteHeading() {
+      var heading = prose.querySelector('#footnotes-and-references');
+      if (!heading || heading.nextElementSibling !== footnotes) return;
+
+      heading.remove();
+      document.querySelectorAll('.contents a[href="#footnotes-and-references"]').forEach(function (link) {
+        var item = link.closest('li');
+        if (item) item.remove();
+      });
+    }
+
+    if (!references.length) {
+      if (!footnotes.querySelector('li')) {
+        removeRedundantFootnoteHeading();
+        footnotes.remove();
+      }
+      return;
+    }
+
+    var transformed = 0;
+    references.forEach(function (reference) {
+      var link = reference.querySelector('a');
+      if (!link) return;
+
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
+      var definition = targetId ? document.getElementById(targetId) : null;
+      if (!definition) return;
+
+      transformed += 1;
+      var noteId = 'sidenote-' + transformed;
+      var clone = definition.cloneNode(true);
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
+
+      var noteBody = Array.from(clone.children).map(function (child) {
+        return child.tagName === 'P' ? child.innerHTML : child.outerHTML;
+      }).join(' ');
+
+      var number = document.createElement('button');
+      number.type = 'button';
+      number.className = 'sidenote-number';
+      number.textContent = link.textContent;
+      number.setAttribute('aria-expanded', 'false');
+      number.setAttribute('aria-controls', noteId);
+      number.setAttribute('aria-label', 'Show footnote ' + link.textContent);
+
+      var note = document.createElement('span');
+      note.className = 'sidenote';
+      note.id = noteId;
+      note.innerHTML = '<span class="sidenote-num">' + link.textContent + '.</span> ' + noteBody;
+
+      number.addEventListener('click', function () {
+        var open = note.classList.toggle('is-open');
+        number.setAttribute('aria-expanded', String(open));
+      });
+
+      reference.replaceWith(number, note);
+    });
+
+    if (transformed) {
+      prose.classList.add('footnotes-are-sidenotes');
+      removeRedundantFootnoteHeading();
+    }
+  })();
+</script>
+
+
+
+</body>
+</html>
