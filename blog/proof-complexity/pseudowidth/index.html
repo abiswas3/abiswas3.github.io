@@ -199,15 +199,14 @@
 I should clean it up over the weekend</p>
 </aside>
 <p><a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/">Last time</a>, we saw an example of how short proofs imply that all clauses are narrow, but then we also showed that any valid resolution refutation needs a wide clause, so the proofs must be long.
-We showed this for the basic $\PHPBasic$, though the same argument applies to $\FPHP{n}{n-1}{G}$.</p>
-<p>Now we’ll do this again, but we will not use width directly, but a proxy for width - pseudowidth introduced by
-<a href="#ref-razborov2003resolution" class="citation citation-t" title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-key="razborov2003resolution" data-cite-authors="Razborov, A." data-cite-title="Resolution Lower Bounds for the Weak Pigeonhole Principle" data-cite-venue="ECCC" data-cite-year="2003">Razborov (2003)</a></p>
-<p>.
-Then we will use this again, when working with sparse graphs, along with a new idea called graph closure.
+We showed this for the basic $\PHPBasic$, though the same argument applies to $\FPHP{n}{n-1}{K}$.</p>
+<p>Now we’ll do this again, but we will not use width directly, but a proxy for width - pseudowidth introduced by Razbarov.</p>
+<p>Then we will use this again, when working with sparse graphs, along with a new idea called graph closure.
 Also remember last time we had this notion of critical pigeons $\mathcal{P}(C)$, its size $\mu(C)$.
 We will do that again, but this time instead of counting we’ll do this over subspaces using linear algebra.</p>
 <h2 id="the-main-theorem">The Main Theorem<a class="zola-anchor" href="#the-main-theorem" aria-label="Link to this section">#</a>
 </h2>
+<p><strong>This theorem as stated is wrong.</strong></p>
 <aside id="" class="callout callout-theorem thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
     <span class="thm-title"> : Size Lower Bounds on FPHP For Sparse Graphs</span></div>
@@ -337,83 +336,7 @@ Given any arbitrary set of integer vectors of length $m$, $\vec{r}(1), \ldots, \
 </aside>
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
-  <p>The proof follows from the probabilistic method and the Chernoff bounds. The original <a href="../pigeonFilter.pdf">handwritten notes</a> are also available.</p>
-<p>For an integer vector $\vec{s}=(s_1,\ldots,s_m)$, define its weight by</p>
-<p>$$
-W(\vec{s}) := \sum_{i\in[m]} \alpha^{-s_i}.
-$$</p>
-<p>It is enough to find absolute constants $\gamma,\gamma’$ and a vector $\vec r$ such that, for every $\ell\in[L]$,</p>
-<div class="math-display">
-<p>$$
-\begin{aligned}
-W(\vec r(\ell)) \geq \frac{\gamma’w_0}{\alpha}
-&amp;\implies
-\Size{{i\in[m]:r_i\geq r_i(\ell)}}\geq w_0,\
-W(\vec r(\ell)) \leq \frac{\gamma’w_0}{\alpha}
-&amp;\implies
-\Size{{i\in[m]:r_i\geq r_i(\ell)-1}}\leq \gamma\alpha w_0.
-\end{aligned}
-$$</p>
-</div>
-<p>Let $t=\lfloor\log m/\log\alpha\rfloor-1$. Choose the coordinates of $\vec r$ independently from $[t]$ according to</p>
-<p>$$
-\Pr[r_i=x]=\beta\alpha^{-x},
-\qquad
-\beta:=\frac{\alpha-1}{1-\alpha^{-t}}.
-$$</p>
-<p>This is a probability distribution since $\beta\sum_{x\in[t]}\alpha^{-x}=1$.</p>
-<p>Fix $\ell\in[L]$. First suppose that $W(\vec r(\ell))\geq\gamma’w_0/\alpha$. The coordinates with $r_i(\ell)&gt;t$ contribute less than</p>
-<p>$$
-\sum_{r_i(\ell)&gt;t}\alpha^{-r_i(\ell)}
-\leq m\alpha^{-t-1}&lt;\alpha.
-$$</p>
-<p>Since $w_0\geq\alpha^2$, it follows that</p>
-<p>$$
-\sum_{r_i(\ell)\leq t}\alpha^{-r_i(\ell)}
-\geq \frac{(\gamma’-1)w_0}{\alpha}.
-$$</p>
-<p>Define</p>
-<p>$$
-P_{\vec r}(\ell):=\{i\in[m]:r_i(\ell)\leq t\text{ and }r_i\geq r_i(\ell)\}.
-$$</p>
-<p>For every coordinate occurring in this set,
-$\Pr[r_i\geq r_i(\ell)]\geq\beta\alpha^{-r_i(\ell)}$. Hence</p>
-<div class="math-display">
-<p>$$
-\mathbb E\left[\Size{P_{\vec r}(\ell)}\right]
-\geq \beta\sum_{r_i(\ell)\leq t}\alpha^{-r_i(\ell)}
-\geq \frac{\gamma’-1}{2}w_0,
-$$</p>
-</div>
-<p>where $\beta/\alpha\geq1/2$. The relevant events are independent, so a multiplicative Chernoff bound gives, for $\gamma’\geq13$,</p>
-<p>$$
-\Pr\left[\Size{P_{\vec r}(\ell)}&lt;w_0\right]
-\leq \exp(-2w_0)\leq L^{-2}.
-$$</p>
-<p>Now suppose instead that $W(\vec r(\ell))\leq\gamma’w_0/\alpha$. A geometric-sum calculation gives</p>
-<div class="math-display">
-<p>$$
-\Pr[r_i\geq r_i(\ell)-1]
-=\beta\sum_{x=r_i(\ell)-1}^{t}\alpha^{-x}
-\leq 2\alpha^{2-r_i(\ell)}.
-$$</p>
-</div>
-<p>For</p>
-<p>$$
-Q_{\vec r}(\ell):=\{i\in[m]:r_i\geq r_i(\ell)-1\},
-$$</p>
-<p>we therefore have</p>
-<p>$$
-\mathbb E\left[\Size{Q_{\vec r}(\ell)}\right]
-\leq 2\alpha^2W(\vec r(\ell))
-\leq 2\gamma’\alpha w_0.
-$$</p>
-<p>Another Chernoff bound shows that, for $\gamma\geq5\gamma’$,</p>
-<p>$$
-\Pr\left[\Size{Q_{\vec r}(\ell)}\geq\gamma\alpha w_0\right]
-\leq \exp(-\alpha w_0)\leq L^{-2}.
-$$</p>
-<p>A union bound over all $\ell\in[L]$ and both cases now gives a choice of $\vec r$ for which the two implications hold simultaneously. The first implication is conclusion 1, and the second is conclusion 2 with the absolute constant hidden by $\BigO{\cdot}$.</p>
+  <p>The proof follows from the probabilistic method and the Chernoff bounds. The original <a href="../pigeonFilter.pdf">handwritten notes</a>.</p>
   <div class="qed" aria-label="End of proof">□</div>
 </aside>
 <h2 id="how-do-we-use-the-pigeon-filtering-lemma">How Do We Use The Pigeon Filtering Lemma<a class="zola-anchor" href="#how-do-we-use-the-pigeon-filtering-lemma" aria-label="Link to this section">#</a>
@@ -561,9 +484,8 @@ Therefore $\lambda(\bot) = \Span{\lambda{\psi_0}} = \Lambda$.</p>
 But if the pseudowidth of all clauses is small i.e smaller than $\frac{r}{2}$, then every resolvent spans a space entirely contained by the space spanned by its parents, thus we can actually never get to $\bot$, giving us our contradiction.
 This is formally shown in <strong>Lemma 4.10</strong>.</p>
 </aside>
-<p>More formally, Lemma 4.9 says that there exists $$\frac{C_0 \vee x \quad \Complement{x} \vee C_1}{C}$$ such that $\Span{\lambda(C)} \not\subseteq \Span{\lambda(C_0), \lambda(C_1)}$ (otherwise, how do we get to $\bot$). (Remember, in
-<a href="#ref-beame1996simplified" class="citation citation-t" title="Simplified and Improved Resolution Lower Bounds" data-cite-key="beame1996simplified" data-cite-authors="Beame, P. and Pitassi, T." data-cite-title="Simplified and Improved Resolution Lower Bounds" data-cite-venue="FOCS" data-cite-year="1996">Beame &amp; Pitassi (1996)</a></p>
-<p>, <a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/">we did the same thing</a> with critical pigeons, now we’re playing the same game with subspaces, which is a generalisation.)</p>
+<p>More formally, Lemma 4.9 says that there exists $$\frac{C_0 \vee x \quad \Complement{x} \vee C_1}{C}$$ such that $\Span{\lambda(C)} \not\subseteq \Span{\lambda(C_0), \lambda(C_1)}$ (otherwise, how do we get to $\bot$).
+Remember, in Beame and Pitassi, <a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/">we did the same thing</a> with critical pigeons, now we’re playing the same game with subspaces, which is a generalisation.)</p>
 <p>But Lemma 4.10 prevents this from happening if $\max\{\Closure{C_0}, \Closure{C_1}, \Closure{C}\} \le \frac{r}{4}$.
 Thus, for the resolvent to span more space, we need some $C’ \in \{C, C_0, C_1\}$ such that $\Closure{C’} &gt; \frac{r}{4} = \frac{k\Delta}{c - \nu} = \frac{r}{4\xi}$.
 Solving for $k = \frac{r\xi}{4}$.</p>
@@ -575,9 +497,7 @@ Strong expansion implies many holes. Many holes means many vectors in $\mathcal{
 <p>This completes the proof.</p>
   <div class="qed" aria-label="End of proof">□</div>
 </aside>
-<p>Now we prove the main lemmas the above proof relies on. Numbering is from
-<a href="#ref-rezende2020Exp" class="citation citation-t" title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-key="rezende2020Exp" data-cite-authors="de Rezende, S. and Nordström, J. and Risse, K. and Sokolov, D." data-cite-title="Exponential Resolution Lower Bounds for Weak Pigeonhole Principle over Sparse Graphs" data-cite-venue="CCC" data-cite-year="2020">de Rezende et al. (2020)</a></p>
-<p>.</p>
+<p>Now we prove the main lemmas the above proof relies on.</p>
 <aside id="" class="callout callout-lemma thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
     <span class="thm-title"> : Lemma 3.3</span></div>
@@ -586,82 +506,7 @@ Strong expansion implies many holes. Many holes means many vectors in $\mathcal{
 </aside>
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
-  <p>Let $S:=\ClosureParam{T}$. The <a href="../Lemma3.3.pdf">handwritten proof</a> is also available.</p>
-<p>By the definition of closure,</p>
-<p>$$
-\Size{\partial(S)\setminus N(T)}&lt;\nu\Size{S}.
-$$</p>
-<p>We also have $\Size{S}\leq r$, so boundary expansion applies to $S$. Since $\Size{T}\leq k$ and every expanding vertex has degree at most $\Delta$, we have $\Size{N(T)}\leq k\Delta$. Consequently,</p>
-<div class="math-display">
-<p>$$
-\begin{aligned}
-\Size{\partial(S)\setminus N(T)}
-&amp;\geq \Size{\partial(S)}-\Size{N(T)}\
-&amp;\geq c\Size{S}-k\Delta.
-\end{aligned}
-$$</p>
-</div>
-<p>Combining the upper and lower bounds gives</p>
-<p>$$
-c\Size{S}-k\Delta&lt;\nu\Size{S},
-$$</p>
-<p>and hence</p>
-<p>$$
-\Size{\ClosureParam{T}}=\Size{S}&lt;\frac{k\Delta}{c-\nu}.
-$$</p>
-<p>In particular, this implies the stated weak inequality.</p>
-  <div class="qed" aria-label="End of proof">□</div>
-</aside>
-<aside id="" class="callout callout-lemma thm-numbered">
-  <div class="thm-header"><span class="thm-label"></span>
-    <span class="thm-title"> : Lemma 4.9</span></div>
-  <p>Let $\xi \le 1/4$. Let $G$ be any graph with $m &gt; n$ and $\delta_i = 4\GraphNbrs{i}\xi$ for all $i\in [m]$.
-Given a set of $(w_0, \vec{d})$ axioms $\Axioms$ of size $\Size{\Axioms} \le (1 + \xi)^{w_0}$ for arbitrary $w_0$ and any vector $\vec{d}$ with $d_i \le \GraphNbrs{i}$ for all $i\in [m]$, we have</p>
-<p>$$\Span{\lambda(C) : C \in \FPHP{m}{n}{G} \cup \Axioms} \subsetneq \Lambda$$</p>
-</aside>
-<aside class="callout callout-proof">
-  <div class="proof-header">Proof</div>
-  <p>The original <a href="../Lemma4.9.pdf">handwritten proof</a> is also available.</p>
-<p>We first consider the clauses in $\FPHP{m}{n}{G}$. If $A$ is a pigeon axiom or a functionality axiom for pigeon $i$, then $i$ is heavy for $A$, but there is no assignment of $i$ to a hole that fails to satisfy $A$. Thus $Z(A)=\emptyset$, and $\lambda(A)$ is the zero subspace.</p>
-<p>If $A$ is a hole axiom involving pigeons $i$ and $i’$, then both pigeons are heavy. Indeed,</p>
-<p>$$
-\GraphNbrs{i}-1\geq d_i-\delta_i,
-$$</p>
-<p>and likewise for $i’$, since $\delta_i=4\xi\GraphNbrs{i}\geq1$. No matching on these two pigeons can send both to the same hole, so again $Z(A)=\emptyset$ and $\lambda(A)$ is the zero subspace.</p>
-<p>It remains to bound the contribution of the $(w_0,\vec d)$-axioms. Fix $A\in\Axioms$. For every super-heavy pigeon $i\in\SuperHeavy{A}{\vec d}$, there are at most $\GraphNbrs{i}-d_i$ choices of a hole that do not satisfy $A$. All other tensor factors contribute their full spaces. Therefore</p>
-<div class="math-display">
-<p>$$
-\Dim{\lambda(A)}
-\leq
-\prod_{i\notin\SuperHeavy{A}{\vec d}}\Dim{\Lambda_i}
-\prod_{i\in\SuperHeavy{A}{\vec d}}\bigl(\GraphNbrs{i}-d_i\bigr).
-$$</p>
-</div>
-<p>Dividing by $\Dim{\Lambda}=\prod_i\Dim{\Lambda_i}$ and using $\Dim{\Lambda_i}=\GraphNbrs{i}-d_i+\delta_i/4$ gives</p>
-<div class="math-display">
-<p>$$
-\frac{\Dim{\lambda(A)}}{\Dim{\Lambda}}
-\leq
-\prod_{i\in\SuperHeavy{A}{\vec d}}
-\frac{\GraphNbrs{i}-d_i}
-{\GraphNbrs{i}-d_i+\delta_i/4}
-\leq (1-\xi)^{w_0}.
-$$</p>
-</div>
-<p>For the last inequality, note that $\delta_i/4=\xi\GraphNbrs{i}$ and $d_i&gt;\delta_i$, so each displayed ratio is at most $1-\xi$; by definition, $A$ has exactly $w_0$ super-heavy pigeons.</p>
-<p>Finally, subadditivity of dimension and $\Size{\Axioms}\leq(1+\xi)^{w_0}$ imply</p>
-<div class="math-display">
-<p>$$
-\begin{aligned}
-\frac{\Dim{\Span{\lambda(A):A\in\FPHP{m}{n}{G}\cup\Axioms}}}
-{\Dim{\Lambda}}
-&amp;\leq \Size{\Axioms}(1-\xi)^{w_0}\
-&amp;\leq (1+\xi)^{w_0}(1-\xi)^{w_0}\
-&amp;=(1-\xi^2)^{w_0}&lt;1.
-\end{aligned}
-$$</p>
-</div>
-<p>Thus the axioms span a proper subspace of $\Lambda$.</p>
+  <p>The <a href="../Lemma3.3.pdf">handwritten proof</a>.</p>
   <div class="qed" aria-label="End of proof">□</div>
 </aside>
 <aside id="" class="callout callout-remark">
@@ -678,87 +523,7 @@ $$ \max\Big\{\Closure{C_0}, \Closure{C_1}, \Closure{C}\Big\} \le \frac{r}{4} \im
 </aside>
 <aside class="callout callout-proof">
   <div class="proof-header">Proof</div>
-  <p>The original <a href="../Lemma4.10.pdf">handwritten proof</a> is also available. Write</p>
-<p>$$
-S:=\Closure{C},
-\qquad
-S_{01}:=\Closure{C_0}\cup\Closure{C_1},
-\qquad
-D:=S_{01}\setminus S.
-$$</p>
-<p>We will prove that every $\phi\in Z(C)$ satisfies</p>
-<p>$$
-\lambda(\phi)\subseteq\Span{\lambda(C_0),\lambda(C_1)}.
-$$</p>
-<p>Fix such a $\phi$, and let $\phi’$ be its restriction to $S\cap S_{01}$. Since $\phi’$ is a restriction of $\phi$,</p>
-<p>$$
-\lambda(\phi)\subseteq\lambda(\phi’).
-$$</p>
-<p>It therefore suffices to prove the desired containment for $\lambda(\phi’)$.</p>
-<p>Let $\mathcal M_D$ be the set of partial matchings that extend $\phi’$ by assigning all pigeons in $D$, and that do not satisfy $C$. Every $\widetilde\phi\in\mathcal M_D$ fails to satisfy at least one of $C_0$ and $C_1$, by soundness of the resolution rule. Suppose, without loss of generality, that it fails to satisfy $C_0$, and restrict $\widetilde\phi$ to $\Closure{C_0}$. Call this restriction $\widetilde\phi_0$. Then $\widetilde\phi_0\in Z(C_0)$, and hence</p>
-<div class="math-display">
-<p>$$
-\lambda(\widetilde\phi)
-\subseteq\lambda(\widetilde\phi_0)
-\subseteq\lambda(C_0)
-\subseteq\Span{\lambda(C_0),\lambda(C_1)}.
-$$</p>
-</div>
-<p>The analogous conclusion holds when $\widetilde\phi$ fails to satisfy $C_1$. Thus, if</p>
-<p>$$
-\lambda(\mathcal M_D):=
-\Span{\lambda(\widetilde\phi):\widetilde\phi\in\mathcal M_D},
-$$</p>
-<p>then</p>
-<p>$$
-\lambda(\mathcal M_D)
-\subseteq\Span{\lambda(C_0),\lambda(C_1)}.
-$$</p>
-<p>It remains to prove that $\lambda(\mathcal M_D)=\lambda(\phi’)$. Equivalently, after projecting onto</p>
-<p>$$
-\Lambda_D:=\bigotimes_{i\in D}\Lambda_i,
-$$</p>
-<p>the matchings in $\mathcal M_D$ must span all of $\Lambda_D$.</p>
-<p>The set $D$ lies completely outside $S=\Closure{C}$. Moreover, $\Size{S}\leq r/4$ and</p>
-<p>$$
-\Size{D}\leq\Size{S_{01}}\leq r/2.
-$$</p>
-<p>Apply Lemma 3.4 to the graph obtained by deleting $S\cup N(S)$. Recalling that the closure parameter here is $\nu=(1-3\xi)\Delta$, we obtain</p>
-<div class="math-display">
-<p>$$
-\Size{\partial_{G\setminus(S\cup N(S))}(D)}
-\geq(1-3\xi)\Delta\Size{D}.
-$$</p>
-</div>
-<p>An averaging argument gives a pigeon in $D$ with at least $(1-3\xi)\Delta$ unique neighbours. Removing that pigeon and reserving these holes, and then repeating the argument, produces an ordering of $D$ together with disjoint sets of at least $(1-3\xi)\Delta$ available holes for every pigeon. Thus the pigeons can be assigned from these sets independently while remaining a matching.</p>
-<p>Every pigeon $i\in D$ is light in $C$, since all heavy pigeons of $C$ belong to $S$. Hence at most $d_i-\delta_i$ of its available holes satisfy $C$. The number of choices that do not satisfy $C$ is therefore at least</p>
-<div class="math-display">
-<p>$$
-\begin{aligned}
-(1-3\xi)\Delta-(d_i-\delta_i)
-&amp;\geq(1-3\xi)\GraphNbrs{i}-d_i+4\xi\GraphNbrs{i}\
-&amp;\geq\GraphNbrs{i}-d_i+\frac{\delta_i}{4}\
-&amp;=\Dim{\Lambda_i}.
-\end{aligned}
-$$</p>
-</div>
-<p>By the defining property of $\lambda_i$, these choices span all of $\Lambda_i$. Since the reserved choices are independent for different pigeons, their tensor products span</p>
-<p>$$
-\bigotimes_{i\in D}\Lambda_i=\Lambda_D.
-$$</p>
-<p>It follows that $\lambda(\mathcal M_D)=\lambda(\phi’)$, and consequently</p>
-<div class="math-display">
-<p>$$
-\lambda(\phi)
-\subseteq\lambda(\phi’)
-=\lambda(\mathcal M_D)
-\subseteq\Span{\lambda(C_0),\lambda(C_1)}.
-$$</p>
-</div>
-<p>As this holds for every $\phi\in Z(C)$, taking spans proves</p>
-<p>$$
-\lambda(C)\subseteq\Span{\lambda(C_0),\lambda(C_1)}.
-$$</p>
+  <p>The original <a href="../Lemma4.10.pdf">handwritten proof</a> notes.</p>
   <div class="qed" aria-label="End of proof">□</div>
 </aside>
 <p>TODO:</p>
