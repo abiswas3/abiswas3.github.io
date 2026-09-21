@@ -22,10 +22,10 @@
     
       <author><name>Ari</name></author>
     
-    <link rel="alternate" type="text/html" href="https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/"/>
-    <id>https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/</id>
+    <link rel="alternate" type="text/html" href="https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/"/>
+    <id>https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/</id>
     
-    <content type="html" xml:base="https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/">&lt;h2 id=&quot;jolt-implementation-of-csrrw&quot;&gt;Jolt Implementation Of CSRRW&lt;a class=&quot;zola-anchor&quot; href=&quot;#jolt-implementation-of-csrrw&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+    <content type="html" xml:base="https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/">&lt;h2 id=&quot;jolt-implementation-of-csrrw&quot;&gt;Jolt Implementation Of CSRRW&lt;a class=&quot;zola-anchor&quot; href=&quot;#jolt-implementation-of-csrrw&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
 &lt;/h2&gt;
 &lt;p&gt;Jolt supports the writing of 6 control status registers, namely,
 &lt;code&gt;mstatus, mtvec, mepc, mtval, mscratch, mcause&lt;/code&gt;; and it treats the writing to each of these registers uniformly.&lt;/p&gt;
@@ -50,7 +50,7 @@ For the remaining three, the spec asks that we first legalize the value in &lt;c
 &lt;/aside&gt;
 &lt;h2 id=&quot;mtvec&quot;&gt;mtvec&lt;a class=&quot;zola-anchor&quot; href=&quot;#mtvec&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
 &lt;/h2&gt;
-&lt;p&gt;As per the Sail spec, which we checked to be correct&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-mtvec-docs-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/#fn-mtvec-docs&quot;&gt;[1]&lt;/a&gt;&lt;/sup&gt;, the value written to the contents of &lt;code&gt;mtvec&lt;/code&gt; control status register is given by&lt;/p&gt;
+&lt;p&gt;As per the Sail spec, which we checked to be correct&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-mtvec-docs-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/#fn-mtvec-docs&quot;&gt;[1]&lt;/a&gt;&lt;/sup&gt;, the value written to the contents of &lt;code&gt;mtvec&lt;/code&gt; control status register is given by&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;writeReg mtvec (← (legalize_tvec (← readReg mtvec) value))&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;which in simple speak is saying first apply the &lt;code&gt;legalize_tvec&lt;/code&gt; function with inputs the &lt;code&gt;old_mtvec&lt;/code&gt; value and &lt;code&gt;rs1_value&lt;/code&gt; and then write the control status register.
 The &lt;code&gt;legalize_tvec&lt;/code&gt; function is given by&lt;/p&gt;
@@ -72,7 +72,7 @@ The &lt;code&gt;legalize_tvec&lt;/code&gt; function is given by&lt;/p&gt;
 &lt;p&gt;The match statement is saying: get the lowest two bits of &lt;code&gt;rs1_val&lt;/code&gt;.
 If that value is &lt;code&gt;00&lt;/code&gt; or &lt;code&gt;01&lt;/code&gt;, then &lt;code&gt;[vreg_csr] &amp;lt;- [rs1_val]&lt;/code&gt;, as in Jolt.
 Otherwise, grab the two least-significant bits of &lt;code&gt;mtvec&lt;/code&gt;, overwrite &lt;code&gt;rs1_val&lt;/code&gt;’s lowest two bits with them, and then write this updated value into &lt;code&gt;mtvec&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/./mtvec.svg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/./mtvec.svg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;Now for the Jolt code to be correct, we must &lt;em&gt;prove&lt;/em&gt; that the lowest two bits of &lt;code&gt;rs1_val&lt;/code&gt; are always either &lt;code&gt;00&lt;/code&gt; or &lt;code&gt;01&lt;/code&gt;.
 But Jolt does &lt;strong&gt;not&lt;/strong&gt; promise this.&lt;/p&gt;
 &lt;h2 id=&quot;mepc&quot;&gt;mepc&lt;a class=&quot;zola-anchor&quot; href=&quot;#mepc&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
@@ -91,7 +91,7 @@ But Jolt does &lt;strong&gt;not&lt;/strong&gt; promise this.&lt;/p&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;  then&lt;/span&gt;&lt;span&gt; (pure (BitVec.update addr &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;0 0&lt;/span&gt;&lt;span&gt;#&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;1&lt;/span&gt;&lt;span&gt;))&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;  else&lt;/span&gt;&lt;span&gt; (pure (Sail.BitVec.updateSubrange addr &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;1 0&lt;/span&gt;&lt;span&gt; (zeros (n := (&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;1&lt;/span&gt;&lt;span&gt; -i (&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;0&lt;/span&gt;&lt;span&gt; -i &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;1&lt;/span&gt;&lt;span&gt;))))))&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;So the old value read from &lt;code&gt;mepc&lt;/code&gt; is not the value before update (as Jolt assumes), but that value with its low bit cleared.
-Note that because this hart enables &lt;code&gt;Ext_Zca&lt;/code&gt; (&lt;code&gt;hartSupports Ext_Zca =&amp;gt; true&lt;/code&gt;), the &lt;em&gt;active&lt;/em&gt; branch is &lt;code&gt;BitVec.update addr 0 0#1&lt;/code&gt;, which clears &lt;strong&gt;bit 0 only&lt;/strong&gt;; the &lt;code&gt;else&lt;/code&gt; branch clearing bits &lt;code&gt;[1:0]&lt;/code&gt; is reached only when &lt;code&gt;Zca&lt;/code&gt; is disabled.&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-zca-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/#fn-zca&quot;&gt;[2]&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
+Note that because this hart enables &lt;code&gt;Ext_Zca&lt;/code&gt; (&lt;code&gt;hartSupports Ext_Zca =&amp;gt; true&lt;/code&gt;), the &lt;em&gt;active&lt;/em&gt; branch is &lt;code&gt;BitVec.update addr 0 0#1&lt;/code&gt;, which clears &lt;strong&gt;bit 0 only&lt;/strong&gt;; the &lt;code&gt;else&lt;/code&gt; branch clearing bits &lt;code&gt;[1:0]&lt;/code&gt; is reached only when &lt;code&gt;Zca&lt;/code&gt; is disabled.&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-zca-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/#fn-zca&quot;&gt;[2]&lt;/a&gt;&lt;/sup&gt;&lt;/p&gt;
 &lt;p&gt;Similarly, before writing to &lt;code&gt;mepc&lt;/code&gt;, we compute:&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;let&lt;/span&gt;&lt;span&gt; target := (legalize_xepc rs1_value)&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;where&lt;/p&gt;
@@ -249,13 +249,136 @@ Unfortunately, jolt is &lt;strong&gt;always&lt;/strong&gt; in Machine mode.&lt;/
 &lt;section class=&quot;footnotes&quot;&gt;
 &lt;ol class=&quot;footnotes-list&quot;&gt;
 &lt;li id=&quot;fn-mtvec-docs&quot;&gt;
-&lt;p&gt;Checked against the official RISC-V privileged ISA, which defines &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://docs.riscv.org/reference/isa/v20260120/priv/machine.html#3-1-1-7-machine-trap-vector-base-address-mtvec-register&quot;&gt;&lt;code&gt;mtvec&lt;/code&gt;&lt;/a&gt; as a &lt;strong&gt;WARL&lt;/strong&gt; register whose &lt;code&gt;MODE&lt;/code&gt; field has only the &lt;code&gt;Direct&lt;/code&gt; (&lt;code&gt;0b00&lt;/code&gt;) and &lt;code&gt;Vectored&lt;/code&gt; (&lt;code&gt;0b01&lt;/code&gt;) encodings. &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/#fr-mtvec-docs-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Checked against the official RISC-V privileged ISA, which defines &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://docs.riscv.org/reference/isa/v20260120/priv/machine.html#3-1-1-7-machine-trap-vector-base-address-mtvec-register&quot;&gt;&lt;code&gt;mtvec&lt;/code&gt;&lt;/a&gt; as a &lt;strong&gt;WARL&lt;/strong&gt; register whose &lt;code&gt;MODE&lt;/code&gt; field has only the &lt;code&gt;Direct&lt;/code&gt; (&lt;code&gt;0b00&lt;/code&gt;) and &lt;code&gt;Vectored&lt;/code&gt; (&lt;code&gt;0b01&lt;/code&gt;) encodings. &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/#fr-mtvec-docs-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li id=&quot;fn-zca&quot;&gt;
-&lt;p&gt;&lt;code&gt;Zca&lt;/code&gt; enables 16-bit (compressed) instructions. See the official &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://docs.riscv.org/reference/isa/v20240411/unpriv/zc.html&quot;&gt;Zc* specification&lt;/a&gt;. &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/#fr-zca-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;Zca&lt;/code&gt; enables 16-bit (compressed) instructions. See the official &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://docs.riscv.org/reference/isa/v20240411/unpriv/zc.html&quot;&gt;Zc* specification&lt;/a&gt;. &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/#fr-zca-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;/section&gt;
+</content>
+  </entry>
+  
+  
+  
+  <entry xml:lang="en">
+    <title>Jolt: Introduction</title>
+    <published>2026-05-22T00:00:00Z</published>
+    <updated>2026-09-21T00:00:00Z</updated>
+    
+      <author><name>Ari</name></author>
+    
+    <link rel="alternate" type="text/html" href="https://randomwalks.xyz/blog/jolt-qed/01-jolt-why/"/>
+    <id>https://randomwalks.xyz/blog/jolt-qed/01-jolt-why/</id>
+    
+    <content type="html" xml:base="https://randomwalks.xyz/blog/jolt-qed/01-jolt-why/">&lt;h2 id=&quot;jolt-hundred-thousand-feet-overview&quot;&gt;Jolt : Hundred Thousand Feet Overview&lt;a class=&quot;zola-anchor&quot; href=&quot;#jolt-hundred-thousand-feet-overview&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;Jolt is a state-of-the-art zero-knowledge virtual machine (zk-VM) that powers the proving machinery of blockchains in research and industry.
+A traditional virtual machine executes a guest program compiled for a specified instruction set architecture (ISA), such as RISC-V, ARM, x86, etc. by emulating the guest CPU in software.
+A zk-VM is a virtual machine with the added responsibility that it is required to output an efficiently checkable cryptographic proof that it executed every instruction of the guest program correctly.
+Thus, Jolt being a zk-VM, can be logically split into the tracer and the prover.
+The tracer takes a guest program $x$ compiled down to RISC-V, executes instructions in order, and generates a witness $w$.&lt;/p&gt;
+&lt;p&gt;In the language of computational complexity theory, the guest program $x$ is often referred to as the problem instance, and the honest trace witness $w$ is referred to as the $\NP$ witness which can be compared with the program to validate that the output was generated by executing the program’s actual instructions.
+The NP relation $\mathcal{R}$ checks if the witness was generated by running every instruction of the program correctly. If it was, then&lt;/p&gt;
+&lt;p&gt;$$
+\mathcal{R}(x, w) = 1
+$$
+Outputting an $\NP$ witness as the proof on its own accomplishes little.
+A client wishing to confirm the result came from the program could simply run the program to generate its own witness $w’$, and compare it against the prover’s witness $w$.
+&lt;em&gt;The challenge is to generate a substantially cheaper procedure for validating program execution&lt;/em&gt;.
+The Jolt prover’s task, then, can be viewed as compressing the witness $w$ to output a proof $\pi:= \pi(w,x) \in \bit^{*}$ that a client can efficiently process to validate whether the program was in fact run correctly.
+These compressed proofs are often referred to as &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://eprint.iacr.org/2025/2041&quot;&gt; SNARKs &lt;/a&gt; in the literature.&lt;/p&gt;
+&lt;h2 id=&quot;conditions-for-efficient-proof-generation&quot;&gt;Conditions For Efficient Proof Generation&lt;a class=&quot;zola-anchor&quot; href=&quot;#conditions-for-efficient-proof-generation&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;To efficiently generate a proof, the Jolt zk-VM leverages the fact that &lt;em&gt;all&lt;/em&gt; instructions in the guest program’s ISA satisfy the &lt;em&gt;decomposability&lt;/em&gt; condition.
+Intuitively, an instruction is decomposable if it can be evaluated on inputs $(\vec{x},\vec{y})$ by decomposing the inputs into smaller chunks, evaluating a function on each chunk, and then efficiently combining the outputs of each chunk into the final output.
+The &lt;code&gt;AND&lt;/code&gt; instruction, for example, is decomposable.&lt;/p&gt;
+&lt;p&gt;Let $m \in \Naturals$, then for any $\vec{x}, \vec{y} \in \{0,1\}^m$, let $f_{\text{AND}}(\vec{x},\vec{y})  = (x_{m-1} || … || x_0) \land (y_{m-1} || …|| y_0)$ be the bitwise AND operation.
+We can decompose the computation of the AND function as follows:&lt;/p&gt;
+&lt;p&gt;$$
+f_{\text{AND}}(\vec{x}, \vec{y}) = \sum_{i=0}^{m-1} 2^i \cdot f_{\text{AND}} (x_i, y_i)
+$$&lt;/p&gt;
+&lt;p&gt;Unfortunately, not all native RISC-V instructions are decomposable in this way.
+For example, the &lt;code&gt;SLL rd, rs1, rs2&lt;/code&gt; instruction models the computation $f(x,y) = x \ll y$ where $x,y \in \{0,1\}^{64}$ represent the contents of registers &lt;code&gt;rs1&lt;/code&gt; and &lt;code&gt;rs2&lt;/code&gt; respectively.
+$\ll$ denotes the logical left bit shift operator, and the value $f(x,y) \in \bit^{64}$ is written into the contents of &lt;code&gt;rd&lt;/code&gt;.
+Here, in order to know the bit $i$ of $f(x, y)$, we need to know one bit of $x$ and &lt;em&gt;every&lt;/em&gt; bit of $y$.
+There is no way to decompose &lt;code&gt;SLL&lt;/code&gt;.&lt;/p&gt;
+&lt;h3 id=&quot;bytecode-expansion&quot;&gt;Bytecode Expansion&lt;a class=&quot;zola-anchor&quot; href=&quot;#bytecode-expansion&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;p&gt;But the input to Jolt however is still RISC-V program, and so it needs some mechanism to decompose these instructions for efficient proof generation.
+The approach the Jolt zk-VM takes is to re-write the guest RISC-V program into a program in the Jolt ISA, which consists solely of decomposable instructions, but is still expressive enough to permit all RISC-V instructions to be efficiently rewritten into Jolt ISA instructions.
+Thus, Jolt re-writes all troublesome non-decomposable RISC-V instructions with a sequence of one or more decomposable Jolt instructions.
+In order to aid this emulation process the Jolt CPU includes the usual RISC-V registers plus some additional “virtual” general-purpose registers in which it stores intermediate results.&lt;/p&gt;
+&lt;p&gt;Continuing with the same example from above, the &lt;code&gt;SLL&lt;/code&gt; RISC-V instruction is replaced with the following sequence of Jolt instructions.&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;asm&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;VirtualPow2  v1,  rs2&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;MUL&lt;/span&gt;&lt;span&gt;          rd, rs1, v1&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;where &lt;code&gt;VirtualPow2 v1 rs2&lt;/code&gt; is a Jolt ISA instruction that represents computation which sets the contents of virtual register &lt;code&gt;v1&lt;/code&gt; with $2^x$, where $x$ represents the contents of register &lt;code&gt;rs2&lt;/code&gt;.
+As &lt;code&gt;VirtualPow2&lt;/code&gt; is not present in the RISC-V ISA, it is referred to as a virtual instruction.
+&lt;code&gt;MUL&lt;/code&gt; on the other hand is the extension of the RISC-V instruction &lt;code&gt;MUL&lt;/code&gt; to the Jolt ISA by allowing it to operate on both RISC-V general-purpose registers and Jolt ISA virtual registers.
+It is not too hard to see that the above sequence is equivalent to the original &lt;code&gt;SLL&lt;/code&gt; instruction in that value in &lt;code&gt;rd&lt;/code&gt; is the same whether we run one &lt;code&gt;SLL&lt;/code&gt; instruction, or the expanded sequence.
+In summary, the Jolt ISA can be viewed as a strict subset of the RISC-V ISA, plus some virtual instructions, that can operate on RISC-V registers, plus some virtual registers.&lt;/p&gt;
+&lt;p&gt;TODO: (Ari) Insert figure&lt;/p&gt;
+&lt;p&gt;Reflecting back on the job of the tracer, in practice, witness generation proceeds in two steps.
+The Jolt tracer first translates all RISC-V instructions into one or more Jolt ISA instructions (the Jolt documentation refers to this process as &lt;em&gt;bytecode expansion&lt;/em&gt;).
+Once translation is complete, the Jolt CPU executes Jolt instructions to generate the witness.
+&lt;em&gt;Thus, the Jolt proof guarantees that it ran every Jolt (not RISC-V) instruction of the transformed guest program correctly.&lt;/em&gt;
+As the honest witness is generated by executing decomposable instructions, it is amenable to be compressed into an efficiently checkable proof.
+&lt;strong&gt;This added bytecode expansion step however, creates another potential for failure.&lt;/strong&gt;
+RISC-V execution semantics are complex, and it is now necessary to ensure that the expanded Jolt ISA versions of all RISC-V instructions implement equivalent semantics.&lt;/p&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-remark&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;Formally Verifying Bytecode Expansion&lt;/div&gt;
+  &lt;p&gt;Our primary contribution in this phase of the work is to use the Lean 4 proof assistant to prove that each Jolt bytecode expansion faithfully implements its corresponding RISC-V instruction.
+In other words, when starting from the same initial machine state, executing the expansion yields the same final RISC-V CPU state as executing the original instruction.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;h2 id=&quot;the-jolt-constraints&quot;&gt;The Jolt Constraints&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-jolt-constraints&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;This phase of the project is currently under progress.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;At this point we have a way of generating the NP witness.
+We briefly mentioned that a proof allows to assert that Jolt ran every instruction of the Jolt program correctly i.e. it generated the witness as prescribed.
+Note that we do not particularly care &lt;em&gt;how&lt;/em&gt; the prover did this.
+Say in some bizarre world, the prover actually does not follow the ISA semantics, but is still able to generate the correct witness $w$, as if it ran the instructions correctly, then that is fine.
+What are after is a statement of the following form.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Completenss&lt;/strong&gt;: If tracer generated $w$ as prescribed, then the downstream verifying algorithm will &lt;strong&gt;always&lt;/strong&gt; accept.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Soundness&lt;/strong&gt;: If the tracer generated $w^{*}$ that is not the honest witness, the downstream verifier will &lt;strong&gt;always&lt;/strong&gt; reject.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For a well informed reader, it might seem peculiar that we say &lt;em&gt;always&lt;/em&gt; above.
+They are well aware that to achieve succinctness of the SNARK, the above guarantees should hold with high probability.
+Still we claim in this phase of the verification project the above completeness and soundness guarantees must &lt;em&gt;always&lt;/em&gt; hold.
+To justify why, we must understand what the verification algorithm is.
+We will still be somewhat high level about the verifier (without compromising correctness).
+When we say the verifying algorithm accepts, what we really mean is that set of constraints/equations are satisfied.
+The honest witness is simply the unique solution that ensures these equations are satisfied.
+So mentally, you can think that there exists 50 or so equations over $n$ variables over some finite field $\Field$.
+Verification involves checking that $w$ satisfies all the constraints.&lt;/p&gt;
+&lt;p&gt;Of course in reality, the real verifier does not have $w$ in the clear, and neither do they verify each constraint manually.
+Instead we design a randomised check for constraint satisfaction using the sum-check protocol.
+See Chapters 2 and 3 of &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://par.nsf.gov/servlets/purl/10417638&quot;&gt;Justin Thaler’s book&lt;/a&gt; for a concrete example (Frievald’s algorithm does the same thing).&lt;/p&gt;
+&lt;p&gt;By modelling the deterministic version of the thing the verifier is checking, we can later just check if the sum-checks are randomised tests for these constraints or not.
+The actual completeness and soundness checks are handled here, and the we can reduce the remaining security to purely algebraic statements about equations.
+If this is still vague, then we recommend keeping tabs on the progress documented in &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/constraints/&quot;&gt;Jolt Constraints&lt;/a&gt;.&lt;br /&gt;
+Here we document the full process, and the lean proofs.&lt;/p&gt;
+&lt;h2 id=&quot;the-jolt-sum-checks&quot;&gt;The Jolt Sum-checks&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-jolt-sum-checks&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Not yet Started&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&quot;the-sum-check-reductions&quot;&gt;The Sum-Check Reductions&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-sum-check-reductions&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Note yet Started&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&quot;the-commitment-scheme&quot;&gt;The Commitment Scheme&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-commitment-scheme&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Not yet started&lt;/p&gt;
+&lt;/blockquote&gt;
 </content>
   </entry>
   
@@ -268,16 +391,16 @@ Unfortunately, jolt is &lt;strong&gt;always&lt;/strong&gt; in Machine mode.&lt;/
     
       <author><name>Ari</name></author>
     
-    <link rel="alternate" type="text/html" href="https://randomwalks.xyz/blog/jolt-qed/assumptions/"/>
-    <id>https://randomwalks.xyz/blog/jolt-qed/assumptions/</id>
+    <link rel="alternate" type="text/html" href="https://randomwalks.xyz/blog/jolt-qed/02-assumptions/"/>
+    <id>https://randomwalks.xyz/blog/jolt-qed/02-assumptions/</id>
     
-    <content type="html" xml:base="https://randomwalks.xyz/blog/jolt-qed/assumptions/">&lt;p&gt;The Jolt-qed project verifies, in Lean, that each Jolt bytecode expansion has the same effect as the RISC-V instruction it replaces.
+    <content type="html" xml:base="https://randomwalks.xyz/blog/jolt-qed/02-assumptions/">&lt;p&gt;The Jolt-qed project verifies, in Lean, that each Jolt bytecode expansion has the same effect as the RISC-V instruction it replaces.
 These equivalence theorems are not unconditional: they rely on explicit hypotheses about the RISC-V/Jolt state, plus a small number of trusted edits to the generated RISC-V model so that it matches the Jolt CPU.
 This post records those proof assumptions and trusted-code changes.&lt;/p&gt;
 &lt;h2 id=&quot;changes-to-the-trusted-risc-v-model&quot;&gt;Changes to the Trusted RISC-V Model&lt;a class=&quot;zola-anchor&quot; href=&quot;#changes-to-the-trusted-risc-v-model&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
 &lt;/h2&gt;
 &lt;p&gt;The Lean RISC-V model lives in &lt;code&gt;LeanRV64D/&lt;/code&gt;, with the top-level entry point in &lt;code&gt;LeanRV64D.lean&lt;/code&gt;.
-It was generated by automatically transpiling the Sail specification of a RISC-V CPU to Lean&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-att-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/assumptions/#fn-att&quot;&gt;[1]&lt;/a&gt;&lt;/sup&gt;.
+It was generated by automatically transpiling the Sail specification of a RISC-V CPU to Lean&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-att-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/02-assumptions/#fn-att&quot;&gt;[1]&lt;/a&gt;&lt;/sup&gt;.
 The &lt;a href=&quot;https://randomwalks.xyz/blog/sail-to-lean/&quot;&gt;Sail-to-Lean post&lt;/a&gt; explains how we obtained this generated code.
 We treat that generated model as trusted throughout the project, except for the two changes below.&lt;/p&gt;
 &lt;ol&gt;
@@ -315,7 +438,7 @@ The goal of this post is to explain what an assumption bundle is.&lt;/p&gt;
 &lt;p&gt;Assumption bundles are conjunctions of assumptions defined in &lt;code&gt;JoltBytecode/Assumptions.lean&lt;/code&gt; and collected in &lt;code&gt;JoltBytecode/Bundles.lean&lt;/code&gt;.
 Each equivalence statement in Jolt-qed uses an assumption bundle.
 Bundles describe exactly which assumptions were used to prove equivalence for a given instruction.
-An assumption bundle is &lt;strong&gt;always&lt;/strong&gt; made up of a list of assumptions&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-help-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/assumptions/#fn-help&quot;&gt;[2]&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
+An assumption bundle is &lt;strong&gt;always&lt;/strong&gt; made up of a list of assumptions&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-help-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/02-assumptions/#fn-help&quot;&gt;[2]&lt;/a&gt;&lt;/sup&gt;.&lt;/p&gt;
 &lt;p&gt;This specific assumption bundle is made up of the two groups of assumptions shown below.&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;abbrev&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; BinarySourceReadAssumptions&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (rs2 rs1 : regidx) (js : SailJoltState) :=&lt;/span&gt;&lt;/span&gt;
@@ -394,7 +517,7 @@ We only show the theorem statements here; the proofs are in &lt;code&gt;JoltByte
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;structure&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; MtvecWriteDirectMode&lt;/span&gt;&lt;span&gt; (value : BitVec &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;64&lt;/span&gt;&lt;span&gt;) : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Prop where&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  mode_eq : _get_Mtvec_Mode value = 0b00#&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;2&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The RISC-V ISA requires that we legalise values before writing to control and status registers.
-&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/&quot;&gt;See this blog&lt;/a&gt; for more details.
+&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/&quot;&gt;See this post&lt;/a&gt; for more details.
 When writing the contents of &lt;code&gt;rs1&lt;/code&gt; into the &lt;code&gt;mtvec&lt;/code&gt; control and status register, if the value in &lt;code&gt;rs1&lt;/code&gt; has the two least significant bits set to &lt;code&gt;00&lt;/code&gt;, then we write &lt;code&gt;rs1&lt;/code&gt;’s contents directly into &lt;code&gt;mtvec&lt;/code&gt;.
 Otherwise, we need to legalise the value.
 The above assumption says the value in &lt;code&gt;rs1&lt;/code&gt; will &lt;strong&gt;always&lt;/strong&gt; have the lower two bits set to &lt;code&gt;00&lt;/code&gt;.&lt;/p&gt;
@@ -572,41 +695,11 @@ Ordinary RAM is backed by the emulator memory map, while advice/input/output are
 &lt;section class=&quot;footnotes&quot;&gt;
 &lt;ol class=&quot;footnotes-list&quot;&gt;
 &lt;li id=&quot;fn-att&quot;&gt;
-&lt;p&gt;This translation was done by Galois and researchers at Cambridge University. See the Sail-to-Lean post for further details. &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/assumptions/#fr-att-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;This translation was done by Galois and researchers at Cambridge University. See the Sail-to-Lean post for further details. &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/02-assumptions/#fr-att-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;li id=&quot;fn-help&quot;&gt;
 &lt;p&gt;We could not figure out a way to get the Lean kernel to enforce this in a clean manner without completely redoing the project.
-So we do this manually by enforcing that each field uses something from the &lt;code&gt;Assumptions&lt;/code&gt; namespace. If you, the reader, know a better way to do this, please reach out with a pull request. &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/assumptions/#fr-help-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/section&gt;
-</content>
-  </entry>
-  
-  
-  
-  <entry xml:lang="en">
-    <title>Jolt: Introduction</title>
-    <published>2026-05-22T00:00:00Z</published>
-    <updated>2026-05-22T00:00:00Z</updated>
-    
-      <author><name>Ari</name></author>
-    
-    <link rel="alternate" type="text/html" href="https://randomwalks.xyz/blog/jolt-qed/jolt-why/"/>
-    <id>https://randomwalks.xyz/blog/jolt-qed/jolt-why/</id>
-    
-    <content type="html" xml:base="https://randomwalks.xyz/blog/jolt-qed/jolt-why/">&lt;h2 id=&quot;jolt-a-birds-eye-view&quot;&gt;Jolt - a Birds Eye View&lt;a class=&quot;zola-anchor&quot; href=&quot;#jolt-a-birds-eye-view&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
-&lt;/h2&gt;
-&lt;p&gt;A user supplies a guest program&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-inlines-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/jolt-why/#fn-inlines&quot;&gt;[1]&lt;/a&gt;&lt;/sup&gt; (a RISC-V elf) to Jolt.
-Jolt runs this program, and writes any outputs on the output tape, along with a proof.
-A proof is simply another program that the user runs to get output 0 or 1.
-If the output of the proof is 1, then the user agrees&lt;/p&gt;
-&lt;h2 id=&quot;trace-to-polynomials&quot;&gt;Trace to Polynomials&lt;a class=&quot;zola-anchor&quot; href=&quot;#trace-to-polynomials&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
-&lt;/h2&gt;
-&lt;section class=&quot;footnotes&quot;&gt;
-&lt;ol class=&quot;footnotes-list&quot;&gt;
-&lt;li id=&quot;fn-inlines&quot;&gt;
-&lt;p&gt;Technically this statement is not strictly true. The input also allows some custom instructions that are not native RISC-V instructions. &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/jolt-why/#fr-inlines-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+So we do this manually by enforcing that each field uses something from the &lt;code&gt;Assumptions&lt;/code&gt; namespace. If you, the reader, know a better way to do this, please reach out with a pull request. &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/02-assumptions/#fr-help-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;/section&gt;

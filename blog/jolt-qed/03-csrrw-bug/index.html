@@ -126,10 +126,12 @@
       <span class="note-authors">By Ari</span>
       <time datetime="2026-06-19">19 June 2026</time>
       
+        <time datetime="2026-06-19">Last updated 19 June 2026</time>
+      
     </div>
     
     <ul class="tag-list" aria-label="Tags">
-      <li><a href="https://randomwalks.xyz/tags/formal-verification/">formal-verification</a></li><li><a href="https://randomwalks.xyz/tags/jolt/">jolt</a></li>
+      <li><a href="https://randomwalks.xyz/tags/formal-verification/">formal-verification</a></li><li><a href="https://randomwalks.xyz/tags/jolt/">jolt</a></li><li><a href="https://randomwalks.xyz/tags/lean/">lean</a></li>
     </ul>
     
   </header>
@@ -202,7 +204,7 @@ For the remaining three, the spec asks that we first legalize the value in <code
 </aside>
 <h2 id="mtvec">mtvec<a class="zola-anchor" href="#mtvec" aria-label="Link to this section">#</a>
 </h2>
-<p>As per the Sail spec, which we checked to be correct<sup class="footnote-reference" id="fr-mtvec-docs-1"><a href="https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/#fn-mtvec-docs">[1]</a></sup>, the value written to the contents of <code>mtvec</code> control status register is given by</p>
+<p>As per the Sail spec, which we checked to be correct<sup class="footnote-reference" id="fr-mtvec-docs-1"><a href="https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/#fn-mtvec-docs">[1]</a></sup>, the value written to the contents of <code>mtvec</code> control status register is given by</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>writeReg mtvec (← (legalize_tvec (← readReg mtvec) value))</span></span></code></pre>
 <p>which in simple speak is saying first apply the <code>legalize_tvec</code> function with inputs the <code>old_mtvec</code> value and <code>rs1_value</code> and then write the control status register.
 The <code>legalize_tvec</code> function is given by</p>
@@ -224,7 +226,7 @@ The <code>legalize_tvec</code> function is given by</p>
 <p>The match statement is saying: get the lowest two bits of <code>rs1_val</code>.
 If that value is <code>00</code> or <code>01</code>, then <code>[vreg_csr] &lt;- [rs1_val]</code>, as in Jolt.
 Otherwise, grab the two least-significant bits of <code>mtvec</code>, overwrite <code>rs1_val</code>’s lowest two bits with them, and then write this updated value into <code>mtvec</code>.</p>
-<p><img src="https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/./mtvec.svg" alt="" /></p>
+<p><img src="https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/./mtvec.svg" alt="" /></p>
 <p>Now for the Jolt code to be correct, we must <em>prove</em> that the lowest two bits of <code>rs1_val</code> are always either <code>00</code> or <code>01</code>.
 But Jolt does <strong>not</strong> promise this.</p>
 <h2 id="mepc">mepc<a class="zola-anchor" href="#mepc" aria-label="Link to this section">#</a>
@@ -243,7 +245,7 @@ But Jolt does <strong>not</strong> promise this.</p>
 <span class="giallo-l"><span style="color: #D73A49;">  then</span><span> (pure (BitVec.update addr </span><span style="color: #005CC5;">0 0</span><span>#</span><span style="color: #005CC5;">1</span><span>))</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">  else</span><span> (pure (Sail.BitVec.updateSubrange addr </span><span style="color: #005CC5;">1 0</span><span> (zeros (n := (</span><span style="color: #005CC5;">1</span><span> -i (</span><span style="color: #005CC5;">0</span><span> -i </span><span style="color: #005CC5;">1</span><span>))))))</span></span></code></pre>
 <p>So the old value read from <code>mepc</code> is not the value before update (as Jolt assumes), but that value with its low bit cleared.
-Note that because this hart enables <code>Ext_Zca</code> (<code>hartSupports Ext_Zca =&gt; true</code>), the <em>active</em> branch is <code>BitVec.update addr 0 0#1</code>, which clears <strong>bit 0 only</strong>; the <code>else</code> branch clearing bits <code>[1:0]</code> is reached only when <code>Zca</code> is disabled.<sup class="footnote-reference" id="fr-zca-1"><a href="https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/#fn-zca">[2]</a></sup></p>
+Note that because this hart enables <code>Ext_Zca</code> (<code>hartSupports Ext_Zca =&gt; true</code>), the <em>active</em> branch is <code>BitVec.update addr 0 0#1</code>, which clears <strong>bit 0 only</strong>; the <code>else</code> branch clearing bits <code>[1:0]</code> is reached only when <code>Zca</code> is disabled.<sup class="footnote-reference" id="fr-zca-1"><a href="https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/#fn-zca">[2]</a></sup></p>
 <p>Similarly, before writing to <code>mepc</code>, we compute:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">let</span><span> target := (legalize_xepc rs1_value)</span></span></code></pre>
 <p>where</p>
@@ -401,10 +403,10 @@ Unfortunately, jolt is <strong>always</strong> in Machine mode.</p>
 <section class="footnotes">
 <ol class="footnotes-list">
 <li id="fn-mtvec-docs">
-<p>Checked against the official RISC-V privileged ISA, which defines <a rel="noopener noreferrer external" target="_blank" href="https://docs.riscv.org/reference/isa/v20260120/priv/machine.html#3-1-1-7-machine-trap-vector-base-address-mtvec-register"><code>mtvec</code></a> as a <strong>WARL</strong> register whose <code>MODE</code> field has only the <code>Direct</code> (<code>0b00</code>) and <code>Vectored</code> (<code>0b01</code>) encodings. <a href="https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/#fr-mtvec-docs-1">↩</a></p>
+<p>Checked against the official RISC-V privileged ISA, which defines <a rel="noopener noreferrer external" target="_blank" href="https://docs.riscv.org/reference/isa/v20260120/priv/machine.html#3-1-1-7-machine-trap-vector-base-address-mtvec-register"><code>mtvec</code></a> as a <strong>WARL</strong> register whose <code>MODE</code> field has only the <code>Direct</code> (<code>0b00</code>) and <code>Vectored</code> (<code>0b01</code>) encodings. <a href="https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/#fr-mtvec-docs-1">↩</a></p>
 </li>
 <li id="fn-zca">
-<p><code>Zca</code> enables 16-bit (compressed) instructions. See the official <a rel="noopener noreferrer external" target="_blank" href="https://docs.riscv.org/reference/isa/v20240411/unpriv/zc.html">Zc* specification</a>. <a href="https://randomwalks.xyz/blog/jolt-qed/csrrw-bug/#fr-zca-1">↩</a></p>
+<p><code>Zca</code> enables 16-bit (compressed) instructions. See the official <a rel="noopener noreferrer external" target="_blank" href="https://docs.riscv.org/reference/isa/v20240411/unpriv/zc.html">Zc* specification</a>. <a href="https://randomwalks.xyz/blog/jolt-qed/03-csrrw-bug/#fr-zca-1">↩</a></p>
 </li>
 </ol>
 </section>
