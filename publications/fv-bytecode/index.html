@@ -7,7 +7,7 @@
   <meta name="description" content="Written Word">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=daf5369c054787c9c3f9">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=cf75ac392117dc62302b">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -115,7 +115,7 @@
 
 
 
-<article class="publication-page footnotes-right">
+<article class="publication-page footnotes-right note--side-toc">
   <header class="publication-header">
     <h1>Jolt QED: Formally Verifying Jolt Bytecode Expansion In Lean</h1>
 
@@ -128,34 +128,54 @@
     <div class="publication-meta">
       
         
-        <span class="publication-header__venue">In-Preparation</span>
+        <span class="publication-header__venue">In Submission</span>
         
       
-      <time datetime="2026-04-22">Last updated 22 April 2026</time>
+      <time datetime="2026-09-22">Last updated 22 September 2026</time>
     </div>
 
     
     <nav class="publication-artefacts" aria-label="Publication resources">
       
-        <span>e-print</span>
+        <a href="./jolt-qed.pdf">e-print</a>
       
-        <span>Slides (Quang)</span>
+        <span>Slides (Quang talk at A16z)</span>
       
-        <span>Talk (Ari)</span>
+        <a href="https://github.com/LayerZero-Labs/jolt-qed">Github</a>
       
     </nav>
     
 
   </header>
 
-  <div class="publication-layout">
+  <div class="publication-layout note-layout--side">
+    
+    <nav class="contents contents-side" aria-label="Table of contents">
+      <h2>Contents</h2>
+      
+<ol>
+  
+  <li>
+    <a href="#abstract">Abstract</a>
+    
+  </li>
+  
+</ol>
+
+    </nav>
     
 
     <div class="prose publication-prose">
-      <p>This paper is currently in preparation, but I’d be happy to answer questions in the meantime.
-See A16z summer series for a brief talk about the work given by Quang Dao.
-A longer pre-recorded youtube talk will be available along with the eprint by the end of August.</p>
-<p>A less formal but equally detailed blog series about the work can be found <a href="https://randomwalks.xyz/blog/jolt-qed/">here</a></p>
+      <p>See A16z summer series for a brief talk about the work given by Quang Dao.
+A less formal but equally detailed, and sometimes more up to date blog series about the work can be found <a href="https://randomwalks.xyz/blog/jolt-qed/">here</a>.</p>
+<h2 id="abstract">Abstract<a class="zola-anchor" href="#abstract" aria-label="Link to this section">#</a>
+</h2>
+<p>In this work, we formally verify using the Lean4 proof assistant, that jolt zk-VM’s bytecode expansion process faithfully emulates a RISC-V CPU.
+Prior work translated the official Sail specification of RISC-V into Lean.
+We extend this model to define the Jolt ISA in Lean.
+We then write a transpiler to automatically extract Jolt’s bytecode expansions into Lean from their Rust definitions.
+Finally, we prove these expansions equivalent to their corresponding RISC-V instructions.
+Additionally, this lays the groundwork for proving the upstream components of Jolt are complete and sound.</p>
 
     </div>
   </div>

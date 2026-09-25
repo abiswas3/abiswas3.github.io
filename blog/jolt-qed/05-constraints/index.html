@@ -7,7 +7,7 @@
   <meta name="description" content="">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=daf5369c054787c9c3f9">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=cf75ac392117dc62302b">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -138,11 +138,128 @@
 
   <div class="note-layout note-layout--side">
     
+    <nav class="contents contents-side" aria-label="Table of contents">
+      <h2>Contents</h2>
+      
+<ol>
+  
+  <li>
+    <a href="#the-jolt-program-and-initial-state">The Jolt Program And Initial State</a>
+    
+  </li>
+  
+  <li>
+    <a href="#the-trace-jolt-executes-the-guest-program">The Trace (Jolt Executes The Guest Program)</a>
+    
+  </li>
+  
+  <li>
+    <a href="#witness">Witness</a>
+    
+  </li>
+  
+</ol>
+
+    </nav>
+    
 
     <div class="prose">
       <blockquote>
 <p>In progresss</p>
 </blockquote>
+<p>At this point we have that the Jolt ISA is expressive enough to simulate the RISC-V CPU<sup class="footnote-reference" id="fr-except-1"><a href="https://randomwalks.xyz/blog/jolt-qed/05-constraints/#fn-except">[1]</a></sup>.
+Thus, from here onwards, we can forget that the input to Jolt is a RISC-V program, and just pretend the input is a program written in the Jolt ISA.
+This post is about how we go from guest program to an NP witness, and how we define constraints over this witness space.
+The picture you should have is the following:</p>
+<p><strong>TODO</strong> picture.</p>
+<h2 id="the-jolt-program-and-initial-state">The Jolt Program And Initial State<a class="zola-anchor" href="#the-jolt-program-and-initial-state" aria-label="Link to this section">#</a>
+</h2>
+<p>You start with a Jolt program and some initial jolt state.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #6A737D;">/-- Static bytecode and the complete initial state for one execution.</span></span>
+<span class="giallo-l"><span style="color: #6A737D;">Rust stores the [program image](jolt/crates/jolt-program/src/execution/trace.rs:17)</span></span>
+<span class="giallo-l"><span style="color: #6A737D;">and [execution inputs](jolt/crates/jolt-program/src/execution/trace.rs:129)</span></span>
+<span class="giallo-l"><span style="color: #6A737D;">separately; </span></span>
+<span class="giallo-l"><span style="color: #6A737D;">-/</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">structure</span><span style="color: #6F42C1;"> JoltProgram</span><span style="color: #D73A49;"> where</span></span>
+<span class="giallo-l"><span>  -- Rust: JoltProgram::expanded_bytecode.</span></span>
+<span class="giallo-l"><span>  expandedBytecode : Array JoltProgramRow</span></span>
+<span class="giallo-l"><span>  -- Rust: [create_emulator](jolt/tracer/src/lib.rs:</span><span style="color: #005CC5;">366</span><span>).</span></span>
+<span class="giallo-l"><span>  initialState : SailJoltState</span></span></code></pre>
+<p>A <code>JoltProgram</code> is an array of Jolt Instructions which is defined in lean to mimick to the rust implementation.
+Notice that the <code>instruction</code> field re-uses our Lean Jolt ISA.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>-- Rust: crates/jolt-riscv/src/row.rs::JoltInstructionRow.</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">structure</span><span style="color: #6F42C1;"> JoltProgramRow</span><span style="color: #D73A49;"> where</span></span>
+<span class="giallo-l"><span>  instruction : JoltISA.Instr</span></span>
+<span class="giallo-l"><span>  address : BitVec </span><span style="color: #005CC5;">64</span></span>
+<span class="giallo-l"><span>  virtualSequenceRemaining : Option (BitVec </span><span style="color: #005CC5;">16</span><span>)</span></span>
+<span class="giallo-l"><span>  isFirstInSequence : Bool</span></span>
+<span class="giallo-l"><span>  isCompressed : Bool</span></span></code></pre>
+<p>Given this initial state and guest program, the Jolt tracers first task is to simply execute this program to get a <code>trace</code></p>
+<h2 id="the-trace-jolt-executes-the-guest-program">The Trace (Jolt Executes The Guest Program)<a class="zola-anchor" href="#the-trace-jolt-executes-the-guest-program" aria-label="Link to this section">#</a>
+</h2>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">structure</span><span style="color: #6F42C1;"> JoltTrace</span><span> (program : JoltProgram) </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  rows : Array (JoltTraceRow program)</span></span>
+<span class="giallo-l"><span>  startsAtInitial : ∀ h : </span><span style="color: #005CC5;">0</span><span> &lt; rows.size, (getElem rows </span><span style="color: #005CC5;">0</span><span> h).preState = program.initialState</span></span>
+<span class="giallo-l"><span>  linked : ∀ (i : Nat) (currentExists : i &lt; rows.size) (nextExists : i + </span><span style="color: #005CC5;">1</span><span> &lt; rows.size),</span></span>
+<span class="giallo-l"><span>    (getElem rows i currentExists).postState = (getElem rows (i + </span><span style="color: #005CC5;">1</span><span>) nextExists).preState</span></span></code></pre>
+<p>The fields of the structure are as follows.
+<code>rows</code> is an array of trace rows which snapshots the jolt state before and after execution.
+Let $T$ denote the number of cycles this guest program runs for (below <code>T = program.expandedBytecode.size</code>).
+Then <code>rowIndex</code> $\in [T]$.
+<code>executes</code> is an assumption that instruction retires successfully i.e. the guest program is even runnable.
+If this were not true then Jolt is not required to do anything.
+Finally, as the memory is implemented as a hashmap we assume the key exists.
+TODO: Tidy this up</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">structure</span><span style="color: #6F42C1;"> JoltTraceRow</span><span> (program : JoltProgram) </span><span style="color: #D73A49;">where</span></span>
+<span class="giallo-l"><span>  rowIndex : Fin program.expandedBytecode.size</span></span>
+<span class="giallo-l"><span>  preState : SailJoltState</span></span>
+<span class="giallo-l"><span>  postState : SailJoltState</span></span>
+<span class="giallo-l"><span>  executes : JoltISA.execInstr program.expandedBytecode[rowIndex].instruction preState =</span></span>
+<span class="giallo-l"><span>    .ok (.Retire_Success ()) postState</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>  -- Rust: [trace_store](/Users/ari.biswas/Work-</span><span style="color: #D73A49;">with</span><span>-A16z/jolt/tracer/src/emulator/mmu.rs:</span><span style="color: #005CC5;">609</span><span>)</span></span>
+<span class="giallo-l"><span>  -- reads the old word before every store. For RAM, this certifies that all eight</span></span>
+<span class="giallo-l"><span>  -- bytes exist </span><span style="color: #D73A49;">in</span><span> preState.sail.mem; </span><span style="color: #D73A49;">for</span><span> device memory, it certifies a valid read</span></span>
+<span class="giallo-l"><span>  -- </span><span style="color: #D73A49;">from</span><span> preState.io. Successful Sail writes alone </span><span style="color: #D73A49;">do</span><span> not establish this fact.</span></span>
+<span class="giallo-l"><span>  storeMemoryPresent :</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    match</span><span> program.expandedBytecode[rowIndex].instruction </span><span style="color: #D73A49;">with</span></span>
+<span class="giallo-l"><span>    | .SD base _ imm =&gt;</span></span>
+<span class="giallo-l"><span>        (JoltISA.memoryWord? preState</span></span>
+<span class="giallo-l"><span>          (Memory.effectiveAddr12 (JoltISA.sourceValue base preState) imm)).isSome = </span><span style="color: #005CC5;">true</span></span>
+<span class="giallo-l"><span>    | _ =&gt; True</span></span></code></pre><h2 id="witness">Witness<a class="zola-anchor" href="#witness" aria-label="Link to this section">#</a>
+</h2>
+<p>At this point we have a guest program.
+We have run <em>every</em> instruction successfully.
+We have stored the before/after state after the execution of each instruction.
+From this information, we want to create a term of type <code>Witness</code>.
+Or in normal speak, we have a bunch of arrays whose cells need filling.
+The honest tracer is meant to fill these values using the before/after state information it got from tracing the code.</p>
+<p>The picture looks like this
+TODO:</p>
+<p>In Lean, <code>Witness</code> is a dependent type that depends on the Parameters which define how the size of the above arrays.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">structure</span><span style="color: #6F42C1;"> WitnessParams</span><span style="color: #D73A49;"> where</span></span>
+<span class="giallo-l"><span>  -- Rust: crates/jolt-claims/src/protocols/jolt/geometry/dimensions.rs::TraceDimensions::log_t.</span></span>
+<span class="giallo-l"><span>  -- Base-two logarithm of the padded witness length; actual execution may be shorter.</span></span>
+<span class="giallo-l"><span>  logT : Nat</span></span>
+<span class="giallo-l"><span>  -- Rust: crates/jolt-claims/src/protocols/jolt/geometry/dimensions.rs::ReadWriteDimensions::log_k.</span></span>
+<span class="giallo-l"><span>  logRamK : Nat</span></span>
+<span class="giallo-l"><span>  -- Rust: crates/jolt-claims/src/protocols/jolt/geometry/bytecode.rs::BytecodeReadRafDimensions::log_k.</span></span>
+<span class="giallo-l"><span>  logBytecodeK : Nat</span></span>
+<span class="giallo-l"><span>  -- Rust: crates/jolt-claims/src/protocols/jolt/geometry/dimensions.rs::JoltOneHotDimensions::committed_chunk_bits.</span></span>
+<span class="giallo-l"><span>  chunkBits : Nat</span></span>
+<span class="giallo-l"><span>  -- Rust: crates/jolt-claims/src/protocols/jolt/geometry/dimensions.rs::JoltOneHotDimensions::lookup_virtual_chunk_bits.</span></span>
+<span class="giallo-l"><span>  virtualChunkBits : Nat</span></span>
+<span class="giallo-l"><span>  -- Rust: crates/jolt-claims/src/protocols/jolt/geometry/dimensions.rs::JoltFormulaDimensions::try_from.</span></span>
+<span class="giallo-l"><span>  chunkBits_pos : </span><span style="color: #005CC5;">0</span><span> &lt; chunkBits</span></span>
+<span class="giallo-l"><span>  virtualChunkBits_pos : </span><span style="color: #005CC5;">0</span><span> &lt; virtualChunkBits</span></span>
+<span class="giallo-l"><span>  chunkBits_dvd_virtual : chunkBits ∣ virtualChunkBits</span></span>
+<span class="giallo-l"><span>  virtualChunkBits_dvd_lookup : virtualChunkBits ∣ </span><span style="color: #005CC5;">128</span></span></code></pre><section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn-except">
+<p>It should be noted that 7 equivalences proofs were not possible. Those include <code>ECALL, EBREAK, MRET, SCD, SCW, LRD, LRW</code> and the writing of control status registers needed assuming that the legalise process was the identity function. <a href="https://randomwalks.xyz/blog/jolt-qed/05-constraints/#fr-except-1">↩</a></p>
+</li>
+</ol>
+</section>
 
     </div>
   </div>
