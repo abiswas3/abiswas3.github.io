@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1f1e1b">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="">
+    <title>Problem Sets · Algorithms</title>
+    <link rel="stylesheet" href="https://randomwalks.xyz/algorithms/style.css?h=a6e8d9c7f94865969735">
+    <script defer src="https://randomwalks.xyz/algorithms/sidenotes.js?h=abba13c76e721c629ac3"></script>
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          tags: 'ams'
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+</head>
+<body>
+    
+    <header class="site-header">
+        <a class="brand" href="https://randomwalks.xyz/algorithms" aria-label="Algorithms home">
+            <span class="brand-mark" aria-hidden="true">A</span>
+            <span class="brand-copy">
+                <strong>Algorithms</strong>
+            </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="https://randomwalks.xyz/algorithms/lectures/">Lecture Notes</a>
+            <a href="https://randomwalks.xyz/algorithms/hw/" aria-current="page">Problem Sets</a>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        
+<section class="page-shell">
+    <header class="page-heading">
+        <h1>Problem Sets</h1>
+    </header>
+
+    
+    <div class="empty-state">
+        <p>No problem sets have been published yet.</p>
+    </div>
+    
+</section>
+
+    </main>
+
+    
+    <script>
+      document.querySelectorAll('.prose pre').forEach((pre) => {
+        const code = pre.querySelector('code');
+        if (!code) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block';
+        pre.before(wrapper);
+        wrapper.append(pre);
+
+        const button = document.createElement('button');
+        button.className = 'copy-code';
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.setAttribute('aria-label', 'Copy code to clipboard');
+        wrapper.append(button);
+
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(code.textContent);
+            button.textContent = 'Copied';
+            window.setTimeout(() => { button.textContent = 'Copy'; }, 1400);
+          } catch (_) {
+            button.textContent = 'Select and copy';
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(code);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        });
+      });
+    </script>
+    
+
+</body>
+</html>
