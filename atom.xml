@@ -262,7 +262,7 @@ Unfortunately, jolt is &lt;strong&gt;always&lt;/strong&gt; in Machine mode.&lt;/
   
   
   <entry xml:lang="en">
-    <title>Jolt: Introduction</title>
+    <title>Formally Verifying Jolt</title>
     <published>2026-05-22T00:00:00Z</published>
     <updated>2026-09-21T00:00:00Z</updated>
     
@@ -271,114 +271,205 @@ Unfortunately, jolt is &lt;strong&gt;always&lt;/strong&gt; in Machine mode.&lt;/
     <link rel="alternate" type="text/html" href="https://randomwalks.xyz/blog/jolt-qed/01-jolt-why/"/>
     <id>https://randomwalks.xyz/blog/jolt-qed/01-jolt-why/</id>
     
-    <content type="html" xml:base="https://randomwalks.xyz/blog/jolt-qed/01-jolt-why/">&lt;h2 id=&quot;jolt-hundred-thousand-feet-overview&quot;&gt;Jolt : Hundred Thousand Feet Overview&lt;a class=&quot;zola-anchor&quot; href=&quot;#jolt-hundred-thousand-feet-overview&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+    <content type="html" xml:base="https://randomwalks.xyz/blog/jolt-qed/01-jolt-why/">&lt;p&gt;$\newcommand{\trace}[1]{\mathsf{Trace}\left(#1\right)}$
+$\newcommand{\witness}[1]{\mathsf{Witness}\left(#1\right)}$
+$\newcommand{\expand}[1]{\mathsf{Expand}\left(#1\right)}$
+$\newcommand{\witnessFunc}{\mathsf{Witness}}$&lt;/p&gt;
+&lt;p&gt;Today, &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt&quot;&gt;Jolt&lt;/a&gt; consists of &lt;em&gt;hundreds of thousands&lt;/em&gt; of lines of Rust code, and has evolved into a relatively complex piece of software – prone to bugs and other &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues&quot;&gt;issues&lt;/a&gt;.
+As a means towards improving the security guarantees of Jolt, over the last few months we have begun the task of &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/LayerZero-Labs/jolt-qed&quot;&gt;formally verifying&lt;/a&gt; the Jolt zk-VM using the Lean proof assistant.
+Formal verification, in simple words, refers to the act of expressing mathematical claims in a manner such that the veracity of the claim can be automatically checked by a computer.
+But Jolt is written in Rust, and is compiled down to an executable that runs natively on a physical CPU (typically, x86 or ARM).
+A Lean theorem is a statement written in the Lean programming language, and its proof is a proof term checked by Lean’s kernel.
+So what does it even mean to formally verify Jolt?
+In particular a theorem written in Lean about Jolt could be proved to be true, but one &lt;em&gt;must&lt;/em&gt; still demonstrate some connection between the actual Jolt source code and the passing theorem statement, for the claim to have any tangible impact on security.
+In general, claims about formally verifying software are extremely nuanced and often rest on a delicate and volatile set of assumptions.&lt;/p&gt;
+&lt;p&gt;In this post we give a brief overview of our methodology, and what we mean when we say we have formally verified a component.
+We describe how the theorem statement is written, and what assumptions must hold for the claim to be true.
+Perhaps the strictest test of our methodology is not whether theorems pass, but whether it finds actual bugs in Jolt.
+We also outline the limitations in existing methodology, and highlight potential blind spots of our modelling choices.
+Additionally, we chronicle what has been proved, what is currently in progress, and present a road map for the work envisioned to be completed in the near future.&lt;/p&gt;
+&lt;p&gt;As mentioned above, Jolt has grown in complexity, and thus in order to make well-scoped but measurable progress, we have divided the task of verifying Jolt into 5 phases.
+The phases are best understood  by first reviewing the basics of the Jolt idea?&lt;/p&gt;
+&lt;h2 id=&quot;jolt-hundred-thousand-feet-overview-witness-compression&quot;&gt;Jolt : Hundred Thousand Feet Overview - Witness Compression&lt;a class=&quot;zola-anchor&quot; href=&quot;#jolt-hundred-thousand-feet-overview-witness-compression&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
 &lt;/h2&gt;
-&lt;p&gt;Jolt is a state-of-the-art zero-knowledge virtual machine (zk-VM) that powers the proving machinery of blockchains in research and industry.
+&lt;p&gt;Jolt is a state-of-the-art zero-knowledge virtual machine (zk-VM) that is intended to power the proving machinery of blockchains.
 A traditional virtual machine executes a guest program compiled for a specified instruction set architecture (ISA), such as RISC-V, ARM, x86, etc. by emulating the guest CPU in software.
-A zk-VM is a virtual machine with the added responsibility that it is required to output an efficiently checkable cryptographic proof that it executed every instruction of the guest program correctly.
-Thus, Jolt being a zk-VM, can be logically split into the tracer and the prover.
-The tracer takes a guest program $x$ compiled down to RISC-V, executes instructions in order, and generates a witness $w$.&lt;/p&gt;
-&lt;p&gt;In the language of computational complexity theory, the guest program $x$ is often referred to as the problem instance, and the honest trace witness $w$ is referred to as the $\NP$ witness which can be compared with the program to validate that the output was generated by executing the program’s actual instructions.
-The NP relation $\mathcal{R}$ checks if the witness was generated by running every instruction of the program correctly. If it was, then&lt;/p&gt;
-&lt;p&gt;$$
-\mathcal{R}(x, w) = 1
+A zk-VM is a virtual machine with the added responsibility that it is required to output an efficiently checkable cryptographic proof that it executed every instruction of the guest program correctly.&lt;/p&gt;
+&lt;p&gt;Thus, Jolt being a zk-VM, can be logically split into two components - the tracer and the prover.
+The tracer takes a guest program $x$ compiled down to RISC-V, executes instructions in order, and generates a witness $w$.
+In the language of computational complexity theory, the guest program $x$ is often referred to as the problem instance, and the honest trace witness $w$ is referred to as the $\NP$ witness.
+The tracer gets the program $x$.
+It runs the program by fetching, decoding and executing instructions, to generate a trace&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-trace-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/01-jolt-why/#fn-trace&quot;&gt;[1]&lt;/a&gt;&lt;/sup&gt; $\trace{x}$.
+The figure below sketches the idea.&lt;/p&gt;
+&lt;figure&gt;
+  &lt;img src=&quot;./trace.svg&quot; alt=&quot;&quot; /&gt;
+  &lt;figcaption&gt;The Jolt tracer steps through instructions of the input program, while logging the machine state before and after execution for each time step.
+  We refer to the data structure that logs the entire history of computation as the trace.
+  &lt;/figcaption&gt;
+&lt;/figure&gt;
+&lt;p&gt;With the trace in hand, Jolt then computes the witness $w := \witness{\trace{x}}$ as a function of the trace.
+The mental picture one should have is that the $\witnessFunc{}$ function fills in a bunch of arrays with values based on the trace of the guest program.
+These values come from an appropriate finite field $\mathbb{F}$.&lt;/p&gt;
+&lt;figure&gt;
+  &lt;img src=&quot;./witness-gen.svg&quot; alt=&quot;&quot; /&gt;
+  &lt;figcaption&gt;The witness can be thought of a set of arrays/matrices over some finite field. 
+  Once Jolt has the trace it fills out the cells of the witness as a deterministic function of the trace.&lt;/figcaption&gt;
+&lt;/figure&gt;
+&lt;p&gt;The witness is defined as a function of $\trace{x}$, if Jolt behaves as its meant to behave the witness can be filled in as a deterministic function of the trace.
+Now the Jolt prover could output some witness $w’$ as the final proof and be done with it.
+The verifier could simply check whether the $\NP$ relation is satisfied:
 $$
-Outputting an $\NP$ witness as the proof on its own accomplishes little.
-A client wishing to confirm the result came from the program could simply run the program to generate its own witness $w’$, and compare it against the prover’s witness $w$.
-&lt;em&gt;The challenge is to generate a substantially cheaper procedure for validating program execution&lt;/em&gt;.
-The Jolt prover’s task, then, can be viewed as compressing the witness $w$ to output a proof $\pi:= \pi(w,x) \in \bit^{*}$ that a client can efficiently process to validate whether the program was in fact run correctly.
-These compressed proofs are often referred to as &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://eprint.iacr.org/2025/2041&quot;&gt; SNARKs &lt;/a&gt; in the literature.&lt;/p&gt;
-&lt;h2 id=&quot;conditions-for-efficient-proof-generation&quot;&gt;Conditions For Efficient Proof Generation&lt;a class=&quot;zola-anchor&quot; href=&quot;#conditions-for-efficient-proof-generation&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
-&lt;/h2&gt;
-&lt;p&gt;To efficiently generate a proof, the Jolt zk-VM leverages the fact that &lt;em&gt;all&lt;/em&gt; instructions in the guest program’s ISA satisfy the &lt;em&gt;decomposability&lt;/em&gt; condition.
-Intuitively, an instruction is decomposable if it can be evaluated on inputs $(\vec{x},\vec{y})$ by decomposing the inputs into smaller chunks, evaluating a function on each chunk, and then efficiently combining the outputs of each chunk into the final output.
-The &lt;code&gt;AND&lt;/code&gt; instruction, for example, is decomposable.&lt;/p&gt;
-&lt;p&gt;Let $m \in \Naturals$, then for any $\vec{x}, \vec{y} \in \{0,1\}^m$, let $f_{\text{AND}}(\vec{x},\vec{y})  = (x_{m-1} || … || x_0) \land (y_{m-1} || …|| y_0)$ be the bitwise AND operation.
-We can decompose the computation of the AND function as follows:&lt;/p&gt;
-&lt;p&gt;$$
-f_{\text{AND}}(\vec{x}, \vec{y}) = \sum_{i=0}^{m-1} 2^i \cdot f_{\text{AND}} (x_i, y_i)
+\mathcal{R}(x, w’) = 1 \iff w’ = \witness{\trace{x}}
 $$&lt;/p&gt;
-&lt;p&gt;Unfortunately, not all native RISC-V instructions are decomposable in this way.
-For example, the &lt;code&gt;SLL rd, rs1, rs2&lt;/code&gt; instruction models the computation $f(x,y) = x \ll y$ where $x,y \in \{0,1\}^{64}$ represent the contents of registers &lt;code&gt;rs1&lt;/code&gt; and &lt;code&gt;rs2&lt;/code&gt; respectively.
-$\ll$ denotes the logical left bit shift operator, and the value $f(x,y) \in \bit^{64}$ is written into the contents of &lt;code&gt;rd&lt;/code&gt;.
-Here, in order to know the bit $i$ of $f(x, y)$, we need to know one bit of $x$ and &lt;em&gt;every&lt;/em&gt; bit of $y$.
-There is no way to decompose &lt;code&gt;SLL&lt;/code&gt;.&lt;/p&gt;
-&lt;h3 id=&quot;bytecode-expansion&quot;&gt;Bytecode Expansion&lt;a class=&quot;zola-anchor&quot; href=&quot;#bytecode-expansion&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
-&lt;/h3&gt;
-&lt;p&gt;But the input to Jolt however is still RISC-V program, and so it needs some mechanism to decompose these instructions for efficient proof generation.
-The approach the Jolt zk-VM takes is to re-write the guest RISC-V program into a program in the Jolt ISA, which consists solely of decomposable instructions, but is still expressive enough to permit all RISC-V instructions to be efficiently rewritten into Jolt ISA instructions.
-Thus, Jolt re-writes all troublesome non-decomposable RISC-V instructions with a sequence of one or more decomposable Jolt instructions.
-In order to aid this emulation process the Jolt CPU includes the usual RISC-V registers plus some additional “virtual” general-purpose registers in which it stores intermediate results.&lt;/p&gt;
+&lt;p&gt;Such a proof, however, is useless.
+This requires the verifier to compute $\trace{x}$, thereby having to run the program in the first place.
+&lt;em&gt;The challenge is to generate a substantially cheaper procedure for validating program execution&lt;/em&gt;.
+The Jolt prover’s task, then, can be viewed as compressing the witness $w$ to output a proof $\pi:= \pi(w,x) \in \bit^{*}$ that the verifier can efficiently process to validate whether the program was in fact run correctly.
+These compressed proofs are often referred to as &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://eprint.iacr.org/2025/2041&quot;&gt; SNARKs &lt;/a&gt; in the literature.&lt;/p&gt;
+&lt;h2 id=&quot;phase-i-bytecode-expansion&quot;&gt;Phase I: Bytecode Expansion&lt;a class=&quot;zola-anchor&quot; href=&quot;#phase-i-bytecode-expansion&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h2&gt;
+&lt;p&gt;As the goal is efficient proof generation, we have another hiccup to deal with.
+The guest program $x$ is a sequence of RISC-V instructions.
+For efficient proof generation, Jolt needs &lt;em&gt;all&lt;/em&gt; of these instructions to satisfy some special mathematical properties.
+Namely, all instructions must have &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://eprint.iacr.org/2023/1217&quot;&gt;efficient multi-linear evaluations&lt;/a&gt; and they must have &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://eprint.iacr.org/2025/105&quot;&gt;prefix-suffix&lt;/a&gt; structure.
+We won’t fret the exact details here, but the interested reader can read the referenced links for what those words mean.
+Unfortunately, not all native RISC-V instructions satisfy these nice mathematical properties.
+For example, the &lt;code&gt;SLL rd, rs1, rs2&lt;/code&gt; instruction fails to satisfy the prefix-suffix structure needed for Shout (a sub-component of Jolt’s proving machinery).&lt;/p&gt;
+&lt;p&gt;But the input to Jolt is still a RISC-V program that could contain such instructions, and so it needs some mechanism for efficient proof generation.
+The approach that the Jolt zk-VM takes is to re-write the guest RISC-V program into a program in the Jolt ISA, which consists solely of instructions with nice mathematical properties.
+Thus, Jolt re-writes all troublesome RISC-V instructions that do not have these nice mathematical properties with a sequence of one or more nice Jolt instructions.
+In order to aid this emulation process, the Jolt CPU includes the usual RISC-V registers plus some additional “virtual” general-purpose registers in which it stores intermediate results.&lt;/p&gt;
 &lt;p&gt;Continuing with the same example from above, the &lt;code&gt;SLL&lt;/code&gt; RISC-V instruction is replaced with the following sequence of Jolt instructions.&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;asm&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;VirtualPow2  v1,  rs2&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;MUL&lt;/span&gt;&lt;span&gt;          rd, rs1, v1&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;where &lt;code&gt;VirtualPow2 v1 rs2&lt;/code&gt; is a Jolt ISA instruction that represents computation which sets the contents of virtual register &lt;code&gt;v1&lt;/code&gt; with $2^x$, where $x$ represents the contents of register &lt;code&gt;rs2&lt;/code&gt;.
+&lt;p&gt;Here, &lt;code&gt;VirtualPow2 v1 rs2&lt;/code&gt; is a Jolt ISA instruction that represents a computation which sets the contents of virtual register &lt;code&gt;v1&lt;/code&gt; to $2^{x \bmod 64}$ for RV64, where $x$ represents the contents of register &lt;code&gt;rs2&lt;/code&gt;.
 As &lt;code&gt;VirtualPow2&lt;/code&gt; is not present in the RISC-V ISA, it is referred to as a virtual instruction.
 &lt;code&gt;MUL&lt;/code&gt; on the other hand is the extension of the RISC-V instruction &lt;code&gt;MUL&lt;/code&gt; to the Jolt ISA by allowing it to operate on both RISC-V general-purpose registers and Jolt ISA virtual registers.
-It is not too hard to see that the above sequence is equivalent to the original &lt;code&gt;SLL&lt;/code&gt; instruction in that value in &lt;code&gt;rd&lt;/code&gt; is the same whether we run one &lt;code&gt;SLL&lt;/code&gt; instruction, or the expanded sequence.
-In summary, the Jolt ISA can be viewed as a strict subset of the RISC-V ISA, plus some virtual instructions, that can operate on RISC-V registers, plus some virtual registers.&lt;/p&gt;
-&lt;p&gt;TODO: (Ari) Insert figure&lt;/p&gt;
-&lt;p&gt;Reflecting back on the job of the tracer, in practice, witness generation proceeds in two steps.
-The Jolt tracer first translates all RISC-V instructions into one or more Jolt ISA instructions (the Jolt documentation refers to this process as &lt;em&gt;bytecode expansion&lt;/em&gt;).
-Once translation is complete, the Jolt CPU executes Jolt instructions to generate the witness.
-&lt;em&gt;Thus, the Jolt proof guarantees that it ran every Jolt (not RISC-V) instruction of the transformed guest program correctly.&lt;/em&gt;
-As the honest witness is generated by executing decomposable instructions, it is amenable to be compressed into an efficiently checkable proof.
-&lt;strong&gt;This added bytecode expansion step however, creates another potential for failure.&lt;/strong&gt;
-RISC-V execution semantics are complex, and it is now necessary to ensure that the expanded Jolt ISA versions of all RISC-V instructions implement equivalent semantics.&lt;/p&gt;
-&lt;aside id=&quot;&quot; class=&quot;callout callout-remark&quot;&gt;
-  &lt;div class=&quot;callout-title&quot;&gt;Formally Verifying Bytecode Expansion&lt;/div&gt;
+The picture now looks like this.
+The tracer was given $x$ as the program.
+But Jolt internally changes the program to $\expand{x}$, which involves substituting all non-nice RISC-V instructions with a sequence of nice Jolt instructions.
+It then computes the witness $w := \witness{\trace{\expand{x}}}$.
+Shown below is a Lean code snippet representing the expanded &lt;code&gt;SLL&lt;/code&gt; instruction.&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;def&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; sllProgramAuto&lt;/span&gt;&lt;span&gt; (rd rs1 rs2 : regidx) : Program :=&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;  if&lt;/span&gt;&lt;span&gt; isX0 rd &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;then&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    .instr (JoltISA.Encoded.ADDI (.xreg (regidx.Regidx &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;0&lt;/span&gt;&lt;span&gt;)) (.xreg (regidx.Regidx &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;0&lt;/span&gt;&lt;span&gt;)) (&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;0&lt;/span&gt;&lt;span&gt; : BitVec &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;12&lt;/span&gt;&lt;span&gt;)) &amp;lt;|&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    .done RETIRE_SUCCESS&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;  else&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    .instr (.VirtualPow2 (.vreg (BitVec.ofNat &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;7 40&lt;/span&gt;&lt;span&gt;)) (.xreg rs2) (&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;0&lt;/span&gt;&lt;span&gt; : BitVec &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;64&lt;/span&gt;&lt;span&gt;)) &amp;lt;|&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    .instr (.MUL (.xreg rd) (.xreg rs1) (.vreg (BitVec.ofNat &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;7 40&lt;/span&gt;&lt;span&gt;))) &amp;lt;|&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    .done RETIRE_SUCCESS&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;But wait! We have now changed the program&lt;/strong&gt;.
+The witness is a function of a new program $\expand{x}$, and the verifier does not care whether we executed every instruction of this modified program correctly.
+The verifier wants a proof that you ran $x$ correctly.
+In this case, it is not too hard to see that the above sequence is equivalent to the original &lt;code&gt;SLL&lt;/code&gt; instruction in that the value in &lt;code&gt;rd&lt;/code&gt; is the same whether we run one &lt;code&gt;SLL&lt;/code&gt; instruction or the expanded sequence.&lt;/p&gt;
+&lt;figure&gt;
+  &lt;img src=&quot;./expansion.svg&quot; alt=&quot;&quot; /&gt;
+  &lt;figcaption&gt;Bytecode expansion involves replacing all RISC-V instructions that do not have nice mathematical properties with a sequence of Jolt instructions which have nice properties.
+  For Jolt to be a valid proof system, we must show that the net effect on the RISC-V machine state of running this new sequence is the same as running the original instruction. &lt;/figcaption&gt;
+&lt;/figure&gt;
+&lt;p&gt;But in general we need a way of connecting proofs about $\expand{x}$ back to proofs about $x$.
+As RISC-V machine state is a strict subset of the Jolt machine state, we show the following:&lt;/p&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-theorem thm-numbered&quot;&gt;
+  &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;/span&gt;
+    &lt;span class=&quot;thm-title&quot;&gt; : Formally Verifying Bytecode Expansion&lt;/span&gt;&lt;/div&gt;
   &lt;p&gt;Our primary contribution in this phase of the work is to use the Lean 4 proof assistant to prove that each Jolt bytecode expansion faithfully implements its corresponding RISC-V instruction.
 In other words, when starting from the same initial machine state, executing the expansion yields the same final RISC-V CPU state as executing the original instruction.&lt;/p&gt;
 &lt;/aside&gt;
-&lt;h2 id=&quot;the-jolt-constraints&quot;&gt;The Jolt Constraints&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-jolt-constraints&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;p&gt;What these theorems say, is that if a witness validates that $\expand{x}$ was executed correctly, we can automatically infer $x$ was run correctly, and the final output can be reliably trusted by the verifier.
+Without these proofs, the connection between correct execution of the expanded program and the original program lacks formal justification.
+This description of course only scratches the surface of the work that we have done.
+How did we translate Rust code to Lean?
+Where did we get a model of the RISC-V CPU in Lean?
+Do all theorems pass?
+Did we find bugs?
+For the sake of brevity, we leave the technical details out of this post, but we wrote a &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://eprint.iacr.org/2026/2157&quot;&gt;short paper&lt;/a&gt; describing all the details.
+We did find &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/04-divw-bug/&quot;&gt;bugs&lt;/a&gt; as well.
+Then we went ahead and &lt;a href=&quot;TODO:&quot;&gt;fixed&lt;/a&gt; them.&lt;/p&gt;
+&lt;h2 id=&quot;phase-ii-the-jolt-constraints&quot;&gt;Phase II: The Jolt Constraints&lt;a class=&quot;zola-anchor&quot; href=&quot;#phase-ii-the-jolt-constraints&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
 &lt;/h2&gt;
 &lt;blockquote&gt;
-&lt;p&gt;This phase of the project is currently under progress.&lt;/p&gt;
+&lt;p&gt;This phase of the project is currently in progress.&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;At this point we have a way of generating the NP witness.
-We briefly mentioned that a proof allows to assert that Jolt ran every instruction of the Jolt program correctly i.e. it generated the witness as prescribed.
-Note that we do not particularly care &lt;em&gt;how&lt;/em&gt; the prover did this.
-Say in some bizarre world, the prover actually does not follow the ISA semantics, but is still able to generate the correct witness $w$, as if it ran the instructions correctly, then that is fine.
-What are after is a statement of the following form.&lt;/p&gt;
-&lt;ul&gt;
+&lt;p&gt;At this point, we can safely assume the verifier’s input program $x$ only contains &lt;em&gt;nice&lt;/em&gt; instructions.
+If it does not, then we replace $x$ with $\expand{x}$.
+We have already argued there is no point for the verifier to check $\mathcal{R}(x, w)=1$ directly, as it is inefficient.
+So instead we will describe another &lt;em&gt;inefficient&lt;/em&gt; procedure for checking if the relation is satisfied.
+We describe this inefficient procedure to make sense of what is actually going on under the hood.
+In the next section we will tell you what Jolt actually does instead to make this inefficient procedure efficient.
+Nothing of course is free.
+We will show that the cost of improving efficiency is the introduction of randomness.&lt;/p&gt;
+&lt;h3 id=&quot;verification-as-constraint-satisfaction&quot;&gt;Verification As Constraint Satisfaction&lt;a class=&quot;zola-anchor&quot; href=&quot;#verification-as-constraint-satisfaction&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;p&gt;Recall that part of the job of the tracer is to compute the witness.
+Without getting bogged down in specific details, one can treat the witness space as a set of empty tables whose cells can hold values from an appropriate finite field $\mathbb{F}$.
+In Jolt, we define a set of constraints on these values and call them Jolt constraints.
+Once again mentally the picture you have is that a constraint is just a restriction over what values can go in the witness tables.
+So say the witness was partially made up of tables $A, B$ and $C$ of length $T$.
+An example of a constraint could look like the following:&lt;/p&gt;
+&lt;p&gt;$$\forall i \in [T],\quad A[i](B[i] - C[i]) = 0$$&lt;/p&gt;
+&lt;p&gt;What we are really saying is that the tracer is allowed to fill witness tables in a way that satisfies the constraint.
+And if we designed our constraints correctly, this might pin the value of the witness to a single unique value - the one generated by the $\witnessFunc$ function.
+Intuitively, what we are really saying is that satisfying these constraints over the values of the witness is equivalent to tracing the program correctly and then extracting the witness as specified.
+Assume that in Jolt we pick $m \in \mathbb{N}$ constraints such that for $i \in [m]$, we want $C_i(w) = 0$.
+We aim to prove the following completeness and soundness properties in Lean.&lt;/p&gt;
+&lt;aside id=&quot;&quot; class=&quot;callout callout-theorem thm-numbered&quot;&gt;
+  &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;/span&gt;
+    &lt;span class=&quot;thm-title&quot;&gt; : Constraint Satisfaction&lt;/span&gt;&lt;/div&gt;
+  &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Completenss&lt;/strong&gt;: If tracer generated $w$ as prescribed, then the downstream verifying algorithm will &lt;strong&gt;always&lt;/strong&gt; accept.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Completeness&lt;/strong&gt;: If Jolt computes $w$ properly, then the following holds:
+$$w = \witness{\trace{\expand{x}}} \implies \forall i \in [m], \quad C_i(w) = 0$$&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Soundness&lt;/strong&gt;: If the tracer generated $w^{*}$ that is not the honest witness, the downstream verifier will &lt;strong&gt;always&lt;/strong&gt; reject.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Soundness&lt;/strong&gt;: If $w’$ is Jolt’s declared witness, then the following holds:
+$$\left(\forall i \in [m], \quad C_i(w’) = 0\right) \implies w’ = \witness{\trace{\expand{x}}}$$&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;For a well informed reader, it might seem peculiar that we say &lt;em&gt;always&lt;/em&gt; above.
-They are well aware that to achieve succinctness of the SNARK, the above guarantees should hold with high probability.
-Still we claim in this phase of the verification project the above completeness and soundness guarantees must &lt;em&gt;always&lt;/em&gt; hold.
-To justify why, we must understand what the verification algorithm is.
-We will still be somewhat high level about the verifier (without compromising correctness).
-When we say the verifying algorithm accepts, what we really mean is that set of constraints/equations are satisfied.
-The honest witness is simply the unique solution that ensures these equations are satisfied.
-So mentally, you can think that there exists 50 or so equations over $n$ variables over some finite field $\Field$.
-Verification involves checking that $w$ satisfies all the constraints.&lt;/p&gt;
-&lt;p&gt;Of course in reality, the real verifier does not have $w$ in the clear, and neither do they verify each constraint manually.
-Instead we design a randomised check for constraint satisfaction using the sum-check protocol.
-See Chapters 2 and 3 of &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://par.nsf.gov/servlets/purl/10417638&quot;&gt;Justin Thaler’s book&lt;/a&gt; for a concrete example (Frievald’s algorithm does the same thing).&lt;/p&gt;
-&lt;p&gt;By modelling the deterministic version of the thing the verifier is checking, we can later just check if the sum-checks are randomised tests for these constraints or not.
-The actual completeness and soundness checks are handled here, and the we can reduce the remaining security to purely algebraic statements about equations.
-If this is still vague, then we recommend keeping tabs on the progress documented in &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/05-constraints/&quot;&gt;Jolt Constraints&lt;/a&gt;.&lt;br /&gt;
-Here we document the full process, and the lean proofs.&lt;/p&gt;
-&lt;h2 id=&quot;the-jolt-sum-checks&quot;&gt;The Jolt Sum-checks&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-jolt-sum-checks&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/aside&gt;
+&lt;p&gt;Now once again we have not answered important questions.
+How did we get the constraints in Lean from Jolt?
+For now we use a combination of human guided agentic translation of Rust to Lean.
+Of course, this is not the final artefact, and this is a work in progress.
+But still, it is easy to turn one’s nose up at such an unsound extraction process.
+While we do not dispute that one cannot rely solely on agentic translation of Rust code into Lean and that we need better tools, let us justify the value of doing this step.
+We began this part of the project four weeks ago, and in that time we tried to prove just the completeness theorem.
+This led to 13 concrete completeness violations in Jolt.
+The process involved translating small chunks of Rust code to Lean by hand.
+We asked ChatGPT and Claude to audit the translation.
+Then, we wrote a theorem about the translated code and attempted to prove it.
+If we were unable to prove a theorem, we re-examined our translation, looking more deeply for issues.
+If all looked good, we asked an AI agent to find a counterexample.
+This rather simplistic approach allowed us to find concrete guest programs that were valid RISC-V programs and for which the Jolt tracer honestly computed witness polynomials, but which the Jolt verifier rejected.
+The &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1952&quot;&gt;issues&lt;/a&gt; &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1951&quot;&gt;can&lt;/a&gt; &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1950&quot;&gt;be&lt;/a&gt; &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1949&quot;&gt;found&lt;/a&gt; &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1915&quot;&gt;here&lt;/a&gt; and &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1914&quot;&gt;here&lt;/a&gt;.
+We remark that during the development of Jolt, it was audited by Fable, ChatGPT Astra and all the leading models multiple times, and none of them surfaced these issues.
+The &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/LayerZero-Labs/jolt-qed/tree/feat/witness-on-updated-isa&quot;&gt;Lean source code&lt;/a&gt; is publicly available, and is still very much a work in progress.&lt;/p&gt;
+&lt;h4 id=&quot;fleshed-out-example-of-a-constraint&quot;&gt;Fleshed Out Example Of A Constraint&lt;a class=&quot;zola-anchor&quot; href=&quot;#fleshed-out-example-of-a-constraint&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h4&gt;
+&lt;blockquote&gt;
+&lt;p&gt;TODO: Will help motivate the sum-check later. Maybe not needed.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&quot;phase-iii-the-jolt-sum-checks&quot;&gt;Phase III: The Jolt Sum-checks&lt;a class=&quot;zola-anchor&quot; href=&quot;#phase-iii-the-jolt-sum-checks&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
 &lt;/h2&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Not yet Started&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id=&quot;the-sum-check-reductions&quot;&gt;The Sum-Check Reductions&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-sum-check-reductions&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;h2 id=&quot;phase-iv-the-sum-check-reductions&quot;&gt;Phase IV: The Sum-Check Reductions&lt;a class=&quot;zola-anchor&quot; href=&quot;#phase-iv-the-sum-check-reductions&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
 &lt;/h2&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Note yet Started&lt;/p&gt;
+&lt;p&gt;Not yet Started&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;h2 id=&quot;the-commitment-scheme&quot;&gt;The Commitment Scheme&lt;a class=&quot;zola-anchor&quot; href=&quot;#the-commitment-scheme&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;h2 id=&quot;phase-v-the-commitment-scheme&quot;&gt;Phase V: The Commitment Scheme&lt;a class=&quot;zola-anchor&quot; href=&quot;#phase-v-the-commitment-scheme&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
 &lt;/h2&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Not yet started&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;section class=&quot;footnotes&quot;&gt;
+&lt;ol class=&quot;footnotes-list&quot;&gt;
+&lt;li id=&quot;fn-trace&quot;&gt;
+&lt;p&gt;Here a trace refers to a snapshot of the machine state before each fetch-decode-execute cycle run on the guest program. &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/01-jolt-why/#fr-trace-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/section&gt;
 </content>
   </entry>
   
