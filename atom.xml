@@ -314,7 +314,7 @@ We will show, using Lean, that the decision problem $L$ is an $\NP$ decision pro
 &lt;aside id=&quot;&quot; class=&quot;callout callout-theorem thm-numbered&quot;&gt;
   &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;/span&gt;
     &lt;span class=&quot;thm-title&quot;&gt; : Jolt as a decision problem&lt;/span&gt;&lt;/div&gt;
-  &lt;p&gt;More formally, we &lt;em&gt;must&lt;/em&gt; show there exists an $\NP$ relation $\mathcal{R}$ such that the following holds:&lt;/p&gt;
+  &lt;p&gt;More formally, we &lt;em&gt;must&lt;/em&gt; show that the $\NP$ relation $\mathcal{R}$ that Jolt defines satisfies the following property:&lt;/p&gt;
 &lt;p&gt;$$
 x := (\Program, \Input, \Output) \in L \iff \exists\, w \text{ s.t } \mathcal{R}(x, w) = 1
 $$&lt;/p&gt;
@@ -443,9 +443,9 @@ An example of a constraint could look like the following:&lt;/p&gt;
 &lt;p&gt;$$\forall i \in [T],\quad A[i](B[i] - C[i]) = 0$$&lt;/p&gt;
 &lt;p&gt;What we are really saying is that a valid witness contains values that satisfy the constraint.
 Or, in other words, the $\NP$ relation $\mathcal{R}$ is simply the act of satisfying all constraints.
-Let’s say Jolt has $m$ constraints of the form $C_i(w) = 0$ for $i \in [m]$.
+Let’s say Jolt has $m$ constraints of the form $C_i(x, w) = 0$ for $i \in [m]$ where the constraints are a function of both the instance and the witness.
 Then we are saying:&lt;/p&gt;
-&lt;p&gt;$$\mathcal{R}(x, w) = 1 \iff \forall\, i\in [m], \, C_i(w) = 0$$&lt;/p&gt;
+&lt;p&gt;$$\mathcal{R}(x, w) = 1 \iff \forall\, i\in [m], \, C_i(x, w) = 0$$&lt;/p&gt;
 &lt;p&gt;We show the following theorem in Lean (or rather, we are in the process of trying to show this).&lt;/p&gt;
 &lt;aside id=&quot;&quot; class=&quot;callout callout-theorem thm-numbered&quot;&gt;
   &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;/span&gt;
@@ -478,11 +478,6 @@ This rather simplistic approach allowed us to find concrete guest programs that 
 The &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1952&quot;&gt;issues&lt;/a&gt; &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1951&quot;&gt;can&lt;/a&gt; &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1950&quot;&gt;be&lt;/a&gt; &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1949&quot;&gt;found&lt;/a&gt; &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1915&quot;&gt;here&lt;/a&gt; and &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1914&quot;&gt;here&lt;/a&gt;.
 We remark that, during the development of Jolt, it was audited by Fable, ChatGPT Astra and all the leading models multiple times, and none of them surfaced these issues.
 The &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/LayerZero-Labs/jolt-qed/tree/feat/witness-on-updated-isa&quot;&gt;Lean source code&lt;/a&gt; is publicly available, and is still very much a work in progress.&lt;/p&gt;
-&lt;h4 id=&quot;fleshed-out-example-of-a-constraint&quot;&gt;Fleshed Out Example of a Constraint&lt;a class=&quot;zola-anchor&quot; href=&quot;#fleshed-out-example-of-a-constraint&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
-&lt;/h4&gt;
-&lt;blockquote&gt;
-&lt;p&gt;TODO: Will help motivate the sum-check later. Maybe not needed.&lt;/p&gt;
-&lt;/blockquote&gt;
 &lt;h2 id=&quot;phase-iii-the-jolt-sum-checks&quot;&gt;Phase III: The Jolt Sum-Checks&lt;a class=&quot;zola-anchor&quot; href=&quot;#phase-iii-the-jolt-sum-checks&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
 &lt;/h2&gt;
 &lt;blockquote&gt;

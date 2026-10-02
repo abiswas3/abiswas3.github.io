@@ -156,17 +156,6 @@
   <li>
     <a href="#phase-ii-the-jolt-constraints-or-the-np-relation">Phase II: The Jolt Constraints, or the NP Relation</a>
     
-      
-<ol>
-  
-  <li>
-    <a href="#fleshed-out-example-of-a-constraint">Fleshed Out Example of a Constraint</a>
-    
-  </li>
-  
-</ol>
-
-    
   </li>
   
   <li>
@@ -233,7 +222,7 @@ We will show, using Lean, that the decision problem $L$ is an $\NP$ decision pro
 <aside id="" class="callout callout-theorem thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
     <span class="thm-title"> : Jolt as a decision problem</span></div>
-  <p>More formally, we <em>must</em> show there exists an $\NP$ relation $\mathcal{R}$ such that the following holds:</p>
+  <p>More formally, we <em>must</em> show that the $\NP$ relation $\mathcal{R}$ that Jolt defines satisfies the following property:</p>
 <p>$$
 x := (\Program, \Input, \Output) \in L \iff \exists\, w \text{ s.t } \mathcal{R}(x, w) = 1
 $$</p>
@@ -362,9 +351,9 @@ An example of a constraint could look like the following:</p>
 <p>$$\forall i \in [T],\quad A[i](B[i] - C[i]) = 0$$</p>
 <p>What we are really saying is that a valid witness contains values that satisfy the constraint.
 Or, in other words, the $\NP$ relation $\mathcal{R}$ is simply the act of satisfying all constraints.
-Let’s say Jolt has $m$ constraints of the form $C_i(w) = 0$ for $i \in [m]$.
+Let’s say Jolt has $m$ constraints of the form $C_i(x, w) = 0$ for $i \in [m]$ where the constraints are a function of both the instance and the witness.
 Then we are saying:</p>
-<p>$$\mathcal{R}(x, w) = 1 \iff \forall\, i\in [m], \, C_i(w) = 0$$</p>
+<p>$$\mathcal{R}(x, w) = 1 \iff \forall\, i\in [m], \, C_i(x, w) = 0$$</p>
 <p>We show the following theorem in Lean (or rather, we are in the process of trying to show this).</p>
 <aside id="" class="callout callout-theorem thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
@@ -397,11 +386,6 @@ This rather simplistic approach allowed us to find concrete guest programs that 
 The <a rel="noopener noreferrer external" target="_blank" href="https://github.com/a16z/jolt/issues/1952">issues</a> <a rel="noopener noreferrer external" target="_blank" href="https://github.com/a16z/jolt/issues/1951">can</a> <a rel="noopener noreferrer external" target="_blank" href="https://github.com/a16z/jolt/issues/1950">be</a> <a rel="noopener noreferrer external" target="_blank" href="https://github.com/a16z/jolt/issues/1949">found</a> <a rel="noopener noreferrer external" target="_blank" href="https://github.com/a16z/jolt/issues/1915">here</a> and <a rel="noopener noreferrer external" target="_blank" href="https://github.com/a16z/jolt/issues/1914">here</a>.
 We remark that, during the development of Jolt, it was audited by Fable, ChatGPT Astra and all the leading models multiple times, and none of them surfaced these issues.
 The <a rel="noopener noreferrer external" target="_blank" href="https://github.com/LayerZero-Labs/jolt-qed/tree/feat/witness-on-updated-isa">Lean source code</a> is publicly available, and is still very much a work in progress.</p>
-<h4 id="fleshed-out-example-of-a-constraint">Fleshed Out Example of a Constraint<a class="zola-anchor" href="#fleshed-out-example-of-a-constraint" aria-label="Link to this section">#</a>
-</h4>
-<blockquote>
-<p>TODO: Will help motivate the sum-check later. Maybe not needed.</p>
-</blockquote>
 <h2 id="phase-iii-the-jolt-sum-checks">Phase III: The Jolt Sum-Checks<a class="zola-anchor" href="#phase-iii-the-jolt-sum-checks" aria-label="Link to this section">#</a>
 </h2>
 <blockquote>
