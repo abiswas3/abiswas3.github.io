@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1f1e1b">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="">
+    <title>Problem Set 1 · Algorithms</title>
+    <link rel="stylesheet" href="https://randomwalks.xyz/algorithms/style.css?h=4cd69b36f2f908e4f55d">
+    <script defer src="https://randomwalks.xyz/algorithms/sidenotes.js?h=abba13c76e721c629ac3"></script>
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          tags: 'ams'
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+</head>
+<body>
+    
+    <header class="site-header">
+        <a class="brand" href="https://randomwalks.xyz/algorithms" aria-label="Algorithms home">
+            <span class="brand-mark" aria-hidden="true">A</span>
+            <span class="brand-copy">
+                <strong>Algorithms</strong>
+            </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="https://randomwalks.xyz/algorithms/lectures/">Lecture Notes</a>
+            <a href="https://randomwalks.xyz/algorithms/hw/" aria-current="page">Problem Sets</a>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        
+<article class="page-shell">
+    <header class="page-heading">
+        <h1>Problem Set 1</h1>
+        
+        
+        
+        <div class="assignment-dates">
+            <span><span class="credit-label">Posted</span> <time datetime="2026-10-02">2026-10-02</time></span>
+            <span><span class="credit-label">Due</span> <time datetime="2026-10-16">2026-10-16</time></span>
+        </div>
+        
+        
+        
+        
+    </header>
+
+    
+    <div class="prose page-content">
+        <ol>
+<li>
+<p><strong>Counting sort.</strong> Let $A=(a_1,\ldots,a_n)$ be a list of $n\geq 1$ integers, where $0\leq a_i&lt;n$ for every $i$. Counting sort initializes an array $C[0\ldots n-1]$ to zero, increments $C[a_i]$ for each input element, and then outputs each integer $x=0,1,\ldots,n-1$ exactly $C[x]$ times.
+Prove that the output contains exactly the input elements (including repeated values), is sorted in nondecreasing order, and is produced in $O(n)$ time in the word-RAM model. Assume every integer from $0$ to $n$ fits in one machine word, and that word operations and array accesses take constant time.</p>
+</li>
+<li>
+<p><strong>Harmonic series.</strong> For $n\geq 2$, let $H_n=\sum_{i=1}^{n}\frac{1}{i}$. Prove that $H_n=\Theta(\log_2 n)$.</p>
+</li>
+<li>
+<p><strong>Palindromes on one tape.</strong> A binary string $x\in\{0,1\}^n$ is a palindrome if $x$ equals its reversal. The input occupies consecutive cells of a single read/write Turing-machine tape, with blanks on either side; the head starts on the leftmost input symbol (or on a blank if $n=0$). The machine may use additional tape symbols.
+Write down a deterministic one-tape Turing machine that accepts exactly the palindromes. Specify its tape alphabet and transition rules, either as a table or as an unambiguous state-by-state description. Prove that it is correct and that it halts after $O(n^2)$ transitions on every input of length $n$.</p>
+</li>
+<li>
+<p><strong>Asymptotic behavior of functions.</strong> For each collection below, arrange the five functions in increasing order of asymptotic growth as $n\to\infty$: whenever $f_a$ precedes $f_b$, require $f_a=O(f_b)$. Group functions with the same $\Theta$ growth rate inside curly braces, and briefly justify your ordering.</p>
+<p>For example, if $f_1=n$, $f_2=\sqrt{n}$, and $f_3=n+\sqrt{n}$, the ordering is $(f_2,\{f_1,f_3\})$; the functions inside the braces may appear in either order.</p>
+<p>All logarithms below are base $2$. In part (b), let $n$ tend to infinity through even integers.</p>
+<table><thead><tr><th>Function</th><th>(a)</th><th>(b)</th></tr></thead><tbody>
+<tr><td>$f_1$</td><td>$(\log_2 n)^{2019}$</td><td>$2^n$</td></tr>
+<tr><td>$f_2$</td><td>$n^2\log_2(n^{2019})$</td><td>$n^3$</td></tr>
+<tr><td>$f_3$</td><td>$n^3$</td><td>$\binom{n}{n/2}$</td></tr>
+<tr><td>$f_4$</td><td>$(2.019)^n$</td><td>$n!$</td></tr>
+<tr><td>$f_5$</td><td>$n\log_2 n$</td><td>$\binom{n}{3}$</td></tr>
+</tbody></table>
+</li>
+<li>
+<p><strong>Dynamic-array append.</strong> A dynamic array starts empty with capacity $1$. An append writes the new element in the next free slot when the array is not full. When it is full with capacity $c$, it allocates a new array of capacity $2c$, copies the $c$ stored elements, and then writes the new element. Assume reading or writing one element costs $O(1)$ time, and allocating and initializing an array of capacity $c$ costs $O(c)$ time.
+Prove that any sequence of $m\geq 1$ appends starting from an empty array takes $O(m)$ total time. Conclude that the amortized time per append is $O(1)$.</p>
+</li>
+<li>
+<p><strong>Merge sort.</strong> Merge sort sorts an array of $n\geq 1$ elements by recursively sorting two halves of sizes $\lfloor n/2\rfloor$ and $\lceil n/2\rceil$, then merging the sorted halves. An array of length $1$ is handled in $O(1)$ time, and splitting and merging together take $O(n)$ time for an array of length $n$.
+Prove that the worst-case running time of merge sort is $O(n\log_2 n)$.</p>
+</li>
+</ol>
+
+    </div>
+    
+</article>
+
+    </main>
+
+    
+    <script>
+      document.querySelectorAll('.prose pre').forEach((pre) => {
+        const code = pre.querySelector('code');
+        if (!code) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block';
+        pre.before(wrapper);
+        wrapper.append(pre);
+
+        const button = document.createElement('button');
+        button.className = 'copy-code';
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.setAttribute('aria-label', 'Copy code to clipboard');
+        wrapper.append(button);
+
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(code.textContent);
+            button.textContent = 'Copied';
+            window.setTimeout(() => { button.textContent = 'Copy'; }, 1400);
+          } catch (_) {
+            button.textContent = 'Select and copy';
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(code);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        });
+      });
+    </script>
+    
+
+</body>
+</html>
