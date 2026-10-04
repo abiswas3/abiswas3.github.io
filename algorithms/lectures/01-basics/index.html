@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1f1e1b">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="">
+    <title>Overview And Introduction · Algorithms</title>
+    <link rel="stylesheet" href="https://randomwalks.xyz/algorithms/style.css?h=999386aebfba18613f72">
+    <script defer src="https://randomwalks.xyz/algorithms/sidenotes.js?h=abba13c76e721c629ac3"></script>
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          tags: 'ams'
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+</head>
+<body>
+    
+    <header class="site-header">
+        <a class="brand" href="https://randomwalks.xyz/algorithms" aria-label="Algorithms home">
+            <span class="brand-mark" aria-hidden="true">A</span>
+            <span class="brand-copy">
+                <strong>Algorithms</strong>
+            </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="https://randomwalks.xyz/algorithms/lectures/" aria-current="page">Lecture Notes</a>
+            <a href="https://randomwalks.xyz/algorithms/hw/">Problem Sets</a>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        
+<article class="page-shell">
+    <header class="page-heading">
+        <h1>Overview And Introduction</h1>
+        
+        
+        
+        
+        
+        
+        <div class="lecture-credits">
+            <span class="lecture-credit-lecturer"><span class="credit-label">Lecturer</span> Ari</span>
+            <span class="lecture-credit-scribe"><span class="credit-label">Scribe</span> Ari</span>
+        </div>
+        
+    </header>
+
+    
+    <div class="prose page-content">
+        <p>Learning Outcomes:</p>
+<ul>
+<li>Models of Computation</li>
+<li>Comfortably be able to read statements involving Big-O notation in research papers.</li>
+<li>Performance of Algorithms</li>
+</ul>
+<h2 id="notation">Notation</h2>
+<p>We use $[n]$ to denote $\{ 1, 2, \ldots, n\}$.</p>
+<h2 id="what-is-this-course-really-about">What Is This Course Really About?</h2>
+<p>A course on <strong>Algorithms</strong> is really about problem solving.
+More particularly, it is about understanding how a computer solves problems.
+Loosely, an algorithm is merely a sequence of instructions that our computer understands and uses to solve the problem at hand.</p>
+<img src="./problem-solution.svg" alt="" class="inset-image">
+<p>Let’s make things a little more concrete.
+Say you arrive at Hyde Park with a map of London’s tube network, and you want to figure out how to get to Richmond Park.
+This is your <em>problem</em>.
+You pull out your phone (your pocket-sized computer), type things into Google Maps, and out comes a set of directions.
+That is our <em>solution</em>.
+The developers at Google programmed your phone with the Google Maps algorithm that allows you to enter any destination and spits out a route to get there.</p>
+<p>As a person trying to understand algorithms, some questions immediately jump out at us.</p>
+<ol>
+<li>Did the route actually get us to Richmond, i.e., was the algorithm correct?</li>
+<li>Was it sometimes correct and sometimes not, i.e., was randomness used?</li>
+<li>Did the algorithm take a long time to give us a correct solution, i.e., is the algorithm efficient?</li>
+<li>Is there a better way to get to Richmond, i.e., is this algorithm competitive?</li>
+</ol>
+<p>In this course you will play the role of the algorithm designer and answer such questions.
+Before you can do this, we must first learn how to express these questions in a mathematically precise manner.
+For that we must understand asymptotic notation.</p>
+<h2 id="asymptotics">Asymptotics</h2>
+<p>In your undergraduate algorithms class, you must have read results saying that the time complexity of finding the largest number in a list of $n$ integers is $O(n)$.
+Or that finding a path between two nodes in an undirected graph $G=(V,E)$ takes time $O(|V| + 2|E|)$.
+To communicate the results of any kind of analysis we do in this class, we have to get comfortable with what these statements mean.</p>
+<aside id="big-o" class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Big O</span>
+  </div>
+  <div class="statement-body"><p>Let $f, g : \mathbb{N} \to \mathbb{R}_{\ge 0}$.
+We write $f(n) = O(g(n))$ as $n \to \infty$ if there exist constants $c &gt; 0$ and $n_0 \in \mathbb{N}$ such that, for every $n \ge n_0$,</p>
+<p>$$
+f(n) \le c g(n).
+$$</p>
+<p>For functions $f, g : (0, \infty) \to \mathbb{R}_{\ge 0}$, we write $f(\varepsilon) = O(g(\varepsilon))$ as $\varepsilon \to 0^+$ if there exist constants $c &gt; 0$ and $\varepsilon_0 &gt; 0$ such that, for every $0 &lt; \varepsilon &lt; \varepsilon_0$,</p>
+<p>$$
+f(\varepsilon) \le c g(\varepsilon).
+$$</p>
+<img src="./big-o.svg" alt="For n at least n₀, the curve f(n) stays below the curve c g(n)." class="asymptotic-graph">
+</div>
+</aside>
+<p>As an example, consider the sum of the first $n$ natural numbers.
+We often see the result expressed this way.</p>
+<p>\begin{align*}
+\sum_{i=1}^n i &amp;= n(n+1)/2 \\
+&amp;= n^2/2 + n/2 = O(n^2)
+\end{align*}</p>
+<aside id="big-omega" class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Big Ω</span>
+  </div>
+  <div class="statement-body"><p>Let $f, g : \mathbb{N} \to \mathbb{R}_{\ge 0}$.
+We write $f(n) = \Omega(g(n))$ as $n \to \infty$ if there exist constants $c &gt; 0$ and $n_0 \in \mathbb{N}$ such that, for every $n \ge n_0$,</p>
+<p>$$
+f(n) \ge c g(n).
+$$</p>
+<p>For functions $f, g : (0, \infty) \to \mathbb{R}_{\ge 0}$, we write $f(\varepsilon) = \Omega(g(\varepsilon))$ as $\varepsilon \to 0^+$ if there exist constants $c &gt; 0$ and $\varepsilon_0 &gt; 0$ such that, for every $0 &lt; \varepsilon &lt; \varepsilon_0$,</p>
+<p>$$
+f(\varepsilon) \ge c g(\varepsilon).
+$$</p>
+<img src="./big-omega.svg" alt="For n at least n₀, the curve f(n) stays above the curve c g(n)." class="asymptotic-graph">
+</div>
+</aside>
+<p>The comparison-based sorting example below exemplifies how to use the above definition.</p>
+<aside id="little-o" class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Little o</span>
+  </div>
+  <div class="statement-body"><p>Let $f, g : \mathbb{N} \to \mathbb{R}_{\ge 0}$, with $g(n) &gt; 0$ for all sufficiently large $n$.
+We write $f(n) = o(g(n))$ as $n \to \infty$ if</p>
+<p>$$
+\lim_{n \to \infty} \frac{f(n)}{g(n)} = 0.
+$$</p>
+<p>Equivalently, for every constant $c &gt; 0$, there exists $n_0 \in \mathbb{N}$ such that, for every $n \ge n_0$,</p>
+<p>$$
+f(n) &lt; c g(n).
+$$</p>
+<img src="./little-o.svg" alt="The curve f(n) grows more slowly than g(n), so f(n) divided by g(n) tends to zero." class="asymptotic-graph">
+</div>
+</aside>
+<p>Going back to the example of summing $n$ natural numbers, we often write
+\begin{align*}
+\sum_{i=1}^n i &amp;= n(n+1)/2 \\
+&amp;= n^2/2(1 + o(1)) j
+\end{align*}</p>
+<p>to say $n^2$ is a good approximation of the sum, as the product term goes to 1 when $n$ tends to infinity.
+We also have the equivalent version for strictly greater than.</p>
+<aside id="little-omega" class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Little ω</span>
+  </div>
+  <div class="statement-body"><p>Let $f, g : \mathbb{N} \to \mathbb{R}_{\ge 0}$, with $g(n) &gt; 0$ for all sufficiently large $n$.
+We write $f(n) = \omega(g(n))$ as $n \to \infty$ if</p>
+<p>$$
+\lim_{n \to \infty} \frac{f(n)}{g(n)} = +\infty.
+$$</p>
+<p>Equivalently, for every constant $c &gt; 0$, there exists $n_0 \in \mathbb{N}$ such that, for every $n \ge n_0$,</p>
+<p>$$
+f(n) &gt; c g(n).
+$$</p>
+<img src="./little-omega.svg" alt="The curve f(n) grows faster than g(n), so f(n) divided by g(n) tends to infinity." class="asymptotic-graph">
+</div>
+</aside>
+<h3 id="other-things-you-might-see">Other Things You Might See</h3>
+<p>Often you will see people write $f(n) = \operatorname{poly}(n)$.
+What they mean here is that $f(n) = g(n)^{O(1)}$.
+Or more simply, $f(n)$ can be expressed as a polynomial in $g(n)$.</p>
+<p>Sometimes you will also see people write $f(n) = \widetilde{O}(g(n))$, and what they really mean is $f(n) = g(n)\operatorname{poly}(\log n)$.
+Intuitively, we are saying $f(n)$ is pretty much $g(n)$ and a little extra, but that little extra is a log factor, so it’s insignificant compared to $g(n)$.</p>
+<p>For example, $n^4(\log n)^3 = \widetilde{O}(n^4)$. The tilde lets us hide the logarithmic factor.
+Note that if you see a tilde, it does not always hide a power of $\log n$.
+For example, $3^n n^5 = \widetilde{O}(3^n)$, since $\log(3^n) = n \log 3$, so $n^5$ is a polylogarithmic factor in $3^n$.</p>
+<h2 id="models-of-computation">Models Of Computation</h2>
+<p>We were deliberately vague about what a computer is earlier.
+In this course we will discuss 3 models of computation.</p>
+<ol>
+<li>The Turing Machine</li>
+<li>Circuits</li>
+<li>Word RAM model.</li>
+</ol>
+<p>To understand why being specific about this matters, we start with a simple problem.
+Sort a list of $n$ integers?
+What do you reckon is the sorting time of that algorithm?
+Again, from your undergraduate years you might remember it is $\Omega( n \log n)$.
+You might have also seen the following argument.
+The following definition is from <a rel="external" href="https://www.cs.cmu.edu/~avrim/451f11/lectures/lect0913.pdf">Blum’s lecture notes</a>.</p>
+<aside id="comparison-based-sorting" class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>A comparison-based sorting algorithm takes as input an array $\vec{a} = (a_1, a_2, \ldots, a_n)$ of $n \in \mathbb{N}$ items, and can only gain information about the items by comparing pairs of them.
+Each comparison (“is $a_i$ &gt; $a_j$?”) returns YES or NO and counts as one time step.
+The algorithm may also reorder items for free based on the results of comparisons made. In the end, the algorithm must output a permutation of the input in which all items are in sorted order.</p>
+</div>
+</aside>
+<p>So this algorithm does not scan the input values or do anything clever.
+It decides a sequence of questions it must ask.
+For example, its first query might be <em>is the item at position 4 smaller than the item in position 9</em>.
+Based on whether the answer was YES or NO, it might then ask <em>is the item in position 6 smaller than the item in position 9</em>.
+It goes on asking questions, receiving answers and reordering the input till it outputs a permutation function $\pi : [n] \rightarrow [n]$ that tells us how we can sort the input.
+A permutation $\pi$ moves the element $a_i$ from position $i$ in the input to position $\pi(i)$ in the final output.
+Note that the logic for the next question is given by some deterministic function that uses as input the previous questions and previous answers.</p>
+<aside class="statement statement-theorem thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Any <em>deterministic</em> comparison-based sorting algorithm must perform $\Omega(n\log{}n)$ comparisons to sort $n$ elements in the <em>worst case</em>.</p>
+</div>
+</aside>
+<aside class="statement statement-proof">
+  <div class="statement-heading">
+    <span class="statement-kind">Proof</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>We want to show that, whatever deterministic comparison-based sorting algorithm we choose, some input forces it to make at least $\log_2(n!)$ comparisons.
+Fix any such algorithm.
+Our task is to find an input order $\vec{a} = (a_1, \ldots, a_n)$ that forces this many comparisons.</p>
+<p>As we are choosing the input, we can assume that the array $\vec{a} = (a_1, \dots, a_n)$ contains distinct elements.
+Let $S_n$ denote the set of all permutations $\pi : [n] \to [n]$.
+A key feature of assuming distinct elements is that <strong>every</strong> input ordering is sorted by exactly one permutation $\pi \in S_n$.
+To see why, choose $a_i = \pi(i)$ for each $i \in [n]$.
+Since the values are distinct, $\pi$ has to be the only permutation that sorts this input.
+In other words, the map from input orderings to permutations that sort them is a bijective map.</p>
+<p>For a comparison query “Is $a_i &lt; a_j$?”, we say that $\pi$ is <strong>consistent with the answer</strong> if:</p>
+<ul>
+<li>The answer is <strong>YES</strong> and $\pi(i) &lt; \pi(j)$; or</li>
+<li>The answer is <strong>NO</strong> and $\pi(i) \geq \pi(j)$.</li>
+</ul>
+<p>We say $\pi$ is consistent with all $q$ comparison results if the above condition holds for each of the $q$ different comparison queries and its answer.</p>
+<div class="footnote-definition" id="dep"><sup class="footnote-definition-label">1</sup>
+<p>Note that the first query $q_1$ is fixed. We choose $a_1 \in \{\text{YES}, \text{NO}\}$ based on which answer shrinks $H_0$ the least. Then $q_2$ is selected as a deterministic function of $q_1$ and $r_1$. This process goes on $k$ times. $q_k$ is selected as a deterministic function of $(q_1, r_1, \ldots, q_{k-1}, r_{k-1})$.</p>
+</div>
+<p>Set $H_0 := S_n$, the set of all possible sorting permutations.
+Define $H_q$ to be the set of permutations consistent with the results of all $q \ge 0$ comparisons so far<sup class="footnote-reference"><a href="#dep">1</a></sup>.
+The next comparison query $a_i &lt; a_j$ chosen by the sorting algorithm partitions $H_q$ into two sets: those permutations $\pi \in S_n$ for which $\pi(i) &lt; \pi(j)$, and the remaining permutations.
+Define $H_{q+1}$ to <strong>always</strong> be the larger of the two sets, breaking ties arbitrarily.
+If we keep the set where $\pi(i) &lt; \pi(j)$, answer YES to the algorithm’s query; otherwise, answer NO.
+By a simple counting argument we have $|H_q|/2 \le |H_{q+1}| \le |H_q|$.</p>
+<p>Now suppose the algorithm makes $k$ queries and then terminates with output $\sigma$.</p>
+<p>As the map from input orderings to permutations is a bijection, for every possible input, there is a unique $\sigma$ it needs to output.
+From the <a href="#comparison-based-sorting">definition above</a>, the only information the algorithm has to output $\sigma \in S_n$ is the sequence of query-answer pairs it has received in the game above.
+Recall, for every query we adversarially picked the answer that kept at least half of the permutations consistent with the set of questions and answers so far.
+Let’s call this adversarial sequence we generated $(q_1, r_1), \ldots, (q_k, r_k)$.</p>
+<p>Now we claim that $|H_k| = 1$.</p>
+<blockquote>
+<p>Assume not. Since $H_k$ is nonempty by construction, it contains at least two distinct permutations.
+We can therefore choose $\pi \in H_k$ with $\pi \neq \sigma$.
+Observe that $\pi$ is consistent with $(q_1, r_1), \ldots, (q_k, r_k)$.
+Choose an input $\vec{x}$ by setting $x_i = \pi(i)$ for each $i \in [n]$.
+Running the algorithm on this input therefore produces the same sequence of queries and answers $(q_1, r_1), \ldots, (q_k, r_k)$ (by consistency and determinism).
+So the algorithm outputs $\sigma$ as the answer.
+But the only permutation that sorts this input $\vec{x}$ is $\pi$.
+Since $\sigma \neq \pi$, the algorithm fails to sort this input, contradicting its correctness.
+Therefore $|H_k| = 1$.</p>
+</blockquote>
+<p>Let $\pi_*$ be the unique permutation in $H_k$.
+That is, we choose the input by setting $a_i = \pi_*(i)$ for each $i \in [n]$.
+Since each query shrinks the size of $H_q$ by at most a factor of 2, we start with $|H_0| = n!$ and reach $|H_k| = 1$ after $k$ queries, so we have</p>
+<p>\begin{align*}
+1 &amp;\geq \frac{n!}{2^k} \implies k \geq \log_2(n!).
+\end{align*}</p>
+<p>Finally, keep only the largest $\lceil n/2\rceil$ terms in the sum for $\log_2(n!)$.
+The dropped terms are nonnegative, and each retained term is at least $\log_2(n/2)$.
+Writing out both steps, for $n \geq 4$,
+\begin{align*}
+\log_2(n!) &amp;= \log_2 1 + \log_2 2 + \dots + \log_2 n \\[10pt]
+&amp;\geq \log_2(\lfloor n/2\rfloor+1) + \dots + \log_2 n \\[10pt]
+&amp;\geq \underbrace{\log_2(n/2) + \dots + \log_2(n/2)}_{\lceil n/2\rceil\text{ terms}} \\[10pt]
+&amp;\geq \frac{n}{4}\log_2 n = \Omega(n \log{}n)
+\end{align*}
+The last inequality uses $\log_2 n \geq 2$ when $n \geq 4$.
+Together with $k \geq \log_2(n!)$, this proves $k = \Omega(n\log n)$.</p>
+</div>
+  <div class="qed" aria-label="End of proof">□</div>
+</aside>
+<p>But this analysis holds in this weird <em>only comparisons are expensive</em> model.
+We will actually show that in the model most algorithm designers prefer, which is called the Word-RAM model, the time complexity of sorting $n$ integers is remarkably $O(n)$.
+But before we get to the Word-RAM model, we start with one of the earliest formal definitions of a computer: the Turing machine.</p>
+<h3 id="turing-machine">Turing Machine</h3>
+<p>This was one of the first models of a computer, and it has been studied extensively in computer science.</p>
+<aside id="k-tape-turing-machine" class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Deterministic $k$-tape Turing machine</span>
+  </div>
+  <div class="statement-body"><p>Fix $k \ge 1$. A deterministic $k$-tape Turing machine is a tuple</p>
+<p>$$
+M = (Q, \Sigma, \Gamma, \delta, q_0, q_{\mathrm{acc}}, q_{\mathrm{rej}}),
+$$</p>
+<p>where $Q$ is a finite set of states, $\Sigma$ is a finite input alphabet, and $\Gamma$ is a finite tape alphabet with $\Sigma \subseteq \Gamma$ and a blank symbol $\sqcup \in \Gamma \setminus \Sigma$. The distinct states $q_0, q_{\mathrm{acc}}, q_{\mathrm{rej}} \in Q$ are the start, accept, and reject states. The transition function is</p>
+<p>$$
+\delta : (Q \setminus \lbrace q_{\mathrm{acc}}, q_{\mathrm{rej}}\rbrace) \times \Gamma^k
+\to Q \times \Gamma^k \times \lbrace L, S, R\rbrace^k.
+$$</p>
+<p>Each tape has its own read/write head and cells indexed by the integers. On input $w \in \Sigma^*$, tape 1 contains $w$ starting at cell 0 and all other cells are blank; the machine starts in $q_0$ with every head at cell 0. A step reads the $k$ symbols under the heads, changes state, writes one symbol on each tape, and independently moves each head left, stays put, or moves right. Entering $q_{\mathrm{acc}}$ or $q_{\mathrm{rej}}$ halts the machine.</p>
+</div>
+</aside>
+<figure class="lecture-figure">
+  <img src="./turing-machine.svg" alt="A row of tape cells with a read/write head.">
+  <figcaption>A tape head reads, writes, and moves one cell at a time.</figcaption>
+</figure>
+<h4 id="why-do-we-like-this-model">Why Do We Like This Model?</h4>
+<p>It is extremely unambiguous what the space and time complexities are.
+It’s quite literally the number of times we invoke the transition function.
+The space is the total number of cells we used barring the input alphabets.</p>
+<h4 id="why-do-we-not-like-it-so-much">Why Do We Not Like It So Much?</h4>
+<p>While it’s really useful for analysing things precisely, it’s also painful in some cases.
+To demonstrate this, let’s work through the following example.
+Given a bit string of length $n$, what is the time complexity of deciding whether it is a palindrome?
+A string is a palindrome if reversing the string does not change the string.
+For example, <code>1001</code> is a palindrome. <code>1011</code> is not.
+From your undergraduate courses, you might claim it’s $\theta(n)$.
+You could code this problem up in your favourite programming language, and plot the answer for different values of $n$.
+You might see linear plots.</p>
+<p>Now, it is known that for a deterministic one-tape Turing machine, deciding whether a binary string of length $n$ is a palindrome takes $\Omega(n^2)$ transitions in the worst case. This follows from <a rel="external" href="https://www.eecs.tufts.edu/~aloupis/comp260/lectures/hennie-1965.pdf">F. C. Hennie’s 1965 crossing-sequence lower-bound work</a>.
+In <a href="https://randomwalks.xyz/algorithms/hw/01-problem-set/">Problem Set 1</a>, you will be asked to design a deterministic one-tape Turing machine that decides palindromes in $O(n^2)$ time.</p>
+<p>We won’t say too much more about Turing machines till we get to the complexity theory part of the course.
+For now we will move on to circuits, an equally well studied model of computation.</p>
+<h3 id="circuits">Circuits</h3>
+<p>We won’t cover circuits in detail in this class, but it is also a very popular model of a computer.
+Refer to <a rel="external" href="https://www.youtube.com/watch?v=zrr9v8kmMGs">Ryan O’Donnell’s lecture on circuits</a> if you are interested.</p>
+<h3 id="word-ram">Word RAM</h3>
+<p>This model is more akin to a C or assembly program.
+You have memory where each cell is $w$ bits wide.
+If $n$ is the size of the problem, e.g., an array of size $n$ with each cell containing a number between 0 and $k-1$, then we normally assume $w \geq \log_2 \max\left\{k+1, n+1\right\}$.
+This allows us to basically express a pointer to an array location with $w$ bits and index into the addressed store by the pointer in constant time.</p>
+<figure class="lecture-figure">
+  <img src="./word-ram.svg" alt="A row of word-sized memory cells.">
+  <figcaption>Each memory cell stores a word and can be accessed directly.</figcaption>
+</figure>
+<p>The precise definition is quite a mouthful, but it’s given here in the <a rel="external" href="https://people.seas.harvard.edu/~cs125/fall14/lec6.pdf#page=1">Harvard CS125 lecture notes, Section 6.1</a> if you are interested.</p>
+<p>Roughly, this model says that things for which you have assembly instructions are constant time.
+Things like</p>
+<ul>
+<li>Addition and subtraction modulo $2^w$.</li>
+<li>Left and right shifts.</li>
+<li>AND, NOT, OR operations.</li>
+<li>Reading and writing $w$ bits to memory.</li>
+<li>Testing whether a number is greater than or equal to 0, and so on.</li>
+</ul>
+<p>In this course, for the first part at least, we will be using this definition of a computer to do analysis.
+Take, for example, the following program:</p>
+<pre class="giallo" style="color: #E1E4E8; background-color: #24292E;" ><code data-lang="python"><span class="giallo-l"><span style="color: #F97583;">def</span><span style="color: #79B8FF;"> sum</span><span>(a : list[</span><span style="color: #79B8FF;">int</span><span>])-&gt;</span><span style="color: #79B8FF;">int</span><span>:</span></span>
+<span class="giallo-l"><span>    total</span><span style="color: #F97583;"> =</span><span style="color: #79B8FF;"> 0</span></span>
+<span class="giallo-l"><span style="color: #F97583;">    for</span><span> i</span><span style="color: #F97583;"> in</span><span style="color: #79B8FF;"> range</span><span>(</span><span style="color: #79B8FF;">len</span><span>(a)):</span></span>
+<span class="giallo-l"><span>        total</span><span style="color: #F97583;"> +=</span><span> a[i]</span></span>
+<span class="giallo-l"><span style="color: #F97583;">    return</span><span> total</span></span></code></pre>
+<p>Here, it takes $w$ bits to store $i$, so the time is $O(1)$.
+The total takes $2w$ bits, as the sum can overflow, but that’s $O(1)$.
+We do $n$ basic operations, so the run time is $O(n)$.
+The space complexity is $O(1)$, as we do not include the space needed to store $a$ in the analysis.</p>
+<p>Now we will cover the sorting algorithm that takes $O(n)$ time in the next class, but <a rel="external" href="https://en.wikipedia.org/wiki/Counting_sort">here</a> is the algorithm if you’re curious.
+Try and show this takes time $O(n)$.
+Try and understand the space complexity of the algorithm.</p>
+<h2 id="references-and-other-useful-resources">References And Other Useful Resources</h2>
+<ul>
+<li><a rel="external" href="https://people.seas.harvard.edu/~madhusudan/courses/Fall2020/book.pdf">Theory Of Computation (Chapter 7)- Boaz Barak</a></li>
+<li><a rel="external" href="https://www.youtube.com/watch?v=_gKb855_3bk&amp;list=PLm3J0oaFux3ZYpFLwwrlv_EHH9wtH6pnX&amp;index=5">Models Of Computation - Ryan O’Donnell</a></li>
+<li><a rel="external" href="https://www.youtube.com/watch?v=_gKb855_3bk&amp;list=PLm3J0oaFux3ZYpFLwwrlv_EHH9wtH6pnX&amp;index=5">Big O And Friends - Ryan O’Donnell</a></li>
+<li><a rel="external" href="https://www.cs.cmu.edu/~avrim/451f11/lectures/lect0913.pdf">Comparison-based Lower Bounds for Sorting - Avrim Blum</a></li>
+</ul>
+
+    </div>
+    
+</article>
+
+    </main>
+
+    
+    <script>
+      document.querySelectorAll('.prose pre').forEach((pre) => {
+        const code = pre.querySelector('code');
+        if (!code) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block';
+        pre.before(wrapper);
+        wrapper.append(pre);
+
+        const button = document.createElement('button');
+        button.className = 'copy-code';
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.setAttribute('aria-label', 'Copy code to clipboard');
+        wrapper.append(button);
+
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(code.textContent);
+            button.textContent = 'Copied';
+            window.setTimeout(() => { button.textContent = 'Copy'; }, 1400);
+          } catch (_) {
+            button.textContent = 'Select and copy';
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(code);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        });
+      });
+    </script>
+    
+
+</body>
+</html>
