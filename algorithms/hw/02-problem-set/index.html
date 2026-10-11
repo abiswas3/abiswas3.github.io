@@ -69,7 +69,8 @@
 <p><strong>Random bits for hashing.</strong> Let $U = 2^u$ and $M = 2^m$, where $u,m \geq 1$ are integers. Write $[U] = \{0,1,\ldots,U-1\}$ and $[M] = \{0,1,\ldots,M-1\}$. We want to sample a function $h: [U] \rightarrow [M]$ uniformly at random from the set of all such functions. Prove that $U\log_2 M = 2^u m$ independent fair random bits are necessary and sufficient to sample $h$ uniformly from the set of all such functions.</p>
 </li>
 <li>
-<p>Construct a universal hash family where sampling a random hash function takes $\log_2 U\, \log_2 M$ bits.</p>
+<p>Let $U = 2^u$ and $M = 2^m$, where $u,m \geq 1$ are integers.  Define $$\mathcal{H} := \{h_A : A \in \{0,1\}^{m \times u} \land h_A(x) = Ax\}$$
+Show that $\mathcal{H}$ is universal.</p>
 </li>
 <li>
 <p>Show that any binary search algorithm must make $\Omega(\log_2 n)$ comparisons.</p>
@@ -92,7 +93,18 @@
 <li>
 <p>Show that <a rel="external" href="https://en.wikipedia.org/wiki/Insertion_sort">Insertion Sort</a> is correct and runs in time $O(n^2)$.</p>
 </li>
+<li>
+<p>Let $U = 2^u$ and $M = 2^m$, where $u,m \geq 1$ are integers.  Consider the following strategy.</p>
+<ol>
+<li>Pick a random <em>odd</em> number $a \in [M]$.</li>
+<li>Define $h_a(x) = (ax \mod U) \gg u-mm)$</li>
 </ol>
+</li>
+</ol>
+<p>where $\gg$ represents the logical right shift operation.Implement this algorithm and show that</p>
+<p>$$
+\Pr_{\text{odd } a \gets [M]}\left[ h_a(x) = h_a(y) \right] \leq 2/M
+$$</p>
 
     </div>
     
