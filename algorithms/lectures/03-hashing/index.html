@@ -54,7 +54,7 @@
         
         <div class="lecture-credits">
             <span class="lecture-credit-lecturer"><span class="credit-label">Lecturer</span> Ari</span>
-            <span class="lecture-credit-scribe"><span class="credit-label">Scribe</span> Scribe</span>
+            <span class="lecture-credit-scribe"><span class="credit-label">Scribe</span> Ari</span>
         </div>
         
     </header>
@@ -63,7 +63,9 @@
     <div class="prose page-content">
         <p>$\newcommand{\bit}{\{0,1\}}$
 $\newcommand{\Universe}{\bit^u}$
-$\newcommand{\CompressedUniverse}{\bit^m}$</p>
+$\newcommand{\CompressedUniverse}{\bit^m}$
+$\newcommand{\PProb}[2]{\Pr_{ #2}\left[ #1 \right]}$
+$\newcommand{\Prob}[1]{\Pr\left[#1\right]}$</p>
 <p>Recall the situation we landed ourselves in the last lecture was that we have a universe of $U$ items.
 However, we only wanted to use $M$ words of memory to store them.
 We wanted to do so because we wanted to insert $n$ items as per our set interface.
@@ -143,10 +145,265 @@ h_A(x) = Ax \pmod{2}.
 $$</p>
 <p>It is clear that this scheme only needs $um$ bits as opposed to $Um$ bits.</p>
 <p>You show in  <a href="https://randomwalks.xyz/algorithms/hw/02-problem-set/">Problem Set 2, Problem 3</a> that we need far fewer bits to sample a universal hash function than to sample a fully random hash function.</p>
+<h3 id="perfect-hashing">Perfect Hashing</h3>
+<div class="footnote-definition" id="monte-carlo"><sup class="footnote-definition-label">2</sup>
+<p>Previously we designed what is known as a Monte Carlo styled algorithm. Here the algorithm <em>always</em> terminates. Namely, we can always sample a hash function. It maybe that we get extremely unlucky, and therefore, we have awful performance, but the algorithm to insert keys <em>always</em> terminates.</p>
+</div>
+<p>Universal hashing gives us constant expected lookup time.
+But there is still a chance that the time complexity to insert $n$ keys into the hash tables results in chains of length $O(n)$, albeit unlikely.
+Our next challenge is to ask if we can guarantee that this will not happen?
+We already discussed earlier that we must use randomness.
+How then we can guarantee that worst case is not too bad?
+And the answer is that we can, if we are willing to move to a <a href="TODO:">Las Vegas</a> style<sup class="footnote-reference"><a href="#monte-carlo">2</a></sup> algorithm.
+What we mean by that is there is a small chance now that our algorithm will never terminate, but when it does we are guaranteed that all operations will be efficient.</p>
+<p>For a static set of keys, the idea is to use two levels of hashing to obtain constant worst-case lookup time while still using linear space.
+This construction is called <strong>FKS perfect hashing</strong>.</p>
+<h4 id="algorithm">Algorithm</h4>
+<p>For the remainder of this algorithm we will set $M = n$.</p>
+<div class="footnote-definition" id="unorder"><sup class="footnote-definition-label">3</sup>
+<p>If $x$ and $y$ end up in the same bucket we say they collide. When counting collisions, we could say both pairs $(x,y)$ and $(y,x)$ collided. So should we count twice? Here when we say unordered pairs, we count collisions once per pair, no matter the ordering. So we count a collision for either $(x,y)$ or $(y,x)$, but not both.</p>
+</div>
+<ol>
+<li>
+<p>Sample $h \gets \mathcal{H}$ where $\mathcal{H}$ is a universal family.</p>
+</li>
+<li>
+<p>Then insert all $n$ keys in $S$. Let $C$ denote the number unordered<sup class="footnote-reference"><a href="#unorder">3</a></sup> collisions.</p>
+</li>
+<li>
+<p>If $C \ge n$ then go back to step 1. We will show that on average we will have to back to step one two times.</p>
+</li>
+<li>
+<p>Now for all the buckets that are occupied with keys, let $L_i$  denote the number of keys in bucket $i \in [n]$. Sample $g_i : [U] \rightarrow [L_i^2]$ from a universal hash family, and send every key $x$ in bucket $i$ to secondary bucket $g_i(x)$. If there is any collision in the secondary layer, sample another $g_i$. Keep trying till no collisions.</p>
+</li>
+</ol>
+<p>TODO: Picture</p>
+<aside id="static-perfect-hashing" class="statement statement-theorem thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Static perfect hashing</span>
+  </div>
+  <div class="statement-body"><p>Let $S \subseteq [U]$ be a fixed set of $n \ge 1$ distinct keys.
+There is a randomized algorithm that constructs a static dictionary for $S$ with the following guarantees:</p>
+<ol>
+<li>The dictionary uses $O(n)$ words of memory.</li>
+<li>Every membership query takes $O(1)$ worst-case time and returns the correct answer.</li>
+<li>Construction terminates with probability $1$ and takes $O(n)$ expected time.</li>
+</ol>
+<p>The construction is <strong>Las Vegas</strong>: it always produces a correct dictionary when it finishes.</p>
+</div>
+</aside>
+<aside class="proof">
+  <div class="proof-heading">Proof</div>
+  <div class="proof-body"><p>We use two levels of hashing.</p>
+<p><strong>First-level hashing.</strong> Sample $h: [U] \to [n]$ uniformly from a universal hash family.
+For each $i \in [n]$, let $S_i$ be the set of keys in $S$ that map to bucket $i$, and let $L_i = |S_i|$.
+Every key belongs to exactly one bucket, so</p>
+<p>$$
+\sum_{i \in [n]} L_i = n.
+$$</p>
+<p>Let $\mathcal{P}$ be the set of unordered pairs $x,y \in S$.
+There are $|\mathcal{P}| = \binom{n}{2}$ such pairs.
+For each such pair, let $I_{x,y}$ be 1 if $h(x) = h(y)$ and 0 otherwise.
+The number of colliding pairs is therefore</p>
+<p>$$
+C = \sum_{(x,y) \in \mathcal{P}} I_{x,y}.
+$$</p>
+<p>As $I_{x,y}$ is an indicator, $\mathbb{E}_{h}[I_{x,y}] = \PProb{h(x) = h(y)}{h} \le 1/n$.
+By linearity of expectation,</p>
+<p>$$
+\begin{aligned}
+\mathbb{E}[C]
+&amp;= \mathbb{E}\left[\sum_{(x,y) \in \mathcal{P}} I_{x,y}\right] \\
+&amp;= \sum_{(x,y) \in \mathcal{P}} \mathbb{E}[I_{x,y}] \\
+&amp;\le \sum_{(x,y) \in \mathcal{P}} \frac{1}{n} \\
+&amp;= \binom{n}{2}\frac{1}{n} \\
+&amp;= \frac{n(n-1)}{2n} = \frac{n-1}{2}.
+\end{aligned}
+$$</p>
+<p>We can also count collisions within each bucket.
+The $L_i$ keys in bucket $i$ contribute exactly $\binom{L_i}{2}$ pairs.
+Keys in different buckets do not collide, so</p>
+<p>$$
+C = \sum_{i \in [n]} \binom{L_i}{2}.
+$$</p>
+<p>For each bucket, $2\binom{L_i}{2} = L_i(L_i-1) = L_i^2-L_i$.
+Rearranging gives $L_i^2 = L_i + 2\binom{L_i}{2}$.
+Summing over the buckets,</p>
+<p>$$
+\begin{aligned}
+\sum_{i \in [n]} L_i^2
+&amp;= \sum_{i \in [n]} \left(L_i + 2\binom{L_i}{2}\right) \\
+&amp;= \sum_{i \in [n]} L_i + 2\sum_{i \in [n]}\binom{L_i}{2} \\
+&amp;= n + 2C.
+\end{aligned}
+$$</p>
+<p>We keep $h$ if $C \le n$.
+Otherwise, we sample a new $h$ independently and try again.
+Since $C$ is nonnegative, Markov’s inequality gives</p>
+<p>$$
+\Pr[C &gt; n]
+\le \frac{\mathbb{E}[C]}{n}
+\le \frac{n-1}{2n}
+&lt; \frac{1}{2}.
+$$</p>
+<p>Thus an attempt succeeds with probability $p \ge 1/2$.
+Let $T_0$ be the number of attempts needed, counting the successful attempt.
+For $t \ge 0$, the event $T_0 &gt; t$ means that the first $t$ attempts all failed.
+As each attempt uses a fresh independent hash function,</p>
+<p>$$
+\Pr[T_0 &gt; t] = (1-p)^t \le 2^{-t}.
+$$</p>
+<p>From the definition of expectation, we have
+$$
+\mathbb{E}[T_0]
+= \sum_{t=0}^{\infty} \Pr[T_0 &gt; t]
+\le \sum_{t=0}^{\infty} 2^{-t}
+= \frac{1}{1-1/2}
+= 2.
+$$</p>
+<p>For every accepted $h$, the bucket sizes satisfy</p>
+<p>$$
+\sum_{i \in [n]} L_i^2 = n + 2C \le n + 2n = 3n.
+$$</p>
+<p><strong>Second-level hashing.</strong> Fix an accepted first-level hash function $h$.
+The sets $S_i$ and their sizes $L_i$ are now fixed.
+Skip empty buckets.
+For each nonempty bucket $i$, allocate a secondary table of size $L_i^2$, and sample $g_i: [U] \to [L_i^2]$ uniformly from a universal hash family.</p>
+<p>There are $\binom{L_i}{2}$ pairs of distinct keys in $S_i$.
+For any one of these pairs, universality gives</p>
+<p>$$
+\Pr_{g}[g_i(x) = g_i(y) \mid h] \le \frac{1}{L_i^2}.
+$$</p>
+<p>The probability here is over the fresh choice of $g_i$, with $h$ fixed.
+A collision occurs in the secondary table if at least one of these pairs collides.
+By the union bound,</p>
+<p>$$
+\begin{aligned}
+\Pr[\text{some collision in bucket } i \mid h]
+&amp;\le \sum_{\substack{x,y \in S_i \\ x&lt;y}} \Pr_{g}[g_i(x) = g_i(y) \mid h] \\
+&amp;\le \binom{L_i}{2}\frac{1}{L_i^2} \\
+&amp;= \frac{L_i(L_i-1)}{2L_i^2} \\
+&amp;= \frac{L_i-1}{2L_i} \\
+&amp;&lt; \frac{1}{2}.
+\end{aligned}
+$$</p>
+<p>If $L_i = 1$, there are no pairs and no collision is possible.</p>
+<p>If a secondary table has a collision, clear it, sample a new $g_i$ independently, and try again for that bucket.
+Once the table has no collisions, keep it and its hash function.
+Let $T_i$ be the number of attempts needed for this bucket.
+Conditioned on $h$, the probability of success in each attempt is at least $1/2$.
+The same calculation as above gives</p>
+<p>$$
+\Pr[T_i &gt; t \mid h] \le 2^{-t},
+\qquad
+\mathbb{E}[T_i \mid h]
+= \sum_{t=0}^{\infty} \Pr[T_i &gt; t \mid h]
+\le 2.
+$$</p>
+<p><strong>Space.</strong> The first-level table has $n$ entries.
+The secondary tables have exactly $\sum_i L_i^2 \le 3n$ cells altogether, so the two levels use at most $4n$ cells.
+Each occupied secondary cell stores its key, and empty cells are marked empty.
+Each first-level entry stores the size of its bucket, a pointer to its secondary table, and its secondary hash function.
+These take $O(1)$ words per entry under our assumptions.
+The first-level hash function takes another $O(1)$ words.
+Thus the total space is $O(n)$ words.</p>
+<!-- **Construction time.** In a first-level attempt, initialize $n$ empty buckets and scan the $n$ keys. -->
+<!-- For each key $x$, compute $h(x)$, put $x$ in that bucket, and increment its count. -->
+<!-- This takes $O(n)$ time. -->
+<!-- Then scan the $n$ counts and compute $C = \sum_i L_i(L_i-1)/2$, which also takes $O(n)$ time. -->
+<!-- We therefore check the stopping condition without checking all $\binom{n}{2}$ pairs individually. -->
+<!---->
+<!-- There is a constant $a$ such that each first-level attempt takes at most $an$ time. -->
+<!-- Its total expected time is at most -->
+<!---->
+<!-- $$ -->
+<!-- an\mathbb{E}[T_0] \le 2an. -->
+<!-- $$ -->
+<!---->
+<!-- For a secondary attempt in bucket $i$, initialize its $L_i^2$ cells as empty. -->
+<!-- Then scan its $L_i$ keys and try to insert each $x$ at cell $g_i(x)$. -->
+<!-- If a cell is already occupied, we have detected a collision and reject the attempt. -->
+<!-- If all insertions succeed, we accept it. -->
+<!-- Initializing the table takes $O(L_i^2)$ time, and inserting the keys takes $O(L_i)$ time. -->
+<!-- Since $L_i \ge 1$, we have $L_i \le L_i^2$, so one attempt costs at most $bL_i^2$ for some constant $b$. -->
+<!---->
+<!-- Let $R$ be the total time spent building the secondary tables. -->
+<!-- For any accepted $h$, linearity of expectation gives -->
+<!---->
+<!-- $$ -->
+<!-- \begin{aligned} -->
+<!-- \mathbb{E}[R \mid h] -->
+<!-- &\le \sum_{i:L_i>0} bL_i^2\mathbb{E}[T_i \mid h] \\\\ -->
+<!-- &\le 2b\sum_{i \in [n]} L_i^2 \\\\ -->
+<!-- &\le 2b(3n) = 6bn. -->
+<!-- \end{aligned} -->
+<!-- $$ -->
+<!---->
+<!-- This bound holds for every accepted $h$. -->
+<!-- Averaging over the first-level hash function therefore gives $\mathbb{E}[R] \le 6bn$. -->
+<!-- Adding the expected time for both levels gives at most $2an+6bn = O(n)$. -->
+<!---->
+<!-- **Queries.** For a query $q \in [U]$, compute $i = h(q)$ and read the corresponding first-level entry. -->
+<!-- If $L_i = 0$, return "absent". -->
+<!-- Otherwise, compute $j = g_i(q)$ and inspect cell $j$ of the secondary table. -->
+<!-- Return "present" exactly when that cell contains $q$. -->
+<!---->
+<!-- If $q \in S$, it belongs to bucket $i$ and was inserted at cell $g_i(q)$. -->
+<!-- Because that secondary table passed the collision check, this cell contains $q$. -->
+<!-- Thus every key in $S$ is found. -->
+<!-- If $q \notin S$, the inspected cell is either empty or contains a different key from $S$. -->
+<!-- The comparison therefore returns "absent". -->
+<!-- This is why we must compare the stored key with $q$, rather than merely check whether the cell is occupied. -->
+<!---->
+<!-- A query uses at most two hash evaluations, two table accesses, and a comparison of keys occupying $O(1)$ words. -->
+<!-- Each operation takes $O(1)$ time, so the worst-case query time is $O(1)$. -->
+<!---->
+<!-- **Termination.** The first-level stage fails to terminate only if $T_0 > t$ for every finite $t$. -->
+<!-- But $\Pr[T_0 > t] \le 2^{-t}$, and hence -->
+<!---->
+<!-- $$ -->
+<!-- \Pr[T_0 = \infty] -->
+<!-- = \lim_{t\to\infty}\Pr[T_0 > t] -->
+<!-- \le \lim_{t\to\infty}2^{-t} -->
+<!-- = 0. -->
+<!-- $$ -->
+<!---->
+<!-- For any accepted $h$, the same argument gives $\Pr[T_i = \infty \mid h] = 0$ for each nonempty bucket. -->
+<!-- There are at most $n$ such buckets. -->
+<!-- By a union bound, conditioned on $h$, the probability that any secondary stage fails to terminate is at most the sum of at most $n$ zeros, which is zero. -->
+<!-- Averaging over $h$ preserves this probability-zero bound. -->
+<!-- Together with the first-level stage, this proves that the whole construction terminates with probability $1$. -->
+<!---->
+<!-- These probability bounds do not give a finite worst-case bound on the number of attempts. -->
+<!-- However, whenever the algorithm finishes, the first-level hash has passed the space check and every secondary table has passed the collision check. -->
+<!-- The dictionary is therefore always correct when returned, as required for a Las Vegas algorithm. -->
+</div>
+  <div class="qed" aria-label="End of proof">□</div>
+</aside>
+<h2 id="k-wise-independent-hashing-functions">K-wise Independent Hashing Functions</h2>
+<p>There are other types of hash families as well.
+An extremely popular and useful one that satisfies $k$-wise independence with $2 \le k \le U$.
+Originally proposed by TODO:, we will see clever uses of these algorithms, we when we go over graph algorithms.
+Here we will use more randomness than universal functions, but less randomness than the purely random hash function.
+For now we just introduce the definition.</p>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — K-wise Independent Hashing</span>
+  </div>
+  <div class="statement-body"><p>A family $\mathcal{H}$ of hash functions mapping $[U]$ to $[M]$ is called $k$-wise-independent if for any $k$ <em>distinct</em> keys $x_1, x_2, \ldots, x_k \in [U]$, and any $k$ values $y_1, \ldots, y_k \in [M]$ (not necessarily distinct), we have</p>
+<p>$$
+\PProb{h(x_1) = y_1 \land \ldots \land h(x_k) = y_k}{h \gets \mathcal{H}}
+\le \frac{1}{M^k}$$</p>
+</div>
+</aside>
+<p>If I told you the location of where any $k-1$ distinct keys hashed to, the hashed location of another distinct key would still be uniformly distributed over $[M]$.
+After revealing the hash values of $k$ distinct keys, $k$-wise independence alone no longer guarantees that another distinct key’s hash value remains uniformly distributed.</p>
+<p>The fully random family is $U$-wise independent: the hash values of all $U$ keys are independent and uniformly distributed.</p>
 <h2 id="references">References</h2>
 <ul>
 <li><a rel="external" href="https://www.cs.princeton.edu/courses/archive/spring14/cos340/hashing2011.pdf">Princeton COS 340: Hashing</a>.</li>
 <li><a rel="external" href="https://www.cs.cmu.edu/~15451-s17/lectures/lec06-hashing.pdf">Anupam Gupta, CMU 15-451/651, Lecture 6: Hashing</a>.</li>
+<li><a rel="external" href="https://www.cs.cmu.edu/afs/cs.cmu.edu/academic/class/15750-s20/www/notes/hashing.pdf">Anupam Gupta, CMU 15-750, Lecture 6: Hashing and perfect hashing</a>.</li>
 </ul>
 
     </div>
