@@ -84,7 +84,12 @@ Perhaps the AVL trees that implement the set interface? It gives us everything i
 We can use subtree augmentation to implement <code>find_max()</code> in $O(1)$ time as each node can store the maximal key in its subtree.</p>
 <p>In some ways we are done, we cannot really do better.
 But we foreshadowed that we will go over the binary heap, which is in essence a simplification of the above data structure with the same time bounds for the above subset of operations.</p>
-<p>TODO: (Ari) Make a table with rows being Dynamic array, Sorted dyn array, set avl tree and columns being build, insert, delete.</p>
+<table><thead><tr><th>Data Structure</th><th><code>build(X)</code></th><th><code>insert(key)</code></th><th><code>delete_max()</code></th><th>Time</th><th>In-place?</th></tr></thead><tbody>
+<tr><td>Dynamic Array</td><td>$O(n)$</td><td>$O(1_a)$</td><td>$O(n)$</td><td>$O(n^2)$</td><td>Yes</td></tr>
+<tr><td>Sorted Array</td><td>$O(n \log n)$</td><td>$O(n)$</td><td>$O(1)$</td><td>$O(n^2)$</td><td>Yes</td></tr>
+<tr><td>AVL Tree</td><td>$O(n \log n)$</td><td>$O(\log n)$</td><td>$O(\log n)$</td><td>$O(n \log n)$</td><td>No</td></tr>
+<tr><td>Heap Sort</td><td>$O(n \log n)$</td><td>$O(\log n)$</td><td>$O(\log n)$</td><td>$O(n \log n)$</td><td>Yes</td></tr>
+</tbody></table>
 <p>Go over the operations</p>
 <ol>
 <li>
@@ -103,7 +108,6 @@ At each delete we get the largest element.</p>
 <p>The time complexity is $n\cdot T_{\text{insert}} + T_{\text{delete}}$</p>
 <p>Now for the existing data structures we already have the time complexity of all these operations.
 So we get the following.</p>
-<p>TODO: put in the bounds.</p>
 <p>AVL sort is not in place.</p>
 <h3 id="heap-sort">Heap Sort</h3>
 <p>We will show</p>
@@ -122,10 +126,11 @@ So we get the following.</p>
 </li>
 </ul>
 <p>The key thing to remember about this data structure is that we will use an array to represent a tree.
+If it were any tree this would not be possible, but as we will have a complete binary tree things will work out.
 That is although the memory representation of the data structure is an array, one should really think of the operations as if we were doing them on a tree.</p>
-<p>Define a complete binary tree  TODO: (Ari) picture</p>
-<p>Now we can represent a tree like this as an array.
-Write things in depth order (note this is very different from traversal order or what we called in-order).</p>
+<p><img src="https://randomwalks.xyz/algorithms/lectures/04-b-heap-sort/./bin-tree.svg" alt="" /></p>
+<p>Loosely a binary is complete if every level but the last level of the tree is fully balanced, and in the last level, leaves are filled in left to right.</p>
+<p>Write things in depth order (note this is very different from traversal order or what we called in-order).</p>
 <p>There is a bijection between complete binary trees and arrays.
 That is for every complete binary tree there is one unique array that represents it.
 Why? Because the completeness properties forces my hand.
