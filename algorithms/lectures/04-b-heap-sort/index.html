@@ -65,11 +65,10 @@
 <div class="footnote-definition" id="eg"><sup class="footnote-definition-label">1</sup>
 <p>If keys were strings, then the ordering could be lexicographical. If they were integers they could be ordered from lowest to highest and so on.</p>
 </div>
-<p>Having learned how to implement rooted binary trees, today we will learn how to implement another tree like data structures called, binary Heaps.
-We will implement an interface called the priority queue which is a subset of the set interface we have been implementing all this while.
+<p>Having learned how to implement rooted binary trees, today we will learn how to implement another tree like data structures called binary heaps.
+Our motivating problem will be to implement the priority queue interface which is a subset of the set interface we have been implementing all this while.
 We will assume that there is some total ordering defined over the keys<sup class="footnote-reference"><a href="#eg">1</a></sup> of our data <code>X</code>.
 Often this ordering is referred to as the priority of the keys.</p>
-<p>The interface requires us to construct the following operations:</p>
 <ul>
 <li><code>build(X)</code>: Given a collection of $n$ keys build the initial data structure.</li>
 <li><code>insert(k)</code>: Insert key <code>k</code> into the data structure.</li>
@@ -78,56 +77,34 @@ Often this ordering is referred to as the priority of the keys.</p>
 </ul>
 <p>Why would you want something like this?
 Packets going into a router, and you’d want the highest ones to be processed first.
-Same with processes running on a CPU.</p>
-<p>With this problem defined, think about how we would use all the data structures we have discussed so far to solve this problem?
-Perhaps the AVL trees that implement the set interface? It gives us everything in time $\log_2 n$ time and build is $n\log n$ time as we might have to sort the initial collection first.
+Same with processes running on a CPU.
+At each step you might want to pop the most important item off the queue.</p>
+<p>With the problem defined, think about how we would use all the data structures we have discussed so far to solve this problem?</p>
+<p>With AVL trees we had insertion and deletion in time $\log_2 n$, so it would take $n\log n$ time to build the data structure.
+All remaining operations can be done in $\log_2 n$.
 We can use subtree augmentation to implement <code>find_max()</code> in $O(1)$ time as each node can store the maximal key in its subtree.</p>
 <p>In some ways we are done, we cannot really do better.
-But we foreshadowed that we will go over the binary heap, which is in essence a simplification of the above data structure with the same time bounds for the above subset of operations.</p>
+But the AVL tree was quite complex.
+Furthermore, given an items with priorities we had to construct a tree out of it.
+We ask if it is possible to not use extra space?
+To make things clearer, consider the following sorting algorithm using the priority queue interface.</p>
+<h3 id="priority-queue-sort">Priority Queue Sort</h3>
+<p>Given any data structure that implements the priority queue interface, we  can implement a sorting algorithm.
+How? Well insert all the items, and then delete one at a time, and then reverse the list based on whether you need the list sorted in ascending or descending order.
+The time complexity is $n\cdot T_{\text{insert}} + T_{\text{delete}}$</p>
+<p>Now for the existing data structures we already have the time complexity of all these operations.
+So we get the following.</p>
 <table><thead><tr><th>Data Structure</th><th><code>build(X)</code></th><th><code>insert(key)</code></th><th><code>delete_max()</code></th><th>Time</th><th>In-place?</th></tr></thead><tbody>
 <tr><td>Dynamic Array</td><td>$O(n)$</td><td>$O(1_a)$</td><td>$O(n)$</td><td>$O(n^2)$</td><td>Yes</td></tr>
 <tr><td>Sorted Array</td><td>$O(n \log n)$</td><td>$O(n)$</td><td>$O(1)$</td><td>$O(n^2)$</td><td>Yes</td></tr>
 <tr><td>AVL Tree</td><td>$O(n \log n)$</td><td>$O(\log n)$</td><td>$O(\log n)$</td><td>$O(n \log n)$</td><td>No</td></tr>
 <tr><td>Heap Sort</td><td>$O(n \log n)$</td><td>$O(\log n)$</td><td>$O(\log n)$</td><td>$O(n \log n)$</td><td>Yes</td></tr>
 </tbody></table>
-<p>Go over the operations</p>
-<ol>
-<li>
-<p>In an unsorted array, insert is amortised $O_T(1)$ (just stick at the end), and delete max is $O(n)$. We need to go find the maximal element which takes time $O(n)$, and then we can swap it with the last element, and change the size of the array.</p>
-</li>
-<li>
-<p>In a sorted array, <code>delete_max()</code> is $O(1)$ as it’s always the last element. <code>insert(k)</code> is linear as we might do binary search to find where to insert, but once I find the location, I still have to move things over.</p>
-</li>
-</ol>
-<p>So we have fast insert in one case, and fast delete in the other, and we want the best of both worlds.</p>
-<h3 id="priority-queue-sort">Priority Queue Sort</h3>
-<p>Given any data structure that implements the priority queue interface.
-I can implement a sorting algorithm.
-How? Well insert all the items, and then delete one at a time.
-At each delete we get the largest element.</p>
-<p>The time complexity is $n\cdot T_{\text{insert}} + T_{\text{delete}}$</p>
-<p>Now for the existing data structures we already have the time complexity of all these operations.
-So we get the following.</p>
-<p>AVL sort is not in place.</p>
-<h3 id="heap-sort">Heap Sort</h3>
-<p>We will show</p>
-<ul>
-<li>
-<p><code>build(X)</code>: takes time $O(n)$.</p>
-</li>
-<li>
-<p><code>insert(k)</code>: takes time amortised $O_a(\log n)$</p>
-</li>
-<li>
-<p><code>delete(k)</code>: takes time amortised $O_a(\log n)$</p>
-</li>
-<li>
-<p><code>sort()</code>: in place and time $O(n \log n)$.</p>
-</li>
-</ul>
-<p>The key thing to remember about this data structure is that we will use an array to represent a tree.
-If it were any tree this would not be possible, but as we will have a complete binary tree things will work out.
-That is although the memory representation of the data structure is an array, one should really think of the operations as if we were doing them on a tree.</p>
+<p>AVL sort gives us everything we want but we need to store all this extra space in the form of a tree.</p>
+<h3 id="complete-binary-trees">Complete Binary Trees</h3>
+<p>Every array $Q$ can be viewed as a <em>complete</em> binary tree.
+A binary tree of height $h$ <em>complete</em> if in every level $l \in \{0, \ldots, h-1\}$ every node has both left and right children.
+At height $h$ TODO: (ari) formal def and improve this picture.</p>
 <p><img src="https://randomwalks.xyz/algorithms/lectures/04-b-heap-sort/./bin-tree.svg" alt="" /></p>
 <p>Loosely a binary is complete if every level but the last level of the tree is fully balanced, and in the last level, leaves are filled in left to right.</p>
 <p>Write things in depth order (note this is very different from traversal order or what we called in-order).</p>
