@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1f1e1b">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="">
+    <title>Binary Heaps · Algorithms</title>
+    <link rel="stylesheet" href="https://randomwalks.xyz/algorithms/style.css?h=f7cec39f7c401bd55eae">
+    <script defer src="https://randomwalks.xyz/algorithms/sidenotes.js?h=abba13c76e721c629ac3"></script>
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          tags: 'ams'
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+</head>
+<body>
+    
+    <header class="site-header">
+        <a class="brand" href="https://randomwalks.xyz/algorithms" aria-label="Algorithms home">
+            <span class="brand-mark" aria-hidden="true">A</span>
+            <span class="brand-copy">
+                <strong>Algorithms</strong>
+            </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="https://randomwalks.xyz/algorithms/lectures/" aria-current="page">Lecture Notes</a>
+            <a href="https://randomwalks.xyz/algorithms/hw/">Problem Sets</a>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        
+<article class="page-shell">
+    <header class="page-heading">
+        <h1>Binary Heaps</h1>
+        
+        
+        
+        
+        
+        
+        <div class="lecture-credits">
+            <span class="lecture-credit-lecturer"><span class="credit-label">Lecturer</span> Ari</span>
+            <span class="lecture-credit-scribe"><span class="credit-label">Scribe</span> Ari</span>
+        </div>
+        
+    </header>
+
+    
+    <div class="prose page-content">
+        <h2 id="binary-heaps">Binary Heaps</h2>
+<div class="footnote-definition" id="eg"><sup class="footnote-definition-label">1</sup>
+<p>If keys were strings, then the ordering could be lexicographical. If they were integers they could be ordered from lowest to highest and so on.</p>
+</div>
+<p>Having learned how to implement rooted binary trees, today we will learn how to implement another tree like data structures called, binary Heaps.
+We will implement an interface called the priority queue which is a subset of the set interface we have been implementing all this while.
+We will assume that there is some total ordering defined over the keys<sup class="footnote-reference"><a href="#eg">1</a></sup> of our data <code>X</code>.
+Often this ordering is referred to as the priority of the keys.</p>
+<p>The interface requires us to construct the following operations:</p>
+<ul>
+<li><code>build(X)</code>: Given a collection of $n$ keys build the initial data structure.</li>
+<li><code>insert(k)</code>: Insert key <code>k</code> into the data structure.</li>
+<li><code>delete_max()</code>: Remove the maximal key from the data structure,</li>
+<li><code>find_max()</code>: Return the maximal key.</li>
+</ul>
+<p>Why would you want something like this?
+Packets going into a router, and you’d want the highest ones to be processed first.
+Same with processes running on a CPU.</p>
+<p>With this problem defined, think about how we would use all the data structures we have discussed so far to solve this problem?
+Perhaps the AVL trees that implement the set interface? It gives us everything in time $\log_2 n$ time and build is $n\log n$ time as we might have to sort the initial collection first.
+We can use subtree augmentation to implement <code>find_max()</code> in $O(1)$ time as each node can store the maximal key in its subtree.</p>
+<p>In some ways we are done, we cannot really do better.
+But we foreshadowed that we will go over the binary heap, which is in essence a simplification of the above data structure with the same time bounds for the above subset of operations.</p>
+<p>TODO: (Ari) Make a table with rows being Dynamic array, Sorted dyn array, set avl tree and columns being build, insert, delete.</p>
+<p>Go over the operations</p>
+<ol>
+<li>
+<p>In an unsorted array, insert is amortised $O_T(1)$ (just stick at the end), and delete max is $O(n)$. We need to go find the maximal element which takes time $O(n)$, and then we can swap it with the last element, and change the size of the array.</p>
+</li>
+<li>
+<p>In a sorted array, <code>delete_max()</code> is $O(1)$ as it’s always the last element. <code>insert(k)</code> is linear as we might do binary search to find where to insert, but once I find the location, I still have to move things over.</p>
+</li>
+</ol>
+<p>So we have fast insert in one case, and fast delete in the other, and we want the best of both worlds.</p>
+<h3 id="priority-queue-sort">Priority Queue Sort</h3>
+<p>Given any data structure that implements the priority queue interface.
+I can implement a sorting algorithm.
+How? Well insert all the items, and then delete one at a time.
+At each delete we get the largest element.</p>
+<p>The time complexity is $n\cdot T_{\text{insert}} + T_{\text{delete}}$</p>
+<p>Now for the existing data structures we already have the time complexity of all these operations.
+So we get the following.</p>
+<p>TODO: put in the bounds.</p>
+<p>AVL sort is not in place.</p>
+<h3 id="heap-sort">Heap Sort</h3>
+<p>We will show</p>
+<ul>
+<li>
+<p><code>build(X)</code>: takes time $O(n)$.</p>
+</li>
+<li>
+<p><code>insert(k)</code>: takes time amortised $O_a(\log n)$</p>
+</li>
+<li>
+<p><code>delete(k)</code>: takes time amortised $O_a(\log n)$</p>
+</li>
+<li>
+<p><code>sort()</code>: in place and time $O(n \log n)$.</p>
+</li>
+</ul>
+<p>The key thing to remember about this data structure is that we will use an array to represent a tree.
+That is although the memory representation of the data structure is an array, one should really think of the operations as if we were doing them on a tree.</p>
+<p>Define a complete binary tree  TODO: (Ari) picture</p>
+<p>Now we can represent a tree like this as an array.
+Write things in depth order (note this is very different from traversal order or what we called in-order).</p>
+<p>There is a bijection between complete binary trees and arrays.
+That is for every complete binary tree there is one unique array that represents it.
+Why? Because the completeness properties forces my hand.
+There is only one tree shape that stores $n$ keys.
+We fill in each level left to right.</p>
+<p>Note that if we wanted to solve the whole set interface we cannot always guarantee a complete binary tree.
+But as we are supporting a smaller set of operations, we can guarantee to represent data with a complete binary tree.
+A complete binary tree is in some ways the best kind of tree we could hope for for the problems we have been discussing.
+It’s height is guaranteed to be at most $\lceil \log_2 n\rceil$.
+And as we have completeness, we do not even need to store left/right and parent like we did with a normal tree.
+This is an implicit data structure.
+We do not need to store pointers.</p>
+<ul>
+<li><code>left(i) = 2i + 1</code></li>
+<li><code>right(i) = 2i + 2</code></li>
+<li><code>parent(j)</code> = $\lfloor (j-1)/2\rfloor$</li>
+</ul>
+<p>So do not need any pointers, i can just compute them using index arithmetic. This is only possible because we are guaranteed that we have a complete binary tree.</p>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Binary Heap Q</span>
+  </div>
+  <div class="statement-body"><p>An array representing a complete binary tree where every node $i$ of the tree satisfies the maximum heap property at $i$, which says $Q[i] \geq \max\{Q[2j+1], Q[2j+2]\}$.
+In other words, each node is at least as large as it’s children.</p>
+</div>
+</aside>
+<aside class="statement statement-lemma thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Lemma</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>If an array $Q$ representing a complete binary tree satisfies the maximum heap property, then we have $Q[i] \ge Q[j]$ for all $j \in \text{subtree}(i)$.</p>
+</div>
+</aside>
+<p>As a direct corollary we get that the root is the maximum.
+So finding the maximum is very easy.
+Deleting it is a little annoying, as we are deleting the root, and after the delete we want to guarantee that we are still a complete binary tree.</p>
+<h4 id="insert">Insert</h4>
+<ol>
+<li>Add to the end of the array $Q$.</li>
+<li>Then call <code>max_heapify_up(|Q| - 1)</code></li>
+</ol>
+<pre class="giallo" style="color: #E1E4E8; background-color: #24292E;" ><code data-lang="python"><span class="giallo-l"><span style="color: #F97583;">def</span><span style="color: #B392F0;"> max_heapify_up</span><span>(i):</span></span>
+<span class="giallo-l"><span style="color: #F97583;">   if</span><span> Q[parent(i)]</span><span style="color: #F97583;"> &lt;</span><span> Q[i]:</span></span>
+<span class="giallo-l"><span>       Q[parent(i)], Q[i]</span><span style="color: #F97583;"> =</span><span> Q[i], Q[parent(i)]</span></span>
+<span class="giallo-l"><span>       max_heapify_up(parent(i))</span></span></code></pre>
+<p>So the runtime is at most $O(h) = O(\log_2 n)$.</p>
+<h4 id="delete">Delete</h4>
+<p>Delete is almost the same.</p>
+<ol>
+<li>Swap $Q[0]$ and $Q[Q.len -1]$.</li>
+<li>Then delete last.</li>
+<li>Call <code>max_heapify_down(0)</code>.</li>
+</ol>
+<pre class="giallo" style="color: #E1E4E8; background-color: #24292E;" ><code data-lang="python"><span class="giallo-l"><span style="color: #F97583;">def</span><span style="color: #B392F0;"> max_heapify_down</span><span>(i):</span></span>
+<span class="giallo-l"><span style="color: #F97583;">    if</span><span> i</span><span style="color: #F97583;"> is</span><span> leaf:</span></span>
+<span class="giallo-l"><span style="color: #F97583;">       return</span><span> </span></span>
+<span class="giallo-l"><span style="color: #F97583;">    if</span><span> Q[i]</span><span style="color: #F97583;"> &lt;</span><span> Q[</span><span style="color: #FDAEB7;font-style: italic;">2i</span><span style="color: #F97583;"> +</span><span style="color: #79B8FF;"> 1</span><span>]</span><span style="color: #F97583;"> or</span><span> Q[i]</span><span style="color: #F97583;"> &lt;</span><span> Q[</span><span style="color: #FDAEB7;font-style: italic;">2i</span><span style="color: #F97583;">+</span><span style="color: #79B8FF;">2</span><span>]:</span></span>
+<span class="giallo-l"><span>        Q[i],</span><span style="color: #79B8FF;"> max</span><span>(Q[</span><span style="color: #FDAEB7;font-style: italic;">2i</span><span style="color: #F97583;"> +</span><span style="color: #79B8FF;">1</span><span>], Q[</span><span style="color: #FDAEB7;font-style: italic;">2i</span><span style="color: #F97583;"> +</span><span style="color: #79B8FF;"> 2</span><span>])</span><span style="color: #F97583;"> =</span><span style="color: #79B8FF;"> max</span><span>(Q[</span><span style="color: #FDAEB7;font-style: italic;">2i</span><span style="color: #F97583;"> +</span><span style="color: #79B8FF;">1</span><span>], Q[</span><span style="color: #FDAEB7;font-style: italic;">2i</span><span style="color: #F97583;"> +</span><span style="color: #79B8FF;"> 2</span><span>]), Q[i]</span></span>
+<span class="giallo-l"><span>        max_heapify_down(</span><span style="color: #79B8FF;">max</span><span> child)</span></span></code></pre>
+<p>Now we are nearly done, except we have not told you how to make this an in place sorting algorithm.
+The following figure illustrates how we never actually have to do in any extra storage.</p>
+ <figure class="lecture-figure">
+  <img src="./in-place.svg" alt="Heap sort is in-place">
+  <figcaption>The queue is just a prefix of the original input. We never need to allocate more space.</figcaption>
+</figure>
+
+    </div>
+    
+</article>
+
+    </main>
+
+    
+    <script>
+      document.querySelectorAll('.prose pre').forEach((pre) => {
+        const code = pre.querySelector('code');
+        if (!code) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block';
+        pre.before(wrapper);
+        wrapper.append(pre);
+
+        const button = document.createElement('button');
+        button.className = 'copy-code';
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.setAttribute('aria-label', 'Copy code to clipboard');
+        wrapper.append(button);
+
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(code.textContent);
+            button.textContent = 'Copied';
+            window.setTimeout(() => { button.textContent = 'Copy'; }, 1400);
+          } catch (_) {
+            button.textContent = 'Select and copy';
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(code);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        });
+      });
+    </script>
+    
+
+</body>
+</html>
