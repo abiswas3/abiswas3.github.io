@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1f1e1b">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="">
+    <title>Problem Set 1 Solutions · Algorithms</title>
+    <link rel="stylesheet" href="https://randomwalks.xyz/algorithms/style.css?h=f7cec39f7c401bd55eae">
+    <script defer src="https://randomwalks.xyz/algorithms/sidenotes.js?h=abba13c76e721c629ac3"></script>
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          tags: 'ams'
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+</head>
+<body>
+    
+    <header class="site-header">
+        <a class="brand" href="https://randomwalks.xyz/algorithms" aria-label="Algorithms home">
+            <span class="brand-mark" aria-hidden="true">A</span>
+            <span class="brand-copy">
+                <strong>Algorithms</strong>
+            </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="https://randomwalks.xyz/algorithms/lectures/">Lecture Notes</a>
+            <a href="https://randomwalks.xyz/algorithms/hw/" aria-current="page">Problem Sets</a>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        
+<article class="page-shell">
+    <header class="page-heading">
+        <h1>Problem Set 1 Solutions</h1>
+        
+        
+        
+        
+        
+        
+    </header>
+
+    
+    <div class="prose page-content">
+        <h2 id="1-counting-sort">1. Counting sort</h2>
+<p><strong>The output contains exactly the input elements.</strong> For each value $x$, the counter $C[x]$ starts at zero and is incremented once for every occurrence of $x$ in the input. Thus $C[x]$ counts exactly how many times $x$ appears. Since the algorithm outputs $x$ exactly $C[x]$ times, every value has the same number of occurrences in the output as in the input.</p>
+<p><strong>The output is sorted.</strong> The algorithm visits $0,1,\ldots,n-1$ in increasing order and outputs all copies of each value before moving to the next. Consequently, the output is in nondecreasing order.</p>
+<p><strong>The running time is $O(n)$.</strong> All input values, array indices, and counts are between $0$ and $n$, so each fits in one machine word. In the word-RAM model, reading or writing an array entry, adding one to a word, and comparing two words each take constant time. Initializing a counter requires one write. Updating $C[a_i]$ requires reading $a_i$, reading $C[a_i]$, adding one, and writing the result back: a constant number of constant-time operations. Outputting a value requires one word write. The increments and comparisons used to control the loops also take constant time.</p>
+<p>Initializing the $n$ counters takes $O(n)$ time. Counting the input also takes $O(n)$ time, since each of the $n$ elements requires one counter update. Finally, the output phase visits $n$ counters and writes</p>
+<p>$$
+\sum_{x=0}^{n-1} C[x] = n
+$$</p>
+<p>elements in total. Since visiting a counter and writing an output element each take constant time, this phase takes $O(n+n)=O(n)$ time. Adding the times for the three phases gives $O(n)$ total time.</p>
+<h2 id="2-harmonic-series">2. Harmonic series</h2>
+<p><strong>Upper bound.</strong> Replacing each denominator by the largest power of two not exceeding it can only increase the sum. Thus</p>
+<p>$$
+\begin{aligned}
+H_n &amp;= 1+\frac12+\frac13+\cdots+\frac{1}{n} \\
+&amp;\le 1+
+\underbrace{\frac12+\frac12}_{1}+
+\underbrace{\frac14+\frac14+\frac14+\frac14}_{1}
++\cdots,
+\end{aligned}
+$$</p>
+<p>where the right-hand side is stopped after $n$ terms. Each complete block has $2^k$ terms equal to $1/2^k$, so it sums to $1$. The last block may be incomplete, in which case it contributes at most $1$. There are $1+\lfloor\log_2 n\rfloor$ blocks, hence</p>
+<p>$$
+H_n\le 1+\lfloor\log_2 n\rfloor\le 2\log_2 n
+\qquad (n\ge 2).
+$$</p>
+<p>Therefore $H_n=O(\log_2 n)$.</p>
+<p><strong>Lower bound.</strong> Replacing each denominator by the smallest power of two at least as large as it can only decrease the sum. Thus</p>
+<p>$$
+\begin{aligned}
+H_n &amp;= 1+\frac12+\frac13+\cdots+\frac{1}{n} \\
+&amp;\ge 1+
+\underbrace{\frac12}_{1/2}+
+\underbrace{\frac14+\frac14}_{1/2}+
+\underbrace{\frac18+\frac18+\frac18+\frac18}_{1/2}
++\cdots,
+\end{aligned}
+$$</p>
+<p>again stopping after $n$ terms. Each complete block after the initial $1$ sums to $1/2$. These blocks end at indices $2,4,8,\ldots$, so there are $\lfloor\log_2 n\rfloor$ complete blocks. Discarding any final incomplete block gives</p>
+<p>$$
+H_n\ge 1+\frac12\lfloor\log_2 n\rfloor
+\ge 1+\frac12(\log_2 n-1)
+\ge \frac12\log_2 n.
+$$</p>
+<p>Therefore $H_n=\Omega(\log_2 n)$. Together with the upper bound, this proves $H_n=\Theta(\log_2 n)$.</p>
+<h2 id="3-palindromes-on-one-tape">3. Palindromes on one tape</h2>
+<p>See <a rel="external" href="https://people.seas.harvard.edu/~madhusudan/courses/Fall2020/book.pdf#page=254">Boaz Barak, <em>Introduction to Theoretical Computer Science</em>, §7.1.1: “A Turing machine for palindromes”</a>. The example treats even-length palindromes.</p>
+<h2 id="4-asymptotic-behavior-of-functions">4. Asymptotic behavior of functions</h2>
+<p><strong>(a)</strong> The ordering is</p>
+<p>$$
+(f_1,f_5,f_2,f_3,f_4).
+$$</p>
+<p>Since $\log_2(n^{2019})=2019\log_2 n$, we have $f_2(n)=2019n^2\log_2 n$. The ratios of consecutive functions satisfy</p>
+<p>$$
+\begin{aligned}
+\frac{f_1(n)}{f_5(n)} &amp;= \frac{(\log_2 n)^{2018}}{n}\longrightarrow 0, \\
+\frac{f_5(n)}{f_2(n)} &amp;= \frac{1}{2019n}\longrightarrow 0, \\
+\frac{f_2(n)}{f_3(n)} &amp;= \frac{2019\log_2 n}{n}\longrightarrow 0, \\
+\frac{f_3(n)}{f_4(n)} &amp;= \frac{n^3}{(2.019)^n}\longrightarrow 0.
+\end{aligned}
+$$</p>
+<p>Here we use that any fixed power of $\log_2 n$ grows more slowly than $n$, and any fixed power of $n$ grows more slowly than $b^n$ for a constant $b&gt;1$. Each ratio tends to zero, so no two functions have the same $\Theta$ growth rate.</p>
+<p><strong>(b)</strong> The ordering is</p>
+<p>$$
+\bigl(\{f_2,f_5\},f_3,f_1,f_4\bigr).
+$$</p>
+<p>First,</p>
+<p>$$
+\binom{n}{3}=\frac{n(n-1)(n-2)}{6}=\Theta(n^3),
+$$</p>
+<p>so $f_2$ and $f_5$ belong in the same group.</p>
+<p>Stirling’s formula states that $n!=\Theta\bigl(\sqrt{n}(n/e)^n\bigr)$. Applying it to $n!$ and $(n/2)!$, for even $n$ we obtain</p>
+<p>$$
+\binom{n}{n/2}
+=\frac{n!}{((n/2)!)^2}
+=\Theta\left(\frac{\sqrt{n}(n/e)^n}{(n/2)(n/(2e))^n}\right)
+=\Theta\left(\frac{2^n}{\sqrt{n}}\right).
+$$</p>
+<p>This grows faster than $n^3$, since $n^{7/2}/2^n\to 0$, and more slowly than $2^n$, since $1/\sqrt{n}\to 0$. Finally, Stirling’s formula also gives</p>
+<p>$$
+\frac{2^n}{n!}
+=\Theta\left(\frac{1}{\sqrt{n}}\left(\frac{2e}{n}\right)^n\right)
+\longrightarrow 0,
+$$</p>
+<p>so $n!$ grows faster than $2^n$.</p>
+<h2 id="5-dynamic-array-append">5. Dynamic-array append</h2>
+<p>If there is space left, an append takes $O(1)$ time. If the array is full with $k$ elements, we allocate and initialize $2k$ slots, copy the $k$ elements, and insert the new one. By the assumptions, this takes $O(k)$ time.</p>
+<p>Let $c\ge 1$ be the initial capacity, and assume $c=O(1)$. Successive doublings cost $O(c),O(2c),O(4c),\ldots$. The $m$ appends require at most $L=\lceil\log_2 m\rceil$ doublings, since $c2^L\ge m$.</p>
+<p>Checking for space and writing the new elements costs $O(m)$ in total. Adding the initial allocation and the doubling costs gives</p>
+<p>$$
+\begin{aligned}
+T(m) &amp;= O\left(m+c+c\sum_{i=0}^{L-1}2^i\right) \\
+&amp;= O(m+c2^L) \\
+&amp;= O(m),
+\end{aligned}
+$$</p>
+<p>Here the geometric sum is $2^L-1$ (zero when $L=0$), and $2^L&lt;2m$. Since $c=O(1)$, the total time is $O(m)$, giving $O(1)$ amortized time per append.</p>
+<h2 id="6-merge-sort">6. Merge sort</h2>
+<p>These proofs adapt <a rel="external" href="https://math.oxford.emory.edu/site/cs171/mergeSortAnalysis/">Emory University’s Merge Sort Analysis, Proofs #2 and #3</a>.</p>
+<p><strong>Proof 1: repeated substitution.</strong></p>
+<p>Let $T(n)$ be the maximum running time over nonempty inputs with at most $n$ elements. First suppose $n$ is a power of two. Each recursive half then has at most $n/2$ elements. Since splitting and merging take linear time, we can choose a constant $C&gt;0$ such that</p>
+<p>$$
+T(1)\le C,
+\qquad
+T(n)\le 2T(n/2)+Cn \quad (n\ge 2).
+$$</p>
+<p>For $n\ge 4$, the first two substitutions give</p>
+<p>$$
+\begin{aligned}
+T(n) &amp;\le 2T(n/2)+Cn \\
+&amp;\le 2\bigl(2T(n/4)+C(n/2)\bigr)+Cn \\
+&amp;= 4T(n/4)+2Cn.
+\end{aligned}
+$$</p>
+<p>Each substitution doubles the number of subproblems and adds another $Cn$ to the bound. After $j$ substitutions, where $0\le j\le\log_2 n$,</p>
+<p>$$
+T(n)\le 2^jT(n/2^j)+jCn.
+$$</p>
+<p>Setting $j=\log_2 n$ leaves subproblems of size $1$, so</p>
+<p>$$
+T(n)\le nT(1)+Cn\log_2 n
+\le Cn(\log_2 n+1)
+=O(n\log_2 n).
+$$</p>
+<p>For an arbitrary input size $n$, let $N=2^{\lceil\log_2 n\rceil}$, so $n\le N&lt;2n$. Since $T(n)$ includes all inputs of size at most $n$, we have $T(n)\le T(N)$. The bound just proved gives $T(n)=O(N\log_2 N)=O(n\log_2 n)$.</p>
+<p><strong>Proof 2: induction.</strong></p>
+<p>Let $T(n)$ be the worst-case running time on an array of $n$ elements. Merge sort recursively sorts two halves and then merges them. By the assumptions, there is a constant $C&gt;0$ such that $T(1)\le C$ and, for $n\ge 2$,</p>
+<p>$$
+T(n)\le T(\lfloor n/2\rfloor)+T(\lceil n/2\rceil)+Cn.
+$$</p>
+<p>The $Cn$ term accounts for splitting and merging. We prove by strong induction on $n\ge 1$ that</p>
+<p>$$
+T(n)\le Cn\bigl(\lceil\log_2 n\rceil+1\bigr).
+$$</p>
+<p><strong>Base case.</strong> For $n=1$, the proposed bound is $C$, so it follows from $T(1)\le C$.</p>
+<p><strong>Inductive step.</strong> Let $n\ge 2$ and assume the bound holds for every smaller positive input size. Write $a=\lfloor n/2\rfloor$ and $b=\lceil n/2\rceil$. Both $a$ and $b$ are less than $n$, and $a+b=n$.</p>
+<p>Since $n\le 2^{\lceil\log_2 n\rceil}$, each half has at most $2^{\lceil\log_2 n\rceil-1}$ elements. Thus $\lceil\log_2 a\rceil\le\lceil\log_2 n\rceil-1$ and $\lceil\log_2 b\rceil\le\lceil\log_2 n\rceil-1$. The induction hypothesis therefore gives $T(a)\le Ca\lceil\log_2 n\rceil$ and $T(b)\le Cb\lceil\log_2 n\rceil$. Substituting these bounds into the recurrence,</p>
+<p>$$
+\begin{aligned}
+T(n) &amp;\le T(a)+T(b)+Cn \\
+&amp;\le Ca\lceil\log_2 n\rceil+Cb\lceil\log_2 n\rceil+Cn \\
+&amp;= Cn\bigl(\lceil\log_2 n\rceil+1\bigr).
+\end{aligned}
+$$</p>
+<p>This completes the induction. For $n\ge 2$, we have $\lceil\log_2 n\rceil+1\le\log_2 n+2\le 3\log_2 n$. Hence $T(n)=O(n\log_2 n)$.</p>
+
+    </div>
+    
+</article>
+
+    </main>
+
+    
+    <script>
+      document.querySelectorAll('.prose pre').forEach((pre) => {
+        const code = pre.querySelector('code');
+        if (!code) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block';
+        pre.before(wrapper);
+        wrapper.append(pre);
+
+        const button = document.createElement('button');
+        button.className = 'copy-code';
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.setAttribute('aria-label', 'Copy code to clipboard');
+        wrapper.append(button);
+
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(code.textContent);
+            button.textContent = 'Copied';
+            window.setTimeout(() => { button.textContent = 'Copy'; }, 1400);
+          } catch (_) {
+            button.textContent = 'Select and copy';
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(code);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        });
+      });
+    </script>
+    
+
+</body>
+</html>
