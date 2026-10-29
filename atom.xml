@@ -13,6 +13,8 @@
   
   
   
+  
+  
   <entry xml:lang="en">
     <title>Jolt System Mismatch</title>
     <published>2026-06-19T00:00:00Z</published>
@@ -476,6 +478,65 @@ This rather simplistic approach allowed us to find concrete guest programs that 
 The &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1952&quot;&gt;issues&lt;/a&gt; &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1951&quot;&gt;can&lt;/a&gt; &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1950&quot;&gt;be&lt;/a&gt; &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1949&quot;&gt;found&lt;/a&gt; &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1915&quot;&gt;here&lt;/a&gt; and &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/issues/1914&quot;&gt;here&lt;/a&gt;.
 We remark that, during the development of Jolt, it was audited by Fable, ChatGPT Astra and all the leading models multiple times, and none of them surfaced these issues.
 The &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/LayerZero-Labs/jolt-qed/tree/feat/witness-on-updated-isa&quot;&gt;Lean source code&lt;/a&gt; is publicly available, and is still very much a work in progress.&lt;/p&gt;
+&lt;h3 id=&quot;what-does-jolt-memory-look-like&quot;&gt;What does Jolt memory look like?&lt;a class=&quot;zola-anchor&quot; href=&quot;#what-does-jolt-memory-look-like&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
+&lt;/h3&gt;
+&lt;p&gt;Before we can say what the verifier sees, we need a picture of Jolt’s memory.
+Here is a recipe for drawing it by hand.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Jolt memory is one table.&lt;/strong&gt;
+The proof treats memory as a single table of 8-byte words.
+Word $a$ holds the 8 bytes starting at address $\mathsf{lowest} + 8a$.
+The table has $K$ words, and $K$ is always a power of two.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;What is fixed.&lt;/strong&gt;
+Three numbers are constants in Jolt (&lt;code&gt;common/src/constants.rs&lt;/code&gt;):&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;RAM_START = 0x8000_0000&lt;/code&gt; is where RAM begins.&lt;/li&gt;
+&lt;li&gt;The stack canary is 128 bytes.&lt;/li&gt;
+&lt;li&gt;A word is 8 bytes.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;What the program chooses.&lt;/strong&gt;
+Every guest program comes with a memory configuration (&lt;code&gt;MemoryConfig&lt;/code&gt;): the maximum sizes of the trusted advice, the untrusted advice, the inputs and the outputs, and the sizes of the program, the stack and the heap.
+Each size is rounded up to a multiple of 8, and the two advice sizes must be powers of two (or zero).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;The recipe&lt;/strong&gt; (&lt;code&gt;MemoryLayout::new&lt;/code&gt; in &lt;code&gt;common/src/jolt_device.rs&lt;/code&gt;):&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Add up the IO bytes: inputs + trusted advice + untrusted advice + outputs + 16. The 16 is one word for the panic flag and one word for the termination flag.&lt;/li&gt;
+&lt;li&gt;Divide by 8 to count words, and round up to the next power of two. Call this &lt;code&gt;io_words&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;lowest = RAM_START − 8 · io_words&lt;/code&gt;. This is the bottom of the table, word 0.&lt;/li&gt;
+&lt;li&gt;Going up from &lt;code&gt;lowest&lt;/code&gt;, lay out: the larger advice buffer (trusted advice on a tie), the other advice buffer, the inputs, the outputs, the panic word and the termination word. The address just after the termination word is &lt;code&gt;io_end&lt;/code&gt;. Everything from &lt;code&gt;io_end&lt;/code&gt; up to &lt;code&gt;RAM_START&lt;/code&gt; is IO padding.&lt;/li&gt;
+&lt;li&gt;RAM starts at &lt;code&gt;RAM_START&lt;/code&gt;. Lay out the program image (ending at &lt;code&gt;stack_end&lt;/code&gt;), the 128-byte stack canary, the stack (ending at &lt;code&gt;stack_start&lt;/code&gt;) and the heap (ending at &lt;code&gt;heap_end&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;The table ends at &lt;code&gt;lowest + 8K&lt;/code&gt;. The honest prover picks $K$ from the highest word the program touched and the end of the program image, rounded up to a power of two (&lt;code&gt;crates/jolt-prover/src/config.rs&lt;/code&gt;). The verifier accepts any power of two up to the one that covers &lt;code&gt;heap_end&lt;/code&gt;. Words past &lt;code&gt;heap_end&lt;/code&gt; are table padding.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Because of step 2, &lt;code&gt;RAM_START&lt;/code&gt; always lands on word &lt;code&gt;io_words&lt;/code&gt;, which is a power of two.
+Neither kind of padding is ever used: Rust panics on any access above &lt;code&gt;io_end&lt;/code&gt; and below &lt;code&gt;RAM_START&lt;/code&gt;, and on any access at or above &lt;code&gt;heap_end&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;A worked example.&lt;/strong&gt;
+Take trusted advice 32 B, untrusted advice 16 B, inputs 16 B, outputs 16 B, and a program, stack and heap of 64 B each.
+The IO bytes add up to $32 + 16 + 16 + 16 + 16 = 96$, which is 12 words, rounded up to 16 words.
+So &lt;code&gt;lowest = 0x8000_0000 − 128 = 0x7FFF_FF80&lt;/code&gt;, and &lt;code&gt;RAM_START&lt;/code&gt; is word 16.&lt;/p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;Region&lt;/th&gt;&lt;th&gt;Bytes&lt;/th&gt;&lt;th&gt;Words&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;trusted advice&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x7FFF_FF80&lt;/code&gt; – &lt;code&gt;0x7FFF_FFA0&lt;/code&gt;&lt;/td&gt;&lt;td&gt;0–3&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;untrusted advice&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x7FFF_FFA0&lt;/code&gt; – &lt;code&gt;0x7FFF_FFB0&lt;/code&gt;&lt;/td&gt;&lt;td&gt;4–5&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;inputs&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x7FFF_FFB0&lt;/code&gt; – &lt;code&gt;0x7FFF_FFC0&lt;/code&gt;&lt;/td&gt;&lt;td&gt;6–7&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;outputs&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x7FFF_FFC0&lt;/code&gt; – &lt;code&gt;0x7FFF_FFD0&lt;/code&gt;&lt;/td&gt;&lt;td&gt;8–9&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;panic word&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x7FFF_FFD0&lt;/code&gt; – &lt;code&gt;0x7FFF_FFD8&lt;/code&gt;&lt;/td&gt;&lt;td&gt;10&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;termination word&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x7FFF_FFD8&lt;/code&gt; – &lt;code&gt;0x7FFF_FFE0&lt;/code&gt;&lt;/td&gt;&lt;td&gt;11&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;IO padding&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x7FFF_FFE0&lt;/code&gt; – &lt;code&gt;0x8000_0000&lt;/code&gt;&lt;/td&gt;&lt;td&gt;12–15&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;program image&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x8000_0000&lt;/code&gt; – &lt;code&gt;0x8000_0040&lt;/code&gt;&lt;/td&gt;&lt;td&gt;16–23&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;stack canary&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x8000_0040&lt;/code&gt; – &lt;code&gt;0x8000_00C0&lt;/code&gt;&lt;/td&gt;&lt;td&gt;24–39&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;stack&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x8000_00C0&lt;/code&gt; – &lt;code&gt;0x8000_0100&lt;/code&gt;&lt;/td&gt;&lt;td&gt;40–47&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;heap&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x8000_0100&lt;/code&gt; – &lt;code&gt;0x8000_0140&lt;/code&gt;&lt;/td&gt;&lt;td&gt;48–55&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;table padding (largest table)&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x8000_0140&lt;/code&gt; – &lt;code&gt;0x8000_0180&lt;/code&gt;&lt;/td&gt;&lt;td&gt;56–63&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+&lt;p&gt;&lt;img src=&quot;https://randomwalks.xyz/blog/jolt-qed/01-jolt-why/./jolt-memory.svg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;How Lean stores this table.&lt;/strong&gt;
+The Rust tracer does not keep the table in one place, and neither do we.
+Only RAM goes into Sail’s memory, a hash map from byte addresses to bytes.
+The IO region is Lean’s own model of the Jolt device, &lt;code&gt;SailJoltState.io&lt;/code&gt;, and Sail never sees those addresses.
+One mismatch shows up here: Lean currently reads the IO padding as 0, where Rust panics.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://randomwalks.xyz/blog/jolt-qed/01-jolt-why/./jolt-memory-lean.svg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Where Sail checks addresses.&lt;/strong&gt;
+Sail checks every memory access it sees against a list of physical memory attributes (PMA regions).
+Since Sail only ever sees RAM, only RAM needs a PMA region.
+A single region from &lt;code&gt;RAM_START&lt;/code&gt; to &lt;code&gt;heap_end&lt;/code&gt; matches Rust everywhere except the stack canary, where Rust refuses writes.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;https://randomwalks.xyz/blog/jolt-qed/01-jolt-why/./jolt-memory-pma.svg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 &lt;h2 id=&quot;phase-iii-the-jolt-sum-checks&quot;&gt;Phase III: The Jolt Sum-Checks&lt;a class=&quot;zola-anchor&quot; href=&quot;#phase-iii-the-jolt-sum-checks&quot; aria-label=&quot;Link to this section&quot;&gt;#&lt;/a&gt;
 &lt;/h2&gt;
 &lt;blockquote&gt;

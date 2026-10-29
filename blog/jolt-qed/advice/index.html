@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bug Report: Unbounded Untrusted Advice Words — Random Walks</title>
+  <meta name="description" content="">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=58eac425b63a4a9905b4">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
+  
+  
+  
+  
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams',
+        macros: {
+          Field: '{\\mathbb{F}}',
+          field: '{\\mathbb{F}}',
+          Mont: ['{\\widetilde{#1}}', 1],
+          Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+          TauConstraints: '{\\tau_y}',
+          TauTime: '{\\tau_{\\text{cycle}}}',
+          TauGroup: '{\\tau_b}',
+          MLE: ['{\\widetilde{#1}}', 1],
+          tf: ['{\\widetilde{#1}}', 1],
+          eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+          Def: '{:=}',
+          ChallengeSet: '{\\mathsf{C}}',
+          Complement: ['{\\neg{#1}}', 1],
+          Size: ['{\\left|#1\\right|}', 1],
+          Length: ['{L\\left(#1\\right)}', 1],
+          Lenght: ['{L\\left(#1\\right)}', 1],
+          Exp: ['{2^{#1}}', 1],
+          BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+          BigO: ['{O\\ \\left(#1\\right)}', 1],
+          boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+          OntoPHP: ['{\\operatorname{OFPHP}(#3^{#1}_{#2})}', 3],
+          PHP: ['{\\operatorname{PHP}(#3^{#1}_{#2})}', 3],
+          PHPBasic: ['\\PHP{n}{n-1}{K}'],
+          FPHP: ['{\\operatorname{FPHP}(#3^{#1}_{#2})}', 3], 
+          poly: '{\\operatorname{poly}}',
+          criticalAlpha: ['{\\alpha_{#1}}', 1],
+          CPlus: '{\\textcolor{blue}{C^{+}}}',
+          CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
+          GraphNbrs: ['{N_G(#1)}', 1],
+          ClauseNbrs: ['{N_C(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
+          SmallO: ['{o\\!(#1)}', 1],
+          Closure: ['{\\operatorname{Cl}(#1)}', 1],
+          ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+          Dim: ['{\\dim(#1)}', 1],
+          Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+          domain: ['{\\operatorname{dom}(#1)}', 1],
+          False: '{\\bot}',
+          opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+          NP: '{\\mathsf{NP}}',
+          Naturals: '{\\mathbb{N}}',
+          bit: '{\\{0,1\\}}',
+          samples: '{\\xleftarrow{\\$}}'
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  
+  <script defer src="https://randomwalks.xyz/vendor/mathjax-3.2.2/es5/tex-chtml.js"></script>
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="https://randomwalks.xyz" aria-label="Random Walks — home">
+      <span>Random Walks</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="https://randomwalks.xyz/publications/">Publications</a>
+      <a href="https://randomwalks.xyz/blog/">Notes</a>
+      <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
+      <a href="https://randomwalks.xyz/cv/">CV</a>
+      <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
+      <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
+    </nav>
+  </header>
+
+  <div class="command-palette" id="command-palette" data-index-url="https://randomwalks.xyz/search_index.en.json" hidden>
+    <button class="command-backdrop" type="button" aria-label="Close search" data-command-close></button>
+    <section class="command-dialog" role="dialog" aria-modal="true" aria-labelledby="command-title">
+      <h2 class="visually-hidden" id="command-title">Search page titles</h2>
+      <div class="command-query">
+        <span aria-hidden="true">›</span>
+        <input id="command-input" type="search" placeholder="Search titles…" autocomplete="off" autocapitalize="none" spellcheck="false" aria-controls="command-results" aria-autocomplete="list">
+        <kbd>Esc</kbd>
+      </div>
+      <ol class="command-results" id="command-results" role="listbox"></ol>
+      <p class="command-status" role="status" aria-live="polite"></p>
+      <footer class="command-help"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span></footer>
+    </section>
+  </div>
+
+  
+
+  <main id="main-content">
+    
+
+
+
+
+
+
+<article class="note footnotes-right note--side-toc">
+  <header class="note-header">
+    <h1>Bug Report: Unbounded Untrusted Advice Words</h1>
+    
+    <div class="note-meta">
+      <span class="note-authors">By Ari</span>
+      <time datetime="2026-10-29">29 October 2026</time>
+      
+        <time datetime="2026-10-29">Last updated 29 October 2026</time>
+      
+    </div>
+    
+    <ul class="tag-list" aria-label="Tags">
+      <li><a href="https://randomwalks.xyz/tags/jolt/">jolt</a></li><li><a href="https://randomwalks.xyz/tags/soundness/">soundness</a></li>
+    </ul>
+    
+  </header>
+
+  <div class="note-layout note-layout--side">
+    
+    <nav class="contents contents-side" aria-label="Table of contents">
+      <h2>Contents</h2>
+      
+<ol>
+  
+  <li>
+    <a href="#prelude-the-role-of-untrusted-advice-in-jolt">Prelude: the role of untrusted advice in Jolt</a>
+    
+  </li>
+  
+  <li>
+    <a href="#1-the-program-and-its-inputs">1. The program and its inputs</a>
+    
+  </li>
+  
+  <li>
+    <a href="#2-generating-the-cheating-witness">2. Generating the cheating witness</a>
+    
+  </li>
+  
+  <li>
+    <a href="#3-the-constraints-that-matter-pass">3. The constraints that matter pass</a>
+    
+  </li>
+  
+  <li>
+    <a href="#4-how-to-reproduce-this">4. How to reproduce this</a>
+    
+  </li>
+  
+</ol>
+
+    </nav>
+    
+
+    <div class="prose">
+      <h2 id="prelude-the-role-of-untrusted-advice-in-jolt">Prelude: the role of untrusted advice in Jolt<a class="zola-anchor" href="#prelude-the-role-of-untrusted-advice-in-jolt" aria-label="Link to this section">#</a>
+</h2>
+<p>Untrusted advice is how prover-private data enters a Jolt proof.
+The prover places a byte string of its choosing in the guest’s advice region before the program starts.
+The program reads it like ordinary memory.
+The verifier never sees the bytes: it sees only a commitment to the advice.</p>
+<p>The claim a proof attests is existential over that private data.
+Acceptance means: there exist advice bytes and a tape such that the program, run on the public inputs with that private data, produces the claimed output.</p>
+<p>Example: proving knowledge of a secret <code>s</code> whose SHA-256 is <code>d</code>, without revealing <code>s</code>.
+The guest program reads the advice region, hashes it, and stores the digest as its output.
+The prover runs it with <code>s</code> in the advice region and claims outputs = <code>d</code>.
+Acceptance means the program hashed something to <code>d</code> — for SHA-256, that the prover knows a preimage of <code>d</code>.
+Privacy holds because the advice never enters the claim.
+Soundness holds because the output must genuinely follow from some byte string.</p>
+<p>The second half of that bargain is what fails here.
+The commitment the verifier checks is a commitment to field elements, and nothing in Jolt’s constraints forces those elements to be bytes.
+This report exhibits a proof where the committed advice word is not any byte string — it is the field element <code>2⁻¹</code> — and the verifier accepts an output that no advice bytes can produce.</p>
+<h2 id="1-the-program-and-its-inputs">1. The program and its inputs<a class="zola-anchor" href="#1-the-program-and-its-inputs" aria-label="Link to this section">#</a>
+</h2>
+<p>In words: the program reads the first word of the untrusted advice, doubles it, and writes the doubled value as its output.
+That single doubling is the entire computation.</p>
+<p>The program is eight instructions at <code>0x80000000</code>.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>auipc x1, 0            # x1 = 0x80000000</span></span>
+<span class="giallo-l"><span>addi  x1, x1, -0x80    # x1 = 0x7FFFFF80 = input word address</span></span>
+<span class="giallo-l"><span>ld    x5, -0x40(x1)    # x5 = untrusted advice word 0</span></span>
+<span class="giallo-l"><span>add   x6, x5, x5       # x6 = 2 · x5</span></span>
+<span class="giallo-l"><span>sd    x6, 0x8(x1)      # output word 0 = x6</span></span>
+<span class="giallo-l"><span>addi  x11, x0, 1</span></span>
+<span class="giallo-l"><span>sb    x11, 0x28(x1)    # termination byte = 1</span></span>
+<span class="giallo-l"><span>jal   x0, 0            # stop: the PC repeats</span></span></code></pre>
+<p>It runs with</p>
+<ul>
+<li><code>max_input_size = 8</code>, inputs = eight zero bytes,</li>
+<li><code>max_trusted_advice_size = 64</code>, trusted advice = none (no commitment),</li>
+<li><code>max_untrusted_advice_size = 64</code>, untrusted advice = the eight bytes <code>01 00 00 f8 c9 fa f0 21</code>,</li>
+<li><code>max_output_size = 24</code>, and a 4096-byte stack and heap.</li>
+</ul>
+<p>The advice bytes are the little-endian encoding of <code>0x21F0FAC9F8000001</code>, the low 64 bits of <code>2⁻¹</code> in the BN254 scalar field.</p>
+<p>With those sizes the device regions sit directly below <code>RAM_START_ADDRESS</code>:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>trusted advice    [0x7FFFFF00, 0x7FFFFF40)</span></span>
+<span class="giallo-l"><span>untrusted advice  [0x7FFFFF40, 0x7FFFFF80)</span></span>
+<span class="giallo-l"><span>input             [0x7FFFFF80, 0x7FFFFF88)</span></span>
+<span class="giallo-l"><span>output            [0x7FFFFF88, 0x7FFFFFA0)</span></span>
+<span class="giallo-l"><span>panic word        0x7FFFFFA0</span></span>
+<span class="giallo-l"><span>termination word  0x7FFFFFA8</span></span></code></pre>
+<p>The program reads no advice tape, so the tape is empty.</p>
+<p>Running the program on the supplied inputs outputs <code>[2, 0, 0, 240, 147, 245, 225, 67]</code> and does not panic.
+The output is the double of the advice word: <code>2 · 0x21F0FAC9F8000001 mod 2^64 = 0x43E1F593F0000002</code>, the little-endian bytes of which are <code>[2, 0, 0, 240, 147, 245, 225, 67]</code>.
+Instead the Jolt prover generates a proof of the following claim</p>
+<aside id="" class="callout callout-box thm-box">
+  <div class="callout-title">Claim</div>
+  <p>There exist prover-private inputs — an untrusted advice byte string and an advice tape — such that an honest execution of the program above, on the public inputs and with that private data, terminates without panic and with the device’s output bytes equal to <code>[1, 0, 0, 0, 0, 0, 0, 0]</code> (trailing zeros trimmed).</p>
+</aside>
+<h2 id="2-generating-the-cheating-witness">2. Generating the cheating witness<a class="zola-anchor" href="#2-generating-the-cheating-witness" aria-label="Link to this section">#</a>
+</h2>
+<p>We generate the cheating witness by modifying the honest witness.
+Jolt’s tracer runs the program on the supplied advice bytes and produces the honest execution: every row, PC, flag and memory access.
+We keep all of it and change a small set of cells.
+A witness is an assignment of field elements to the proof’s columns, and no constraint asks where a value came from.</p>
+<p>Throughout, <code>p</code> is the characteristic of the BN254 scalar field, and:</p>
+<table><thead><tr><th>name</th><th>value</th></tr></thead><tbody>
+<tr><td><code>A</code></td><td><code>2⁻¹ mod p</code> = <code>0x183227397098D014DC2822DB40C0AC2E9419F4243CDCB848A1F0FAC9F8000001</code> — the cheating advice word</td></tr>
+<tr><td><code>A_lo</code></td><td><code>0x21F0FAC9F8000001</code> — the honest advice word, the supplied bytes</td></tr>
+<tr><td><code>C</code></td><td><code>2 · A_lo</code> = <code>0x43E1F593F0000002</code> — the honest doubled value</td></tr>
+</tbody></table>
+<p><code>A</code>’s low 64 bits are <code>A_lo</code>, the advice bytes supplied above.</p>
+<p>The honest trace places the load at cycle 2, the ADD at cycle 3, and the store at cycle 4.</p>
+<p>The advice commitment:</p>
+<table><thead><tr><th>cell</th><th>honest</th><th>cheating</th></tr></thead><tbody>
+<tr><td>advice word 0</td><td><code>A_lo</code></td><td><code>A</code></td></tr>
+</tbody></table>
+<p>The load row, cycle 2:</p>
+<table><thead><tr><th>cell</th><th>honest</th><th>cheating</th></tr></thead><tbody>
+<tr><td><code>RamReadValue</code></td><td><code>A_lo</code></td><td><code>A</code></td></tr>
+<tr><td><code>RamWriteValue</code></td><td><code>A_lo</code></td><td><code>A</code></td></tr>
+<tr><td><code>RdWriteValue</code></td><td><code>A_lo</code></td><td><code>A</code></td></tr>
+<tr><td><code>RegistersVal</code> x5, cycles after 2</td><td><code>A_lo</code></td><td><code>A</code></td></tr>
+<tr><td><code>RdInc</code></td><td><code>A_lo</code></td><td><code>A</code></td></tr>
+<tr><td><code>RamVal</code> advice word, all cycles</td><td><code>A_lo</code></td><td><code>A</code></td></tr>
+</tbody></table>
+<p>The ADD row, cycle 3:</p>
+<table><thead><tr><th>cell</th><th>honest</th><th>cheating</th></tr></thead><tbody>
+<tr><td><code>Rs1Value</code></td><td><code>A_lo</code></td><td><code>A</code></td></tr>
+<tr><td><code>Rs2Value</code></td><td><code>A_lo</code></td><td><code>A</code></td></tr>
+<tr><td><code>LeftInstructionInput</code></td><td><code>A_lo</code></td><td><code>A</code></td></tr>
+<tr><td><code>RightInstructionInput</code></td><td><code>A_lo</code></td><td><code>A</code></td></tr>
+<tr><td><code>RightLookupOperand</code></td><td><code>C</code></td><td><code>1</code></td></tr>
+<tr><td><code>LookupOutput</code></td><td><code>C</code></td><td><code>1</code></td></tr>
+<tr><td><code>RdWriteValue</code></td><td><code>C</code></td><td><code>1</code></td></tr>
+<tr><td><code>RegistersVal</code> x6, cycles after 3</td><td><code>C</code></td><td><code>1</code></td></tr>
+<tr><td><code>RdInc</code></td><td><code>C</code></td><td><code>1</code></td></tr>
+<tr><td><code>Product</code></td><td><code>0x0480037F425017B7A421F593F0000001</code></td><td><code>0x244B3AD628E5381F4A3C3448E1210245DE26EE365B4B146CF2E9782EF4000001</code></td></tr>
+<tr><td>lookup one-hot selectors</td><td>the chunks of <code>C</code></td><td>the chunks of <code>1</code></td></tr>
+</tbody></table>
+<p>The store row, cycle 4:</p>
+<table><thead><tr><th>cell</th><th>honest</th><th>cheating</th></tr></thead><tbody>
+<tr><td><code>Rs2Value</code></td><td><code>C</code></td><td><code>1</code></td></tr>
+<tr><td><code>RamWriteValue</code></td><td><code>C</code></td><td><code>1</code></td></tr>
+<tr><td><code>RamInc</code></td><td><code>C</code></td><td><code>1</code></td></tr>
+<tr><td><code>RamVal</code> output word, cycles after 4</td><td><code>C</code></td><td><code>1</code></td></tr>
+<tr><td><code>RamValFinal</code> output word</td><td><code>C</code></td><td><code>1</code></td></tr>
+<tr><td><code>RamValFinal</code> advice word</td><td><code>A_lo</code></td><td><code>A</code></td></tr>
+</tbody></table>
+<p>The device records output bytes <code>[1, 0, 0, 0, 0, 0, 0, 0]</code>, the claimed public I/O.</p>
+<p>Everything else in the witness is the honest value: every other row, every other register, every other memory word, the PCs, the flags, the byte-store expansion, the padding.</p>
+<p>The only cell that uses the field wrap is the ADD row’s <code>RightLookupOperand</code> — the row’s lookup query, the sum of its two operands.
+The honest value is the integer sum <code>A_lo + A_lo = C</code>.
+The cheating value is the field sum <code>A + A = 1</code>, which wraps at the field characteristic <code>p</code> instead of at <code>2⁶⁴</code>.
+Every other changed cell keeps the books consistent with that one substitution.</p>
+<h2 id="3-the-constraints-that-matter-pass">3. The constraints that matter pass<a class="zola-anchor" href="#3-the-constraints-that-matter-pass" aria-label="Link to this section">#</a>
+</h2>
+<p>All arithmetic below is in the field <code>F_p</code>.
+Each constraint is stated in words, then with the cheating values filled in.</p>
+<p><strong>The ADD row, cycle 3.</strong></p>
+<p>On an ADD row, the right lookup operand is the sum of the left and right instruction inputs.
+<code>RightLookupOperand = LeftInstructionInput + RightInstructionInput</code>
+<code>1 = A + A</code>
+This holds because <code>A = 2⁻¹</code>, so <code>A + A = 1</code> in the field.
+With honest operands the sum is the integer <code>A_lo + A_lo = C</code>; the constraint never asks the operands to be 64-bit numbers, so <code>A</code> is admissible.</p>
+<p>The lookup query must select an entry of the range table, whose entry at index <code>i</code> is <code>i mod 2⁶⁴</code>.
+The ADD row queries index <code>1</code>, and the entry at index <code>1</code> is <code>1</code>.
+<code>LookupOutput = 1</code></p>
+<p>On a row that writes its lookup output to the destination register, the rd write value is the lookup output.
+<code>RdWriteValue = LookupOutput</code>
+<code>1 = 1</code></p>
+<p>The product of the instruction inputs equals the product column.
+<code>Product = LeftInstructionInput · RightInstructionInput</code>
+<code>4⁻¹ = A · A</code>
+This holds because <code>A · A = 4⁻¹</code> in the field, which is the value the product column carries.</p>
+<p>On an ADD row, the left lookup operand is zero.
+<code>LeftLookupOperand = 0</code></p>
+<p>The one-hot lookup selectors select the chunks of the index <code>1</code>, so the selectors and the lookup operand agree.</p>
+<p><strong>The load row, cycle 2.</strong></p>
+<p>The load’s read value, write value and rd write value are one value.
+<code>RamReadValue = RamWriteValue = RdWriteValue</code>
+<code>A = A = A</code></p>
+<p>The read value is the value of the selected RAM word.
+<code>RamReadValue = RamVal(advice word, cycle 2)</code>
+<code>A = A</code></p>
+<p><strong>The register file.</strong></p>
+<p>A register read returns the register table’s value.
+<code>Rs1Value(3) = RegistersVal(x5, 3)</code>
+<code>A = A</code>
+<code>Rs2Value(3) = RegistersVal(x5, 3)</code>
+<code>A = A</code>
+<code>Rs2Value(4) = RegistersVal(x6, 4)</code>
+<code>1 = 1</code></p>
+<p>The register table advances by the increment column.
+<code>RegistersVal(x5, 3) = RegistersVal(x5, 2) + RdInc(2)</code>
+<code>A = 0 + A</code>
+<code>RegistersVal(x6, 4) = RegistersVal(x6, 3) + RdInc(3)</code>
+<code>1 = 0 + 1</code></p>
+<p><strong>The store row, cycle 4.</strong></p>
+<p>The store writes its rs2 value to memory.
+<code>RamWriteValue = Rs2Value</code>
+<code>1 = 1</code></p>
+<p>The RAM table advances by the increment column.
+<code>RamVal(output word, 5) = RamVal(output word, 4) + RamInc(4)</code>
+<code>1 = 0 + 1</code></p>
+<p><strong>The memory-checking folds.</strong></p>
+<p>The initial value of the advice word is the committed advice leaf, and the fold closes.
+<code>RamValFinal(advice word) = RamValInit(advice word) + Σ increments</code>
+<code>A = A + 0</code></p>
+<p>The output word’s fold closes.
+<code>RamValFinal(output word) = 0 + RamInc(4)</code>
+<code>1 = 0 + 1</code></p>
+<p>The final value of the output word equals the claimed output word.
+<code>RamValFinal(output word) = 1</code></p>
+<p>Every other constraint sees only honest values, and holds as in the honest proof.
+No step anywhere asks that a value be below <code>2⁶⁴</code>: not the committed advice word, not the load’s read value, not the register table.
+That is the one check Jolt never makes.</p>
+<h2 id="4-how-to-reproduce-this">4. How to reproduce this<a class="zola-anchor" href="#4-how-to-reproduce-this" aria-label="Link to this section">#</a>
+</h2>
+<p>Everything below is at commit <code>5def437f</code>, clear mode (the default Dory path, no <code>zk</code> feature), Rust 1.95.
+The prover, the verifier, the commitment scheme, the sumchecks and the transcript are Jolt’s own and unmodified.
+All modifications sit at the seams where Jolt’s pipeline derives witness values from the honest trace, substituting the cells of §2.</p>
+<p><strong>The guest and the host.</strong>
+Assemble the eight-instruction program of §1 at <code>0x80000000</code>.
+Run it with the memory configuration, inputs, advice bytes and claim of §1.
+Jolt’s tracer produces the honest trace.
+The host preprocesses, proves and verifies through <code>jolt_sdk::preprocess_program</code>, <code>jolt_sdk::prove_program</code> and <code>jolt_verifier::verify</code>.</p>
+<p><strong>Where the witness is substituted.</strong>
+The proof’s field-element tables are served from one surface: the trace backend’s oracle, <code>crates/jolt-witness/src/backend/trace/oracle.rs</code>, function <code>oracle_table</code>.
+After each honest table is materialized, overwrite the cells of §2: the advice commitment’s first leaf, the load row’s three values, the ADD row’s operands, sum, lookup output, product and rd write, the store row’s values and increment, the <code>RegistersVal</code> and <code>RamVal</code> grids, <code>RamValFinal</code>, and the ADD row’s one-hot lookup selectors — at both chunk granularities, retargeted from the index <code>C</code> to the index <code>1</code>.
+Locate the three rows semantically — the load of the advice word, the ADD doubling the loaded register, the store to the output word — not by fixed cycle indices.</p>
+<p><strong>The kernel tier.</strong>
+Run the reference kernel tier, <code>JoltBackend::reference()</code>, not the optimized one.
+The reference tier derives every sumcheck table and every opening from the oracle.
+The optimized tier re-derives its tables from integer-typed row bundles (<code>u64</code>/<code>i128</code>), which cannot express a 253-bit cell.
+Jolt’s parity tests pin the two tiers to identical round polynomials, so the proof object is the same either way.</p>
+<p><strong>The commitment stream and the stage-5 RAF.</strong>
+Two further surfaces derive values from integer row data and need the same substitutions.
+The commitment streaming — <code>crates/jolt-kernels/src/reference/commitment.rs</code>, the <code>FusedColumns</code> and <code>MaterializedColumn</code> consumers — feeds the increment columns through <code>PCS::feed_i128</code> and the lookup one-hots as hot addresses.
+Substitute the same increment cells as field values, and retarget the ADD row’s lookup-index chunks to the chunks of <code>1</code>.
+The stage-5 instruction-read RAF kernel — <code>crates/jolt-kernels/src/reference/instruction_read_raf.rs</code> — reads the per-cycle lookup index from a typed bundle.
+Set the ADD row’s index to <code>1</code>.</p>
+<p><strong>The device.</strong>
+The trace device’s output bytes are the public I/O that both the prover and the verifier read.
+Record the claimed bytes <code>[1, 0, 0, 0, 0, 0, 0, 0]</code> for the output-region store — <code>common/src/jolt_device.rs</code>, <code>JoltDevice::store</code>.</p>
+<p><strong>The check.</strong>
+Run once with the honest witness: the program outputs <code>[2, 0, 0, 240, 147, 245, 225, 67]</code>, and <code>jolt_verifier::verify</code> returns <code>Ok(())</code> on that claim.
+Run once with the substitutions: the proof claims outputs <code>[1, 0, 0, 0, 0, 0, 0, 0]</code>, and <code>jolt_verifier::verify</code> returns <code>Ok(())</code>.</p>
+<p><strong>What the plumbing is for.</strong>
+A malicious prover needs none of it: it commits its own polynomials directly and runs the generic sumcheck machinery.
+The substitutions exist only so that the proof object comes out of Jolt’s own prover.
+The reproduction is Jolt’s own code accepting Jolt’s own lie.</p>
+
+    </div>
+  </div>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <!-- <div> -->
+    <!--   <h2>Working Notes</h2> -->
+    <!--   <p>Something to say</p> -->
+    <!-- </div> -->
+    
+    <!-- <div> -->
+    <!--   <h2>Elsewhere</h2> -->
+    <!--   <ul> -->
+    <!--     <li><a href="https://randomwalks.xyz/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/tags">Browse by tag</a></li> -->
+    <!--   </ul> -->
+    <!-- </div> -->
+    
+    <div class="footer-credit">
+      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('pre').forEach(function (pre) {
+      if (!pre.querySelector('code')) return;
+      var button = document.createElement('button');
+      button.className = 'copy-code';
+      button.type = 'button';
+      button.textContent = 'Copy';
+      button.addEventListener('click', function () {
+        var clone = pre.querySelector('code').cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function (line) { line.remove(); });
+        navigator.clipboard.writeText(clone.textContent).then(function () {
+          button.textContent = 'Copied';
+          window.setTimeout(function () { button.textContent = 'Copy'; }, 1400);
+        });
+      });
+      pre.appendChild(button);
+    });
+  </script>
+  <script>
+    window.addEventListener('load', function () {
+      function containShortcodeMath() {
+        var selector =
+          '.callout mjx-container[display="true"], ' +
+          '.comparison-dual mjx-container[display="true"], ' +
+          '.comparison-single mjx-container[display="true"]';
+
+        function wrap(equation) {
+          if (equation.parentElement.classList.contains('shortcode-math-scroll')) return;
+          var boundary = document.createElement('span');
+          boundary.className = 'shortcode-math-scroll';
+          equation.before(boundary);
+          boundary.appendChild(equation);
+        }
+
+        document.querySelectorAll(selector).forEach(wrap);
+
+        document.querySelectorAll(
+          '.callout mjx-container:not([display="true"]), ' +
+          '.comparison-dual mjx-container:not([display="true"]), ' +
+          '.comparison-single mjx-container:not([display="true"])'
+        ).forEach(function (equation) {
+          var line = equation.closest('li, p') || equation.parentElement;
+          if (equation.getBoundingClientRect().width > line.clientWidth) wrap(equation);
+        });
+      }
+
+      if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+        MathJax.startup.promise.then(containShortcodeMath);
+      } else {
+        containShortcodeMath();
+      }
+    });
+  </script>
+  <script>
+    (function () {
+      var prose = document.querySelector('.prose');
+      if (!prose || prose.querySelector('.bibliography')) return;
+
+      var citations = prose.querySelectorAll('a.citation[data-cite-key]');
+      if (!citations.length) return;
+
+      var bibliography = document.createElement('div');
+      var heading = document.createElement('h2');
+      var list = document.createElement('ol');
+      var seen = new Set();
+
+      bibliography.className = 'bibliography';
+      heading.textContent = 'References';
+      bibliography.append(heading, list);
+
+      citations.forEach(function (citation) {
+        var key = citation.dataset.citeKey;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+
+        var item = document.createElement('li');
+        var title = document.createElement('span');
+        var authors = citation.dataset.citeAuthors;
+        var venue = citation.dataset.citeVenue;
+        var year = citation.dataset.citeYear;
+
+        item.id = 'ref-' + key;
+        if (authors) item.append(document.createTextNode(authors + '. '));
+        title.className = 'bib-title';
+        title.textContent = citation.dataset.citeTitle;
+        item.append(title);
+        if (citation.dataset.citeTitle) item.append(document.createTextNode('.'));
+        if (venue) {
+          var venueElement = document.createElement('em');
+          venueElement.textContent = venue;
+          item.append(document.createTextNode(' '), venueElement);
+        }
+        if (year) item.append(document.createTextNode((venue ? ', ' : ' ') + year));
+        item.append(document.createTextNode('.'));
+        list.appendChild(item);
+      });
+
+      prose.appendChild(bibliography);
+    })();
+
+    document.addEventListener('click', function (event) {
+      var back = event.target.closest('.bib-back');
+      if (back) {
+        event.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = event.target.closest('a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      event.preventDefault();
+      document.querySelectorAll('.citation-highlight').forEach(function (item) {
+        item.classList.remove('citation-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function (item) { item.remove(); });
+
+      var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+      if (!target) return;
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('citation-highlight');
+
+      if (!link.id) link.id = 'cite-source-' + target.id;
+      var arrow = document.createElement('a');
+      arrow.className = 'bib-back';
+      arrow.setAttribute('data-source', link.id);
+      arrow.setAttribute('href', '#' + link.id);
+      arrow.setAttribute('aria-label', 'Back to citation');
+      arrow.textContent = ' ↩';
+      target.appendChild(arrow);
+    });
+  </script>
+  <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
+  
+
+
+
+<script>
+  (function () {
+    var prose = document.querySelector('.prose');
+    if (!prose) return;
+
+    var references = prose.querySelectorAll('.footnote-reference');
+    var footnotes = prose.querySelector('.footnotes');
+    if (!footnotes) return;
+
+    function removeRedundantFootnoteHeading() {
+      var heading = prose.querySelector('#footnotes-and-references');
+      if (!heading || heading.nextElementSibling !== footnotes) return;
+
+      heading.remove();
+      document.querySelectorAll('.contents a[href="#footnotes-and-references"]').forEach(function (link) {
+        var item = link.closest('li');
+        if (item) item.remove();
+      });
+    }
+
+    if (!references.length) {
+      if (!footnotes.querySelector('li')) {
+        removeRedundantFootnoteHeading();
+        footnotes.remove();
+      }
+      return;
+    }
+
+    var transformed = 0;
+    references.forEach(function (reference) {
+      var link = reference.querySelector('a');
+      if (!link) return;
+
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
+      var definition = targetId ? document.getElementById(targetId) : null;
+      if (!definition) return;
+
+      transformed += 1;
+      var noteId = 'sidenote-' + transformed;
+      var clone = definition.cloneNode(true);
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
+
+      var noteBody = Array.from(clone.children).map(function (child) {
+        return child.tagName === 'P' ? child.innerHTML : child.outerHTML;
+      }).join(' ');
+
+      var number = document.createElement('button');
+      number.type = 'button';
+      number.className = 'sidenote-number';
+      number.textContent = link.textContent;
+      number.setAttribute('aria-expanded', 'false');
+      number.setAttribute('aria-controls', noteId);
+      number.setAttribute('aria-label', 'Show footnote ' + link.textContent);
+
+      var note = document.createElement('span');
+      note.className = 'sidenote';
+      note.id = noteId;
+      note.innerHTML = '<span class="sidenote-num">' + link.textContent + '.</span> ' + noteBody;
+
+      number.addEventListener('click', function () {
+        var open = note.classList.toggle('is-open');
+        number.setAttribute('aria-expanded', String(open));
+      });
+
+      reference.replaceWith(number, note);
+    });
+
+    if (transformed) {
+      prose.classList.add('footnotes-are-sidenotes');
+      removeRedundantFootnoteHeading();
+    }
+  })();
+</script>
+
+
+
+</body>
+</html>
