@@ -234,7 +234,7 @@ $$</p>
   <p>Given an unsatisfiable CNF formula $F = \bigwedge_{i \in [m]}C_i$ over $n$ variables, a resolution refutation $\pi$ is a sequence of clauses $D_1, \dots, D_L$ where</p>
 <ol>
 <li>$D_i = C_i$ for $1 \le i \le m$.</li>
-<li>$D_k$ is a clause derived by applying the resolution (or the weakening) rule to clauses $D_i$ and $D_j$ for $i,j \le m$.</li>
+<li>$D_k$ is a clause derived by applying the resolution (or the weakening) rule to clauses $D_i$ and $D_j$ for $i,j &lt; k$.</li>
 <li>$D_L = \emptyset$ is the empty clause which is always false.</li>
 </ol>
 <p><strong>Size Of A Refutation</strong>: The size of a refutation $\Size{\pi}$ is the number of clauses in the sequence ($L$ in this case).</p>

@@ -1,0 +1,661 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Razborov&#39;s high minimal degree proof — Random Walks</title>
+  <meta name="description" content="">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=58eac425b63a4a9905b4">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
+  
+  
+  
+  
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams',
+        macros: {
+          Field: '{\\mathbb{F}}',
+          field: '{\\mathbb{F}}',
+          Mont: ['{\\widetilde{#1}}', 1],
+          Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+          TauConstraints: '{\\tau_y}',
+          TauTime: '{\\tau_{\\text{cycle}}}',
+          TauGroup: '{\\tau_b}',
+          MLE: ['{\\widetilde{#1}}', 1],
+          tf: ['{\\widetilde{#1}}', 1],
+          eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+          Def: '{:=}',
+          ChallengeSet: '{\\mathsf{C}}',
+          Complement: ['{\\neg{#1}}', 1],
+          Size: ['{\\left|#1\\right|}', 1],
+          Length: ['{L\\left(#1\\right)}', 1],
+          Lenght: ['{L\\left(#1\\right)}', 1],
+          Exp: ['{2^{#1}}', 1],
+          BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+          BigO: ['{O\\ \\left(#1\\right)}', 1],
+          boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+          OntoPHP: ['{\\operatorname{OFPHP}(#3^{#1}_{#2})}', 3],
+          PHP: ['{\\operatorname{PHP}(#3^{#1}_{#2})}', 3],
+          PHPBasic: ['\\PHP{n}{n-1}{K}'],
+          FPHP: ['{\\operatorname{FPHP}(#3^{#1}_{#2})}', 3], 
+          poly: '{\\operatorname{poly}}',
+          criticalAlpha: ['{\\alpha_{#1}}', 1],
+          CPlus: '{\\textcolor{blue}{C^{+}}}',
+          CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
+          GraphNbrs: ['{N_G(#1)}', 1],
+          ClauseNbrs: ['{N_C(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
+          SmallO: ['{o\\!(#1)}', 1],
+          Closure: ['{\\operatorname{Cl}(#1)}', 1],
+          ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+          Dim: ['{\\dim(#1)}', 1],
+          Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+          domain: ['{\\operatorname{dom}(#1)}', 1],
+          False: '{\\bot}',
+          opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+          NP: '{\\mathsf{NP}}',
+          Naturals: '{\\mathbb{N}}',
+          bit: '{\\{0,1\\}}',
+          samples: '{\\xleftarrow{\\$}}'
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  
+  <script defer src="https://randomwalks.xyz/vendor/mathjax-3.2.2/es5/tex-chtml.js"></script>
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="https://randomwalks.xyz" aria-label="Random Walks — home">
+      <span>Random Walks</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="https://randomwalks.xyz/publications/">Publications</a>
+      <a href="https://randomwalks.xyz/blog/">Notes</a>
+      <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
+      <a href="https://randomwalks.xyz/cv/">CV</a>
+      <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
+      <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
+    </nav>
+  </header>
+
+  <div class="command-palette" id="command-palette" data-index-url="https://randomwalks.xyz/search_index.en.json" hidden>
+    <button class="command-backdrop" type="button" aria-label="Close search" data-command-close></button>
+    <section class="command-dialog" role="dialog" aria-modal="true" aria-labelledby="command-title">
+      <h2 class="visually-hidden" id="command-title">Search page titles</h2>
+      <div class="command-query">
+        <span aria-hidden="true">›</span>
+        <input id="command-input" type="search" placeholder="Search titles…" autocomplete="off" autocapitalize="none" spellcheck="false" aria-controls="command-results" aria-autocomplete="list">
+        <kbd>Esc</kbd>
+      </div>
+      <ol class="command-results" id="command-results" role="listbox"></ol>
+      <p class="command-status" role="status" aria-live="polite"></p>
+      <footer class="command-help"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span></footer>
+    </section>
+  </div>
+
+  
+
+  <main id="main-content">
+    
+
+
+
+
+
+
+<article class="note footnotes-right note--side-toc">
+  <header class="note-header">
+    <h1>Razborov&#39;s high minimal degree proof</h1>
+    
+    <div class="note-meta">
+      <span class="note-authors">By Ari</span>
+      <time datetime="2026-11-02">02 November 2026</time>
+      
+        <time datetime="2026-11-02">Last updated 02 November 2026</time>
+      
+    </div>
+    
+    <ul class="tag-list" aria-label="Tags">
+      <li><a href="https://randomwalks.xyz/tags/proof-complexity/">proof-complexity</a></li><li><a href="https://randomwalks.xyz/tags/combinatorics/">combinatorics</a></li>
+    </ul>
+    
+  </header>
+
+  <div class="note-layout note-layout--side">
+    
+    <nav class="contents contents-side" aria-label="Table of contents">
+      <h2>Contents</h2>
+      
+<ol>
+  
+  <li>
+    <a href="#notation">Notation</a>
+    
+  </li>
+  
+  <li>
+    <a href="#pos-calculus-proof-system">Pos Calculus Proof System</a>
+    
+  </li>
+  
+  <li>
+    <a href="#relating-resolution-and-positive-calculus-for-perfect-matchings">Relating Resolution and Positive Calculus For Perfect Matchings</a>
+    
+      
+<ol>
+  
+  <li>
+    <a href="#upper-bound">Upper Bound</a>
+    
+  </li>
+  
+</ol>
+
+    
+  </li>
+  
+</ol>
+
+    </nav>
+    
+
+    <div class="prose">
+      <p>This post is all about refuting perfect matchings in graphs using the resolution proof system.
+When the graph is the complete bipartite graph $K_{m,n}$ on $[m] \times [n]$, refuting the existence of a perfect matching is identical to refuting the onto-functional pigeonhole principle.
+For a general bipartite graph $G$ on $[m] \times [n]$, it is identical to refuting the restricted version, onto-$G$-FPHP.
+For more details, see <a href="https://randomwalks.xyz/blog/proof-complexity/basic-lower-bound/">earlier notes</a>.</p>
+<h2 id="notation">Notation<a class="zola-anchor" href="#notation" aria-label="Link to this section">#</a>
+</h2>
+<p>All our definitions will be with respect to hypergraphs, as this is what the original paper does.
+As my interest for now is in boundary expander graphs, I will also write down the simplified version for graphs where it suits.
+Given a hypergraph $H = (V, \xi)$, for each hyperedge $F \in \xi$, we have a Boolean variable $x_F$.
+Similarly, for a graph $G = (V, E)$, for each edge $e \in E$, we have a Boolean variable $x_e$.
+The pictures below illustrate the idea.</p>
+<p><img src="https://randomwalks.xyz/blog/proof-complexity/razbarov-high-min-degree/./variables-graph.svg" alt="A graph where each edge has its own variable" /></p>
+<p><img src="https://randomwalks.xyz/blog/proof-complexity/razbarov-high-min-degree/./variables-hypergraph.svg" alt="A hypergraph where each hyperedge has its own variable" /></p>
+<p>If $x_F = 1$ or $x_e = 1$, it means the hyperedge $F$ or the edge $e$, respectively, was selected to be in the matching.</p>
+<p>Each variable also has a negation: $\overline{x}_F := 1 - x_F$ and $\overline{x}_e := 1 - x_e$.
+If $\overline{x}_F = 1$ or $\overline{x}_e = 1$, it means the hyperedge $F$ or the edge $e$, respectively, was not selected to be in the matching.
+A variable or its negation is referred to as a literal.</p>
+<h2 id="pos-calculus-proof-system">Pos Calculus Proof System<a class="zola-anchor" href="#pos-calculus-proof-system" aria-label="Link to this section">#</a>
+</h2>
+<p>Almost every paper in this area gets rid of negated variables.</p>
+<p>A clause is a disjunction of literals, and we call a clause <em>positive</em> if none of its literals are negated.
+On the triangle above, $x_{ab} \lor x_{bc}$ is positive, whereas $\overline{x_{ab}} \lor x_{bc}$ is not.</p>
+<p>Positive clauses come up a lot, so we use a shorthand for them.
+For a set of hyperedges $S \subseteq \xi$, or a set of edges $S \subseteq E$, we write</p>
+<p>$$
+X_S := \bigvee_{F \in S} x_F, \qquad X_S := \bigvee_{e \in S} x_e,
+$$</p>
+<p>respectively.
+So the subscript of a small $x$ is one hyperedge or edge, and the subscript of a capital $X$ is a set of them.</p>
+<p>On the triangle, for $S = \lbrace ab, bc \rbrace$, we have $X_S = x_{ab} \lor x_{bc}$.
+On the hypergraph, for $S = \lbrace F_1, F_3 \rbrace$, we have $X_S = x_{F_1} \lor x_{F_3}$.</p>
+<aside id="" class="callout callout-definition thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Positive Transformation Of A Literal</span></div>
+  <p>Let $H = (V, \xi)$ be a hypergraph.
+Let $\mathcal{L} := \lbrace x_F, \overline{x}_F \mid F \in \xi \rbrace$ be the set of literals, and let $\mathcal{P} := \lbrace X_S \mid S \subseteq \xi \rbrace$ be the set of positive clauses.
+The <em>positive transformation</em> is the map $\theta : \mathcal{L} \to \mathcal{P}$ defined, for every $F \in \xi$, by</p>
+<p>$$
+\theta(x_F) := X_{\lbrace F \rbrace}, \qquad \theta(\overline{x}_F) := X_{\lbrace F^\prime \in \xi \mid F^\prime \neq F, \ F^\prime \cap F \neq \emptyset \rbrace}.
+$$</p>
+</aside>
+<p><img src="https://randomwalks.xyz/blog/proof-complexity/razbarov-high-min-degree/./theta-hypergraph.svg" alt="A hypergraph where the hyperedges F1 and F2 intersect F, and the hyperedge F3 does not" /></p>
+<p>Take $F = \lbrace u, v, w \rbrace$, shown in red.
+The blue hyperedges $F_1 = \lbrace u, a, b \rbrace$ and $F_2 = \lbrace w, c \rbrace$ intersect $F$, and the grey hyperedge $F_3 = \lbrace b, c \rbrace$ does not.
+So $\theta(\overline{x}_F) = X_{\lbrace F_1, F_2 \rbrace} = x_{F_1} \lor x_{F_2}$.</p>
+<p>A graph is a hypergraph where every edge has two vertices, so the definition covers graphs too.</p>
+<p><img src="https://randomwalks.xyz/blog/proof-complexity/razbarov-high-min-degree/./theta-graph.svg" alt="A triangle where the edges bc and ca each contain a vertex of the edge ab" /></p>
+<p>Take the triangle with $e = ab$, shown in red.
+The blue edges $bc$ and $ca$ each have a vertex in common with $e$.
+So $\theta(\overline{x}_{ab}) = X_{\lbrace bc, ca \rbrace} = x_{bc} \lor x_{ca}$.</p>
+<aside id="" class="callout callout-definition thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Positive Transformation Of A Literal</span></div>
+  <p>For a clause $C = z_1 \lor \dots \lor z_k$, where each $z_i$ is a literal, we use the notation $$\theta(C) := \theta(z_1) \lor \dots \lor \theta(z_k)$$ to denote $\theta$ applied to every literal in the clause.</p>
+</aside>
+<aside id="" class="callout callout-definition thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Inconsistent Sets Of Hyperedges</span></div>
+  <p>Let $H = (V, \xi)$ be a hypergraph.
+For $S_0, S_1 \subseteq \xi$, we write $S_0 \perp S_1$ if $S_0 \cap S_1 = \emptyset$, and $F_0 \cap F_1 \neq \emptyset$ for all $F_0 \in S_0$ and $F_1 \in S_1$.</p>
+</aside>
+<p>If $S_0 \perp S_1$, a matching cannot contain a hyperedge from $S_0$ and a hyperedge from $S_1$, because the two would be different hyperedges sharing a vertex.
+So $X_{S_0}$ and $X_{S_1}$ cannot both be true.</p>
+<p>In the hypergraph above, $\lbrace F \rbrace \perp \lbrace F_1, F_2 \rbrace$, but $\lbrace F \rbrace \perp \lbrace F_3 \rbrace$ fails, because $F \cap F_3 = \emptyset$.
+In the triangle, $\lbrace ab, ca \rbrace \perp \lbrace bc \rbrace$, even though no single vertex is shared by all three edges.</p>
+<p><strong>Positive Rule</strong>: Given two positive clauses of the form $A \lor X_{S_0}$ and $B \lor X_{S_1}$ with $S_0 \perp S_1$, the positive rule allows us to derive a new positive clause $D$ where $A \lor B \subseteq D$ i.e. every literal in $A \lor B$ is present in $D$.
+In the literature we denote this rule as<sup class="footnote-reference" id="fr-side-condition-1"><a href="https://randomwalks.xyz/blog/proof-complexity/razbarov-high-min-degree/#fn-side-condition">[1]</a></sup></p>
+<p>$$
+\frac{A \lor X_{S_0} \quad B \lor X_{S_1}}{D} [A \lor B \subseteq D, \ S_0 \perp S_1]
+$$</p>
+<aside id="" class="callout callout-definition thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Positive Calculus Proof System</span></div>
+  <p>Given positive clauses $C_1, \dots, C_m$, a positive calculus refutation $\pi$ is a sequence of positive clauses $D_1, \dots, D_L$ where</p>
+<ol>
+<li>$D_i = C_i$ for $1 \le i \le m$.</li>
+<li>$D_k$ is a clause derived by applying the positive rule to clauses $D_i$ and $D_j$ for $i, j &lt; k$.</li>
+<li>$D_L = \emptyset$ is the empty clause which is always false.</li>
+</ol>
+<p><strong>Size Of A Refutation</strong>: The size of a refutation $\Size{\pi}$ is the number of clauses in the sequence ($L$ in this case).</p>
+</aside>
+<h2 id="relating-resolution-and-positive-calculus-for-perfect-matchings">Relating Resolution and Positive Calculus For Perfect Matchings<a class="zola-anchor" href="#relating-resolution-and-positive-calculus-for-perfect-matchings" aria-label="Link to this section">#</a>
+</h2>
+<p>Recall, given $H = (V, \xi)$ showing there exists no perfect matching is equivalent to showing the following CNF has no satisfying achievement.</p>
+<div class="math-display">
+\begin{align*}
+Q_v &:= \bigvee_{F \in \xi \text{ s.t } v \,\in F} x_F &\qquad& \forall v \in V \\[12pt]
+Q_{F,F'} &:= \overline{x}_F \lor \overline{x}_{F'} &\qquad& \forall F \neq F' \in \xi, \; F \cap F' \neq \emptyset
+\end{align*}
+</div>
+<p>For general bi-partite graphs the formula is given by</p>
+<div class="math-display">
+\begin{align*}
+P_i &:= \underset{j\in N_G(i)}{\lor}(x_{ij}) &\qquad& \forall i \in [m] \\[12pt]
+H_j^{i,i'} &:= \overline{x}_{ij} \lor \overline{x}_{i'j} &\qquad& \forall i \neq i' \in [m],\; j \in N_G(i) \cap N_G(i') \\[12pt]
+F_i^{j,j'} &:= \overline{x}_{ij'} \lor \overline{x}_{ij} &\qquad& \forall i \in [m],\; j \neq j' \in N_G(i) \\[12pt]
+S_j &:= \underset{i\in N_G(j)}{\lor}(x_{ij}) &\qquad& \forall j \in [n]
+\end{align*}
+</div>
+<p>These are the pigeon, hole, functional and onto axioms from the <a href="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/">crash course</a>.</p>
+<aside id="" class="callout callout-definition thm-numbered">
+  <div class="thm-header"><span class="thm-label"></span>
+    <span class="thm-title"> : Positive Calculus Refutation Of A Perfect Matching Formula</span></div>
+  <p>Let $H = (V, \xi)$ be a hypergraph, and let $\mathrm{PM}(H)$ denote the CNF above with clauses $Q_v$ and $Q_{F,F^\prime}$.
+A <em>positive calculus refutation of $\mathrm{PM}(H)$</em> is a positive calculus refutation of <em>only</em> the clauses $\lbrace Q_v \mid v \in V \rbrace$.</p>
+</aside>
+<p>So only the positive clauses of $\mathrm{PM}(H)$ are starting clauses, and the clauses $Q_{F,F^\prime}$ are left out.
+For bipartite graphs, the starting clauses are $P_i$ and $S_j$.</p>
+<p>Observe that $\mathrm{PM}(H)$ has negations, in the clauses $Q_{F,F^\prime}$.
+Thus, the axioms will contain negations when refuting the formula with resolution.
+Let $\pi$ be a resolution refutation of the non-existence of a perfect matching in a hypergraph.
+Let $\pi^{+}$ denote the sequence of clauses obtained by applying $\theta$ to every line of $\pi$.</p>
+<p><img src="https://randomwalks.xyz/blog/proof-complexity/razbarov-high-min-degree/./theta-sequence.svg" alt="The lines D1 to DL of the refutation on the left, and the lines theta of D1 to theta of DL on the right" /></p>
+<p>We want to show $\pi^{+}$ is a valid positive calculus refutation of $\mathrm{PM}(H)$, but we have two obstacles.</p>
+<ol>
+<li>
+<p>The clauses $\theta(Q_{F,F^\prime})$ are not derived using the positive rule, so for them to exist as non-derived lines in $\pi^{+}$, they must be axioms. So we must show that applying $\theta$ to any axiom $Q_{F,F^\prime}$ leads to a clause $D$ such that $Q_v \subseteq D$ for some $v \in V$, where $Q_v$ is one of the axioms of the positive calculus, and that we can write $Q_v$ to justify $D$.<sup class="footnote-reference" id="fr-weakening-1"><a href="https://randomwalks.xyz/blog/proof-complexity/razbarov-high-min-degree/#fn-weakening">[2]</a></sup> We will discuss why we can just write $Q_v$ instead of $D$ in a bit, but first we prove that $D$ is a weakening of $Q_v$.</p>
+<p>Let $D := \theta(Q_{F,F^\prime}) = \theta(\overline{x}_F) \lor \theta(\overline{x}_{F^\prime})$, and let $v \in F \cap F^\prime$, which exists as $F \cap F^\prime \neq \emptyset$.
+Take any literal $x_K$ of $Q_v$, so $v \in K$.
+If $K \neq F$, then $K$ and $F$ both contain $v$, so $x_K$ is in $\theta(\overline{x}_F)$.
+If $K = F$, then $K \neq F^\prime$, and $K$ and $F^\prime$ both contain $v$, so $x_K$ is in $\theta(\overline{x}_{F^\prime})$.
+As $x_K$ was arbitrary, it implies that every literal in $Q_v$ is in $D$, i.e. $Q_v \subseteq D$.</p>
+<p>Now we show that any line in $\pi^{+}$ that uses $D$ as a premise can use $Q_v$ instead to derive the same result.
+The clause $Q_{F,F^\prime} = \overline{x}_F \lor \overline{x}_{F^\prime}$ has no positive literals, so in $\pi$ it can only be the premise that provides the negated literal.
+So a step of $\pi$ that uses $Q_{F,F^\prime}$ looks like this, resolving on $x_F$ (resolving on $x_{F^\prime}$ is the same).</p>
+<div class="math-display">
+$$
+\dfrac{C \lor x_F \quad \underbrace{\overline{x}_F \lor \overline{x}_{F'}}_{\theta \text{ turns this into } D}}{C \lor \overline{x}_{F'}}
+$$
+</div>
+<p>On the left is this step after applying $\theta$, and on the right is the same step using $Q_v$ instead of $D$, where $S_1 = \lbrace K \in \xi \mid v \in K, \ K \neq F \rbrace$, so $Q_v = x_F \lor X_{S_1}$.</p>
+<div class="math-display">
+$$
+\begin{array}{ccc}
+\text{Using } D & & \text{Using } Q_v \\[10pt]
+\dfrac{\theta(C) \lor x_F \quad D}{\theta(C) \lor \theta(\overline{x}_{F'})} & \longrightarrow & \dfrac{\theta(C) \lor x_F \quad x_F \lor X_{S_1}}{\theta(C) \lor \theta(\overline{x}_{F'})}
+\end{array}
+$$
+</div>
+<p>The right side is just a positive rule inference, with $S_0 = \lbrace F \rbrace$ and $S_1$ as above.
+Its first side condition holds, $S_0 \perp S_1$, as $F \notin S_1$ and every hyperedge in $S_1$ contains $v \in F$.
+Its second side condition holds, as the conclusion contains $\theta(C) \lor x_F$: we have $F \neq F^\prime$ and both contain $v$, so $x_F$ is in $\theta(\overline{x}_{F^\prime})$.
+So this step is fine, and the line $D$ never needs to be written.</p>
+</li>
+<li>
+<p>The remaining lines of $\pi$ are inferred using the resolution rule, so for $\theta$ of them to be valid lines in $\pi^{+}$, they must be inferred using the positive rule. So we must show that applying $\theta$ to any resolution step gives a positive rule step. We prove this below.</p>
+<p>Suppose $D_k = A \lor B$ is inferred by resolving on $x_F$. On the left is this step in $\pi$, and on the right is what $\theta$ turns it into, where $S = \lbrace F^\prime \in \xi \mid F^\prime \neq F, \ F^\prime \cap F \neq \emptyset \rbrace$.</p>
+<div class="math-display">
+$$
+\begin{array}{ccc}
+\text{Resolution in } \pi & & \text{After applying } \theta \\[10pt]
+\dfrac{A \lor x_F \quad B \lor \overline{x}_F}{A \lor B} & \xrightarrow{\ \theta\ } & \dfrac{\theta(A) \lor x_F \quad \theta(B) \lor X_S}{\theta(A) \lor \theta(B)}
+\end{array}
+$$
+</div>
+<p>The right side is just a positive rule inference, with $S_0 = \lbrace F \rbrace$ and $S_1 = S$.
+Its side condition holds, $S_0 \perp S_1$, as $F \notin S$ and every hyperedge in $S$ intersects $F$.
+So this step is fine, and $\theta(D_k) = \theta(A) \lor \theta(B)$ is a valid line in $\pi^{+}$.</p>
+</li>
+</ol>
+<p>Finally, the last line of $\pi$ is the empty clause, and $\theta(\emptyset) = \emptyset$.
+So $\pi^{+}$, with each $\theta(Q_{F,F^\prime})$ replaced by $Q_v$, is a valid positive calculus refutation of $\mathrm{PM}(H)$ with the same number of lines as $\pi$.</p>
+<p>Let $S_R(\mathrm{PM}(H))$ and $S_P(\mathrm{PM}(H))$ be the sizes of the smallest resolution refutation and the smallest positive calculus refutation of $\mathrm{PM}(H)$, respectively.
+We have shown that the smallest positive calculus refutation of $\mathrm{PM}(H)$ must have size at most $S_R(\mathrm{PM}(H))$ (it could be smaller, we have not shown anything yet), as in the worst case we can take the smallest resolution refutation and convert its lines to positive calculus lines by the above strategy, and that is fine.
+Therefore,</p>
+<p>$$
+S_P(\mathrm{PM}(H)) \leq S_R(\mathrm{PM}(H)).
+$$</p>
+<h3 id="upper-bound">Upper Bound<a class="zola-anchor" href="#upper-bound" aria-label="Link to this section">#</a>
+</h3>
+<p>Now we go the other way, and start with the lines of a smallest positive calculus refutation of $\mathrm{PM}(H)$.
+This refutation has no negated axioms, but a resolution refutation of $\mathrm{PM}(H)$ is allowed to use them.
+So first, we add all the negated axioms $Q_{F,F^\prime}$ of $\mathrm{PM}(H)$ as lines at the top.
+There is at most one for each pair of hyperedges, so this adds at most</p>
+<p>$$
+\binom{|\xi|}{2} = O(|\xi|^2)
+$$</p>
+<p>lines, once in total.</p>
+<p>Now take one line $D$ of the positive calculus refutation.
+If $D$ is an axiom $Q_v$, it is also an axiom of $\mathrm{PM}(H)$, so there is nothing to do.
+Otherwise, $D$ is derived by the positive rule:</p>
+<p>$$
+\frac{A \lor X_{S_0} \quad B \lor X_{S_1}}{D} [A \lor B \subseteq D, \ S_0 \perp S_1]
+$$</p>
+<p>Write $S_0 = \lbrace F_1, \dots, F_a \rbrace$ and $S_1 = \lbrace K_1, \dots, K_b \rbrace$, so the two premises are</p>
+<p>$$
+A \lor x_{F_1} \lor \dots \lor x_{F_a} \qquad \text{and} \qquad B \lor x_{K_1} \lor \dots \lor x_{K_b}.
+$$</p>
+<p>As $S_0 \perp S_1$, we have $F_i \neq K_j$ and $F_i \cap K_j \neq \emptyset$ for all $i$ and $j$.
+Recall that $\mathrm{PM}(H)$ has the clause $Q_{F,F^\prime} = \overline{x}_F \lor \overline{x}_{F^\prime}$ for every two different hyperedges $F, F^\prime$ that intersect.
+So for all $i$ and $j$, the clause $Q_{F_i,K_j} = \overline{x}_{F_i} \lor \overline{x}_{K_j}$ is in $\mathrm{PM}(H)$, which means it is one of the negated axioms we added at the top.
+We want to derive $D$ from the two premises and these axioms using resolution.</p>
+<p><strong>First, remove $S_1$.</strong> Fix some $F_i$, and start with the second premise.
+Resolving it with the axiom $Q_{F_i,K_1}$ removes $x_{K_1}$:</p>
+<div class="math-display">
+$$
+\dfrac{B \lor x_{K_1} \lor x_{K_2} \lor \dots \lor x_{K_b} \quad \overline{x}_{F_i} \lor \overline{x}_{K_1}}{B \lor \overline{x}_{F_i} \lor x_{K_2} \lor \dots \lor x_{K_b}}
+$$
+</div>
+<p>We continue with the axioms $Q_{F_i,K_2}, \dots, Q_{F_i,K_b}$, removing one variable each time, until the last step:</p>
+<div class="math-display">
+$$
+\dfrac{B \lor \overline{x}_{F_i} \lor x_{K_b} \quad \overline{x}_{F_i} \lor \overline{x}_{K_b}}{B \lor \overline{x}_{F_i}}
+$$
+</div>
+<p>This takes $b$ resolution steps, and we do it for each $F_i$, which takes $ab$ steps and gives the clauses $B \lor \overline{x}_{F_1}, \dots, B \lor \overline{x}_{F_a}$.</p>
+<p><strong>Then, remove $S_0$.</strong> Start with the first premise, and resolve it with the clause $B \lor \overline{x}_{F_1}$ we just derived:</p>
+<div class="math-display">
+$$
+\dfrac{A \lor x_{F_1} \lor x_{F_2} \lor \dots \lor x_{F_a} \quad B \lor \overline{x}_{F_1}}{A \lor B \lor x_{F_2} \lor \dots \lor x_{F_a}}
+$$
+</div>
+<p>We continue with $B \lor \overline{x}_{F_2}, \dots, B \lor \overline{x}_{F_a}$, until the last step:</p>
+<div class="math-display">
+$$
+\dfrac{A \lor B \lor x_{F_a} \quad B \lor \overline{x}_{F_a}}{A \lor B}
+$$
+</div>
+<p>This takes $a$ resolution steps.</p>
+<p><strong>Finally, get $D$.</strong> As $A \lor B \subseteq D$, we derive $D$ from $A \lor B$ by weakening, which takes one more step.
+If $S_0$ or $S_1$ is empty, one of the premises is already contained in $D$, so weakening is all we need.</p>
+<p><strong>Counting.</strong> One line of the positive calculus refutation takes at most $ab + a + 1$ lines of resolution.
+As $S_0, S_1 \subseteq \xi$, we have $a, b \leq |\xi|$, so this is at most $|\xi|^2 + |\xi| + 1 = O(|\xi|^2)$.
+There are $S_P(\mathrm{PM}(H))$ lines, each taking $O(|\xi|^2)$ lines of resolution, plus the $O(|\xi|^2)$ negated axioms we added at the top.
+The last line is still the empty clause, so this is a resolution refutation of $\mathrm{PM}(H)$.
+The smallest resolution refutation could be smaller, but it is at most this size:</p>
+<p>$$
+S_R(\mathrm{PM}(H)) \leq O(S_P(\mathrm{PM}(H)) \cdot |\xi|^2).
+$$</p>
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn-side-condition">
+<p>In the notation $\frac{P}{Q}[R]$, $P$ is the premises, $Q$ is the conclusion, and $R$ is the side conditions. Side conditions are not clauses in the proof; they are facts that must hold for the rule to be applied. This is standard in logic, though some authors, including Razborov, write them in parentheses. <a href="https://randomwalks.xyz/blog/proof-complexity/razbarov-high-min-degree/#fr-side-condition-1">↩</a></p>
+</li>
+<li id="fn-weakening">
+<p>We can derive $D$ from $Q_v$ by weakening. So that’s fine, but it adds one extra line, the line $D$ itself, which we need to write as downstream lines might use $D$ as a premise. We will show this never happens, and that writing $Q_v$ is fine. That is, any line in $\pi^{+}$ that uses $D$ as a premise can use $Q_v$ instead to derive the same result. <a href="https://randomwalks.xyz/blog/proof-complexity/razbarov-high-min-degree/#fr-weakening-1">↩</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+  </div>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <!-- <div> -->
+    <!--   <h2>Working Notes</h2> -->
+    <!--   <p>Something to say</p> -->
+    <!-- </div> -->
+    
+    <!-- <div> -->
+    <!--   <h2>Elsewhere</h2> -->
+    <!--   <ul> -->
+    <!--     <li><a href="https://randomwalks.xyz/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/tags">Browse by tag</a></li> -->
+    <!--   </ul> -->
+    <!-- </div> -->
+    
+    <div class="footer-credit">
+      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('pre').forEach(function (pre) {
+      if (!pre.querySelector('code')) return;
+      var button = document.createElement('button');
+      button.className = 'copy-code';
+      button.type = 'button';
+      button.textContent = 'Copy';
+      button.addEventListener('click', function () {
+        var clone = pre.querySelector('code').cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function (line) { line.remove(); });
+        navigator.clipboard.writeText(clone.textContent).then(function () {
+          button.textContent = 'Copied';
+          window.setTimeout(function () { button.textContent = 'Copy'; }, 1400);
+        });
+      });
+      pre.appendChild(button);
+    });
+  </script>
+  <script>
+    window.addEventListener('load', function () {
+      function containShortcodeMath() {
+        var selector =
+          '.callout mjx-container[display="true"], ' +
+          '.comparison-dual mjx-container[display="true"], ' +
+          '.comparison-single mjx-container[display="true"]';
+
+        function wrap(equation) {
+          if (equation.parentElement.classList.contains('shortcode-math-scroll')) return;
+          var boundary = document.createElement('span');
+          boundary.className = 'shortcode-math-scroll';
+          equation.before(boundary);
+          boundary.appendChild(equation);
+        }
+
+        document.querySelectorAll(selector).forEach(wrap);
+
+        document.querySelectorAll(
+          '.callout mjx-container:not([display="true"]), ' +
+          '.comparison-dual mjx-container:not([display="true"]), ' +
+          '.comparison-single mjx-container:not([display="true"])'
+        ).forEach(function (equation) {
+          var line = equation.closest('li, p') || equation.parentElement;
+          if (equation.getBoundingClientRect().width > line.clientWidth) wrap(equation);
+        });
+      }
+
+      if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+        MathJax.startup.promise.then(containShortcodeMath);
+      } else {
+        containShortcodeMath();
+      }
+    });
+  </script>
+  <script>
+    (function () {
+      var prose = document.querySelector('.prose');
+      if (!prose || prose.querySelector('.bibliography')) return;
+
+      var citations = prose.querySelectorAll('a.citation[data-cite-key]');
+      if (!citations.length) return;
+
+      var bibliography = document.createElement('div');
+      var heading = document.createElement('h2');
+      var list = document.createElement('ol');
+      var seen = new Set();
+
+      bibliography.className = 'bibliography';
+      heading.textContent = 'References';
+      bibliography.append(heading, list);
+
+      citations.forEach(function (citation) {
+        var key = citation.dataset.citeKey;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+
+        var item = document.createElement('li');
+        var title = document.createElement('span');
+        var authors = citation.dataset.citeAuthors;
+        var venue = citation.dataset.citeVenue;
+        var year = citation.dataset.citeYear;
+
+        item.id = 'ref-' + key;
+        if (authors) item.append(document.createTextNode(authors + '. '));
+        title.className = 'bib-title';
+        title.textContent = citation.dataset.citeTitle;
+        item.append(title);
+        if (citation.dataset.citeTitle) item.append(document.createTextNode('.'));
+        if (venue) {
+          var venueElement = document.createElement('em');
+          venueElement.textContent = venue;
+          item.append(document.createTextNode(' '), venueElement);
+        }
+        if (year) item.append(document.createTextNode((venue ? ', ' : ' ') + year));
+        item.append(document.createTextNode('.'));
+        list.appendChild(item);
+      });
+
+      prose.appendChild(bibliography);
+    })();
+
+    document.addEventListener('click', function (event) {
+      var back = event.target.closest('.bib-back');
+      if (back) {
+        event.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = event.target.closest('a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      event.preventDefault();
+      document.querySelectorAll('.citation-highlight').forEach(function (item) {
+        item.classList.remove('citation-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function (item) { item.remove(); });
+
+      var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+      if (!target) return;
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('citation-highlight');
+
+      if (!link.id) link.id = 'cite-source-' + target.id;
+      var arrow = document.createElement('a');
+      arrow.className = 'bib-back';
+      arrow.setAttribute('data-source', link.id);
+      arrow.setAttribute('href', '#' + link.id);
+      arrow.setAttribute('aria-label', 'Back to citation');
+      arrow.textContent = ' ↩';
+      target.appendChild(arrow);
+    });
+  </script>
+  <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
+  
+
+
+
+<script>
+  (function () {
+    var prose = document.querySelector('.prose');
+    if (!prose) return;
+
+    var references = prose.querySelectorAll('.footnote-reference');
+    var footnotes = prose.querySelector('.footnotes');
+    if (!footnotes) return;
+
+    function removeRedundantFootnoteHeading() {
+      var heading = prose.querySelector('#footnotes-and-references');
+      if (!heading || heading.nextElementSibling !== footnotes) return;
+
+      heading.remove();
+      document.querySelectorAll('.contents a[href="#footnotes-and-references"]').forEach(function (link) {
+        var item = link.closest('li');
+        if (item) item.remove();
+      });
+    }
+
+    if (!references.length) {
+      if (!footnotes.querySelector('li')) {
+        removeRedundantFootnoteHeading();
+        footnotes.remove();
+      }
+      return;
+    }
+
+    var transformed = 0;
+    references.forEach(function (reference) {
+      var link = reference.querySelector('a');
+      if (!link) return;
+
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
+      var definition = targetId ? document.getElementById(targetId) : null;
+      if (!definition) return;
+
+      transformed += 1;
+      var noteId = 'sidenote-' + transformed;
+      var clone = definition.cloneNode(true);
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
+
+      var noteBody = Array.from(clone.children).map(function (child) {
+        return child.tagName === 'P' ? child.innerHTML : child.outerHTML;
+      }).join(' ');
+
+      var number = document.createElement('button');
+      number.type = 'button';
+      number.className = 'sidenote-number';
+      number.textContent = link.textContent;
+      number.setAttribute('aria-expanded', 'false');
+      number.setAttribute('aria-controls', noteId);
+      number.setAttribute('aria-label', 'Show footnote ' + link.textContent);
+
+      var note = document.createElement('span');
+      note.className = 'sidenote';
+      note.id = noteId;
+      note.innerHTML = '<span class="sidenote-num">' + link.textContent + '.</span> ' + noteBody;
+
+      number.addEventListener('click', function () {
+        var open = note.classList.toggle('is-open');
+        number.setAttribute('aria-expanded', String(open));
+      });
+
+      reference.replaceWith(number, note);
+    });
+
+    if (transformed) {
+      prose.classList.add('footnotes-are-sidenotes');
+      removeRedundantFootnoteHeading();
+    }
+  })();
+</script>
+
+
+
+</body>
+</html>
