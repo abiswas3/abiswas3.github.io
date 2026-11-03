@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Razborov&#39;s high minimal degree proof — Random Walks</title>
+  <title>Razborov&#39;s high minimal degree proof [Incomplete] — Random Walks</title>
   <meta name="description" content="">
   <meta name="color-scheme" content="light">
   <meta name="theme-color" content="#ffffff">
@@ -120,7 +120,7 @@
 
 <article class="note footnotes-right note--side-toc">
   <header class="note-header">
-    <h1>Razborov&#39;s high minimal degree proof</h1>
+    <h1>Razborov&#39;s high minimal degree proof [Incomplete]</h1>
     
     <div class="note-meta">
       <span class="note-authors">By Ari</span>
@@ -227,7 +227,7 @@ The blue edges $bc$ and $ca$ each have a vertex in common with $e$.
 So $\theta(\overline{x}_{ab}) = X_{\lbrace bc, ca \rbrace} = x_{bc} \lor x_{ca}$.</p>
 <aside id="" class="callout callout-definition thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
-    <span class="thm-title"> : Positive Transformation Of A Literal</span></div>
+    <span class="thm-title"> : Positive Transformation Of A Clause</span></div>
   <p>For a clause $C = z_1 \lor \dots \lor z_k$, where each $z_i$ is a literal, we use the notation $$\theta(C) := \theta(z_1) \lor \dots \lor \theta(z_k)$$ to denote $\theta$ applied to every literal in the clause.</p>
 </aside>
 <aside id="" class="callout callout-definition thm-numbered">
@@ -258,20 +258,20 @@ $$</p>
 </aside>
 <h2 id="relating-resolution-and-positive-calculus-for-perfect-matchings">Relating Resolution and Positive Calculus For Perfect Matchings<a class="zola-anchor" href="#relating-resolution-and-positive-calculus-for-perfect-matchings" aria-label="Link to this section">#</a>
 </h2>
-<p>Recall, given $H = (V, \xi)$ showing there exists no perfect matching is equivalent to showing the following CNF has no satisfying achievement.</p>
+<p>Recall, given $H = (V, \xi)$, showing there exists no perfect matching is equivalent to showing the following CNF has no satisfying assignment.</p>
 <div class="math-display">
 \begin{align*}
 Q_v &:= \bigvee_{F \in \xi \text{ s.t } v \,\in F} x_F &\qquad& \forall v \in V \\[12pt]
 Q_{F,F'} &:= \overline{x}_F \lor \overline{x}_{F'} &\qquad& \forall F \neq F' \in \xi, \; F \cap F' \neq \emptyset
 \end{align*}
 </div>
-<p>For general bi-partite graphs the formula is given by</p>
+<p>For general bipartite graphs, the formula is given by</p>
 <div class="math-display">
 \begin{align*}
 P_i &:= \underset{j\in N_G(i)}{\lor}(x_{ij}) &\qquad& \forall i \in [m] \\[12pt]
-H_j^{i,i'} &:= \overline{x}_{ij} \lor \overline{x}_{i'j} &\qquad& \forall i \neq i' \in [m],\; j \in N_G(i) \cap N_G(i') \\[12pt]
-F_i^{j,j'} &:= \overline{x}_{ij'} \lor \overline{x}_{ij} &\qquad& \forall i \in [m],\; j \neq j' \in N_G(i) \\[12pt]
-S_j &:= \underset{i\in N_G(j)}{\lor}(x_{ij}) &\qquad& \forall j \in [n]
+W_j^{i,i'} &:= \overline{x}_{ij} \lor \overline{x}_{i'j} &\qquad& \forall i \neq i' \in [m],\; j \in N_G(i) \cap N_G(i') \\[12pt]
+T_i^{j,j'} &:= \overline{x}_{ij'} \lor \overline{x}_{ij} &\qquad& \forall i \in [m],\; j \neq j' \in N_G(i) \\[12pt]
+O_j &:= \underset{i\in N_G(j)}{\lor}(x_{ij}) &\qquad& \forall j \in [n]
 \end{align*}
 </div>
 <p>These are the pigeon, hole, functional and onto axioms from the <a href="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/">crash course</a>.</p>
@@ -282,7 +282,7 @@ S_j &:= \underset{i\in N_G(j)}{\lor}(x_{ij}) &\qquad& \forall j \in [n]
 A <em>positive calculus refutation of $\mathrm{PM}(H)$</em> is a positive calculus refutation of <em>only</em> the clauses $\lbrace Q_v \mid v \in V \rbrace$.</p>
 </aside>
 <p>So only the positive clauses of $\mathrm{PM}(H)$ are starting clauses, and the clauses $Q_{F,F^\prime}$ are left out.
-For bipartite graphs, the starting clauses are $P_i$ and $S_j$.</p>
+For bipartite graphs, the starting clauses are $P_i$ and $O_j$.</p>
 <p>Observe that $\mathrm{PM}(H)$ has negations, in the clauses $Q_{F,F^\prime}$.
 Thus, the axioms will contain negations when refuting the formula with resolution.
 Let $\pi$ be a resolution refutation of the non-existence of a perfect matching in a hypergraph.
