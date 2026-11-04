@@ -62,57 +62,6 @@
     
     <div class="prose page-content">
         <p>$\newcommand{\Path}[2]{ #1 \rightsquigarrow #2 }$</p>
-<p>In the last lecture we learned about breadth-first search and depth-first search.
-Using those search algorithms we were able to solve the following problems.</p>
-<ol>
-<li>
-<p>Single Source Shortest Path : The shortest path from a source node <code>s</code> and every other node in the graph. We did this using bfs in time $O(|V| + |E|)$.</p>
-</li>
-<li>
-<p>An algorithm to solve the problem of determining which nodes are reachable from a given node <code>s</code>. We did this using dfs in time $O(|E|)$.</p>
-</li>
-<li>
-<p>How to find connected components in an undirected graph. This took time $O(|V| + |E|)$.</p>
-</li>
-<li>
-<p>How to sort nodes topologically, where if $(u,v) \in E$ then $u$ must appear before $v$ in the final ordering. This took time  $O(|V| + |E|)$, and the problem only made sense if the graph was a directed acyclic graph.</p>
-</li>
-</ol>
-<p>Today we look at weighted graphs.
-Previously, the distance between two nodes was given by the number of edges between two nodes.
-Now each edge will be associated with an integer weight, and the distance will be defined by the sum of weights of the edges between the nodes.
-An unweighted graph can be thought of as a weighted graph, where all the weights on all the edges are 1.</p>
-<p>More formally, given $G = (V,E)$ if the graph is weighted we will also be given some function $w: E \rightarrow \mathbb{Z}$.
-As we have simple graphs i.e. at most one edge between two nodes this function is well defined.</p>
-<p>TODO: distance definition</p>
-<p>Previously we stored graphs as adjacency lists.
-Having a weight associated per edge fits with this model.
-We can just store the weights in the list as a tuple.
-Alternatively we can use the <code>Set</code> interface we have been discussing throughout the class to store keys as edges and values as weights.
-We won’t care too much about how we do this, the point is we can query the weight of an edge in constant time.</p>
-<aside class="statement statement-definition thm-numbered">
-  <div class="statement-heading">
-    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Path</span>
-  </div>
-  <div class="statement-body"><p>A path from $u$ to $v$ is a sequence of edges $P_{\Path{u}{v}} := (e_1, e_2, \ldots, e_k)$.
-$e_1$ has left vertex $u$, $e_k$ has right vertex $v$, and the right vertex of each edge is the left vertex of the next.</p>
-</div>
-</aside>
-<aside class="statement statement-definition thm-numbered">
-  <div class="statement-heading">
-    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Weight Of A Path</span>
-  </div>
-  <div class="statement-body"><p>In a weighted graph $G=(V,E,w)$, the weight of a path is $w(P_{\Path{u}{v}}) := \sum_{i=1}^{k} w(e_i)$.</p>
-</div>
-</aside>
-<p>Some examples in pictures, TODO:</p>
-<aside class="statement statement-definition thm-numbered">
-  <div class="statement-heading">
-    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Weighted Shortest Path</span>
-  </div>
-  <div class="statement-body"><p>TODO:</p>
-</div>
-</aside>
 <h2 id="dijkstra-s-algorithm">Dijkstra’s Algorithm</h2>
 <p>Let $n = |V|$ and $m = |E|$.
 So far here is the story we have.
