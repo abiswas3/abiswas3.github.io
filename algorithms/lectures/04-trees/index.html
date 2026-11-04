@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1f1e1b">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="">
+    <title>Trees · Algorithms</title>
+    <link rel="stylesheet" href="https://randomwalks.xyz/algorithms/style.css?h=8031905c9b66e978bf68">
+    <script defer src="https://randomwalks.xyz/algorithms/sidenotes.js?h=abba13c76e721c629ac3"></script>
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          tags: 'ams'
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+</head>
+<body>
+    
+    <header class="site-header">
+        <a class="brand" href="https://randomwalks.xyz/algorithms" aria-label="Algorithms home">
+            <span class="brand-mark" aria-hidden="true">A</span>
+            <span class="brand-copy">
+                <strong>Algorithms</strong>
+            </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="https://randomwalks.xyz/algorithms/lectures/" aria-current="page">Lecture Notes</a>
+            <a href="https://randomwalks.xyz/algorithms/hw/">Problem Sets</a>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        
+<article class="page-shell">
+    <header class="page-heading">
+        <h1>Trees</h1>
+        
+        
+        
+        
+        
+        
+        <div class="lecture-credits">
+            <span class="lecture-credit-lecturer"><span class="credit-label">Lecturer</span> Ari</span>
+            <span class="lecture-credit-scribe"><span class="credit-label">Scribe</span> Ari</span>
+        </div>
+        
+    </header>
+
+    
+    <div class="prose page-content">
+        <aside class="caution" role="note">
+  <div class="caution-heading">
+    <svg class="caution-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+      <path d="M12 3 22 21H2Z" fill="currentColor" />
+      <path d="M12 9v5" fill="none" stroke="var(--base)" stroke-width="2" stroke-linecap="round" />
+      <circle cx="12" cy="17.5" r="1" fill="var(--base)" />
+    </svg>
+    <strong>Incomplete notes</strong>
+  </div>
+  <div class="caution-body"><p>These notes are a work in progress and will be filled in.</p>
+</div>
+</aside>
+<h2 id="basic-notation">Basic Notation</h2>
+<p>Tree Operations (with respect to traversal order)</p>
+<ul>
+<li>add pseudo code.</li>
+</ul>
+<p>The subtree operations:</p>
+<ul>
+<li>Insert, Delete</li>
+</ul>
+<p>Traversal orders matter both for the set and sequence interface.
+For sequences, the order of how things are stored matters.
+For sets, the traversal order captures the ordering imposed by <code>find_next</code> and <code>find_soft</code>.
+So we will want to store things in the tree such that when we traverse the tree in order, we will traverse the tree in key order.</p>
+<p>So how do we implement <code>find(key)</code> for the set interface.</p>
+<pre class="giallo" style="color: #E1E4E8; background-color: #24292E;" ><code data-lang="python"><span class="giallo-l"><span style="color: #F97583;">def</span><span style="color: #B392F0;"> find</span><span>(node, key):</span></span>
+<span class="giallo-l"><span style="color: #F97583;">    if</span><span> node</span><span style="color: #F97583;"> ==</span><span style="color: #79B8FF;"> None</span><span>:</span></span>
+<span class="giallo-l"><span style="color: #F97583;">        return</span><span style="color: #79B8FF;"> None</span></span>
+<span class="giallo-l"><span style="color: #F97583;">    if</span><span> node.item</span><span style="color: #F97583;"> =</span><span> key:</span></span>
+<span class="giallo-l"><span style="color: #F97583;">        return</span><span> node </span></span>
+<span class="giallo-l"><span style="color: #F97583;">    elif</span><span> node.item</span><span style="color: #F97583;"> &lt;</span><span> key:</span></span>
+<span class="giallo-l"><span>        find(node.right, key)</span></span>
+<span class="giallo-l"><span style="color: #F97583;">    else</span><span> </span></span>
+<span class="giallo-l"><span>        find(node.left, key) </span></span></code></pre>
+<p>Work through a real example in class.
+Note that we are literally doing binary search, just happens to be doing this on a tree.
+But what is perhaps a little trickier is to model the sequence interface.</p>
+<p>Define <code>size(node)</code> to be the number of nodes in its sub-tree (including itself)
+Our goal will to be to implement <code>get_at(i)</code> and <code>set_at(i)</code>, but this will be easier if we can solve the following general problem.</p>
+<blockquote>
+<p>How do we get the $i$’th node in a subtree?</p>
+</blockquote>
+<pre class="giallo" style="color: #E1E4E8; background-color: #24292E;" ><code data-lang="python"><span class="giallo-l"><span style="color: #F97583;">def</span><span style="color: #B392F0;"> subtree_at</span><span>(node, i):</span></span>
+<span class="giallo-l"><span>    nl</span><span style="color: #F97583;"> =</span><span> size(node)</span></span>
+<span class="giallo-l"><span style="color: #F97583;">    if</span><span> i</span><span style="color: #F97583;"> &lt;</span><span> nl : subtree_at(node.left, i)</span></span>
+<span class="giallo-l"><span style="color: #F97583;">    if</span><span> i</span><span style="color: #F97583;"> ==</span><span> nl :</span><span style="color: #F97583;"> return</span><span> node</span></span>
+<span class="giallo-l"><span style="color: #6A737D;">    # re-indexing go over in class</span></span>
+<span class="giallo-l"><span style="color: #F97583;">    if</span><span> i</span><span style="color: #F97583;"> &gt;</span><span> nl : subtree_at(node.right, nl</span><span style="color: #F97583;"> -</span><span> i</span><span style="color: #F97583;"> -</span><span style="color: #79B8FF;"> 1</span><span>)</span></span></code></pre>
+<p>So to <code>insert_at(i)</code> we can just call <code>x=subtree_at(node, i)</code> followed by <code>insert_before(x)</code>.</p>
+<p><strong>But there is a problem</strong>. How do we compute size?
+If at each step I traversed the sub-tree to get size, then that’s no good.
+We need to update the size function.</p>
+<h2 id="subtree-augmentation">Subtree Augmentation</h2>
+<ul>
+<li>
+<p>Each node can store a constant number of extra fields, call them properties.</p>
+</li>
+<li>
+<p>Subtree property is something that can be computed from the properties of the nodes children (and node). So for example size is a subtree property because it can be computed as <code>1 + node.left.size + node.right.size</code>, and i can compute it on constant time.</p>
+</li>
+</ul>
+<p>Note that this property must be downward looking. I cannot look upwards to compute the property of a node.</p>
+<p>Now if I want to <code>insert</code> or <code>delete</code> nodes it changes the size of the nodes by adding or removing a leaf in the tree.
+So I would have to update the field of the ancestors so I can use the sub-tree property.
+Leaves have no children so their properties can be updated in constant time.
+But then the parents of those leaves can also be updated in constant time.
+And there can be at most $O(h)$ parents for any delete or insert.</p>
+<aside class="statement statement-remark">
+  <div class="statement-heading">
+    <span class="statement-kind">Remark</span><span class="statement-number"></span><span class="statement-title"> — Non Subtree property</span>
+  </div>
+  <div class="statement-body"><p><strong>Index is not a subtree property</strong> It is a global property.
+You might wonder can’t I just store the index of each node as a field?
+Well when I insert a new node, <strong>every</strong> node must change its fields, not just the sub-trees. Therefore it’s global not sub-tree.</p>
+</div>
+</aside>
+<h2 id="avl-trees">AVL Trees</h2>
+<p>Goal of this lecture to ensure that $h = O(\log_2 n)$.</p>
+<p>Need some new tools.
+Rotation – a way to rebalance the tree.
+We  can <strong>NEVER</strong> change the traversal order.
+Note the reason we can do this because in a tree there are multiple ways to store the same traversal order.
+In an array we could not do this.
+Moreover there is <strong>always</strong> a balanced tree representing the same traversal order.</p>
+<p>Example rotate_right preserves traversal order.</p>
+<h3 id="rotations">Rotations</h3>
+<p><img src="https://randomwalks.xyz/algorithms/lectures/04-trees/./rotate-avl.svg" alt="" /></p>
+
+    </div>
+    
+</article>
+
+    </main>
+
+    
+    <script>
+      document.querySelectorAll('.prose pre').forEach((pre) => {
+        const code = pre.querySelector('code');
+        if (!code) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block';
+        pre.before(wrapper);
+        wrapper.append(pre);
+
+        const button = document.createElement('button');
+        button.className = 'copy-code';
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.setAttribute('aria-label', 'Copy code to clipboard');
+        wrapper.append(button);
+
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(code.textContent);
+            button.textContent = 'Copied';
+            window.setTimeout(() => { button.textContent = 'Copy'; }, 1400);
+          } catch (_) {
+            button.textContent = 'Select and copy';
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(code);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        });
+      });
+    </script>
+    
+
+</body>
+</html>

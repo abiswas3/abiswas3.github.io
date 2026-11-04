@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>How to Model a CPU in Lean — Random Walks</title>
   <meta name="description" content="">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=58eac425b63a4a9905b4">
+  <script src="https://randomwalks.xyz/theme.js?h=022c5e6dda6564ebbb98"></script>
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=24e8d15864242f235d81">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -88,6 +89,10 @@
       <a href="https://randomwalks.xyz/blog/">Notes</a>
       <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
       <a href="https://randomwalks.xyz/cv/">CV</a>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" hidden>
+        <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+        <svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
       <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
       <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
@@ -121,18 +126,18 @@
 <article class="note footnotes-right note--side-toc">
   <header class="note-header">
     <h1>How to Model a CPU in Lean</h1>
-    
     <div class="note-meta">
       <span class="note-authors">By Ari</span>
       <time datetime="2026-05-22">22 May 2026</time>
       
         <time datetime="2026-05-22">Last updated 22 May 2026</time>
       
+      
+      <ul class="tag-list" aria-label="Tags">
+        <li><a href="https://randomwalks.xyz/tags/lean/">#lean</a></li><li><a href="https://randomwalks.xyz/tags/jolt/">#jolt</a></li>
+      </ul>
+      
     </div>
-    
-    <ul class="tag-list" aria-label="Tags">
-      <li><a href="https://randomwalks.xyz/tags/lean/">lean</a></li><li><a href="https://randomwalks.xyz/tags/jolt/">Jolt</a></li>
-    </ul>
     
   </header>
 
@@ -277,8 +282,7 @@ For example, on a silicon chip, the CPU emits an address on a bus, and the memor
 We will not focus on the mechanics of how state transitions happen on a physical chip or in software emulation.
 Our concern is what happens before and after a state transition.
 From here on, we refer to the trusted Sail-to-Lean transpilation as Sail code.</p>
-<h2 id="state">State<a class="zola-anchor" href="#state" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="state">State</h2>
 <p>The RISC-V state, abbreviated as <code>SailState</code>, is given by:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="JoltBytecode/JoltISA/Core.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">25</span><span style="color: #D73A49;">abbrev</span><span style="color: #6F42C1;"> SailState</span><span> := SequentialState RegisterType trivialChoiceSource</span></span></code></pre>
 <p>Here, <code>SequentialState</code> describes the full machine state from the Sail model.
@@ -334,8 +338,7 @@ The second parameter <code>c</code> has type <code>ChoiceSource</code>, a struct
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">307</span><span>    | .bitvector _ =&gt; </span><span style="color: #005CC5;">0</span></span></code></pre>
 <p>More simply, this says that all default values are the expected ones.
 Next, we describe how one steps the CPU or performs a state transition.</p>
-<h2 id="the-sail-monad">The Sail Monad<a class="zola-anchor" href="#the-sail-monad" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="the-sail-monad">The Sail Monad</h2>
 <p>Step transitions are modeled using Lean’s built-in error-state monad (<code>EStateM ε σ α</code>), with the <a href="https://randomwalks.xyz/blog/jolt-qed/state/#errors">error</a> and <a href="https://randomwalks.xyz/blog/jolt-qed/state/#state">state</a> types.
 Under the hood <code>EStateM ε σ α</code> is just a function <code>σ → Result ε σ α</code> that takes a state and returns either <code>.ok v newState</code> or <code>.error e newState</code>, where <code>v : α</code> and <code>e : ε</code>.
 See the <a rel="noopener noreferrer external" target="_blank" href="https://leanprover-community.github.io/mathlib4_docs/Init/Control/EState.html">official <code>EStateM</code> documentation</a> for further details.</p>
@@ -352,8 +355,7 @@ The remaining <code>α</code> is filled in at each use site, giving a different 
 <span class="giallo-l"><span>SailM (BitVec </span><span style="color: #005CC5;">64</span><span>)       -- a step that reads a register, yielding a </span><span style="color: #005CC5;">64</span><span>-bit word</span></span>
 <span class="giallo-l"><span>SailM Unit              -- a step run only </span><span style="color: #D73A49;">for</span><span> its effect on state</span></span></code></pre>
 <p>So <code>SailM</code> is the “RISC-V step computation” constructor, and <code>SailM α</code> is “a step computation that produces an <code>α</code>”. This is the same currying you already use when you write <code>List</code> (a <code>Type → Type</code>) and only later <code>List Nat</code>.</p>
-<h3 id="errors">Errors<a class="zola-anchor" href="#errors" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="errors">Errors</h3>
 <p>These variants model all the ways the execution part of the fetch-decode-execute cycle can go wrong.
 <code>Error</code> is from the Sail library:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name=".lake/packages/Sail/Sail/Sail.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">351</span><span style="color: #D73A49;">inductive</span><span style="color: #6F42C1;"> Error</span><span> (ue : </span><span style="color: #D73A49;">Type</span><span>) </span><span style="color: #D73A49;">where</span></span>
@@ -366,15 +368,13 @@ The remaining <code>α</code> is filled in at each use site, giving a different 
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="LeanRV64D/Defs.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">87</span><span style="color: #D73A49;">inductive</span><span style="color: #6F42C1;"> exception</span><span style="color: #D73A49;"> where</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">88</span><span>  | Error_not_implemented (_ : String)</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">89</span><span>  | Error_internal_error (_ : String)</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">90</span><span>  | Error_reserved_behavior (_ : String)</span></span></code></pre><h2 id="executing-instructions">Executing Instructions<a class="zola-anchor" href="#executing-instructions" aria-label="Link to this section">#</a>
-</h2>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">90</span><span>  | Error_reserved_behavior (_ : String)</span></span></code></pre><h2 id="executing-instructions">Executing Instructions</h2>
 <p>With <code>SailM</code> defined above, to execute instructions we must provide two things:</p>
 <ol>
 <li>The type for $\alpha$. For RISC-V instructions, $\alpha$ will invariably be <code>ExecutionResult</code>. This is the final output after execution.</li>
 <li>Once $\alpha$ is defined, a full description of the state transition.</li>
 </ol>
-<h3 id="execution-results-the-return-type-after-execution">Execution Results: The Return Type After Execution<a class="zola-anchor" href="#execution-results-the-return-type-after-execution" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="execution-results-the-return-type-after-execution">Execution Results: The Return Type After Execution</h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="LeanRV64D/Defs.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">1464</span><span style="color: #D73A49;">inductive</span><span style="color: #6F42C1;"> ExecutionResult</span><span style="color: #D73A49;"> where</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">1465</span><span>  | Retire_Success (_ : Unit)</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">1466</span><span>  | ExecuteAs (_ : instruction)</span></span>
@@ -402,13 +402,12 @@ Below is the trusted Sail implementation of the pseudocode above.</p>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">71661</span><span>  (pure RETIRE_SUCCESS) -- m3</span></span></code></pre>
 <p>Next we try and parse the above code.
 It might look simple, but under the hood a lot is going, and understanding it is key for understanding our proof tactics later on.</p>
-<aside id="" class="callout callout-remark">
+<aside class="callout theorem-block callout-remark">
   <div class="callout-title">Remark</div>
   <p>We will not always discuss do notation in such detail, but we choose to do so here because all CPU implementations are written in do notation.
 Thus, it’s important to get used to mentally translating do notation into function composition.</p>
 </aside>
-<h4 id="function-signature">Function Signature<a class="zola-anchor" href="#function-signature" aria-label="Link to this section">#</a>
-</h4>
+<h4 id="function-signature">Function Signature</h4>
 <p>The function signature says the inputs are a 12-bit immediate value <code>imm</code> and general-purpose source and destination registers <code>rs1</code> and <code>rd</code>, which are of type<sup class="footnote-reference" id="fr-gpr-1"><a href="https://randomwalks.xyz/blog/jolt-qed/state/#fn-gpr">[4]</a></sup> <code>regidx</code>.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="LeanRV64D/Defs.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">31</span><span style="color: #D73A49;">inductive</span><span style="color: #6F42C1;"> regidx</span><span style="color: #D73A49;"> where</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">32</span><span>  | Regidx (_ : (BitVec (</span><span style="color: #D73A49;">if</span><span> ( </span><span style="color: #005CC5;">false</span><span>  : Bool) </span><span style="color: #D73A49;">then</span><span style="color: #005CC5;"> 4</span><span style="color: #D73A49;"> else</span><span style="color: #005CC5;"> 5</span><span>)))</span></span></code></pre>
@@ -417,8 +416,7 @@ Lean is a functional language, but CPU execution is inherently stateful, so <cod
 The mental model is that each line of the block is a <code>SailM α</code> computation — and recall these are just functions: feed one the current state and it either returns <code>.ok</code> with a new value and state, or <code>.error</code> with an error value and state.
 If a line errors, the computation short-circuits and the whole block returns that error; on success, the returned value is passed along to the next line.
 Applying this to the whole body, the three <code>do</code> lines desugar into one nested <code>&gt;&gt;=</code> chain:</p>
-<h4 id="parsing-the-body">Parsing The Body<a class="zola-anchor" href="#parsing-the-body" aria-label="Link to this section">#</a>
-</h4>
+<h4 id="parsing-the-body">Parsing The Body</h4>
 <p>We rewrite the outer <code>do</code> block as</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">do</span></span>
 <span class="giallo-l"><span>  result ← m1</span></span>
@@ -491,8 +489,7 @@ The next desugaring step is as follows:</p>
 </ol>
 <p>Thus, <code>wX_bits ...</code> is the <em>only</em> monadic computation that changes state.
 We refer the reader to the <a href="https://randomwalks.xyz/blog/jolt-qed/state/#read-and-write-chain">Read and Write Chain</a> appendix for the full code blocks.</p>
-<h2 id="jolt-cpu">Jolt CPU<a class="zola-anchor" href="#jolt-cpu" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="jolt-cpu">Jolt CPU</h2>
 <p>The Jolt CPU as modeled in Rust is shown below.
 Most fields have an equivalent copy in the Sail state, so the Jolt state can and should be built on top of <code>SailState</code> with some extra fields.
 For the purposes of proving expansion equivalence, this is enough<sup class="footnote-reference" id="fr-extend-1"><a href="https://randomwalks.xyz/blog/jolt-qed/state/#fn-extend">[7]</a></sup>.
@@ -545,8 +542,7 @@ To make proofs easier to manage, we directly use the Sail registers when writing
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">38</span><span style="color: #D73A49;">  if</span><span> vr.toNat &lt; </span><span style="color: #005CC5;">32</span><span style="color: #D73A49;"> then</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">39</span><span>    throw (Error.Assertion </span><span style="color: #032F62;">&quot;writeVReg: architectural xreg address&quot;</span><span>)</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">40</span><span style="color: #D73A49;">  else</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">41</span><span>    modify </span><span style="color: #D73A49;">fun</span><span> js =&gt; { js </span><span style="color: #D73A49;">with</span><span> vregs := </span><span style="color: #D73A49;">fun</span><span> r =&gt; </span><span style="color: #D73A49;">if</span><span> r = vr </span><span style="color: #D73A49;">then</span><span> val </span><span style="color: #D73A49;">else</span><span> js.vregs r }</span></span></code></pre><h3 id="virtual-registers">Virtual Registers<a class="zola-anchor" href="#virtual-registers" aria-label="Link to this section">#</a>
-</h3>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">41</span><span>    modify </span><span style="color: #D73A49;">fun</span><span> js =&gt; { js </span><span style="color: #D73A49;">with</span><span> vregs := </span><span style="color: #D73A49;">fun</span><span> r =&gt; </span><span style="color: #D73A49;">if</span><span> r = vr </span><span style="color: #D73A49;">then</span><span> val </span><span style="color: #D73A49;">else</span><span> js.vregs r }</span></span></code></pre><h3 id="virtual-registers">Virtual Registers</h3>
 <p>Not all virtual registers are the same.
 The figure below shows the classification of the different registers.</p>
 <p><img src="https://randomwalks.xyz/blog/jolt-qed/state/./jolt-registers.svg" alt="" /></p>
@@ -557,7 +553,7 @@ The logic used in Jolt is as follows:</p>
 <li>When Jolt asks for a scratch virtual register, we return the lowest-indexed register marked free. For example, at the start, with all scratch registers marked free, the first free register is 40. Once this is returned, 40 is marked used until it is explicitly marked free again. The next free register is then 41, and so on.</li>
 </ul>
 <p>We explicitly model this in <code>JoltBytecode/JoltISA/VirtualRegisters.lean</code>, with proof-side facts in <code>JoltBytecode/InstructionEquivalence/ProofSupport/VirtualRegisters.lean</code>, so that expansion proofs can check that the allocator neither runs out of scratch virtual registers nor reuses one that is still live.</p>
-<aside id="" class="callout callout-remark">
+<aside class="callout theorem-block callout-remark">
   <div class="callout-title">Two sets of control/status registers</div>
   <p>It might seem confusing that some virtual registers represent control/status registers, while there is also a separate field for CSRs.
 This is because the Jolt CPU emulator is a fork of a RISC-V emulator.
@@ -565,8 +561,7 @@ This means that the emulator is able to emulate non-expanded vanilla RISC-V prog
 However, when reading a Jolt CPU program, control/status register reads and writes are done via the virtual register file.
 <code>ECALL</code>, <code>EBREAK</code>, <code>MRET</code>, <code>CSRRW</code>, <code>CSRRS</code>, and <code>CSRRC</code> are all expanded (as we show later).</p>
 </aside>
-<h2 id="jolt-monad-stepping-the-cpu">Jolt Monad (Stepping the CPU)<a class="zola-anchor" href="#jolt-monad-stepping-the-cpu" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="jolt-monad-stepping-the-cpu">Jolt Monad (Stepping the CPU)</h2>
 <p>We step the Jolt CPU using the same <code>EStateM</code> infrastructure.
 The only difference between this and the RISC-V CPU is that we use <code>SailJoltState</code> instead of <code>SailState</code>.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">abbrev</span><span style="color: #6F42C1;"> JoltMonad</span><span> (α : </span><span style="color: #D73A49;">Type</span><span>) := EStateM (Error exception) SailJoltState α</span></span></code></pre>
@@ -607,8 +602,7 @@ These are modeled in Lean as the inductive type <code>JoltISA.Instr</code>.</p>
 <p>The inductive type above only lists the different instructions supported by the Jolt ISA.
 It does not describe how the Jolt state changes when these instructions are executed.
 We do that next.</p>
-<h3 id="executing-jolt-instructions">Executing Jolt Instructions<a class="zola-anchor" href="#executing-jolt-instructions" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="executing-jolt-instructions">Executing Jolt Instructions</h3>
 <p>In <code>JoltBytecode/JoltISA/Semantics.lean</code> we define <code>execInstr</code>, a function that maps a <code>JoltISA.Instr</code> to a <code>JoltMonad ExecutionResult</code>.
 That is, for each native or virtual Jolt instruction, it defines the state update function.
 Remember, <code>JoltMonad</code> is just a function.
@@ -643,8 +637,7 @@ For each instruction, the process is as follows:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>| .ADDI dst src imm =&gt; </span><span style="color: #D73A49;">do</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">    let</span><span> x ← readSrc src</span></span>
 <span class="giallo-l"><span>    writeDst dst (x + sign_extend (m := </span><span style="color: #005CC5;">64</span><span>) imm)</span></span>
-<span class="giallo-l"><span>    pure RETIRE_SUCCESS</span></span></code></pre><aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<span class="giallo-l"><span>    pure RETIRE_SUCCESS</span></span></code></pre><aside class="callout theorem-block callout-box thm-box">
   <p>This eyeballing of Rust and Lean code is prone to bugs. As a temporary solution, we always have an AI agent double-check the two code blocks. In the coming weeks, we will have an auto-translator from Rust to Lean for instruction execution semantics.</p>
 </aside>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="rust" data-name="https://github.com/abiswas3/jolt/blob/main/tracer/src/instruction/addi.rs"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">19</span><span style="color: #D73A49;">    fn</span><span style="color: #6F42C1;"> exec</span><span>(</span><span style="color: #D73A49;">&amp;</span><span style="color: #005CC5;">self</span><span>, cpu</span><span style="color: #D73A49;">: &amp;mut</span><span style="color: #6F42C1;"> Cpu</span><span>, _</span><span style="color: #D73A49;">: &amp;mut</span><span> &lt;</span><span style="color: #005CC5;">ADDI</span><span style="color: #D73A49;"> as</span><span style="color: #6F42C1;"> RISCVInstruction</span><span>&gt;</span><span style="color: #D73A49;">::</span><span style="color: #6F42C1;">RAMAccess</span><span>) {</span></span>
@@ -669,9 +662,9 @@ Continuing with the <code>ADDI</code> example, it looks like the following:</p>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">76</span><span>    ((JoltISA.execInstr (.ADDI (.xreg rd) (.xreg rs1) imm)).run js) =</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">77</span><span>    ((execute_ITYPE imm rs1 rd iop.ADDI).run js.sail)</span></span></code></pre>
 <p>The statement above translates to the following mathematical statement.</p>
-<aside id="" class="callout callout-theorem thm-numbered">
+<aside class="callout theorem-block callout-theorem thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
-    <span class="thm-title"> : ADDI Equivalence Statement</span></div>
+    <span class="thm-title">— ADDI Equivalence Statement</span></div>
   <p>Given a 12-bit immediate value <code>imm</code>, a readable source register <code>rs1</code>, a writable destination register <code>rd</code>, assumptions <code>h</code>, and an initial Jolt state <code>js</code>, running Jolt’s <code>ADDI</code> and projecting down to the Sail state gives the same state as running the trusted Sail <code>ADDI</code> on the input state <code>js.sail</code>.</p>
 </aside>
 <p>The exact assumption bundle used for <code>ADDI</code> is <code>UnarySourceReadWithLinkedCSRs rs1 js</code>, which bundles two sets of assumptions together.</p>
@@ -729,8 +722,7 @@ We need to tell Lean that those virtual registers represent the same values as t
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">88</span><span>  | .ok a js&#39; =&gt; .ok a (systemProject js&#39;)</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">89</span><span>  | .error e js&#39; =&gt; .error e (systemProject js&#39;)</span></span></code></pre>
 <p>And that’s it: for every natively supported instruction, we have to prove that this statement is true.</p>
-<h3 id="expansions">Expansions<a class="zola-anchor" href="#expansions" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="expansions">Expansions</h3>
 <p>We’ve handled natively supported RISC-V instructions.
 What about instructions like <code>LW</code>, where the RISC-V instruction is handled as a sequence of Jolt instructions rather than as one native <code>execInstr</code> step?
 These instructions are modeled by expansion programs.
@@ -796,7 +788,7 @@ Without <code>&lt;|</code>, the same program is:</p>
 In that case Jolt swaps <code>rd</code> for the first free virtual register, and this means the downstream virtual register allocation changes by an offset of 1.
 These helpers help represent that in a clean manner.
 So far, this only says how to build a program. We still need to say how to run one.</p>
-<aside id="" class="callout callout-remark">
+<aside class="callout theorem-block callout-remark">
   <div class="callout-title">What are these blocks?</div>
   <p>One might notice that we said a program is built by composing instructions.
 However, the two lines <code>slliBlock</code> and <code>srlBlock</code> are not themselves instructions.
@@ -861,8 +853,7 @@ This is because Jolt does not support <code>SLLI</code> and <code>SRL</code> nat
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">51</span><span>    asm</span><span style="color: #D73A49;">.</span><span style="color: #6F42C1;">release</span><span>(v1);</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">52</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">53</span><span>    asm</span><span style="color: #D73A49;">.</span><span style="color: #6F42C1;">finalize</span><span>()</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">54</span><span>}</span></span></code></pre><h2 id="executing-expanded-programs">Executing Expanded Programs<a class="zola-anchor" href="#executing-expanded-programs" aria-label="Link to this section">#</a>
-</h2>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">54</span><span>}</span></span></code></pre><h2 id="executing-expanded-programs">Executing Expanded Programs</h2>
 <p>Execution of a program is much like the execution of a single Jolt instruction.
 Given a program, instead of a single Jolt instruction, we return a state transition function.
 If the program is already complete, then execution just returns the result.
@@ -885,16 +876,14 @@ We will also prove that this program leaves the Sail state exactly as it would b
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">403</span><span>      ((JoltISA.execProgram (JoltISA.lwProgram imm rs1 rd)).run js) =</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">404</span><span>    (execute_LOAD imm rs1 rd </span><span style="color: #005CC5;">false 4</span><span>).run js.sail</span></span></code></pre>
 <p>The statement above translates to the following mathematical statement.</p>
-<aside id="" class="callout callout-theorem thm-numbered">
+<aside class="callout theorem-block callout-theorem thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
-    <span class="thm-title"> : LW Equivalence Statement</span></div>
+    <span class="thm-title">— LW Equivalence Statement</span></div>
   <p>Given a 12-bit immediate value <code>imm</code>, a readable source register <code>rs1</code>, a writable destination register <code>rd</code>, assumptions <code>h</code>, and an initial Jolt state <code>js</code>, running Jolt’s expanded <code>LW</code> program and projecting down to the Sail state gives the same state as running the trusted Sail <code>LW</code> on the input state <code>js.sail</code>.</p>
 </aside>
 <p>In upcoming posts, we will dive into the details of assumptions in theorem statements and how to go about proving these statements.</p>
-<h2 id="appendices">Appendices<a class="zola-anchor" href="#appendices" aria-label="Link to this section">#</a>
-</h2>
-<h3 id="read-and-write-chain">Read and Write Chain<a class="zola-anchor" href="#read-and-write-chain" aria-label="Link to this section">#</a>
-</h3>
+<h2 id="appendices">Appendices</h2>
+<h3 id="read-and-write-chain">Read and Write Chain</h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="LeanRV64D/Regs.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">696</span><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> rX_bits</span><span> (app_0 : regidx) : SailM (BitVec </span><span style="color: #005CC5;">64</span><span>) := </span><span style="color: #D73A49;">do</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">697</span><span style="color: #D73A49;">  let</span><span> .Regidx i := app_0</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">698</span><span>  (rX (Regno (BitVec.toNatInt i)))</span></span>
@@ -925,8 +914,7 @@ We will also prove that this program leaves the Sail state exactly as it would b
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">531</span><span>  modify </span><span style="color: #D73A49;">fun</span><span> s =&gt; { s </span><span style="color: #D73A49;">with</span><span> regs := s.regs.insert r v }</span></span></code></pre><pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name=".lake/packages/Sail/Sail/Sail.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">534</span><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> readReg</span><span> (r : Register) : PreSailM RegisterType c ue (RegisterType r) := </span><span style="color: #D73A49;">do</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">535</span><span style="color: #D73A49;">  let</span><span> .some s := (← get).regs.get? r</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">536</span><span>    | throw .Unreachable</span></span>
-<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">537</span><span>  pure s</span></span></code></pre><h3 id="csr-assumptions">CSR Assumptions<a class="zola-anchor" href="#csr-assumptions" aria-label="Link to this section">#</a>
-</h3>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">537</span><span>  pure s</span></span></code></pre><h3 id="csr-assumptions">CSR Assumptions</h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="JoltBytecode/Assumptions.lean"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">107</span><span style="color: #D73A49;">structure</span><span style="color: #6F42C1;"> MstatusVRegMatchesSail</span><span> (js : SailJoltState) : </span><span style="color: #D73A49;">Prop where</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">108</span><span>  value_eq :</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">109</span><span>    js.sail.regs.get? Register.mstatus =</span></span>
@@ -1003,9 +991,6 @@ Of course, in a real physical CPU, the register file is not a hash map and we do
     <!--   </ul> -->
     <!-- </div> -->
     
-    <div class="footer-credit">
-      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
-    </div>
   </footer>
 
   <script>
@@ -1144,6 +1129,7 @@ Of course, in a real physical CPU, the register file is not a hash map and we do
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+<script defer src="https://randomwalks.xyz/tag-colours.js?h=862d01e15ac82a14daed"></script>
 
 
 

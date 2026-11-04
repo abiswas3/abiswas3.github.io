@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Resolution Crash Course — Random Walks</title>
   <meta name="description" content="">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=58eac425b63a4a9905b4">
+  <script src="https://randomwalks.xyz/theme.js?h=022c5e6dda6564ebbb98"></script>
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=24e8d15864242f235d81">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -88,6 +89,10 @@
       <a href="https://randomwalks.xyz/blog/">Notes</a>
       <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
       <a href="https://randomwalks.xyz/cv/">CV</a>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" hidden>
+        <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+        <svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
       <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
       <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
@@ -121,16 +126,16 @@
 <article class="note footnotes-right note--side-toc">
   <header class="note-header">
     <h1>Resolution Crash Course</h1>
-    
     <div class="note-meta">
       <span class="note-authors">By Ari</span>
       <time datetime="2025-01-01">01 January 2025</time>
       
+      
+      <ul class="tag-list" aria-label="Tags">
+        <li><a href="https://randomwalks.xyz/tags/proof-complexity/">#proof-complexity</a></li><li><a href="https://randomwalks.xyz/tags/combinatorics/">#combinatorics</a></li>
+      </ul>
+      
     </div>
-    
-    <ul class="tag-list" aria-label="Tags">
-      <li><a href="https://randomwalks.xyz/tags/proof-complexity/">proof-complexity</a></li><li><a href="https://randomwalks.xyz/tags/combinatorics/">combinatorics</a></li>
-    </ul>
     
   </header>
 
@@ -215,8 +220,7 @@
     
 
     <div class="prose">
-      <h2 id="resolution-proof-system">Resolution Proof System<a class="zola-anchor" href="#resolution-proof-system" aria-label="Link to this section">#</a>
-</h2>
+      <h2 id="resolution-proof-system">Resolution Proof System</h2>
 <p>A Boolean formula $F$ is a CNF formula if $F$ is an AND of clauses $F = C_1 \land \ldots \land C_m$ where each clause $C_i$ is an OR of literals (variables $x_i$ or their negation $\Complement{x_i}$).</p>
 <p><strong>Resolution Rule</strong>: Given two clauses $C_0$ and $C_1$ of the form $C_0 = A \lor x$ and $C_1 = B \lor \Complement{x}$, the resolution rule allows us to derive a new clause $C’= A \lor B$.
 In the literature we denote this rule as
@@ -228,9 +232,9 @@ Sometimes we also allow for the weakening rule, where given a clause $C$, we can
 <p>$$
 \frac{C}{D} [C\subseteq D]
 $$</p>
-<aside id="" class="callout callout-definition thm-numbered">
+<aside class="callout theorem-block callout-definition thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
-    <span class="thm-title"> : Resolution Proof System</span></div>
+    <span class="thm-title">— Resolution Proof System</span></div>
   <p>Given an unsatisfiable CNF formula $F = \bigwedge_{i \in [m]}C_i$ over $n$ variables, a resolution refutation $\pi$ is a sequence of clauses $D_1, \dots, D_L$ where</p>
 <ol>
 <li>$D_i = C_i$ for $1 \le i \le m$.</li>
@@ -240,29 +244,26 @@ $$</p>
 <p><strong>Size Of A Refutation</strong>: The size of a refutation $\Size{\pi}$ is the number of clauses in the sequence ($L$ in this case).</p>
 </aside>
 <p>The complexity of refuting a formula $F$ is given by the size of the smallest proof that refutes $F$.</p>
-<aside id="" class="callout callout-definition thm-numbered">
+<aside class="callout theorem-block callout-definition thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
-    <span class="thm-title"> : Proof Complexity</span></div>
+    <span class="thm-title">— Proof Complexity</span></div>
   <p>Let $F$ be some un-satisfiable CNF and $\Pi_F$ be the set of resolution proofs that refute $F$.
 Then</p>
 <p>$$L(F) := \min_{\pi \in \Pi_F}\Size{\pi} $$</p>
 <p>denotes the complexity of refuting $F$ in the resolution proof system.</p>
 </aside>
-<h3 id="worked-out-example">Worked Out Example<a class="zola-anchor" href="#worked-out-example" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="worked-out-example">Worked Out Example</h3>
 <p>Shown below is a worked out example using only the resolution rule (no weakening).
 The original clauses/axioms are shown in green, and the derivations are shown in brown.</p>
 <p><img src="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/./Derivation.svg" alt="" /></p>
 <p>We use $x’’$ to denote negations of variables in the figure above, and $L(\pi) = 15$.</p>
-<h2 id="the-pigeon-hole-principle">The Pigeon Hole Principle<a class="zola-anchor" href="#the-pigeon-hole-principle" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="the-pigeon-hole-principle">The Pigeon Hole Principle</h2>
 <p>It is convenient to think of the principle in terms of a bipartite graph
 $G = (V_P \cup V_H, E)$ with pigeons $V_P = [m]$ and holes $V_H = [n]$ for $m \ge n+ 1$.
 For a given pigeon $u \in V_P$, $N_G(u)$ denotes the set of holes pigeon $u$ is allowed to fly into.
 Similarly, for any hole $v\in V_H$, $N_G(v)$ denotes the set of pigeons allowed in hole $v$.
 If nothing is stated about $G$, it is safe to assume $G = K_{m,n}$ the complete bipartite graph.</p>
-<h3 id="encoding-php-as-a-cnf">Encoding PHP as a CNF<a class="zola-anchor" href="#encoding-php-as-a-cnf" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="encoding-php-as-a-cnf">Encoding PHP as a CNF</h3>
 <p>To encode the idea that each hole can accommodate at most 1 pigeon, and as there are not enough holes, it is impossible to assign every pigeon a hole, we use variables $x_{ij} \in \bit$ to denote the assignment of pigeon $i$ to hole $j$.
 That is if $x_{ij} = 1$ then pigeon $i$ is assigned to hole $j$.
 Now, saying that we cannot assign every pigeon a unique hole is equivalent to saying, that there is no assignment $\vec{x} = (x_{e})_{e\in E}$ that satisfies the conjunction of the following clauses.</p>
@@ -290,8 +291,8 @@ F &amp;= \underset{i \in [m]}{\land} P_i \
 &amp; \bigwedge\underset{j \in [m]}{\land} S_j
 \end{align}$$</p>
 </div>
-<aside id="" class="callout callout-remark">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-remark">
+  <div class="callout-title">Remark</div>
   <p>Satisfying all 4 axioms, implies that there exists a <strong>perfect matching</strong> in the graph $G$.</p>
 </aside>
 <p>Clearly any formula that includes constraints $\eqref{eq:pigeon}$–$\eqref{eq:onto}$ is the MOST<sup class="footnote-reference" id="fr-mental-1"><a href="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/#fn-mental">[1]</a></sup> constrained system.
@@ -300,8 +301,7 @@ Thus, lower bounds for <strong>more</strong> constrained systems subsume lower b
 <p>Similarly, if we make $m$ very very large, it should be really easy to refute the axioms, when compared to the case when $m=n+1$.
 Thus, showing lower bounds on the length of the refutation for $m \gg n$ subsume the lower bounds for the case when $m$ is slightly larger than $n$.
 When $m \in \omega(n^2)$ we refer to the formula as the <strong>weak</strong> PHP.</p>
-<h2 id="what-is-known-lower-bounds-for-resolution">What Is Known: Lower Bounds For Resolution<a class="zola-anchor" href="#what-is-known-lower-bounds-for-resolution" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="what-is-known-lower-bounds-for-resolution">What Is Known: Lower Bounds For Resolution</h2>
 <p>The following results are for $G= K_{m,n}$ where every pigeon is allowed to fly into every hole.</p>
 <ul>
 <li>
@@ -311,8 +311,8 @@ When $m \in \omega(n^2)$ we refer to the formula as the <strong>weak</strong> PH
 <p>The above result was  further generalised by <a href="#ref-buss1988resolution" class="citation">[Buss &amp; Turán, 1988]</a> to $\Length{\OntoPHP{n+1}{n}{K}} = \Exp{\BigOmega{\frac{n^2}{n+1}}}$.</p>
 </li>
 </ul>
-<aside id="" class="callout callout-remark">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-remark">
+  <div class="callout-title">Remark</div>
   <p>The above lower bounds do not say anything meaningful when $m = \BigOmega{n^2}$.
 So they are in the <em>small</em> $m$ regime.</p>
 </aside>
@@ -324,8 +324,8 @@ So they are in the <em>small</em> $m$ regime.</p>
 <p>In <a href="#ref-razborov2003resolution" class="citation">[Razborov, 2003]</a> and <a href="#ref-razborov2004resolution" class="citation">[Razborov, 2004]</a>, the above result was strengthened and extended to saying every proof $\pi$ that refutes the onto pigeon hole principle $\OntoPHP{m}{n}{K}$ has size $\Exp{\BigOmega{\frac{n}{\log^2 m}}}$.</p>
 </li>
 </ul>
-<aside id="" class="callout callout-remark">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-remark">
+  <div class="callout-title">Remark</div>
   <p>Now for even $m$ as large as $m=\exp(\BigO{n^{1/3}})$, we have all proofs have size that is $\exp(\BigOmega{n^{1/3}})$.
 Note if we have $m$ as large as $\exp(\BigO{n^{1/3}})$, even writing down all the pigeon, hole, function and onto axioms take $\exp(\BigOmega{n^{1/3}})$ clauses worth of space.
 Thus, there is no point of thinking $m$ any larger.</p>
@@ -335,9 +335,9 @@ Thus, there is no point of thinking $m$ any larger.</p>
 For example, the presence of an isolated vertex leads to short proofs.
 So now we go into the business of for what kind of “sparse” graphs, is the problem still hard.</p>
 <p>The graph family we consider is the $(r, \Delta, c)$-boundary<sup class="footnote-reference" id="fr-boundary-1"><a href="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/#fn-boundary">[3]</a></sup> expander.</p>
-<aside id="" class="callout callout-definition thm-numbered">
+<aside class="callout theorem-block callout-definition thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
-    <span class="thm-title"> : The Boundary Expander</span></div>
+    <span class="thm-title">— The Boundary Expander</span></div>
   <p>Given Bipartite graph $G = (V_P \cup V_H, E)$ is an $(r, \Delta, c)$ boundary expander, if $\forall u \in V_P$ we have $\deg_G(u) \le \Delta$, and for every set $S \subseteq V_P$ with size $\Size{S} \le r$ we have</p>
 <p>$$\Size{\boundary{S}} \ge c \Size{S}$$</p>
 <p>where the boundary of a set $S \subseteq V_P$, denoted by $\boundary{S}$, is the set of vertices joined by an edge to exactly one vertex in $S$.
@@ -348,25 +348,24 @@ $$ \boundary{S} = { v \in V_H : \Size{N_G(v) \cap S} = 1}$$</p>
 <ul>
 <li><a href="#ref-ben1999short" class="citation">[Ben-Sasson &amp; Wigderson, 2001]</a> prove a general width lower bound for graph PHP on boundary expanders. Their balanced application has $m=n+1$ and constant degree. Their displayed application for $m\gg n$ uses degree $\Delta=\log m$ and gives length $\Exp{\BigOmega{\frac{n^2}{m\log m}}}$. The latter is useful only below the quadratic barrier; the precise calculation is given below.</li>
 </ul>
-<aside id="" class="callout callout-remark">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-remark">
+  <div class="callout-title">Remark</div>
   <p>The phrase $m\gg n$ in Ben-Sasson and Wigderson does not mean $m\gg n^2$. The exponent $n^2/(m\log m)$ tends to infinity only when $m\log m=o(n^2)$.</p>
 </aside>
 <ul>
 <li>The other extreme, where $m$ can be arbitrary, but each pigeon also has a lot of holes to go into (high minimal degree i.e graph is not very sparse) <a href="#ref-razborov2004resolution" class="citation">[Razborov, 2004]</a> and <a href="#ref-razborov2003resolution" class="citation">[Razborov, 2003]</a> show that the size is $\Exp{\BigOmega{\frac{\delta_G}{\log^2 m}}}$, where $\delta_G$ is the minimum degree of the graph.
 For any number of pigeons with a polynomial lower bound $\delta_G = n^{\BigOmega{1}}$ on the number holes each pigeon can fly into, we also have exponential size lower bounds.</li>
 </ul>
-<h2 id="their-main-result">Their Main Result<a class="zola-anchor" href="#their-main-result" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="their-main-result">Their Main Result</h2>
 <p>This leaves us asking what happens when $m \gg n^2$, but the minimal degree is small $\delta_G = \poly(\log(m))$?</p>
 <p><a href="#ref-rezende2020Exp" class="citation">[de Rezende et al., 2020]</a> solves this problem, and is the focus of our work.
 They prove lower bounds via pseudo-width for highly unbalanced sparse graphs satisfying a strong relative boundary-expansion condition.
 The use of pseudowidth instead of width like Wigderson-Ben Sasson, allows them to use a much larger $m$.
 They make no assumptions on minimal degree of graph as well.</p>
 <p><img src="https://randomwalks.xyz/blog/proof-complexity/resolution-crash-course/./graph_php.svg" alt="" /></p>
-<aside id="" class="callout callout-theorem thm-numbered">
+<aside class="callout theorem-block callout-theorem thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
-    <span class="thm-title"> : Size Lower Bounds on FPHP For Sparse Graphs (Theorem 4.4)</span></div>
+    <span class="thm-title">— Size Lower Bounds on FPHP For Sparse Graphs (Theorem 4.4)</span></div>
   <p>God fixes $n\geq n_0$ for some $n_0\in\Naturals$, where $n$ is the number of holes. The adversary then chooses:</p>
 <ol>
 <li>A number of pigeons $m:=m(n)$.</li>
@@ -405,8 +404,7 @@ $$</p>
 </aside>
 <p>Note that $\Delta$ is a free parameter and can be constant. We require no lower bound on the maximal degree of the graph.</p>
 <p>All three FPHP lower bounds shown in the paper are applications of Theorem 4.4 above.</p>
-<h3 id="regime-1-m-n-k-for-fixed-k">Regime 1: $m=n^k$ for fixed $k$<a class="zola-anchor" href="#regime-1-m-n-k-for-fixed-k" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="regime-1-m-n-k-for-fixed-k">Regime 1: $m=n^k$ for fixed $k$</h3>
 <p>Fix a constant $\varepsilon&gt;0$. Corollary 4.7 specializes the random-graph Corollary 4.5 with
 $$
 r=n^{1-\varepsilon/2},\qquad
@@ -421,8 +419,7 @@ $$
 \exp\!\left(\Omega\!\left(n^{1-3\varepsilon/4}\right)\right).
 $$
 The paper states the slightly weaker and cleaner bound $\exp(\Omega(n^{1-\varepsilon}))$. Thus arbitrary fixed polynomial imbalance is obtained by changing the constant degree and invoking the same master theorem.</p>
-<h3 id="regime-2-m-leq-n-o-log-n">Regime 2: $m\leq n^{o(\log n)}$<a class="zola-anchor" href="#regime-2-m-leq-n-o-log-n" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="regime-2-m-leq-n-o-log-n">Regime 2: $m\leq n^{o(\log n)}$</h3>
 <p>Write $m=n^{f(n)}$, where $f(n)=o(\log n)$, and set
 $$
 \varepsilon=16\sqrt{\frac{f(n)}{\log n}}=o(1).
@@ -438,8 +435,7 @@ $$
 L(\FPHP{m}{n}{G})=\exp\!\left(\Omega\!\left(n^{1-o(1)}\right)\right)
 $$
 asymptotically almost surely. This regime optimizes the random-graph corollary for the strongest exponent, whereas Regime 1 optimizes it for small degree.</p>
-<h3 id="regime-3-weakly-exponential-m">Regime 3: weakly exponential $m$<a class="zola-anchor" href="#regime-3-weakly-exponential-m" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="regime-3-weakly-exponential-m">Regime 3: weakly exponential $m$</h3>
 <p>Random graphs no longer provide the required relative boundary expansion, so Corollary 4.8 uses the explicit expander from Corollary 2.4. For any constant
 $$
 \kappa&lt;\frac{3}{2}-\sqrt{2},
@@ -467,8 +463,7 @@ m=\exp(O(n^{1/16})),\qquad
 L(\FPHP{m}{n}{G})=\exp\!\left(\Omega\!\left(n^{1/8-\varepsilon}\right)\right).
 $$</p>
 <p>The perfect-matching results follow the same architecture but technically invoke Theorem 5.4, the perfect-matching analogue of the master theorem. It has the same $r$–$\alpha$ trade-off and adds degree conditions on the right side of the graph.</p>
-<h2 id="what-is-open">What is open?<a class="zola-anchor" href="#what-is-open" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="what-is-open">What is open?</h2>
 <p>Write the number of pigeons in the general form
 $$
 m_n:=2^{f(n)},
@@ -536,7 +531,7 @@ Thus, in the polynomial regime the theorem permits sufficiently small constant e
 <p>Now suppose that $m_n=2^{f(n)}$ is superpolynomial in $n$, meaning that for every constant $C&gt;0$ there exists $n_C\in\mathbb{N}$ such that $f(n)&gt;C\log n$ for every $n\geq n_C$.
 Then no fixed constant $\gamma&gt;0$ can satisfy the boxed condition.
 Consequently, in the superpolynomial regime Theorem 4.4 requires $\gamma_n=o(1)$.</p>
-<aside id="" class="callout callout-remark">
+<aside class="callout theorem-block callout-remark">
   <div class="callout-title">Remark</div>
   <p>The limitation of Theorem 4.4 is that its side condition prevents it from handling arbitrary relative expansion loss $\gamma$.
 For $m=n^k$, it excludes every constant $\gamma\geq1/(6k)$.
@@ -624,9 +619,6 @@ The pigeon filtering lemma (by Razbarov) is critical to this technique, so to pr
     <!--   </ul> -->
     <!-- </div> -->
     
-    <div class="footer-credit">
-      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
-    </div>
   </footer>
 
   <script>
@@ -765,6 +757,7 @@ The pigeon filtering lemma (by Razbarov) is critical to this technique, so to pr
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+<script defer src="https://randomwalks.xyz/tag-colours.js?h=862d01e15ac82a14daed"></script>
 
 
 

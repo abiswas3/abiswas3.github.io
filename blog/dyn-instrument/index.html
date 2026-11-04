@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Montgomery Multiplication: Theory Vs Practice — Random Walks</title>
   <meta name="description" content="">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=58eac425b63a4a9905b4">
+  <script src="https://randomwalks.xyz/theme.js?h=022c5e6dda6564ebbb98"></script>
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=24e8d15864242f235d81">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -88,6 +89,10 @@
       <a href="https://randomwalks.xyz/blog/">Notes</a>
       <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
       <a href="https://randomwalks.xyz/cv/">CV</a>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" hidden>
+        <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+        <svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
       <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
       <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
@@ -121,16 +126,16 @@
 <article class="note footnotes-right">
   <header class="note-header">
     <h1>Montgomery Multiplication: Theory Vs Practice</h1>
-    
     <div class="note-meta">
       <span class="note-authors">By Ari, Squirrel</span>
       <time datetime="2025-05-15">15 May 2025</time>
       
+      
+      <ul class="tag-list" aria-label="Tags">
+        <li><a href="https://randomwalks.xyz/tags/instrumentation/">#instrumentation</a></li><li><a href="https://randomwalks.xyz/tags/jolt/">#jolt</a></li>
+      </ul>
+      
     </div>
-    
-    <ul class="tag-list" aria-label="Tags">
-      <li><a href="https://randomwalks.xyz/tags/instrumentation/">instrumentation</a></li><li><a href="https://randomwalks.xyz/tags/jolt/">jolt</a></li>
-    </ul>
     
   </header>
 
@@ -138,8 +143,7 @@
     
 
     <div class="prose">
-      <aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+      <aside class="callout theorem-block callout-box thm-box">
   <p><strong>UPDATE (2025-06-01)</strong> This post is still relevant as a tutorial for how to use dynamic binary instrumentation to analyse why code is slow – and is still reproducible using the methods described here.
 More information about the exact details of Montgomery multiplication has been uncovered, and the discussion can be found <a href="why-jolt-breaks.html">here</a>, where we discuss in detail why we often draw different conclusions from benchmarking the same source of code.</p>
 </aside>
@@ -147,8 +151,7 @@ More information about the exact details of Montgomery multiplication has been u
 Previously, the best known algorithm<sup class="footnote-reference" id="fr-z2-1"><a href="https://randomwalks.xyz/blog/dyn-instrument/#fn-z2">[2]</a></sup> for Montgomery multiplication was known to use $2n^2 + n$ multiplication operations.
 Although the new algorithm theoretically requires fewer multiplications, empirical evaluations revealed no improvements in runtime. In fact, prior algorithms consistently outperformed the proposed method.
 This post is a deep dive into why this could be, and potentially what can be done about it.</p>
-<h2 id="montgomery-multiplication-a-brief-review">Montgomery Multiplication - A Brief Review<a class="zola-anchor" href="#montgomery-multiplication-a-brief-review" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="montgomery-multiplication-a-brief-review">Montgomery Multiplication - A Brief Review</h2>
 <p>Given $n$ limb modulus $p$, and integers $a$ and $b$, the modular multiplication problem is to compute the remainder of the product</p>
 <p>$$ ab \mod p$$</p>
 <p>Reducing an integer with respect to a modulus, is computationally as expensive as performing the <a rel="noopener noreferrer external" target="_blank" href="https://en.algorithmica.org/hpc/arithmetic/division/">division operation</a>, which is known to be much slower than other operations such as multiplication or addition<sup class="footnote-reference" id="fr-e-1"><a href="https://randomwalks.xyz/blog/dyn-instrument/#fn-e">[3]</a></sup>.
@@ -168,8 +171,7 @@ For the interested reader, <a rel="noopener noreferrer external" target="_blank"
 <li>Read and Writes of 64 and 128 bit values to memory.</li>
 </ul>
 <p>More complex operations just use the above instructions as building blocks.</p>
-<aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-box thm-box">
   <p>A critical factor for understanding performance is that these operations are not equal.
 For example, on Skylake (mid-level x86 processor)</p>
 <ul>
@@ -186,16 +188,13 @@ For example, on Skylake (mid-level x86 processor)</p>
 <p><a rel="noopener noreferrer external" target="_blank" href="https://www.agner.org/optimize/instruction_tables.pdf">See Page 278</a> for more details on what instructions take how long.</p>
 </aside>
 <p>Now given the above constraints, one would imagine that minimising the number of multiplication operations would be the answer to implementing faster algorithms.</p>
-<aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-box thm-box">
   <p>Surprisingly, this was not what we see in actual experiments.
 The remainder of this document tries to understand why?</p>
 </aside>
-<h2 id="benchmarking-details">Benchmarking Details<a class="zola-anchor" href="#benchmarking-details" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="benchmarking-details">Benchmarking Details</h2>
 <p>We first describe our findings, and then describe how to recreate the analysis workflow.</p>
-<h3 id="empirical-performance">Empirical Performance<a class="zola-anchor" href="#empirical-performance" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="empirical-performance">Empirical Performance</h3>
 <p>We were provided with an <a rel="noopener noreferrer external" target="_blank" href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">implementation</a> of the new multiplication algorithm<sup class="footnote-reference" id="fr-y-1"><a href="https://randomwalks.xyz/blog/dyn-instrument/#fn-y">[5]</a></sup> by the folks at <a rel="noopener noreferrer external" target="_blank" href="https://www.ingonyama.com/">Ingoyama</a>, specifically targeting the <a rel="noopener noreferrer external" target="_blank" href="https://neuromancer.sk/std/bn/bn254">BN-254</a> curve (i.e $n=4$), which we refer to as Y-mult in this post.</p>
 <p>The algorithms used for comparison are the Separated Operand Scanning Algorithm (SOS) and the optimised Coarsely Integrated Operand Scanning Algorithm (CIOS).
 These were the state of the art Montgomery multiplication algorithms prior to Yuval’s post.
@@ -207,8 +206,7 @@ An implementation of the SOS<sup class="footnote-reference" id="fr-g-1"><a href=
 Then we wrote a simple bench script to compare the performance of the two algorithms to see the speedup promised in theory manifested itself in practice.
 The stripped down code needed to compute the Montgomery product with Yuval’s algorithm can be found <a rel="noopener noreferrer external" target="_blank" href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/main/src/world_coin_single.rs">here</a>.
 Similarly, the stripped down code needed to compute the Montgomery product with CIOS can be found <a rel="noopener noreferrer external" target="_blank" href="https://github.com/abiswas3/Montgomery-Benchmarks/blob/main/src/arkworks_cios.rs">here</a>.</p>
-<aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-box thm-box">
   <p>This entire write-up focuses on $n=4$.
 It is entirely possible that for larger values of $n$, the miscellaneous overheads we are about to discuss below will be outdone by the gains from fewer multiplications.</p>
 </aside>
@@ -224,8 +222,7 @@ to Montgomery form is not included in benchmarking run times.</p>
 <p><strong>UPDATE: 2025-06-01</strong>: The barebones_profiling has been merged into main, and running <code>cargo bench</code> should give you time stamps for 4 algorithms: the arkworks, and implementation discussed above, plus additionally two different implementations, one of CIOS and one of the new algorithm – written to optimise use of registers.
 See <a href="https://randomwalks.xyz/blog/mont-mult/">more details</a></p>
 </blockquote>
-<h3 id="computer-information">Computer Information<a class="zola-anchor" href="#computer-information" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="computer-information">Computer Information</h3>
 <p>All computations were run on Intel CPUs on Digital Ocean servers.
 Admittedly, this machine is not one of the top-of-the-line, fully specked-out servers available today.
 However, it was more than sufficient to do multiplication.
@@ -270,8 +267,7 @@ We also ran the code on an M2 MacBook Air with 8GB of RAM and observed that the 
 <span class="giallo-l"><span style="color: #6F42C1;">  L1i:</span><span style="color: #005CC5;">                    32</span><span style="color: #032F62;"> KiB</span><span> (1</span><span style="color: #032F62;"> instance</span><span>)</span></span></code></pre><pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">free</span><span style="color: #005CC5;"> -h</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">               total</span><span style="color: #032F62;">        used        free      shared  buff/cache   available</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">Mem:</span><span style="color: #032F62;">           1.9Gi       421Mi       359Mi       5.5Mi       1.3Gi       1.5Gi</span></span>
-<span class="giallo-l"><span style="color: #6F42C1;">Swap:</span><span style="color: #032F62;">             0B          0B          0B</span></span></code></pre><h2 id="analysis">Analysis<a class="zola-anchor" href="#analysis" aria-label="Link to this section">#</a>
-</h2>
+<span class="giallo-l"><span style="color: #6F42C1;">Swap:</span><span style="color: #032F62;">             0B          0B          0B</span></span></code></pre><h2 id="analysis">Analysis</h2>
 <p>As a first step towards understanding what is going on, shown below is the <code>x86</code>-assembly code that the Rust compiler generates for each of the algorithm implementations.</p>
 <ul>
 <li><a href="/blog_assets/mont_mult/code/yuval">y-mult</a> (Short for Yuval’s multiplication algorithm.)</li>
@@ -285,8 +281,7 @@ For now you can safely trust that they are accurately represented in the files d
 The format in which the code is expressed is</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">memory</span><span style="color: #032F62;"> address, instruction</span></span></code></pre>
 <p>Where memory address refers to the virutal memory address at which the instruction is stored for the process executing the program.</p>
-<h3 id="summary-of-findings">Summary Of Findings<a class="zola-anchor" href="#summary-of-findings" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="summary-of-findings">Summary Of Findings</h3>
 <p>The arkworks code base executes fewer x86 instructions; 280 vs 326 to specific.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">wc</span><span style="color: #005CC5;"> -l</span><span style="color: #032F62;"> static/code/yuval                                                                     ─╯</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">     326</span><span style="color: #032F62;"> static/code/yuval</span></span>
@@ -337,8 +332,7 @@ We make 74 64-bit read/write operations and 6 128-bit/read write operations.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">root@ubuntu-s-1vcpu-2gb-amd-nyc3-01:~/Montgomery-Benchmarks#</span><span style="color: #032F62;"> cat yuval</span><span style="color: #D73A49;">|</span><span style="color: #6F42C1;">grep</span><span style="color: #005CC5;"> -o</span><span style="color: #032F62;"> &#39;[a-z0-9]\+ ptr&#39;</span><span style="color: #D73A49;"> |</span><span style="color: #6F42C1;"> sort</span><span style="color: #D73A49;">|</span><span style="color: #6F42C1;">uniq</span><span style="color: #005CC5;"> -c</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">      2</span><span style="color: #032F62;"> byte ptr</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">     74</span><span style="color: #032F62;"> qword ptr</span></span>
-<span class="giallo-l"><span style="color: #6F42C1;">      6</span><span style="color: #032F62;"> xmmword ptr</span></span></code></pre><aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<span class="giallo-l"><span style="color: #6F42C1;">      6</span><span style="color: #032F62;"> xmmword ptr</span></span></code></pre><aside class="callout theorem-block callout-box thm-box">
   <p>So it seems that the gains from having fewer multiplications is being drowned out by the heavier read/write operations, and the greater number of assembly instructions.
 Note that this does not imply that the new algorithm could not be faster for even $n=4$.
 It just means that the way the Rust compiler is building the current binary is not as efficient.</p>
@@ -346,10 +340,8 @@ It just means that the way the Rust compiler is building the current binary is n
 <p>At this point we have established why we think we do not see an improvement in runtime.
 One potential way to see the promised speedup is to write optimised assembly code directly.
 We defer investigating whether this is possible to future work.</p>
-<h2 id="how-to-replicate-the-process">How To Replicate The Process<a class="zola-anchor" href="#how-to-replicate-the-process" aria-label="Link to this section">#</a>
-</h2>
-<aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<h2 id="how-to-replicate-the-process">How To Replicate The Process</h2>
+<aside class="callout theorem-block callout-box thm-box">
   <p><strong>Update: 2025-05-27</strong>: Since this blog was published we’ve cleaned up the benchmarking code. The names of functions are no longer called <code>scalar_mul</code>, but the analysis below will still work with if we replace <code>scalar_mul*</code> with the correct function names.</p>
 </aside>
 <p>The remainder of the post is written as a tutorial on how we were able to perform the above analysis.
@@ -357,13 +349,11 @@ To extract assembly we use techniques inspired by the field of <a rel="noopener 
 At a high level, when we run <code>cargo run</code>, just before an instruction in our code is physically executed on the CPU, the <a rel="noopener noreferrer external" target="_blank" href="https://software.intel.com/sites/landingpage/pintool/downloads/pin-external-3.31-98869-gfa6f126a8-gcc-linux.tar.gz">pin tool</a> provided by Intel interjects, and allows us to run pre and post instrumentation code.
 We modified <a href="/blog_assets/mont_mult/code/itrace.cpp">the instrumentation</a> code to simply log the assembly instructions to a file called <code>itrace.out</code> just before they are executed.
 Thus, the files above not only describe assembly instructions associated with each algorithm, but they are are listed in time order of execution.</p>
-<aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-box thm-box">
   <p>This is often strictly more powerful than <code>cargo-asm</code> which just dumps the assembly associated with a function label. If this function has conditional branches, we do not know without feeding real inputs and running the code, how often these branches will be taken.
 Your CPU tries to predict branch outcomes as an optimisation. So in a way this linear trace of everything that happened can offer more insight than just dumping the assembly associated with a method header using <code>cargo asm</code></p>
 </aside>
-<aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-box thm-box">
   <p>Given that we use the above tool, our techniques only apply when executing programs on Intel CPU’s.
 This dynamic technique for extracting assembly instructions by running the binary would not apply to a M series Mac on apple silicon.
 There could be static instrumentation techniques that one could use instead.</p>
@@ -432,8 +422,7 @@ Likewise, the opt::scalar_mul routine is contained at <code>0x5e4052170000</code
 <p>So if we want to dump a copy of a run of the yuval scalar_mul, we simply print from <code>0x5e4052170000</code>+<code>0x4b7d0</code>=<code>0x5e40521bb7d0</code> to the corresponding ret instruction:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cat</span><span style="color: #032F62;"> itrace.out</span><span style="color: #D73A49;"> |</span><span style="color: #6F42C1;"> sed</span><span style="color: #005CC5;"> -n</span><span style="color: #032F62;"> &#39;/^0x5e40521bb7d0/,/ret/{p;/ret/q}&#39;</span><span style="color: #D73A49;"> &gt;</span><span style="color: #032F62;"> yuval.disas</span></span></code></pre>
 <p>and similarly</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cat</span><span style="color: #032F62;"> itrace.out</span><span style="color: #D73A49;"> |</span><span style="color: #6F42C1;"> sed</span><span style="color: #005CC5;"> -n</span><span style="color: #032F62;"> &#39;/^0x5e40521bb3a0/,/ret/{p;/ret/q}&#39;</span><span style="color: #D73A49;"> &gt;</span><span style="color: #032F62;"> opt.disas</span></span></code></pre><aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cat</span><span style="color: #032F62;"> itrace.out</span><span style="color: #D73A49;"> |</span><span style="color: #6F42C1;"> sed</span><span style="color: #005CC5;"> -n</span><span style="color: #032F62;"> &#39;/^0x5e40521bb3a0/,/ret/{p;/ret/q}&#39;</span><span style="color: #D73A49;"> &gt;</span><span style="color: #032F62;"> opt.disas</span></span></code></pre><aside class="callout theorem-block callout-box thm-box">
   <p>The above sed script is a little bit facile, and works here because the functions of interest do not call anything established, as we asked the Rust compiler to inline the helpers.
 A more robust way to extract the assembly is to do the following:</p>
 </aside>
@@ -495,9 +484,6 @@ This only sped things up. <a href="https://randomwalks.xyz/blog/dyn-instrument/#
     <!--   </ul> -->
     <!-- </div> -->
     
-    <div class="footer-credit">
-      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
-    </div>
   </footer>
 
   <script>
@@ -636,6 +622,7 @@ This only sped things up. <a href="https://randomwalks.xyz/blog/dyn-instrument/#
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+<script defer src="https://randomwalks.xyz/tag-colours.js?h=862d01e15ac82a14daed"></script>
 
 
 

@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>General Notes On Lean — Random Walks</title>
   <meta name="description" content="An example of a proof">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=58eac425b63a4a9905b4">
+  <script src="https://randomwalks.xyz/theme.js?h=022c5e6dda6564ebbb98"></script>
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=24e8d15864242f235d81">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -88,6 +89,10 @@
       <a href="https://randomwalks.xyz/blog/">Notes</a>
       <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
       <a href="https://randomwalks.xyz/cv/">CV</a>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" hidden>
+        <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+        <svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
       <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
       <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
@@ -121,19 +126,19 @@
 <article class="note footnotes-right">
   <header class="note-header">
     <h1>General Notes On Lean</h1>
-    <p class="note-deck">An example of a proof</p>
     <div class="note-meta">
       <span class="note-authors">By Ari</span>
       <time datetime="2026-02-07">07 February 2026</time>
       
         <time datetime="2026-02-07">Last updated 07 February 2026</time>
       
+      
+      <ul class="tag-list" aria-label="Tags">
+        <li><a href="https://randomwalks.xyz/tags/lean-notes/">#lean-notes</a></li>
+      </ul>
+      
     </div>
-    
-    <ul class="tag-list" aria-label="Tags">
-      <li><a href="https://randomwalks.xyz/tags/lean-notes/">lean-notes</a></li>
-    </ul>
-    
+    <p class="note-deck">An example of a proof</p>
   </header>
 
   <div class="note-layout">
@@ -266,8 +271,7 @@ That is, <code>SequenceHasLimit u x₀</code> is a <code>Prop</code> — it is t
 that the sequence<sup class="footnote-reference" id="fr-sequences-1"><a href="https://randomwalks.xyz/blog/lean/lectures/general-notes/#fn-sequences">[1]</a></sup> <code>u</code> converges to <code>x₀</code>, defined as:</p>
 <p>$$\forall \varepsilon &gt; 0, \exists N \in \mathbb{N}, \forall n \geq N, |u_n - x_0| &lt; \varepsilon$$</p>
 <p>This statement may or may not have a proof, but it is a well-formed proposition.</p>
-<h3 id="a-note-curried-functions">A Note: Curried Functions<a class="zola-anchor" href="#a-note-curried-functions" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="a-note-curried-functions">A Note: Curried Functions</h3>
 <p>In Lean (and in type theory generally), multi-argument functions are curried by default, not tupled.
 So:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">#check</span><span> (add_complex_i : ℂ → ℂ)</span></span>
@@ -287,8 +291,7 @@ So:</p>
 <ul>
 <li><code>ℝ → ℝ → Prop</code> (curried) — takes one ℝ, returns a function <code>ℝ → Prop</code>. This is what Lean uses.</li>
 </ul>
-<h2 id="first-proof">First Proof<a class="zola-anchor" href="#first-proof" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="first-proof">First Proof</h2>
 <p>Now let us look at a slightly non-trivial first proof in Lean.
 We start off by defining what it means for a sequence to have a limit, and for a function to be continuous.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #6A737D;">/-- The sequence `u` of real numbers converges to `l`. -/</span></span>
@@ -300,9 +303,9 @@ We start off by defining what it means for a sequence to have a limit, and for a
 <span class="giallo-l"><span>  ∀ ε &gt; </span><span style="color: #005CC5;">0</span><span>, ∃ δ &gt; </span><span style="color: #005CC5;">0</span><span>, ∀ x, |x - x₀| &lt; δ →</span></span>
 <span class="giallo-l"><span>  |f (x) - f (x₀)| &lt; ε</span></span></code></pre>
 <p>Then we state our first lemma:</p>
-<aside id="" class="callout callout-lemma thm-numbered">
+<aside class="callout theorem-block callout-lemma thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
-    <span class="thm-title"> : </span></div>
+    </div>
   <p>If a sequence $u: \mathbb{N} \rightarrow \mathbb{R}$ converges to $x_0$, and a function $f: \mathbb{R} \rightarrow \mathbb{R}$ is continuous at $x_0$, <em>then</em> the sequence $f(u(n))$ converges to $f(x_0)$.</p>
 </aside>
 <p>We first prove this theorem on “paper” like we are used to, but in a way that is directly (or almost directly) translatable to Lean.
@@ -359,8 +362,7 @@ The steps of the proof are as follows.</p>
 <p>The (by assumption) on Line 13 is just finding <code>hε : ε &gt; 0</code> from the context automatically.
 Since you already have <code>hε</code> in scope, you can pass it directly as a term — no tactic needed at all.
 The <code>by assumption</code> version is a convenience for when you don’t want to remember/type the exact hypothesis name.</p>
-<h2 id="the-re-write-tactic">The Re Write Tactic<a class="zola-anchor" href="#the-re-write-tactic" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="the-re-write-tactic">The Re Write Tactic</h2>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (a b c d : ℝ) (h : a + b = c - d) : </span><span style="color: #005CC5;">2</span><span> * (a + b) = </span><span style="color: #005CC5;">2</span><span> * c - </span><span style="color: #005CC5;">2</span><span> * d := </span><span style="color: #D73A49;">by</span><span> {</span></span>
 <span class="giallo-l"><span>  rw [h, mul_sub]</span></span>
 <span class="giallo-l"><span>  }</span></span></code></pre>
@@ -375,21 +377,18 @@ Alternatively,</p>
 <span class="giallo-l"><span>  rw [mul_sub]</span></span>
 <span class="giallo-l"><span>}</span></span></code></pre>
 <p>also works.</p>
-<h2 id="the-ring-tactic">The Ring Tactic<a class="zola-anchor" href="#the-ring-tactic" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="the-ring-tactic">The Ring Tactic</h2>
 <p>Basic properties of addition, subtraction and multiplication that are supported by rings are handled by the ring tactic.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (a b c d : ℝ) (h : a + b = c - d) : </span><span style="color: #005CC5;">2</span><span> * (a + b) = </span><span style="color: #005CC5;">2</span><span> * c - </span><span style="color: #005CC5;">2</span><span> * d := </span><span style="color: #D73A49;">by</span><span> {</span></span>
 <span class="giallo-l"><span>  rw [h]</span></span>
 <span class="giallo-l"><span>  ring </span></span>
 <span class="giallo-l"><span>}</span></span></code></pre>
 <p>This also works instead of re-writing <code>mul_sub</code>.</p>
-<h2 id="simp">Simp<a class="zola-anchor" href="#simp" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="simp">Simp</h2>
 <p>Next tactic we have in computation is the simplifier <code>simp</code>. It will
 repeatedly apply a number of lemmas that are marked as simplification lemmas.
 For instance the proof below simplifies <code>x - x</code> to <code>0</code> and then <code>|0|</code> to <code>0</code>.</p>
-<h2 id="intro-apply">Intro + Apply<a class="zola-anchor" href="#intro-apply" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="intro-apply">Intro + Apply</h2>
 <p>The <code>apply</code> tactic can be used to specialize universally quantified statements.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (f : ℝ → ℝ) (hf : even_fun f) : f (-</span><span style="color: #005CC5;">3</span><span>) = f </span><span style="color: #005CC5;">3</span><span> := </span><span style="color: #D73A49;">by</span></span>
 <span class="giallo-l"><span>  apply hf </span><span style="color: #005CC5;">3</span></span>
@@ -450,8 +449,7 @@ Alternatively, I could have specialised h earlier, and not needed to use <code>h
 <span class="giallo-l"><span style="color: #D73A49;">example</span><span> (f : ℝ → ℝ) (hf : non_decreasing f) (x₁ x₂ : ℝ) (hx : x₁ ≤ x₂) : f x₁ ≤ f x₂ := </span><span style="color: #D73A49;">by</span></span>
 <span class="giallo-l"><span>  apply hf x₁ x₂ hx</span></span></code></pre>
 <p>Here as <code>hf</code> is telling us  that <code>f</code> is <code>non_decreasing</code>, so when we apply <code>hf</code> with the argumeents <code>x1, x2</code> and the hypothesis that <code>x1 &lt;= x2</code>, we reduce to getting what we need.</p>
-<h2 id="r-cases">R cases<a class="zola-anchor" href="#r-cases" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="r-cases">R cases</h2>
 <p>In order to use <code>h : ∃ x, P x</code>, we use the <code>rcases</code> tactic to fix
 one <code>x₀</code> that works.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">example</span><span> (a b c : ℤ) (h₁ : a ∣ b) (h₂ : b ∣ c) : a ∣ c := </span><span style="color: #D73A49;">by</span></span>
@@ -462,8 +460,7 @@ one <code>x₀</code> that works.</p>
 <span class="giallo-l"><span style="color: #D73A49;">  calc</span></span>
 <span class="giallo-l"><span>    c = b*l     := </span><span style="color: #D73A49;">by</span><span> congr</span></span>
 <span class="giallo-l"><span>    _ = (a*k)*l := </span><span style="color: #D73A49;">by</span><span> congr</span></span>
-<span class="giallo-l"><span>    _ = a*(k*l) := </span><span style="color: #D73A49;">by</span><span> ring</span></span></code></pre><h2 id="complex-applies-with-specialise">Complex Applies with specialise<a class="zola-anchor" href="#complex-applies-with-specialise" aria-label="Link to this section">#</a>
-</h2>
+<span class="giallo-l"><span>    _ = a*(k*l) := </span><span style="color: #D73A49;">by</span><span> ring</span></span></code></pre><h2 id="complex-applies-with-specialise">Complex Applies with specialise</h2>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>-- You don&#39;t need to specialise but this is more exolicit</span></span>
 <span class="giallo-l"><span>example (f g : ℝ → ℝ) (hf : non_decreasing f) (hg : non_increasing g) :</span></span>
 <span class="giallo-l"><span>    non_increasing (g ∘ f) := by</span></span>
@@ -474,10 +471,8 @@ one <code>x₀</code> that works.</p>
 <span class="giallo-l"><span>  specialize hg (f (x1)) (f (x2))</span></span>
 <span class="giallo-l"><span>  apply hg</span></span>
 <span class="giallo-l"><span>  apply hf</span></span>
-<span class="giallo-l"><span>  exact hx</span></span></code></pre><h2 id="scratch-notes-from-bhavik-mehta-s-course">Scratch Notes From Bhavik Mehta’s course<a class="zola-anchor" href="#scratch-notes-from-bhavik-mehta-s-course" aria-label="Link to this section">#</a>
-</h2>
-<h2 id="sheet-1">Sheet 1<a class="zola-anchor" href="#sheet-1" aria-label="Link to this section">#</a>
-</h2>
+<span class="giallo-l"><span>  exact hx</span></span></code></pre><h2 id="scratch-notes-from-bhavik-mehta-s-course">Scratch Notes From Bhavik Mehta’s course</h2>
+<h2 id="sheet-1">Sheet 1</h2>
 <ol>
 <li>Tactics learned : <code>intro, exact, apply</code></li>
 </ol>
@@ -501,10 +496,8 @@ What it tries, roughly in order, includes <code>rfl</code>, <code>assumption</co
 <li><code>obtain</code> or <code>rcases</code></li>
 </ul>
 <p><code>linarith</code> handles linear arithmetic.</p>
-<h2 id="obtain">Obtain<a class="zola-anchor" href="#obtain" aria-label="Link to this section">#</a>
-</h2>
-<h3 id="pulling-out-the-existential">Pulling Out the Existential<a class="zola-anchor" href="#pulling-out-the-existential" aria-label="Link to this section">#</a>
-</h3>
+<h2 id="obtain">Obtain</h2>
+<h3 id="pulling-out-the-existential">Pulling Out the Existential</h3>
 <p>Say you have a proof of the following proposition.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>hb : ∃ B, ∀ (n : ℕ), B ≤ n → |b n - u| &lt; eps0 / 2</span></span></code></pre>
 <p>Then</p>
@@ -520,8 +513,7 @@ What it tries, roughly in order, includes <code>rfl</code>, <code>assumption</co
 </ul>
 </li>
 </ul>
-<h3 id="another-use-case-of-rcases">Another use case of rcases<a class="zola-anchor" href="#another-use-case-of-rcases" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="another-use-case-of-rcases">Another use case of rcases</h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span style="color: #D73A49;">theorem</span><span style="color: #6F42C1;"> lt_trichotomy.</span><span>{u_1} {α : </span><span style="color: #D73A49;">Type</span><span> u_1} [LinearOrder α] (a b : α) : a &lt; b ∨ a = b ∨ b &lt; a</span></span></code></pre>
 <p>Says: for any two elements <code>a,b</code> of a linearly ordered type, exactly one of three things holds.</p>
 <ol>
@@ -534,8 +526,7 @@ What it tries, roughly in order, includes <code>rfl</code>, <code>assumption</co
 <span class="giallo-l"><span>-- this gives </span><span style="color: #005CC5;">3</span><span> cases</span></span>
 <span class="giallo-l"><span>· </span></span>
 <span class="giallo-l"><span>·  </span></span>
-<span class="giallo-l"><span>· </span></span></code></pre><h3 id="simp-1">Simp<a class="zola-anchor" href="#simp-1" aria-label="Link to this section">#</a>
-</h3>
+<span class="giallo-l"><span>· </span></span></code></pre><h3 id="simp-1">Simp</h3>
 <p>The three components</p>
 <p>simp only   [mul_comm c]   at h2
 └─ tactic    └─ lemma set    └─ target</p>
@@ -546,8 +537,7 @@ things.</li>
 <li>[mul_comm c] — the single rewrite rule to use (more on this below).</li>
 <li>at h2 — apply the rewriting to hypothesis h2 instead of the goal. Without at h2, simp acts on the goal; with it, simp transforms h2 in place.</li>
 </ul>
-<h3 id="difference-between-change-and-show">Difference between change and show?<a class="zola-anchor" href="#difference-between-change-and-show" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="difference-between-change-and-show">Difference between change and show?</h3>
 <p>what is the diff between change and show ? minimal example please</p>
 <p>⏺ In tactic mode, for the current goal they’re interchangeable: both restate the goal to a definitionally equal expression. The differences are at the edges.</p>
 <p>The overlap (identical behavior)</p>
@@ -591,8 +581,7 @@ show Bool      – reorders: now proving Bool first
 │ Usable in term mode                │ ✓    │ ✗      │
 └────────────────────────────────────┴──────┴────────┘</p>
 <p>Rule of thumb: reach for show when you just want to re-display the goal more readably (especially to pick a goal); reach for change when you need to rewrite a hypothesis or a subterm by definitional equality.</p>
-<h3 id="true-vs-fale">True Vs Fale<a class="zola-anchor" href="#true-vs-fale" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="true-vs-fale">True Vs Fale</h3>
 <p>trivial is a “try the cheap stuff” tactic. It’s essentially a first | … | … that runs a fixed list of lightweight closing tactics in order and succeeds as soon as one of them closes the goal; if none do, trivial fails. The list includes (roughly):</p>
 <ul>
 <li>rfl — goal is a = a / a ≤ a / Iff.rfl etc. by reflexivity</li>
@@ -626,8 +615,7 @@ example : ¬ False := fun h =&gt; h          – ✓ provable</p>
 true  false   : Bool   – data values; you <em>compute</em> with them</p>
 <p>Prop is about provability (a True goal needs a proof term True.intro). Bool is about computation (true/false are concrete values you can branch on with if, test for equality, etc.). They’re bridged by decide/Decidable when a proposition is decidable, but
 they’re fundamentally different layers. Mixing them up is a very common early stumbling block.</p>
-<h2 id="explicit-vs-implicit">Explicit vs Implicit<a class="zola-anchor" href="#explicit-vs-implicit" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="explicit-vs-implicit">Explicit vs Implicit</h2>
 <p>Short version: use explicit () for a reusable lemma like this — it matches Mathlib convention and stays flexible. But let me show you exactly how the choice interacts with your call site, because that’s the real consideration.</p>
 <p>How each choice behaves at the call site</p>
 <p>Your calc step’s goal is fully determined: |a n - b n - t| + |b n - u| on the right, so Lean can infer a and b by unification.</p>
@@ -644,8 +632,7 @@ exact basic_triangle                       – ✗ it’s a function, not a proo
 against a goal) — but in forward use (have h := basic_triangle …) Lean would have nothing to infer from and you’d get stuck metavariables. Explicit avoids that trap.</p>
 <p>This is exactly why Mathlib’s real version uses explicit args:</p>
 <p>theorem abs_add (a b : α) : |a + b| ≤ |a| + |b|</p>
-<h3 id="tricks">Tricks<a class="zola-anchor" href="#tricks" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="tricks">Tricks</h3>
 <p>Right — Real.mul_self_sqrt wants 0 ≤ ε but you have <code>hε : 0 &lt; ε</code>. Just weaken it with .le:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean"><span class="giallo-l"><span>_ = ε := Real.mul_self_sqrt hε.le</span></span></code></pre>
 <p>hε.le is dot-notation for le_of_lt hε — every h : a &lt; b has a .le field (LT.lt.le) giving a ≤ b. It’s the idiomatic one-character way to go from strict to non-strict.</p>
@@ -684,9 +671,6 @@ against a goal) — but in forward use (have h := basic_triangle …) Lean would
     <!--   </ul> -->
     <!-- </div> -->
     
-    <div class="footer-credit">
-      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
-    </div>
   </footer>
 
   <script>
@@ -825,6 +809,7 @@ against a goal) — but in forward use (have h := basic_triangle …) Lean would
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+<script defer src="https://randomwalks.xyz/tag-colours.js?h=862d01e15ac82a14daed"></script>
 
 
 

@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Sail RISC-V Into Lean — Random Walks</title>
   <meta name="description" content="">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=58eac425b63a4a9905b4">
+  <script src="https://randomwalks.xyz/theme.js?h=022c5e6dda6564ebbb98"></script>
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=24e8d15864242f235d81">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -88,6 +89,10 @@
       <a href="https://randomwalks.xyz/blog/">Notes</a>
       <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
       <a href="https://randomwalks.xyz/cv/">CV</a>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" hidden>
+        <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+        <svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
       <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
       <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
@@ -121,18 +126,18 @@
 <article class="note footnotes-right note--side-toc">
   <header class="note-header">
     <h1>Sail RISC-V Into Lean</h1>
-    
     <div class="note-meta">
       <span class="note-authors">By Ari</span>
       <time datetime="2026-03-22">22 March 2026</time>
       
         <time datetime="2026-03-22">Last updated 22 March 2026</time>
       
+      
+      <ul class="tag-list" aria-label="Tags">
+        <li><a href="https://randomwalks.xyz/tags/jolt/">#jolt</a></li><li><a href="https://randomwalks.xyz/tags/compilers/">#compilers</a></li>
+      </ul>
+      
     </div>
-    
-    <ul class="tag-list" aria-label="Tags">
-      <li><a href="https://randomwalks.xyz/tags/jolt/">jolt</a></li><li><a href="https://randomwalks.xyz/tags/compilers/">compilers</a></li>
-    </ul>
     
   </header>
 
@@ -262,8 +267,8 @@
     
 
     <div class="prose">
-      <aside id="" class="callout callout-caution">
-  <div class="callout-title"></div>
+      <aside class="callout theorem-block callout-remark">
+  <div class="callout-title">Remark</div>
   <p>These notes re-cap the steps required to transplile the RISC-V sail specification to Lean.</p>
 <p>NOTE: As confirmed from the original documentation, only the non-computable Lean code builds and compiles cleanly.
 Some work is still needed to get the executable CPU to work.
@@ -274,26 +279,22 @@ I do not imagine a whole lot, but as of the date of writing this, the executable
 <li>macOS (Apple Silicon)</li>
 <li>Intel CPU Arch Linux (TODO:)</li>
 </ul>
-<h2 id="step-0-clone-both-repos">Step 0: Clone Both Repos<a class="zola-anchor" href="#step-0-clone-both-repos" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="step-0-clone-both-repos">Step 0: Clone Both Repos</h2>
 <p>Here I’ve forked the two repositories with the hope of eventually fixing the executable issue.
 But there’s nothing special about my fork right now. Cloning the original repos will also work.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">git</span><span style="color: #032F62;"> clone git@github.com:abiswas3/sail-riscv.git</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">git</span><span style="color: #032F62;"> clone git@github.com:abiswas3/sail.git</span></span></code></pre><pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>parent/</span></span>
 <span class="giallo-l"><span>├── sail/                  # Sail compiler (transpiler) -- clone from github.com/rems-project/sail</span></span>
-<span class="giallo-l"><span>└── sail-riscv/            # This repo -- RISC-V ISA model written in Sail</span></span></code></pre><h2 id="step-1-install-system-dependencies">Step 1: Install System Dependencies<a class="zola-anchor" href="#step-1-install-system-dependencies" aria-label="Link to this section">#</a>
-</h2>
-<aside id="" class="callout callout-warning">
+<span class="giallo-l"><span>└── sail-riscv/            # This repo -- RISC-V ISA model written in Sail</span></span></code></pre><h2 id="step-1-install-system-dependencies">Step 1: Install System Dependencies</h2>
+<aside class="callout theorem-block callout-warning">
   <div class="callout-title">Note To Reader</div>
   <p>I do not particularly understand the Sail DSL, nor am I an expert ocaml programmer.
 These steps mostly follow the <code>README.md</code>’s in the repo, a bit of googling and some Claude code help.
 Hopefully with time, I will be able to write a better version of what the hell is going on.</p>
 </aside>
-<h3 id="macos-homebrew">macOS (Homebrew)<a class="zola-anchor" href="#macos-homebrew" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="macos-homebrew">macOS (Homebrew)</h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">xcode-select</span><span style="color: #005CC5;"> --install</span><span style="color: #6A737D;">    # if not already done</span></span>
-<span class="giallo-l"><span style="color: #6F42C1;">brew</span><span style="color: #032F62;"> install opam gmp z3 pkgconf cmake</span></span></code></pre><h3 id="arch-linux">Arch Linux<a class="zola-anchor" href="#arch-linux" aria-label="Link to this section">#</a>
-</h3>
+<span class="giallo-l"><span style="color: #6F42C1;">brew</span><span style="color: #032F62;"> install opam gmp z3 pkgconf cmake</span></span></code></pre><h3 id="arch-linux">Arch Linux</h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">sudo</span><span style="color: #032F62;"> pacman</span><span style="color: #005CC5;"> -S</span><span style="color: #032F62;"> opam</span><span style="color: #6A737D;">        # OCaml package manager -- needed to fetch and install Sail&#39;s OCaml dependencies</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">sudo</span><span style="color: #032F62;"> pacman</span><span style="color: #005CC5;"> -S</span><span style="color: #032F62;"> gmp</span><span style="color: #6A737D;">         # GNU Multiple Precision arithmetic library -- Sail uses it internally for big integer arithmetic</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">sudo</span><span style="color: #032F62;"> pacman</span><span style="color: #005CC5;"> -S</span><span style="color: #032F62;"> z3</span><span style="color: #6A737D;">          # SMT solver from Microsoft Research -- Sail calls Z3 during type-checking to prove</span></span>
@@ -302,8 +303,7 @@ Hopefully with time, I will be able to write a better version of what the hell i
 <span class="giallo-l"><span style="color: #6F42C1;">sudo</span><span style="color: #032F62;"> pacman</span><span style="color: #005CC5;"> -S</span><span style="color: #032F62;"> base-devel</span><span style="color: #6A737D;">  # C compiler, make, binutils, etc. -- OCaml&#39;s runtime is written in C and some opam</span></span>
 <span class="giallo-l"><span style="color: #6A737D;">                           #   packages have C bindings (e.g. GMP). Also provides C++ compiler which sail-riscv&#39;s</span></span>
 <span class="giallo-l"><span style="color: #6A737D;">                           #   CMake build needs for the emulator harness, even if you only want Lean output.</span></span>
-<span class="giallo-l"><span style="color: #6F42C1;">sudo</span><span style="color: #032F62;"> pacman</span><span style="color: #005CC5;"> -S</span><span style="color: #032F62;"> pkgconf</span><span style="color: #6A737D;">     # pkg-config implementation -- CMake uses it to locate system libraries like GMP</span></span></code></pre><h3 id="both-platforms-initialize-opam-one-time">Both Platforms: Initialize opam (one-time)<a class="zola-anchor" href="#both-platforms-initialize-opam-one-time" aria-label="Link to this section">#</a>
-</h3>
+<span class="giallo-l"><span style="color: #6F42C1;">sudo</span><span style="color: #032F62;"> pacman</span><span style="color: #005CC5;"> -S</span><span style="color: #032F62;"> pkgconf</span><span style="color: #6A737D;">     # pkg-config implementation -- CMake uses it to locate system libraries like GMP</span></span></code></pre><h3 id="both-platforms-initialize-opam-one-time">Both Platforms: Initialize opam (one-time)</h3>
 <p>Run the following code from anywhere – opam stores its state in <code>~/.opam/</code>.</p>
 <p><strong>TODO:</strong> ocaml crash course</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">opam</span><span style="color: #032F62;"> init</span><span style="color: #6A737D;">                 # follow prompts, say yes to shell setup</span></span>
@@ -314,13 +314,12 @@ installs a default OCaml compiler.
 libraries that opam installed.
 You need to run <code>eval $(opam env)</code> in each new shell session, or let opam’s shell hook do it automatically (it offers to set this up during
 <code>opam init</code>).</p>
-<h2 id="step-2-build-and-install-the-sail-compiler-locally">Step 2: Build and Install the Sail Compiler Locally<a class="zola-anchor" href="#step-2-build-and-install-the-sail-compiler-locally" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="step-2-build-and-install-the-sail-compiler-locally">Step 2: Build and Install the Sail Compiler Locally</h2>
 <p>You should be in the <code>parent/</code> directory (the one containing both <code>sail/</code> and <code>sail-riscv/</code>).</p>
 <p>The Sail compiler is a single binary called <code>sail</code>.
 On its own, it can only parse and type-check Sail code.
 To actually generate output for a specific language (Lean, C++, Coq, etc.), it needs a <strong>backend plugin</strong> loaded at startup.</p>
-<aside id="" class="callout callout-box thm-box">
+<aside class="callout theorem-block callout-box thm-box">
   <div class="callout-title">What The Hell Is A Plugin</div>
   <p>Note that I do not understand ocaml’s plugin infrastructure properly.
 I had to ask Calude and this is what it gave me:</p>
@@ -333,13 +332,11 @@ There is no separate “lean binary” – it’s all one <code>sail</code> bina
 <p><strong>dune</strong> is OCaml’s build system (like <code>make</code> or <code>cargo</code>).
 It reads build instructions from <code>dune</code> files in the source tree.
 Below, we use three commands. Each is explained with what it does and what it produces:</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> sail</span></span></code></pre><h3 id="2a-install-ocaml-dependencies">2a. Install OCaml dependencies<a class="zola-anchor" href="#2a-install-ocaml-dependencies" aria-label="Link to this section">#</a>
-</h3>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> sail</span></span></code></pre><h3 id="2a-install-ocaml-dependencies">2a. Install OCaml dependencies</h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">opam</span><span style="color: #032F62;"> install .</span><span style="color: #005CC5;"> --deps-only</span></span></code></pre>
 <p>Reads the <code>.opam</code> files in the sail repo and installs all required OCaml libraries
 into the current opam switch. Does not build sail itself.</p>
-<h3 id="2b-build-the-compiler-and-plugins">2b. Build the compiler and plugins<a class="zola-anchor" href="#2b-build-the-compiler-and-plugins" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="2b-build-the-compiler-and-plugins">2b. Build the compiler and plugins</h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">dune</span><span style="color: #032F62;"> build</span><span style="color: #005CC5;"> --release</span></span></code></pre>
 <p>Compiles everything in the sail repo. Produces build artifacts under <code>_build/</code>, including:</p>
 <ul>
@@ -347,8 +344,7 @@ into the current opam switch. Does not build sail itself.</p>
 <li><code>_build/default/src/sail_lean_backend/sail_plugin_lean.cmxs</code> – the Lean plugin</li>
 </ul>
 <p>At this point the binary exists but doesn’t know where to find its plugins.</p>
-<h3 id="2c-install-into-a-local-prefix">2c. Install into a local prefix<a class="zola-anchor" href="#2c-install-into-a-local-prefix" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="2c-install-into-a-local-prefix">2c. Install into a local prefix</h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">dune</span><span style="color: #032F62;"> install</span><span style="color: #005CC5;"> --prefix</span><span style="color: #032F62;"> _local_install</span></span></code></pre>
 <p>Copies the binary, plugins, and standard library files into a structured directory:</p>
 <ul>
@@ -358,14 +354,12 @@ into the current opam switch. Does not build sail itself.</p>
 </ul>
 <p>This is what “installing a plugin” means concretely: copying the <code>.cmxs</code> file into the
 <code>share/libsail/plugins/</code> directory where the <code>sail</code> binary knows to look for it.</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> ..</span></span></code></pre><h3 id="verify-the-lean-backend-is-loaded">Verify the Lean backend is loaded<a class="zola-anchor" href="#verify-the-lean-backend-is-loaded" aria-label="Link to this section">#</a>
-</h3>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> ..</span></span></code></pre><h3 id="verify-the-lean-backend-is-loaded">Verify the Lean backend is loaded</h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span>SAIL_DIR</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">sail/_local_install/share/sail</span><span style="color: #6F42C1;"> sail/_local_install/bin/sail</span><span style="color: #005CC5;"> --help</span><span style="color: #D73A49;"> |</span><span style="color: #6F42C1;"> grep</span><span style="color: #032F62;"> lean</span></span></code></pre>
 <p><code>SAIL_DIR</code> tells the sail binary where to find its standard library and plugins.
 You should see <code>--lean</code> and related flags listed. If you don’t, the plugin file is
 not in the expected <code>share/libsail/plugins/</code> directory – re-run <code>dune install</code>.</p>
-<h2 id="step-3-configure-the-sail-riscv-build">Step 3: Configure the sail-riscv Build<a class="zola-anchor" href="#step-3-configure-the-sail-riscv-build" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="step-3-configure-the-sail-riscv-build">Step 3: Configure the sail-riscv Build</h2>
 <p>From the parent directory (or from <code>sail-riscv/</code>):</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> sail-riscv</span></span>
 <span class="giallo-l"></span>
@@ -384,43 +378,37 @@ to locate the Sail library directory, and the sail binary echoes back whatever
 <code>SAIL_DIR</code> was set to. If that’s a relative path like <code>../sail/...</code>, CMake
 resolves it relative to the build directory (<code>build/</code>), not the source directory,
 causing “Cannot find source file” errors for the C runtime files.</p>
-<h2 id="step-4-generate-lean-code">Step 4: Generate Lean Code<a class="zola-anchor" href="#step-4-generate-lean-code" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="step-4-generate-lean-code">Step 4: Generate Lean Code</h2>
 <p>Two variants can be generated. Both take a few minutes (the Sail compiler
 type-checks the full model, calling Z3 to solve arithmetic constraints).</p>
-<aside id="" class="callout callout-warning">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-warning">
+  <div class="callout-title">Warning</div>
   <p>I also do not understand any of the Z3 stuff right now.</p>
 </aside>
-<h3 id="noncomputable-for-theorem-proving">Noncomputable (for theorem proving)<a class="zola-anchor" href="#noncomputable-for-theorem-proving" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="noncomputable-for-theorem-proving">Noncomputable (for theorem proving)</h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span>SAIL_DIR</span><span style="color: #D73A49;">=</span><span>$(</span><span style="color: #6F42C1;">realpath</span><span style="color: #032F62;"> ../sail/_local_install/share/sail</span><span>)</span><span style="color: #6F42C1;"> \</span></span>
 <span class="giallo-l"><span style="color: #032F62;">  cmake</span><span style="color: #005CC5;"> --build</span><span style="color: #032F62;"> build</span><span style="color: #005CC5;"> --target</span><span style="color: #032F62;"> generated_lean_rv64d</span></span></code></pre>
 <p>Output: <code>build/model/Lean_RV64D/</code> (~155 <code>.lean</code> files)</p>
 <p>This version uses <code>noncomputable</code> sections, suitable for interactive proof in Lean.</p>
-<h3 id="executable-for-running-theorem-provin-theorem-provingg">Executable (for running + theorem provin + theorem provingg)<a class="zola-anchor" href="#executable-for-running-theorem-provin-theorem-provingg" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="executable-for-running-theorem-provin-theorem-provingg">Executable (for running + theorem provin + theorem provingg)</h3>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span>SAIL_DIR</span><span style="color: #D73A49;">=</span><span>$(</span><span style="color: #6F42C1;">realpath</span><span style="color: #032F62;"> ../sail/_local_install/share/sail</span><span>)</span><span style="color: #6F42C1;"> \</span></span>
 <span class="giallo-l"><span style="color: #032F62;">  cmake</span><span style="color: #005CC5;"> --build</span><span style="color: #032F62;"> build</span><span style="color: #005CC5;"> --target</span><span style="color: #032F62;"> generated_lean_executable_rv64d</span></span></code></pre>
 <p>Output: <code>build/model/Lean_RV64D_executable/</code> (~155 <code>.lean</code> files)</p>
 <p>This version generates computable code that can be built and executed with <code>lake build</code>.</p>
-<h3 id="rv32-variants">RV32 Variants<a class="zola-anchor" href="#rv32-variants" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="rv32-variants">RV32 Variants</h3>
 <p>Replace <code>rv64d</code> with <code>rv32d</code> in the target names for 32-bit:</p>
 <ul>
 <li><code>generated_lean_rv32d</code></li>
 <li><code>generated_lean_executable_rv32d</code></li>
 </ul>
-<h2 id="step-5-build-the-generated-lean-code-optional">Step 5: Build the Generated Lean Code (Optional)<a class="zola-anchor" href="#step-5-build-the-generated-lean-code-optional" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="step-5-build-the-generated-lean-code-optional">Step 5: Build the Generated Lean Code (Optional)</h2>
 <p>Each output directory contains a <code>lakefile.toml</code> and <code>lean-toolchain</code>. To compile:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> build/model/Lean_RV64D/</span><span style="color: #6A737D;">          # or Lean_RV64D_executable/</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">lake</span><span style="color: #032F62;"> update</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">lake</span><span style="color: #032F62;"> build</span></span></code></pre>
 <p>The generated Lean requires a specific Lean toolchain version (specified in
 <code>lean-toolchain</code>) and the <code>lean-sail</code> support library (fetched automatically by <code>lake</code>).</p>
-<h2 id="rebuilding-after-sail-compiler-changes">Rebuilding After Sail Compiler Changes<a class="zola-anchor" href="#rebuilding-after-sail-compiler-changes" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="rebuilding-after-sail-compiler-changes">Rebuilding After Sail Compiler Changes</h2>
 <p>Since you’re running from source, after modifying the Sail compiler:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6A737D;"># 1. Rebuild and reinstall the compiler</span></span>
 <span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> ../sail</span></span>
@@ -435,8 +423,7 @@ type-checks the full model, calling Z3 to solve arithmetic constraints).</p>
 <span class="giallo-l"><span style="color: #032F62;">  cmake</span><span style="color: #005CC5;"> --build</span><span style="color: #032F62;"> build</span><span style="color: #005CC5;"> --target</span><span style="color: #032F62;"> generated_lean_rv64d</span></span>
 <span class="giallo-l"></span>
 <span class="giallo-l"><span>SAIL_DIR</span><span style="color: #D73A49;">=</span><span>$(</span><span style="color: #6F42C1;">realpath</span><span style="color: #032F62;"> ../sail/_local_install/share/sail</span><span>)</span><span style="color: #6F42C1;"> \</span></span>
-<span class="giallo-l"><span style="color: #032F62;">  cmake</span><span style="color: #005CC5;"> --build</span><span style="color: #032F62;"> build</span><span style="color: #005CC5;"> --target</span><span style="color: #032F62;"> generated_lean_executable_rv64d</span></span></code></pre><h2 id="troubleshooting">Troubleshooting<a class="zola-anchor" href="#troubleshooting" aria-label="Link to this section">#</a>
-</h2>
+<span class="giallo-l"><span style="color: #032F62;">  cmake</span><span style="color: #005CC5;"> --build</span><span style="color: #032F62;"> build</span><span style="color: #005CC5;"> --target</span><span style="color: #032F62;"> generated_lean_executable_rv64d</span></span></code></pre><h2 id="troubleshooting">Troubleshooting</h2>
 <ul>
 <li>
 <p><strong><code>Cannot find source file: ../sail/_local_install/share/sail/lib/elf.c</code></strong>: You used
@@ -463,8 +450,7 @@ again to rebuild both from the same source.</p>
 reconfigure: <code>rm -rf build &amp;&amp; cmake -S . -B build ...</code></p>
 </li>
 </ul>
-<h2 id="what-gets-generated">What Gets Generated<a class="zola-anchor" href="#what-gets-generated" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="what-gets-generated">What Gets Generated</h2>
 <p>The Sail compiler translates the entire RISC-V ISA model into Lean definitions:</p>
 <ul>
 <li>Instruction encodings/decodings</li>
@@ -497,9 +483,6 @@ The executable version can simulate RISC-V binaries.</p>
     <!--   </ul> -->
     <!-- </div> -->
     
-    <div class="footer-credit">
-      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
-    </div>
   </footer>
 
   <script>
@@ -638,6 +621,7 @@ The executable version can simulate RISC-V binaries.</p>
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+<script defer src="https://randomwalks.xyz/tag-colours.js?h=862d01e15ac82a14daed"></script>
 
 
 

@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Small Scalar Binding — Random Walks</title>
   <meta name="description" content="">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=58eac425b63a4a9905b4">
+  <script src="https://randomwalks.xyz/theme.js?h=022c5e6dda6564ebbb98"></script>
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=24e8d15864242f235d81">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -88,6 +89,10 @@
       <a href="https://randomwalks.xyz/blog/">Notes</a>
       <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
       <a href="https://randomwalks.xyz/cv/">CV</a>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" hidden>
+        <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+        <svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
       <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
       <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
@@ -121,18 +126,18 @@
 <article class="note footnotes-right">
   <header class="note-header">
     <h1>Small Scalar Binding</h1>
-    
     <div class="note-meta">
       <span class="note-authors">By Ari</span>
       <time datetime="2025-10-04">04 October 2025</time>
       
         <time datetime="2026-01-08">Last updated 08 January 2026</time>
       
+      
+      <ul class="tag-list" aria-label="Tags">
+        <li><a href="https://randomwalks.xyz/tags/sumcheck/">#sumcheck</a></li><li><a href="https://randomwalks.xyz/tags/montgomery-mults/">#montgomery-mults</a></li>
+      </ul>
+      
     </div>
-    
-    <ul class="tag-list" aria-label="Tags">
-      <li><a href="https://randomwalks.xyz/tags/sumcheck/">sumcheck</a></li><li><a href="https://randomwalks.xyz/tags/montgomery-mults/">montgomery-mults</a></li>
-    </ul>
     
   </header>
 
@@ -140,15 +145,13 @@
     
 
     <div class="prose">
-      <h2 id="tl-dr-just-tell-us-what-you-did">TL;DR - Just Tell Us What You Did<a class="zola-anchor" href="#tl-dr-just-tell-us-what-you-did" aria-label="Link to this section">#</a>
-</h2>
-<aside id="" class="callout callout-box thm-box">
+      <h2 id="tl-dr-just-tell-us-what-you-did">TL;DR - Just Tell Us What You Did</h2>
+<aside class="callout theorem-block callout-box thm-box">
   <div class="callout-title">Faster Sumcheck In Jolt</div>
   <p>By sampling the verifiers random challenges from a set $S \subset \mathbb{F}$ of size roughly $\sqrt{|\mathbb{F}|}$, we speed up sum-check binding by <strong>1.6x</strong> from baseline (where challenges are sampled over the whole field $\mathbb{F}$ – the field over which polynomials are defined. )
 <strong>NOTE:</strong> This now reduces the soundness error from $1/2^{254}$ to $1/2^{125}$, but this is not a concern as currently Jolt usess the <code>bn256</code> curve to commit to polynomials, which offers 110 bits of security anyway.</p>
 </aside>
-<h2 id="sum-check-recap">Sum-Check Recap<a class="zola-anchor" href="#sum-check-recap" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="sum-check-recap">Sum-Check Recap</h2>
 <p>We briefly recap the sum-check protocol<sup class="footnote-reference" id="fr-a-1"><a href="https://randomwalks.xyz/blog/small-scalar-binding/#fn-a">[1]</a></sup>.</p>
 <p>Let $g \in \Field[X_1, \ldots, X_m]$ be a polynomial over $\Field$ with the following structure.
 $$ g(X_1, \ldots, X_m) = \prod_{j=1}^d q_j(X_1, \ldots, X_m)$$
@@ -208,21 +211,18 @@ Therefore this step requires $2^{m-i}$ $\Field \times \Field$ multiplications in
 It is well known that multiplication for $\Field$ elements is 1000x costlier than addition.
 So our hope is that we can choose $S$ cleverly such that this operation can be done faster.
 Note we cannot make $S$ too small, as this the soundness probability of any sumcheck protocol is given by $\frac{d}{|S|}$.</p>
-<aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-box thm-box">
   <h4 id="what-we-show">What we show</h4>
 <p>We show that there exists a set $S$ of size rouhgly $|\Field|^{1/2}$, which we call <code>MontU128Challenge</code>, in which $\Field \times r$ is 1.6x
 faster than $\Field \times \Field$.
 This in returns speeds up the <strong>binding</strong> phase of the sum-check protocol, which results in a 1.3x speedup per round of sum-check.</p>
 </aside>
-<h2 id="the-challenge-set-s">The Challenge Set $S$<a class="zola-anchor" href="#the-challenge-set-s" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="the-challenge-set-s">The Challenge Set $S$</h2>
 <p>Define the set</p>
 <p>$$
 S \subset \Field  \text{where} S = { x \in \Field : \text{the least 2 significant digits of $x$ in Montgomery form are 0} }
 $$</p>
-<h4 id="worked-out-example">Worked Out Example:<a class="zola-anchor" href="#worked-out-example" aria-label="Link to this section">#</a>
-</h4>
+<h4 id="worked-out-example">Worked Out Example:</h4>
 <p>Prime Field $\Field = \mathbb{Z}_{13}$ with Montgomery Form.
 Montgomery parameter: $R = 16 = 2⁴$.
 Montgomery form of $x$ is given by $xR \mod 13$</p>
@@ -245,8 +245,7 @@ Montgomery form of $x$ is given by $xR \mod 13$</p>
 <p><strong>Note:</strong> $|S| = 4 \approx \sqrt{p}$, which makes sense since we’re filtering by the last 2 bits.</p>
 <p>The short answer to why we this set $S$ is nice, is that it saves us 10 multiplication instructions per field multiplication.
 We first briefly review the <a href="https://randomwalks.xyz/blog/mont-mult/">CIOS</a> algorithm, which is currently used to multiply field elements.</p>
-<h3 id="cios-review">CIOS Review<a class="zola-anchor" href="#cios-review" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="cios-review">CIOS Review</h3>
 <p>Let $n$ be the number of limbs used to represent field elements. Currently in Jolt, $n=4$.
 The width $w$ of each limb is 64 bits.
 Given $a \in \Field$ and $b\in S$ , let $\Mont{a} = aR \mod p, \Mont{b} = bR \mod p$ be the respective Montgomery representations.</p>
@@ -261,8 +260,7 @@ cr^{-1} &amp; \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-
 \end{align}
 $$</p>
 </div>
-<h3 id="important-sub-routine">Important Sub-Routine<a class="zola-anchor" href="#important-sub-routine" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="important-sub-routine">Important Sub-Routine</h3>
 <p>Observe that $c_0r^{-1} \equiv (c_0 + mp)r^{-1} \mod p$, where $m$ such that $c_0 + mp \equiv 0 \mod r$.
 Solving for $m = -p^{-1}c_0 \equiv \mu c_0 \mod r$.
 Also as we are working modulo $r$, it suffices to use $m = \mu_{0}c_0$ discarding any carries, where $\mu_{0}$ is the least significant word of $\mu$.</p>
@@ -279,8 +277,7 @@ cr^{-1} &amp; \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-
 \end{align}
 $$</p>
 </div>
-<h3 id="repeat-the-subroutine-n-times">Repeat The Subroutine $n$ times<a class="zola-anchor" href="#repeat-the-subroutine-n-times" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="repeat-the-subroutine-n-times">Repeat The Subroutine $n$ times</h3>
 <p>Now we can play the subroutine again with $c^{(1)}_1$ replacing the role of $c_0$, and the updated value of $m = \mu_0c_1^{(1)}$ (<strong>NOTE</strong> the same $\mu_0$ is always used)</p>
 <div class="math-display">
 <p>$$
@@ -297,8 +294,7 @@ $$</p>
 </div>
 <p>To get the final answer<sup class="footnote-reference" id="fr-c-1"><a href="https://randomwalks.xyz/blog/small-scalar-binding/#fn-c">[2]</a></sup></p>
 <blockquote>
-<h4 id="total-multiplications">Total Multiplications<a class="zola-anchor" href="#total-multiplications" aria-label="Link to this section">#</a>
-</h4>
+<h4 id="total-multiplications">Total Multiplications</h4>
 <p>The total number of multiplications is $2n^2 + n$ which for $n=4$ is 36.</p>
 <ul>
 <li>$n^2$ multiplications to compute $c$.</li>
@@ -333,8 +329,7 @@ Comparing it against the baseline</p>
 <p><img src="https://randomwalks.xyz/blog/small-scalar-binding/binding-slow.png" alt="" /></p>
 <p>Shown below is the diff from bench with the red pdf representing our fast multiplication.</p>
 <p><img src="https://randomwalks.xyz/blog/small-scalar-binding/binding-diff.svg" alt="" /></p>
-<h2 id="some-implementation-details">Some Implementation Details<a class="zola-anchor" href="#some-implementation-details" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="some-implementation-details">Some Implementation Details</h2>
 <p>we use $256$ bits to represent big integers and our challenge and the modulus for <code>ark-bn256</code> uses $254$ bits. Thus, if sampled a 2 limbed $128$ bit integer $x$ and used that as the challenge as is <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that $x &lt; p$ which the CIOS algorithm assumes.
 we use $256$ bits to represent big integers and our challenge and the modulus for <code>ark-bn254</code> uses $254$ bits. Thus, if sampled a 2 limbed $128$ bit integer $x$ and used that as the challenge as is <code>x = [x_1, x_0, 0, 0]</code> we are not guaranteed that $x &lt; p$ which the CIOS algorithm assumes.
 So we clear the first 3 bits of $x$ to ensure that $x$ is <strong>ALWAYS</strong> less than $p$.</p>
@@ -361,8 +356,7 @@ So we clear the first 3 bits of $x$ to ensure that $x$ is <strong>ALWAYS</strong
 <span class="giallo-l"><span>	}</span></span>
 <span class="giallo-l"><span>}</span></span>
 <span class="giallo-l"></span>
-<span class="giallo-l"></span></code></pre><h2 id="footnotes-and-references">Footnotes and References<a class="zola-anchor" href="#footnotes-and-references" aria-label="Link to this section">#</a>
-</h2>
+<span class="giallo-l"></span></code></pre><h2 id="footnotes-and-references">Footnotes and References</h2>
 <section class="footnotes">
 <ol class="footnotes-list">
 <li id="fn-a">
@@ -394,9 +388,6 @@ So we clear the first 3 bits of $x$ to ensure that $x$ is <strong>ALWAYS</strong
     <!--   </ul> -->
     <!-- </div> -->
     
-    <div class="footer-credit">
-      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
-    </div>
   </footer>
 
   <script>
@@ -535,6 +526,7 @@ So we clear the first 3 bits of $x$ to ensure that $x$ is <strong>ALWAYS</strong
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+<script defer src="https://randomwalks.xyz/tag-colours.js?h=862d01e15ac82a14daed"></script>
 
 
 

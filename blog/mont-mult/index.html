@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Algorithms For Montgomery Multiplication — Random Walks</title>
   <meta name="description" content="">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff">
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=58eac425b63a4a9905b4">
+  <script src="https://randomwalks.xyz/theme.js?h=022c5e6dda6564ebbb98"></script>
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=24e8d15864242f235d81">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -88,6 +89,10 @@
       <a href="https://randomwalks.xyz/blog/">Notes</a>
       <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
       <a href="https://randomwalks.xyz/cv/">CV</a>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" hidden>
+        <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+        <svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
       <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
       <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
     </nav>
@@ -121,18 +126,18 @@
 <article class="note footnotes-right">
   <header class="note-header">
     <h1>Algorithms For Montgomery Multiplication</h1>
-    
     <div class="note-meta">
       <span class="note-authors">By Ari</span>
       <time datetime="2025-05-16">16 May 2025</time>
       
         <time datetime="2025-05-18">Last updated 18 May 2025</time>
       
+      
+      <ul class="tag-list" aria-label="Tags">
+        <li><a href="https://randomwalks.xyz/tags/jolt/">#jolt</a></li><li><a href="https://randomwalks.xyz/tags/algebra/">#algebra</a></li><li><a href="https://randomwalks.xyz/tags/montgomery-multiplication/">#montgomery-multiplication</a></li>
+      </ul>
+      
     </div>
-    
-    <ul class="tag-list" aria-label="Tags">
-      <li><a href="https://randomwalks.xyz/tags/jolt/">jolt</a></li><li><a href="https://randomwalks.xyz/tags/algebra/">algebra</a></li><li><a href="https://randomwalks.xyz/tags/montgomery-multiplication/">montgomery-multiplication</a></li>
-    </ul>
     
   </header>
 
@@ -263,8 +268,7 @@
     
 
     <div class="prose">
-      <h2 id="background">Background<a class="zola-anchor" href="#background" aria-label="Link to this section">#</a>
-</h2>
+      <h2 id="background">Background</h2>
 <p>In an earlier <a href="https://randomwalks.xyz/blog/dyn-instrument/">post</a>, we analysed why <a rel="noopener noreferrer external" target="_blank" href="https://github.com/worldfnd/ProveKit/blob/dd8134ec3f2ad4991caa87653254ee64daf2d441/block-multiplier/src/lib.rs#L121">this implementation</a> of the improved <a rel="noopener noreferrer external" target="_blank" href="https://en.wikipedia.org/wiki/Montgomery_modular_multiplication">Montgomery multiplication</a> algorithm by <a rel="noopener noreferrer external" target="_blank" href="https://hackmd.io/@Ingonyama/Barret-Montgomery">Yuval Domb</a> was not empirically faster out of the box.
 After disassembling the code using the Intel Pin tool, we identified large memory reads and writes as the primary source of slower run times.
 Although the analysis was specific to x86 architectures, the empirical findings were consistent across MacBook M2 Laptops and Intel x86 Digital Ocean servers.
@@ -282,8 +286,7 @@ current Arkworks CIOS implementation, this code seemed to be 5-10% faster (at le
 <p>For the remainder of the post, we refer to the original Arkworks CIOS algorithm for Montgomery multiplication as <code>c-mul</code>, the previous implementation of the new multiplication as <code>s-mul</code>, and the faster implementation as <code>h-mul</code>.
 c stands for CIOS, s stands for single step, and h stands for hybrid.
 The naming convention will soon become clear.</p>
-<h3 id="putting-this-faster-code-into-jolt">Putting this faster code into Jolt<a class="zola-anchor" href="#putting-this-faster-code-into-jolt" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="putting-this-faster-code-into-jolt">Putting this faster code into Jolt</h3>
 <p>Ignoring speed for a minute, we plugged in the <code>c-mul</code> and <code>smul</code> multiplication algorithms in their native form<sup class="footnote-reference" id="fr-b-1"><a href="https://randomwalks.xyz/blog/mont-mult/#fn-b">[2]</a></sup> into Jolt.
 Then we ran <code>cargo test -p jolt-core -- sha3_e2e_hyperkzg</code>, and the unit tests <strong>fail</strong> for <strong>both</strong> <code>s-mult</code> and <code>h-mult</code>.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">thread</span><span style="color: #032F62;"> &#39;&lt;unnamed&gt;&#39; panicked at /Users/aribiswas3/Work-With-A16z/arkworks-algebra/ff/src/fields/models/fp/montgomery_backend.rs:1360:9:</span></span>
@@ -298,8 +301,7 @@ Then we ran <code>cargo test -p jolt-core -- sha3_e2e_hyperkzg</code>, and the u
 The <a rel="noopener noreferrer external" target="_blank" href="https://github.com/abiswas3/arkworks-algebra/blob/19e66617147b3a9779df30522539fb8e8d3217c6/ff/src/fields/models/fp/montgomery_backend.rs#L1348">Conditional Subtraction For Barrett Reduction</a> throws an error claiming that the number we passed in was too large.
 If you look at <code>line 1360</code>, it specifically needs the Big integer listed as <code>r_tmp</code> not to have its high bit set to 1.
 This error goes away when using Arkworks-CIOS as the multiplication algorithm.</p>
-<h3 id="why-does-this-happen">Why does this happen?<a class="zola-anchor" href="#why-does-this-happen" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="why-does-this-happen">Why does this happen?</h3>
 <p>Scanning the <a rel="noopener noreferrer external" target="_blank" href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/main/src/mul_logjumps_unr_2.rs">lines of code</a> for <code>h-mult</code>, we observe that the final answer is not reduced $\mod p$.
 When you multiply two numbers that are both less than $p$, the result may still cross over the modulus $p$.</p>
 <p>In <a rel="noopener noreferrer external" target="_blank" href="https://github.com/ingonyama-zk/ingo_skyscraper/blob/0cc267afa60c87deb632164ff692d783ef6f2109/src/mul_cios_opt_unr_2.rs#L62">Arkworks-CIOS</a>, the last line of multiplication involves subtracting $p$ from the final answer if the answer is greater than $p$.
@@ -327,8 +329,7 @@ $100000$ trials are minuscule when compared to the input space of 256-bit number
 What if there are edge cases that we can’t catch via fudging?</p>
 <p>In what follows, we derive a formal guarantee on how large the answer of these algorithms can be, therefore establishing the maximum number of conditional subtracts we must employ.
 In the process, we establish that there is not just 1 new algorithm for Montgomery multiplication, but a family of algorithms that are all related to each other, each demonstrating speed for different input distributions.</p>
-<h2 id="montgomery-multiplication-maths">Montgomery Multiplication Maths<a class="zola-anchor" href="#montgomery-multiplication-maths" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="montgomery-multiplication-maths">Montgomery Multiplication Maths</h2>
 <p>We begin with the basics of Montgomery multiplication, and then describe the CIOS algorithm.
 This gives all the background needed to figure out what is going on.</p>
 <p>Below, we actually describe the Separated Operand Scanning Algorithm (SOS), but deceptively refer to it as the Coarse Integrated Operand Scanning (CIOS) algorithm.
@@ -343,8 +344,7 @@ A simple calculation solving for $m$ gives us that $m = -p^{-1}c \mod R$.
 For our purposes, $p$ is prime so $p$ and $r$ are co-prime.
 Therefore, $-p^{-1}$ is well defined, and thus so is $m$.</p>
 <p><strong>Key Idea</strong>: As $R$ is a power of 2, the last division can be done by bit shift operations native to most instruction architectures.</p>
-<h2 id="the-cios-algorithm">The CIOS algorithm<a class="zola-anchor" href="#the-cios-algorithm" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="the-cios-algorithm">The CIOS algorithm</h2>
 <p>What we describe above is the pseudocode description of the Montgomery reduction algorithm.
 In practice, we do not actually compute $m$ as a whole, then multiply it by $p$ and then add $mp$ to $c$.
 We perform the computation limb by limb.<br />
@@ -356,13 +356,11 @@ $$</p>
 cr^{-1} \equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1} + c_0 r^{-1}   \mod p
 $$</p>
 <p>The limb by limb process follows by repeating the following sub-routine $n$ times.</p>
-<h3 id="important-sub-routine">Important Sub-Routine<a class="zola-anchor" href="#important-sub-routine" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="important-sub-routine">Important Sub-Routine</h3>
 <p>Observe that $c_0r^{-1} \equiv (c_0 + mp)r^{-1} \mod p$, where $m$ such that $c_0 + mp \equiv 0 \mod r$.
 Solving for $m = -p^{-1}c_0 \equiv \mu c_0 \mod r$.
 Also as we are working modulo $r$, it suffices to use $m = \mu_{0}c_0$ discarding any carries, where $\mu_{0}$ is the least significant word of $\mu$.</p>
-<aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-box thm-box">
   <p>We overload $m$ a little in notation. This $m$ is NOT the same $m$ as the one defined in the pseudocode description on top.
 This $m$ is just to make $c_0 + mp$ divisible by $r$.</p>
 </aside>
@@ -379,8 +377,7 @@ cr^{-1} &amp;\equiv ( c_{2n-1}r^{2n-1} + c_{2n-2} r^{2n-2} + \ldots + c_1r)r^{-1
 \end{align}
 $$</p>
 </div>
-<h3 id="repeat-the-subroutine-n-times">Repeat The Subroutine $n$ times<a class="zola-anchor" href="#repeat-the-subroutine-n-times" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="repeat-the-subroutine-n-times">Repeat The Subroutine $n$ times</h3>
 <p>Now we can play the subroutine again with $c^{(1)}_1$ replacing the role of $c_0$, and the updated value of $m = \mu_0c_1^{(1)}$ (<strong>NOTE</strong> the same $\mu_0$ is always used)</p>
 <div class="math-display">
 <p>$$
@@ -396,8 +393,7 @@ $$</p>
 <p>$$cR^{-1} \equiv cr^{-n} \equiv c^{(n)}<em>{2n-1}r^{n-1} + c^{(n)}</em>{n+1}r +c^{(n)}_{n} \mod p$$</p>
 </div>
 <p>To get the final answer.</p>
-<h3 id="why-can-t-this-answer-be-greater-than-2p">Why Can’t This Answer Be Greater Than $2p$ ?<a class="zola-anchor" href="#why-can-t-this-answer-be-greater-than-2p" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="why-can-t-this-answer-be-greater-than-2p">Why Can’t This Answer Be Greater Than $2p$ ?</h3>
 <p>What did we actually do in the above process ?
 Over $n$ iterations, in each iteration, we computed $m$, added $mp$ to $c$ and divided by $r$.
 We denote the $m$ in iteration $i$ with $m_i$ here.
@@ -416,11 +412,9 @@ $$</p>
 <p>Here $m’$ is some integer expressed using $n$ limbs, therefore strictly less than $R$.
 This is exactly why, if the answer is greater than $p$, <strong>one</strong> subtraction suffices for <code>c-mul</code>.
 We <strong>NEVER</strong> need more than one subtraction!</p>
-<h2 id="yuval-s-new-multiplication-algorithm">Yuval’s New Multiplication Algorithm<a class="zola-anchor" href="#yuval-s-new-multiplication-algorithm" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="yuval-s-new-multiplication-algorithm">Yuval’s New Multiplication Algorithm</h2>
 <p>The new algorithm is based on a subtle observation. Quoting the original <a rel="noopener noreferrer external" target="_blank" href="https://hackmd.io/@Ingonyama/Barret-Montgomery">blog</a>:</p>
-<aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-box thm-box">
   <p>Per round of the Montgomery reduction, we previously computed $c_i\text{ }r^{-1} \mod p$ using $n+1$ digit multiplications. An alternative method to achieve this, using only
 $n$ digit multiplications, is by computing $\rho_1 = r^{-1}\mod p$.
 One way to understand this algorithm is that, in each round, the current sum is divided by $𝑟$, and the resulting fraction is converted into an $n+1$-digit number $c_i\text{ }\rho_1$, which is then added to the integer part of the division.</p>
@@ -444,9 +438,9 @@ More simply, the remainder and quotient.</p>
 This is the akin to playing the CIOS game for 1 round.</p>
 <p>$$ cR^{-1} \mod p \equiv (s+ mp)/r$$</p>
 <p>What the code described in the <code>s-mul</code> algorithm does is – it implements the above algorithm <strong>exactly</strong> as described above.</p>
-<aside id="" class="callout callout-theorem thm-numbered">
+<aside class="callout theorem-block callout-theorem thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
-    <span class="thm-title"> : Upper Bound</span></div>
+    <span class="thm-title">— Upper Bound</span></div>
   <p>We claim that $s &lt; n\cdot(rp)$.</p>
 </aside>
 <aside class="callout callout-proof">
@@ -466,14 +460,12 @@ $$</p>
 <p>From this, we can conclude that</p>
 <p>$$ cR^{-1} \mod p \equiv (s+ mp)/r &lt; (nrp + rp)/r &lt; (n+1)p$$</p>
 <p>Therefore, <strong>it is often not sufficient to subtract $2p$ from the answer, you might have to go as high as subtracting $4p$</strong>.</p>
-<h2 id="why-does-h-mult-pass">Why Does h-mult Pass?<a class="zola-anchor" href="#why-does-h-mult-pass" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="why-does-h-mult-pass">Why Does h-mult Pass?</h2>
 <p>It makes sense why <code>s-mul</code> fails.
 From the above bounds its very possible that the final answer is much bigger than $p$.
 But this does not explain why <code>h-mul</code>, which computes the same thing, passes with only one more subtraction?</p>
 <p>The answer to this is that although <code>h-mul</code> are <code>s-mul</code> are based on the same algorithm, they are implemented slightly differently.</p>
-<h3 id="a-hybrid-algorithm">A hybrid algorithm<a class="zola-anchor" href="#a-hybrid-algorithm" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="a-hybrid-algorithm">A hybrid algorithm</h3>
 <p>More specifically, <code>h-mul</code> is a hybrid between the completely expanded <code>s-mul</code> algorithm and the <code>c-mul</code> algorithm.
 We explain this difference in the context of $n=4$.</p>
 <p>The <code>h-mul</code> algorithm can be described as an iteration of $\log_2 n$ division operations.
@@ -494,8 +486,7 @@ cr^{-3} &amp;\equiv \Big(c_{7}r^{4} + \ldots +c_{3} \Big)  + \rho_1(c_2 + \rho_2
 &amp;\equiv Q + \text{Remainder}
 \end{align}
 $$</p>
-<aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-box thm-box">
   <p>Note that the total effect is the same as in <code>h-mul</code> where we also divide by $r^{-3}$ before adding things.
 The key difference between <code>h-mul</code> and <code>s-mul</code> is that in <code>s-mul</code> we call do all 3 divisions in parallel, whereas here we first divide by $r^{-2}$, and only then can we divide by $r^{-1}$.
 So we lose some parallelism in <code>h-mul</code>, but as we will soon see, we minimise the amount of overflow.</p>
@@ -530,15 +521,14 @@ $$</p>
 <p>In this case, the number of subtractions is always 1 less than that of <code>h-mul</code> but one more than <code>c-mul</code>.
 Thus, <code>s-mul</code> can be thought of as maximising parallel division operations before adding, and <code>c-mul</code> can be thought of as minimising division operations before an add. They are the two extremes of this family of algorithms.
 Using the above analysis, one can easily show the following:</p>
-<aside id="" class="callout callout-theorem thm-numbered">
+<aside class="callout theorem-block callout-theorem thm-numbered">
   <div class="thm-header"><span class="thm-label"></span>
-    <span class="thm-title"> : Number of multiplications vs parallelisation vs number of reductions</span></div>
+    <span class="thm-title">— Number of multiplications vs parallelisation vs number of reductions</span></div>
   <p>Let $u$ be the number of multiplication operations the CIOS algorithm with inputs $a$ and $b$ that each at most $p$, and $v$ be the number of addition operations (including the reduction phase).
 Then, for any $0 \le k \le n-1$, if we divide $ab$ by $r^k$ before adding, we have $k$ fewer multiplication operations compared to CIOS.
 If we have $m$ rounds of division, then we have $m$ more addition operations than CIOS (due to the reduction step of making the answer less than $p$).</p>
 </aside>
-<h2 id="missing-factor-of-1p">Missing Factor Of $1p$<a class="zola-anchor" href="#missing-factor-of-1p" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="missing-factor-of-1p">Missing Factor Of $1p$</h2>
 <p>At this point, there is one question left. We proved that in theory</p>
 <ul>
 <li><code>s-mul</code> needs at most 4 subtractions and saves 3 multiplications.</li>
@@ -555,17 +545,14 @@ If we tighten our analysis, $\rho_1$ and $\rho_2$ are fixed. The largest value f
 Plugging in exact numbers</p>
 <p>$$cr^{-4} &lt; \frac{p^2}{r^4} + (\rho_1 + \rho_2) + p &lt; 2.25p$$</p>
 <p>It turns out to be less than $3.25p$ for <code>s-mul</code></p>
-<aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<aside class="callout theorem-block callout-box thm-box">
   <p>It’s the <code>bn-254</code> prime modulus $p$ that allows us to do one subtraction less for <code>h-mul</code> and <code>s-mul</code> than what theory would suggest for any general prime $p$.
 If $p$ were only a little smaller than $r^n$, then we’d have to put in one extra reduction for each of these algorithms.</p>
 </aside>
-<h2 id="the-need-for-speed">The Need For Speed<a class="zola-anchor" href="#the-need-for-speed" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="the-need-for-speed">The Need For Speed</h2>
 <p>Remember, we began with the goal of speeding up Montgomery multiplication. So far, we have only understood correctness to make Jolt unit tests pass.
 We had to add extra instructions to handle overflow. Do the speedups previously observed still exist?</p>
-<h3 id="without-subtractions">Without Subtractions<a class="zola-anchor" href="#without-subtractions" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="without-subtractions">Without Subtractions</h3>
 <p>The first step is to remove all subtractions from all algorithms and observe how fast things are.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">warning:</span><span style="color: #032F62;"> `</span><span style="color: #6F42C1;">minimal_mult</span><span style="color: #032F62;">`</span><span> (</span><span style="color: #6F42C1;">example</span><span style="color: #032F62;"> &quot;ark-multiplication&quot;</span><span>)</span><span style="color: #6F42C1;"> generated</span><span style="color: #005CC5;"> 1</span><span style="color: #032F62;"> warning</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">    Finished</span><span style="color: #032F62;"> `</span><span style="color: #6F42C1;">release</span><span style="color: #032F62;">`</span><span style="color: #6F42C1;"> profile</span><span> [optimized] target(</span><span style="color: #6F42C1;">s</span><span>) in 3.76s</span></span>
@@ -578,8 +565,7 @@ We had to add extra instructions to handle overflow. Do the speedups previously 
 <span class="giallo-l"><span style="color: #6F42C1;">dtype:</span><span style="color: #032F62;"> float64</span></span></code></pre>
 <p>We are 11% faster. Note is very difficult to pinpoint if it’s due to fewer multiplications or how we wrote the code without using contiguous memory, but with 100,000 random inputs and 100 chained multiplications, we appear to be consistently faster.
 Although fast, this code will not pass – we need the answer to be reduced $\mod p$.</p>
-<h3 id="putting-in-the-subtractions">Putting In The Subtractions<a class="zola-anchor" href="#putting-in-the-subtractions" aria-label="Link to this section">#</a>
-</h3>
+<h3 id="putting-in-the-subtractions">Putting In The Subtractions</h3>
 <p>Now, for starters, ignoring the fact that <code>h-mul</code> actually needs <strong>two</strong> conditional subtractions, we stick one conditional subtraction for both <code>c-mul</code> and <code>h-mul</code>.
 We should still have a speed advantage, right? After all, we had one algorithm faster than the second algorithm, and we added the same line of code to both.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">    Finished</span><span style="color: #032F62;"> `</span><span style="color: #6F42C1;">release</span><span style="color: #032F62;">`</span><span style="color: #6F42C1;"> profile</span><span> [optimized] target(</span><span style="color: #6F42C1;">s</span><span>) in 0.80s</span></span>
@@ -608,8 +594,7 @@ The branch prediction is the same for both code bases, as the compiler will just
 <span class="giallo-l"><span style="color: #6F42C1;">H-mult</span><span style="color: #005CC5;">         1594.99482</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;"> C-overflow</span><span style="color: #005CC5;">       0.05428</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;"> H-overflow</span><span style="color: #005CC5;">       0.68088</span></span>
-<span class="giallo-l"><span style="color: #6F42C1;">dtype:</span><span style="color: #032F62;"> float64</span></span></code></pre><h3 id="aside-same-code-two-conclusions">Aside: Same Code Two Conclusions<a class="zola-anchor" href="#aside-same-code-two-conclusions" aria-label="Link to this section">#</a>
-</h3>
+<span class="giallo-l"><span style="color: #6F42C1;">dtype:</span><span style="color: #032F62;"> float64</span></span></code></pre><h3 id="aside-same-code-two-conclusions">Aside: Same Code Two Conclusions</h3>
 <p>As a brief distraction, in this section, we give an example of how finicky performance benchmarking can be.</p>
 <p>One of the reasons we embarked on this journey was that preliminary experimentation showed 10-15% speedups<sup class="footnote-reference" id="fr-bench-1"><a href="https://randomwalks.xyz/blog/mont-mult/#fn-bench">[7]</a></sup>.
 Without the subtractions, we have a clear understanding of why this was the case (fewer multiplications and no big read/write chunks).
@@ -634,10 +619,8 @@ This strips away the overflow prevention property of CIOS – therefore, we lose
 Now the CPU cannot predict the branch, and this is much closer to the no-subtraction situation.
 Of course, we still lose a bit as <code>h-mul</code> needs 2 subtractions and 2 checks as opposed to 1 – hence we don’t see the 11% speedup, but still see some speedup.</p>
 <p>In conclusion, something as innocuous as random inputs can lead to completely different conclusions about the real-world performance of code.</p>
-<h2 id="so-where-do-we-go-now">So Where Do We Go Now?<a class="zola-anchor" href="#so-where-do-we-go-now" aria-label="Link to this section">#</a>
-</h2>
-<aside id="" class="callout callout-box thm-box">
-  <div class="callout-title"></div>
+<h2 id="so-where-do-we-go-now">So Where Do We Go Now?</h2>
+<aside class="callout theorem-block callout-box thm-box">
   <p>At this point, where do we stand? We have a family of algorithms for Montgomery multiplication. If we are not bothered about reducing $\mod p$, then <code>s-mul</code> should be the fastest algorithm, owing to its maximal parallelism (allows maximal for out-of-order execution on the CPU).
 But we <em>need</em> the final answer to be less than $p$ for the rest of the Jolt setup to work.
 Does this mean that for Jolt, CIOS remains the best algorithm to use?</p>
@@ -691,8 +674,7 @@ In conclusion, the number of multiplications is one source of slowdown in the re
 Now, a priori, if you knew the input ranges to your algorithm, then you could predict how much each of them with overflow. This would allow you to use the right level of parallelism and pre-computation to get maximal speed. For example, if you know that the inputs are near $p-1$, you’d likely still use CIOS.
 If you knew the answers would be very small, then you’d use <code>s-mul</code>.
 For anything in between, you’d want to use the mini-theorem above and figure out how to balance the number of multiplications vs overflow.</p>
-<h2 id="instructions-for-running-benchmarks-discussed-above">Instructions For Running Benchmarks Discussed Above<a class="zola-anchor" href="#instructions-for-running-benchmarks-discussed-above" aria-label="Link to this section">#</a>
-</h2>
+<h2 id="instructions-for-running-benchmarks-discussed-above">Instructions For Running Benchmarks Discussed Above</h2>
 <p>To get individual times on chained multiplications</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">git</span><span style="color: #032F62;"> clone https://github.com/abiswas3/Montgomery-Benchmarks.git</span></span>
 <span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> Montgomery-Benchmarks</span></span>
@@ -746,9 +728,6 @@ For anything in between, you’d want to use the mini-theorem above and figure o
     <!--   </ul> -->
     <!-- </div> -->
     
-    <div class="footer-credit">
-      <p>Design inspired by <a href="https://www.inkandswitch.com/">Ink &amp; Switch</a>.</p>
-    </div>
   </footer>
 
   <script>
@@ -887,6 +866,7 @@ For anything in between, you’d want to use the mini-theorem above and figure o
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   
+<script defer src="https://randomwalks.xyz/tag-colours.js?h=862d01e15ac82a14daed"></script>
 
 
 

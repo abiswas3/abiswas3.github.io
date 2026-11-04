@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1f1e1b">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="">
+    <title>Graph Algorithms: Part III · Algorithms</title>
+    <link rel="stylesheet" href="https://randomwalks.xyz/algorithms/style.css?h=8031905c9b66e978bf68">
+    <script defer src="https://randomwalks.xyz/algorithms/sidenotes.js?h=abba13c76e721c629ac3"></script>
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          tags: 'ams'
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+</head>
+<body>
+    
+    <header class="site-header">
+        <a class="brand" href="https://randomwalks.xyz/algorithms" aria-label="Algorithms home">
+            <span class="brand-mark" aria-hidden="true">A</span>
+            <span class="brand-copy">
+                <strong>Algorithms</strong>
+            </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="https://randomwalks.xyz/algorithms/lectures/" aria-current="page">Lecture Notes</a>
+            <a href="https://randomwalks.xyz/algorithms/hw/">Problem Sets</a>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        
+<article class="page-shell">
+    <header class="page-heading">
+        <h1>Graph Algorithms: Part III</h1>
+        
+        
+        
+        
+        
+        
+        <div class="lecture-credits">
+            <span class="lecture-credit-lecturer"><span class="credit-label">Lecturer</span> Ari</span>
+            <span class="lecture-credit-scribe"><span class="credit-label">Scribe</span> Ari</span>
+        </div>
+        
+    </header>
+
+    
+    <div class="prose page-content">
+        <p>$\newcommand{\Path}[2]{ #1 \rightsquigarrow #2 }$</p>
+<p>In the last lecture we learned about breadth-first search and depth-first search.
+Using those search algorithms we were able to solve the following problems.</p>
+<ol>
+<li>
+<p>Single Source Shortest Path : The shortest path from a source node <code>s</code> and every other node in the graph. We did this using bfs in time $O(|V| + |E|)$.</p>
+</li>
+<li>
+<p>An algorithm to solve the problem of determining which nodes are reachable from a given node <code>s</code>. We did this using dfs in time $O(|E|)$.</p>
+</li>
+<li>
+<p>How to find connected components in an undirected graph. This took time $O(|V| + |E|)$.</p>
+</li>
+<li>
+<p>How to sort nodes topologically, where if $(u,v) \in E$ then $u$ must appear before $v$ in the final ordering. This took time  $O(|V| + |E|)$, and the problem only made sense if the graph was a directed acyclic graph.</p>
+</li>
+</ol>
+<p>Today we look at weighted graphs.
+Previously, the distance between two nodes was given by the number of edges between two nodes.
+Now each edge will be associated with an integer weight, and the distance will be defined by the sum of weights of the edges between the nodes.
+An unweighted graph can be thought of as a weighted graph, where all the weights on all the edges are 1.</p>
+<p>More formally, given $G = (V,E)$ if the graph is weighted we will also be given some function $w: E \rightarrow \mathbb{Z}$.
+As we have simple graphs i.e. at most one edge between two nodes this function is well defined.</p>
+<p>TODO: distance definition</p>
+<p>Previously we stored graphs as adjacency lists.
+Having a weight associated per edge fits with this model.
+We can just store the weights in the list as a tuple.
+Alternatively we can use the <code>Set</code> interface we have been discussing throughout the class to store keys as edges and values as weights.
+We won’t care too much about how we do this, the point is we can query the weight of an edge in constant time.</p>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Path</span>
+  </div>
+  <div class="statement-body"><p>A path from $u$ to $v$ is a sequence of edges $P_{\Path{u}{v}} := (e_1, e_2, \ldots, e_k)$.
+$e_1$ has left vertex $u$, $e_k$ has right vertex $v$, and the right vertex of each edge is the left vertex of the next.</p>
+</div>
+</aside>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Weight Of A Path</span>
+  </div>
+  <div class="statement-body"><p>In a weighted graph $G=(V,E,w)$, the weight of a path is $w(P_{\Path{u}{v}}) := \sum_{i=1}^{k} w(e_i)$.</p>
+</div>
+</aside>
+<p>Some examples in pictures, TODO:</p>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Weighted Shortest Path</span>
+  </div>
+  <div class="statement-body"><p>TODO:</p>
+</div>
+</aside>
+<h2 id="dijkstra-s-algorithm">Dijkstra’s Algorithm</h2>
+<p>Let $n = |V|$ and $m = |E|$.
+So far here is the story we have.
+We want to solve <em>single source shortest path</em> (SSSP).
+If the weights were small we can do breadth first search.
+If we are guaranteed the graph is a DAG, then we can use DAG relaxation and topological sort.
+Finally, if we had no assumptions, then we had a slow algorithm, where we used Bellman-Ford.
+We still do not know a linear time algorithm to solve the general problem.
+Today, if we are guaranteed non-negative weights, we can get something that is pretty close to linear.</p>
+<table><thead><tr><th>Algorithm</th><th>Graph Type</th><th>SSSP Complexity</th></tr></thead><tbody>
+<tr><td>Breadth-first search (BFS)</td><td>Unweighted graphs</td><td>$O(n + m)$</td></tr>
+<tr><td>DAG shortest paths (topological order)</td><td>Directed acyclic graphs with arbitrary edge weights</td><td>$O(n + m)$</td></tr>
+<tr><td>Bellman–Ford</td><td>General Graphs</td><td>$O(n(n + m))$</td></tr>
+<tr><td>Dijkstra’s algorithm  (Today)</td><td>Graphs with nonnegative edge weights</td><td>$O((n + m) \log n)$</td></tr>
+</tbody></table>
+<p>There are two key ideas really.
+First, we start with BFS.
+The reason BFS does not work for us is because in a weighted graph the idea of level sets falls apart.
+Nodes two edges away could be closer to a source than a node one edge away with a higher weight.
+So the first idea is that if we can traverse nodes in increasing order of distance from the source node.
+If we can get nodes in this order, we can relax them like above and we will be done.</p>
+<h3 id="changeable-priority-queue">Changeable Priority Queue</h3>
+<p>So let’s say I have a data structure that implements the following API for me.</p>
+<ul>
+<li><code>insert(id, key)-&gt;()</code>: The regular insert operation of a priority queue.</li>
+<li><code>delete_min()-&gt;(id, key)</code>: Removes and returns the <code>id, key</code> of the tuple with the minimum key value.</li>
+<li><code>change_key_val(id, key)-&gt;()</code>: Changes the <code>key</code> associated with the given <code>id</code> and restores heap order. For Dijkstra’s algorithm, we only need to decrease keys.</li>
+<li><code>is_empty()-&gt;bool</code>: Returns whether the queue is empty.</li>
+</ul>
+<p>We have already learned how to do the first two operations using priority queues in this class.
+For the third operation, we can use a data structure implementing the set API to keep track of each vertex’s position in the heap.
+A direct access array works fine if the vertex IDs are numbered from $0$ to $n-1$.
+Whenever we swap heap entries, we update their positions in the array.
+This lets us find an entry in constant time, decrease its key, and bubble it up in $O(\log n)$ time.</p>
+<h3 id="algorithm">Algorithm</h3>
+<p>Equipped with this data structure we are ready to give you the algorithm.</p>
+<p>Assume all edge weights are nonnegative. Here <code>Adj[u]</code> contains pairs <code>(v, weight)</code> for edges from <code>u</code> to <code>v</code>.
+We write $d(s,u)$ for the current distance estimate from $s$ to $u$, stored as <code>d[s, u]</code> in the pseudocode.
+Initially, $d(s,s) = 0$ and $d(s,u) = \infty$ for every $u \ne s$.</p>
+<pre class="giallo" style="color: #E1E4E8; background-color: #24292E;" ><code data-lang="python"><span class="giallo-l"><span style="color: #F97583;">def</span><span style="color: #B392F0;"> dijkstra</span><span>(V, Adj, s):</span></span>
+<span class="giallo-l"><span style="color: #6A737D;">    # Initialize distances and parents.</span></span>
+<span class="giallo-l"><span>    d</span><span style="color: #F97583;"> =</span><span> {}</span></span>
+<span class="giallo-l"><span>    parent</span><span style="color: #F97583;"> =</span><span> {}</span></span>
+<span class="giallo-l"><span style="color: #F97583;">    for</span><span> u</span><span style="color: #F97583;"> in</span><span> V:</span></span>
+<span class="giallo-l"><span>        d[s, u]</span><span style="color: #F97583;"> =</span><span style="color: #79B8FF;"> float</span><span>(</span><span style="color: #9ECBFF;">&quot;inf&quot;</span><span>)</span></span>
+<span class="giallo-l"><span>        parent[u]</span><span style="color: #F97583;"> =</span><span style="color: #79B8FF;"> None</span></span>
+<span class="giallo-l"><span>    d[s, s]</span><span style="color: #F97583;"> =</span><span style="color: #79B8FF;"> 0</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;">    # Initialize the queue with every vertex, keyed by its distance.</span></span>
+<span class="giallo-l"><span>    Q</span><span style="color: #F97583;"> =</span><span> ChangeablePriorityQueue()</span></span>
+<span class="giallo-l"><span style="color: #F97583;">    for</span><span> u</span><span style="color: #F97583;"> in</span><span> V:</span></span>
+<span class="giallo-l"><span>        Q.insert(u, d[s, u])</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;">    # Repeatedly extract the closest vertex and relax its outgoing edges.</span></span>
+<span class="giallo-l"><span style="color: #F97583;">    while not</span><span> Q.is_empty():</span></span>
+<span class="giallo-l"><span>        u, _</span><span style="color: #F97583;"> =</span><span> Q.delete_min()</span></span>
+<span class="giallo-l"><span style="color: #F97583;">        if</span><span> d[s, u]</span><span style="color: #F97583;"> ==</span><span style="color: #79B8FF;"> float</span><span>(</span><span style="color: #9ECBFF;">&quot;inf&quot;</span><span>):</span></span>
+<span class="giallo-l"><span style="color: #F97583;">            break</span><span style="color: #6A737D;">  # All remaining vertices are unreachable from s.</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F97583;">        for</span><span> v, weight</span><span style="color: #F97583;"> in</span><span> Adj[u]:</span></span>
+<span class="giallo-l"><span style="color: #F97583;">            if</span><span> d[s, v]</span><span style="color: #F97583;"> &gt;</span><span> d[s, u]</span><span style="color: #F97583;"> +</span><span> weight:</span></span>
+<span class="giallo-l"><span>                d[s, v]</span><span style="color: #F97583;"> =</span><span> d[s, u]</span><span style="color: #F97583;"> +</span><span> weight</span></span>
+<span class="giallo-l"><span>                parent[v]</span><span style="color: #F97583;"> =</span><span> u</span></span>
+<span class="giallo-l"><span>                Q.change_key_val(v, d[s, v])</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #F97583;">    return</span><span> d, parent</span></span></code></pre>
+<p>When we remove a vertex from the queue, its distance is final.
+With nonnegative weights, a later relaxation cannot improve that distance, so every call to <code>change_key_val</code> refers to a vertex still in the queue.
+Unreachable vertices keep distance $\infty$ and parent <code>None</code>.</p>
+<h3 id="walkthrough">Walkthrough</h3>
+<figure class="lecture-figure">
+  <img src="./dijjstra.svg" alt="Directed weighted graph with vertices s, a, b, c, and d. Edges: s to a (10), s to c (3), c to a (4), a to c (1), a to b (2), c to b (8), c to d (2), d to b (5), and b to d (7).">
+  <figcaption>A weighted directed graph for a dry run of Dijkstra's algorithm from source s.</figcaption>
+</figure>
+<p>Initialize $d(s,s) = 0$ and all other distance estimates to $\infty$.
+Insert every vertex into the queue with its distance estimate as its key.
+Each row below shows the estimates after extracting the indicated vertex and relaxing its outgoing edges.</p>
+<table><thead><tr><th>Extracted vertex</th><th>$d(s,s)$</th><th>$d(s,a)$</th><th>$d(s,b)$</th><th>$d(s,c)$</th><th>$d(s,d)$</th></tr></thead><tbody>
+<tr><td>Initialization</td><td>$0$</td><td>$\infty$</td><td>$\infty$</td><td>$\infty$</td><td>$\infty$</td></tr>
+<tr><td>$s$</td><td>$0$</td><td>$10$</td><td>$\infty$</td><td>$3$</td><td>$\infty$</td></tr>
+<tr><td>$c$</td><td>$0$</td><td>$7$</td><td>$11$</td><td>$3$</td><td>$5$</td></tr>
+<tr><td>$d$</td><td>$0$</td><td>$7$</td><td>$10$</td><td>$3$</td><td>$5$</td></tr>
+<tr><td>$a$</td><td>$0$</td><td>$7$</td><td>$9$</td><td>$3$</td><td>$5$</td></tr>
+<tr><td>$b$</td><td>$0$</td><td>$7$</td><td>$9$</td><td>$3$</td><td>$5$</td></tr>
+</tbody></table>
+<ol>
+<li>Extract $s$ with distance $0$. Its outgoing edges give $d(s,a) = 10$ and $d(s,c) = 3$.</li>
+<li>Extract $c$ with distance $3$. The edge to $a$ improves $d(s,a)$ from $10$ to $3 + 4 = 7$. The other edges give $d(s,b) = 3 + 8 = 11$ and $d(s,d) = 3 + 2 = 5$.</li>
+<li>Extract $d$ with distance $5$. The edge to $b$ improves $d(s,b)$ from $11$ to $5 + 5 = 10$.</li>
+<li>Extract $a$ with distance $7$. The edge to $b$ improves $d(s,b)$ again, from $10$ to $7 + 2 = 9$. The edge to $c$ offers $7 + 1 = 8$, which does not improve its distance of $3$.</li>
+<li>Extract $b$ with distance $9$. The edge to $d$ offers $9 + 7 = 16$, which does not improve its distance of $5$. The queue is now empty.</li>
+</ol>
+<p>The final parent pointers are $\operatorname{parent}[c] = s$, $\operatorname{parent}[a] = c$, $\operatorname{parent}[d] = c$, and $\operatorname{parent}[b] = a$.
+For example, the shortest path to $b$ is $s \to c \to a \to b$, with total weight $3 + 4 + 2 = 9$.</p>
+<h2 id="correctness">Correctness</h2>
+<aside class="statement statement-theorem thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Correctness of Dijkstra</span>
+  </div>
+  <div class="statement-body"><p>Assuming nonnegative edge weights, at the end of the algorithm $d(s,v) = \delta(s,v)$ for all $v \in V$.
+Here $\delta(s,v)$ is the shortest-path distance, with $\delta(s,v) = \infty$ if $v$ is unreachable from $s$.</p>
+</div>
+</aside>
+<aside class="statement statement-proof">
+  <div class="statement-heading">
+    <span class="statement-kind">Proof</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>We showed earlier that the relaxation step is safe.
+That is, at all times, if $d(s,v)$ is finite it is the distance from $s$ to $v$ via some legitimate path, albeit not necessarily the shortest.
+Also we only decrease $d(s,v)$.
+Thus, it suffices to show that after node $v$ is removed from the priority queue, we get $d(s,v) = \delta(s,v)$.
+We do this using induction on the number of nodes popped off the queue.
+The base case is 1. $d(s,s) = 0 = \delta(s,s)$.
+Assume this is the case after $k-1$ deletions.
+Now let $v$ be the $k$th deletion and consider the shortest path from $s$ to $v$.</p>
+<figure class="lecture-figure">
+  <img src="./proof.svg" alt="A shortest path from s to v, passing through consecutive vertices x and y.">
+  <figcaption>Consider the shortest path from s to v.</figcaption>
+</figure>
+<p>Let $y$ (shown in blue) be the first predecessor of $v$ on this path that has not yet been deleted (if there is no such predecessor, let $y = v$).
+Here we consider the queue just before $v$ is deleted.
+All nodes before $y$ have been deleted in the $k-1$ steps earlier.
+Let $x$ (shown in red) be the immediate predecessor of $y$ on the chosen shortest path from $s$ to $v$. Thus $(x,y)$ is an edge of this path, and $x$ has already been deleted from the queue.
+Therefore,</p>
+<p>\begin{align}
+d(s,y) &amp;\le d(s,x) + w(x,y) \label{eq:dijkstra-relaxation} \\
+&amp;= \delta(s,y) \label{eq:dijkstra-prefix} \\
+&amp;\le \delta(s,v) \label{eq:dijkstra-nonnegative} \\
+&amp;\le d(s,v) \label{eq:dijkstra-upper-bound} \\
+&amp;\le d(s,y). \label{eq:dijkstra-minimum}
+\end{align}</p>
+<p>Equation $\eqref{eq:dijkstra-relaxation}$ follows from the fact that $x$ has already been popped off the queue, so its neighbours have been relaxed.
+Equation $\eqref{eq:dijkstra-prefix}$ follows from the induction hypothesis $d(s,x) = \delta(s,x)$ and the assumption that this is a shortest path from $s$ to $v$, so its prefix must be a shortest path from $s$ to $y$.
+Equation $\eqref{eq:dijkstra-nonnegative}$ follows from the fact that we have nonnegative edge weights.
+Equation $\eqref{eq:dijkstra-upper-bound}$ follows from the fact that relaxation is safe: $d(s,v)$ is the length of a path from $s$ to $v$, so it cannot be less than the shortest-path distance $\delta(s,v)$.
+Equation $\eqref{eq:dijkstra-minimum}$ follows from the fact that $v$ is removed with the minimum key, while $y$ is still in the queue, so $d(s,v) \le d(s,y)$.</p>
+<p>The chain begins and ends with $d(s,y)$, so all the inequalities are equalities. In particular, $d(s,v) = \delta(s,v)$, completing the induction.</p>
+</div>
+  <div class="qed" aria-label="End of proof">□</div>
+</aside>
+
+    </div>
+    
+</article>
+
+    </main>
+
+    
+    <script>
+      document.querySelectorAll('.prose pre').forEach((pre) => {
+        const code = pre.querySelector('code');
+        if (!code) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block';
+        pre.before(wrapper);
+        wrapper.append(pre);
+
+        const button = document.createElement('button');
+        button.className = 'copy-code';
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.setAttribute('aria-label', 'Copy code to clipboard');
+        wrapper.append(button);
+
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(code.textContent);
+            button.textContent = 'Copied';
+            window.setTimeout(() => { button.textContent = 'Copy'; }, 1400);
+          } catch (_) {
+            button.textContent = 'Select and copy';
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(code);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        });
+      });
+    </script>
+    
+
+</body>
+</html>
