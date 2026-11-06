@@ -296,12 +296,12 @@ But before we get to the Word-RAM model, we start with one of the earliest forma
 <p>$$
 M = (Q, \Sigma, \Gamma, \delta, q_0, q_{\mathrm{acc}}, q_{\mathrm{rej}}),
 $$</p>
-<p>where $Q$ is a finite set of states, $\Sigma$ is a finite input alphabet, and $\Gamma$ is a finite tape alphabet with $\Sigma \subseteq \Gamma$ and a blank symbol $\sqcup \in \Gamma \setminus \Sigma$. The distinct states $q_0, q_{\mathrm{acc}}, q_{\mathrm{rej}} \in Q$ are the start, accept, and reject states. The transition function is</p>
+<p>where $Q$ is a finite set of states, $\Sigma$ is a finite input alphabet, and $\Gamma$ is a finite tape alphabet with $\Sigma \subseteq \Gamma$, a blank symbol $\sqcup \in \Gamma \setminus \Sigma$, and a start symbol $\triangleright \in \Gamma \setminus \Sigma$. The distinct states $q_0, q_{\mathrm{acc}}, q_{\mathrm{rej}} \in Q$ are the start, accept, and reject states. The transition function is</p>
 <p>$$
 \delta : (Q \setminus \lbrace q_{\mathrm{acc}}, q_{\mathrm{rej}}\rbrace) \times \Gamma^k
 \to Q \times \Gamma^k \times \lbrace L, S, R\rbrace^k.
 $$</p>
-<p>Each tape has its own read/write head and cells indexed by the integers. On input $w \in \Sigma^*$, tape 1 contains $w$ starting at cell 0 and all other cells are blank; the machine starts in $q_0$ with every head at cell 0. A step reads the $k$ symbols under the heads, changes state, writes one symbol on each tape, and independently moves each head left, stays put, or moves right. Entering $q_{\mathrm{acc}}$ or $q_{\mathrm{rej}}$ halts the machine.</p>
+<p>Each tape has its own read/write head and cells indexed by $0, 1, 2, \ldots$. Cell 0 of every tape holds $\triangleright$, which marks the left end of the tape. On input $w = w_1 \cdots w_n \in \Sigma^*$, tape 1 holds $w$ in cells 1 through $n$, and all other cells are blank; the machine starts in $q_0$ with every head at cell 0. A step reads the $k$ symbols under the heads, changes state, writes one symbol on each tape, and independently moves each head left, stays put, or moves right. A head on cell 0 that is told to move left stays on cell 0. Entering $q_{\mathrm{acc}}$ or $q_{\mathrm{rej}}$ halts the machine.</p>
 </div>
 </aside>
 <figure class="lecture-figure">
