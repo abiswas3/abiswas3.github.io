@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Introduction To Separation Logic — Random Walks</title>
+  <meta name="description" content="">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ffffff">
+  <script src="https://randomwalks.xyz/theme.js?h=022c5e6dda6564ebbb98"></script>
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=5010d239a435f54dfc63">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
+  
+  
+  
+  
+  
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams',
+        macros: {
+          Field: '{\\mathbb{F}}',
+          field: '{\\mathbb{F}}',
+          Mont: ['{\\widetilde{#1}}', 1],
+          Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+          TauConstraints: '{\\tau_y}',
+          TauTime: '{\\tau_{\\text{cycle}}}',
+          TauGroup: '{\\tau_b}',
+          MLE: ['{\\widetilde{#1}}', 1],
+          tf: ['{\\widetilde{#1}}', 1],
+          eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+          Def: '{:=}',
+          ChallengeSet: '{\\mathsf{C}}',
+          Complement: ['{\\neg{#1}}', 1],
+          Size: ['{\\left|#1\\right|}', 1],
+          Length: ['{L\\left(#1\\right)}', 1],
+          Lenght: ['{L\\left(#1\\right)}', 1],
+          Exp: ['{2^{#1}}', 1],
+          BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+          BigO: ['{O\\ \\left(#1\\right)}', 1],
+          boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+          OntoPHP: ['{\\operatorname{OFPHP}(#3^{#1}_{#2})}', 3],
+          PHP: ['{\\operatorname{PHP}(#3^{#1}_{#2})}', 3],
+          PHPBasic: ['\\PHP{n}{n-1}{K}'],
+          FPHP: ['{\\operatorname{FPHP}(#3^{#1}_{#2})}', 3], 
+          poly: '{\\operatorname{poly}}',
+          criticalAlpha: ['{\\alpha_{#1}}', 1],
+          CPlus: '{\\textcolor{blue}{C^{+}}}',
+          CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
+          GraphNbrs: ['{N_G(#1)}', 1],
+          ClauseNbrs: ['{N_C(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
+          SmallO: ['{o\\!(#1)}', 1],
+          Closure: ['{\\operatorname{Cl}(#1)}', 1],
+          ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+          Dim: ['{\\dim(#1)}', 1],
+          Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+          domain: ['{\\operatorname{dom}(#1)}', 1],
+          False: '{\\bot}',
+          opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+          NP: '{\\mathsf{NP}}',
+          Naturals: '{\\mathbb{N}}',
+          bit: '{\\{0,1\\}}',
+          samples: '{\\xleftarrow{\\$}}'
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  
+  <script defer src="https://randomwalks.xyz/vendor/mathjax-3.2.2/es5/tex-chtml.js"></script>
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="https://randomwalks.xyz" aria-label="Random Walks — home">
+      <span>Random Walks</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="https://randomwalks.xyz/publications/">Publications</a>
+      <a href="https://randomwalks.xyz/blog/">Notes</a>
+      <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
+      <a href="https://randomwalks.xyz/cv/">CV</a>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" hidden>
+        <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+        <svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
+      <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
+    </nav>
+  </header>
+
+  <div class="command-palette" id="command-palette" data-index-url="https://randomwalks.xyz/search_index.en.json" hidden>
+    <button class="command-backdrop" type="button" aria-label="Close search" data-command-close></button>
+    <section class="command-dialog" role="dialog" aria-modal="true" aria-labelledby="command-title">
+      <h2 class="visually-hidden" id="command-title">Search page titles</h2>
+      <div class="command-query">
+        <span aria-hidden="true">›</span>
+        <input id="command-input" type="search" placeholder="Search titles…" autocomplete="off" autocapitalize="none" spellcheck="false" aria-controls="command-results" aria-autocomplete="list">
+        <kbd>Esc</kbd>
+      </div>
+      <ol class="command-results" id="command-results" role="listbox"></ol>
+      <p class="command-status" role="status" aria-live="polite"></p>
+      <footer class="command-help"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span></footer>
+    </section>
+  </div>
+
+  
+
+  <main id="main-content">
+    
+
+
+
+
+
+
+<article class="note footnotes-right note--side-toc">
+  <header class="note-header">
+    <h1>Introduction To Separation Logic</h1>
+    <div class="note-meta">
+      <span class="note-authors">By Squirrel</span>
+      <time datetime="2026-11-06">06 November 2026</time>
+      
+        <time datetime="2026-11-06">Last updated 06 November 2026</time>
+      
+      
+      <ul class="tag-list" aria-label="Tags">
+        <li><a href="https://randomwalks.xyz/tags/separation-logic/">#separation-logic</a></li><li><a href="https://randomwalks.xyz/tags/formal-verification/">#formal-verification</a></li>
+      </ul>
+      
+    </div>
+    
+  </header>
+
+  <div class="note-layout note-layout--side">
+    
+    <nav class="contents contents-side" aria-label="Table of contents">
+      <h2>Contents</h2>
+      
+<ol>
+  
+  <li>
+    <a href="#step-0-basic-reasoning-about-code-with-hoare-triples">Step 0: Basic reasoning about code with Hoare triples</a>
+    
+  </li>
+  
+  <li>
+    <a href="#step-1-taming-the-complexity-of-hoare-triples-the-starting-point-of-separation-logic">Step 1: Taming the complexity of Hoare triples–the starting point of separation logic</a>
+    
+  </li>
+  
+  <li>
+    <a href="#step-2-formulating-the-first-rules-of-separation-logic">Step 2: Formulating the first rules of separation logic</a>
+    
+  </li>
+  
+  <li>
+    <a href="#step-3-concurrency-as-motivating-ghost-state-and-resource-algebras-the-other-rules-of-separation-logic">Step 3: Concurrency as motivating ghost state and resource algebras–the other rules of separation logic</a>
+    
+  </li>
+  
+  <li>
+    <a href="#step-4-formulating-a-full-separation-logic">Step 4: Formulating a full separation logic</a>
+    
+  </li>
+  
+</ol>
+
+    </nav>
+    
+
+    <div class="prose">
+      <h2 id="step-0-basic-reasoning-about-code-with-hoare-triples">Step 0: Basic reasoning about code with Hoare triples</h2>
+<p>To start with, consider the following program whose job is to take two
+pointers and to set the first to be the sum of the two pointed-to
+values, and the second to be their difference:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>fn f(int *a, int *b) {</span></span>
+<span class="giallo-l"><span>  c = *a</span></span>
+<span class="giallo-l"><span>  d = *b</span></span>
+<span class="giallo-l"><span>  *a = c+d</span></span>
+<span class="giallo-l"><span>  *b = c-d</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>Does this work? How would we prove it?</p>
+<p>Well, it might not work. What if <code>a</code> or <code>b</code> isn’t a valid pointer?</p>
+<p>There isn’t a generic programmatic check for “pointer validity”
+(though usually “not <code>NULL</code>” is used in practice as a guard at least
+against the most common kind of accidental invalid pointer).</p>
+<p>So we can only really reason about this function under the
+precondition that <code>a</code> and <code>b</code> are valid pointers. This calls for some
+notation: We will write “<code>a -&gt; x</code>” to mean “<code>a</code> is a valid
+pointer, and points to the valid <code>x</code>.”</p>
+<p>Moreover, following the conventions of the community, we will denote
+conditions on program execution by surrounding them in curly braces:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>{a -&gt; x AND b -&gt; y}</span></span></code></pre>
+<p>Finally, the convention for describing the behaviour of code is that we write</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>{precondition} code {postcondition}</span></span></code></pre>
+<p>if, when <code>precondition</code> is true and we execute <code>code</code>, it becomes the
+case that afterwards, <code>postcondition</code> is true.</p>
+<p>So what we’d like to show is that:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>{a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>fn f(int *a, int *b) {</span></span>
+<span class="giallo-l"><span>  let c = *a</span></span>
+<span class="giallo-l"><span>  let d = *b</span></span>
+<span class="giallo-l"><span>  *a = c+d</span></span>
+<span class="giallo-l"><span>  *b = c-d</span></span>
+<span class="giallo-l"><span>  return</span></span>
+<span class="giallo-l"><span>}</span></span>
+<span class="giallo-l"><span>{a -&gt; x+y AND b -&gt; x-y}</span></span></code></pre>
+<p>So how do we prove this?</p>
+<p>You might already see how we can work our way down the code, one line
+at a time. We’ll do it slowly, however, to make clear the structure of
+the logic we’re using, since this will be important and more
+challenging later.</p>
+<p>What we need to know is, for various statements in our programming
+language like <code>variable = *pointer_variable</code>, what post-conditions
+follow from this code in various pre-conditions. For example, for the
+line <code>c = *a</code>, what pre-conditions are required to even run this line?
+What post-conditions follow? The answers to these questions for the
+various statement types in our programming language are called the
+<strong>operational semantics</strong> of the language.</p>
+<p>For example, one proposition in the operational semantics of our
+pseudo-C language should be:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>{a -&gt; x} let c = *a {c = x AND a -&gt; x} (S1)</span></span></code></pre>
+<p>Now we meet with an immediate problem: Our pre-condition doesn’t
+actually have the required shape to apply this rule.</p>
+<p>Of course, the fact that our precondition includes extra conditions
+shouldn’t really matter. Indeed, the way these pre-/post-condition
+statements (generally referred to as <strong>Hoare triples</strong>) work should
+include some axiom like:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>({P} code {Q}) AND ({R} code {R}) =&gt; {P AND R} code {Q AND R}</span></span></code></pre>
+<p>That is, if <code>code</code> transforms pre-condition <code>P</code> into <code>Q</code> but leaves
+<code>R</code> unchanged, then it transforms the pre-condition <code>P AND R</code> into <code>Q AND R</code>. We shall collect axioms like this one as we go. Usually, all
+the axioms are frontloaded into a rather chaotic looking early page in
+most programming languages papers, even before the terms needed to
+understand them are introduced. For the sake of helping to read such
+papers, however, we will note here that the usual way of writing
+axioms like this is:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>{P} code {Q}      {R} code {R}</span></span>
+<span class="giallo-l"><span>-------------------------------  (A1)</span></span>
+<span class="giallo-l"><span>   {P AND R} code {Q AND R}</span></span></code></pre>
+<p>(This particular axiom is sometimes called the “frame rule” on account
+of its noting that any “context frame” that is untouched by that code
+can be freely added to the pre- and post-conditions of that code.)</p>
+<p>The set of all the primitives comprising our language (for example,
+points-to—i.e. <code>a -&gt; b</code>, variable values—i.e. <code>a = b</code>, Hoare
+triples) as well as the axioms governing those primitives, all
+together define a <strong>program logic</strong>. The specific subspecies of logic
+that we will be constructing is called <strong>separation logic</strong>.</p>
+<p>Now we’re prepared to take our first steps through the program:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>  {a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  let c = *a</span></span>
+<span class="giallo-l"><span>  {c = x AND a -&gt; x AND b -&gt; y}</span></span></code></pre>
+<p>follows from <code>A1</code> and <code>S1</code> and a liberal use of commutativity and
+associativity of <code>AND</code>.</p>
+<p>Likewise, we can continue:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>  {a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  let c = *a</span></span>
+<span class="giallo-l"><span>  {c = x AND a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  d = *b</span></span>
+<span class="giallo-l"><span>  {d = y AND c = x AND a -&gt; x AND b -&gt; y}</span></span></code></pre>
+<p>If <code>S1</code> is a semantic rule governing reads, it is not surprising we
+should have one governing writes as well:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>{a -&gt; x} *x = y {a -&gt; y} (S2)</span></span></code></pre>
+<p>Along with a fairly trivial axiom saying that if a pointer points to a
+value, then it also points</p>
+<p>This gets us through the rest of our program:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>  {a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  c = *a</span></span>
+<span class="giallo-l"><span>  {c = x AND a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  d = *b</span></span>
+<span class="giallo-l"><span>  {d = y AND c = x AND a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  *a = c+d</span></span>
+<span class="giallo-l"><span>  {d = y AND c = x AND a -&gt; x+y AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  *b = c-d</span></span>
+<span class="giallo-l"><span>  {d = y AND c = x AND a -&gt; x+y AND b -&gt; x-y}</span></span></code></pre>
+<p>But this is not the post-condition we claimed! It has extra
+stipulations!</p>
+<p>For some definitions of the logic, we could have a rule that allows us
+to drop conditions:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>{P AND Q}</span></span>
+<span class="giallo-l"><span>---------</span></span>
+<span class="giallo-l"><span>  {P}</span></span></code></pre>
+<p>However, permitting this will make it challenging to reason about
+concurrency and about memory leakage. If <code>{a -&gt; x}</code> means “we have a
+resource <code>a</code> that points to <code>x</code>, but we might have other resources
+also”, then we cannot conclude that it is safe for any other code to
+use, say, <code>b</code>. Moreover, we cannot conclude that <code>b</code> has been properly
+cleaned up, or whether we have simply dropped <code>b</code> from our
+propositions using the above axiom.</p>
+<p>So if we are only designing a logic that will handle straight-line
+code in a single thread, particularly in a garbage-collected language
+where memory-leaks are handled outside the code, this might be
+fine. To reason about concurrency, however, it will be much more
+conducive to define <code>{a -&gt; x}</code> to mean “we have a resource <code>a</code> that
+points to <code>x</code>, and no other resources.” In consequence, however, it is
+then false that from <code>{a -&gt; x AND b -&gt; y}</code> we can conclude <code>{a -&gt; x}</code>.</p>
+<p>So what is going on in our code above?</p>
+<p>You might recognise that what really makes our conclusion possible
+should be some notion of our exiting the function’s scope, causing <code>c</code>
+and <code>d</code> to drop because they are attached to this scope. If we are
+explicit about scope in our writing the program, then, we might write
+it something like:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>  {a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  begin_scope(f)</span></span>
+<span class="giallo-l"><span>  let c = *a</span></span>
+<span class="giallo-l"><span>  let d = *b</span></span>
+<span class="giallo-l"><span>  *a = c+d</span></span>
+<span class="giallo-l"><span>  *b = c-d</span></span>
+<span class="giallo-l"><span>  end_scope(f)</span></span></code></pre>
+<p>Where the result</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>  {a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  begin_scope(f)</span></span>
+<span class="giallo-l"><span>  let c = *a</span></span>
+<span class="giallo-l"><span>  {c = x AND a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  d = *b</span></span>
+<span class="giallo-l"><span>  {d = y AND c = x AND a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  *a = c+d</span></span>
+<span class="giallo-l"><span>  {d = y AND c = x AND a -&gt; x+y AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  *b = c-d</span></span>
+<span class="giallo-l"><span>  {d = y AND c = x AND a -&gt; x+y AND b -&gt; x-y}</span></span>
+<span class="giallo-l"><span>  end_scope(f)</span></span></code></pre><h2 id="step-1-taming-the-complexity-of-hoare-triples-the-starting-point-of-separation-logic">Step 1: Taming the complexity of Hoare triples–the starting point of separation logic</h2>
+<p>In the previous program, we used some auxiliary variables to ensure
+things were done carefully, but we need not have done so if we were
+just a little more clever:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>fn f(int *a, int *b) {</span></span>
+<span class="giallo-l"><span>  *a = *a + *b</span></span>
+<span class="giallo-l"><span>  *b = *a - 2 * (*b)</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>Not needing all the local variables at least helps us avoid the
+troublesome reasoning about scope management from the previous
+step. However, does this program actually work the same way? We can
+start with the same pre- and post-conditions:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>  {a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  *a = *a + *b</span></span>
+<span class="giallo-l"><span>  *b = *a - 2 * (*b)</span></span>
+<span class="giallo-l"><span>  {a -&gt; x+y AND b -&gt; x-y}</span></span></code></pre>
+<p>What about the proof?</p>
+<p>Certainly, we can try to apply our rules for reads and writes as
+before, but to be careful about it, let’s slow up the first line a
+little (noting that, as this line does in fact do two reads and a
+store, it is in reality three operations):</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>  temp1 = *a</span></span>
+<span class="giallo-l"><span>  temp2 = *b</span></span>
+<span class="giallo-l"><span>  *a = temp1+temp2</span></span></code></pre>
+<p>Then we can apply our rules to get as far as:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>  {a -&gt; x AND b -&gt; y}</span></span>
+<span class="giallo-l"><span>  temp1 = *a</span></span>
+<span class="giallo-l"><span>  {a -&gt; x AND b -&gt; y AND temp1 = x}</span></span>
+<span class="giallo-l"><span>  temp2 = *b</span></span>
+<span class="giallo-l"><span>  {a -&gt; x AND b -&gt; y AND temp1 = x AND temp2 = y}</span></span>
+<span class="giallo-l"><span>  *a = temp1+temp2</span></span></code></pre>
+<p>Now we want to conclude the post-condition</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>  {a -&gt; x+y AND b -&gt; y AND temp1 = x AND temp2 = y}</span></span></code></pre>
+<p>How do we do this? Remember (S1) that to reason about a store
+operation, we need pre- and post-conditions shaped like:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>{ a -&gt; ? } *a = z { a -&gt; z }</span></span></code></pre>
+<p>While we do have the precondition <code>a -&gt; x+y</code>, we also have a lot of
+other preconditions. Recall that it is the “frame rule” (A1) that
+allows us to add unaffected “frame” hypotheses to the pre- and
+post-conditions. So to apply this, we need:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>{b -&gt; y AND temp1 = x AND temp2 = y} *a = temp1+temp2 {b -&gt; y AND temp1 = x AND temp2 = y}</span></span></code></pre>
+<p>That is, that this line of code leaves the truthfulness of every
+statement not about <code>a</code> unchanged.</p>
+<p>So does it? Well, we don’t yet have an axiom that tells us so. In fact
+this is because it may not be so: if <code>a</code> and <code>b</code> point to the same
+location, then a write to <code>a</code> may in fact change the value pointed to
+by <code>b</code>!</p>
+<p>The axiom we are looking for, then, would look something like:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>{b -&gt; x AND a != b} *a = y {b -&gt; x AND a != b}</span></span></code></pre>
+<p>However, a logistical problem quickly presents itself: If we had three
+pointers, we would need to tote around up to 8 extra conditions
+expressing which pairs of the two pointers may or may not, at any
+given time, point to the same location. For a more realistically-sized
+program which might have up to 30 pointers live at some points, we
+would technically require over a billion conditions to track any
+possible aliasing. So some better method of bookkeeping is needed.</p>
+<p>Now of course, most of the time, pointer aliasing is not
+expected. Probably, if we wrote a function like the above, we intend
+that it always be called with two separate pointers, and probably if
+we had 30 pointers running around our code, we would expect (perhaps
+even rely on) that all of them are different. This motivates the
+bookkeeping trick that is often used to solve this problem: a new
+coordinating conjunction to replace <code>AND</code>–one that doesn’t just say
+that two pointers point somewhere, but that explicitly denotes that
+they are not aliased. This conjunction, which is usually written as
+<code>*</code> and read as “separate from”: <code>a -&gt; x * b -&gt; y</code> (“a points to x;
+separately, b points to y”) is the statement that <code>a</code> and <code>b</code> are
+valid <strong>and non-overlapping</strong> pointers, pointing to values <code>x</code> and <code>y</code>
+respectively.</p>
+<p>The frame rule then states:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>   {P} code {Q}</span></span>
+<span class="giallo-l"><span>--------------------</span></span>
+<span class="giallo-l"><span>{P * R} code {Q * R}</span></span></code></pre>
+<p>(Where we no longer need to qualify that R is unaffected, because the
+use of <code>*</code> already necessitates that <code>R</code> is disjoint from <code>P</code> and <code>Q</code>.</p>
+<p>Then the deduction above becomes not only simpler, but actually
+correct: If we start with the pre-condition that</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>{a -&gt; x * b -&gt; y}</span></span></code></pre>
+<p>Then we will be justified in using the frame rule to deduce:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>{a -&gt; ? * b -&gt; y} *a = x+y {a -&gt; x+y * b -&gt; y}</span></span></code></pre>
+<p>So our code written this way, has the pre-condition that not only must
+<code>a</code> and <code>b</code> be valid pointers, but they must be separate:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>  {a -&gt; x * b -&gt; y}</span></span>
+<span class="giallo-l"><span>  *a = *a + *b</span></span>
+<span class="giallo-l"><span>  {a -&gt; x + y * b -&gt; y}</span></span>
+<span class="giallo-l"><span>  *b = *a - 2 * (*b)</span></span>
+<span class="giallo-l"><span>  {a -&gt; x + y * b -&gt; (x + y) - 2*y}</span></span>
+<span class="giallo-l"><span>  {a -&gt; x+y * b -&gt; x-y}</span></span></code></pre>
+<p>It concludes that <code>a</code> and <code>b</code> take on the requisite values, and are
+still separate.</p>
+<h2 id="step-2-formulating-the-first-rules-of-separation-logic">Step 2: Formulating the first rules of separation logic</h2>
+<h2 id="step-3-concurrency-as-motivating-ghost-state-and-resource-algebras-the-other-rules-of-separation-logic">Step 3: Concurrency as motivating ghost state and resource algebras–the other rules of separation logic</h2>
+<h2 id="step-4-formulating-a-full-separation-logic">Step 4: Formulating a full separation logic</h2>
+
+    </div>
+  </div>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <!-- <div> -->
+    <!--   <h2>Working Notes</h2> -->
+    <!--   <p>Something to say</p> -->
+    <!-- </div> -->
+    
+    <!-- <div> -->
+    <!--   <h2>Elsewhere</h2> -->
+    <!--   <ul> -->
+    <!--     <li><a href="https://randomwalks.xyz/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/tags">Browse by tag</a></li> -->
+    <!--   </ul> -->
+    <!-- </div> -->
+    
+  </footer>
+
+  <script>
+    document.querySelectorAll('pre').forEach(function (pre) {
+      if (!pre.querySelector('code')) return;
+      var button = document.createElement('button');
+      button.className = 'copy-code';
+      button.type = 'button';
+      button.textContent = 'Copy';
+      button.addEventListener('click', function () {
+        var clone = pre.querySelector('code').cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function (line) { line.remove(); });
+        navigator.clipboard.writeText(clone.textContent).then(function () {
+          button.textContent = 'Copied';
+          window.setTimeout(function () { button.textContent = 'Copy'; }, 1400);
+        });
+      });
+      pre.appendChild(button);
+    });
+  </script>
+  <script>
+    window.addEventListener('load', function () {
+      function containShortcodeMath() {
+        var selector =
+          '.callout mjx-container[display="true"], ' +
+          '.comparison-dual mjx-container[display="true"], ' +
+          '.comparison-single mjx-container[display="true"]';
+
+        function wrap(equation) {
+          if (equation.parentElement.classList.contains('shortcode-math-scroll')) return;
+          var boundary = document.createElement('span');
+          boundary.className = 'shortcode-math-scroll';
+          equation.before(boundary);
+          boundary.appendChild(equation);
+        }
+
+        document.querySelectorAll(selector).forEach(wrap);
+
+        document.querySelectorAll(
+          '.callout mjx-container:not([display="true"]), ' +
+          '.comparison-dual mjx-container:not([display="true"]), ' +
+          '.comparison-single mjx-container:not([display="true"])'
+        ).forEach(function (equation) {
+          var line = equation.closest('li, p') || equation.parentElement;
+          if (equation.getBoundingClientRect().width > line.clientWidth) wrap(equation);
+        });
+      }
+
+      if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+        MathJax.startup.promise.then(containShortcodeMath);
+      } else {
+        containShortcodeMath();
+      }
+    });
+  </script>
+  <script>
+    (function () {
+      var prose = document.querySelector('.prose');
+      if (!prose || prose.querySelector('.bibliography')) return;
+
+      var citations = prose.querySelectorAll('a.citation[data-cite-key]');
+      if (!citations.length) return;
+
+      var bibliography = document.createElement('div');
+      var heading = document.createElement('h2');
+      var list = document.createElement('ol');
+      var seen = new Set();
+
+      bibliography.className = 'bibliography';
+      heading.textContent = 'References';
+      bibliography.append(heading, list);
+
+      citations.forEach(function (citation) {
+        var key = citation.dataset.citeKey;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+
+        var item = document.createElement('li');
+        var title = document.createElement('span');
+        var authors = citation.dataset.citeAuthors;
+        var venue = citation.dataset.citeVenue;
+        var year = citation.dataset.citeYear;
+
+        item.id = 'ref-' + key;
+        if (authors) item.append(document.createTextNode(authors + '. '));
+        title.className = 'bib-title';
+        title.textContent = citation.dataset.citeTitle;
+        item.append(title);
+        if (citation.dataset.citeTitle) item.append(document.createTextNode('.'));
+        if (venue) {
+          var venueElement = document.createElement('em');
+          venueElement.textContent = venue;
+          item.append(document.createTextNode(' '), venueElement);
+        }
+        if (year) item.append(document.createTextNode((venue ? ', ' : ' ') + year));
+        item.append(document.createTextNode('.'));
+        list.appendChild(item);
+      });
+
+      prose.appendChild(bibliography);
+    })();
+
+    document.addEventListener('click', function (event) {
+      var back = event.target.closest('.bib-back');
+      if (back) {
+        event.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = event.target.closest('a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      event.preventDefault();
+      document.querySelectorAll('.citation-highlight').forEach(function (item) {
+        item.classList.remove('citation-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function (item) { item.remove(); });
+
+      var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+      if (!target) return;
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('citation-highlight');
+
+      if (!link.id) link.id = 'cite-source-' + target.id;
+      var arrow = document.createElement('a');
+      arrow.className = 'bib-back';
+      arrow.setAttribute('data-source', link.id);
+      arrow.setAttribute('href', '#' + link.id);
+      arrow.setAttribute('aria-label', 'Back to citation');
+      arrow.textContent = ' ↩';
+      target.appendChild(arrow);
+    });
+  </script>
+  <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
+  
+<script defer src="https://randomwalks.xyz/tag-colours.js?h=862d01e15ac82a14daed"></script>
+
+
+
+<script>
+  (function () {
+    var prose = document.querySelector('.prose');
+    if (!prose) return;
+
+    var references = prose.querySelectorAll('.footnote-reference');
+    var footnotes = prose.querySelector('.footnotes');
+    if (!footnotes) return;
+
+    function removeRedundantFootnoteHeading() {
+      var heading = prose.querySelector('#footnotes-and-references');
+      if (!heading || heading.nextElementSibling !== footnotes) return;
+
+      heading.remove();
+      document.querySelectorAll('.contents a[href="#footnotes-and-references"]').forEach(function (link) {
+        var item = link.closest('li');
+        if (item) item.remove();
+      });
+    }
+
+    if (!references.length) {
+      if (!footnotes.querySelector('li')) {
+        removeRedundantFootnoteHeading();
+        footnotes.remove();
+      }
+      return;
+    }
+
+    var transformed = 0;
+    references.forEach(function (reference) {
+      var link = reference.querySelector('a');
+      if (!link) return;
+
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
+      var definition = targetId ? document.getElementById(targetId) : null;
+      if (!definition) return;
+
+      transformed += 1;
+      var noteId = 'sidenote-' + transformed;
+      var clone = definition.cloneNode(true);
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
+
+      var noteBody = Array.from(clone.children).map(function (child) {
+        return child.tagName === 'P' ? child.innerHTML : child.outerHTML;
+      }).join(' ');
+
+      var number = document.createElement('button');
+      number.type = 'button';
+      number.className = 'sidenote-number';
+      number.textContent = link.textContent;
+      number.setAttribute('aria-expanded', 'false');
+      number.setAttribute('aria-controls', noteId);
+      number.setAttribute('aria-label', 'Show footnote ' + link.textContent);
+
+      var note = document.createElement('span');
+      note.className = 'sidenote';
+      note.id = noteId;
+      note.innerHTML = '<span class="sidenote-num">' + link.textContent + '.</span> ' + noteBody;
+
+      number.addEventListener('click', function () {
+        var open = note.classList.toggle('is-open');
+        number.setAttribute('aria-expanded', String(open));
+      });
+
+      reference.replaceWith(number, note);
+    });
+
+    if (transformed) {
+      prose.classList.add('footnotes-are-sidenotes');
+      removeRedundantFootnoteHeading();
+    }
+  })();
+</script>
+
+
+
+</body>
+</html>
