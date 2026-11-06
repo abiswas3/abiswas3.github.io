@@ -169,9 +169,21 @@ Here $\delta(s,v)$ is the shortest-path distance, with $\delta(s,v) = \infty$ if
   <div class="statement-heading">
     <span class="statement-kind">Proof</span><span class="statement-number"></span>
   </div>
-  <div class="statement-body"><p>We showed earlier that the relaxation step is safe.
-That is, at all times, if $d(s,v)$ is finite it is the distance from $s$ to $v$ via some legitimate path, albeit not necessarily the shortest.
-Also we only decrease $d(s,v)$.
+  <div class="statement-body"><p>The relaxation step is <strong>safe</strong>: it never makes an estimate smaller than the true shortest-path distance. In other words, at all times,
+[
+d(s,v) \ge \delta(s,v).
+]
+The intuition is that every finite estimate is backed by an actual route from $s$ to $v$.
+Initially, $d(s,s) = 0$ represents the empty path, and all other estimates are $\infty$.
+When we relax an edge $(u,v)$, we set
+[
+d(s,v) \leftarrow \min{d(s,v),\ d(s,u) + w(u,v)}.
+]
+If $d(s,u)$ is finite, the candidate $d(s,u) + w(u,v)$ represents a route we can actually take: follow the route to $u$, then traverse the edge to $v$.
+Thus, we only decrease an estimate when we have found a shorter route that justifies it, and that route cannot be shorter than the shortest possible route.
+For example, in the walkthrough, $d(s,c) = 3$ and $w(c,a) = 4$, so lowering $d(s,a)$ from $10$ to $7$ is justified by the route $s \to c \to a$.</p>
+<p>Safety does not mean that the new estimate is already optimal; it may improve again.
+Dijkstra’s additional claim, which uses nonnegative edge weights, is that a vertex’s estimate is final once it is removed from the queue.
 Thus, it suffices to show that after node $v$ is removed from the priority queue, we get $d(s,v) = \delta(s,v)$.
 We do this using induction on the number of nodes popped off the queue.
 The base case is 1. $d(s,s) = 0 = \delta(s,s)$.
