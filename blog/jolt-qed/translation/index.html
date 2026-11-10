@@ -206,25 +206,43 @@
     
 
     <div class="prose">
-      <p>Since we started this project sometime around April of 2026, there have been improvements to Lean and the compiler.
+      <aside class="callout theorem-block callout-box thm-box">
+  <p><strong>AI Usage</strong>: This post is entirely human written, but code snippets were ai generated to avoid typos.
+An AI agent was also asked to double check if the included links were correct.</p>
+</aside>
+<p>Since we started <code>jolt-qed</code> sometime around April of 2026, there have been improvements to Lean and the compiler.
 <a rel="noopener noreferrer external" target="_blank" href="https://quangvdao.github.io/">Quang Dao</a><sup class="footnote-reference" id="fr-thanks-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-thanks">[1]</a></sup> generously took the time to upgrade <a rel="noopener noreferrer external" target="_blank" href="https://github.com/LayerZero-Labs/jolt-qed/">jolt-qed</a> to use Lean version 4.35 (from 4.29), and a more up to date version of the sail compiler (<a rel="noopener noreferrer external" target="_blank" href="https://github.com/LayerZero-Labs/jolt-qed/pull/36">PR #36</a>).
 Additionally, Mathlib and lean-sail (the runtime library for the generated Lean code) were also upgraded.
-<a href="https://randomwalks.xyz/blog/sail-to-lean/">Last time</a>, we did a poor job of describing how we get this “trusted” generated Lean code for the RISC-V instruction set architecture (ISA)<sup class="footnote-reference" id="fr-rush-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-rush">[2]</a></sup>.
-As enough files have changed, we feel we should give a detailed of account of what is going on.
-How do we get this trusted Lean code for the RISC-V ISA?</p>
+<a href="https://randomwalks.xyz/blog/sail-to-lean/">Last time</a>, we did a poor job of describing how we got our “trusted” Lean code for the RISC-V instruction set architecture (ISA)<sup class="footnote-reference" id="fr-rush-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-rush">[2]</a></sup>.
+As enough files have changed, and we have a bit more time, we give a semi-detailed of account of what is going on.
+That is, how did we get this trusted Lean code for the RISC-V ISA?</p>
 <aside class="callout theorem-block callout-box thm-box">
   <p>All steps described below were tested on a <code>x86_64</code> desktop running Arch Linux.
 It has an Intel Core i7-14700K (20 cores, 28 hardware threads) CPU and about 62.5 GiB of usable RAM.</p>
 </aside>
+<p>There is a lot of code that is needed to get this translation, so we first, we introduce the characters of our play.
+Broadly, there are four types of files.</p>
+<ul>
+<li>
+<p>Specification files written written in the Sail language<sup class="footnote-reference" id="fr-sail-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-sail">[3]</a></sup>. These are the ground truth for the RISC-V ISA. These files are maintained in the <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/tree/266473f8b2872ac25f5cfaf5a4293d6421a40b5d">sail-riscv</a> repository.</p>
+</li>
+<li>
+<p>Source code for the Sail compiler. We build this source to get an executable which is our compiler. This compiler takes the Sail specification as input, and outputs a RISC-V specification in Lean, C and other languages. The source code for the compiler is maintained by in the <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/sail">rems-project/sail</a> repository.</p>
+</li>
+<li>
+<p>Helper files. These are handwritten files that aid the compilation process. We describe them in more detail in the sections below.</p>
+</li>
+<li>
+<p>Finally, there is our <a rel="noopener noreferrer external" target="_blank" href="https://github.com/jolt-qed/">code</a> which translates Jolt written in rust to Lean. Then proves theorems. Some of these theorems are proven against auto-generated Lean code.</p>
+</li>
+</ul>
+<p>Below we describe each file in greater detail.</p>
 <h2 id="the-specification">The Specification</h2>
-<p>There is a lot of code that is needed to get this translation, so we first, we introduce the characters of our play.</p>
 <h3 id="the-sail-files">The Sail Files</h3>
-<p>The main character is the source specification of the RISC-V ISA.
+<p>This is the specification of the RISC-V ISA.
 It is written in Sail, a domain-specific language for describing ISA semantics.
 This specification has been adopted by RISC-V International as the formal specification of the RISC-V ISA.
-The code can be found in the <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/tree/266473f8b2872ac25f5cfaf5a4293d6421a40b5d">sail-riscv repository</a>, at commit <code>266473f</code>.
-These files describe the RISC-V ISA.
-How each instruction updates the RISCV cpu and the whole shabang.</p>
+The code can be found in the <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/tree/266473f8b2872ac25f5cfaf5a4293d6421a40b5d">sail-riscv repository</a>, and the commit we are using is <code>266473f</code>.</p>
 <p>As everything is clearer with a working example, here is some code from the specification that describes 6 RISC-V instructions.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>function clause execute ITYPE(imm, rs1, rd, op) = {</span></span>
 <span class="giallo-l"><span>  let immext : xlenbits = sign_extend(imm);</span></span>
@@ -238,18 +256,17 @@ How each instruction updates the RISCV cpu and the whole shabang.</p>
 <span class="giallo-l"><span>  };</span></span>
 <span class="giallo-l"><span>  RETIRE_SUCCESS</span></span>
 <span class="giallo-l"><span>}</span></span></code></pre>
-<p><em>Snippet 1: the specification code for 6 RISC-V instructions.</em></p>
-<p>It is in <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/extensions/I/base_insts.sail#L158-L169"><code>model/extensions/I/base_insts.sail</code>, lines 158–169</a>.
-So this function in the specification is describing what happens when these 6 instructions are executed on a RISC-V CPU.
+<p>It is mostly self explanatory.
+<code>ADDI</code> reads <code>rs1</code> and adds the contents to a sign extended <code>imm</code> operand, and stores the output in register <code>rd</code>.
+The source code can be found in <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/extensions/I/base_insts.sail#L158-L169"><code>model/extensions/I/base_insts.sail</code>, lines 158–169</a>.
 Eventually, we will want an equivalent version of this in the generated Lean code.</p>
 <h3 id="the-modules">The Modules</h3>
-<p>The RISC-V specification is a collection of 158 <code>.sail</code> files in the <code>model/</code> folder of <code>sail-riscv</code> repository.
+<p>The RISC-V specification is a collection of 158 <code>.sail</code> files in the <code>model/</code> folder of sail-riscv repository.
 Each file holds some code from the specification which describes something about the RISC-V ISA.
 A module is a named group of <code>.sail</code> files and other modules, together with a list of the modules it depends on.
-That was a mouthful.
 In more simple words, loosely, a module is the logical grouping of files in the project and a description of what those file depends on.
-Now there is a single file <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/riscv.sail_project"><code>model/riscv.sail_project</code></a> that lists every module, its <code>.sail</code> files and the modules it depends on.
-For example, here is the module <code>I</code> from that file.
+Now there is a single file <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/riscv.sail_project"><code>model/riscv.sail_project</code></a> that lists every module, its <code>.sail</code> files and the modules it depends on.</p>
+<p>For example, here is the module <code>I</code> from that file.
 <code>I</code> is a module that itself contains the two modules <code>I_types</code> and <code>I_insts</code>, and it depends on the module <code>core</code>.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>I {</span></span>
 <span class="giallo-l"><span>  requires core</span></span>
@@ -269,48 +286,45 @@ For example, here is the module <code>I</code> from that file.
 <span class="giallo-l"><span>        extensions/I/jalr_seq.sail</span></span>
 <span class="giallo-l"><span>  }</span></span>
 <span class="giallo-l"><span>}</span></span></code></pre>
-<p><em>Snippet 2: the module <code>I</code> in <code>model/riscv.sail_project</code>.</em></p>
 <p>The module <code>I_types</code> includes one file, <code>extensions/I/base_types.sail</code>.
-Its line <code>before sys</code> is not a dependency. It only tells the compiler<sup class="footnote-reference" id="fr-compiler-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-compiler">[3]</a></sup> to process <code>I_types</code> before the module <code>sys</code>.</p>
+Its line <code>before sys</code> tells the compiler<sup class="footnote-reference" id="fr-compiler-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-compiler">[4]</a></sup> to process <code>I_types</code> before the module <code>sys</code>.</p>
 <p>The module <code>I_insts</code> depends on 4 other modules named <code>exceptions</code>, <code>sys</code>, <code>I_types</code> and <code>Zicfilp_regs</code>, and on the modules its parent modules depend on.
 RMEM is a flag that can be true or false, and only one of the two files <code>jalr_rmem</code> or <code>jalr_seq</code> is included.
-Dependency is described by require is what one might expect if they have programmed in any other language.
-In Snippet 1, the different variants of <code>op</code> were <code>ADDI</code>, <code>SLTI</code> and so on.
+Dependency is described by <code>require</code>, and is what one might expect.
+In the code block above different variants of <code>op</code> were <code>ADDI</code>, <code>SLTI</code> and so on.
 Where did these names come from?
 They are defined in <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/extensions/I/base_types.sail#L11"><code>model/extensions/I/base_types.sail</code></a> as shown below.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>enum iop = {ADDI, SLTI, SLTIU, XORI, ORI, ANDI}  // immediate ops</span></span></code></pre>
-<p><em>Snippet 3: the names of the 6 instructions, in <code>model/extensions/I/base_types.sail</code>.</em></p>
-<p>As <code>I_types</code> is required by <code>I_insts</code>, the compiler will know what files to pull in.
-Finally, we need some additional help to get the generated Lean code for the RISCV-cpu to build.</p>
+<p>As <code>I_types</code> is required by <code>I_insts</code>, the compiler will know what files to pull in.</p>
 <h3 id="the-helpers">The Helpers</h3>
 <p>When writing the specification, the sail-riscv authors sometimes use functions whose body is not defined in any <code>.sail</code> file.
-For example, look at the following code from the specification in <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/sys/sys_reservation.sail#L20"><code>model/sys/sys_reservation.sail</code></a> (Snippet 4):</p>
+For example, look at the following code from the specification in <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/sys/sys_reservation.sail#L20"><code>model/sys/sys_reservation.sail</code></a>:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>val load_reservation = impure {interpreter: &quot;Platform.load_reservation&quot;, cpp: &quot;load_reservation&quot;, c: &quot;load_reservation&quot;, lem: &quot;load_reservation&quot;} : forall &#39;n, 0 &lt; &#39;n &lt; max_mem_access . (/* addr */ physaddrbits, /* width */ int(&#39;n)) -&gt; unit</span></span></code></pre>
-<p><em>Snippet 4: the declaration of <code>load_reservation</code>.</em></p>
 <p>It says that there is a function called <code>load_reservation</code>, which takes an address and a width and returns nothing.
 It does not say what the function does, and no <code>.sail</code> file gives it a body.
-The list in braces gives, for each tool that runs the specification, the name of the function that tool should call.<sup class="footnote-reference" id="fr-names-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-names">[4]</a></sup>
-Lean is not in the list, so the generated Lean code calls <code>load_reservation</code> by its own name.
-The compiler will translate every call to <code>load_reservation</code> fine, but there is no body for it to translate.
+The list in braces gives, for each language in which we describe specification, the name of the function that tool should call.<sup class="footnote-reference" id="fr-names-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-names">[5]</a></sup>
+Lean is not in the list, so the generated Lean code calls <code>load_reservation</code> by its own name in Lean version of the spec (the default behaviour).
+So the compiler will translate every call to <code>load_reservation</code>, but if we build our Lean program, there is no body for it to translate.
 As a result, the generated Lean code will not build.
-For builds to pass, the sail-riscv authors handwrote some Lean code, which the compiler copies over to the generated Lean project unchanged.
+For builds to pass, the sail-riscv authors handwrite some Lean code, which the compiler copies over to the generated Lean project unchanged.
 All this code is listed in one file, <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/handwritten_support/RiscvExtras.lean"><code>handwritten_support/RiscvExtras.lean</code></a>.
-For <code>load_reservation</code>, the authors hand wrote this line of Lean code (Snippet 5):</p>
+For <code>load_reservation</code>, the authors hand wrote this line of Lean code:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>axiom load_reservation : Arch.pa → Nat → SailM Unit</span></span></code></pre>
-<p><em>Snippet 5: the handwritten Lean stand-in for <code>load_reservation</code>, line 34 of <code>handwritten_support/RiscvExtras.lean</code>.</em></p>
 <p>They too did not give it any body, but they gave it a type.
-This is enough for the generated Lean code to typecheck, but it is not enough for execution.
-This is part of the reason the generated Lean code is noncomputable.</p>
+This is enough for the generated Lean code to type check, but it is not enough for execution.
+This is part of the reason the generated Lean code is non computable[^upgrade].</p>
+<h2 id="getting-the-specification-locally">Getting The Specification Locally</h2>
+<p>So the story looks like this so far.
+We have described all the specification files that fully describe the RISC-V ISA, and we have some helper files for methods that do not have sail functions.</p>
 <figure class="image-figure" style="max-width: 55%">
   <img src="./spec.svg" alt="Figure 1: All the specification files we need." loading="lazy" decoding="async">
   <figcaption>Figure 1: All the specification files we need.</figcaption>
 </figure>
-<h2 id="getting-the-specification-locally">Getting The Specification Locally</h2>
-<p>Let us get a local copy of the specification files and the handwritten Lean helpers.
-Start in the directory where you want to keep the build; we will put everything in <code>scratch/sail-build/</code>.
-We clone our fork of <code>sail-riscv</code> and check out the commit used by <code>jolt-qed</code>.
-Replace <code>/absolute/path/to/jolt-qed</code> with the absolute path to your checkout of <code>jolt-qed</code>, where we keep the patch.
-We apply that patch to make the handwritten helpers work with the newer compiler and Lean version.<sup class="footnote-reference" id="fr-helpers-patch-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-helpers-patch">[5]</a></sup></p>
+<p>This section describes how to get a copy of the specification files on your own computer.
+Start in the directory where you want to keep the build; we will put everything<sup class="footnote-reference" id="fr-rand-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-rand">[6]</a></sup> in <code>scratch/sail-build/</code>.
+We clone our fork of <code>sail-riscv</code> and check out the right commit hash.</p>
+<p>Replace <code>/absolute/path/to/jolt-qed</code> with the absolute path to your checkout of <code>jolt-qed</code>, where we keep the patch.
+We apply that patch to make the handwritten helpers work with the newer compiler and Lean version.<sup class="footnote-reference" id="fr-helpers-patch-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-helpers-patch">[7]</a></sup></p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6A737D;"># Where to find the patch.</span></span>
 <span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set JOLT_QED /absolute/path/to/jolt-qed</span></span>
 <span class="giallo-l"><span>JOLT_QED</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">/absolute/path/to/jolt-qed</span></span>
@@ -328,30 +342,31 @@ We apply that patch to make the handwritten helpers work with the newer compiler
 <span class="giallo-l"><span style="color: #6F42C1;">git</span><span style="color: #005CC5;"> -C</span><span style="color: #032F62;"> scratch/sail-build/sail-riscv apply &quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/sail-import/patches/sail-riscv-lean-handwritten.patch&quot;</span></span></code></pre><h2 id="the-compiler">The Compiler</h2>
 <p>With these three characters, we have everything we need to describe the RISC-V ISA, but we still need a compiler to translate the specification into Lean code.</p>
 <p>We now introduce the compiler, a program written in OCaml.
-It is general purpose in that it can generate code in several languages, including Lean.
-It can also generate C code from the specification.
+It is general purpose in that it can generate code in several languages, including Lean and C.
 We will use the generated C code later to do differential testing, but that is a topic for another post.</p>
 <p>Our first step is to compile the compiler from its source to a binary file that is executable.
-Then we will take that executable, feed it appropriate command line arguments and complete our translation.
-Below are detailed instructions on how to build the compiler from source<sup class="footnote-reference" id="fr-patch-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-patch">[6]</a></sup>.
+Then we will take that executable, feed it appropriate command line arguments and complete our translation.</p>
+<p>The rest of this section is the mechanical description of how to get this binary.
+Below are detailed instructions on how to build the compiler from source<sup class="footnote-reference" id="fr-patch-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-patch">[8]</a></sup>.
 We tested this build with opam 2.6.1, OCaml 5.4.1, Dune 3.24.2 and Z3 4.16.0.</p>
+<figure class="image-figure" style="max-width: 65%">
+  <img src="./build.svg" alt="Figure 2: from the compiler's source code to the `sail` binary." loading="lazy" decoding="async">
+  <figcaption>Figure 2: from the compiler’s source code to the <code>sail</code> binary.</figcaption>
+</figure>
 <p>First install a C compiler, Git, GMP (a library for large numbers), Z3 (a solver the compiler uses to check the specification), pkgconf (which helps find installed libraries) and opam (OCaml’s package manager).
 On Arch Linux:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">sudo</span><span style="color: #032F62;"> pacman</span><span style="color: #005CC5;"> -S --needed</span><span style="color: #032F62;"> base-devel git gmp z3 pkgconf opam</span></span></code></pre>
-<p>On macOS:</p>
+<p>On macOS (AI generated, I cannot vouch this works)</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6A737D;"># Install a C compiler and Git.</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">xcode-select</span><span style="color: #005CC5;"> --install</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">brew</span><span style="color: #032F62;"> install gmp z3 pkgconf opam</span></span></code></pre>
-<p>Run the remaining commands in the same terminal.
-The examples use Bash; comments beside commands whose syntax differs show what to use in Fish instead.
-Run this from the same directory where you created <code>scratch/sail-build/</code> above.
+<p>Run this from the same directory where you created <code>scratch/sail-build/</code> above.
 Replace <code>/absolute/path/to/jolt-qed</code> with the absolute path to your checkout of <code>jolt-qed</code>, which contains the patch.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6A737D;"># Where to find the patch. Replace this with your checkout&#39;s absolute path.</span></span>
 <span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set JOLT_QED /absolute/path/to/jolt-qed</span></span>
 <span class="giallo-l"><span>JOLT_QED</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">/absolute/path/to/jolt-qed</span></span>
 <span class="giallo-l"></span>
 <span class="giallo-l"><span style="color: #6A737D;"># Keep the sources, OCaml environment, cache and installed compiler together.</span></span>
-<span class="giallo-l"><span style="color: #6F42C1;">mkdir</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> scratch/sail-build</span></span>
 <span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> scratch/sail-build</span></span>
 <span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set -gx SAIL_BUILD_DIR &quot;$PWD&quot;</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">export</span><span> SAIL_BUILD_DIR</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">&quot;</span><span>$PWD</span><span style="color: #032F62;">&quot;</span></span>
@@ -412,14 +427,15 @@ The source checkout is in <code>scratch/sail-build/sail/</code>, and the install
 <span class="giallo-l"><span style="color: #005CC5;">eval</span><span style="color: #032F62;"> &quot;$(</span><span style="color: #6F42C1;">opam</span><span style="color: #032F62;"> env</span><span style="color: #005CC5;"> --switch</span><span style="color: #032F62;"> sail</span><span style="color: #005CC5;"> --shell=bash</span><span style="color: #032F62;">)&quot;</span></span>
 <span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> sail</span></span>
 <span class="giallo-l"></span>
-<span class="giallo-l"><span style="color: #6F42C1;">&quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #6F42C1;">/sail-install/bin/sail&quot;</span><span style="color: #005CC5;"> --version</span></span></code></pre><figure class="image-figure" style="max-width: 65%">
-  <img src="./build.svg" alt="Figure 2: from the compiler's source code to the `sail` binary." loading="lazy" decoding="async">
-  <figcaption>Figure 2: from the compiler’s source code to the <code>sail</code> binary.</figcaption>
-</figure>
-<h2 id="generating-lean-code">Generating Lean Code</h2>
+<span class="giallo-l"><span style="color: #6F42C1;">&quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #6F42C1;">/sail-install/bin/sail&quot;</span><span style="color: #005CC5;"> --version</span></span></code></pre><h2 id="generating-lean-code">Generating Lean Code</h2>
+<blockquote>
+<p>Now we have both the compiler and the specification on our local machine.</p>
+</blockquote>
 <p>Continue in the same terminal, using <code>JOLT_QED</code> and <code>SAIL_BUILD_DIR</code> from the build instructions above.
-Before running the compiler, set the variables below and move into the specification’s <code>model/</code> directory.
-Reading the module list requires Python 3.11 or later.</p>
+Set the environment variables below and <code>cd</code> into the specification’s <code>model/</code> directory.</p>
+<p>In our <code>jolt-qed</code> repository we have a file called <code>sail-import/PROVENANCE.toml</code>.
+Amongst other things, here we list a subset of modules we want translated (remember the project file we introduced earlier).
+We wrote a small ai generated bash command that uses <code>python3</code> to pull out the modules and set them as an environment variable<sup class="footnote-reference" id="fr-why-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-why">[9]</a></sup>.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6A737D;"># The compiler&#39;s installed libraries.</span></span>
 <span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set -gx SAIL_DIR &quot;$SAIL_BUILD_DIR/sail-install/share/sail&quot;</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">export</span><span> SAIL_DIR</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">&quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/sail-install/share/sail&quot;</span></span>
@@ -431,7 +447,11 @@ Reading the module list requires Python 3.11 or later.</p>
 <span class="giallo-l"><span>MODULES</span><span style="color: #D73A49;">=</span><span>($(</span><span style="color: #6F42C1;">python3</span><span style="color: #005CC5;"> -c</span><span style="color: #032F62;"> &#39;import sys, tomllib; print(*tomllib.load(open(sys.argv[1], &quot;rb&quot;))[&quot;modules&quot;][&quot;selected&quot;], sep=&quot;\n&quot;)&#39; &quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/sail-import/PROVENANCE.toml&quot;</span><span>))</span></span>
 <span class="giallo-l"></span>
 <span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> &quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/sail-riscv/model&quot;</span></span>
-<span class="giallo-l"><span style="color: #6F42C1;">mkdir</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> ../build</span></span></code></pre><pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 1</span><span style="color: #6A737D;"># Run the compiler. The flags are the ones upstream sail-riscv uses to generate its own Lean code.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">mkdir</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> ../build</span></span></code></pre>
+<p>This environment variable <code>MODULES</code> will be later fed into the compiler as a command line argument.
+Now we have everything to compile.
+So we do so with this command.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 1</span><span style="color: #6A737D;"># Run the compiler. The flags are the ones upstream sail-riscv uses to generate its own Lean code.</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 2</span><span style="color: #6A737D;"># The result goes into the folder ../build/Lean_RV64D.</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 3</span><span style="color: #6A737D;"># For Fish use this instead on the last line: riscv.sail_project $MODULES</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 4</span><span style="color: #6F42C1;">&quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #6F42C1;">/sail-install/bin/sail&quot;</span><span style="color: #005CC5;"> \</span></span>
@@ -458,10 +478,7 @@ Reading the module list requires Python 3.11 or later.</p>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">25</span><span style="color: #005CC5;">  --lean-import-file</span><span style="color: #032F62;"> ../handwritten_support/RiscvExtras.lean</span><span style="color: #005CC5;"> \</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">26</span><span style="color: #005CC5;">  -o</span><span style="color: #032F62;"> Lean_RV64D</span><span style="color: #005CC5;"> \</span></span>
 <span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">27</span><span style="color: #032F62;">  riscv.sail_project &quot;${</span><span>MODULES</span><span style="color: #032F62;">[</span><span style="color: #D73A49;">@</span><span style="color: #032F62;">]}&quot;</span></span></code></pre>
-<p>Now there is a lot going on here.
-All we had done so far was get the specification locally along with a few more files, and we built the compiler from source.
-The executable was tagged with version <code>0.20.3</code>.
-We did not really go over how to use this compiler.</p>
+<p>There is a lot going on here.</p>
 <ul>
 <li>
 <p>Line 9 tells the compiler to generate Lean code.</p>
@@ -482,30 +499,19 @@ The compiler copies it into the generated Lean project and imports it.
 While copying it, the compiler replaces <code>THE_MODULE_NAME</code> with <code>LeanRV64D</code>.</p>
 </li>
 <li>
-<p>Line 26 names the generated Lean project <code>Lean_RV64D</code>.
-This is the name used with the output directory on line 11.</p>
-</li>
-<li>
 <p>Line 27 supplies the specification’s project file and the list of modules we want to translate.</p>
 <ul>
-<li>
-<p><code>riscv.sail_project</code> is the project file we saw earlier: it lists the modules and the <code>.sail</code> files they contain. <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/sail/blob/2ae2199f8890180a8f9653f6ea08e54cd9790220/doc/asciidoc/modules.adoc#L49-L64">Sail manual: modules</a>.
-This file is in <code>sail-riscv/model/</code>, where we run the command.</p>
-</li>
-<li>
-<p><code>MODULES</code> holds our chosen subset of the module names listed in <code>riscv.sail_project</code>.
-Bash replaces <code>"${MODULES[@]}"</code> with those names, passing each one to the compiler as a separate argument.</p>
-<p>The module list comes from <code>$JOLT_QED/sail-import/PROVENANCE.toml</code>.</p>
-</li>
+<li><code>riscv.sail_project</code> is the project file we saw earlier: it lists the modules and the <code>.sail</code> files they contain.</li>
+<li><code>MODULES</code> holds our chosen subset of the module names listed in <code>riscv.sail_project</code> as described above.</li>
 </ul>
 </li>
 <li>
 <p>Line 5 enables three compiler checks on the specification.</p>
 <ul>
 <li>
-<p><code>--strict-var</code> makes the compiler report an error and stop translation if a mutable variable in the specification is introduced without <code>var</code>. <a rel="noopener noreferrer external" target="_blank" href="https://alasdair.github.io/manual.html#_mutable_variables">Sail manual: mutable variables</a>.
-In <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/core/arithmetic.sail#L79-L90">this function in the specification</a>, <code>count</code> is mutable: the loop changes it with <code>count = new_count</code>.
-It is already declared with <code>var</code>, so it passes this check.</p>
+<p><code>--strict-var</code> makes the compiler report an error and stop translation if a mutable variable in the specification is introduced without <code>var</code>. In <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/core/arithmetic.sail#L79-L90">this function</a>, <code>count</code> is mutable: the loop changes it with <code>count = new_count</code>.
+It is already declared with <code>var</code>, so it passes this check.
+If it was not declared with <code>var</code> the compilation would fail.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain" data-name="sail-riscv/model/core/arithmetic.sail:79-90"><span class="giallo-l"><span>val count_ones : forall &#39;n, &#39;n &gt;= 0. (bits(&#39;n)) -&gt; range(0, &#39;n)</span></span>
 <span class="giallo-l"><span>function count_ones(x) = {</span></span>
 <span class="giallo-l"><span>  var count : range(0, &#39;n) = 0;</span></span>
@@ -518,7 +524,8 @@ It is already declared with <code>var</code>, so it passes this check.</p>
 <span class="giallo-l"><span>  };</span></span>
 <span class="giallo-l"><span>  count</span></span>
 <span class="giallo-l"><span>}</span></span></code></pre>
-<p>In <a rel="noopener noreferrer external" target="_blank" href="https://github.com/LayerZero-Labs/jolt-qed/blob/06c5f2b885b712fc321ae6d3e937d8eba4dff82a/LeanRV64D/Arithmetic.lean#L281-L297">the generated Lean code</a>, the changing count is stored in <code>loop_vars</code>, marked as mutable with <code>let mut</code>:</p>
+<p>Below is how the above snippet looks once it has been translated.
+The mutable count is stored in <code>loop_vars</code>, marked as mutable with <code>let mut</code>:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="LeanRV64D/Arithmetic.lean:281-297"><span class="giallo-l"><span style="color: #6A737D;">/-- Type quantifiers: k_n : Nat, k_n ≥ 0, k_n ≥ 0 -/</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> count_ones</span><span> (x : (BitVec k_n)) : SailM Nat := </span><span style="color: #D73A49;">do</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">  let</span><span> count : Nat := </span><span style="color: #005CC5;">0</span></span>
@@ -590,13 +597,16 @@ The generated Lean code still contains their definitions, as seen in <a rel="noo
 It contains the generated Lean code in the <code>LeanRV64D/</code> folder and the <code>LeanRV64D.lean</code> file.
 We then copy both into <code>jolt-qed</code>:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cp</span><span style="color: #005CC5;"> -R</span><span style="color: #032F62;"> &quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/sail-riscv/build/Lean_RV64D/LeanRV64D&quot; &quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/&quot;</span></span>
-<span class="giallo-l"><span style="color: #6F42C1;">cp</span><span style="color: #032F62;"> &quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/sail-riscv/build/Lean_RV64D/LeanRV64D.lean&quot; &quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/&quot;</span></span></code></pre><figure class="image-figure" style="max-width: 75%">
+<span class="giallo-l"><span style="color: #6F42C1;">cp</span><span style="color: #032F62;"> &quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/sail-riscv/build/Lean_RV64D/LeanRV64D.lean&quot; &quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/&quot;</span></span></code></pre>
+<p>So now we get the following picture</p>
+<figure class="image-figure" style="max-width: 85%">
   <img src="./trusted.svg" alt="Figure 3: Once we have the compiler, and the specification files we can generate the trusted lean code in `LeanRV64D`." loading="lazy" decoding="async">
   <figcaption>Figure 3: Once we have the compiler, and the specification files we can generate the trusted lean code in <code>LeanRV64D</code>.</figcaption>
 </figure>
 <h2 id="the-runtime-library">The Runtime Library</h2>
-<p>Go back to Snippet 1.
-To execute <code>ADDI</code>, the specification reads the register <code>rs1</code> with <code>X(rs1)</code>.
+<p>Unfortunately, we are <strong>still</strong> not done.
+Though theoretically, we should be.</p>
+<p>To execute <code>ADDI</code>, the specification reads the register <code>rs1</code> with <code>X(rs1)</code>.
 <code>X</code> is a shorthand, and reading with it calls <code>rX_bits</code>, which turns the register index into a number and calls <code>rX</code> (<a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/core/regs.sail#L229-L235"><code>model/core/regs.sail</code>, lines 229–235</a>).
 Here is <code>rX</code> in the specification.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain" data-name="sail-riscv/model/core/regs.sail:151-188"><span class="giallo-l"><span>function rX (Regno(r) : regno) -&gt; xlenbits = {</span></span>
@@ -611,9 +621,9 @@ Here is <code>rX</code> in the specification.</p>
 <span class="giallo-l"><span>  regval_from_reg(v)</span></span>
 <span class="giallo-l"><span>}</span></span></code></pre>
 <p>Register 0 in RISC-V always holds zero, so <code>rX</code> returns the constant <code>zero_reg</code> for it.
-Every other number picks one of the registers <code>x1</code> to <code>x31</code>, which are declared a few lines above with <code>register x1 : regtype</code> and so on.
-In Sail, writing the name of a register reads it.
-There is no function call.</p>
+Every other number picks one of the registers <code>x1</code> to <code>x31</code>.
+In Sail, writing the name of a register, say by writing <code>x1</code>, reads <code>x1</code>.
+There is no separate function call to read <code>x1</code>.</p>
 <p>Here is the Lean code the compiler generated for <code>rX</code>.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="LeanRV64D/Regs.lean:621-657"><span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> rX</span><span> (app_0 : regno) : SailM (BitVec </span><span style="color: #005CC5;">64</span><span>) := </span><span style="color: #D73A49;">do</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">  let</span><span> .Regno r := app_0</span></span>
@@ -625,12 +635,11 @@ There is no function call.</p>
 <span class="giallo-l"><span>    -- ... and so on </span><span style="color: #D73A49;">for</span><span> registers </span><span style="color: #005CC5;">3</span><span> to </span><span style="color: #005CC5;">30</span></span>
 <span class="giallo-l"><span>    | _ =&gt; readReg x31 ) : SailM regtype )</span></span>
 <span class="giallo-l"><span>  (pure (regval_from_reg v))</span></span></code></pre>
-<p>The Lean <code>rX</code> is generated, like everything else in <code>LeanRV64D/</code>.
-Each register read in the Sail code has become a call to <code>readReg</code>.
+<p>Each register read in the Sail code has become a call to <code>readReg</code>.
 But none of the 135 files in <code>LeanRV64D/</code> defines <code>readReg</code>.
 Reading a register is built into the Sail language, so the specification does not define it either, and the compiler has no Sail code to translate.</p>
 <p>The body of <code>readReg</code> comes from <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/lean-sail/tree/1e5b216bf881ef08da160db63b44ecda430802d6">lean-sail</a>, a small Lean library written by the same people who wrote the compiler.
-Every generated Lean file starts with <code>import Sail</code>, and that import is lean-sail.
+Every generated Lean file starts with <code>import Sail</code>, and that import is this <code>lean-sail</code> library.
 Here is <code>readReg</code> in <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/lean-sail/blob/1e5b216bf881ef08da160db63b44ecda430802d6/Sail/ConcurrencyInterfaceV1.lean#L172-L176"><code>Sail/ConcurrencyInterfaceV1.lean</code></a>.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="lean-sail/Sail/ConcurrencyInterfaceV1.lean:172-176"><span class="giallo-l"><span style="color: #D73A49;">@[simp_sail]</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> readReg</span><span> (r : Register) : PreSailM RegisterType c ue (RegisterType r) := </span><span style="color: #D73A49;">do</span></span>
@@ -661,21 +670,27 @@ We copied only <code>LeanRV64D/</code> into <code>jolt-qed</code>, so <code>jolt
 <li id="fn-rush">
 <p>I wish in a rush, and got Claude to get the thing to pass and then forgot about it. We left behind instructions on how to reproduce the work, but admittedly, I myself was not sure of what I was doing. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-rush-1">↩</a></p>
 </li>
+<li id="fn-sail">
+<p>A domain specific language for writing ISAs. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-sail-1">↩</a></p>
+</li>
 <li id="fn-compiler">
-<p>We have not introduced this guy yet. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-compiler-1">↩</a></p>
+<p>The program that does the translation. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-compiler-1">↩</a></p>
 </li>
 <li id="fn-names">
 <p>For example, the interpreter uses <code>Platform.load_reservation</code>, while the C target uses <code>load_reservation</code>. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-names-1">↩</a></p>
+</li>
+<li id="fn-rand">
+<p>We could not think of a better name. You are welcome to use any file path you want. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-rand-1">↩</a></p>
 </li>
 <li id="fn-helpers-patch">
 <p>The patch adds <code>open THE_MODULE_NAME</code> so the helper can refer to types inside the generated model’s namespace; the compiler replaces this placeholder with <code>LeanRV64D</code> when copying the file.
 It also changes <code>extension.toCtorIdx</code> to <code>extension.ctorIdx</code>, the name available in Lean 4.35, in the helper’s <code>SizeOf extension</code> instance. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-helpers-patch-1">↩</a></p>
 </li>
 <li id="fn-patch">
-<p>We apply the fix from <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/sail/pull/1774">rems-project/sail#1774</a> for missing parentheses in the Lean translation of type-level arithmetic.
-Without it, the compiler translates <code>(if true then 8 else 4) * 8</code> as <code>if true then 8 else 4 * 8</code>, which Lean reads as <code>if true then 8 else (4 * 8)</code>.
-This makes <code>flen</code>, the floating-point register width, 8 bits instead of 64.
-The PR is still open as of 9 November 2026, so we apply the saved patch in <code>sail-import/patches/1774-type-arithmetic.patch</code> before building the compiler. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-patch-1">↩</a></p>
+<p>We apply the fix from <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/sail/pull/1774">rems-project/sail#1774</a> for missing parentheses in the Lean translation of type-level arithmetic. Without it, the compiler translates <code>(if true then 8 else 4) * 8</code> as <code>if true then 8 else 4 * 8</code>, which Lean reads as <code>if true then 8 else (4 * 8)</code>. This makes <code>flen</code>, the floating-point register width, 8 bits instead of 64. The PR is still open as of 9 November 2026, so we apply the saved patch in <code>sail-import/patches/1774-type-arithmetic.patch</code> before building the compiler. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-patch-1">↩</a></p>
+</li>
+<li id="fn-why">
+<p>Why do we only build a filter? Two reasons. One, Jolt does not use all of RISC-V, so we can ignore the vector instructions. Secondly, the version of Lean we are using limits the number of constructors an inductive type can have. If we translated every module, then the compiled lean code has inductive types with too many constructors. To alleviate ourselves from having to change the compiler, we just build the modules we need. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-why-1">↩</a></p>
 </li>
 </ol>
 </section>
