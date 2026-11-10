@@ -8,7 +8,7 @@
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff">
   <script src="https://randomwalks.xyz/theme.js?h=022c5e6dda6564ebbb98"></script>
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=5010d239a435f54dfc63">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=f196a0bcbf965ee3648a">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -139,6 +139,10 @@
   
     
   
+    
+  
+    
+  
 
   
   <ol class="series-posts">
@@ -154,6 +158,13 @@
     <li>
       <a href="https://randomwalks.xyz/blog/jolt-qed/state/">How to Model a CPU in Lean</a>
       <time datetime="2026-05-22">22 May 2026</time>
+    </li>
+    
+    
+    
+    <li>
+      <a href="https://randomwalks.xyz/blog/jolt-qed/translation/">Sail To Lean Translation</a>
+      <time datetime="2026-11-09">09 Nov 2026</time>
     </li>
     
     
@@ -183,6 +194,8 @@
       <a href="https://randomwalks.xyz/blog/jolt-qed/extraction/">Automatic Bytecode Expansion Extraction</a>
       <time datetime="2026-09-01">01 Sep 2026</time>
     </li>
+    
+    
     
     
   </ol>
@@ -340,6 +353,19 @@
       arrow.textContent = ' ↩';
       target.appendChild(arrow);
     });
+  </script>
+  <script>
+    // Expose the pinned header's height so sticky elements and anchor jumps sit below it.
+    (function () {
+      var header = document.querySelector('.site-header');
+      if (!header) return;
+      function update() {
+        document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+      }
+      update();
+      if (window.ResizeObserver) new ResizeObserver(update).observe(header);
+      else window.addEventListener('resize', update);
+    })();
   </script>
   <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
   

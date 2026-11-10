@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sail To Lean Translation — Random Walks</title>
+  <meta name="description" content="">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#ffffff">
+  <script src="https://randomwalks.xyz/theme.js?h=022c5e6dda6564ebbb98"></script>
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=f196a0bcbf965ee3648a">
+  <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
+  
+  
+  
+  
+  
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        tags: 'ams',
+        macros: {
+          Field: '{\\mathbb{F}}',
+          field: '{\\mathbb{F}}',
+          Mont: ['{\\widetilde{#1}}', 1],
+          Lagrange: ['{\\mathcal{L}_{#1}\\left(#2\\right)}', 2],
+          TauConstraints: '{\\tau_y}',
+          TauTime: '{\\tau_{\\text{cycle}}}',
+          TauGroup: '{\\tau_b}',
+          MLE: ['{\\widetilde{#1}}', 1],
+          tf: ['{\\widetilde{#1}}', 1],
+          eq: ['{\\widetilde{\\mathsf{eq}}\\left(#1, #2\\right)}', 2],
+          Def: '{:=}',
+          ChallengeSet: '{\\mathsf{C}}',
+          Complement: ['{\\neg{#1}}', 1],
+          Size: ['{\\left|#1\\right|}', 1],
+          Length: ['{L\\left(#1\\right)}', 1],
+          Lenght: ['{L\\left(#1\\right)}', 1],
+          Exp: ['{2^{#1}}', 1],
+          BigOmega: ['{\\Omega\\left(#1\\right)}', 1],
+          BigO: ['{O\\ \\left(#1\\right)}', 1],
+          boundary: ['{\\partial\\!\\left(#1\\right)}', 1],
+          OntoPHP: ['{\\operatorname{OFPHP}(#3^{#1}_{#2})}', 3],
+          PHP: ['{\\operatorname{PHP}(#3^{#1}_{#2})}', 3],
+          PHPBasic: ['\\PHP{n}{n-1}{K}'],
+          FPHP: ['{\\operatorname{FPHP}(#3^{#1}_{#2})}', 3], 
+          poly: '{\\operatorname{poly}}',
+          criticalAlpha: ['{\\alpha_{#1}}', 1],
+          CPlus: '{\\textcolor{blue}{C^{+}}}',
+          CStar: ['C'],
+          Axioms: '{\\mathcal{A}}',
+          GraphNbrs: ['{N_G(#1)}', 1],
+          ClauseNbrs: ['{N_C(#1)}', 1],
+          PseudoWidth: ['{\\mathcal{P}_{\\vec{d},#2}\\left(#1\\right)}', 2],
+          SuperHeavy: ['{\\mathcal{P}_{#2}\\left(#1\\right)}', 2],
+          SmallO: ['{o\\!(#1)}', 1],
+          Closure: ['{\\operatorname{Cl}(#1)}', 1],
+          ClosureParam: ['{\\operatorname{Cl}(#1)}', 1],
+          Dim: ['{\\dim(#1)}', 1],
+          Span: ['{\\operatorname{span}\\left\\{#1\\right\\}}', 1],
+          domain: ['{\\operatorname{dom}(#1)}', 1],
+          False: '{\\bot}',
+          opening: ['{r^{(#1)}_{\\text{#2}}}', 2],
+          NP: '{\\mathsf{NP}}',
+          Naturals: '{\\mathbb{N}}',
+          bit: '{\\{0,1\\}}',
+          samples: '{\\xleftarrow{\\$}}'
+        }
+      },
+      options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] }
+    };
+  </script>
+  
+  <script defer src="https://randomwalks.xyz/vendor/mathjax-3.2.2/es5/tex-chtml.js"></script>
+  
+  
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="https://randomwalks.xyz" aria-label="Random Walks — home">
+      <span>Random Walks</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="https://randomwalks.xyz/publications/">Publications</a>
+      <a href="https://randomwalks.xyz/blog/">Notes</a>
+      <a href="https://randomwalks.xyz/travel/">Miscellaneous</a>
+      <a href="https://randomwalks.xyz/cv/">CV</a>
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" hidden>
+        <svg class="theme-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+        <svg class="theme-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <!-- <a href="https://randomwalks.xyz/tags">Tags</a> -->
+      <!-- <a href="https://randomwalks.xyz/atom.xml">Feed</a> -->
+    </nav>
+  </header>
+
+  <div class="command-palette" id="command-palette" data-index-url="https://randomwalks.xyz/search_index.en.json" hidden>
+    <button class="command-backdrop" type="button" aria-label="Close search" data-command-close></button>
+    <section class="command-dialog" role="dialog" aria-modal="true" aria-labelledby="command-title">
+      <h2 class="visually-hidden" id="command-title">Search page titles</h2>
+      <div class="command-query">
+        <span aria-hidden="true">›</span>
+        <input id="command-input" type="search" placeholder="Search titles…" autocomplete="off" autocapitalize="none" spellcheck="false" aria-controls="command-results" aria-autocomplete="list">
+        <kbd>Esc</kbd>
+      </div>
+      <ol class="command-results" id="command-results" role="listbox"></ol>
+      <p class="command-status" role="status" aria-live="polite"></p>
+      <footer class="command-help"><span><kbd>↑</kbd><kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span></footer>
+    </section>
+  </div>
+
+  
+
+  <main id="main-content">
+    
+
+
+
+
+
+
+<article class="note footnotes-right note--side-toc">
+  <header class="note-header">
+    <h1>Sail To Lean Translation</h1>
+    <div class="note-meta">
+      <span class="note-authors">By Ari</span>
+      <time datetime="2026-11-09">09 November 2026</time>
+      
+        <time datetime="2026-11-09">Last updated 09 November 2026</time>
+      
+      
+      <ul class="tag-list" aria-label="Tags">
+        <li><a href="https://randomwalks.xyz/tags/compilers/">#compilers</a></li><li><a href="https://randomwalks.xyz/tags/lean/">#lean</a></li><li><a href="https://randomwalks.xyz/tags/formal-methods/">#formal-methods</a></li>
+      </ul>
+      
+    </div>
+    
+  </header>
+
+  <div class="note-layout note-layout--side">
+    
+    <nav class="contents contents-side" aria-label="Table of contents">
+      <h2>Contents</h2>
+      
+<ol>
+  
+  <li>
+    <a href="#the-specification">The Specification</a>
+    
+      
+<ol>
+  
+  <li>
+    <a href="#the-sail-files">The Sail Files</a>
+    
+  </li>
+  
+  <li>
+    <a href="#the-modules">The Modules</a>
+    
+  </li>
+  
+  <li>
+    <a href="#the-helpers">The Helpers</a>
+    
+  </li>
+  
+</ol>
+
+    
+  </li>
+  
+  <li>
+    <a href="#getting-the-specification-locally">Getting The Specification Locally</a>
+    
+  </li>
+  
+  <li>
+    <a href="#the-compiler">The Compiler</a>
+    
+  </li>
+  
+  <li>
+    <a href="#generating-lean-code">Generating Lean Code</a>
+    
+  </li>
+  
+  <li>
+    <a href="#the-runtime-library">The Runtime Library</a>
+    
+  </li>
+  
+  <li>
+    <a href="#summary">Summary</a>
+    
+  </li>
+  
+</ol>
+
+    </nav>
+    
+
+    <div class="prose">
+      <p>Since we started this project sometime around April of 2026, there have been improvements to Lean and the compiler.
+<a rel="noopener noreferrer external" target="_blank" href="https://quangvdao.github.io/">Quang Dao</a><sup class="footnote-reference" id="fr-thanks-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-thanks">[1]</a></sup> generously took the time to upgrade <a rel="noopener noreferrer external" target="_blank" href="https://github.com/LayerZero-Labs/jolt-qed/">jolt-qed</a> to use Lean version 4.35 (from 4.29), and a more up to date version of the sail compiler (<a rel="noopener noreferrer external" target="_blank" href="https://github.com/LayerZero-Labs/jolt-qed/pull/36">PR #36</a>).
+Additionally, Mathlib and lean-sail (the runtime library for the generated Lean code) were also upgraded.
+<a href="https://randomwalks.xyz/blog/sail-to-lean/">Last time</a>, we did a poor job of describing how we get this “trusted” generated Lean code for the RISC-V instruction set architecture (ISA)<sup class="footnote-reference" id="fr-rush-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-rush">[2]</a></sup>.
+As enough files have changed, we feel we should give a detailed of account of what is going on.
+How do we get this trusted Lean code for the RISC-V ISA?</p>
+<aside class="callout theorem-block callout-box thm-box">
+  <p>All steps described below were tested on a <code>x86_64</code> desktop running Arch Linux.
+It has an Intel Core i7-14700K (20 cores, 28 hardware threads) CPU and about 62.5 GiB of usable RAM.</p>
+</aside>
+<h2 id="the-specification">The Specification</h2>
+<p>There is a lot of code that is needed to get this translation, so we first, we introduce the characters of our play.</p>
+<h3 id="the-sail-files">The Sail Files</h3>
+<p>The main character is the source specification of the RISC-V ISA.
+It is written in Sail, a domain-specific language for describing ISA semantics.
+This specification has been adopted by RISC-V International as the formal specification of the RISC-V ISA.
+The code can be found in the <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/tree/266473f8b2872ac25f5cfaf5a4293d6421a40b5d">sail-riscv repository</a>, at commit <code>266473f</code>.
+These files describe the RISC-V ISA.
+How each instruction updates the RISCV cpu and the whole shabang.</p>
+<p>As everything is clearer with a working example, here is some code from the specification that describes 6 RISC-V instructions.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>function clause execute ITYPE(imm, rs1, rd, op) = {</span></span>
+<span class="giallo-l"><span>  let immext : xlenbits = sign_extend(imm);</span></span>
+<span class="giallo-l"><span>  X(rd) = match op {</span></span>
+<span class="giallo-l"><span>    ADDI  =&gt; X(rs1) + immext,</span></span>
+<span class="giallo-l"><span>    SLTI  =&gt; zero_extend(bool_to_bit(X(rs1) &lt;_s immext)),</span></span>
+<span class="giallo-l"><span>    SLTIU =&gt; zero_extend(bool_to_bit(X(rs1) &lt;_u immext)),</span></span>
+<span class="giallo-l"><span>    ANDI  =&gt; X(rs1) &amp; immext,</span></span>
+<span class="giallo-l"><span>    ORI   =&gt; X(rs1) | immext,</span></span>
+<span class="giallo-l"><span>    XORI  =&gt; X(rs1) ^ immext</span></span>
+<span class="giallo-l"><span>  };</span></span>
+<span class="giallo-l"><span>  RETIRE_SUCCESS</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p><em>Snippet 1: the specification code for 6 RISC-V instructions.</em></p>
+<p>It is in <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/extensions/I/base_insts.sail#L158-L169"><code>model/extensions/I/base_insts.sail</code>, lines 158–169</a>.
+So this function in the specification is describing what happens when these 6 instructions are executed on a RISC-V CPU.
+Eventually, we will want an equivalent version of this in the generated Lean code.</p>
+<h3 id="the-modules">The Modules</h3>
+<p>The RISC-V specification is a collection of 158 <code>.sail</code> files in the <code>model/</code> folder of <code>sail-riscv</code> repository.
+Each file holds some code from the specification which describes something about the RISC-V ISA.
+A module is a named group of <code>.sail</code> files and other modules, together with a list of the modules it depends on.
+That was a mouthful.
+In more simple words, loosely, a module is the logical grouping of files in the project and a description of what those file depends on.
+Now there is a single file <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/riscv.sail_project"><code>model/riscv.sail_project</code></a> that lists every module, its <code>.sail</code> files and the modules it depends on.
+For example, here is the module <code>I</code> from that file.
+<code>I</code> is a module that itself contains the two modules <code>I_types</code> and <code>I_insts</code>, and it depends on the module <code>core</code>.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>I {</span></span>
+<span class="giallo-l"><span>  requires core</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>  I_types {</span></span>
+<span class="giallo-l"><span>    before sys</span></span>
+<span class="giallo-l"><span>    files extensions/I/base_types.sail</span></span>
+<span class="giallo-l"><span>  }</span></span>
+<span class="giallo-l"><span>  I_insts {</span></span>
+<span class="giallo-l"><span>    requires exceptions, sys, I_types, Zicfilp_regs</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span>    files</span></span>
+<span class="giallo-l"><span>      extensions/I/base_insts.sail,</span></span>
+<span class="giallo-l"><span>      if $RMEM then</span></span>
+<span class="giallo-l"><span>        extensions/I/jalr_rmem.sail</span></span>
+<span class="giallo-l"><span>      else</span></span>
+<span class="giallo-l"><span>        extensions/I/jalr_seq.sail</span></span>
+<span class="giallo-l"><span>  }</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p><em>Snippet 2: the module <code>I</code> in <code>model/riscv.sail_project</code>.</em></p>
+<p>The module <code>I_types</code> includes one file, <code>extensions/I/base_types.sail</code>.
+Its line <code>before sys</code> is not a dependency. It only tells the compiler<sup class="footnote-reference" id="fr-compiler-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-compiler">[3]</a></sup> to process <code>I_types</code> before the module <code>sys</code>.</p>
+<p>The module <code>I_insts</code> depends on 4 other modules named <code>exceptions</code>, <code>sys</code>, <code>I_types</code> and <code>Zicfilp_regs</code>, and on the modules its parent modules depend on.
+RMEM is a flag that can be true or false, and only one of the two files <code>jalr_rmem</code> or <code>jalr_seq</code> is included.
+Dependency is described by require is what one might expect if they have programmed in any other language.
+In Snippet 1, the different variants of <code>op</code> were <code>ADDI</code>, <code>SLTI</code> and so on.
+Where did these names come from?
+They are defined in <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/extensions/I/base_types.sail#L11"><code>model/extensions/I/base_types.sail</code></a> as shown below.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>enum iop = {ADDI, SLTI, SLTIU, XORI, ORI, ANDI}  // immediate ops</span></span></code></pre>
+<p><em>Snippet 3: the names of the 6 instructions, in <code>model/extensions/I/base_types.sail</code>.</em></p>
+<p>As <code>I_types</code> is required by <code>I_insts</code>, the compiler will know what files to pull in.
+Finally, we need some additional help to get the generated Lean code for the RISCV-cpu to build.</p>
+<h3 id="the-helpers">The Helpers</h3>
+<p>When writing the specification, the sail-riscv authors sometimes use functions whose body is not defined in any <code>.sail</code> file.
+For example, look at the following code from the specification in <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/sys/sys_reservation.sail#L20"><code>model/sys/sys_reservation.sail</code></a> (Snippet 4):</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>val load_reservation = impure {interpreter: &quot;Platform.load_reservation&quot;, cpp: &quot;load_reservation&quot;, c: &quot;load_reservation&quot;, lem: &quot;load_reservation&quot;} : forall &#39;n, 0 &lt; &#39;n &lt; max_mem_access . (/* addr */ physaddrbits, /* width */ int(&#39;n)) -&gt; unit</span></span></code></pre>
+<p><em>Snippet 4: the declaration of <code>load_reservation</code>.</em></p>
+<p>It says that there is a function called <code>load_reservation</code>, which takes an address and a width and returns nothing.
+It does not say what the function does, and no <code>.sail</code> file gives it a body.
+The list in braces gives, for each tool that runs the specification, the name of the function that tool should call.<sup class="footnote-reference" id="fr-names-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-names">[4]</a></sup>
+Lean is not in the list, so the generated Lean code calls <code>load_reservation</code> by its own name.
+The compiler will translate every call to <code>load_reservation</code> fine, but there is no body for it to translate.
+As a result, the generated Lean code will not build.
+For builds to pass, the sail-riscv authors handwrote some Lean code, which the compiler copies over to the generated Lean project unchanged.
+All this code is listed in one file, <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/handwritten_support/RiscvExtras.lean"><code>handwritten_support/RiscvExtras.lean</code></a>.
+For <code>load_reservation</code>, the authors hand wrote this line of Lean code (Snippet 5):</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain"><span class="giallo-l"><span>axiom load_reservation : Arch.pa → Nat → SailM Unit</span></span></code></pre>
+<p><em>Snippet 5: the handwritten Lean stand-in for <code>load_reservation</code>, line 34 of <code>handwritten_support/RiscvExtras.lean</code>.</em></p>
+<p>They too did not give it any body, but they gave it a type.
+This is enough for the generated Lean code to typecheck, but it is not enough for execution.
+This is part of the reason the generated Lean code is noncomputable.</p>
+<figure class="image-figure" style="max-width: 55%">
+  <img src="./spec.svg" alt="Figure 1: All the specification files we need." loading="lazy" decoding="async">
+  <figcaption>Figure 1: All the specification files we need.</figcaption>
+</figure>
+<h2 id="getting-the-specification-locally">Getting The Specification Locally</h2>
+<p>Let us get a local copy of the specification files and the handwritten Lean helpers.
+Start in the directory where you want to keep the build; we will put everything in <code>scratch/sail-build/</code>.
+We clone our fork of <code>sail-riscv</code> and check out the commit used by <code>jolt-qed</code>.
+Replace <code>/absolute/path/to/jolt-qed</code> with the absolute path to your checkout of <code>jolt-qed</code>, where we keep the patch.
+We apply that patch to make the handwritten helpers work with the newer compiler and Lean version.<sup class="footnote-reference" id="fr-helpers-patch-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-helpers-patch">[5]</a></sup></p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6A737D;"># Where to find the patch.</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set JOLT_QED /absolute/path/to/jolt-qed</span></span>
+<span class="giallo-l"><span>JOLT_QED</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">/absolute/path/to/jolt-qed</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Keep the specification and compiler builds in the same scratch folder.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">mkdir</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> scratch/sail-build</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Download the RISC-V specification.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">git</span><span style="color: #032F62;"> clone https://github.com/abiswas3/sail-riscv.git scratch/sail-build/sail-riscv</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Go to the exact version of the specification that we use.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">git</span><span style="color: #005CC5;"> -C</span><span style="color: #032F62;"> scratch/sail-build/sail-riscv checkout 266473f8b2872ac25f5cfaf5a4293d6421a40b5d</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Apply our two-line change to RiscvExtras.lean.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">git</span><span style="color: #005CC5;"> -C</span><span style="color: #032F62;"> scratch/sail-build/sail-riscv apply &quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/sail-import/patches/sail-riscv-lean-handwritten.patch&quot;</span></span></code></pre><h2 id="the-compiler">The Compiler</h2>
+<p>With these three characters, we have everything we need to describe the RISC-V ISA, but we still need a compiler to translate the specification into Lean code.</p>
+<p>We now introduce the compiler, a program written in OCaml.
+It is general purpose in that it can generate code in several languages, including Lean.
+It can also generate C code from the specification.
+We will use the generated C code later to do differential testing, but that is a topic for another post.</p>
+<p>Our first step is to compile the compiler from its source to a binary file that is executable.
+Then we will take that executable, feed it appropriate command line arguments and complete our translation.
+Below are detailed instructions on how to build the compiler from source<sup class="footnote-reference" id="fr-patch-1"><a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fn-patch">[6]</a></sup>.
+We tested this build with opam 2.6.1, OCaml 5.4.1, Dune 3.24.2 and Z3 4.16.0.</p>
+<p>First install a C compiler, Git, GMP (a library for large numbers), Z3 (a solver the compiler uses to check the specification), pkgconf (which helps find installed libraries) and opam (OCaml’s package manager).
+On Arch Linux:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">sudo</span><span style="color: #032F62;"> pacman</span><span style="color: #005CC5;"> -S --needed</span><span style="color: #032F62;"> base-devel git gmp z3 pkgconf opam</span></span></code></pre>
+<p>On macOS:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6A737D;"># Install a C compiler and Git.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">xcode-select</span><span style="color: #005CC5;"> --install</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">brew</span><span style="color: #032F62;"> install gmp z3 pkgconf opam</span></span></code></pre>
+<p>Run the remaining commands in the same terminal.
+The examples use Bash; comments beside commands whose syntax differs show what to use in Fish instead.
+Run this from the same directory where you created <code>scratch/sail-build/</code> above.
+Replace <code>/absolute/path/to/jolt-qed</code> with the absolute path to your checkout of <code>jolt-qed</code>, which contains the patch.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6A737D;"># Where to find the patch. Replace this with your checkout&#39;s absolute path.</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set JOLT_QED /absolute/path/to/jolt-qed</span></span>
+<span class="giallo-l"><span>JOLT_QED</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">/absolute/path/to/jolt-qed</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Keep the sources, OCaml environment, cache and installed compiler together.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">mkdir</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> scratch/sail-build</span></span>
+<span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> scratch/sail-build</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set -gx SAIL_BUILD_DIR &quot;$PWD&quot;</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">export</span><span> SAIL_BUILD_DIR</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">&quot;</span><span>$PWD</span><span style="color: #032F62;">&quot;</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set -gx OPAMROOT &quot;$SAIL_BUILD_DIR/opam&quot;</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">export</span><span> OPAMROOT</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">&quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/opam&quot;</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set -gx XDG_CACHE_HOME &quot;$SAIL_BUILD_DIR/cache&quot;</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">export</span><span> XDG_CACHE_HOME</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">&quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/cache&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Initialise this separate opam root without changing shell startup files</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># or creating a default OCaml environment.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">opam</span><span style="color: #032F62;"> init</span><span style="color: #005CC5;"> --bare --no-setup</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Create a separate environment called &quot;sail&quot;, with its own OCaml 5.4.1 compiler</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># and its own libraries (like a Python virtual environment).</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">opam</span><span style="color: #032F62;"> switch create sail</span><span style="color: #005CC5;"> 5.4.1</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Make this terminal use that OCaml installation.</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: opam env --switch sail --shell=fish | source</span></span>
+<span class="giallo-l"><span style="color: #005CC5;">eval</span><span style="color: #032F62;"> &quot;$(</span><span style="color: #6F42C1;">opam</span><span style="color: #032F62;"> env</span><span style="color: #005CC5;"> --switch</span><span style="color: #032F62;"> sail</span><span style="color: #005CC5;"> --shell=bash</span><span style="color: #032F62;">)&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Check the OCaml compiler version (5.4.1).</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">ocamlc</span><span style="color: #005CC5;"> -version</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Download the source code of the compiler.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">git</span><span style="color: #032F62;"> clone https://github.com/rems-project/sail.git</span></span>
+<span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> sail</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Go to the exact version of the compiler that we use.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">git</span><span style="color: #032F62;"> checkout 2ae2199f8890180a8f9653f6ea08e54cd9790220</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Apply the fix from the unmerged pull request rems-project/sail#1774.</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># We keep this fix as a patch file in our repository, jolt-qed.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">git</span><span style="color: #032F62;"> apply &quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/sail-import/patches/1774-type-arithmetic.patch&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Install the OCaml libraries that the compiler depends on.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">opam</span><span style="color: #032F62;"> install</span><span style="color: #005CC5;"> --deps-only</span><span style="color: #032F62;"> .</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Compile the compiler.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">dune</span><span style="color: #032F62;"> build</span><span style="color: #005CC5;"> --release</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Install the compiler beside the source checkout.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">dune</span><span style="color: #032F62;"> install</span><span style="color: #005CC5;"> --release --prefix</span><span style="color: #032F62;"> &quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/sail-install&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># Check that it works. This prints the compiler&#39;s version, 0.20.3.</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">&quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #6F42C1;">/sail-install/bin/sail&quot;</span><span style="color: #005CC5;"> --version</span></span></code></pre>
+<p><code>OPAMROOT</code> tells opam where this environment lives.
+The activation command (<code>eval</code> in Bash, or <code>source</code> in Fish) puts the <code>sail</code> switch’s tools on this terminal’s <code>PATH</code>, so the subsequent <code>dune</code> commands use the dependencies installed in that switch.
+The source checkout is in <code>scratch/sail-build/sail/</code>, and the installed compiler is in <code>scratch/sail-build/sail-install/bin/sail</code>.</p>
+<p>To return to the build in a new terminal, replace the path below with the absolute path to the directory created above:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> /absolute/path/to/scratch/sail-build</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set -gx SAIL_BUILD_DIR &quot;$PWD&quot;</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">export</span><span> SAIL_BUILD_DIR</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">&quot;</span><span>$PWD</span><span style="color: #032F62;">&quot;</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set -gx OPAMROOT &quot;$SAIL_BUILD_DIR/opam&quot;</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">export</span><span> OPAMROOT</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">&quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/opam&quot;</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set -gx XDG_CACHE_HOME &quot;$SAIL_BUILD_DIR/cache&quot;</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">export</span><span> XDG_CACHE_HOME</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">&quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/cache&quot;</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: opam env --switch sail --shell=fish | source</span></span>
+<span class="giallo-l"><span style="color: #005CC5;">eval</span><span style="color: #032F62;"> &quot;$(</span><span style="color: #6F42C1;">opam</span><span style="color: #032F62;"> env</span><span style="color: #005CC5;"> --switch</span><span style="color: #032F62;"> sail</span><span style="color: #005CC5;"> --shell=bash</span><span style="color: #032F62;">)&quot;</span></span>
+<span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> sail</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6F42C1;">&quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #6F42C1;">/sail-install/bin/sail&quot;</span><span style="color: #005CC5;"> --version</span></span></code></pre><figure class="image-figure" style="max-width: 65%">
+  <img src="./build.svg" alt="Figure 2: from the compiler's source code to the `sail` binary." loading="lazy" decoding="async">
+  <figcaption>Figure 2: from the compiler’s source code to the <code>sail</code> binary.</figcaption>
+</figure>
+<h2 id="generating-lean-code">Generating Lean Code</h2>
+<p>Continue in the same terminal, using <code>JOLT_QED</code> and <code>SAIL_BUILD_DIR</code> from the build instructions above.
+Before running the compiler, set the variables below and move into the specification’s <code>model/</code> directory.
+Reading the module list requires Python 3.11 or later.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6A737D;"># The compiler&#39;s installed libraries.</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set -gx SAIL_DIR &quot;$SAIL_BUILD_DIR/sail-install/share/sail&quot;</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">export</span><span> SAIL_DIR</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">&quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/sail-install/share/sail&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set CONFIG &quot;$JOLT_QED/sail-import/rv64d_jolt.json&quot;</span></span>
+<span class="giallo-l"><span>CONFIG</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">&quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/sail-import/rv64d_jolt.json&quot;</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set MODULES (python3 -c &#39;import sys, tomllib; print(*tomllib.load(open(sys.argv[1], &quot;rb&quot;))[&quot;modules&quot;][&quot;selected&quot;], sep=&quot;\n&quot;)&#39; &quot;$JOLT_QED/sail-import/PROVENANCE.toml&quot;)</span></span>
+<span class="giallo-l"><span>MODULES</span><span style="color: #D73A49;">=</span><span>($(</span><span style="color: #6F42C1;">python3</span><span style="color: #005CC5;"> -c</span><span style="color: #032F62;"> &#39;import sys, tomllib; print(*tomllib.load(open(sys.argv[1], &quot;rb&quot;))[&quot;modules&quot;][&quot;selected&quot;], sep=&quot;\n&quot;)&#39; &quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/sail-import/PROVENANCE.toml&quot;</span><span>))</span></span>
+<span class="giallo-l"></span>
+<span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> &quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/sail-riscv/model&quot;</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">mkdir</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> ../build</span></span></code></pre><pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 1</span><span style="color: #6A737D;"># Run the compiler. The flags are the ones upstream sail-riscv uses to generate its own Lean code.</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 2</span><span style="color: #6A737D;"># The result goes into the folder ../build/Lean_RV64D.</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 3</span><span style="color: #6A737D;"># For Fish use this instead on the last line: riscv.sail_project $MODULES</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 4</span><span style="color: #6F42C1;">&quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #6F42C1;">/sail-install/bin/sail&quot;</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 5</span><span style="color: #005CC5;">  --strict-var --strict-bitvector --strict-exponentials \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 6</span><span style="color: #005CC5;">  --require-version 0.20.1 \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 7</span><span style="color: #005CC5;">  --memo-z3-path</span><span style="color: #032F62;"> ../build/sail_smt_cache</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 8</span><span style="color: #005CC5;">  --config</span><span style="color: #032F62;"> &quot;</span><span>$CONFIG</span><span style="color: #032F62;">&quot;</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;"> 9</span><span style="color: #005CC5;">  --lean \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">10</span><span style="color: #005CC5;">  --memo-z3 \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">11</span><span style="color: #005CC5;">  --lean-output-dir</span><span style="color: #032F62;"> ../build</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">12</span><span style="color: #005CC5;">  --lean-force-output \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">13</span><span style="color: #005CC5;">  --lean-non-beq-type</span><span style="color: #032F62;"> instruction</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">14</span><span style="color: #005CC5;">  --lean-non-beq-type</span><span style="color: #032F62;"> ExecutionResult</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">15</span><span style="color: #005CC5;">  --lean-non-beq-type</span><span style="color: #032F62;"> Step</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">16</span><span style="color: #005CC5;">  --lean-noncomputable \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">17</span><span style="color: #005CC5;">  --lean-noncomputable-function</span><span style="color: #032F62;"> encdec_forwards</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">18</span><span style="color: #005CC5;">  --lean-noncomputable-function</span><span style="color: #032F62;"> encdec_backwards</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">19</span><span style="color: #005CC5;">  --lean-noncomputable-function</span><span style="color: #032F62;"> encdec_forwards_matches</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">20</span><span style="color: #005CC5;">  --lean-noncomputable-function</span><span style="color: #032F62;"> encdec_backwards_matches</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">21</span><span style="color: #005CC5;">  --lean-noncomputable-function</span><span style="color: #032F62;"> encdec_compressed_forwards</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">22</span><span style="color: #005CC5;">  --lean-noncomputable-function</span><span style="color: #032F62;"> encdec_compressed_backwards</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">23</span><span style="color: #005CC5;">  --lean-noncomputable-function</span><span style="color: #032F62;"> encdec_compressed_forwards_matches</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">24</span><span style="color: #005CC5;">  --lean-noncomputable-function</span><span style="color: #032F62;"> encdec_compressed_backwards_matches</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">25</span><span style="color: #005CC5;">  --lean-import-file</span><span style="color: #032F62;"> ../handwritten_support/RiscvExtras.lean</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">26</span><span style="color: #005CC5;">  -o</span><span style="color: #032F62;"> Lean_RV64D</span><span style="color: #005CC5;"> \</span></span>
+<span class="giallo-l"><span aria-hidden="true" class="giallo-ln" style="color: #1B1F234D;">27</span><span style="color: #032F62;">  riscv.sail_project &quot;${</span><span>MODULES</span><span style="color: #032F62;">[</span><span style="color: #D73A49;">@</span><span style="color: #032F62;">]}&quot;</span></span></code></pre>
+<p>Now there is a lot going on here.
+All we had done so far was get the specification locally along with a few more files, and we built the compiler from source.
+The executable was tagged with version <code>0.20.3</code>.
+We did not really go over how to use this compiler.</p>
+<ul>
+<li>
+<p>Line 9 tells the compiler to generate Lean code.</p>
+</li>
+<li>
+<p>Line 7 sets the path to the SMT solver’s cache, we do not need to worry about this. It is the implementation detail of the compiler and how it uses z3. We do not care how the compiler works for now, just how to use it.</p>
+</li>
+<li>
+<p>Line 4 is the path of the compiler executable.</p>
+</li>
+<li>
+<p>Line 11 chooses <code>../build</code> as the directory in which to create the generated Lean project.
+Line 26 supplies its name, <code>Lean_RV64D</code>, so the project goes in <code>../build/Lean_RV64D/</code>.</p>
+</li>
+<li>
+<p>Line 25 supplies the handwritten Lean helper we introduced earlier, <code>handwritten_support/RiscvExtras.lean</code>.
+The compiler copies it into the generated Lean project and imports it.
+While copying it, the compiler replaces <code>THE_MODULE_NAME</code> with <code>LeanRV64D</code>.</p>
+</li>
+<li>
+<p>Line 26 names the generated Lean project <code>Lean_RV64D</code>.
+This is the name used with the output directory on line 11.</p>
+</li>
+<li>
+<p>Line 27 supplies the specification’s project file and the list of modules we want to translate.</p>
+<ul>
+<li>
+<p><code>riscv.sail_project</code> is the project file we saw earlier: it lists the modules and the <code>.sail</code> files they contain. <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/sail/blob/2ae2199f8890180a8f9653f6ea08e54cd9790220/doc/asciidoc/modules.adoc#L49-L64">Sail manual: modules</a>.
+This file is in <code>sail-riscv/model/</code>, where we run the command.</p>
+</li>
+<li>
+<p><code>MODULES</code> holds our chosen subset of the module names listed in <code>riscv.sail_project</code>.
+Bash replaces <code>"${MODULES[@]}"</code> with those names, passing each one to the compiler as a separate argument.</p>
+<p>The module list comes from <code>$JOLT_QED/sail-import/PROVENANCE.toml</code>.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Line 5 enables three compiler checks on the specification.</p>
+<ul>
+<li>
+<p><code>--strict-var</code> makes the compiler report an error and stop translation if a mutable variable in the specification is introduced without <code>var</code>. <a rel="noopener noreferrer external" target="_blank" href="https://alasdair.github.io/manual.html#_mutable_variables">Sail manual: mutable variables</a>.
+In <a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/core/arithmetic.sail#L79-L90">this function in the specification</a>, <code>count</code> is mutable: the loop changes it with <code>count = new_count</code>.
+It is already declared with <code>var</code>, so it passes this check.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain" data-name="sail-riscv/model/core/arithmetic.sail:79-90"><span class="giallo-l"><span>val count_ones : forall &#39;n, &#39;n &gt;= 0. (bits(&#39;n)) -&gt; range(0, &#39;n)</span></span>
+<span class="giallo-l"><span>function count_ones(x) = {</span></span>
+<span class="giallo-l"><span>  var count : range(0, &#39;n) = 0;</span></span>
+<span class="giallo-l"><span>  foreach (i from 0 to (&#39;n - 1)) {</span></span>
+<span class="giallo-l"><span>    if x[i] == 0b1 then {</span></span>
+<span class="giallo-l"><span>      let new_count = count + 1;</span></span>
+<span class="giallo-l"><span>      assert(new_count &lt;= &#39;n);</span></span>
+<span class="giallo-l"><span>      count = new_count;</span></span>
+<span class="giallo-l"><span>    }</span></span>
+<span class="giallo-l"><span>  };</span></span>
+<span class="giallo-l"><span>  count</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>In <a rel="noopener noreferrer external" target="_blank" href="https://github.com/LayerZero-Labs/jolt-qed/blob/06c5f2b885b712fc321ae6d3e937d8eba4dff82a/LeanRV64D/Arithmetic.lean#L281-L297">the generated Lean code</a>, the changing count is stored in <code>loop_vars</code>, marked as mutable with <code>let mut</code>:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="LeanRV64D/Arithmetic.lean:281-297"><span class="giallo-l"><span style="color: #6A737D;">/-- Type quantifiers: k_n : Nat, k_n ≥ 0, k_n ≥ 0 -/</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> count_ones</span><span> (x : (BitVec k_n)) : SailM Nat := </span><span style="color: #D73A49;">do</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  let</span><span> count : Nat := </span><span style="color: #005CC5;">0</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  let</span><span> loop_i_lower := </span><span style="color: #005CC5;">0</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  let</span><span> loop_i_upper := ((Sail.BitVec.length x) -i </span><span style="color: #005CC5;">1</span><span>)</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  let mut</span><span> loop_vars := count</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  for</span><span> i </span><span style="color: #D73A49;">in</span><span> [loop_i_lower:loop_i_upper:</span><span style="color: #005CC5;">1</span><span>]i </span><span style="color: #D73A49;">do</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    let</span><span> count := loop_vars</span></span>
+<span class="giallo-l"><span>    loop_vars ← </span><span style="color: #D73A49;">do</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">      if</span><span> (((BitVec.access x i) == </span><span style="color: #005CC5;">1</span><span>#</span><span style="color: #005CC5;">1</span><span>) : Bool)</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">      then</span></span>
+<span class="giallo-l"><span>        (</span><span style="color: #D73A49;">do</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">          let</span><span> new_count := (count +i </span><span style="color: #005CC5;">1</span><span>)</span></span>
+<span class="giallo-l"><span>          sail_assert (new_count ≤b (Sail.BitVec.length x)) </span><span style="color: #032F62;">&quot;core/arithmetic.sail:85.28-85.29&quot;</span></span>
+<span class="giallo-l"><span>          (pure new_count))</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">      else</span><span> (pure count)</span></span>
+<span class="giallo-l"><span>  (pure loop_vars)</span></span></code></pre></li>
+<li>
+<p><code>--strict-bitvector</code> requires bitvector lengths in the specification to be nonnegative.</p>
+</li>
+<li>
+<p><code>--strict-exponentials</code> requires exponents in type-level expressions in the specification, such as <code>2 ^ n</code>, to be nonnegative.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Line 6 requires compiler version <code>0.20.1</code> or later.
+Our compiler is version <code>0.20.3</code>, so it passes this check. <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/sail/blob/2ae2199f8890180a8f9653f6ea08e54cd9790220/doc/asciidoc/usage.adoc#L264-L266">Sail manual: version check</a>.</p>
+</li>
+<li>
+<p>Line 8 gives the compiler a <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/sail/blob/2ae2199f8890180a8f9653f6ea08e54cd9790220/doc/asciidoc/configuration.adoc#L3-L32">JSON configuration file</a>.
+We change three settings in the <a rel="noopener noreferrer external" target="_blank" href="https://github.com/LayerZero-Labs/jolt-qed/blob/06c5f2b885b712fc321ae6d3e937d8eba4dff82a/sail-import/rv64d_v256_e64.json">default RV64D configuration</a> from <code>true</code> to <code>false</code>, because Jolt does not support these features:</p>
+<ul>
+<li><code>memory.misaligned.supported</code>: <a rel="noopener noreferrer external" target="_blank" href="https://docs.riscv.org/reference/isa/v20240411/unpriv/rv32.html">misaligned memory accesses</a>, such as a four-byte load from an address that is not a multiple of four.</li>
+<li><code>extensions.Zicfilp.supported</code>: <a rel="noopener noreferrer external" target="_blank" href="https://docs.riscv.org/reference/isa/unpriv/unpriv-cfi.html">landing pads</a>, which check where indirect calls and jumps land.</li>
+<li><code>extensions.Zicfiss.supported</code>: <a rel="noopener noreferrer external" target="_blank" href="https://docs.riscv.org/reference/isa/unpriv/unpriv-cfi.html">shadow stacks</a>, which check function return addresses.</li>
+</ul>
+<p>The modified file is <code>$JOLT_QED/sail-import/rv64d_jolt.json</code>, whose path we store in <code>CONFIG</code> above.</p>
+</li>
+<li>
+<p>Line 10 tells the compiler to save and reuse answers from Z3, so repeated checks can be faster.
+Line 7 specifies where to keep that cache. <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/sail/blob/2ae2199f8890180a8f9653f6ea08e54cd9790220/doc/asciidoc/usage.adoc#L253-L255">Sail manual: solver caching</a>.</p>
+</li>
+<li>
+<p>Line 12 allows the compiler to generate into that project directory again if it already exists, removing the old generated Lean files first.</p>
+</li>
+<li>
+<p>Lines 13–15 tell the compiler to omit <code>deriving BEq</code> for three types in the generated Lean code.
+<code>BEq</code> supplies Boolean equality, used by <code>==</code>.
+The three types are <code>instruction</code>, <code>ExecutionResult</code>, and <code>Step</code>.</p>
+<p>For example, the generated <a rel="noopener noreferrer external" target="_blank" href="https://github.com/LayerZero-Labs/jolt-qed/blob/06c5f2b885b712fc321ae6d3e937d8eba4dff82a/LeanRV64D/Defs.lean#L1324-L1330">Step</a> type derives <code>Inhabited</code> and <code>Repr</code>, with no <code>BEq</code>:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="LeanRV64D/Defs.lean:1324-1330"><span class="giallo-l"><span style="color: #D73A49;">inductive</span><span style="color: #6F42C1;"> Step</span><span style="color: #D73A49;"> where</span></span>
+<span class="giallo-l"><span>  | Step_Pending_Interrupt (_ : (InterruptType × Privilege))</span></span>
+<span class="giallo-l"><span>  | Step_Ext_Fetch_Failure (_ : ext_fetch_addr_error)</span></span>
+<span class="giallo-l"><span>  | Step_Fetch_Failure (_ : (virtaddr × ExceptionType))</span></span>
+<span class="giallo-l"><span>  | Step_Execute (_ : (ExecutionResult × instbits))</span></span>
+<span class="giallo-l"><span>  | Step_Waiting (_ : WaitReason)</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  deriving</span><span> Inhabited, Repr</span></span></code></pre></li>
+<li>
+<p>Line 16 adds <code>noncomputable section</code> to the generated Lean code.
+This allows definitions to depend on helpers declared as axioms, such as <code>load_reservation</code>, without requiring executable implementations of those helpers.</p>
+</li>
+<li>
+<p>Lines 17–24 mark the eight named functions as <code>noncomputable</code> in the generated Lean code.
+The generated Lean code still contains their definitions, as seen in <a rel="noopener noreferrer external" target="_blank" href="https://github.com/LayerZero-Labs/jolt-qed/blob/06c5f2b885b712fc321ae6d3e937d8eba4dff82a/LeanRV64D/Types.lean#L3154">encdec_forwards</a>, one of the functions listed above.</p>
+</li>
+</ul>
+<p>At the end of all this, you should have a folder called <code>Lean_RV64D</code> at <code>$SAIL_BUILD_DIR/sail-riscv/build/Lean_RV64D/</code>.
+It contains the generated Lean code in the <code>LeanRV64D/</code> folder and the <code>LeanRV64D.lean</code> file.
+We then copy both into <code>jolt-qed</code>:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6F42C1;">cp</span><span style="color: #005CC5;"> -R</span><span style="color: #032F62;"> &quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/sail-riscv/build/Lean_RV64D/LeanRV64D&quot; &quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/&quot;</span></span>
+<span class="giallo-l"><span style="color: #6F42C1;">cp</span><span style="color: #032F62;"> &quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/sail-riscv/build/Lean_RV64D/LeanRV64D.lean&quot; &quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/&quot;</span></span></code></pre><figure class="image-figure" style="max-width: 75%">
+  <img src="./trusted.svg" alt="Figure 3: Once we have the compiler, and the specification files we can generate the trusted lean code in `LeanRV64D`." loading="lazy" decoding="async">
+  <figcaption>Figure 3: Once we have the compiler, and the specification files we can generate the trusted lean code in <code>LeanRV64D</code>.</figcaption>
+</figure>
+<h2 id="the-runtime-library">The Runtime Library</h2>
+<p>Go back to Snippet 1.
+To execute <code>ADDI</code>, the specification reads the register <code>rs1</code> with <code>X(rs1)</code>.
+<code>X</code> is a shorthand, and reading with it calls <code>rX_bits</code>, which turns the register index into a number and calls <code>rX</code> (<a rel="noopener noreferrer external" target="_blank" href="https://github.com/riscv/sail-riscv/blob/266473f8b2872ac25f5cfaf5a4293d6421a40b5d/model/core/regs.sail#L229-L235"><code>model/core/regs.sail</code>, lines 229–235</a>).
+Here is <code>rX</code> in the specification.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="plain" data-name="sail-riscv/model/core/regs.sail:151-188"><span class="giallo-l"><span>function rX (Regno(r) : regno) -&gt; xlenbits = {</span></span>
+<span class="giallo-l"><span>  let v : regtype =</span></span>
+<span class="giallo-l"><span>    match r {</span></span>
+<span class="giallo-l"><span>      0 =&gt; zero_reg,</span></span>
+<span class="giallo-l"><span>      1 =&gt; x1,</span></span>
+<span class="giallo-l"><span>      2 =&gt; x2,</span></span>
+<span class="giallo-l"><span>      // ... and so on for registers 3 to 30</span></span>
+<span class="giallo-l"><span>      31 =&gt; x31,</span></span>
+<span class="giallo-l"><span>    };</span></span>
+<span class="giallo-l"><span>  regval_from_reg(v)</span></span>
+<span class="giallo-l"><span>}</span></span></code></pre>
+<p>Register 0 in RISC-V always holds zero, so <code>rX</code> returns the constant <code>zero_reg</code> for it.
+Every other number picks one of the registers <code>x1</code> to <code>x31</code>, which are declared a few lines above with <code>register x1 : regtype</code> and so on.
+In Sail, writing the name of a register reads it.
+There is no function call.</p>
+<p>Here is the Lean code the compiler generated for <code>rX</code>.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="LeanRV64D/Regs.lean:621-657"><span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> rX</span><span> (app_0 : regno) : SailM (BitVec </span><span style="color: #005CC5;">64</span><span>) := </span><span style="color: #D73A49;">do</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  let</span><span> .Regno r := app_0</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  let</span><span> v ← (( </span><span style="color: #D73A49;">do</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">    match</span><span> r </span><span style="color: #D73A49;">with</span></span>
+<span class="giallo-l"><span>    | </span><span style="color: #005CC5;">0</span><span> =&gt; (pure zero_reg)</span></span>
+<span class="giallo-l"><span>    | </span><span style="color: #005CC5;">1</span><span> =&gt; readReg x1</span></span>
+<span class="giallo-l"><span>    | </span><span style="color: #005CC5;">2</span><span> =&gt; readReg x2</span></span>
+<span class="giallo-l"><span>    -- ... and so on </span><span style="color: #D73A49;">for</span><span> registers </span><span style="color: #005CC5;">3</span><span> to </span><span style="color: #005CC5;">30</span></span>
+<span class="giallo-l"><span>    | _ =&gt; readReg x31 ) : SailM regtype )</span></span>
+<span class="giallo-l"><span>  (pure (regval_from_reg v))</span></span></code></pre>
+<p>The Lean <code>rX</code> is generated, like everything else in <code>LeanRV64D/</code>.
+Each register read in the Sail code has become a call to <code>readReg</code>.
+But none of the 135 files in <code>LeanRV64D/</code> defines <code>readReg</code>.
+Reading a register is built into the Sail language, so the specification does not define it either, and the compiler has no Sail code to translate.</p>
+<p>The body of <code>readReg</code> comes from <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/lean-sail/tree/1e5b216bf881ef08da160db63b44ecda430802d6">lean-sail</a>, a small Lean library written by the same people who wrote the compiler.
+Every generated Lean file starts with <code>import Sail</code>, and that import is lean-sail.
+Here is <code>readReg</code> in <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/lean-sail/blob/1e5b216bf881ef08da160db63b44ecda430802d6/Sail/ConcurrencyInterfaceV1.lean#L172-L176"><code>Sail/ConcurrencyInterfaceV1.lean</code></a>.</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="lean" data-name="lean-sail/Sail/ConcurrencyInterfaceV1.lean:172-176"><span class="giallo-l"><span style="color: #D73A49;">@[simp_sail]</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">def</span><span style="color: #6F42C1;"> readReg</span><span> (r : Register) : PreSailM RegisterType c ue (RegisterType r) := </span><span style="color: #D73A49;">do</span></span>
+<span class="giallo-l"><span style="color: #D73A49;">  let</span><span> .some s := (← get).regs.get? r</span></span>
+<span class="giallo-l"><span>    | throw .Unreachable</span></span>
+<span class="giallo-l"><span>  pure s</span></span></code></pre>
+<p><code>readReg</code> looks up the register <code>r</code> in the machine’s state and returns its value.
+lean-sail also defines that state, which we discussed in detail in <a href="https://randomwalks.xyz/blog/jolt-qed/state/">How to Model a CPU in Lean</a>.</p>
+<p>So <code>readReg</code> is in the same position as <code>load_reservation</code> from <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#the-helpers">The Helpers</a>.
+The generated code calls both, and neither has a body in the specification.
+<code>load_reservation</code> is specific to RISC-V, so the sail-riscv authors wrote a stand-in for it in <code>RiscvExtras.lean</code>.
+<code>readReg</code> is needed by every Sail specification, whatever the ISA, so the compiler’s authors wrote it once, in lean-sail.
+Without <code>import Sail</code>, <code>readReg</code> would be an unknown name, and the generated code would not build.
+The same is true of <code>writeReg</code>, which <code>wX</code> uses to write a register.</p>
+<p>The compiler and lean-sail are released together, and the compiler at commit <code>2ae2199</code> expects lean-sail tag <code>v8</code>.
+We copied only <code>LeanRV64D/</code> into <code>jolt-qed</code>, so <code>jolt-qed</code>’s own <a rel="noopener noreferrer external" target="_blank" href="https://github.com/LayerZero-Labs/jolt-qed/blob/06c5f2b885b712fc321ae6d3e937d8eba4dff82a/lakefile.toml"><code>lakefile.toml</code></a> asks for lean-sail at <code>v8</code>.
+<code>lake-manifest.json</code> pins that tag to commit <code>1e5b216</code>.</p>
+<h2 id="summary">Summary</h2>
+<p>Putting everything together we get the following picture</p>
+<figure class="image-figure" style="max-width: 90%">
+  <img src="./overview.svg" alt="" loading="lazy" decoding="async">
+</figure>
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn-thanks">
+<p>Thanks Quang! <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-thanks-1">↩</a></p>
+</li>
+<li id="fn-rush">
+<p>I wish in a rush, and got Claude to get the thing to pass and then forgot about it. We left behind instructions on how to reproduce the work, but admittedly, I myself was not sure of what I was doing. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-rush-1">↩</a></p>
+</li>
+<li id="fn-compiler">
+<p>We have not introduced this guy yet. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-compiler-1">↩</a></p>
+</li>
+<li id="fn-names">
+<p>For example, the interpreter uses <code>Platform.load_reservation</code>, while the C target uses <code>load_reservation</code>. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-names-1">↩</a></p>
+</li>
+<li id="fn-helpers-patch">
+<p>The patch adds <code>open THE_MODULE_NAME</code> so the helper can refer to types inside the generated model’s namespace; the compiler replaces this placeholder with <code>LeanRV64D</code> when copying the file.
+It also changes <code>extension.toCtorIdx</code> to <code>extension.ctorIdx</code>, the name available in Lean 4.35, in the helper’s <code>SizeOf extension</code> instance. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-helpers-patch-1">↩</a></p>
+</li>
+<li id="fn-patch">
+<p>We apply the fix from <a rel="noopener noreferrer external" target="_blank" href="https://github.com/rems-project/sail/pull/1774">rems-project/sail#1774</a> for missing parentheses in the Lean translation of type-level arithmetic.
+Without it, the compiler translates <code>(if true then 8 else 4) * 8</code> as <code>if true then 8 else 4 * 8</code>, which Lean reads as <code>if true then 8 else (4 * 8)</code>.
+This makes <code>flen</code>, the floating-point register width, 8 bits instead of 64.
+The PR is still open as of 9 November 2026, so we apply the saved patch in <code>sail-import/patches/1774-type-arithmetic.patch</code> before building the compiler. <a href="https://randomwalks.xyz/blog/jolt-qed/translation/#fr-patch-1">↩</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+  </div>
+</article>
+
+  </main>
+
+  <footer class="site-footer">
+    <!-- <div> -->
+    <!--   <h2>Working Notes</h2> -->
+    <!--   <p>Something to say</p> -->
+    <!-- </div> -->
+    
+    <!-- <div> -->
+    <!--   <h2>Elsewhere</h2> -->
+    <!--   <ul> -->
+    <!--     <li><a href="https://randomwalks.xyz/atom.xml">Atom feed</a></li> -->
+    <!--     <li><a href="https://randomwalks.xyz/tags">Browse by tag</a></li> -->
+    <!--   </ul> -->
+    <!-- </div> -->
+    
+  </footer>
+
+  <script>
+    document.querySelectorAll('pre').forEach(function (pre) {
+      if (!pre.querySelector('code')) return;
+      var button = document.createElement('button');
+      button.className = 'copy-code';
+      button.type = 'button';
+      button.textContent = 'Copy';
+      button.addEventListener('click', function () {
+        var clone = pre.querySelector('code').cloneNode(true);
+        clone.querySelectorAll('.giallo-ln').forEach(function (line) { line.remove(); });
+        navigator.clipboard.writeText(clone.textContent).then(function () {
+          button.textContent = 'Copied';
+          window.setTimeout(function () { button.textContent = 'Copy'; }, 1400);
+        });
+      });
+      pre.appendChild(button);
+    });
+  </script>
+  <script>
+    window.addEventListener('load', function () {
+      function containShortcodeMath() {
+        var selector =
+          '.callout mjx-container[display="true"], ' +
+          '.comparison-dual mjx-container[display="true"], ' +
+          '.comparison-single mjx-container[display="true"]';
+
+        function wrap(equation) {
+          if (equation.parentElement.classList.contains('shortcode-math-scroll')) return;
+          var boundary = document.createElement('span');
+          boundary.className = 'shortcode-math-scroll';
+          equation.before(boundary);
+          boundary.appendChild(equation);
+        }
+
+        document.querySelectorAll(selector).forEach(wrap);
+
+        document.querySelectorAll(
+          '.callout mjx-container:not([display="true"]), ' +
+          '.comparison-dual mjx-container:not([display="true"]), ' +
+          '.comparison-single mjx-container:not([display="true"])'
+        ).forEach(function (equation) {
+          var line = equation.closest('li, p') || equation.parentElement;
+          if (equation.getBoundingClientRect().width > line.clientWidth) wrap(equation);
+        });
+      }
+
+      if (window.MathJax && MathJax.startup && MathJax.startup.promise) {
+        MathJax.startup.promise.then(containShortcodeMath);
+      } else {
+        containShortcodeMath();
+      }
+    });
+  </script>
+  <script>
+    (function () {
+      var prose = document.querySelector('.prose');
+      if (!prose || prose.querySelector('.bibliography')) return;
+
+      var citations = prose.querySelectorAll('a.citation[data-cite-key]');
+      if (!citations.length) return;
+
+      var bibliography = document.createElement('div');
+      var heading = document.createElement('h2');
+      var list = document.createElement('ol');
+      var seen = new Set();
+
+      bibliography.className = 'bibliography';
+      heading.textContent = 'References';
+      bibliography.append(heading, list);
+
+      citations.forEach(function (citation) {
+        var key = citation.dataset.citeKey;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+
+        var item = document.createElement('li');
+        var title = document.createElement('span');
+        var authors = citation.dataset.citeAuthors;
+        var venue = citation.dataset.citeVenue;
+        var year = citation.dataset.citeYear;
+
+        item.id = 'ref-' + key;
+        if (authors) item.append(document.createTextNode(authors + '. '));
+        title.className = 'bib-title';
+        title.textContent = citation.dataset.citeTitle;
+        item.append(title);
+        if (citation.dataset.citeTitle) item.append(document.createTextNode('.'));
+        if (venue) {
+          var venueElement = document.createElement('em');
+          venueElement.textContent = venue;
+          item.append(document.createTextNode(' '), venueElement);
+        }
+        if (year) item.append(document.createTextNode((venue ? ', ' : ' ') + year));
+        item.append(document.createTextNode('.'));
+        list.appendChild(item);
+      });
+
+      prose.appendChild(bibliography);
+    })();
+
+    document.addEventListener('click', function (event) {
+      var back = event.target.closest('.bib-back');
+      if (back) {
+        event.preventDefault();
+        var source = document.getElementById(back.getAttribute('data-source'));
+        if (source) source.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      var link = event.target.closest('a.citation[href^="#ref-"]');
+      if (!link) return;
+
+      event.preventDefault();
+      document.querySelectorAll('.citation-highlight').forEach(function (item) {
+        item.classList.remove('citation-highlight');
+      });
+      document.querySelectorAll('.bib-back').forEach(function (item) { item.remove(); });
+
+      var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+      if (!target) return;
+
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.classList.add('citation-highlight');
+
+      if (!link.id) link.id = 'cite-source-' + target.id;
+      var arrow = document.createElement('a');
+      arrow.className = 'bib-back';
+      arrow.setAttribute('data-source', link.id);
+      arrow.setAttribute('href', '#' + link.id);
+      arrow.setAttribute('aria-label', 'Back to citation');
+      arrow.textContent = ' ↩';
+      target.appendChild(arrow);
+    });
+  </script>
+  <script>
+    // Expose the pinned header's height so sticky elements and anchor jumps sit below it.
+    (function () {
+      var header = document.querySelector('.site-header');
+      if (!header) return;
+      function update() {
+        document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+      }
+      update();
+      if (window.ResizeObserver) new ResizeObserver(update).observe(header);
+      else window.addEventListener('resize', update);
+    })();
+  </script>
+  <script defer src="https://randomwalks.xyz/search.js?h=fc484d91e37c4f6c4c2a"></script>
+  
+<script defer src="https://randomwalks.xyz/tag-colours.js?h=862d01e15ac82a14daed"></script>
+
+
+
+<script>
+  (function () {
+    var prose = document.querySelector('.prose');
+    if (!prose) return;
+
+    var references = prose.querySelectorAll('.footnote-reference');
+    var footnotes = prose.querySelector('.footnotes');
+    if (!footnotes) return;
+
+    function removeRedundantFootnoteHeading() {
+      var heading = prose.querySelector('#footnotes-and-references');
+      if (!heading || heading.nextElementSibling !== footnotes) return;
+
+      heading.remove();
+      document.querySelectorAll('.contents a[href="#footnotes-and-references"]').forEach(function (link) {
+        var item = link.closest('li');
+        if (item) item.remove();
+      });
+    }
+
+    if (!references.length) {
+      if (!footnotes.querySelector('li')) {
+        removeRedundantFootnoteHeading();
+        footnotes.remove();
+      }
+      return;
+    }
+
+    var transformed = 0;
+    references.forEach(function (reference) {
+      var link = reference.querySelector('a');
+      if (!link) return;
+
+      var targetId = new URL(link.href, document.baseURI).hash.slice(1);
+      var definition = targetId ? document.getElementById(targetId) : null;
+      if (!definition) return;
+
+      transformed += 1;
+      var noteId = 'sidenote-' + transformed;
+      var clone = definition.cloneNode(true);
+      clone.querySelectorAll('a').forEach(function (candidate) {
+        if (new URL(candidate.href, document.baseURI).hash.indexOf('#fr-') === 0) candidate.remove();
+      });
+
+      var noteBody = Array.from(clone.children).map(function (child) {
+        return child.tagName === 'P' ? child.innerHTML : child.outerHTML;
+      }).join(' ');
+
+      var number = document.createElement('button');
+      number.type = 'button';
+      number.className = 'sidenote-number';
+      number.textContent = link.textContent;
+      number.setAttribute('aria-expanded', 'false');
+      number.setAttribute('aria-controls', noteId);
+      number.setAttribute('aria-label', 'Show footnote ' + link.textContent);
+
+      var note = document.createElement('span');
+      note.className = 'sidenote';
+      note.id = noteId;
+      note.innerHTML = '<span class="sidenote-num">' + link.textContent + '.</span> ' + noteBody;
+
+      number.addEventListener('click', function () {
+        var open = note.classList.toggle('is-open');
+        number.setAttribute('aria-expanded', String(open));
+      });
+
+      reference.replaceWith(number, note);
+    });
+
+    if (transformed) {
+      prose.classList.add('footnotes-are-sidenotes');
+      removeRedundantFootnoteHeading();
+    }
+  })();
+</script>
+
+
+
+</body>
+</html>
