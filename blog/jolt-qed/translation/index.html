@@ -8,7 +8,7 @@
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#ffffff">
   <script src="https://randomwalks.xyz/theme.js?h=022c5e6dda6564ebbb98"></script>
-  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=f196a0bcbf965ee3648a">
+  <link rel="stylesheet" href="https://randomwalks.xyz/style.css?h=a39ef98aa3becc986083">
   <link rel="alternate" type="application/atom+xml" title="Random Walks" href="https://randomwalks.xyz/atom.xml">
   
   
@@ -149,23 +149,23 @@
       
 <ol>
   
-  <li>
+  <li class="toc-level-2">
     <a href="#the-specification">The Specification</a>
     
       
 <ol>
   
-  <li>
+  <li class="toc-level-3">
     <a href="#the-sail-files">The Sail Files</a>
     
   </li>
   
-  <li>
+  <li class="toc-level-3">
     <a href="#the-modules">The Modules</a>
     
   </li>
   
-  <li>
+  <li class="toc-level-3">
     <a href="#the-helpers">The Helpers</a>
     
   </li>
@@ -175,27 +175,27 @@
     
   </li>
   
-  <li>
+  <li class="toc-level-2">
     <a href="#getting-the-specification-locally">Getting The Specification Locally</a>
     
   </li>
   
-  <li>
+  <li class="toc-level-2">
     <a href="#the-compiler">The Compiler</a>
     
   </li>
   
-  <li>
+  <li class="toc-level-2">
     <a href="#generating-lean-code">Generating Lean Code</a>
     
   </li>
   
-  <li>
+  <li class="toc-level-2">
     <a href="#the-runtime-library">The Runtime Library</a>
     
   </li>
   
-  <li>
+  <li class="toc-level-2">
     <a href="#summary">Summary</a>
     
   </li>
@@ -356,8 +356,7 @@ On Arch Linux:</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6A737D;"># Install a C compiler and Git.</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">xcode-select</span><span style="color: #005CC5;"> --install</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">brew</span><span style="color: #032F62;"> install gmp z3 pkgconf opam</span></span></code></pre>
-<p>Run this from the same directory where you created <code>scratch/sail-build/</code> above.
-Replace <code>/absolute/path/to/jolt-qed</code> with the absolute path to your checkout of <code>jolt-qed</code>, which contains the patch.</p>
+<p>Run this from the same directory where you created <code>scratch/sail-build/</code> above.</p>
 <pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6A737D;"># Where to find the patch. Replace this with your checkout&#39;s absolute path.</span></span>
 <span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set JOLT_QED /absolute/path/to/jolt-qed</span></span>
 <span class="giallo-l"><span>JOLT_QED</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">/absolute/path/to/jolt-qed</span></span>
@@ -411,8 +410,10 @@ Replace <code>/absolute/path/to/jolt-qed</code> with the absolute path to your c
 <p><code>OPAMROOT</code> tells opam where this environment lives.
 The activation command (<code>eval</code> in Bash, or <code>source</code> in Fish) puts the <code>sail</code> switch’s tools on this terminal’s <code>PATH</code>, so the subsequent <code>dune</code> commands use the dependencies installed in that switch.
 The source checkout is in <code>scratch/sail-build/sail/</code>, and the installed compiler is in <code>scratch/sail-build/sail-install/bin/sail</code>.</p>
-<p>To return to the build in a new terminal, replace the path below with the absolute path to the directory created above:</p>
-<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> /absolute/path/to/scratch/sail-build</span></span>
+<p>To return to the build in a new terminal, replace the two paths below with your checkout and build directories:</p>
+<pre class="giallo" style="color: #24292E; background-color: #FFFFFF;" ><code data-lang="shellscript"><span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set JOLT_QED /absolute/path/to/jolt-qed</span></span>
+<span class="giallo-l"><span>JOLT_QED</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">/absolute/path/to/jolt-qed</span></span>
+<span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> /absolute/path/to/scratch/sail-build</span></span>
 <span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set -gx SAIL_BUILD_DIR &quot;$PWD&quot;</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">export</span><span> SAIL_BUILD_DIR</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">&quot;</span><span>$PWD</span><span style="color: #032F62;">&quot;</span></span>
 <span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set -gx OPAMROOT &quot;$SAIL_BUILD_DIR/opam&quot;</span></span>
@@ -439,8 +440,21 @@ We wrote a small ai generated bash command that uses <code>python3</code> to pul
 <span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set CONFIG &quot;$JOLT_QED/sail-import/rv64d_jolt.json&quot;</span></span>
 <span class="giallo-l"><span>CONFIG</span><span style="color: #D73A49;">=</span><span style="color: #032F62;">&quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/sail-import/rv64d_jolt.json&quot;</span></span>
 <span class="giallo-l"></span>
-<span class="giallo-l"><span style="color: #6A737D;"># For Fish use this instead: set MODULES (python3 -c &#39;import sys, tomllib; print(*tomllib.load(open(sys.argv[1], &quot;rb&quot;))[&quot;modules&quot;][&quot;selected&quot;], sep=&quot;\n&quot;)&#39; &quot;$JOLT_QED/sail-import/PROVENANCE.toml&quot;)</span></span>
-<span class="giallo-l"><span>MODULES</span><span style="color: #D73A49;">=</span><span>($(</span><span style="color: #6F42C1;">python3</span><span style="color: #005CC5;"> -c</span><span style="color: #032F62;"> &#39;import sys, tomllib; print(*tomllib.load(open(sys.argv[1], &quot;rb&quot;))[&quot;modules&quot;][&quot;selected&quot;], sep=&quot;\n&quot;)&#39; &quot;</span><span>$JOLT_QED</span><span style="color: #032F62;">/sail-import/PROVENANCE.toml&quot;</span><span>))</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish replace the next line with: set MODULES \</span></span>
+<span class="giallo-l"><span>MODULES</span><span style="color: #D73A49;">=</span><span>( \</span></span>
+<span class="giallo-l"><span style="color: #032F62;">  A_types B_types CFI_types FD_core H I_insts I_types</span><span> \</span></span>
+<span class="giallo-l"><span style="color: #032F62;">  K_core M_insts M_types Smcntrpmf Sscofpmf Ssqosid Sstc</span><span> \</span></span>
+<span class="giallo-l"><span style="color: #032F62;">  Stateen_csrs Stateen_regs Svinval V_core V_types Zaamo</span><span> \</span></span>
+<span class="giallo-l"><span style="color: #032F62;">  Zalrsc Zawrs_insts Zawrs_types Zba Zbb Zbc Zbkb Zbkx</span><span> \</span></span>
+<span class="giallo-l"><span style="color: #032F62;">  Zbs Zca Zcb Zcmop Zibi_insts Zibi_types Zicbom_insts</span><span> \</span></span>
+<span class="giallo-l"><span style="color: #032F62;">  Zicbom_types Zicbop_insts Zicbop_types Zicboz Zicfilp_insts</span><span> \</span></span>
+<span class="giallo-l"><span style="color: #032F62;">  Zicfilp_regs Zicfiss_insts Zicfiss_regs Zicntr Zicond_insts</span><span> \</span></span>
+<span class="giallo-l"><span style="color: #032F62;">  Zicond_types Zicsr_insts Zicsr_types Zifencei Zihintntl_insts</span><span> \</span></span>
+<span class="giallo-l"><span style="color: #032F62;">  Zihintntl_types Zihintpause Zihpm Zimop Zkn Zkr Zks</span><span> \</span></span>
+<span class="giallo-l"><span style="color: #032F62;">  Zvabd_types Zvk_core core exceptions main pmp postlude</span><span> \</span></span>
+<span class="giallo-l"><span style="color: #032F62;">  prelude rmem sys unit_tests</span></span>
+<span class="giallo-l"><span style="color: #6A737D;"># For Fish omit the closing parenthesis below.</span></span>
+<span class="giallo-l"><span>)</span></span>
 <span class="giallo-l"></span>
 <span class="giallo-l"><span style="color: #005CC5;">cd</span><span style="color: #032F62;"> &quot;</span><span>$SAIL_BUILD_DIR</span><span style="color: #032F62;">/sail-riscv/model&quot;</span></span>
 <span class="giallo-l"><span style="color: #6F42C1;">mkdir</span><span style="color: #005CC5;"> -p</span><span style="color: #032F62;"> ../build</span></span></code></pre>

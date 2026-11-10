@@ -589,7 +589,11 @@ The &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot;
     <link rel="alternate" type="text/html" href="https://randomwalks.xyz/blog/jolt-qed/02-assumptions/"/>
     <id>https://randomwalks.xyz/blog/jolt-qed/02-assumptions/</id>
     
-    <content type="html" xml:base="https://randomwalks.xyz/blog/jolt-qed/02-assumptions/">&lt;p&gt;The Jolt-qed project verifies, in Lean, that each Jolt bytecode expansion has the same effect as the RISC-V instruction it replaces.
+    <content type="html" xml:base="https://randomwalks.xyz/blog/jolt-qed/02-assumptions/">&lt;aside class=&quot;callout theorem-block callout-box thm-box&quot;&gt;
+  &lt;p&gt;&lt;strong&gt;Update (2026-11-10)&lt;/strong&gt;: The assumptions for Bytecode will become stale as of &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/jolt-qed/pull/39&quot;&gt;PR#39&lt;/a&gt;.
+We will update this post once we review and merge the pull request.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;p&gt;The Jolt-qed project verifies, in Lean, that each Jolt bytecode expansion has the same effect as the RISC-V instruction it replaces.
 These equivalence theorems are not unconditional: they rely on explicit hypotheses about the RISC-V/Jolt state, plus a small number of trusted edits to the generated RISC-V model so that it matches the Jolt CPU.
 This post records those proof assumptions and trusted-code changes.&lt;/p&gt;
 &lt;h2 id=&quot;changes-to-the-trusted-risc-v-model&quot;&gt;Changes to the Trusted RISC-V Model&lt;/h2&gt;
@@ -615,7 +619,7 @@ We treat that generated model as trusted throughout the project, except for the 
 It says that running the Jolt instruction &lt;code&gt;sraProgram&lt;/code&gt; with arguments &lt;code&gt;rd rs2 rs1&lt;/code&gt; on the current Jolt state &lt;code&gt;js&lt;/code&gt;, and then projecting down to the RISC-V state, is identical to running &lt;code&gt;sra rd rs2 rs1&lt;/code&gt; on the RISC-V state of the current Jolt CPU.
 In simple words, we could either run the original RISC-V instruction or run the Jolt expansion on the same starting state, and the effect is the same.
 If we showed this for all RISC-V instructions, then we would show that Jolt faithfully simulates RISC-V.
-Now to prove this theorem, we use an assumption bundle.
+Now, to prove this theorem, we use an assumption bundle.
 The goal of this post is to explain what an assumption bundle is.&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot; style=&quot;color: #1B1F234D;&quot;&gt; 1&lt;/span&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;/-- Main program-level equivalence for `SRA`. -/&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span aria-hidden=&quot;true&quot; class=&quot;giallo-ln&quot; style=&quot;color: #1B1F234D;&quot;&gt; 2&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;def&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; sraProgramEqSailStatement&lt;/span&gt;&lt;/span&gt;
@@ -653,7 +657,7 @@ If any assumption that is not listed here, or in &lt;code&gt;Assumptions.lean&lt
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;structure&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; CurPrivilegeMachine&lt;/span&gt;&lt;span&gt; (s : SailState) : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Prop where&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  value : s.regs.get? Register.cur_privilege =&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    some (Privilege.Machine : RegisterType Register.cur_privilege)&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;In simple English, the value in &lt;code&gt;current_privilege&lt;/code&gt; indicates that the Jolt CPU runs in machine mode all the time.
+&lt;p&gt;In simple English, the value in &lt;code&gt;cur_privilege&lt;/code&gt; indicates that the Jolt CPU runs in machine mode all the time.
 According to the &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/abiswas3/jolt/blob/main/tracer/src/emulator/cpu.rs:329-353&quot;&gt;Jolt Rust code base&lt;/a&gt;, Jolt always runs in machine mode.
 The above Lean code simply states that the value in the &lt;code&gt;cur_privilege&lt;/code&gt; register is &lt;code&gt;Privilege.Machine&lt;/code&gt;.&lt;/p&gt;
 &lt;h3 id=&quot;mpp-bit-set-to-machine&quot;&gt;MPP Bit Set To Machine&lt;/h3&gt;
@@ -717,7 +721,7 @@ to &lt;code&gt;mtvec&lt;/code&gt;, and the trap handler definition is &lt;a rel=
 &lt;aside class=&quot;callout theorem-block callout-remark&quot;&gt;
   &lt;div class=&quot;callout-title&quot;&gt;Warning&lt;/div&gt;
   &lt;p&gt;This assumption holds when we use the write to &lt;code&gt;mtvec&lt;/code&gt; operation as it is meant to be used in Jolt.
-If a malicious program were to write a different value to Jolt &lt;code&gt;mtvec&lt;/code&gt;, Jolt does not have any mechanism to legalise the value. In that case, Jolt would not be following the RISC-V spec.
+If a malicious program were to write a different value to Jolt’s &lt;code&gt;mtvec&lt;/code&gt;, Jolt does not have any mechanism to legalise the value. In that case, Jolt would not be following the RISC-V spec.
 We will rely on the proof mechanism to catch this.&lt;/p&gt;
 &lt;/aside&gt;
 &lt;h3 id=&quot;align-pc&quot;&gt;Align PC&lt;/h3&gt;
@@ -875,11 +879,12 @@ Ordinary RAM is backed by the emulator memory map, while advice/input/output are
 &lt;p&gt;These assumptions say that the Sail register file is readable.&lt;/p&gt;
 &lt;h2 id=&quot;jolt-constraint-assumptions&quot;&gt;Jolt Constraint Assumptions&lt;/h2&gt;
 &lt;p&gt;The assumptions below are the assumptions used for proving completeness and soundness of the Jolt constraint system.
-Note, all the above assumptions described in the bytecode expansion process still apply.
+Note that all the above assumptions described in the bytecode expansion process still apply.
 Without them, we do not get the RISC-V simulation claim.&lt;/p&gt;
 &lt;h3 id=&quot;completeness-assumptions&quot;&gt;Completeness Assumptions&lt;/h3&gt;
 &lt;p&gt;We only have a &lt;em&gt;single&lt;/em&gt; assumption that the completeness statement currently takes.
-It simply says the guest program is not empty.&lt;/p&gt;
+It simply says the guest program is not empty.
+In the Jolt Rust code, the guest program is internally stored with the following struct.&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;pub struct&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; Rv64ProgramImage&lt;/span&gt;&lt;span&gt; {&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;    /// Source instructions decoded from executable text sections.&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    pub&lt;/span&gt;&lt;span&gt; instructions&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; Vec&lt;/span&gt;&lt;span&gt;&amp;lt;&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;SourceInstruction&lt;/span&gt;&lt;span&gt;&amp;gt;,&lt;/span&gt;&lt;/span&gt;
@@ -889,16 +894,41 @@ It simply says the guest program is not empty.&lt;/p&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    pub&lt;/span&gt;&lt;span&gt; program_end&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; u64&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;    /// ELF entry point.&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    pub&lt;/span&gt;&lt;span&gt; entry_address&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; u64&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- The program is not empty: its memory image loads at least one byte.&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;def&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; Rv64ProgramImage.ImageNonempty&lt;/span&gt;&lt;span&gt; {Source : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Type&lt;/span&gt;&lt;span&gt;} (image : Rv64ProgramImage Source) : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Prop&lt;/span&gt;&lt;span&gt; :=&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  image.memory_init ≠ []&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In Lean, the corresponding types are defined in &lt;code&gt;JoltConstraints/program.lean&lt;/code&gt;.
+You will note that in Lean we have two extra fields, which are propositions.
+The first one simply says that the memory addresses in &lt;code&gt;memory_init&lt;/code&gt; are at least the lowest address in Jolt address space, and at most one minus the highest value in the address space.
+The second one states that no guest bytecode PC wraps around.
+Both of these assumptions were confirmed with Jolt authors.&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;structure&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; SourceInstructionRow&lt;/span&gt;&lt;span&gt; (Source : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Type&lt;/span&gt;&lt;span&gt;) &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;where&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  address : BitVec &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;64&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  instruction : Source&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  is_compressed : Bool&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;structure&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; Rv64ProgramImage&lt;/span&gt;&lt;span&gt; (Source : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Type&lt;/span&gt;&lt;span&gt;) &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;where&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  instructions : Array (SourceInstructionRow Source)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  memory_init : List (BitVec &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;64&lt;/span&gt;&lt;span&gt; × BitVec &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;8&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  program_end : BitVec &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;64&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  entry_address : BitVec &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;64&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  -- Facts that the fields above must satisfy.&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  -- Provide proofs of these facts when constructing the image.&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  program_end_ge_ram_start : JoltISA.RAM_START_ADDRESS ≤ program_end.toNat&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  memory_init_in_program : ∀ entry ∈ memory_init,&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (JoltISA.RAM_START_ADDRESS ≤ entry.&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;1&lt;/span&gt;&lt;span&gt;.toNat) ∧ (entry.&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;1&lt;/span&gt;&lt;span&gt;.toNat &amp;lt; program_end.toNat)&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  next_pc_no_wrap : ∀ row ∈ instructions,&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    row.address.toNat + (&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;if&lt;/span&gt;&lt;span&gt; row.is_compressed &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;then&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 2&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; else&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; 4&lt;/span&gt;&lt;span&gt;) &amp;lt; &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;2&lt;/span&gt;&lt;span&gt; ^ &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;64&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The assumption states that the program’s &lt;code&gt;memory_init&lt;/code&gt; is not empty: the ELF loads at least one byte into memory.&lt;/p&gt;
-&lt;h3 id=&quot;soundness-assumptions&quot;&gt;Soundness Assumptions&lt;/h3&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;-- The program is not empty: its memory image loads at least one byte.&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;def&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; Rv64ProgramImage.ImageNonempty&lt;/span&gt;&lt;span&gt; {Source : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Type&lt;/span&gt;&lt;span&gt;} (image : Rv64ProgramImage Source) : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Prop&lt;/span&gt;&lt;span&gt; :=&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  image.memory_init ≠ []&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&quot;soundness-assumptions&quot;&gt;Soundness Assumptions&lt;/h3&gt;
 &lt;p&gt;Soundness is trickier.
 It uses &lt;em&gt;one&lt;/em&gt; assumption and &lt;strong&gt;six&lt;/strong&gt; temporary assumptions.
-We say temporary because, they are currently used to show that the Jolt constraint system is sound by we are not sure if every one of these assumptions is justified yet.&lt;/p&gt;
-&lt;p&gt;The assumption says that every load or store used in the program, reads/writes to an effective address that fits in the address space.&lt;/p&gt;
-&lt;p&gt;In Jolt the memory layout is given by the following rust structure.&lt;/p&gt;
+We say temporary because they are currently used to show that the Jolt constraint system is sound, but these assumptions are not as easily justified.
+We will start with the main soundness assumption, which is mild and harmless, and then we will get into the temporary restrictions.&lt;/p&gt;
+&lt;h4 id=&quot;main-soundness-assumption&quot;&gt;Main Soundness Assumption&lt;/h4&gt;
+&lt;p&gt;The assumption says that every load or store used in the program reads/writes to an effective address that fits in the address space.
+In Jolt, the memory layout is given by the following Rust structure.&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;pub struct&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; MemoryLayout&lt;/span&gt;&lt;span&gt; {&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;    /// The total size of the elf&amp;#39;s sections, including the .text, .data, .rodata, and .bss sections.&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    pub&lt;/span&gt;&lt;span&gt; program_size&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; u64&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/span&gt;
@@ -945,64 +975,53 @@ We say temporary because, they are currently used to show that the Jolt constrai
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;        .&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;checked_next_power_of_two&lt;/span&gt;&lt;span&gt;()&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;        .&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;ok_or&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;RamDomainError&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;::&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;DomainTooLarge&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The verifier has access to this layout, and compute the largest legal address that can be read or written to.
-The verifier performs this computation using &lt;code&gt;compute_max_ram_k(layout)&lt;/code&gt;shown above.&lt;/p&gt;
+&lt;p&gt;The verifier has access to this layout, and computes the largest legal address that can be read or written to.
+The verifier performs this computation using &lt;code&gt;compute_max_ram_k(layout)&lt;/code&gt; shown above.&lt;/p&gt;
 &lt;aside class=&quot;callout theorem-block callout-theorem thm-numbered&quot;&gt;
   &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;/span&gt;
-    &lt;span class=&quot;thm-title&quot;&gt;— Assumption On Maxmimum Addressable Memory&lt;/span&gt;&lt;/div&gt;
+    &lt;span class=&quot;thm-title&quot;&gt;— Assumption On Maximum Addressable Memory&lt;/span&gt;&lt;/div&gt;
   &lt;p&gt;Let $m$ denote the output of &lt;code&gt;compute_max_ram_k&lt;/code&gt;, and let $\ell$ denote the smallest address in the memory layout.
-The assumption states that $\ell + 8m \le 2^{64}$&lt;/p&gt;
+The assumption states that $\ell + 8m \le 2^{64}$.&lt;/p&gt;
 &lt;/aside&gt;
+&lt;p&gt;The same theorem expressed in Lean.
+We have not defined every type in the theorem, and that will be done in another post.&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;def&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; JoltInstance.RamRegionFits&lt;/span&gt;&lt;span&gt; {Source : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Type&lt;/span&gt;&lt;span&gt;} (joltInstance : JoltInstance Source) : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Prop&lt;/span&gt;&lt;span&gt; :=&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  ∀ (layout : MemoryLayout) (maximum : Nat),&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    joltInstance.memory_layout = some layout →&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    JoltConstraints.VerifierSizes.maxRamSize layout = some maximum →&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      layout.get_lowest_address.toNat + &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;8&lt;/span&gt;&lt;span&gt; * maximum ≤ &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;2&lt;/span&gt;&lt;span&gt; ^ &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;64&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&quot;temporary-soundness-restrictions&quot;&gt;Temporary Soundness Restrictions&lt;/h2&gt;
-&lt;p&gt;These assumptions are assumptions that if we removed today, there is prover strategy that deceives the verifier and makes jolt unsound.
-TODO: write a line&lt;/p&gt;
-&lt;h3 id=&quot;the-claim-says-no-panic&quot;&gt;The Claim Says No Panic&lt;/h3&gt;
-&lt;p&gt;A Jolt claim says, loosely, that program &lt;code&gt;prog&lt;/code&gt; on input &lt;code&gt;in&lt;/code&gt; produces output &lt;code&gt;out&lt;/code&gt;, and either panicked or did not.
-We restrict our formal guarantees only to claims where the prover claims the program did &lt;em&gt;not&lt;/em&gt; panic.&lt;/p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;def&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; JoltInstance.ClaimsNoPanic&lt;/span&gt;&lt;span&gt; (joltInstance : JoltInstance SourceInstruction) : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Prop&lt;/span&gt;&lt;span&gt; :=&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  joltInstance.panic = &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;false&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;In other words, if the provers’ claims was&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;running &lt;code&gt;prog&lt;/code&gt; on input &lt;code&gt;in&lt;/code&gt; produces output &lt;code&gt;out&lt;/code&gt; and the program panics i.e. panic region of memory is set to 1.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;This claim may or may not be true, but our soundness theorem provides no guarantees of soundness.
-This might seem egregious, and it is why such an assumption is a temporary restriction.
-On the other hand if the prover ever claims that the program does &lt;em&gt;not&lt;/em&gt; panic, then we show that prover cannot lie without getting caught (assuming all other assumptions listed in this document hold)&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;It is important to note that this split only exists in the world of Lean proofs.&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;Jolt’s verifier runs verification algorithm for both types of claims.
-However, when the prover claims the program panicked, under the current constraint system we are able to find a proof that the verifier accepts but the provers’ claim is a lie.
-More simply the prover can cheat i.e. &lt;em&gt;Jolt is not sound&lt;/em&gt;.
-The reason the prover can cheat for one claim, but not for other has little to do with the constraint system, and everything to do with another temporary assumption - Termination Then Stall.
-Loosely, we will show that Jolt prover can lie about when a program ends (it could claim a program ends before it actually ends).
-Under the termination then stall assumption, it cannot lie if it claims the program did not panic.
-When it claims that the program did panic, there is nothing that termination then stall assumption can do for us.&lt;/p&gt;
-&lt;h3 id=&quot;stores-to-the-panic-region-write-1&quot;&gt;Stores to the Panic Region Write 1&lt;/h3&gt;
-&lt;p&gt;Before describing the assumption, we give much needed context.
-Jolt partitions its memory into regions - (1) the device (2) ordinary RAM, where the stack, bytecode, heap and usable memory live.&lt;/p&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      layout.get_lowest_address.toNat + &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;8&lt;/span&gt;&lt;span&gt; * maximum ≤ &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;2&lt;/span&gt;&lt;span&gt; ^ &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;64&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Loosely, we are saying, given a problem instance &lt;code&gt;JoltInstance&lt;/code&gt; (loosely read as public info to prover and verifier), for all memory layouts of the form given above with &lt;code&gt;maximum&lt;/code&gt; computed by &lt;code&gt;compute_max_ram_k&lt;/code&gt;, we show that the layout’s lowest address plus 8 times the maximum is less than $2^{64}$.
+This is the same thing as saying that every address fits in the 64-bit address space without overflowing.
+Note that unless our program was using millions of gigabytes of memory, we are fine with this assumption.
+Nearly every program encountered in practice satisfies this assumption, and it can be checked statically.&lt;/p&gt;
+&lt;h2 id=&quot;temporary-soundness-restrictions&quot;&gt;Temporary Soundness Restrictions&lt;/h2&gt;
+&lt;p&gt;If we removed these assumptions today, there would be prover strategies that deceive the verifier and make Jolt unsound.
+Hence, these are marked as temporary, and there is ongoing discussion about how reasonable these assumptions are.
+Before we begin, we review the Jolt memory model again.
+Jolt partitions its memory into regions: (1) the device, and (2) ordinary RAM, where the stack, bytecode, heap and usable memory live.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;https://randomwalks.xyz/blog/jolt-qed/02-assumptions/./memory.svg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
 &lt;p&gt;The device is further partitioned into regions, where each region has special meaning.
 The following picture illustrates a subset of the regions in the Jolt device.
-It shows the termination and panic region.
+It shows the termination and panic regions.
 When a program panics, the Jolt tracer writes 1 to the panic region.
 When a program terminates, it also writes 1 to the termination region before exiting.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;https://randomwalks.xyz/blog/jolt-qed/02-assumptions/./panic-termination.svg&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-&lt;p&gt;The core source of the grief is caused by the following issue.&lt;/p&gt;
+&lt;p&gt;The core source of the grief is the following issue.&lt;/p&gt;
 &lt;aside class=&quot;callout theorem-block callout-box thm-box&quot;&gt;
   &lt;ol&gt;
 &lt;li&gt;
-&lt;p&gt;reading and writing to this region works slightly differently in the tracer than when writing to “normal” regions of memory.&lt;/p&gt;
+&lt;p&gt;Reading and writing to this region works slightly differently in the tracer than when writing to “normal” regions of memory.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;But the Jolt constraints treat this region as regular memory. There is no special constraint for these regions.&lt;/p&gt;
+&lt;p&gt;But the Jolt constraints treat panic and termination as regular memory. There is no special constraint for these regions.&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;/aside&gt;
 &lt;p&gt;In more detail, if the guest program has a store that writes to the &lt;code&gt;panic&lt;/code&gt; region or the &lt;code&gt;termination&lt;/code&gt; region, the store never updates memory, as depicted by the code snippet in Jolt.
-Furthermore, loading from that region does not return contents of memory, but rather returns the contents of the tracers &lt;code&gt;panic&lt;/code&gt; flag.&lt;/p&gt;
+If the address being written is the first byte of the panic region, then a flag is set to true, and no bytes are written to memory.
+If the address is the termination region or the other panic region, the write is just ignored&lt;sup class=&quot;footnote-reference&quot; id=&quot;fr-region-1&quot;&gt;&lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/02-assumptions/#fn-region&quot;&gt;[3]&lt;/a&gt;&lt;/sup&gt;.
+Furthermore, loading from that region does not return contents of memory, but rather returns the contents of the tracer’s &lt;code&gt;panic&lt;/code&gt; flag.
+For termination, it always returns 0, regardless of what was written there.&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;impl&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; JoltDevice&lt;/span&gt;&lt;span&gt; {&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    pub fn&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; store&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;&amp;amp;mut&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;/span&gt;&lt;span&gt;, address&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; u64&lt;/span&gt;&lt;span&gt;, value&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; u8&lt;/span&gt;&lt;span&gt;) {&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;        if&lt;/span&gt;&lt;span&gt; address&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; ==&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span&gt;memory_layout&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span&gt;panic {&lt;/span&gt;&lt;/span&gt;
@@ -1014,7 +1033,6 @@ Furthermore, loading from that region does not return contents of memory, but ra
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;        // ...&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    }&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    pub fn&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; load&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;&amp;amp;&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;self&lt;/span&gt;&lt;span&gt;, address&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; u64&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; -&amp;gt;&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; u8&lt;/span&gt;&lt;span&gt; {&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;        if&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;is_panic&lt;/span&gt;&lt;span&gt;(address) {&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;            self&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span&gt;panic &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;as&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; u8&lt;/span&gt;&lt;/span&gt;
@@ -1025,7 +1043,33 @@ Furthermore, loading from that region does not return contents of memory, but ra
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    }&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;def&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; JoltInstance.PanicStoresOne&lt;/span&gt;&lt;span&gt; (joltInstance : JoltInstance SourceInstruction) : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Prop&lt;/span&gt;&lt;span&gt; :=&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;But something very different happens in the witness polynomials&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;There is a witness polynomial called &lt;code&gt;RamWriteValue&lt;/code&gt; that has an evaluation for every cycle.
+If the panic flag is initially clear and the guest program writes 5 to the first byte of the &lt;code&gt;panic&lt;/code&gt; region at time step &lt;code&gt;t&lt;/code&gt;, the witness records &lt;code&gt;RamWriteValue[t] = 5&lt;/code&gt;, as recorded by &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/blob/e21affaeaf0d2c0a4630b958a883a4ac877acbfd/tracer/src/emulator/mmu.rs#L484-L495&quot;&gt;&lt;code&gt;trace_store&lt;/code&gt;&lt;/a&gt;.
+Note that this witness is saying the write to memory was 5, but as we just discussed above, this write never actually goes through.
+A later byte load from &lt;code&gt;panic&lt;/code&gt; at time step &lt;code&gt;t&#39; &amp;gt; t&lt;/code&gt; returns the value of the panic flag.
+For the witness, &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/blob/e21affaeaf0d2c0a4630b958a883a4ac877acbfd/tracer/src/emulator/mmu.rs#L470-L515&quot;&gt;&lt;code&gt;trace_load&lt;/code&gt;&lt;/a&gt; records the whole doubleword, reading the flag for each of its eight bytes, so &lt;a rel=&quot;noopener noreferrer external&quot; target=&quot;_blank&quot; href=&quot;https://github.com/a16z/jolt/blob/e21affaeaf0d2c0a4630b958a883a4ac877acbfd/crates/jolt-witness/src/witnesses/ram.rs#L57-L65&quot;&gt;&lt;code&gt;RamReadValue[t&#39;] = 0x0101_0101_0101_0101&lt;/code&gt;&lt;/a&gt;.
+As we will show later, this will cause all sorts of havoc when we do memory checking.&lt;/p&gt;
+&lt;h3 id=&quot;stores-to-the-panic-region-write-1&quot;&gt;Stores to the Panic Region Write 1&lt;/h3&gt;
+&lt;p&gt;This brings us to our first assumption.
+Our assumption in plain English says,&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;If our program ever stores to the panic region, it &lt;em&gt;MUST&lt;/em&gt; write 1, and no other value. Once you write to the &lt;code&gt;panic&lt;/code&gt; region, the program should never load from that region again.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Note that this condition cannot be statically checked.
+We are trusting the ELF program author to handle this.
+Our theorems say all soundness guarantees are off if this condition is violated.&lt;/p&gt;
+&lt;aside class=&quot;callout theorem-block callout-theorem thm-numbered&quot;&gt;
+  &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;/span&gt;
+    &lt;span class=&quot;thm-title&quot;&gt;— Do Not Write To Panic Inappropriately&lt;/span&gt;&lt;/div&gt;
+  &lt;p&gt;A program built with Jolt’s SDK meets the restriction if the original guest code never writes to the panic region at all.
+Only the Jolt SDK writes to panic: it writes 1, and the program then stops.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;p&gt;This condition, when expressed in Lean, is kind of annoying to write.
+We describe it below, and every line might not make sense immediately.
+When we write our post about how we wrote theorem statements, this proposition should be more approachable.&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;def&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; JoltInstance.PanicStoresOne&lt;/span&gt;&lt;span&gt; (joltInstance : JoltInstance SourceInstruction) : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Prop&lt;/span&gt;&lt;span&gt; :=&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  ∀ (privateInputs : JoltPrivateInputs)&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (run : JoltConstraints.Soundness.UntrustedAnswerRun joltInstance privateInputs)&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (next : Fin run.bytecode.size) (pre : SailJoltState),&lt;/span&gt;&lt;/span&gt;
@@ -1048,26 +1092,10 @@ Furthermore, loading from that region does not return contents of memory, but ra
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          (∃ i, run.StoresPanicAt i) →&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            ¬ JoltConstraints.Soundness.TouchesPanic pre.jolt_device&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;              ((JoltISA.sourceValue base pre + imm) &amp;amp;&amp;amp;&amp;amp; ~~~&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;7&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | _ =&amp;gt; True&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt; address:  panic  panic+1  ...  panic+7&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          +------+-------+-----+-------+&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          |  b0  |  b1   | ... |  b7   |   the panic region: one doubleword&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          +------+-------+-----+-------+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Jolt’s constraints treat the region as ordinary memory, and the verifier checks that its final value equals the claimed panic bit.
-So if a program stores 0 there, the tracer says it panicked, but the constraints accept a “no panic” claim.&lt;/p&gt;
-&lt;p&gt;The restriction states that, for every untrusted advice and runtime advice, every store to the panic region writes 1, and no load reads the region after such a store.
-Our theorems provide no guarantee about programs that store any other value there, or read it back after a store.
-A program built with Jolt’s SDK meets the restriction if its own code never writes to the panic region: the SDK’s only store there writes 1, and the program then stops.&lt;/p&gt;
-&lt;p&gt;Jolt’s tracer allows a store of any value to the panic and termination regions; Jolt’s SDK stores 1.
-A store of a value &lt;code&gt;v&lt;/code&gt; there affects three things: the tracer’s panic flag, the witness, and the tracer’s emulated memory, which later loads read.&lt;/p&gt;
-&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;&lt;/th&gt;&lt;th&gt;Store of &lt;code&gt;v&lt;/code&gt; to the termination region&lt;/th&gt;&lt;th&gt;Store of &lt;code&gt;v&lt;/code&gt; to the panic region&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;
-&lt;tr&gt;&lt;td&gt;Tracer’s panic flag, the boolean &lt;code&gt;JoltDevice.panic&lt;/code&gt;&lt;/td&gt;&lt;td&gt;The tracer leaves the flag unchanged.&lt;/td&gt;&lt;td&gt;If the store writes the byte at address &lt;code&gt;panic&lt;/code&gt;, the tracer sets the flag to true, whatever &lt;code&gt;v&lt;/code&gt; is.&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;Witness&lt;/td&gt;&lt;td&gt;From that cycle on, the witness’s memory cell for the termination region holds &lt;code&gt;v&lt;/code&gt;.&lt;/td&gt;&lt;td&gt;From that cycle on, the witness’s memory cell for the panic region holds &lt;code&gt;v&lt;/code&gt;.&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;Emulated memory&lt;/td&gt;&lt;td&gt;The tracer discards the store.&lt;/td&gt;&lt;td&gt;The tracer discards the store.&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;A later load from the region&lt;/td&gt;&lt;td&gt;The load reads 0 in every byte.&lt;/td&gt;&lt;td&gt;The load reads the flag in every byte: 1 once the flag is true.&lt;/td&gt;&lt;/tr&gt;
-&lt;/tbody&gt;&lt;/table&gt;
-&lt;p&gt;The panic flag is internal to the tracer; no witness polynomial holds it.
-So after a store, the witness and the emulated memory disagree on both regions: the witness holds &lt;code&gt;v&lt;/code&gt;, while a load reads 0, or 1 in every byte.&lt;/p&gt;
-&lt;p&gt;Without the ban on loads, a false “panicked” claim could pass when the program reads the panic region back and acts on the value:&lt;/p&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | _ =&amp;gt; True&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We have already outlined the major issues.
+As we load after a store, the constraints disagree with what is in memory.
+Without the ban on loads, a false “panicked” claim could pass when the program reads the panic region back and acts on the value:&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        sb   t0, 0(s0)     # panic := 1        (t0 = 1)&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ld   t1, 0(s0)     # read the panic doubleword back&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        beq  t1, t0, one   # branch on what was read&lt;/span&gt;&lt;/span&gt;
@@ -1077,9 +1105,17 @@ So after a store, the witness and the emulated memory disagree on both regions: 
 &lt;tr&gt;&lt;td&gt;Jolt’s tracer, from the panic flag&lt;/td&gt;&lt;td&gt;&lt;code&gt;0x0101_0101_0101_0101&lt;/code&gt;&lt;/td&gt;&lt;td&gt;not taken&lt;/td&gt;&lt;td&gt;9&lt;/td&gt;&lt;/tr&gt;
 &lt;/tbody&gt;&lt;/table&gt;
 &lt;p&gt;The witness satisfies every constraint, so the verifier accepts “panicked, output 7”, but the real run ends with output 9.&lt;/p&gt;
-&lt;p&gt;For a “no panic” claim this cannot happen: a store to the panic region must write 1, which leaves the panic doubleword at 1, but the claim requires 0.
-So no accepted “no panic” witness contains a panic store, and the load ban matters only for “panicked” claims, which &lt;code&gt;claimsNoPanic&lt;/code&gt; already excludes.&lt;/p&gt;
 &lt;h3 id=&quot;termination-then-stall&quot;&gt;Termination Then Stall&lt;/h3&gt;
+&lt;p&gt;Now we get to the next assumption.
+First, in plain English.&lt;/p&gt;
+&lt;aside class=&quot;callout theorem-block callout-theorem thm-numbered&quot;&gt;
+  &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;/span&gt;
+    &lt;span class=&quot;thm-title&quot;&gt;— After Writing To The Termination Region&lt;/span&gt;&lt;/div&gt;
+  &lt;p&gt;If our program ever stores to the &lt;code&gt;termination&lt;/code&gt; region, it must never load from that region again.
+From that point on, every &lt;code&gt;jal&lt;/code&gt; must jump to itself (offset 0), and the program must never execute a &lt;code&gt;jalr&lt;/code&gt;.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;p&gt;The same thing in Lean looks terribly complicated, but it’s just saying the same thing.
+We will go over the theorem statements and translation at a different date.&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;def&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; JoltInstance.TerminationThenStall&lt;/span&gt;&lt;span&gt; (joltInstance : JoltInstance SourceInstruction) : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Prop&lt;/span&gt;&lt;span&gt; :=&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  ∀ (privateInputs : JoltPrivateInputs)&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (run : JoltConstraints.Soundness.UntrustedAnswerRun joltInstance privateInputs)&lt;/span&gt;&lt;/span&gt;
@@ -1095,13 +1131,62 @@ So no accepted “no panic” witness contains a panic store, and the load ban m
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;          ¬ JoltConstraints.Soundness.TouchesTermination pre.jolt_device&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;            ((JoltISA.sourceValue base pre + imm) &amp;amp;&amp;amp;&amp;amp; ~~~&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;7&lt;/span&gt;&lt;span&gt;)&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | _ =&amp;gt; True&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;TODO: write up in plain English.
-For every untrusted advice and runtime advice, once the program has stored to the termination region, the doubleword at addresses &lt;code&gt;termination&lt;/code&gt; to &lt;code&gt;termination + 7&lt;/code&gt;:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;every later &lt;code&gt;jal&lt;/code&gt; has offset 0, so it jumps to itself, where Jolt’s tracer stops;&lt;/li&gt;
-&lt;li&gt;no later instruction is a &lt;code&gt;jalr&lt;/code&gt;;&lt;/li&gt;
-&lt;li&gt;no later load reads the termination region.&lt;/li&gt;
-&lt;/ol&gt;
+&lt;p&gt;Without this assumption, we have one major issue.
+The constraints do not tell us when the program ends.
+In Jolt, a program ends when the &lt;code&gt;PC&lt;/code&gt; jumps to the same address.
+That is, at times &lt;code&gt;t&lt;/code&gt; and &lt;code&gt;t+1&lt;/code&gt; we have the same &lt;code&gt;PC&lt;/code&gt;.
+Now assume we can write to the termination region as we please, many times.
+See the following program.&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        # s0 = termination address; s1 = address of an output word&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        li   t0, 1&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        li   t1, 7&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        sd   t1, 0(s1)     # output := 7&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        sd   t0, 0(s0)     # termination := 1&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        j    more         # a cheating prover can end its real rows here&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;more:&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        li   t1, 9&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        sd   t1, 0(s1)     # the real execution changes output to 9&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        j    done&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;done:&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        j    done         # the real tracer stops here&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After we write to termination, we also have many jump statements.
+A cheating prover could just pretend any of the jumps is where the program ends.
+There is nothing in the constraints that stops this.
+Why?
+Cos the constraints simply ask the following.&lt;/p&gt;
+&lt;p&gt;For a claim that says the program did not panic, the final RAM witness must contain &lt;code&gt;0&lt;/code&gt; at &lt;code&gt;panic&lt;/code&gt;, &lt;code&gt;1&lt;/code&gt; at &lt;code&gt;termination&lt;/code&gt;, and the claimed output in the output region.
+The relevant jump constraints are:&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;ShouldJump[t] = Jump[t] · (1 − NextIsNoop[t])&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;ShouldJump[t] · (NextUnexpandedPC[t] − LookupOutput[t]) = 0&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here &lt;code&gt;LookupOutput[t]&lt;/code&gt; is the address the PC must jump to.
+If a cheating prover puts padding immediately after &lt;code&gt;j more&lt;/code&gt;, then &lt;code&gt;NextIsNoop[t] = 1&lt;/code&gt;, so &lt;code&gt;ShouldJump[t] = 0&lt;/code&gt; and the second equation becomes &lt;code&gt;0 = 0&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The cheating prover’s padded witness is proving the run of this program instead.&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        li   t0, 1&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        li   t1, 7&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        sd   t1, 0(s1)     # output := 7&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        sd   t0, 0(s0)     # termination := 1&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        j    more         # last real row; the code at more is never executed&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        NoOp              # padding row: IsNoop = 1&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        NoOp              # padding row: IsNoop = 1&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;        ...               # padding continues to the chosen trace length&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;At &lt;code&gt;j more&lt;/code&gt;, &lt;code&gt;Jump[t] = 1&lt;/code&gt;, &lt;code&gt;NextIsNoop[t] = 1&lt;/code&gt;, &lt;code&gt;NextUnexpandedPC[t] = 0&lt;/code&gt;, and the cheating prover sets &lt;code&gt;ShouldJump[t] = 0&lt;/code&gt;.
+Substituting into the two constraints:&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;plain&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;ShouldJump[t] = Jump[t] · (1 − NextIsNoop[t])&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;           0 = 1 · (1 − 1) = 0&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;ShouldJump[t] · (NextUnexpandedPC[t] − LookupOutput[t]) = 0&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;           0 · (0 − address(more)) = 0&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If we assume that after termination the program is over as Jolt expects and the next jump signals the tracer we are done, these constraints are sufficient.
+For a claim that says the program did not panic, the witness must finish with &lt;code&gt;termination = 1&lt;/code&gt;, so it must include a store to that region.
+The last real row must be a jump, and our assumption forces every jump after that store to jump to itself.
+&lt;strong&gt;Therefore, padding can only begin where the real tracer would stop.&lt;/strong&gt;&lt;/p&gt;
+&lt;aside class=&quot;callout theorem-block callout-remark&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;Remark&lt;/div&gt;
+  &lt;p&gt;But addresses being written to and read from memory cannot be statically analysed.
+So there is no way for us to know if this could be guaranteed.
+We are putting a lot of faith in the ELF writer.
+We are asking the guest program author to only use the SDK to write to termination, and furthermore guarantee that their program will not accidentally or intentionally write to the termination region.&lt;/p&gt;
+&lt;/aside&gt;
 &lt;h3 id=&quot;no-maximum-length-trace&quot;&gt;No Maximum-Length Trace&lt;/h3&gt;
 &lt;p&gt;The guest program’s developer sets a maximum trace length &lt;code&gt;T&#39;&lt;/code&gt; in the program’s attribute, &lt;code&gt;#[jolt::provable(max_trace_length = T&#39;)]&lt;/code&gt;; if they don’t, &lt;code&gt;T&#39; = 2^24&lt;/code&gt;.
 Jolt passes &lt;code&gt;T&#39;&lt;/code&gt; unchanged into the program preprocessing, as the field &lt;code&gt;max_padded_trace_length&lt;/code&gt;:&lt;/p&gt;
@@ -1112,32 +1197,29 @@ Jolt passes &lt;code&gt;T&#39;&lt;/code&gt; unchanged into the program preproces
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    pub&lt;/span&gt;&lt;span&gt; max_padded_trace_length&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; usize&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Let &lt;code&gt;T&lt;/code&gt; be the true trace length: the number of instructions the run executes.
-Jolt’s prover pads the trace to &lt;code&gt;T_1 = max(next_pow2(T + 1), 256)&lt;/code&gt; cycles, a power of two with at least one padding row, so &lt;code&gt;T_1 ≥ T + 1&lt;/code&gt; (&lt;code&gt;ProverConfig::derive_from_dimensions&lt;/code&gt;).
+Our assumption in plain English simply states&lt;/p&gt;
+&lt;aside class=&quot;callout theorem-block callout-theorem thm-numbered&quot;&gt;
+  &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;p&gt;Let $T$ be the true trace length of the program, i.e., the number of cycles the program runs for.
+Let $T’$ be the claimed upper bound on the trace length.
+Then we assume $T \neq 2^{\lfloor \log_2 T’ \rfloor}$.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;p&gt;To understand why this is an issue, let us understand what the Jolt prover does.
+Jolt’s prover pads the trace to &lt;code&gt;T_1 = max(next_pow2(T + 1), 256)&lt;/code&gt; cycles, a power of two with at least one padding row, so &lt;code&gt;T_1 ≥ T + 1&lt;/code&gt; according to &lt;code&gt;ProverConfig::derive_from_dimensions&lt;/code&gt;.
 The prover proceeds only if &lt;code&gt;T_1 ≤ T&#39;&lt;/code&gt;.
-The length Jolt’s verifier checks is the trace length written in the proof; call it &lt;code&gt;T_2&lt;/code&gt;.&lt;/p&gt;
+Otherwise, the honest Jolt prover gives up and says, “I cannot prove things.”&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;T_2&lt;/code&gt; is &lt;code&gt;proof.trace_length&lt;/code&gt;, a number the prover puts in the proof. The verifier reads it with &lt;code&gt;let trace_length = proof.trace_length;&lt;/code&gt; in &lt;code&gt;validate_inputs&lt;/code&gt;, &lt;code&gt;crates/jolt-verifier/src/verifier.rs&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;It is the number of cycles in the committed witness. Every per-cycle witness polynomial has one value per cycle &lt;code&gt;t &amp;lt; T_2&lt;/code&gt;. In Lean it is &lt;code&gt;WitnessParams.traceLength&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;The verifier checks it with &lt;code&gt;validate_trace_length&lt;/code&gt;: &lt;code&gt;T_2&lt;/code&gt; must be a power of two between 256 and &lt;code&gt;T&#39;&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;An honest prover sets &lt;code&gt;T_2 = T_1&lt;/code&gt;. A cheating prover can put any &lt;code&gt;T_2&lt;/code&gt; in the proof, and only that check limits it.&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Let &lt;code&gt;T_2 = proof.trace_length&lt;/code&gt; denote the prover’s claim of the trace length. The verifier reads it with &lt;code&gt;let trace_length = proof.trace_length&lt;/code&gt;. An honest prover sets &lt;code&gt;T_2 = T_1&lt;/code&gt;. A cheating prover can put any &lt;code&gt;T_2&lt;/code&gt; in the proof.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;As a consequence, &lt;code&gt;T_2&lt;/code&gt; is the claimed number of cycles in the committed witness. Every per-cycle witness polynomial has one value per cycle &lt;code&gt;t &amp;lt; T_2&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;The verifier checks that &lt;code&gt;T_2&lt;/code&gt; is a power of two and &lt;code&gt;256 ≤ T_2 ≤ T&#39;&lt;/code&gt;. The Rust code that does this is &lt;code&gt;validate_trace_length&lt;/code&gt;.&lt;/p&gt;
+&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;code&gt;validate_inputs&lt;/code&gt; reads the length from the proof, then checks it:&lt;/p&gt;
-&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;pub fn&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; validate_inputs&lt;/span&gt;&lt;span&gt;&amp;lt;&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;PCS&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt; VC&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; ZkProof&lt;/span&gt;&lt;span&gt;&amp;gt;(&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    preprocessing&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;: &amp;amp;&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;JoltVerifierPreprocessing&lt;/span&gt;&lt;span&gt;&amp;lt;&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;PCS&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; VC&lt;/span&gt;&lt;span&gt;&amp;gt;,&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    public_io&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;: &amp;amp;&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;JoltDevice&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    proof&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;: &amp;amp;&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;JoltProof&lt;/span&gt;&lt;span&gt;&amp;lt;&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;PCS&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; VC&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; ZkProof&lt;/span&gt;&lt;span&gt;&amp;gt;,&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    trusted_advice_commitment_present&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; bool&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;)&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; -&amp;gt;&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; Result&lt;/span&gt;&lt;span&gt;&amp;lt;&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;CheckedInputs&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; VerifierError&lt;/span&gt;&lt;span&gt;&amp;gt;&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;where&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;    PCS&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; CommitmentScheme&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;    VC&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; VectorCommitment&lt;/span&gt;&lt;span&gt;&amp;lt;&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;Field&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; =&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; PCS&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;::&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;Field&lt;/span&gt;&lt;span&gt;&amp;gt;,&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;{&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    let&lt;/span&gt;&lt;span&gt; trace_length&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; =&lt;/span&gt;&lt;span&gt; proof&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span&gt;trace_length;&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    let&lt;/span&gt;&lt;span&gt; ram_k&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; =&lt;/span&gt;&lt;span&gt; proof&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span&gt;ram_K;&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;    let&lt;/span&gt;&lt;span&gt; trace_polynomial_order&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt; =&lt;/span&gt;&lt;span&gt; proof&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span&gt;trace_polynomial_order;&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6A737D;&quot;&gt;    // ...&lt;/span&gt;&lt;/span&gt;
-&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;    validate_trace_length&lt;/span&gt;&lt;span&gt;(trace_length, program&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;.&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;max_padded_trace_length&lt;/span&gt;&lt;span&gt;())&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;?&lt;/span&gt;&lt;span&gt;;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The check itself, where &lt;code&gt;MIN_PADDED_TRACE_LENGTH&lt;/code&gt; is 256 in the base build (&lt;code&gt;crates/jolt-verifier/src/config.rs&lt;/code&gt;):&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;rust&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;fn&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; validate_trace_length&lt;/span&gt;&lt;span&gt;(&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    trace_length&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; usize&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    max_padded_trace_length&lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;:&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; usize&lt;/span&gt;&lt;span&gt;,&lt;/span&gt;&lt;/span&gt;
@@ -1154,21 +1236,51 @@ The length Jolt’s verifier checks is the trace length written in the proof; ca
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    }&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt;    Ok&lt;/span&gt;&lt;span&gt;(())&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;}&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;code&gt;T&#39;&lt;/code&gt; is an upper bound, not a length: for example, with &lt;code&gt;T&#39; = 1500&lt;/code&gt; the largest witness length is 1024, and with &lt;code&gt;T&#39; = 48&lt;/code&gt; no witness length is allowed.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;MIN_PADDED_TRACE_LENGTH&lt;/code&gt; is 256.
+The same assumption re-expressed in Lean.&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;def&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; JoltInstance.NoMaxLengthTrace&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (joltInstance : JoltInstance SourceInstruction) : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Prop&lt;/span&gt;&lt;span&gt; :=&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  ∀ (privateInputs : JoltPrivateInputs)&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (trace : JoltConstraints.Soundness.UntrustedAnswerTrace joltInstance privateInputs),&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    trace.rows.size ≠ &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;2&lt;/span&gt;&lt;span&gt; ^ Nat.log2 joltInstance.max_padded_trace_length.toNat&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;For every untrusted advice and runtime advice, no complete run of the program has &lt;code&gt;T = P&lt;/code&gt;, where &lt;code&gt;P = 2^⌊log2 T&#39;⌋&lt;/code&gt;.&lt;/p&gt;
-&lt;p&gt;On your guess: yes, T = P is an edge case where Jolt’s prover and verifier disagree.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;The verifier accepts a proof with T_2 = P, where all P rows are real.&lt;/li&gt;
-&lt;li&gt;Jolt’s prover never produces that proof, because it needs T_1 = 2P &amp;gt; T’ and refuses.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;It’s a narrow kind of bad. The run is real and its outputs are correct.
-What fails is our language L’s condition that Jolt’s prover accepts the run.
-So the verifier accepts a run that Jolt’s own prover refuses to prove.&lt;/p&gt;
+&lt;p&gt;Now imagine this assumption did not hold.
+Take &lt;code&gt;T&#39; = 1500&lt;/code&gt; and a complete run with &lt;code&gt;T = 1024&lt;/code&gt;.
+Although &lt;code&gt;T &amp;lt; T&#39;&lt;/code&gt;, the honest prover pads the trace to &lt;code&gt;T_1 = 2048&lt;/code&gt;, so &lt;code&gt;T_1 &amp;gt; T&#39;&lt;/code&gt; and it refuses to prove the run.
+But a dishonest prover could omit the padding and claim &lt;code&gt;T_2 = 1024&lt;/code&gt;.
+The verifier’s length check would pass: &lt;code&gt;T_2&lt;/code&gt; is a power of two and &lt;code&gt;256 ≤ T_2 ≤ T&#39;&lt;/code&gt;.&lt;/p&gt;
+&lt;aside class=&quot;callout theorem-block callout-remark&quot;&gt;
+  &lt;div class=&quot;callout-title&quot;&gt;Remark&lt;/div&gt;
+  &lt;p&gt;This mismatch occurs &lt;strong&gt;only&lt;/strong&gt; when &lt;code&gt;T = 2^⌊log2 T&#39;⌋&lt;/code&gt;: the run exactly fills the largest trace length allowed by the verifier.
+It is a single edge case.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;h3 id=&quot;the-claim-says-no-panic&quot;&gt;The Claim Says No Panic&lt;/h3&gt;
+&lt;aside class=&quot;callout theorem-block callout-theorem thm-numbered&quot;&gt;
+  &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;/span&gt;
+    &lt;span class=&quot;thm-title&quot;&gt;— We give no guarantees about claims&lt;/span&gt;&lt;/div&gt;
+  &lt;p&gt;If a prover claims that the program panicked, we cannot give any soundness guarantees.
+If the prover claims that the program did not panic, assuming all other assumptions above hold, then Jolt is sound.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;p&gt;A Jolt claim says, loosely, that program &lt;code&gt;prog&lt;/code&gt; on input &lt;code&gt;in&lt;/code&gt; produces output &lt;code&gt;out&lt;/code&gt;, and either panicked or did not.
+We restrict our formal guarantees only to claims where the prover claims the program did &lt;em&gt;not&lt;/em&gt; panic.&lt;/p&gt;
+&lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;def&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; JoltInstance.ClaimsNoPanic&lt;/span&gt;&lt;span&gt; (joltInstance : JoltInstance SourceInstruction) : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Prop&lt;/span&gt;&lt;span&gt; :=&lt;/span&gt;&lt;/span&gt;
+&lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  joltInstance.panic = &lt;/span&gt;&lt;span style=&quot;color: #005CC5;&quot;&gt;false&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In other words, if the prover’s claim was&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;running &lt;code&gt;prog&lt;/code&gt; on input &lt;code&gt;in&lt;/code&gt; produces output &lt;code&gt;out&lt;/code&gt; and the program panics, i.e., the panic region of memory is set to 1.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;This claim may or may not be true, but our soundness theorem says there are no guarantees that the claim is definitively true even if the verifier accepts.
+On the other hand, if the prover ever claims that the program does &lt;em&gt;not&lt;/em&gt; panic, then we show that the prover cannot lie without getting caught (assuming all other assumptions listed in this document hold).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;It is important to note that this split only exists in the world of Lean proofs.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Jolt’s verifier runs the verification algorithm for both types of claims.
+However, when the prover claims the program panicked, under the current constraint system we are able to find a proof that the verifier accepts but the prover’s claim is a lie.
+&lt;em&gt;More simply the prover can cheat&lt;/em&gt;.
+The reason the prover can cheat for one claim but not for the other has little to do with the constraint system, and everything to do with another temporary assumption - Termination Then Stall.
+That assumption exists because the constraint system currently does not restrict how a program stalls well enough.
+Loosely, we will show that the Jolt prover can lie about when a program ends (it could claim a program ends before it actually ends).
+Under the termination then stall assumption, it cannot lie if it claims the program did not panic.
+So these restrictions are &lt;strong&gt;not&lt;/strong&gt; independent, but subtly interlinked.
+When it claims that the program did panic, there is nothing that the termination then stall assumption can do for us.
+Next, we get to our &lt;strong&gt;second&lt;/strong&gt; temporary assumption.&lt;/p&gt;
 &lt;h3 id=&quot;host-calls-succeed&quot;&gt;Host Calls Succeed&lt;/h3&gt;
 &lt;p&gt;A host call is the guest program asking the machine that runs Jolt’s tracer, the host, to do something for it, much like a system call.
 The guest makes a host call with the Jolt instruction &lt;code&gt;VirtualHostIO&lt;/code&gt;.&lt;/p&gt;
@@ -1212,9 +1324,16 @@ The guest makes a host call with the Jolt instruction &lt;code&gt;VirtualHostIO&
 &lt;li&gt;Advice write (&lt;code&gt;x10 = 0xADBABE&lt;/code&gt;): copy the &lt;code&gt;x12&lt;/code&gt; bytes at address &lt;code&gt;x11&lt;/code&gt; onto the runtime advice tape; &lt;code&gt;x13&lt;/code&gt; is ignored.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;Any other call id does nothing.&lt;/p&gt;
-&lt;p&gt;The call ids are constants in &lt;code&gt;jolt-platform/src&lt;/code&gt; (&lt;code&gt;advice.rs&lt;/code&gt;, &lt;code&gt;cycle_tracking.rs&lt;/code&gt;, &lt;code&gt;print.rs&lt;/code&gt;).
-&lt;code&gt;VirtualHostIO&lt;/code&gt; writes no register and no guest memory, and the PC advances by 4.
-&lt;code&gt;exec&lt;/code&gt; ignores an error a handler returns (&lt;code&gt;let _ = ...&lt;/code&gt;), but a panic, such as a print with an unknown &lt;code&gt;x13&lt;/code&gt;, stops the tracer.&lt;/p&gt;
+&lt;p&gt;Loosely, this is used for debugging, and there is no Jolt constraint about this instruction.
+So if one of these instructions fails, then the tracer will not run.
+But the cheating prover can just ignore these &lt;code&gt;VirtualHostIO&lt;/code&gt; calls and run the program as if they never existed.
+The verifier will accept.&lt;/p&gt;
+&lt;aside class=&quot;callout theorem-block callout-theorem thm-numbered&quot;&gt;
+  &lt;div class=&quot;thm-header&quot;&gt;&lt;span class=&quot;thm-label&quot;&gt;&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;p&gt;All calls to &lt;code&gt;VirtualHostIO&lt;/code&gt; succeed in our guest program.&lt;/p&gt;
+&lt;/aside&gt;
+&lt;p&gt;This assumption assumes that every call to &lt;code&gt;VirtualHostIO&lt;/code&gt; the program makes, for every untrusted advice and runtime advice, succeeds.&lt;/p&gt;
 &lt;pre class=&quot;giallo&quot; style=&quot;color: #24292E; background-color: #FFFFFF;&quot; &gt;&lt;code data-lang=&quot;lean&quot;&gt;&lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;def&lt;/span&gt;&lt;span style=&quot;color: #6F42C1;&quot;&gt; JoltInstance.HostCallsSucceed&lt;/span&gt;&lt;span&gt; (joltInstance : JoltInstance SourceInstruction) : &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;Prop&lt;/span&gt;&lt;span&gt; :=&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;  ∀ (privateInputs : JoltPrivateInputs)&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;    (run : JoltConstraints.Soundness.UntrustedAnswerRun joltInstance privateInputs)&lt;/span&gt;&lt;/span&gt;
@@ -1223,19 +1342,8 @@ The guest makes a host call with the Jolt instruction &lt;code&gt;VirtualHostIO&
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;      match&lt;/span&gt;&lt;span&gt; run.bytecode[next].instruction &lt;/span&gt;&lt;span style=&quot;color: #D73A49;&quot;&gt;with&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | .VirtualHostIO =&amp;gt; ∃ post, execHostIO pre = .ok RETIRE_SUCCESS post&lt;/span&gt;&lt;/span&gt;
 &lt;span class=&quot;giallo-l&quot;&gt;&lt;span&gt;      | _ =&amp;gt; True&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This assumption assumes that every call to &lt;code&gt;VirtualHostIO&lt;/code&gt; the program makes, for every untrusted advice and runtime advice, succeeds.&lt;/p&gt;
-&lt;p&gt;The assumption exists because the constraints never check a host call, but Jolt’s tracer can fail on one.
-Jolt gives &lt;code&gt;VirtualHostIO&lt;/code&gt; no circuit flags (&lt;code&gt;jolt_instruction!(VirtualHostIO)&lt;/code&gt; in &lt;code&gt;crates/jolt-riscv/src/instructions/virt/host_io.rs&lt;/code&gt;) and no lookup table (&lt;code&gt;impl_lookup_table!(VirtualHostIO, None)&lt;/code&gt; in &lt;code&gt;crates/jolt-lookup-tables/src/instructions/virt/host_io.rs&lt;/code&gt;), and its &lt;code&gt;rd&lt;/code&gt; is &lt;code&gt;x0&lt;/code&gt;.
-So on a &lt;code&gt;VirtualHostIO&lt;/code&gt; row the constraints check only that the row writes no register, makes no RAM access, and moves the PC to the next instruction.
-They do not check the call id, the pointer, the length or the event, or whether the call succeeded.
-The row is still a real row of the trace, not the padding no-op: its &lt;code&gt;IsNoop&lt;/code&gt; flag is 0.&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Jolt’s tracer can fail on a host call and stop the run: a cycle marker or a print whose &lt;code&gt;x13&lt;/code&gt; is invalid, or a pointer overflow while reading the string.&lt;/li&gt;
-&lt;li&gt;When it fails, the tracer never completes the run, so no run of the program produces the claim, and the claim is not in L.&lt;/li&gt;
-&lt;li&gt;A witness, however, can treat the failed call as a row that does nothing and continue to the end, and the verifier accepts it.&lt;/li&gt;
-&lt;li&gt;So without the assumption, the verifier could accept a claim that no completed run produces, and our soundness theorem would be false.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;The assumption excludes every program where some host call could fail, so this case never arises.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;This is a really mild assumption if we are not using the advice tape.&lt;/strong&gt;
+As the rest of the use cases are just debugging.&lt;/p&gt;
 &lt;section class=&quot;footnotes&quot;&gt;
 &lt;ol class=&quot;footnotes-list&quot;&gt;
 &lt;li id=&quot;fn-att&quot;&gt;
@@ -1244,6 +1352,9 @@ The row is still a real row of the trace, not the padding no-op: its &lt;code&gt
 &lt;li id=&quot;fn-help&quot;&gt;
 &lt;p&gt;We could not figure out a way to get the Lean kernel to enforce this in a clean manner without completely redoing the project.
 So we do this manually by enforcing that each field uses something from the &lt;code&gt;Assumptions&lt;/code&gt; namespace. If you, the reader, know a better way to do this, please reach out with a pull request. &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/02-assumptions/#fr-help-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li id=&quot;fn-region&quot;&gt;
+&lt;p&gt;By region I mean any of the 8-byte locations shown in the figure above. &lt;a href=&quot;https://randomwalks.xyz/blog/jolt-qed/02-assumptions/#fr-region-1&quot;&gt;↩&lt;/a&gt;&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ol&gt;
 &lt;/section&gt;
