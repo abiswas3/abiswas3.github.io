@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1f1e1b">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="">
+    <title>Hierarchy Theorems and Time versus Space · Algorithms</title>
+    <link rel="stylesheet" href="https://randomwalks.xyz/algorithms/style.css?h=8031905c9b66e978bf68">
+    <script defer src="https://randomwalks.xyz/algorithms/sidenotes.js?h=abba13c76e721c629ac3"></script>
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          tags: 'ams'
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+</head>
+<body>
+    
+    <header class="site-header">
+        <a class="brand" href="https://randomwalks.xyz/algorithms" aria-label="Algorithms home">
+            <span class="brand-mark" aria-hidden="true">A</span>
+            <span class="brand-copy">
+                <strong>Algorithms</strong>
+            </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="https://randomwalks.xyz/algorithms/lectures/" aria-current="page">Lecture Notes</a>
+            <a href="https://randomwalks.xyz/algorithms/hw/">Problem Sets</a>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        
+<article class="page-shell">
+    <header class="page-heading">
+        <h1>Hierarchy Theorems and Time versus Space</h1>
+        
+        
+        
+        
+        
+        
+        <div class="lecture-credits">
+            <span class="lecture-credit-lecturer"><span class="credit-label">Lecturer</span> Ari</span>
+            
+        </div>
+        
+    </header>
+
+    
+    <div class="prose page-content">
+        <p><a href="https://randomwalks.xyz/algorithms/lectures/13-hierarchy-theorems-and-time-versus-space/./lec04.pdf">Download the PDF</a>.</p>
+<p><strong>Goals</strong>: The main goal of this lecture is to get through the proof of the time and space hierarchy theorems, for which we will once again use diagonalisation.</p>
+<h2 id="introduction">Introduction</h2>
+<p>Before we can state and prove the hierarchy theorems, we need to know some facts about universal Turing machines.</p>
+<aside id="universal-tm" class="statement statement-theorem thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Universal Turing Machines</span>
+  </div>
+  <div class="statement-body"><p>There is a universal TM $\mathcal{U}$ that simulates any TM $M$ on input $x$ and outputs whatever $M$ outputs. If $M$ halts in $t_M(n)$ steps, then $\mathcal{U}$ halts in time $O(|\lfloor M \rfloor|t_M(n)\log t_M(n))$, where $n=|x|$ and $\lfloor M \rfloor$ is an encoding of $M$.</p>
+</div>
+</aside>
+<p>There is a simpler proof that shows that $\mathcal{U}$ halts in time $O(t_M(n)^2)$ and a more complicated proof that proves the above result. Both proofs can be found in Arora and Barak, <em>Computational Complexity</em>, Theorem 1.13. A similar result holds for simulating any TM $M$ that runs in space $t_M(n)$, but $\mathcal{U}$ successfully simulates $M$ with space $O(|\lfloor M \rfloor| t_{M}(n))$. There’s no slack! The key intuition behind the difference in slack is that time unlike space is not re-usable. We can overwrite existing cells, but we cannot re-use time. Thus space can be used more efficiently.</p>
+<p>Next we re-state the definition of time constructibility.</p>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>A time bound $t: \mathbb{N} \rightarrow \mathbb{N}$ is time constructible if there exists a TM $M$ which, given a string $1^n$ as input, outputs the binary representation of $t(n)$ in $O(t(n))$ time. A space bound $s: \mathbb{N} \rightarrow \mathbb{N}$ is space constructible if there exists a TM $M$ which, given a string $1^n$ as input, outputs the binary representation of $s(n)$ in $O(s(n))$ space.</p>
+</div>
+</aside>
+<p>With these definitions in place, we have everything we need to prove hierarchy theorems.</p>
+<aside id="time-hierarchy" class="statement statement-theorem thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Time Hierarchy Theorem</span>
+  </div>
+  <div class="statement-body"><p>Let $g$ and $G$ be time constructible bounds, and assume that $G(n) = \omega(g(n)\log{}g(n))$. Then there exists a language $L$ with $L \in \mathsf{DTIME}(G(n))$ and $L \notin \mathsf{DTIME}(g(n))$. Since $g \in O(G)$, it follows that $\mathsf{DTIME}(g(n))$ is a proper subset of $\mathsf{DTIME}(G(n))$.</p>
+</div>
+</aside>
+<aside class="statement statement-proof">
+  <div class="statement-heading">
+    <span class="statement-kind">Proof</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>We will come up with a language $L$ by defining a TM $D$, and then setting $L$ to be the set of all strings $x$ that $D$ accepts. We will then show that $L \in \mathsf{DTIME}(G(n))$ but $L \notin \mathsf{DTIME}(g(n))$, which concludes the proof.</p>
+<p>Throughout, we use two facts. First, a time constructible function $T$ satisfies $T(n) \ge n$, so $g(n) \ge n$ and $G(n) \ge n$. Second, by <a href="#universal-tm">the universal TM theorem</a>, if a TM $M$ halts on input $x$ within $t$ steps, then $\mathcal{U}$ halts on input $(\lfloor M \rfloor, x)$ within $C_M, t \log t$ steps and gives the same answer as $M$, where $C_M$ depends only on $M$.</p>
+<h3 id="the-map-mu">The map $\mu$.</h3>
+<p>Let $\lfloor M \rfloor$ denote the string representation of a TM $M$. We define a map $\mu : \Sigma^* \to \lbrace \text{TMs}\rbrace $ as follows.</p>
+<ol>
+<li>
+<p>If $x \neq 0^k 1 \lfloor M \rfloor$ for all $k \in \mathbb{N}$ and all TMs $M$, then $\mu(x)$ is the TM that always rejects.</p>
+</li>
+<li>
+<p>If there exist $k \in \mathbb{N}$ and a TM $M$ such that $x = 0^k 1 \lfloor M \rfloor$, then $\mu(x) = M$.</p>
+</li>
+</ol>
+<p>In item 2, $k$ and $M$ are unique, since $k$ is the number of leading $0$s of $x$, so $\mu$ is well defined. Infinitely many strings map to each TM $M$. Indeed, for every $k \in \mathbb{N}$, item 2 gives $\mu(0^k 1 \lfloor M \rfloor) = M$, and the strings $0^k 1 \lfloor M \rfloor$ are all different, since they have different lengths. We will see in the proof that $L \notin \mathsf{DTIME}(g(n))$ why this matters.</p>
+<h3 id="the-diagonal-table">The diagonal table.</h3>
+<p>We use diagonalisation, so we write down our table as before. Let $x_1, x_2, \dots$ be the strings of $\Sigma^*$ in length-lexicographic order. Row $i$ of the table corresponds to the TM $\mu(x_i)$ and column $j$ to the string $x_j$, and the entry $A[i,j]$ is $1$ if $\mu(x_i)$ accepts $x_j$ and $0$ otherwise; see <a href="#fig:time_hierarchy">Figure 1</a>. On input $x_i$, the machine $D$ will try to output the opposite of $A[i,i]$.</p>
+<figure id="fig:time_hierarchy" class="lecture-figure">
+  <img src="./diagonal-table.svg" alt="A table of machines versus input strings with highlighted diagonal entries and a final row D that flips them.">
+  <figcaption>Rows are machines $\mu(x_i)$ and columns are strings $x_j$. The last row describes $D$, which disagrees with the diagonal entry when its simulation finishes within the clock budget.</figcaption>
+</figure>
+<h3 id="the-machine-d">The machine $D$.</h3>
+<p>We define $D$ in terms of the universal TM $\mathcal{U}$. $D$ has all the tapes and states of $\mathcal{U}$, and whenever $D$ is in a state of $\mathcal{U}$, it makes the same move on the tapes of $\mathcal{U}$ as $\mathcal{U}$ would. So running $\mathcal{U}$ inside $D$ takes exactly as many steps as running $\mathcal{U}$ on its own. In addition, $D$ has a work tape for a clock, and extra states for the steps below that do not involve $\mathcal{U}$. We need $\mathcal{U}$ because $D$ is a single TM with a fixed number of tapes and a fixed alphabet, so it cannot have the transition function of every TM built in; instead it has the transition function of $\mathcal{U}$ built in, and $\mathcal{U}$ can simulate any TM.</p>
+<p>On input $x$ of length $n$, $D$ does the following.</p>
+<ol>
+<li>
+<p>Read $x$. This takes $n \le G(n)$ steps.</p>
+</li>
+<li>
+<p>Compute $G(n)$ and write $G(n)$ zeroes on a work tape reserved for this purpose, which we call the clock. Since $G$ is time constructible, this takes $O(G(n))$ steps. From now on, every step of $D$ also erases one zero from the clock, and if the clock becomes empty, $D$ halts immediately and rejects, so $x \notin L$.</p>
+</li>
+<li>
+<p>Compute $\lfloor \mu(x) \rfloor$, and write $(\lfloor \mu(x) \rfloor, x)$ on the input tape of $\mathcal{U}$.</p>
+</li>
+<li>
+<p>Run $\mathcal{U}$ on input $(\lfloor \mu(x) \rfloor, x)$. This simulates $\mu(x)$ on $x$: if $\mu(x)$ halts on $x$, then $\mathcal{U}$ halts with the same answer.</p>
+</li>
+<li>
+<p>If $\mathcal{U}$ accepts, that is, $\mu(x)$ accepts $x$, then $D$ rejects, so $x \notin L$. If $\mathcal{U}$ rejects, that is, $\mu(x)$ rejects $x$, then $D$ accepts, so $x \in L$.</p>
+</li>
+</ol>
+<p>The clock has two consequences. First, $D$ halts within $O(G(n))$ steps on every input, whatever $\mu(x)$ does; without the clock, step 4 would run for as long as $\mu(x)$ runs on $x$, possibly forever. Second, if the clock runs out before $\mathcal{U}$ halts, then $D$ rejects regardless of what $\mu(x)$ does on $x$, so on that input $D$ need not disagree with $\mu(x)$. The first consequence gives $L \in \mathsf{DTIME}(G(n))$, and the second is the obstacle we must overcome to show $L \notin \mathsf{DTIME}(g(n))$.</p>
+<h3 id="l-in-mathsf-dtime-g-n">$L \in \mathsf{DTIME}(G(n))$.</h3>
+<p>Let $x$ be an input of length $n$.</p>
+<ul>
+<li>
+<p>Step 1 takes $n \le G(n)$ steps.</p>
+</li>
+<li>
+<p>Step 2 takes $O(G(n))$ steps.</p>
+</li>
+<li>
+<p>Because of the clock, steps 3 to 5 take at most $G(n) + 1$ steps in total.</p>
+</li>
+</ul>
+<p>So $D$ halts on every input within $O(G(n))$ steps. Since $D$ halts on every input, it rejects every string it does not accept, so $D$ decides $L$. Hence $L \in \mathsf{DTIME}(G(n))$.</p>
+<h3 id="l-notin-mathsf-dtime-g-n">$L \notin \mathsf{DTIME}(g(n))$.</h3>
+<p>Suppose, for contradiction, that $L \in \mathsf{DTIME}(g(n))$, that is, some TM $M$ decides $L$ in time $O(g(n))$. Then there are constants $c$ and $n_0$ such that $M$ halts within $c,g(n)$ steps on every input of length $n \ge n_0$. Let $x = 0^k 1 \lfloor M \rfloor$, where $k$ will be chosen below, and let $n = |x|$. Then $\mu(x) = M$, so on input $x$, $D$ simulates $M$ on $x$. In terms of the table, $M$ is the TM in row $i$ for every $x_i$ of the form $0^k 1 \lfloor M \rfloor$, so $M$ appears in infinitely many rows. Choosing $k$ amounts to choosing one of these rows, and we look at its diagonal entry, where $M$ is run on $x$.</p>
+<p>We first show that, if $k$ is large enough, this simulation finishes before the clock runs out. On input $x$:</p>
+<ul>
+<li>
+<p>Step 3 takes $O(n)$ steps: skipping the prefix $0^k 1$ and copying $x$ take $O(n)$ steps, and copying $\lfloor M \rfloor$ and checking that it is a valid encoding takes a number of steps depending only on $M$.</p>
+</li>
+<li>
+<p>If $n \ge n_0$, then $M$ halts on $x$ within $c,g(n)$ steps, so $\mathcal{U}$ halts on $(\lfloor M \rfloor, x)$ within $O(g(n) \log g(n))$ steps, with the same answer as $M$.</p>
+</li>
+</ul>
+<p>The constants hidden in both bounds depend only on $M$, not on $k$. Since $g(n) \ge n$, steps 3 and 4 together take $O(g(n) \log g(n))$ steps, and since $G(n) = \omega(g(n)\log{}g(n))$, this is less than $G(n)$ for all sufficiently large $n$. Since $n = k + 1 + |\lfloor M \rfloor|$, we can choose $k$ so large that $n \ge n_0$ and this bound holds. <em>This is possible because infinitely many strings map to $M$: there is one, $0^k 1 \lfloor M \rfloor$, for every $k$.</em> For this chosen $k$, the clock does not run out before $\mathcal{U}$ halts. <em>This fact that the clock does not run out is crucial</em>.</p>
+<p>Now we derive the contradiction. Since $D$ reaches step 5 on input $x$, and $\mathcal{U}$ gives the same answer as $M$, $D$ accepts $x$ if and only if $M$ rejects $x$. By the definition of $L$, $x \in L$ if and only if $D$ accepts $x$. As we assumed, $M$ decides $L$, so $x \in L$ if and only if $M$ accepts $x$. Together, $M$ accepts $x$ if and only if $M$ rejects $x$, which is impossible. This concludes the proof.</p>
+</div>
+  <div class="qed" aria-label="End of proof">□</div>
+</aside>
+<aside class="statement statement-remark">
+  <div class="statement-heading">
+    <span class="statement-kind">Remark</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>If the above proof is somewhat unclear, see this lecture <a rel="external" href="https://www.youtube.com/watch?v=HrJKTTJfweo">https://www.youtube.com/watch?v=HrJKTTJfweo</a> by Ryan O’Donnell. He provides plenty of intuition, as to how to think of this proof.</p>
+</div>
+</aside>
+<aside id="space-hierarchy" class="statement statement-theorem thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Space Hierarchy Theorem</span>
+  </div>
+  <div class="statement-body"><p>Let $g$ and $G$ be space constructible bounds. Also assume that $G(n) = \omega(g(n))$. Then there exists a language $L \in \mathsf{DSPACE}(G(n))$ but $L \notin \mathsf{DSPACE}(g(n))$. In other words, $\mathsf{DSPACE}(g(n))$ is a proper subset of $\mathsf{DSPACE}(G(n))$</p>
+</div>
+</aside>
+<aside class="statement statement-proof">
+  <div class="statement-heading">
+    <span class="statement-kind">Proof</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>This proof is identical to the one above. The only difference is that, now the universal TM does not need the extra log factor to simulate. So the space bound is as tight as we could hope for.</p>
+</div>
+  <div class="qed" aria-label="End of proof">□</div>
+</aside>
+<p>As a direct consequence of the above theorems, we have</p>
+<p>$$\mathsf{DTIME}(n) \subset \mathsf{P} \subset \mathsf{E} \subset \mathsf{EXP}$$</p>
+<p>and $$\mathsf{LogSpace} \subset \mathsf{PSPACE}  \subset \mathsf{ExpSpace}$$</p>
+<p>Now that we have estabilished a time and a space hierarchy, what can we say about the relationship between time and space?</p>
+<h2 id="relationship-between-time-and-space">Relationship Between Time And Space</h2>
+<aside id="time-space" class="statement statement-theorem thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Time is at least space</span>
+  </div>
+  <div class="statement-body"><p>Let $T$ be any time bound $\mathsf{DTIME}(T) \subseteq \mathsf{DSPACE}(T)$.</p>
+</div>
+</aside>
+<aside class="statement statement-proof">
+  <div class="statement-heading">
+    <span class="statement-kind">Proof</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>The reason is that any computation halting after at most $t$ steps cannot use space more than $t$.</p>
+</div>
+  <div class="qed" aria-label="End of proof">□</div>
+</aside>
+<aside id="space-time" class="statement statement-theorem thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Space to time simulation</span>
+  </div>
+  <div class="statement-body"><p>Let $S$ be any space bound such that $S = \Omega(log(n))$. Then $\mathsf{DSPACE}(S) \subseteq \cup_{c &gt; 1}\mathsf{DTIME}(c^S)$</p>
+</div>
+</aside>
+<aside class="statement statement-proof">
+  <div class="statement-heading">
+    <span class="statement-kind">Proof</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Let $L$ be any language in $\mathsf{DSPACE}(S)$ and $M$ be a machine with read only input tape deciding $L$ in space $O(S)$. The key observation is that there are at most $(n + 1)2^{O(S)}$ possible configurations of $M$ on any input of length $n$, since a configuration of $M$ is completely described by the position of the input tape head, the positions of the work tape heads, the contents of the work tapes and the state. This is at most $c^S$ for some constant $c$ as we have $S = \Omega(log(n))$.</p>
+<p>To see the upper bound on number of possible configurations, note that there are at most $(n + 1)$ possible positions of the input tape head, at most $poly(S)$ possible positions of work tape heads, at most $2^{O(S)}$ possible contents of work tapes, and at most constantly many possible states of the machine.</p>
+<p>We assume that $M$ decides $L$ and hence $M$ halts on every input. As a consequence, no configuration can recur in the computation of the machine. Indeed, any recurrence of a configuration will imply that the computation goes on for ever, in contradiction to our assumption on $M$.</p>
+<p>We already argued that there are at most $c^S$ possible configurations. By the argument in the previous paragraph, every configuration occurs at most once in the computation. Hence the computation has length at most $c^S$, which implies that $M$ halts within time $c^S$.</p>
+</div>
+  <div class="qed" aria-label="End of proof">□</div>
+</aside>
+
+    </div>
+    
+</article>
+
+    </main>
+
+    
+    <script>
+      document.querySelectorAll('.prose pre').forEach((pre) => {
+        const code = pre.querySelector('code');
+        if (!code) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block';
+        pre.before(wrapper);
+        wrapper.append(pre);
+
+        const button = document.createElement('button');
+        button.className = 'copy-code';
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.setAttribute('aria-label', 'Copy code to clipboard');
+        wrapper.append(button);
+
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(code.textContent);
+            button.textContent = 'Copied';
+            window.setTimeout(() => { button.textContent = 'Copy'; }, 1400);
+          } catch (_) {
+            button.textContent = 'Select and copy';
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(code);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        });
+      });
+    </script>
+    
+
+</body>
+</html>

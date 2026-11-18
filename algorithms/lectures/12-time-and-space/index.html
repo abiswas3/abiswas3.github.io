@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#1f1e1b">
+    <meta name="color-scheme" content="dark">
+    <meta name="description" content="">
+    <title>Time and Space · Algorithms</title>
+    <link rel="stylesheet" href="https://randomwalks.xyz/algorithms/style.css?h=8031905c9b66e978bf68">
+    <script defer src="https://randomwalks.xyz/algorithms/sidenotes.js?h=abba13c76e721c629ac3"></script>
+    
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          tags: 'ams'
+        },
+        options: {
+          skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    
+</head>
+<body>
+    
+    <header class="site-header">
+        <a class="brand" href="https://randomwalks.xyz/algorithms" aria-label="Algorithms home">
+            <span class="brand-mark" aria-hidden="true">A</span>
+            <span class="brand-copy">
+                <strong>Algorithms</strong>
+            </span>
+        </a>
+
+        <nav class="site-nav" aria-label="Primary navigation">
+            <a href="https://randomwalks.xyz/algorithms/lectures/" aria-current="page">Lecture Notes</a>
+            <a href="https://randomwalks.xyz/algorithms/hw/">Problem Sets</a>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        
+<article class="page-shell">
+    <header class="page-heading">
+        <h1>Time and Space</h1>
+        
+        
+        
+        
+        
+        
+        <div class="lecture-credits">
+            <span class="lecture-credit-lecturer"><span class="credit-label">Lecturer</span> Ari</span>
+            
+        </div>
+        
+    </header>
+
+    
+    <div class="prose page-content">
+        <p><a href="https://randomwalks.xyz/algorithms/lectures/12-time-and-space/./lec03.pdf">Download the PDF</a>.</p>
+<p>So far we’ve only been talking about computability theory, and refreshing relevant material in computability theory. We did that to introduce the general model of computation we will be working with in this class– the multi-tape TM, and also to provide a brief refresher to concepts like diagonalisation, reductions and completeness, which will be useful later on. In this lecture we define time and space complexity. In computational complexity we are interested in the most efficient way to solve a given problem, or in other words, how do you solve with it with the fewest resources possible. In this lecture we will formalise and study time and space as resources.</p>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Let $M$ be a deterministic TM and let $x \in \Sigma^*$. The <em>running time</em> of $M$ on $x$, denoted by $\mathrm{time}_M(x) \in \mathbb{N} \cup \lbrace \infty\rbrace $, is the number of steps $M$ takes on input $x$ before halting, or $\infty$ if $M$ does not halt on $x$.</p>
+</div>
+</aside>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Let $M$ be a deterministic TM with a read-only input tape and let $x \in \Sigma^*$. The <em>space used</em> by $M$ on $x$, denoted by $\mathrm{space}_M(x) \in \mathbb{N} \cup \lbrace \infty\rbrace $, is the total number of distinct work-tape cells that $M$ scans when run on input $x$.</p>
+</div>
+</aside>
+<aside class="statement statement-remark">
+  <div class="statement-heading">
+    <span class="statement-kind">Remark</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Note that $\mathrm{space}_M(x)$ can be finite even if $M$ does not halt on $x$.</p>
+</div>
+</aside>
+<aside class="statement statement-remark">
+  <div class="statement-heading">
+    <span class="statement-kind">Remark</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>We make the input tape read-only so that the cells holding the input do not count towards space. Otherwise every machine would use at least $n$ cells on inputs of length $n$, and sub linear space bounds such as $\log n$ would be meaningless.</p>
+</div>
+</aside>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Let $M$ be a deterministic TM. The <em>time complexity</em> of $M$ is the function $T_M : \mathbb{N} \to \mathbb{N} \cup \lbrace \infty\rbrace $ given by $T_M(n) = \max \lbrace  \mathrm{time}_M(x) : x \in \Sigma^n \rbrace $.</p>
+</div>
+</aside>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Let $M$ be a deterministic TM with a read-only input tape. The <em>space complexity</em> of $M$ is the function $S_M : \mathbb{N} \to \mathbb{N} \cup \lbrace \infty\rbrace $ given by $S_M(n) = \max \lbrace  \mathrm{space}_M(x) : x \in \Sigma^n \rbrace $.</p>
+</div>
+</aside>
+<p>The maxima exist because $\Sigma^n$ is finite and $\mathbb{N} \cup \lbrace \infty\rbrace $ is totally ordered. We also define complexity classes, which are sets of languages that can be decided within a given amount of time or space.</p>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Let $L \subseteq \Sigma^*$ and $T : \mathbb{N} \to \mathbb{N}$. We say $L \in \mathsf{DTIME}(T)$ if there exists a deterministic TM $M$ that decides $L$ with $T_M \in O(T)$.</p>
+</div>
+</aside>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Let $L \subseteq \Sigma^*$ and $S : \mathbb{N} \to \mathbb{N}$. We say $L \in \mathsf{DSPACE}(S)$ if there exists a deterministic TM $M$ with a read-only input tape that decides $L$ with $S_M \in O(S)$.</p>
+</div>
+</aside>
+<p>The above definitions capture the worst case performance of a machine as a function of the size of the input. Alternatively, one can also consider the average case performance/complexity. We are typically interested only in asymptotics. One reason for such a decision is that the runtimes obtained through analysis are obtained by using a multi-tape TM as a model of computation. If we used another model, we might need a different set of constants. Another reason for only being interested in the asymptotics is the speedup theorem, which we will prove later in the lecture.</p>
+<aside class="statement statement-observation">
+  <div class="statement-heading">
+    <span class="statement-kind">Observation</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Any language $L$ for which membership depends on reading the <strong>entire</strong> input requires time at least $n$.</p>
+</div>
+</aside>
+<aside class="statement statement-example">
+  <div class="statement-heading">
+    <span class="statement-kind">Example</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Parity $\in \mathsf{DTIME}(n)$: Read the input from left to right keeping track of the parity of bits so far in the machine’s state.</p>
+</div>
+</aside>
+<p>Note that the above example generalises to membership of any regular language in linear time.</p>
+<aside class="statement statement-example">
+  <div class="statement-heading">
+    <span class="statement-kind">Example</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Palindromes $\in \mathsf{DTIME}(n)$: Copy the input onto another tape in reverse order. Then check cell by cell up to the middle.</p>
+</div>
+</aside>
+<aside class="statement statement-example">
+  <div class="statement-heading">
+    <span class="statement-kind">Example</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>Define $L = \lbrace x\#x : x \in \lbrace 0,1\rbrace ^*\rbrace $, then $L \in \mathsf{DTIME}(n)$: Read the input from left to right until a $\#$ is encountered. Copy the part of the input after that onto a separate tape. Now move the tape heads back to the left end, and compare the part of the input until the $\#$ bit by bit with the string written on the work tape, accepting if and only if they are identical.</p>
+</div>
+</aside>
+<p>We still don’t actually have explicit examples of languages that are not in $\mathsf{DTIME}(n)$ (except those that follow from application of the time hierarchy theorem).</p>
+<p>Other interesting classes include</p>
+<ol>
+<li>
+<p>$\mathsf{P} = \cup_{k} \mathsf{DTIME}(n^k)$</p>
+</li>
+<li>
+<p>$\mathsf{E} = \cup_{k} \mathsf{DTIME}(2^{nk})$</p>
+</li>
+<li>
+<p>$\mathsf{EXP} = \cup_{k} \mathsf{DTIME}(2^{n^k})$</p>
+</li>
+</ol>
+<p>In all of the above examples, $n$ represents the size of the input. Although linear time is a very useful complexity class, it’s not robust to the choice of how we choose to model computation. For example, a language that’s linear in the multi-tape TM model, may not be linear another model (like single tape TM, or RAM). This is where the class $\mathsf{P}$ is very useful. Although not formally provable, a wildly held belief is that <em>regardless of which model we use, if a language is in $\mathsf{P}$ in one computational model, then it is in $\mathsf{P}$ is all other “reasonable” and <strong>deterministic</strong> computational models.</em> The reason we cannot formally prove this statement is because it’s hard to define what a “reasonable” model of computation is.</p>
+<aside class="statement statement-remark">
+  <div class="statement-heading">
+    <span class="statement-kind">Remark</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>The deterministic quantifier is quite important as the above conjecture is not believed to hold for quantum TMs. The Factoring problem is believed to be hard for classical TMs but is solvable in polynomial time on quantum TMs.</p>
+</div>
+</aside>
+<p>Some interesting examples of languages in $\mathsf{P}$:</p>
+<ol>
+<li>
+<p>Fundamental optimisation problems like Linear Programming are in $\mathsf{P}$. So is Max-Flow.</p>
+</li>
+<li>
+<p>Checking if a number is prime or not is in $\mathsf{P}$.</p>
+</li>
+<li>
+<p>2-SAT, GCD of 2 integers is also in $\mathsf{P}$.</p>
+</li>
+</ol>
+<aside id="time-speedup" class="statement statement-theorem thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Time Speedup Theorem</span>
+  </div>
+  <div class="statement-body"><p>Let $T :\mathbb{N} \rightarrow \mathbb{N}$ be a time function and let $r \in \mathbb{N}$ be a positive integer. Suppose a TM $M$ decides a language $L \subseteq \Sigma^*$ with time complexity $T(n)$, where $n$ is the length of the input. Then there is another TM $M^{\prime}$ that decides $L$ with time complexity $\frac{T(n)}{r} + O(n)$.</p>
+</div>
+</aside>
+<aside class="statement statement-proof">
+  <div class="statement-heading">
+    <span class="statement-kind">Proof</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>The idea is to let $M^{\prime}$ treat a block of $m$ consecutive symbols of $M$ as a single symbol, so that one step of $M^{\prime}$ does the work of about $m$ steps of $M$. This is allowed because a TM can have any finite tape alphabet. <a href="#fig:lin_speedup_compress">Figure 1</a> shows the blocking. The block size is $m = 6r$, where $r$ is the speedup factor in the theorem.</p>
+<figure id="fig:lin_speedup_compress" class="lecture-figure">
+  <img src="./blocking-input.svg" alt="Nine input bits 001111101 grouped into three blocks 001, 111, 101 on a work tape.">
+  <figcaption>Phase 1: $M^{\prime}$ copies the input into blocks of $m$ symbols (shown with $m=3$). The original input tape is kept; the work tape stores one block per cell.</figcaption>
+</figure>
+<p><em>Phase 1: compress the input.</em> $M^{\prime}$ reads $M$’s input $x$, of length $n$, and copies it onto a work tape with $m$ symbols of $x$ in each cell. This uses $\lceil n/m\rceil$ cells; pad the last block if needed. The copying takes $O(n)$ time to read the input. Once copying is done, this blocked work tape serves as the simulated input tape of $M$. The other tapes of $M$ start blank, and each cell of their simulation stores $m$ symbols from $\Gamma$. See <a href="#fig:lin_speedup_compress">Figure 1</a>.</p>
+<p><em>Phase 2: simulate $m$ steps of $M$ using 6 steps of $M^{\prime}$.</em> A round is a sequence of 6 consecutive steps of $M^{\prime}$ that simulates the next $m$ steps of $M$. So $M^{\prime}$ does 1 round for every $m$ steps that $M$ does. A step of a TM depends on the current state and on the cells under the heads: together they determine the new state, the symbols written and the head moves.</p>
+<p>$m$ steps of $M$ means the following. On each work tape, $M$ writes at most $m$ cells. On each tape, $M$ reads at most $m+1$ cells. $M$ goes through $m$ state transitions $q_0 \to q_1 \to \cdots \to q_m$.</p>
+<p>To simulate this, $M^{\prime}$ does not need to model the intermediate steps. It needs $q_0$, the contents of the cells that $M$ can read and the positions of its heads at the start, and it needs $q_m$, the final contents and the final head positions. If $M^{\prime}$ can produce these, it has done $m$ steps of $M$.</p>
+<p>Consider the next $m$ steps of $M$. Fix any work tape of $M$. A round of $M^{\prime}$ goes as follows. It starts with $q_0$ in its state. If $M$ starts on cell $i$, then this cell belongs to some block $B_j$ of $M^{\prime}$. In $m$ steps $M$ moves at most $m$ cells, so it can only reach cells in the blocks $B_{j-1}$, $B_j$ and $B_{j+1}$ (<a href="#fig:lin_speedup_read">Figure 2</a>). These are all the blocks that $M$ could read or write in these $m$ steps, which is why $M^{\prime}$ reads exactly these three blocks. $M^{\prime}$ cannot tell in advance which neighbour $M$ will use, because that depends on the state of $M$ and on the contents of the cells, and with several tapes on what the other heads read. So it scans these blocks by going left, right, right and left (<a href="#fig:lin_speedup_read">Figure 2</a>). This takes 4 time steps. Now $M^{\prime}$ has read everything $M$ could read. We define $\delta^{\prime}$ so that, from $q_0$ and what $M^{\prime}$ has read, it gives $q_m$, the final contents and the final head positions. It writes back the blocks that changed. At most 2 blocks were written to by $M$ since the cells $M$ visits are at most $m+1$ consecutive cells. So $M^{\prime}$ writes two blocks which takes 2 steps. The last of these steps also moves the head of $M^{\prime}$ onto the block that holds the head of $M$, and the state of $M^{\prime}$ now holds $q_m$, ready for the next round. The heads on all the tapes do this at the same time, so a round takes 6 steps in total.</p>
+<p><em>Counting steps.</em> $M$ runs for at most $T(n)$ steps, so $M^{\prime}$ needs at most $\lceil T(n)/m \rceil$ rounds. Each round takes 6 steps of $M^{\prime}$, so Phase 2 takes at most $6\lceil T(n)/m \rceil \le \frac{6T(n)}{m} + 6$ steps. Phase 1 takes $O(n)$ steps. So $M^{\prime}$ takes at most $\frac{6T(n)}{m} + O(n)$ steps in total. With $m = 6r$ this is $\frac{T(n)}{r} + O(n)$. Since every round simulates $m$ steps of $M$ exactly, $M^{\prime}$ halts with the same answer as $M$, so $M^{\prime}$ decides $L$.</p>
+<figure id="fig:lin_speedup_read" class="lecture-figure">
+  <img src="./three-block-scan.svg" alt="The simulator scans from the current block to the left neighbour, back, to the right neighbour, and back.">
+  <figcaption>$M^{\prime}$ reads $B_{j-1}$, $B_j$, and $B_{j+1}$ using four moves: left, right, right, left.</figcaption>
+</figure>
+</div>
+  <div class="qed" aria-label="End of proof">□</div>
+</aside>
+<p>There is an analogous result for space.</p>
+<aside id="space-compression" class="statement statement-theorem thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Space Compression Theorem</span>
+  </div>
+  <div class="statement-body"><p>Let $S : \mathbb{N} \rightarrow \mathbb{N}$ be a space bound and let $r \in \mathbb{N}$ be a positive integer. If a TM $M$ decides a language $L \subseteq \Sigma^*$ in space $S(n)$, then another TM $M^{\prime}$ decides $L$ in space $S(n)/r$.</p>
+</div>
+</aside>
+<p>The proof of this theorem is essentially the same as for the time speedup theorem, except that we don’t need to compress the input in this case, and hence save the additional $O(n)$ term in the statement of the time speedup theorem.</p>
+<p>A fundamental goal of complexity theory is to establish hierarchies. We want to decide if a given language requires more time and space than another, thereby establishing the complexity of that language. Ideally we would like to prove statements such as $$T = o(T^{\prime}) \implies \mathsf{DTIME}(T) \subset \mathsf{DTIME}(T^{\prime}) .$$ However, a highly non-intuitive result known as the gap theorem shows that this fails for some $T$.</p>
+<aside id="gap-theorem" class="statement statement-theorem thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Gap Theorem, informal</span>
+  </div>
+  <div class="statement-body"><p>Let $f : \mathbb{N} \to \mathbb{N}$ be a total computable function with $f(n) \ge n$ for all $n$. Then there exist total computable functions $T, S : \mathbb{N} \to \mathbb{N}$ such that $$\mathsf{DTIME}(T) = \mathsf{DTIME}(f \circ T)
+\quad\text{and}\quad
+\mathsf{DSPACE}(S) = \mathsf{DSPACE}(f \circ S) .$$</p>
+</div>
+</aside>
+<p>Here $f \circ T$ denotes the function $n \mapsto f(T(n))$. Taking $f(n) = 2^n$, we get the surprising consequence that there are a time bound $T$ and a space bound $S$ with $\mathsf{DTIME}(2^T) = \mathsf{DTIME}(T)$ and $\mathsf{DSPACE}(2^S) = \mathsf{DSPACE}(S)$, where $2^T$ denotes $n \mapsto 2^{T(n)}$.</p>
+<p>However, for time-constructible bounds we can prove a hierarchy theorem, so for $f(n) = 2^n$ the time bound $T$ given by the gap theorem cannot be time-constructible. However, for “nice looking” time bounds, we can construct a hierarchy.</p>
+<aside class="statement statement-definition thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>A time bound $T: \mathbb{N} \rightarrow \mathbb{N}$ is time constructible if there exits a TM $M$ which, given a string $1^n$ as input, outputs the binary representation of $T(n)$ in $O(T(n))$ time.</p>
+</div>
+</aside>
+<aside class="statement statement-remark">
+  <div class="statement-heading">
+    <span class="statement-kind">Remark</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>The above definition just states that the above time bounds are efficiently computable. It is easy to verify that the bounds $n, n^k, 2^n, 2^{n^k}$ are all time constructible (do it as an exercise).</p>
+</div>
+</aside>
+<aside id="time-hierarchy" class="statement statement-theorem thm-numbered">
+  <div class="statement-heading">
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Time Hierarchy Theorem</span>
+  </div>
+  <div class="statement-body"><p>Let $T, T^{\prime}: \mathbb{N} \rightarrow \mathbb{N}$ s.t $T^{\prime}$ is time constructible and $T\log{}T = o(T^{\prime})$. Then $\mathsf{DTIME}(T) \subset \mathsf{DTIME}(T^{\prime})$. A similar statement can be made for space hierarchies, but we only need $S = o(S’)$.</p>
+</div>
+</aside>
+<aside class="statement statement-proof">
+  <div class="statement-heading">
+    <span class="statement-kind">Proof</span><span class="statement-number"></span>
+  </div>
+  <div class="statement-body"><p>We will discuss the proof in Lecture 4.</p>
+</div>
+  <div class="qed" aria-label="End of proof">□</div>
+</aside>
+
+    </div>
+    
+</article>
+
+    </main>
+
+    
+    <script>
+      document.querySelectorAll('.prose pre').forEach((pre) => {
+        const code = pre.querySelector('code');
+        if (!code) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'code-block';
+        pre.before(wrapper);
+        wrapper.append(pre);
+
+        const button = document.createElement('button');
+        button.className = 'copy-code';
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.setAttribute('aria-label', 'Copy code to clipboard');
+        wrapper.append(button);
+
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(code.textContent);
+            button.textContent = 'Copied';
+            window.setTimeout(() => { button.textContent = 'Copy'; }, 1400);
+          } catch (_) {
+            button.textContent = 'Select and copy';
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(code);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        });
+      });
+    </script>
+    
+
+</body>
+</html>
