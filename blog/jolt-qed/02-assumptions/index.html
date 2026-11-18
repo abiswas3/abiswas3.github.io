@@ -614,7 +614,7 @@ In the Jolt Rust code, the guest program is internally stored with the following
 <span class="giallo-l"><span style="color: #6A737D;">    /// ELF entry point.</span></span>
 <span class="giallo-l"><span style="color: #D73A49;">    pub</span><span> entry_address</span><span style="color: #D73A49;">:</span><span style="color: #6F42C1;"> u64</span><span>,</span></span>
 <span class="giallo-l"><span>}</span></span></code></pre>
-<p>In Lean, the corresponding types are defined in <code>JoltConstraints/program.lean</code>.
+<p>In Lean, the corresponding types are defined in <code>JoltConstraints/translation/program.lean</code>.
 You will note that in Lean we have two extra fields, which are propositions.
 The first one simply says that the memory addresses in <code>memory_init</code> are at least the lowest address in Jolt address space, and at most one minus the highest value in the address space.
 The second one states that no guest bytecode PC wraps around.
