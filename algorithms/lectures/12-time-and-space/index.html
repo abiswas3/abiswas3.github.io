@@ -61,7 +61,7 @@
 
     
     <div class="prose page-content">
-        <p><a href="https://randomwalks.xyz/algorithms/lectures/12-time-and-space/./lec03.pdf">Download the PDF</a>.</p>
+        <p>See the <a href="https://randomwalks.xyz/algorithms/lectures/12-time-and-space/./lec03.pdf">PDF</a>.</p>
 <p>So far we’ve only been talking about computability theory, and refreshing relevant material in computability theory. We did that to introduce the general model of computation we will be working with in this class– the multi-tape TM, and also to provide a brief refresher to concepts like diagonalisation, reductions and completeness, which will be useful later on. In this lecture we define time and space complexity. In computational complexity we are interested in the most efficient way to solve a given problem, or in other words, how do you solve with it with the fewest resources possible. In this lecture we will formalise and study time and space as resources.</p>
 <aside class="statement statement-definition thm-numbered">
   <div class="statement-heading">
@@ -93,14 +93,14 @@
 </aside>
 <aside class="statement statement-definition thm-numbered">
   <div class="statement-heading">
-    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Time Complexity of a TM</span>
   </div>
   <div class="statement-body"><p>Let $M$ be a deterministic TM. The <em>time complexity</em> of $M$ is the function $T_M : \mathbb{N} \to \mathbb{N} \cup \lbrace \infty\rbrace $ given by $T_M(n) = \max \lbrace  \mathrm{time}_M(x) : x \in \Sigma^n \rbrace $.</p>
 </div>
 </aside>
 <aside class="statement statement-definition thm-numbered">
   <div class="statement-heading">
-    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Space Complexity of a TM</span>
   </div>
   <div class="statement-body"><p>Let $M$ be a deterministic TM with a read-only input tape. The <em>space complexity</em> of $M$ is the function $S_M : \mathbb{N} \to \mathbb{N} \cup \lbrace \infty\rbrace $ given by $S_M(n) = \max \lbrace  \mathrm{space}_M(x) : x \in \Sigma^n \rbrace $.</p>
 </div>
@@ -108,14 +108,14 @@
 <p>The maxima exist because $\Sigma^n$ is finite and $\mathbb{N} \cup \lbrace \infty\rbrace $ is totally ordered. We also define complexity classes, which are sets of languages that can be decided within a given amount of time or space.</p>
 <aside class="statement statement-definition thm-numbered">
   <div class="statement-heading">
-    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Time Complexity Classes</span>
   </div>
   <div class="statement-body"><p>Let $L \subseteq \Sigma^*$ and $T : \mathbb{N} \to \mathbb{N}$. We say $L \in \mathsf{DTIME}(T)$ if there exists a deterministic TM $M$ that decides $L$ with $T_M \in O(T)$.</p>
 </div>
 </aside>
 <aside class="statement statement-definition thm-numbered">
   <div class="statement-heading">
-    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Space Complexity Classes</span>
   </div>
   <div class="statement-body"><p>Let $L \subseteq \Sigma^*$ and $S : \mathbb{N} \to \mathbb{N}$. We say $L \in \mathsf{DSPACE}(S)$ if there exists a deterministic TM $M$ with a read-only input tape that decides $L$ with $S_M \in O(S)$.</p>
 </div>
@@ -196,18 +196,18 @@
   </div>
   <div class="statement-body"><p>The idea is to let $M^{\prime}$ treat a block of $m$ consecutive symbols of $M$ as a single symbol, so that one step of $M^{\prime}$ does the work of about $m$ steps of $M$. This is allowed because a TM can have any finite tape alphabet. <a href="#fig:lin_speedup_compress">Figure 1</a> shows the blocking. The block size is $m = 6r$, where $r$ is the speedup factor in the theorem.</p>
 <figure id="fig:lin_speedup_compress" class="lecture-figure">
-  <img src="./blocking-input.svg" alt="Nine input bits 001111101 grouped into three blocks 001, 111, 101 on a work tape.">
-  <figcaption>Phase 1: $M^{\prime}$ copies the input into blocks of $m$ symbols (shown with $m=3$). The original input tape is kept; the work tape stores one block per cell.</figcaption>
+  <img src="./blocking-input.svg" alt="">
+  <figcaption>Phase 1: blocking the input, here with $m=3$. $M^{\prime}$ keeps its original input tape and copies $x$ onto a work tape, writing each block of $m$ symbols of $x$ as one symbol of $\Sigma^m$. The head on the original input tape moves one symbol of $\Sigma$ per step, while the head on this work tape moves one block, a symbol of $\Sigma^m$, per step. The other work tapes also hold blocks, symbols of $\Gamma^m$.</figcaption>
 </figure>
-<p><em>Phase 1: compress the input.</em> $M^{\prime}$ reads $M$’s input $x$, of length $n$, and copies it onto a work tape with $m$ symbols of $x$ in each cell. This uses $\lceil n/m\rceil$ cells; pad the last block if needed. The copying takes $O(n)$ time to read the input. Once copying is done, this blocked work tape serves as the simulated input tape of $M$. The other tapes of $M$ start blank, and each cell of their simulation stores $m$ symbols from $\Gamma$. See <a href="#fig:lin_speedup_compress">Figure 1</a>.</p>
+<p><em>Phase 1: compress the input.</em> $M^{\prime}$ reads $M$’s input $x$, of length $n$, and copies it onto the its work tape with $m$ symbols of $x$ in each cell. That is each cell has of this tape has $n/m$ input alphabets (assume things are divisible otherwise pad). This copying needs time $O(n)$ to read $M$’s input tape. Once this copying is done, $M$’s chunked input tape will be the input tape. The other tapes of $M$ start blank and each cell holds $m$ symbols from $\Gamma$. See <a href="#fig:lin_speedup_compress">Figure 1</a>.</p>
 <p><em>Phase 2: simulate $m$ steps of $M$ using 6 steps of $M^{\prime}$.</em> A round is a sequence of 6 consecutive steps of $M^{\prime}$ that simulates the next $m$ steps of $M$. So $M^{\prime}$ does 1 round for every $m$ steps that $M$ does. A step of a TM depends on the current state and on the cells under the heads: together they determine the new state, the symbols written and the head moves.</p>
 <p>$m$ steps of $M$ means the following. On each work tape, $M$ writes at most $m$ cells. On each tape, $M$ reads at most $m+1$ cells. $M$ goes through $m$ state transitions $q_0 \to q_1 \to \cdots \to q_m$.</p>
 <p>To simulate this, $M^{\prime}$ does not need to model the intermediate steps. It needs $q_0$, the contents of the cells that $M$ can read and the positions of its heads at the start, and it needs $q_m$, the final contents and the final head positions. If $M^{\prime}$ can produce these, it has done $m$ steps of $M$.</p>
 <p>Consider the next $m$ steps of $M$. Fix any work tape of $M$. A round of $M^{\prime}$ goes as follows. It starts with $q_0$ in its state. If $M$ starts on cell $i$, then this cell belongs to some block $B_j$ of $M^{\prime}$. In $m$ steps $M$ moves at most $m$ cells, so it can only reach cells in the blocks $B_{j-1}$, $B_j$ and $B_{j+1}$ (<a href="#fig:lin_speedup_read">Figure 2</a>). These are all the blocks that $M$ could read or write in these $m$ steps, which is why $M^{\prime}$ reads exactly these three blocks. $M^{\prime}$ cannot tell in advance which neighbour $M$ will use, because that depends on the state of $M$ and on the contents of the cells, and with several tapes on what the other heads read. So it scans these blocks by going left, right, right and left (<a href="#fig:lin_speedup_read">Figure 2</a>). This takes 4 time steps. Now $M^{\prime}$ has read everything $M$ could read. We define $\delta^{\prime}$ so that, from $q_0$ and what $M^{\prime}$ has read, it gives $q_m$, the final contents and the final head positions. It writes back the blocks that changed. At most 2 blocks were written to by $M$ since the cells $M$ visits are at most $m+1$ consecutive cells. So $M^{\prime}$ writes two blocks which takes 2 steps. The last of these steps also moves the head of $M^{\prime}$ onto the block that holds the head of $M$, and the state of $M^{\prime}$ now holds $q_m$, ready for the next round. The heads on all the tapes do this at the same time, so a round takes 6 steps in total.</p>
 <p><em>Counting steps.</em> $M$ runs for at most $T(n)$ steps, so $M^{\prime}$ needs at most $\lceil T(n)/m \rceil$ rounds. Each round takes 6 steps of $M^{\prime}$, so Phase 2 takes at most $6\lceil T(n)/m \rceil \le \frac{6T(n)}{m} + 6$ steps. Phase 1 takes $O(n)$ steps. So $M^{\prime}$ takes at most $\frac{6T(n)}{m} + O(n)$ steps in total. With $m = 6r$ this is $\frac{T(n)}{r} + O(n)$. Since every round simulates $m$ steps of $M$ exactly, $M^{\prime}$ halts with the same answer as $M$, so $M^{\prime}$ decides $L$.</p>
 <figure id="fig:lin_speedup_read" class="lecture-figure">
-  <img src="./three-block-scan.svg" alt="The simulator scans from the current block to the left neighbour, back, to the right neighbour, and back.">
-  <figcaption>$M^{\prime}$ reads $B_{j-1}$, $B_j$, and $B_{j+1}$ using four moves: left, right, right, left.</figcaption>
+  <img src="./three-block-scan.svg" alt="">
+  <figcaption>$M^{\prime}$ reads the three blocks $B_{j-1}$, $B_j$ and $B_{j+1}$, which contain every cell the head of $M$ can reach in $m$ steps. It does this with 4 moves, $\mathrm{L}$, $\mathrm{R}$, $\mathrm{R}$, $\mathrm{L}$, and ends on $B_j$ again.</figcaption>
 </figure>
 </div>
   <div class="qed" aria-label="End of proof">□</div>
@@ -217,14 +217,14 @@
   <div class="statement-heading">
     <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Space Compression Theorem</span>
   </div>
-  <div class="statement-body"><p>Let $S : \mathbb{N} \rightarrow \mathbb{N}$ be a space bound and let $r \in \mathbb{N}$ be a positive integer. If a TM $M$ decides a language $L \subseteq \Sigma^*$ in space $S(n)$, then another TM $M^{\prime}$ decides $L$ in space $S(n)/r$.</p>
+  <div class="statement-body"><p>Let $T : \mathbb{N} \rightarrow \mathbb{N}$ be a space function. Let $r \in \mathbb{N}$ be a positive integer. If there is a TM $M$ that decides $L \in \Sigma^*$ in space $S$, then there exists another TM $M^{\prime}$ that decides $L$ in $\frac{S}{r}$ space, where $n$ is the size of the input $x \in L$.</p>
 </div>
 </aside>
 <p>The proof of this theorem is essentially the same as for the time speedup theorem, except that we don’t need to compress the input in this case, and hence save the additional $O(n)$ term in the statement of the time speedup theorem.</p>
 <p>A fundamental goal of complexity theory is to establish hierarchies. We want to decide if a given language requires more time and space than another, thereby establishing the complexity of that language. Ideally we would like to prove statements such as $$T = o(T^{\prime}) \implies \mathsf{DTIME}(T) \subset \mathsf{DTIME}(T^{\prime}) .$$ However, a highly non-intuitive result known as the gap theorem shows that this fails for some $T$.</p>
 <aside id="gap-theorem" class="statement statement-theorem thm-numbered">
   <div class="statement-heading">
-    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Gap Theorem, informal</span>
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Gap Theorem, Informal</span>
   </div>
   <div class="statement-body"><p>Let $f : \mathbb{N} \to \mathbb{N}$ be a total computable function with $f(n) \ge n$ for all $n$. Then there exist total computable functions $T, S : \mathbb{N} \to \mathbb{N}$ such that $$\mathsf{DTIME}(T) = \mathsf{DTIME}(f \circ T)
 \quad\text{and}\quad

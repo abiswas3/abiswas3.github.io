@@ -61,7 +61,7 @@
 
     
     <div class="prose page-content">
-        <p><a href="https://randomwalks.xyz/algorithms/lectures/13-hierarchy-theorems-and-time-versus-space/./lec04.pdf">Download the PDF</a>.</p>
+        <p>See the <a href="https://randomwalks.xyz/algorithms/lectures/13-hierarchy-theorems-and-time-versus-space/./lec04.pdf">PDF</a>.</p>
 <p><strong>Goals</strong>: The main goal of this lecture is to get through the proof of the time and space hierarchy theorems, for which we will once again use diagonalisation.</p>
 <h2 id="introduction">Introduction</h2>
 <p>Before we can state and prove the hierarchy theorems, we need to know some facts about universal Turing machines.</p>
@@ -69,14 +69,14 @@
   <div class="statement-heading">
     <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Universal Turing Machines</span>
   </div>
-  <div class="statement-body"><p>There is a universal TM $\mathcal{U}$ that simulates any TM $M$ on input $x$ and outputs whatever $M$ outputs. If $M$ halts in $t_M(n)$ steps, then $\mathcal{U}$ halts in time $O(|\lfloor M \rfloor|t_M(n)\log t_M(n))$, where $n=|x|$ and $\lfloor M \rfloor$ is an encoding of $M$.</p>
+  <div class="statement-body"><p>There is a universal TM $\mathcal{U}$ such that for all Tm’s $M$ and inputs $x$, run in time $O(|\lfloor M \rfloor| t_{M}(n)\log{}t_{M}(n))$, and outputs whatever $M$ outputs on input $x$. Here $n=|x|$ and $t_M(n)$ denotes the time $M$ takes before it halts on input $x$.</p>
 </div>
 </aside>
-<p>There is a simpler proof that shows that $\mathcal{U}$ halts in time $O(t_M(n)^2)$ and a more complicated proof that proves the above result. Both proofs can be found in Arora and Barak, <em>Computational Complexity</em>, Theorem 1.13. A similar result holds for simulating any TM $M$ that runs in space $t_M(n)$, but $\mathcal{U}$ successfully simulates $M$ with space $O(|\lfloor M \rfloor| t_{M}(n))$. There’s no slack! The key intuition behind the difference in slack is that time unlike space is not re-usable. We can overwrite existing cells, but we cannot re-use time. Thus space can be used more efficiently.</p>
+<p>There is a simpler proof that shows that $\mathcal{U}$ halts in time $O(t_M(n)^2)$ and a more complicated proof that proves the above result. Both proofs can be found in [AB09, Theorem 1.13]. A similar result holds for simulating any TM $M$ that runs in space $t_M(n)$, but $\mathcal{U}$ successfully simulates $M$ with space $O(|\lfloor M \rfloor| t_{M}(n))$. There’s no slack! The key intuition behind the difference in slack is that time unlike space is not re-usable. We can overwrite existing cells, but we cannot re-use time. Thus space can be used more efficiently.</p>
 <p>Next we re-state the definition of time constructibility.</p>
 <aside class="statement statement-definition thm-numbered">
   <div class="statement-heading">
-    <span class="statement-kind">Definition</span><span class="statement-number"></span>
+    <span class="statement-kind">Definition</span><span class="statement-number"></span><span class="statement-title"> — Constructibility</span>
   </div>
   <div class="statement-body"><p>A time bound $t: \mathbb{N} \rightarrow \mathbb{N}$ is time constructible if there exists a TM $M$ which, given a string $1^n$ as input, outputs the binary representation of $t(n)$ in $O(t(n))$ time. A space bound $s: \mathbb{N} \rightarrow \mathbb{N}$ is space constructible if there exists a TM $M$ which, given a string $1^n$ as input, outputs the binary representation of $s(n)$ in $O(s(n))$ space.</p>
 </div>
@@ -94,7 +94,7 @@
     <span class="statement-kind">Proof</span><span class="statement-number"></span>
   </div>
   <div class="statement-body"><p>We will come up with a language $L$ by defining a TM $D$, and then setting $L$ to be the set of all strings $x$ that $D$ accepts. We will then show that $L \in \mathsf{DTIME}(G(n))$ but $L \notin \mathsf{DTIME}(g(n))$, which concludes the proof.</p>
-<p>Throughout, we use two facts. First, a time constructible function $T$ satisfies $T(n) \ge n$, so $g(n) \ge n$ and $G(n) \ge n$. Second, by <a href="#universal-tm">the universal TM theorem</a>, if a TM $M$ halts on input $x$ within $t$ steps, then $\mathcal{U}$ halts on input $(\lfloor M \rfloor, x)$ within $C_M, t \log t$ steps and gives the same answer as $M$, where $C_M$ depends only on $M$.</p>
+<p>Throughout, we use two facts. First, a time constructible function $T$ satisfies $T(n) \ge n$, so $g(n) \ge n$ and $G(n) \ge n$. Second, by <a href="#universal-tm">Theorem 4.1</a>, if a TM $M$ halts on input $x$ within $t$ steps, then $\mathcal{U}$ halts on input $(\lfloor M \rfloor, x)$ within $C_M, t \log t$ steps and gives the same answer as $M$, where $C_M$ depends only on $M$.</p>
 <h3 id="the-map-mu">The map $\mu$.</h3>
 <p>Let $\lfloor M \rfloor$ denote the string representation of a TM $M$. We define a map $\mu : \Sigma^* \to \lbrace \text{TMs}\rbrace $ as follows.</p>
 <ol>
@@ -109,8 +109,8 @@
 <h3 id="the-diagonal-table">The diagonal table.</h3>
 <p>We use diagonalisation, so we write down our table as before. Let $x_1, x_2, \dots$ be the strings of $\Sigma^*$ in length-lexicographic order. Row $i$ of the table corresponds to the TM $\mu(x_i)$ and column $j$ to the string $x_j$, and the entry $A[i,j]$ is $1$ if $\mu(x_i)$ accepts $x_j$ and $0$ otherwise; see <a href="#fig:time_hierarchy">Figure 1</a>. On input $x_i$, the machine $D$ will try to output the opposite of $A[i,i]$.</p>
 <figure id="fig:time_hierarchy" class="lecture-figure">
-  <img src="./diagonal-table.svg" alt="A table of machines versus input strings with highlighted diagonal entries and a final row D that flips them.">
-  <figcaption>Rows are machines $\mu(x_i)$ and columns are strings $x_j$. The last row describes $D$, which disagrees with the diagonal entry when its simulation finishes within the clock budget.</figcaption>
+  <img src="./diagonal-table.svg" alt="">
+  <figcaption>The columns are the strings $x_1, x_2, \dots$ in length-lexicographic order, and the rows are the TMs $\mu(x_1), \mu(x_2), \dots$. The last row records which strings $D$ accepts, that is, which strings are in $L$. Whenever $D$ finishes simulating $\mu(x_i)$ on $x_i$ within its time budget, $D$ disagrees with $\mu(x_i)$ on $x_i$.</figcaption>
 </figure>
 <h3 id="the-machine-d">The machine $D$.</h3>
 <p>We define $D$ in terms of the universal TM $\mathcal{U}$. $D$ has all the tapes and states of $\mathcal{U}$, and whenever $D$ is in a state of $\mathcal{U}$, it makes the same move on the tapes of $\mathcal{U}$ as $\mathcal{U}$ would. So running $\mathcal{U}$ inside $D$ takes exactly as many steps as running $\mathcal{U}$ on its own. In addition, $D$ has a work tape for a clock, and extra states for the steps below that do not involve $\mathcal{U}$. We need $\mathcal{U}$ because $D$ is a single TM with a fixed number of tapes and a fixed alphabet, so it cannot have the transition function of every TM built in; instead it has the transition function of $\mathcal{U}$ built in, and $\mathcal{U}$ can simulate any TM.</p>
@@ -192,7 +192,7 @@
 <h2 id="relationship-between-time-and-space">Relationship Between Time And Space</h2>
 <aside id="time-space" class="statement statement-theorem thm-numbered">
   <div class="statement-heading">
-    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Time is at least space</span>
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span>
   </div>
   <div class="statement-body"><p>Let $T$ be any time bound $\mathsf{DTIME}(T) \subseteq \mathsf{DSPACE}(T)$.</p>
 </div>
@@ -207,7 +207,7 @@
 </aside>
 <aside id="space-time" class="statement statement-theorem thm-numbered">
   <div class="statement-heading">
-    <span class="statement-kind">Theorem</span><span class="statement-number"></span><span class="statement-title"> — Space to time simulation</span>
+    <span class="statement-kind">Theorem</span><span class="statement-number"></span>
   </div>
   <div class="statement-body"><p>Let $S$ be any space bound such that $S = \Omega(log(n))$. Then $\mathsf{DSPACE}(S) \subseteq \cup_{c &gt; 1}\mathsf{DTIME}(c^S)$</p>
 </div>
